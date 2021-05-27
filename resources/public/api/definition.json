@@ -1,0 +1,21 @@
+{
+  "scopes": [
+    {
+      "key": "hello-world",
+      "name": "Say Hello",
+      "description": "Say Hello!"
+    }
+  ],
+  "api": {
+    "name": "Hello World",
+    "description": "A 'hello world' example of Time To Pay Proxy.",
+    "context": "time-to-pay-proxy/hello-world",
+    "versions": [
+      {
+        "version": "1.0",
+        "status": "STABLE",
+        "endpointsEnabled": true
+      }
+    ]
+  }
+}
