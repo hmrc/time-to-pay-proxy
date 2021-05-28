@@ -1,19 +1,23 @@
 {
   "scopes": [
     {
-      "key": "hello-world",
-      "name": "Say Hello",
-      "description": "Say Hello!"
+      "key": "read:time-to-pay-proxy",
+      "name": "Time to pay proxy",
+      "description": "Allow Read access to time to pay proxy"
     }
   ],
   "api": {
-    "name": "Hello World",
-    "description": "A 'hello world' example of Time To Pay Proxy.",
-    "context": "time-to-pay-proxy/hello-world",
+    "name": "Time To Pay Proxy",
+    "description": "A API for Time To Pay Proxy.",
+    "context": "individuals/time-to-pay-proxy",
     "versions": [
       {
         "version": "1.0",
-        "status": "STABLE",
+        "access": {
+          "type": "PRIVATE",
+          "whitelistedApplicationIds": []
+        },
+        "status": "BETA",
         "endpointsEnabled": true
       }
     ]
