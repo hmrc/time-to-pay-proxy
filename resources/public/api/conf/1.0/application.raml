@@ -16,7 +16,7 @@ documentation:
    content: !include https://developer.service.hmrc.gov.uk/api-documentation/assets/common/docs/errors.md
  - title: Testing
    content: !include https://developer.service.hmrc.gov.uk/api-documentation/assets/common/docs/testing.md
-- title: Send fraud prevention data
+ - title: Send fraud prevention data
    content: !include https://developer.service.hmrc.gov.uk/api-documentation/assets/common/docs/fraud-prevention.md
 
 uses:
@@ -32,10 +32,9 @@ uses:
       description: |
         An example for integrating with Time To Pay Proxy service.
         Any request to this endpoint initiates a 'Hello world' response.
-      is: [headers.acceptHeader]
       responses:
         200:
           body:
-            string:
+            text/html:
               example: |
                 "Hello world"
