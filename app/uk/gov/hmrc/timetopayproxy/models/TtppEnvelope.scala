@@ -14,21 +14,18 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.timetopayproxy.config
+package uk.gov.hmrc.timetopayproxy.models
 
-import javax.inject.{Inject, Singleton}
-import play.api.Configuration
-import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
+import cats.data.EitherT
 
-@Singleton
-class AppConfig @Inject()
-  (
-    config: Configuration
-  , servicesConfig: ServicesConfig
-  ) {
+import scala.concurrent.{ExecutionContext, Future}
 
-  val authBaseUrl: String = servicesConfig.baseUrl("auth")
-  val ttpBaseUrl: String = servicesConfig.baseUrl("ttp")
-  val auditingEnabled: Boolean = config.get[Boolean]("auditing.enabled")
-  val graphiteHost: String     = config.get[String]("microservice.metrics.graphite.host")
+object TtppEnvelope {
+  type TtppEnvelope[T] = EitherT[Future, TtppError, T]
+
+  def apply[T](arg: T)(implicit ec: ExecutionContext): TtppEnvelope[T] = EitherT.pure[Future, TtppError](arg)
+
+  def apply[T](f: Future[Either[TtppError, T]]): TtppEnvelope[T] = EitherT(f)
+
+  def apply[T](eitherArg: Either[TtppError, T])(implicit ec: ExecutionContext): TtppEnvelope[T] = EitherT.fromEither[Future](eitherArg)
 }

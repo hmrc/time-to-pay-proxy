@@ -14,21 +14,18 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.timetopayproxy.config
+package uk.gov.hmrc.timetopayproxy
 
-import javax.inject.{Inject, Singleton}
-import play.api.Configuration
-import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
+import play.api.libs.json.{Format, Json}
+import play.api.mvc.{Result, Results}
+import uk.gov.hmrc.timetopayproxy.models.TimeToPayErrorResponse
 
-@Singleton
-class AppConfig @Inject()
-  (
-    config: Configuration
-  , servicesConfig: ServicesConfig
-  ) {
-
-  val authBaseUrl: String = servicesConfig.baseUrl("auth")
-  val ttpBaseUrl: String = servicesConfig.baseUrl("ttp")
-  val auditingEnabled: Boolean = config.get[Boolean]("auditing.enabled")
-  val graphiteHost: String     = config.get[String]("microservice.metrics.graphite.host")
+object TtppResultConverter {
+  implicit class ToResult[T](r: T) {
+    def toResult(implicit format: Format[T]): Result = r match {
+      case TimeToPayErrorResponse(status, _) if ((status >= 500) && (status < 600)) =>
+        Results.InternalServerError(Json.toJson(r))
+      case _ => Results.Ok(Json.toJson(r))
+    }
+  }
 }
