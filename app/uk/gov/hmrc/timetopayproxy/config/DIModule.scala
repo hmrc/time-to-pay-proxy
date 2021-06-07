@@ -19,10 +19,21 @@ package uk.gov.hmrc.timetopayproxy.config
 import com.google.inject.AbstractModule
 import uk.gov.hmrc.auth.core.PlayAuthConnector
 import uk.gov.hmrc.play.bootstrap.auth.DefaultAuthConnector
+import uk.gov.hmrc.timetopayproxy.connectors.{DefaultTtpConnector, TtpConnector}
+import uk.gov.hmrc.timetopayproxy.services.{DefaultGenerateQuoteService, GenerateQuoteService}
 
 class DIModule extends AbstractModule {
-  override def configure(): Unit =
+  override def configure(): Unit = {
     bind(classOf[PlayAuthConnector])
       .to(classOf[DefaultAuthConnector])
       .asEagerSingleton()
+
+    bind(classOf[TtpConnector])
+      .to(classOf[DefaultTtpConnector])
+      .asEagerSingleton()
+
+    bind(classOf[GenerateQuoteService])
+      .to(classOf[DefaultGenerateQuoteService])
+      .asEagerSingleton()
+  }
 }
