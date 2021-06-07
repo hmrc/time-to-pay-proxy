@@ -23,8 +23,8 @@ import uk.gov.hmrc.timetopayproxy.models.TimeToPayErrorResponse
 object TtppResultConverter {
   implicit class ToResult[T](r: T) {
     def toResult(implicit format: Format[T]): Result = r match {
-      case TimeToPayErrorResponse(status, _) if ((status >= 500) && (status < 600)) =>
-        Results.InternalServerError(Json.toJson(r))
+      case TimeToPayErrorResponse(status, _) =>
+        Results.Status(status)(Json.toJson(r))
       case _ => Results.Ok(Json.toJson(r))
     }
   }
