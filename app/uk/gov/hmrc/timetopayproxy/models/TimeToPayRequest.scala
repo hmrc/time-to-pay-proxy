@@ -60,7 +60,7 @@ object Debts {
   implicit val format = Json.format[Debts]
 }
 
-case class Customer(quoteType: String,
+final case class Customer(quoteType: String,
                     instalmentStartDate: String,
                     instalmentAmount: Int,
                     frequency: String,
@@ -73,7 +73,7 @@ object Customer {
   implicit val format = Json.format[Customer]
 }
 
-case class TimeToPayRequest(
+final case class TimeToPayRequest(
                              customerReference: String,
                              debtAmount: BigDecimal,
                              customer: List[Customer],

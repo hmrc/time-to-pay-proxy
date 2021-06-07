@@ -16,4 +16,4 @@
 
 package uk.gov.hmrc.timetopayproxy.models
 
-case class ConnectorError(statusCod: Int, massage: String) extends TtppError
+final case class ConnectorError(statusCod: Int, massage: String) extends TtppError

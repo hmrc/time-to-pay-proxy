@@ -65,7 +65,7 @@ class GenerateQuoteServiceSpec extends UnitSpec {
           .expects(timeToPayRequest, *, *)
           .returning(TtppEnvelope(responseFromTtp))
 
-        val quoteService = new GenerateQuoteService(connector)
+        val quoteService = new DefaultGenerateQuoteService(connector)
         await(
           quoteService.generateQuote(timeToPayRequest).value,
           5,
@@ -91,7 +91,7 @@ class GenerateQuoteServiceSpec extends UnitSpec {
           .expects(timeToPayRequest, *, *)
           .returning(TtppEnvelope(errorFromTtpConnector.asLeft[TimeToPayResponse]))
 
-        val quoteService = new GenerateQuoteService(connector)
+        val quoteService = new DefaultGenerateQuoteService(connector)
         await(
           quoteService.generateQuote(timeToPayRequest).value,
           5,
