@@ -17,33 +17,27 @@
 package uk.gov.hmrc.timetopayproxy.services
 
 import com.google.inject.ImplementedBy
+
 import javax.inject.{Inject, Singleton}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.timetopayproxy.connectors.TtpConnector
-import uk.gov.hmrc.timetopayproxy.models.{TimeToPayRequest, TimeToPayResponse}
+import uk.gov.hmrc.timetopayproxy.models.{GenerateQuoteRequest, GenerateQuoteResponse, RetrievePlanResponse}
 import uk.gov.hmrc.timetopayproxy.models.TtppEnvelope.TtppEnvelope
 
 import scala.concurrent.ExecutionContext
-@ImplementedBy(classOf[DefaultGenerateQuoteService])
-trait GenerateQuoteService {
-  def generateQuote(
-                     timeToPayRequest: TimeToPayRequest
-                   )
-                   (
-                     implicit ec: ExecutionContext,
-                     hc: HeaderCarrier
-                   ): TtppEnvelope[TimeToPayResponse]
+
+@ImplementedBy(classOf[DefaultTTPQuoteService])
+trait TTPQuoteService {
+  def generateQuote(timeToPayRequest: GenerateQuoteRequest)(implicit ec: ExecutionContext, hc: HeaderCarrier): TtppEnvelope[GenerateQuoteResponse]
+  def getExistingPlan(customerReference: String, pegaId: String)(implicit ec: ExecutionContext, hc: HeaderCarrier): TtppEnvelope[RetrievePlanResponse]
 }
 
 @Singleton
-class DefaultGenerateQuoteService @Inject()(ttpConnector: TtpConnector) extends GenerateQuoteService {
-  def generateQuote(
-                     timeToPayRequest: TimeToPayRequest
-                   )
-                   (
-                     implicit ec: ExecutionContext,
-                     hc: HeaderCarrier
-                   ): TtppEnvelope[TimeToPayResponse] =
+class DefaultTTPQuoteService @Inject()(ttpConnector: TtpConnector) extends TTPQuoteService {
+  def generateQuote(timeToPayRequest: GenerateQuoteRequest)(implicit ec: ExecutionContext, hc: HeaderCarrier): TtppEnvelope[GenerateQuoteResponse] =
     ttpConnector.generateQuote(timeToPayRequest)
 
+  override def getExistingPlan(customerReference: String, pegaId: String)(implicit ec: ExecutionContext, hc: HeaderCarrier): TtppEnvelope[RetrievePlanResponse] = {
+    ttpConnector.getExistingQuote(customerReference, pegaId)
+  }
 }
