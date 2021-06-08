@@ -14,18 +14,20 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.timetopayproxy
+package uk.gov.hmrc.timetopayproxy.models
 
-import play.api.libs.json.{Format, Json}
-import play.api.mvc.{Result, Results}
-import uk.gov.hmrc.timetopayproxy.models.TimeToPayErrorResponse
+import play.api.libs.json.Json
 
-object TtppResultConverter {
-  implicit class ToResult[T](r: T) {
-    def toResult(implicit format: Format[T]): Result = r match {
-      case TimeToPayErrorResponse(status, _) =>
-        Results.Status(status)(Json.toJson(r))
-      case _ => Results.Ok(Json.toJson(r))
-    }
-  }
+import java.time.LocalDate
+
+final case class Debt(
+                        debtId: String,
+                        mainTrans: String,
+                        interestStartDate: LocalDate,
+                        debtRespiteFrom: LocalDate,
+                        debtRespiteTo: LocalDate,
+                        duties: Seq[Duty])
+
+object Debt {
+  implicit val format = Json.format[Debt]
 }

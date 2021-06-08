@@ -20,7 +20,7 @@ import com.google.inject.AbstractModule
 import uk.gov.hmrc.auth.core.PlayAuthConnector
 import uk.gov.hmrc.play.bootstrap.auth.DefaultAuthConnector
 import uk.gov.hmrc.timetopayproxy.connectors.{DefaultTtpConnector, TtpConnector}
-import uk.gov.hmrc.timetopayproxy.services.{DefaultGenerateQuoteService, GenerateQuoteService}
+import uk.gov.hmrc.timetopayproxy.services.{DefaultTTPQuoteService, TTPQuoteService}
 
 class DIModule extends AbstractModule {
   override def configure(): Unit = {
@@ -32,8 +32,8 @@ class DIModule extends AbstractModule {
       .to(classOf[DefaultTtpConnector])
       .asEagerSingleton()
 
-    bind(classOf[GenerateQuoteService])
-      .to(classOf[DefaultGenerateQuoteService])
+    bind(classOf[TTPQuoteService])
+      .to(classOf[DefaultTTPQuoteService])
       .asEagerSingleton()
   }
 }

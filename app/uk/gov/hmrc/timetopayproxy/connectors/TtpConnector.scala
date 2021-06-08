@@ -19,44 +19,53 @@ package uk.gov.hmrc.timetopayproxy.connectors
 import uk.gov.hmrc.http.{HeaderCarrier, HttpClient, HttpException, UpstreamErrorResponse}
 
 import scala.concurrent.{ExecutionContext, Future}
-import uk.gov.hmrc.timetopayproxy.models.{ConnectorError, TimeToPayRequest, TimeToPayResponse, TtppEnvelope}
+import uk.gov.hmrc.timetopayproxy.models.{ConnectorError, GenerateQuoteRequest, GenerateQuoteResponse, RetrievePlanResponse, TtppEnvelope}
 import uk.gov.hmrc.timetopayproxy.models.TtppEnvelope.TtppEnvelope
 import cats.syntax.either._
 import com.google.inject.ImplementedBy
+
 import javax.inject.{Inject, Singleton}
 import uk.gov.hmrc.timetopayproxy.config.AppConfig
 
 @ImplementedBy(classOf[DefaultTtpConnector])
 trait TtpConnector {
-  def generateQuote(
-                     ttppRequest: TimeToPayRequest
-                   )
-                   (
-                     implicit ec: ExecutionContext,
-                     hc: HeaderCarrier
-                   ): TtppEnvelope[TimeToPayResponse]
+  def generateQuote(ttppRequest: GenerateQuoteRequest)(implicit ec: ExecutionContext, hc: HeaderCarrier): TtppEnvelope[GenerateQuoteResponse]
+
+  def getExistingQuote(customerReference: String, pegaId: String)(implicit ec: ExecutionContext, hc: HeaderCarrier): TtppEnvelope[RetrievePlanResponse]
+
 }
+
 @Singleton
 class DefaultTtpConnector @Inject()(appConfig: AppConfig, httpClient: HttpClient) extends TtpConnector {
-  def generateQuote(
-                     ttppRequest: TimeToPayRequest
-                   )
-                   (
-                     implicit ec: ExecutionContext,
-                     hc: HeaderCarrier
-                   ): TtppEnvelope[TimeToPayResponse] = {
+  def generateQuote(ttppRequest: GenerateQuoteRequest)(implicit ec: ExecutionContext, hc: HeaderCarrier): TtppEnvelope[GenerateQuoteResponse] = {
     val path = "individuals/time-to-pay/quote"
     val url = s"${appConfig.ttpBaseUrl}/$path"
 
-    val response: Future[Either[ConnectorError, TimeToPayResponse]] =
+    TtppEnvelope {
       httpClient
-        .POST[TimeToPayRequest, TimeToPayResponse](url, ttppRequest)
+        .POST[GenerateQuoteRequest, GenerateQuoteResponse](url, ttppRequest)
         .map(r => r.asRight[ConnectorError])
         .recover {
-          case e: HttpException => ConnectorError(e.responseCode, e.message).asLeft[TimeToPayResponse]
-          case e: UpstreamErrorResponse => ConnectorError(e.statusCode, e.getMessage()).asLeft[TimeToPayResponse]
+          case e: HttpException => ConnectorError(e.responseCode, e.message).asLeft[GenerateQuoteResponse]
+          case e: UpstreamErrorResponse => ConnectorError(e.statusCode, e.getMessage()).asLeft[GenerateQuoteResponse]
         }
+    }
+  }
 
-    TtppEnvelope(response)
+
+  override def getExistingQuote(customerReference: String, pegaId: String)
+                               (implicit ec: ExecutionContext, hc: HeaderCarrier): TtppEnvelope[RetrievePlanResponse] = {
+    val path = s"individuals/time-to-pay/quote/$customerReference/$pegaId"
+    val url = s"${appConfig.ttpBaseUrl}/$path"
+
+    TtppEnvelope(
+      httpClient.GET[RetrievePlanResponse](url)
+        .map(r => r.asRight[ConnectorError])
+        .recover {
+          case e: HttpException => ConnectorError(e.responseCode, e.message).asLeft[RetrievePlanResponse]
+          case e: UpstreamErrorResponse => ConnectorError(e.statusCode, e.getMessage()).asLeft[RetrievePlanResponse]
+        }
+    )
+
   }
 }

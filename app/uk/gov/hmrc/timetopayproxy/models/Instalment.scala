@@ -14,16 +14,14 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.timetopayproxy
+package uk.gov.hmrc.timetopayproxy.models
 
-import uk.gov.hmrc.timetopayproxy.models.{ConnectorError, TimeToPayErrorResponse, TtppError}
+import play.api.libs.json.Json
 
-object TtppErrorHandler {
+import java.time.LocalDate
 
-  implicit class FromErrorToResult(error: TtppError) {
-    def toErrorResponse: TimeToPayErrorResponse = error match {
-      case ConnectorError(status, message) =>
-        TimeToPayErrorResponse(status, message)
-    }
-  }
+final case class Instalment(dueDate: LocalDate, amountDue: BigDecimal, interestRate: Double)
+
+object Instalment {
+  implicit val format = Json.format[Instalment]
 }

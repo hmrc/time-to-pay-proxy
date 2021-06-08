@@ -18,16 +18,7 @@ package uk.gov.hmrc.timetopayproxy.models
 
 import play.api.libs.json.Json
 
-final case class Payment(
-                    paymentDate: String,
-                    paymentAmount: Int
-                  )
-
-object Payment {
-  implicit val format = Json.format[Payment]
-}
-
-final case class TimeToPayResponse(
+final case class GenerateQuoteResponse(
                               quoteReference: String,
                               customerReference: String,
                               quoteStatus: String,
@@ -39,8 +30,8 @@ final case class TimeToPayResponse(
                               totalAmount: Int
                             )
 
-object TimeToPayResponse {
-  implicit val format = Json.format[TimeToPayResponse]
+object GenerateQuoteResponse {
+  implicit val format = Json.format[GenerateQuoteResponse]
 }
 
 

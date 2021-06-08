@@ -1,4 +1,5 @@
 # microservice specific routes
 
-GET        /hello-world                     uk.gov.hmrc.timetopayproxy.controllers.MicroserviceHelloWorldController.hello
-POST       /individuals/time-to-pay/quote   uk.gov.hmrc.timetopayproxy.controllers.TimeToPayProxyController.generateQuote
+GET        /hello-world                                                     uk.gov.hmrc.timetopayproxy.controllers.MicroserviceHelloWorldController.hello
+POST       /individuals/time-to-pay/quote                                   uk.gov.hmrc.timetopayproxy.controllers.TimeToPayProxyController.generateQuote
+GET        /individuals/time-to-pay/quote/:customerReference/:pegaId        uk.gov.hmrc.timetopayproxy.controllers.TimeToPayProxyController.getExistingPlan(customerReference: String, pegaId: String)

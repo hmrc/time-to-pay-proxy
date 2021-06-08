@@ -17,7 +17,6 @@
 package uk.gov.hmrc.timetopayproxy.controllers
 
 import java.time.LocalDate
-
 import org.scalamock.scalatest.MockFactory
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
@@ -30,8 +29,7 @@ import uk.gov.hmrc.auth.core.authorise.Predicate
 import uk.gov.hmrc.auth.core.retrieve.Retrieval
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.timetopayproxy.actions.auth.{AuthoriseAction, AuthoriseActionImpl}
-import uk.gov.hmrc.timetopayproxy.services.GenerateQuoteService
-import uk.gov.hmrc.timetopayproxy.models.TimeToPayRequest
+import uk.gov.hmrc.timetopayproxy.services.TTPQuoteService
 import uk.gov.hmrc.timetopayproxy.models._
 import play.api.test.{FakeRequest, Helpers}
 
@@ -42,23 +40,22 @@ import cats.syntax.either._
 
 class TimeToPayProxyControllerSpec extends AnyWordSpec with Matchers with MockFactory {
 
-
   private val authConnector: PlayAuthConnector = mock[PlayAuthConnector]
 
   private val cc: ControllerComponents = Helpers.stubControllerComponents()
   private val authoriseAction: AuthoriseAction = new AuthoriseActionImpl(authConnector, cc)
 
-  private val generateQuoteService = mock[GenerateQuoteService]
+  private val generateQuoteService = mock[TTPQuoteService]
   private val controller = new TimeToPayProxyController(authoriseAction, cc, generateQuoteService)
 
-  private val timeToPayRequest = TimeToPayRequest(
+  private val timeToPayRequest = GenerateQuoteRequest(
     "customerReference",
     10,
     List(Customer("quoteType", "2021-01-01", 1, "", "", 1, LocalDate.now(), "paymentPlanType")),
     List()
   )
 
-  "POST /" should {
+  "POST /individuals/time-to-pay/quote" should {
     "return 200" when {
       "service returns success" in {
 
@@ -66,19 +63,19 @@ class TimeToPayProxyControllerSpec extends AnyWordSpec with Matchers with MockFa
           .expects(*, *, *, *)
           .returning(Future.successful())
 
-        val responseFromTtp = TimeToPayResponse(
+        val responseFromTtp = GenerateQuoteResponse(
           "quoteReference",
           "customerReference",
           "quoteStatus",
           "quoteType",
-          List(Payment("2021-01-01", 1)),
+          List(Payment(LocalDate.parse("2021-01-01"), 1)),
           1,
           "",
           0.1,
           1
         )
         (generateQuoteService.generateQuote(
-          _: TimeToPayRequest
+          _: GenerateQuoteRequest
         )
         (
           _: ExecutionContext,
@@ -88,7 +85,7 @@ class TimeToPayProxyControllerSpec extends AnyWordSpec with Matchers with MockFa
           .expects(timeToPayRequest, *, *)
           .returning(TtppEnvelope(responseFromTtp))
 
-        val fakeRequest: FakeRequest[JsValue] = FakeRequest("POST", "/individuals/time-to-pay/quote").withHeaders(CONTENT_TYPE -> MimeTypes.JSON).withBody(Json.toJson[TimeToPayRequest](timeToPayRequest))
+        val fakeRequest: FakeRequest[JsValue] = FakeRequest("POST", "/individuals/time-to-pay/quote").withHeaders(CONTENT_TYPE -> MimeTypes.JSON).withBody(Json.toJson[GenerateQuoteRequest](timeToPayRequest))
         val response: Future[Result] = controller.generateQuote()(fakeRequest)
         status(response) shouldBe Status.OK
       }
@@ -102,7 +99,7 @@ class TimeToPayProxyControllerSpec extends AnyWordSpec with Matchers with MockFa
 
         val errorFromTtpConnector = ConnectorError(500, "Internal Service Error")
         (generateQuoteService.generateQuote(
-          _: TimeToPayRequest
+          _: GenerateQuoteRequest
         )
         (
           _: ExecutionContext,
@@ -110,14 +107,85 @@ class TimeToPayProxyControllerSpec extends AnyWordSpec with Matchers with MockFa
         )
           )
           .expects(timeToPayRequest, *, *)
-          .returning(TtppEnvelope(errorFromTtpConnector.asLeft[TimeToPayResponse]))
+          .returning(TtppEnvelope(errorFromTtpConnector.asLeft[GenerateQuoteResponse]))
 
-        val fakeRequest: FakeRequest[JsValue] = FakeRequest("POST", "/individuals/time-to-pay/quote").withHeaders(CONTENT_TYPE -> MimeTypes.JSON).withBody(Json.toJson[TimeToPayRequest](timeToPayRequest))
+        val fakeRequest: FakeRequest[JsValue] = FakeRequest("POST", "/individuals/time-to-pay/quote").withHeaders(CONTENT_TYPE -> MimeTypes.JSON).withBody(Json.toJson[GenerateQuoteRequest](timeToPayRequest))
         val response: Future[Result] = controller.generateQuote()(fakeRequest)
 
-        println(contentAsJson(response))
         status(response) shouldBe Status.INTERNAL_SERVER_ERROR
       }
+    }
+  }
+
+  "GET /individuals/time-to-pay/quote/:customerReference/:pegaId" should {
+    "return a 200 given a successful response" in {
+
+      (authConnector.authorise[Unit](_: Predicate, _: Retrieval[Unit])(_: HeaderCarrier, _: ExecutionContext))
+        .expects(*, *, *, *)
+        .returning(Future.successful())
+
+      (generateQuoteService.getExistingPlan(
+        _: String, _: String
+      )
+      (
+        _: ExecutionContext,
+        _: HeaderCarrier
+      )
+        )
+        .expects(*, *, *, *)
+        .returning(TtppEnvelope(RetrievePlanResponse("someCustomerRef", "somePegaId", "someQuoateStatus", "xyz", "ref", "info", "info", Nil, Nil, "2", 100, 0.26)))
+
+      val fakeRequest = FakeRequest("GET", "/individuals/time-to-pay/quote/customerReference/pegaId")
+      val response: Future[Result] = controller.getExistingPlan("customerReference", "pegaId")(fakeRequest)
+
+      status(response) shouldBe Status.OK
+    }
+
+    "return a 404 if the quote is not found" in {
+      (authConnector.authorise[Unit](_: Predicate, _: Retrieval[Unit])(_: HeaderCarrier, _: ExecutionContext))
+        .expects(*, *, *, *)
+        .returning(Future.successful())
+
+      val errorFromTtpConnector = ConnectorError(404, "Not Found")
+      (generateQuoteService.getExistingPlan(
+        _: String, _: String
+      )
+      (
+        _: ExecutionContext,
+        _: HeaderCarrier
+      )
+        )
+        .expects(*, *, *, *)
+        .returning(TtppEnvelope(errorFromTtpConnector.asLeft[RetrievePlanResponse]))
+
+      val fakeRequest = FakeRequest("GET", "/individuals/time-to-pay/quote/customerReference/pegaId")
+      val response: Future[Result] = controller.getExistingPlan("customerReference", "pegaId")(fakeRequest)
+
+      status(response) shouldBe Status.NOT_FOUND
+    }
+
+    "return 500 if the underlying service fails" in {
+
+      (authConnector.authorise[Unit](_: Predicate, _: Retrieval[Unit])(_: HeaderCarrier, _: ExecutionContext))
+        .expects(*, *, *, *)
+        .returning(Future.successful())
+
+      val errorFromTtpConnector = ConnectorError(500, "Internal Service Error")
+      (generateQuoteService.getExistingPlan(
+        _: String, _: String
+      )
+      (
+        _: ExecutionContext,
+        _: HeaderCarrier
+      )
+        )
+        .expects(*, *, *, *)
+        .returning(TtppEnvelope(errorFromTtpConnector.asLeft[RetrievePlanResponse]))
+
+      val fakeRequest = FakeRequest("GET", "/individuals/time-to-pay/quote/customerReference/pegaId")
+      val response: Future[Result] = controller.getExistingPlan("customerReference", "pegaId")(fakeRequest)
+
+      status(response) shouldBe Status.INTERNAL_SERVER_ERROR
     }
   }
 }
