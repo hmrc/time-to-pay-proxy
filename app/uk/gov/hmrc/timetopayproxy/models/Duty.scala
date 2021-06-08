@@ -16,12 +16,15 @@
 
 package uk.gov.hmrc.timetopayproxy.models
 
+import java.time.LocalDate
+
 import play.api.libs.json.Json
 
 final case class Duty(
                        dutyId: String,
                        subtrans: String,
-                       payments: Seq[Payment],
+                       paymentDate: LocalDate,
+                       paymentAmount: Int,
                        originalDebtAmount: Int)
 
 object Duty {

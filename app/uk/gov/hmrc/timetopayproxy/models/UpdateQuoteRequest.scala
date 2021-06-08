@@ -18,20 +18,13 @@ package uk.gov.hmrc.timetopayproxy.models
 
 import play.api.libs.json.Json
 
-final case class GenerateQuoteResponse(
-                              quoteReference: String,
-                              customerReference: String,
-                              quoteStatus: String,
-                              quoteType: String,
-                              payments: List[Payment],
-                              numberOfInstalments: String,
-                              outstandingAmountDue: String,
-                              interestRate: Double,
-                              totalAmount: Int
-                            )
+case class UpdateQuoteRequest(
+                               customerReference: String,
+                               pegaId: String,
+                               updateType: String,
+                               reason: String
+                             )
 
-object GenerateQuoteResponse {
-  implicit val format = Json.format[GenerateQuoteResponse]
+object UpdateQuoteRequest {
+  implicit val format = Json.format[UpdateQuoteRequest]
 }
-
-

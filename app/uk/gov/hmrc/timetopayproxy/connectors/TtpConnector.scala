@@ -19,11 +19,10 @@ package uk.gov.hmrc.timetopayproxy.connectors
 import uk.gov.hmrc.http.{HeaderCarrier, HttpClient, HttpException, UpstreamErrorResponse}
 
 import scala.concurrent.{ExecutionContext, Future}
-import uk.gov.hmrc.timetopayproxy.models.{ConnectorError, GenerateQuoteRequest, GenerateQuoteResponse, RetrievePlanResponse, TtppEnvelope}
+import uk.gov.hmrc.timetopayproxy.models._
 import uk.gov.hmrc.timetopayproxy.models.TtppEnvelope.TtppEnvelope
 import cats.syntax.either._
 import com.google.inject.ImplementedBy
-
 import javax.inject.{Inject, Singleton}
 import uk.gov.hmrc.timetopayproxy.config.AppConfig
 
@@ -32,6 +31,13 @@ trait TtpConnector {
   def generateQuote(ttppRequest: GenerateQuoteRequest)(implicit ec: ExecutionContext, hc: HeaderCarrier): TtppEnvelope[GenerateQuoteResponse]
 
   def getExistingQuote(customerReference: String, pegaId: String)(implicit ec: ExecutionContext, hc: HeaderCarrier): TtppEnvelope[RetrievePlanResponse]
+  def updateQuote(
+                   updateQuoteRequest: UpdateQuoteRequest
+                 )
+                 (
+                   implicit ec: ExecutionContext,
+                   hc: HeaderCarrier
+                 ): TtppEnvelope[UpdateQuoteResponse]
 
 }
 
@@ -67,5 +73,27 @@ class DefaultTtpConnector @Inject()(appConfig: AppConfig, httpClient: HttpClient
         }
     )
 
+  }
+
+  def updateQuote(
+                   updateQuoteRequest: UpdateQuoteRequest
+                 )
+                 (
+                   implicit ec: ExecutionContext,
+                   hc: HeaderCarrier
+                 ): TtppEnvelope[UpdateQuoteResponse] = {
+    val path = "individuals/time-to-pay/quote"
+    val url = s"${appConfig.ttpBaseUrl}/$path/${updateQuoteRequest.customerReference}/${updateQuoteRequest.pegaId}"
+
+    val response: Future[Either[ConnectorError, UpdateQuoteResponse]] =
+      httpClient
+        .PUT[UpdateQuoteRequest, UpdateQuoteResponse](url, updateQuoteRequest)
+        .map(r => r.asRight[ConnectorError])
+        .recover {
+          case e: HttpException => ConnectorError(e.responseCode, e.message).asLeft[UpdateQuoteResponse]
+          case e: UpstreamErrorResponse => ConnectorError(e.statusCode, e.getMessage()).asLeft[UpdateQuoteResponse]
+        }
+
+    TtppEnvelope(response)
   }
 }

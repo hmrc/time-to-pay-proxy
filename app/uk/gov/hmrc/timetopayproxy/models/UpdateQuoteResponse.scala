@@ -15,10 +15,18 @@
  */
 
 package uk.gov.hmrc.timetopayproxy.models
+
+import java.time.LocalDate
+
 import play.api.libs.json.Json
 
-final case class ConnectorError(statusCode: Int, massage: String) extends TtppError
+case class UpdateQuoteResponse(
+                                customerReference: String,
+                                pegaId: String,
+                                quoteStatus: String,
+                                quoteUpdatedDate: LocalDate
+                              )
 
-object ConnectorError {
-  implicit val format = Json.format[ConnectorError]
+object UpdateQuoteResponse {
+  implicit val format = Json.format[UpdateQuoteResponse]
 }
