@@ -20,7 +20,7 @@ import play.api.libs.json.Json
 
 import java.time.LocalDate
 
-final case class Instalment(dueDate: LocalDate, amountDue: BigDecimal, interestRate: Double)
+final case class Instalment(dutyId: DutyId, debtId: DebtId, dueDate: LocalDate, amountDue: BigDecimal, interestRate: Double, instalmentNumber: Int)
 
 object Instalment {
   implicit val format = Json.format[Instalment]

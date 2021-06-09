@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.timetopayproxy.models
 
-case class QuoteReference(value: String) extends AnyVal
+final case class QuoteReference(value: String) extends AnyVal
 
 object QuoteReference extends ValueTypeFormatter {
   implicit val format =

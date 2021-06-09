@@ -15,11 +15,15 @@
  */
 
 package uk.gov.hmrc.timetopayproxy.models
+import java.time.LocalDate
 
-final case class PaymentPlanType(value: String) extends AnyVal
+import play.api.libs.json.Json
 
-object PaymentPlanType extends ValueTypeFormatter {
-  implicit val format =
-    valueTypeFormatter(PaymentPlanType.apply, PaymentPlanType.unapply)
+case class BreathingSpace(debtRespiteFrom: LocalDate,
+                          debtRespiteTo: LocalDate,
+                          paymentDate: LocalDate,
+                          paymentAmount: BigDecimal)
+
+object BreathingSpace {
+  implicit val format = Json.format[BreathingSpace]
 }
-

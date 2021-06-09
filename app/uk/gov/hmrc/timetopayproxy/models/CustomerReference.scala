@@ -16,7 +16,14 @@
 
 package uk.gov.hmrc.timetopayproxy.models
 
-case class CustomerReference(value: String) extends AnyVal
+final case class Frequency(value: String) extends AnyVal
+
+object Frequency extends ValueTypeFormatter {
+  implicit val format =
+    valueTypeFormatter(Frequency.apply, Frequency.unapply)
+}
+
+final case class CustomerReference(value: String) extends AnyVal
 
 object CustomerReference extends ValueTypeFormatter {
   implicit val format =

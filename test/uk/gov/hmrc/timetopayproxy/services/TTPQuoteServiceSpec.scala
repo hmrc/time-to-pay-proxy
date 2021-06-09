@@ -51,13 +51,11 @@ class TTPQuoteServiceSpec extends UnitSpec {
   val generateQuoteResponse = GenerateQuoteResponse(
     QuoteReference("quoteReference"),
     CustomerReference("customerReference"),
-    QuoteStatus("quoteStatus"),
     QuoteType("quoteType"),
-    List(Payment(LocalDate.parse("2021-01-01"), 1)),
+    List(Instalment(DutyId("dutyId"), DebtId("debtId"), LocalDate.parse("2022-01-01"), 100, 0.1, 1)),
     "1",
-    "",
-    0.1,
-    1
+    100,
+    0.1
   )
 
   val retrievePlanResponse = RetrievePlanResponse(
@@ -76,12 +74,20 @@ class TTPQuoteServiceSpec extends UnitSpec {
   )
 
   val updateQuoteRequest =
-    UpdateQuoteRequest("customerReference", "pegaId", "updateType", "reason")
+    UpdateQuoteRequest(
+      CustomerReference("customerReference"),
+      PegaPlanId("pegaPlanId"),
+      UpdateType("updateType"),
+      CancellationReason("reason"),
+      PaymentMethod("method"),
+      PaymentReference("reference"),
+      true,
+    )
 
   val updateQuoteResponse = UpdateQuoteResponse(
-    "customerReference",
-    "pegaId",
-    "quoteStatus",
+    CustomerReference("customerReference"),
+    PegaPlanId("pegaPlanId"),
+    QuoteStatus("quoteStatus"),
     LocalDate.now
   )
 
@@ -142,11 +148,10 @@ class TTPQuoteServiceSpec extends UnitSpec {
         Right(generateQuoteResponse),
         Right(retrievePlanResponse),
         Right(updateQuoteResponse)
-
       )
       val quoteService = new DefaultTTPQuoteService(connectorStub)
 
-      await(quoteService.getExistingPlan("someCustomer", "somePegaId").value) shouldBe retrievePlanResponse
+      await(quoteService.getExistingPlan(CustomerReference("someCustomer"), PegaPlanId("somePegaId")).value) shouldBe retrievePlanResponse
         .asRight[TtppError]
     }
 
@@ -158,7 +163,7 @@ class TTPQuoteServiceSpec extends UnitSpec {
       )
       val quoteService = new DefaultTTPQuoteService(connectorStub)
 
-      await(quoteService.getExistingPlan("someCustomer", "somePegaId").value) shouldBe ConnectorError(
+      await(quoteService.getExistingPlan(CustomerReference("someCustomer"), PegaPlanId("somePegaId")).value) shouldBe ConnectorError(
         500,
         "Internal server error"
       ).asLeft[RetrievePlanResponse]
@@ -231,7 +236,7 @@ class TtpConnectorStub(
   ): TtppEnvelope[GenerateQuoteResponse] =
     TtppEnvelope(Future successful generateQuoteResponse)
 
-  override def getExistingQuote(customerReference: String, pegaId: String)(
+  override def getExistingQuote(customerReference: CustomerReference, pegaPlanId: PegaPlanId)(
     implicit ec: ExecutionContext,
     hc: HeaderCarrier
   ): TtppEnvelope[RetrievePlanResponse] =

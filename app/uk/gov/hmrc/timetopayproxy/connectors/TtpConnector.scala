@@ -30,7 +30,7 @@ import uk.gov.hmrc.timetopayproxy.config.AppConfig
 trait TtpConnector {
   def generateQuote(ttppRequest: GenerateQuoteRequest)(implicit ec: ExecutionContext, hc: HeaderCarrier): TtppEnvelope[GenerateQuoteResponse]
 
-  def getExistingQuote(customerReference: String, pegaId: String)(implicit ec: ExecutionContext, hc: HeaderCarrier): TtppEnvelope[RetrievePlanResponse]
+  def getExistingQuote(customerReference: CustomerReference, pegaId: PegaPlanId)(implicit ec: ExecutionContext, hc: HeaderCarrier): TtppEnvelope[RetrievePlanResponse]
   def updateQuote(
                    updateQuoteRequest: UpdateQuoteRequest
                  )
@@ -59,9 +59,9 @@ class DefaultTtpConnector @Inject()(appConfig: AppConfig, httpClient: HttpClient
   }
 
 
-  override def getExistingQuote(customerReference: String, pegaId: String)
+  override def getExistingQuote(customerReference: CustomerReference, pegaPlanId: PegaPlanId)
                                (implicit ec: ExecutionContext, hc: HeaderCarrier): TtppEnvelope[RetrievePlanResponse] = {
-    val path = s"individuals/time-to-pay/quote/$customerReference/$pegaId"
+    val path = s"individuals/time-to-pay/quote/${customerReference.value}/${pegaPlanId.value}"
     val url = s"${appConfig.ttpBaseUrl}/$path"
 
     TtppEnvelope(
@@ -83,7 +83,7 @@ class DefaultTtpConnector @Inject()(appConfig: AppConfig, httpClient: HttpClient
                    hc: HeaderCarrier
                  ): TtppEnvelope[UpdateQuoteResponse] = {
     val path = "individuals/time-to-pay/quote"
-    val url = s"${appConfig.ttpBaseUrl}/$path/${updateQuoteRequest.customerReference}/${updateQuoteRequest.pegaId}"
+    val url = s"${appConfig.ttpBaseUrl}/$path/${updateQuoteRequest.customerReference.value}/${updateQuoteRequest.pegaPlanId.value}"
 
     val response: Future[Either[ConnectorError, UpdateQuoteResponse]] =
       httpClient

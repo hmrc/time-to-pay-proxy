@@ -18,12 +18,42 @@ package uk.gov.hmrc.timetopayproxy.models
 
 import play.api.libs.json.Json
 
-case class UpdateQuoteRequest(
-                               customerReference: String,
-                               pegaId: String,
-                               updateType: String,
-                               reason: String
-                             )
+final case class CancellationReason(value: String) extends AnyVal
+
+object CancellationReason extends ValueTypeFormatter {
+  implicit val format =
+    valueTypeFormatter(CancellationReason.apply, CancellationReason.unapply)
+}
+
+final case class PaymentMethod(value: String) extends AnyVal
+
+object PaymentMethod extends ValueTypeFormatter {
+  implicit val format =
+    valueTypeFormatter(PaymentMethod.apply, PaymentMethod.unapply)
+}
+
+final case class PaymentReference(value: String) extends AnyVal
+
+object PaymentReference extends ValueTypeFormatter {
+  implicit val format =
+    valueTypeFormatter(PaymentReference.apply, PaymentReference.unapply)
+}
+
+final case class UpdateType(value: String) extends AnyVal
+
+object UpdateType extends ValueTypeFormatter {
+  implicit val format =
+    valueTypeFormatter(UpdateType.apply, UpdateType.unapply)
+}
+
+final case class UpdateQuoteRequest(customerReference: CustomerReference,
+                                    pegaPlanId: PegaPlanId,
+                                    updateType: UpdateType,
+                                    cancellationReason: CancellationReason,
+                                    paymentMethod: PaymentMethod,
+                                    paymentReference: PaymentReference,
+                                    thirdPartyBank: Boolean,
+)
 
 object UpdateQuoteRequest {
   implicit val format = Json.format[UpdateQuoteRequest]

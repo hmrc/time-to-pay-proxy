@@ -76,7 +76,15 @@ class TimeToPayProxyControllerSpec
   )
 
   private val updateQuoteRequest =
-    UpdateQuoteRequest("customerReference", "pegaId", "updateType", "reason")
+    UpdateQuoteRequest(
+      CustomerReference("customerReference"),
+      PegaPlanId("pegaId"),
+      UpdateType("updateType"),
+      CancellationReason("reason"),
+      PaymentMethod("method"),
+      PaymentReference("reference"),
+      true
+    )
 
   "POST /individuals/time-to-pay/quote" should {
     "return 200" when {
@@ -93,13 +101,11 @@ class TimeToPayProxyControllerSpec
         val responseFromTtp = GenerateQuoteResponse(
           QuoteReference("quoteReference"),
           CustomerReference("customerReference"),
-          QuoteStatus("quoteStatus"),
           QuoteType("quoteType"),
-          List(Payment(LocalDate.parse("2021-01-01"), 1)),
+          List(Instalment(DutyId("dutyId"), DebtId("debtId"), LocalDate.parse("2022-01-01"), 100, 0.1, 1)),
           "1",
-          "",
-          0.1,
-          1
+          100,
+          0.1
         )
         (ttpQuoteService
           .generateQuote(_: GenerateQuoteRequest)(
@@ -163,7 +169,7 @@ class TimeToPayProxyControllerSpec
         .returning(Future.successful())
 
       (ttpQuoteService
-        .getExistingPlan(_: String, _: String)(
+        .getExistingPlan(_: CustomerReference, _: PegaPlanId)(
           _: ExecutionContext,
           _: HeaderCarrier
         ))
@@ -208,7 +214,7 @@ class TimeToPayProxyControllerSpec
 
       val errorFromTtpConnector = ConnectorError(404, "Not Found")
       (ttpQuoteService
-        .getExistingPlan(_: String, _: String)(
+        .getExistingPlan(_: CustomerReference, _: PegaPlanId)(
           _: ExecutionContext,
           _: HeaderCarrier
         ))
@@ -239,7 +245,7 @@ class TimeToPayProxyControllerSpec
 
       val errorFromTtpConnector = ConnectorError(500, "Internal Service Error")
       (ttpQuoteService
-        .getExistingPlan(_: String, _: String)(
+        .getExistingPlan(_: CustomerReference, _: PegaPlanId)(
           _: ExecutionContext,
           _: HeaderCarrier
         ))
@@ -272,9 +278,9 @@ class TimeToPayProxyControllerSpec
           .returning(Future.successful())
 
         val responseFromTtp = UpdateQuoteResponse(
-          "customerReference",
-          "pageId",
-          "quoteStatus": String,
+          CustomerReference("customerReference"),
+          PegaPlanId("pageId"),
+          QuoteStatus("quoteStatus"),
           LocalDate.now
         )
         (ttpQuoteService
@@ -287,7 +293,7 @@ class TimeToPayProxyControllerSpec
 
         val fakeRequest: FakeRequest[JsValue] = FakeRequest(
           "POST",
-          s"/individuals/time-to-pay/quote/${updateQuoteRequest.customerReference}/${updateQuoteRequest.pegaId}"
+          s"/individuals/time-to-pay/quote/${updateQuoteRequest.customerReference.value}/${updateQuoteRequest.pegaPlanId.value}"
         ).withHeaders(CONTENT_TYPE -> MimeTypes.JSON)
           .withBody(Json.toJson[UpdateQuoteRequest](updateQuoteRequest))
         val response: Future[Result] = controller.updateQuote()(fakeRequest)
@@ -323,7 +329,7 @@ class TimeToPayProxyControllerSpec
 
         val fakeRequest: FakeRequest[JsValue] = FakeRequest(
           "POST",
-          s"/individuals/time-to-pay/quote/${updateQuoteRequest.customerReference}/${updateQuoteRequest.pegaId}"
+          s"/individuals/time-to-pay/quote/${updateQuoteRequest.customerReference.value}/${updateQuoteRequest.pegaPlanId.value}"
         ).withHeaders(CONTENT_TYPE -> MimeTypes.JSON)
           .withBody(Json.toJson[UpdateQuoteRequest](updateQuoteRequest))
         val response: Future[Result] = controller.updateQuote()(fakeRequest)

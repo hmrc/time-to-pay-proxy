@@ -22,6 +22,7 @@ import java.util.concurrent.TimeUnit
 import cats.syntax.either._
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.timetopayproxy.connectors.TtpConnector
+import uk.gov.hmrc.timetopayproxy.models
 import uk.gov.hmrc.timetopayproxy.models._
 import uk.gov.hmrc.timetopayproxy.support.UnitSpec
 
@@ -31,19 +32,22 @@ import scala.concurrent.ExecutionContext.Implicits.global
 class UpdateQuoteServiceSpec extends UnitSpec {
   implicit val hc = HeaderCarrier()
   val updateQuoteRequest = UpdateQuoteRequest(
-    "customerReference",
-    "pegaId",
-    "updateType",
-    "reason"
+    CustomerReference("customerReference"),
+    PegaPlanId("pegaId"),
+    UpdateType("updateType"),
+    CancellationReason("reason"),
+    PaymentMethod("method"),
+    PaymentReference("reference"),
+    true
   )
 
   "Update Quote endpoint" should {
     "return a success response" when {
       "connector returns success" in {
         val responseFromTtp = UpdateQuoteResponse(
-          "customerReference",
-          "pegaId",
-          "quoteStatus",
+          CustomerReference("customerReference"),
+          PegaPlanId("pegaId"),
+          QuoteStatus("quoteStatus"),
           LocalDate.now
         )
         val connector = mock[TtpConnector]

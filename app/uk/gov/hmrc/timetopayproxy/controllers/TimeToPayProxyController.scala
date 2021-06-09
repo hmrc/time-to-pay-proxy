@@ -21,10 +21,7 @@ import play.api.libs.json.JsValue
 import play.api.mvc.{Action, BaseController, ControllerComponents}
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
 import uk.gov.hmrc.timetopayproxy.actions.auth.AuthoriseAction
-import uk.gov.hmrc.timetopayproxy.models.{
-  GenerateQuoteRequest,
-  UpdateQuoteRequest
-}
+import uk.gov.hmrc.timetopayproxy.models.{CustomerReference, GenerateQuoteRequest, PegaPlanId, UpdateQuoteRequest}
 import uk.gov.hmrc.timetopayproxy.models.TimeToPayErrorResponse._
 import uk.gov.hmrc.timetopayproxy.services.TTPQuoteService
 import uk.gov.hmrc.timetopayproxy.utils.TtppErrorHandler._
@@ -39,7 +36,7 @@ class TimeToPayProxyController @Inject()(authoriseAction: AuthoriseAction,
     with BaseController {
   implicit val ec = cc.executionContext
 
-  def generateQuote: Action[JsValue] = authoriseAction.async(parse.json) {
+  def generateQuote: Action[JsValue] = Action.async(parse.json) {
     implicit request =>
       withJsonBody[GenerateQuoteRequest] {
         timeToPayRequest: GenerateQuoteRequest => {
@@ -54,7 +51,7 @@ class TimeToPayProxyController @Inject()(authoriseAction: AuthoriseAction,
   def getExistingPlan(customerReference: String, pegaId: String) =
     authoriseAction.async { implicit request =>
       timeToPayProxyService
-        .getExistingPlan(customerReference, pegaId)
+        .getExistingPlan(CustomerReference(customerReference), PegaPlanId(pegaId))
         .leftMap(ttppError => ttppError.toErrorResponse)
         .fold(e => e.toResult, r => r.toResult)
     }

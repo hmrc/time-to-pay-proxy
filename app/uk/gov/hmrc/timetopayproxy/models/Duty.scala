@@ -23,7 +23,7 @@ import play.api.libs.json._
 import play.api.libs.json.Reads._
 import play.api.libs.functional.syntax._
 
-case class DutyId(value: String) extends AnyVal
+final case class DutyId(value: String) extends AnyVal
 
 object DutyId extends ValueTypeFormatter {
   implicit val formatter = valueTypeFormatter[String, DutyId](
@@ -32,7 +32,7 @@ object DutyId extends ValueTypeFormatter {
   )
 }
 
-case class Subtrans(value: String) extends AnyVal
+final case class Subtrans(value: String) extends AnyVal
 
 object Subtrans extends ValueTypeFormatter {
 
@@ -45,9 +45,9 @@ object Subtrans extends ValueTypeFormatter {
 
 final case class Duty(dutyId: DutyId,
                       subtrans: Subtrans,
-                      paymentDate: LocalDate,
-                      paymentAmount: BigDecimal,
-                      originalDebtAmount: BigDecimal)
+                      originalDebtAmount: BigDecimal,
+                      interestStartDate: LocalDate,
+                      breathingSpaces: List[BreathingSpace])
 
 object Duty {
   implicit val format = Json.format[Duty]

@@ -21,13 +21,11 @@ import play.api.libs.json.Json
 final case class GenerateQuoteResponse(
                               quoteReference: QuoteReference,
                               customerReference: CustomerReference,
-                              quoteStatus: QuoteStatus,
                               quoteType: QuoteType,
-                              payments: List[Payment],
+                              instalments: List[Instalment],
                               numberOfInstalments: String,
-                              outstandingAmountDue: String,
-                              interestRate: Double,
-                              totalAmount: BigDecimal
+                              totalDebtAmount: BigDecimal,
+                              totalInterest: Double
                             )
 
 object GenerateQuoteResponse {

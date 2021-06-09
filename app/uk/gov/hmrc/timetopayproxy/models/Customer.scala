@@ -22,7 +22,7 @@ import java.time.LocalDate
 
 final case class Customer(quoteType: QuoteType,
                           instalmentStartDate: LocalDate,
-                          instalmentAmount: Int,
+                          instalmentAmount: BigDecimal,
                           frequency: Frequency,
                           duration: Duration,
                           initialPaymentAmount: Int,
