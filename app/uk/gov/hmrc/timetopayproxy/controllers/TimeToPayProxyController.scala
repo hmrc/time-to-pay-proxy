@@ -36,7 +36,7 @@ class TimeToPayProxyController @Inject()(authoriseAction: AuthoriseAction,
     with BaseController {
   implicit val ec = cc.executionContext
 
-  def generateQuote: Action[JsValue] = Action.async(parse.json) {
+  def generateQuote: Action[JsValue] = authoriseAction.async(parse.json) {
     implicit request =>
       withJsonBody[GenerateQuoteRequest] {
         timeToPayRequest: GenerateQuoteRequest => {
@@ -56,7 +56,7 @@ class TimeToPayProxyController @Inject()(authoriseAction: AuthoriseAction,
         .fold(e => e.toResult, r => r.toResult)
     }
 
-  def updateQuote: Action[JsValue] = authoriseAction.async(parse.json) {
+  def updateQuote(customerReference: String, pegaId: String): Action[JsValue] = authoriseAction.async(parse.json) {
     implicit request =>
       withJsonBody[UpdateQuoteRequest] {
         updateQuoteRequest: UpdateQuoteRequest => {

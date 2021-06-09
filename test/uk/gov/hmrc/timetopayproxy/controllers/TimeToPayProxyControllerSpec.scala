@@ -296,7 +296,7 @@ class TimeToPayProxyControllerSpec
           s"/individuals/time-to-pay/quote/${updateQuoteRequest.customerReference.value}/${updateQuoteRequest.pegaPlanId.value}"
         ).withHeaders(CONTENT_TYPE -> MimeTypes.JSON)
           .withBody(Json.toJson[UpdateQuoteRequest](updateQuoteRequest))
-        val response: Future[Result] = controller.updateQuote()(fakeRequest)
+        val response: Future[Result] = controller.updateQuote(updateQuoteRequest.customerReference.value, updateQuoteRequest.pegaPlanId.value)(fakeRequest)
         status(response) shouldBe Status.OK
         Json.fromJson[UpdateQuoteResponse](contentAsJson(response)) shouldBe JsSuccess(
           responseFromTtp
@@ -332,7 +332,7 @@ class TimeToPayProxyControllerSpec
           s"/individuals/time-to-pay/quote/${updateQuoteRequest.customerReference.value}/${updateQuoteRequest.pegaPlanId.value}"
         ).withHeaders(CONTENT_TYPE -> MimeTypes.JSON)
           .withBody(Json.toJson[UpdateQuoteRequest](updateQuoteRequest))
-        val response: Future[Result] = controller.updateQuote()(fakeRequest)
+        val response: Future[Result] = controller.updateQuote(updateQuoteRequest.customerReference.value, updateQuoteRequest.pegaPlanId.value)(fakeRequest)
 
         status(response) shouldBe Status.INTERNAL_SERVER_ERROR
         Json.fromJson[TimeToPayErrorResponse](contentAsJson(response)) shouldBe JsSuccess(
