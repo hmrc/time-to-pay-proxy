@@ -33,7 +33,7 @@ class UpdateQuoteServiceSpec extends UnitSpec {
   implicit val hc = HeaderCarrier()
   val updateQuoteRequest = UpdateQuoteRequest(
     CustomerReference("customerReference"),
-    PegaPlanId("pegaId"),
+    PlanId("planId"),
     UpdateType("updateType"),
     CancellationReason("reason"),
     PaymentMethod("method"),
@@ -46,7 +46,7 @@ class UpdateQuoteServiceSpec extends UnitSpec {
       "connector returns success" in {
         val responseFromTtp = UpdateQuoteResponse(
           CustomerReference("customerReference"),
-          PegaPlanId("pegaId"),
+          PlanId("planId"),
           QuoteStatus("quoteStatus"),
           LocalDate.now
         )

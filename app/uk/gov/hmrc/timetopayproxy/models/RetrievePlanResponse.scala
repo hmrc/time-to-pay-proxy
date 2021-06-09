@@ -19,7 +19,7 @@ package uk.gov.hmrc.timetopayproxy.models
 import play.api.libs.json.Json
 
 final case class RetrievePlanResponse(customerReference: String,
-                                      pegaPlanId: String,
+                                      planId: String,
                                       quoteType: String,
                                       paymentMethod: String,
                                       paymentReference: String,

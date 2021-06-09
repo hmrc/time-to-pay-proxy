@@ -32,7 +32,7 @@ trait TTPQuoteService {
     hc: HeaderCarrier
   ): TtppEnvelope[GenerateQuoteResponse]
 
-  def getExistingPlan(customerReference: CustomerReference, pegaId: PegaPlanId)(
+  def getExistingPlan(customerReference: CustomerReference, planId: PlanId)(
     implicit ec: ExecutionContext,
     hc: HeaderCarrier
   ): TtppEnvelope[RetrievePlanResponse]
@@ -53,11 +53,11 @@ class DefaultTTPQuoteService @Inject()(ttpConnector: TtpConnector)
   ): TtppEnvelope[GenerateQuoteResponse] =
     ttpConnector.generateQuote(timeToPayRequest)
 
-  override def getExistingPlan(customerReference: CustomerReference, pegaPlanId: PegaPlanId)(
+  override def getExistingPlan(customerReference: CustomerReference, planId: PlanId)(
     implicit ec: ExecutionContext,
     hc: HeaderCarrier
   ): TtppEnvelope[RetrievePlanResponse] = {
-    ttpConnector.getExistingQuote(customerReference, pegaPlanId)
+    ttpConnector.getExistingQuote(customerReference, planId)
   }
 
   def updateQuote(updateQuoteRequest: UpdateQuoteRequest)(

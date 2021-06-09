@@ -60,7 +60,7 @@ class TTPQuoteServiceSpec extends UnitSpec {
 
   val retrievePlanResponse = RetrievePlanResponse(
     "someCustomerRef",
-    "somePegaId",
+    "someplanId",
     "someQuoateStatus",
     "xyz",
     "ref",
@@ -76,7 +76,7 @@ class TTPQuoteServiceSpec extends UnitSpec {
   val updateQuoteRequest =
     UpdateQuoteRequest(
       CustomerReference("customerReference"),
-      PegaPlanId("pegaPlanId"),
+      PlanId("planId"),
       UpdateType("updateType"),
       CancellationReason("reason"),
       PaymentMethod("method"),
@@ -86,7 +86,7 @@ class TTPQuoteServiceSpec extends UnitSpec {
 
   val updateQuoteResponse = UpdateQuoteResponse(
     CustomerReference("customerReference"),
-    PegaPlanId("pegaPlanId"),
+    PlanId("planId"),
     QuoteStatus("quoteStatus"),
     LocalDate.now
   )
@@ -151,7 +151,7 @@ class TTPQuoteServiceSpec extends UnitSpec {
       )
       val quoteService = new DefaultTTPQuoteService(connectorStub)
 
-      await(quoteService.getExistingPlan(CustomerReference("someCustomer"), PegaPlanId("somePegaId")).value) shouldBe retrievePlanResponse
+      await(quoteService.getExistingPlan(CustomerReference("someCustomer"), PlanId("someplanId")).value) shouldBe retrievePlanResponse
         .asRight[TtppError]
     }
 
@@ -163,7 +163,7 @@ class TTPQuoteServiceSpec extends UnitSpec {
       )
       val quoteService = new DefaultTTPQuoteService(connectorStub)
 
-      await(quoteService.getExistingPlan(CustomerReference("someCustomer"), PegaPlanId("somePegaId")).value) shouldBe ConnectorError(
+      await(quoteService.getExistingPlan(CustomerReference("someCustomer"), PlanId("someplanId")).value) shouldBe ConnectorError(
         500,
         "Internal server error"
       ).asLeft[RetrievePlanResponse]
@@ -236,7 +236,7 @@ class TtpConnectorStub(
   ): TtppEnvelope[GenerateQuoteResponse] =
     TtppEnvelope(Future successful generateQuoteResponse)
 
-  override def getExistingQuote(customerReference: CustomerReference, pegaPlanId: PegaPlanId)(
+  override def getExistingQuote(customerReference: CustomerReference, planId: PlanId)(
     implicit ec: ExecutionContext,
     hc: HeaderCarrier
   ): TtppEnvelope[RetrievePlanResponse] =

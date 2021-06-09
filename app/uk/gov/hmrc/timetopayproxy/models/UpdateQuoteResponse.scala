@@ -22,7 +22,7 @@ import play.api.libs.json.Json
 
 final case class UpdateQuoteResponse(
                                 customerReference: CustomerReference,
-                                pegaPlanId: PegaPlanId,
+                                planId: PlanId,
                                 quoteStatus: QuoteStatus,
                                 quoteUpdatedDate: LocalDate
                               )
