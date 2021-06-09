@@ -78,7 +78,7 @@ class TimeToPayProxyControllerSpec
   private val updateQuoteRequest =
     UpdateQuoteRequest(
       CustomerReference("customerReference"),
-      PegaPlanId("pegaId"),
+      PlanId("planId"),
       UpdateType("updateType"),
       CancellationReason("reason"),
       PaymentMethod("method"),
@@ -157,7 +157,7 @@ class TimeToPayProxyControllerSpec
     }
   }
 
-  "GET /individuals/time-to-pay/quote/:customerReference/:pegaId" should {
+  "GET /individuals/time-to-pay/quote/:customerReference/:planId" should {
     "return a 200 given a successful response" in {
 
       (authConnector
@@ -169,7 +169,7 @@ class TimeToPayProxyControllerSpec
         .returning(Future.successful())
 
       (ttpQuoteService
-        .getExistingPlan(_: CustomerReference, _: PegaPlanId)(
+        .getExistingPlan(_: CustomerReference, _: PlanId)(
           _: ExecutionContext,
           _: HeaderCarrier
         ))
@@ -178,7 +178,7 @@ class TimeToPayProxyControllerSpec
           TtppEnvelope(
             RetrievePlanResponse(
               "someCustomerRef",
-              "somePegaId",
+              "someplanId",
               "someQuoateStatus",
               "xyz",
               "ref",
@@ -195,10 +195,10 @@ class TimeToPayProxyControllerSpec
 
       val fakeRequest = FakeRequest(
         "GET",
-        "/individuals/time-to-pay/quote/customerReference/pegaId"
+        "/individuals/time-to-pay/quote/customerReference/planId"
       )
       val response: Future[Result] =
-        controller.getExistingPlan("customerReference", "pegaId")(fakeRequest)
+        controller.getExistingPlan("customerReference", "planId")(fakeRequest)
 
       status(response) shouldBe Status.OK
     }
@@ -214,7 +214,7 @@ class TimeToPayProxyControllerSpec
 
       val errorFromTtpConnector = ConnectorError(404, "Not Found")
       (ttpQuoteService
-        .getExistingPlan(_: CustomerReference, _: PegaPlanId)(
+        .getExistingPlan(_: CustomerReference, _: PlanId)(
           _: ExecutionContext,
           _: HeaderCarrier
         ))
@@ -225,10 +225,10 @@ class TimeToPayProxyControllerSpec
 
       val fakeRequest = FakeRequest(
         "GET",
-        "/individuals/time-to-pay/quote/customerReference/pegaId"
+        "/individuals/time-to-pay/quote/customerReference/planId"
       )
       val response: Future[Result] =
-        controller.getExistingPlan("customerReference", "pegaId")(fakeRequest)
+        controller.getExistingPlan("customerReference", "planId")(fakeRequest)
 
       status(response) shouldBe Status.NOT_FOUND
     }
@@ -245,7 +245,7 @@ class TimeToPayProxyControllerSpec
 
       val errorFromTtpConnector = ConnectorError(500, "Internal Service Error")
       (ttpQuoteService
-        .getExistingPlan(_: CustomerReference, _: PegaPlanId)(
+        .getExistingPlan(_: CustomerReference, _: PlanId)(
           _: ExecutionContext,
           _: HeaderCarrier
         ))
@@ -256,16 +256,16 @@ class TimeToPayProxyControllerSpec
 
       val fakeRequest = FakeRequest(
         "GET",
-        "/individuals/time-to-pay/quote/customerReference/pegaId"
+        "/individuals/time-to-pay/quote/customerReference/planId"
       )
       val response: Future[Result] =
-        controller.getExistingPlan("customerReference", "pegaId")(fakeRequest)
+        controller.getExistingPlan("customerReference", "planId")(fakeRequest)
 
       status(response) shouldBe Status.INTERNAL_SERVER_ERROR
     }
   }
 
-  "PUT /individuals/time-to-pay/quote/:customerReference/:pegaId" should {
+  "PUT /individuals/time-to-pay/quote/:customerReference/:planId" should {
     "return 200" when {
       "service returns success" in {
 
@@ -279,7 +279,7 @@ class TimeToPayProxyControllerSpec
 
         val responseFromTtp = UpdateQuoteResponse(
           CustomerReference("customerReference"),
-          PegaPlanId("pageId"),
+          PlanId("planId"),
           QuoteStatus("quoteStatus"),
           LocalDate.now
         )
@@ -293,10 +293,10 @@ class TimeToPayProxyControllerSpec
 
         val fakeRequest: FakeRequest[JsValue] = FakeRequest(
           "POST",
-          s"/individuals/time-to-pay/quote/${updateQuoteRequest.customerReference.value}/${updateQuoteRequest.pegaPlanId.value}"
+          s"/individuals/time-to-pay/quote/${updateQuoteRequest.customerReference.value}/${updateQuoteRequest.planId.value}"
         ).withHeaders(CONTENT_TYPE -> MimeTypes.JSON)
           .withBody(Json.toJson[UpdateQuoteRequest](updateQuoteRequest))
-        val response: Future[Result] = controller.updateQuote(updateQuoteRequest.customerReference.value, updateQuoteRequest.pegaPlanId.value)(fakeRequest)
+        val response: Future[Result] = controller.updateQuote(updateQuoteRequest.customerReference.value, updateQuoteRequest.planId.value)(fakeRequest)
         status(response) shouldBe Status.OK
         Json.fromJson[UpdateQuoteResponse](contentAsJson(response)) shouldBe JsSuccess(
           responseFromTtp
@@ -329,10 +329,10 @@ class TimeToPayProxyControllerSpec
 
         val fakeRequest: FakeRequest[JsValue] = FakeRequest(
           "POST",
-          s"/individuals/time-to-pay/quote/${updateQuoteRequest.customerReference.value}/${updateQuoteRequest.pegaPlanId.value}"
+          s"/individuals/time-to-pay/quote/${updateQuoteRequest.customerReference.value}/${updateQuoteRequest.planId.value}"
         ).withHeaders(CONTENT_TYPE -> MimeTypes.JSON)
           .withBody(Json.toJson[UpdateQuoteRequest](updateQuoteRequest))
-        val response: Future[Result] = controller.updateQuote(updateQuoteRequest.customerReference.value, updateQuoteRequest.pegaPlanId.value)(fakeRequest)
+        val response: Future[Result] = controller.updateQuote(updateQuoteRequest.customerReference.value, updateQuoteRequest.planId.value)(fakeRequest)
 
         status(response) shouldBe Status.INTERNAL_SERVER_ERROR
         Json.fromJson[TimeToPayErrorResponse](contentAsJson(response)) shouldBe JsSuccess(

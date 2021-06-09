@@ -47,7 +47,7 @@ object UpdateType extends ValueTypeFormatter {
 }
 
 final case class UpdateQuoteRequest(customerReference: CustomerReference,
-                                    pegaPlanId: PegaPlanId,
+                                    planId: PlanId,
                                     updateType: UpdateType,
                                     cancellationReason: CancellationReason,
                                     paymentMethod: PaymentMethod,
