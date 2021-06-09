@@ -19,15 +19,15 @@ package uk.gov.hmrc.timetopayproxy.models
 import play.api.libs.json.Json
 
 final case class GenerateQuoteResponse(
-                              quoteReference: String,
-                              customerReference: String,
-                              quoteStatus: String,
-                              quoteType: String,
+                              quoteReference: QuoteReference,
+                              customerReference: CustomerReference,
+                              quoteStatus: QuoteStatus,
+                              quoteType: QuoteType,
                               payments: List[Payment],
                               numberOfInstalments: String,
                               outstandingAmountDue: String,
                               interestRate: Double,
-                              totalAmount: Int
+                              totalAmount: BigDecimal
                             )
 
 object GenerateQuoteResponse {

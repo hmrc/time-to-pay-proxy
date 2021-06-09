@@ -35,24 +35,24 @@ class TTPQuoteServiceSpec extends UnitSpec {
     10,
     List(
       Customer(
-        "quoteType",
-        "2021-01-01",
+        QuoteType("quoteType"),
+        LocalDate.of(2021, 1, 1),
         1,
-        "",
-        "",
+        Frequency("some frequency"),
+        Duration("some duration"),
         1,
         LocalDate.now(),
-        "paymentPlanType"
+        PaymentPlanType("paymentPlanType")
       )
     ),
     List()
   )
 
   val generateQuoteResponse = GenerateQuoteResponse(
-    "quoteReference",
-    "customerReference",
-    "quoteStatus",
-    "quoteType",
+    QuoteReference("quoteReference"),
+    CustomerReference("customerReference"),
+    QuoteStatus("quoteStatus"),
+    QuoteType("quoteType"),
     List(Payment(LocalDate.parse("2021-01-01"), 1)),
     "1",
     "",
