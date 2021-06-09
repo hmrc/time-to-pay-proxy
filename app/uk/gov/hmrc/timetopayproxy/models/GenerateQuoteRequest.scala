@@ -44,3 +44,5 @@ final case class GenerateQuoteRequest(
 object GenerateQuoteRequest {
   implicit val format = Json.format[GenerateQuoteRequest]
 }
+
+

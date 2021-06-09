@@ -15,21 +15,19 @@
  */
 
 package uk.gov.hmrc.timetopayproxy.models
+import play.api.libs.json._
 
-import play.api.libs.json.Json
-
-final case class GenerateQuoteResponse(
-                              quoteReference: QuoteReference,
-                              customerReference: CustomerReference,
-                              quoteType: QuoteType,
-                              instalments: List[Instalment],
-                              numberOfInstalments: String,
-                              totalDebtAmount: BigDecimal,
-                              totalInterest: Double
-                            )
-
-object GenerateQuoteResponse {
-  implicit val format = Json.format[GenerateQuoteResponse]
+trait ValueTypeFormatter {
+  def valueTypeFormatter[T, U](
+    apply: T => U,
+    unapply: U => Option[T]
+  )(implicit readsT: Reads[T], writesT: Writes[T]): Format[U] =
+    new Format[U] {
+      override def reads(json: JsValue): JsResult[U] =
+        json.validate[T].map(apply)
+      override def writes(o: U): JsValue = unapply(o) match {
+        case Some(x) => Json.toJson(x)
+        case None    => JsNull
+      }
+    }
 }
-
-

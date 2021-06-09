@@ -16,13 +16,38 @@
 
 package uk.gov.hmrc.timetopayproxy.models
 
-import play.api.libs.json.Json
+import java.time.LocalDate
 
-final case class Duty(
-                       dutyId: String,
-                       subtrans: String,
-                       payments: Seq[Payment],
-                       originalDebtAmount: Int)
+import play.api.libs.json.{Format, JsPath, Json}
+import play.api.libs.json._
+import play.api.libs.json.Reads._
+import play.api.libs.functional.syntax._
+
+final case class DutyId(value: String) extends AnyVal
+
+object DutyId extends ValueTypeFormatter {
+  implicit val formatter = valueTypeFormatter[String, DutyId](
+    DutyId.apply,
+    DutyId.unapply
+  )
+}
+
+final case class Subtrans(value: String) extends AnyVal
+
+object Subtrans extends ValueTypeFormatter {
+
+  implicit val formatter = valueTypeFormatter[String, Subtrans](
+    Subtrans.apply,
+    Subtrans.unapply
+  )
+
+}
+
+final case class Duty(dutyId: DutyId,
+                      subtrans: Subtrans,
+                      originalDebtAmount: BigDecimal,
+                      interestStartDate: LocalDate,
+                      breathingSpaces: List[BreathingSpace])
 
 object Duty {
   implicit val format = Json.format[Duty]

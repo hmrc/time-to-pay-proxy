@@ -21,7 +21,7 @@ import play.api.libs.json.JsValue
 import play.api.mvc.{Action, BaseController, ControllerComponents}
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
 import uk.gov.hmrc.timetopayproxy.actions.auth.AuthoriseAction
-import uk.gov.hmrc.timetopayproxy.models.GenerateQuoteRequest
+import uk.gov.hmrc.timetopayproxy.models.{CustomerReference, GenerateQuoteRequest, PegaPlanId, UpdateQuoteRequest}
 import uk.gov.hmrc.timetopayproxy.models.TimeToPayErrorResponse._
 import uk.gov.hmrc.timetopayproxy.services.TTPQuoteService
 import uk.gov.hmrc.timetopayproxy.utils.TtppErrorHandler._
@@ -29,31 +29,42 @@ import uk.gov.hmrc.timetopayproxy.utils.TtppResultConverter._
 import uk.gov.hmrc.timetopayproxy.models.GenerateQuoteResponse._
 
 @Singleton()
-class TimeToPayProxyController @Inject()(
-                                          authoriseAction: AuthoriseAction,
-                                          cc: ControllerComponents,
-                                          timeToPayProxyService: TTPQuoteService
-                                        ) extends BackendController(cc) with BaseController {
+class TimeToPayProxyController @Inject()(authoriseAction: AuthoriseAction,
+                                         cc: ControllerComponents,
+                                         timeToPayProxyService: TTPQuoteService)
+    extends BackendController(cc)
+    with BaseController {
   implicit val ec = cc.executionContext
 
-  def generateQuote: Action[JsValue] = authoriseAction.async(parse.json) { implicit request =>
-    withJsonBody[GenerateQuoteRequest] { timeToPayRequest: GenerateQuoteRequest => {
-      timeToPayProxyService.generateQuote(timeToPayRequest)
-        .leftMap(ttppError => ttppError.toErrorResponse)
-        .fold(
-          e => e.toResult,
-          r => r.toResult
-        )
-    }
-    }
+  def generateQuote: Action[JsValue] = authoriseAction.async(parse.json) {
+    implicit request =>
+      withJsonBody[GenerateQuoteRequest] {
+        timeToPayRequest: GenerateQuoteRequest => {
+          timeToPayProxyService
+            .generateQuote(timeToPayRequest)
+            .leftMap(ttppError => ttppError.toErrorResponse)
+            .fold(e => e.toResult, r => r.toResult)
+        }
+      }
   }
 
-  def getExistingPlan(customerReference: String, pegaId: String) = authoriseAction.async { implicit request =>
-    timeToPayProxyService.getExistingPlan(customerReference, pegaId)
-      .leftMap(ttppError => ttppError.toErrorResponse)
-      .fold(
-        e => e.toResult,
-        r => r.toResult
-      )
+  def getExistingPlan(customerReference: String, pegaId: String) =
+    authoriseAction.async { implicit request =>
+      timeToPayProxyService
+        .getExistingPlan(CustomerReference(customerReference), PegaPlanId(pegaId))
+        .leftMap(ttppError => ttppError.toErrorResponse)
+        .fold(e => e.toResult, r => r.toResult)
+    }
+
+  def updateQuote(customerReference: String, pegaId: String): Action[JsValue] = authoriseAction.async(parse.json) {
+    implicit request =>
+      withJsonBody[UpdateQuoteRequest] {
+        updateQuoteRequest: UpdateQuoteRequest => {
+          timeToPayProxyService
+            .updateQuote(updateQuoteRequest)
+            .leftMap(ttppError => ttppError.toErrorResponse)
+            .fold(e => e.toResult, r => r.toResult)
+        }
+      }
   }
 }

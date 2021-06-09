@@ -17,27 +17,52 @@
 package uk.gov.hmrc.timetopayproxy.services
 
 import com.google.inject.ImplementedBy
-
 import javax.inject.{Inject, Singleton}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.timetopayproxy.connectors.TtpConnector
-import uk.gov.hmrc.timetopayproxy.models.{GenerateQuoteRequest, GenerateQuoteResponse, RetrievePlanResponse}
+import uk.gov.hmrc.timetopayproxy.models._
 import uk.gov.hmrc.timetopayproxy.models.TtppEnvelope.TtppEnvelope
 
 import scala.concurrent.ExecutionContext
 
 @ImplementedBy(classOf[DefaultTTPQuoteService])
 trait TTPQuoteService {
-  def generateQuote(timeToPayRequest: GenerateQuoteRequest)(implicit ec: ExecutionContext, hc: HeaderCarrier): TtppEnvelope[GenerateQuoteResponse]
-  def getExistingPlan(customerReference: String, pegaId: String)(implicit ec: ExecutionContext, hc: HeaderCarrier): TtppEnvelope[RetrievePlanResponse]
+  def generateQuote(timeToPayRequest: GenerateQuoteRequest)(
+    implicit ec: ExecutionContext,
+    hc: HeaderCarrier
+  ): TtppEnvelope[GenerateQuoteResponse]
+
+  def getExistingPlan(customerReference: CustomerReference, pegaId: PegaPlanId)(
+    implicit ec: ExecutionContext,
+    hc: HeaderCarrier
+  ): TtppEnvelope[RetrievePlanResponse]
+
+  def updateQuote(updateQuoteRequest: UpdateQuoteRequest)(
+    implicit ec: ExecutionContext,
+    hc: HeaderCarrier
+  ): TtppEnvelope[UpdateQuoteResponse]
 }
 
 @Singleton
-class DefaultTTPQuoteService @Inject()(ttpConnector: TtpConnector) extends TTPQuoteService {
-  def generateQuote(timeToPayRequest: GenerateQuoteRequest)(implicit ec: ExecutionContext, hc: HeaderCarrier): TtppEnvelope[GenerateQuoteResponse] =
+class DefaultTTPQuoteService @Inject()(ttpConnector: TtpConnector)
+    extends TTPQuoteService {
+
+  def generateQuote(timeToPayRequest: GenerateQuoteRequest)(
+    implicit ec: ExecutionContext,
+    hc: HeaderCarrier
+  ): TtppEnvelope[GenerateQuoteResponse] =
     ttpConnector.generateQuote(timeToPayRequest)
 
-  override def getExistingPlan(customerReference: String, pegaId: String)(implicit ec: ExecutionContext, hc: HeaderCarrier): TtppEnvelope[RetrievePlanResponse] = {
-    ttpConnector.getExistingQuote(customerReference, pegaId)
+  override def getExistingPlan(customerReference: CustomerReference, pegaPlanId: PegaPlanId)(
+    implicit ec: ExecutionContext,
+    hc: HeaderCarrier
+  ): TtppEnvelope[RetrievePlanResponse] = {
+    ttpConnector.getExistingQuote(customerReference, pegaPlanId)
   }
+
+  def updateQuote(updateQuoteRequest: UpdateQuoteRequest)(
+    implicit ec: ExecutionContext,
+    hc: HeaderCarrier
+  ): TtppEnvelope[UpdateQuoteResponse] =
+    ttpConnector.updateQuote(updateQuoteRequest)
 }

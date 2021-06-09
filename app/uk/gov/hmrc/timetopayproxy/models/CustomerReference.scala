@@ -16,20 +16,16 @@
 
 package uk.gov.hmrc.timetopayproxy.models
 
-import play.api.libs.json.Json
+final case class Frequency(value: String) extends AnyVal
 
-final case class GenerateQuoteResponse(
-                              quoteReference: QuoteReference,
-                              customerReference: CustomerReference,
-                              quoteType: QuoteType,
-                              instalments: List[Instalment],
-                              numberOfInstalments: String,
-                              totalDebtAmount: BigDecimal,
-                              totalInterest: Double
-                            )
-
-object GenerateQuoteResponse {
-  implicit val format = Json.format[GenerateQuoteResponse]
+object Frequency extends ValueTypeFormatter {
+  implicit val format =
+    valueTypeFormatter(Frequency.apply, Frequency.unapply)
 }
 
+final case class CustomerReference(value: String) extends AnyVal
 
+object CustomerReference extends ValueTypeFormatter {
+  implicit val format =
+    valueTypeFormatter(CustomerReference.apply, CustomerReference.unapply)
+}

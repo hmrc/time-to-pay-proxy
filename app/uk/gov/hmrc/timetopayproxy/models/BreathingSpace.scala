@@ -15,21 +15,15 @@
  */
 
 package uk.gov.hmrc.timetopayproxy.models
+import java.time.LocalDate
 
 import play.api.libs.json.Json
 
-final case class GenerateQuoteResponse(
-                              quoteReference: QuoteReference,
-                              customerReference: CustomerReference,
-                              quoteType: QuoteType,
-                              instalments: List[Instalment],
-                              numberOfInstalments: String,
-                              totalDebtAmount: BigDecimal,
-                              totalInterest: Double
-                            )
+case class BreathingSpace(debtRespiteFrom: LocalDate,
+                          debtRespiteTo: LocalDate,
+                          paymentDate: LocalDate,
+                          paymentAmount: BigDecimal)
 
-object GenerateQuoteResponse {
-  implicit val format = Json.format[GenerateQuoteResponse]
+object BreathingSpace {
+  implicit val format = Json.format[BreathingSpace]
 }
-
-
