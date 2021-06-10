@@ -48,7 +48,7 @@ class TimeToPayProxyController @Inject()(authoriseAction: AuthoriseAction,
       }
   }
 
-  def getExistingPlan(customerReference: String, pegaId: String) =
+  def viewPlan(customerReference: String, pegaId: String) =
     authoriseAction.async { implicit request =>
       timeToPayProxyService
         .getExistingPlan(CustomerReference(customerReference), PegaPlanId(pegaId))

@@ -189,15 +189,12 @@ class TimeToPayProxyControllerSpec
         .expects(*, *, *, *)
         .returning(
           TtppEnvelope(
-            RetrievePlanResponse(
+            ViewPlanResponse(
               "someCustomerRef",
               "somePegaId",
               "someQuoateStatus",
               "xyz",
-              "ref",
-              "info",
-              "info",
-              Nil,
+              "xyz",
               Nil,
               "2",
               100,
@@ -211,7 +208,7 @@ class TimeToPayProxyControllerSpec
         "/individuals/time-to-pay/quote/customerReference/pegaId"
       )
       val response: Future[Result] =
-        controller.getExistingPlan("customerReference", "pegaId")(fakeRequest)
+        controller.viewPlan("customerReference", "pegaId")(fakeRequest)
 
       status(response) shouldBe Status.OK
     }
@@ -233,7 +230,7 @@ class TimeToPayProxyControllerSpec
         ))
         .expects(*, *, *, *)
         .returning(
-          TtppEnvelope(errorFromTtpConnector.asLeft[RetrievePlanResponse])
+          TtppEnvelope(errorFromTtpConnector.asLeft[ViewPlanResponse])
         )
 
       val fakeRequest = FakeRequest(
@@ -241,7 +238,7 @@ class TimeToPayProxyControllerSpec
         "/individuals/time-to-pay/quote/customerReference/pegaId"
       )
       val response: Future[Result] =
-        controller.getExistingPlan("customerReference", "pegaId")(fakeRequest)
+        controller.viewPlan("customerReference", "pegaId")(fakeRequest)
 
       status(response) shouldBe Status.NOT_FOUND
     }
@@ -264,7 +261,7 @@ class TimeToPayProxyControllerSpec
         ))
         .expects(*, *, *, *)
         .returning(
-          TtppEnvelope(errorFromTtpConnector.asLeft[RetrievePlanResponse])
+          TtppEnvelope(errorFromTtpConnector.asLeft[ViewPlanResponse])
         )
 
       val fakeRequest = FakeRequest(
@@ -272,7 +269,7 @@ class TimeToPayProxyControllerSpec
         "/individuals/time-to-pay/quote/customerReference/pegaId"
       )
       val response: Future[Result] =
-        controller.getExistingPlan("customerReference", "pegaId")(fakeRequest)
+        controller.viewPlan("customerReference", "pegaId")(fakeRequest)
 
       status(response) shouldBe Status.INTERNAL_SERVER_ERROR
     }
