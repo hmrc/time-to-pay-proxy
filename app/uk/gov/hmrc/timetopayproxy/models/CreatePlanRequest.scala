@@ -36,7 +36,7 @@ object PlanInstalment {
 
 final case class CreatePlanRequest(
                                     customerReference: CustomerReference,
-                                    pegaPlanId: PegaPlanId,
+                                    planId: PlanId,
                                     paymentMethod: String,
                                     paymentReference: String,
                                     thirdPartyBank: Boolean,

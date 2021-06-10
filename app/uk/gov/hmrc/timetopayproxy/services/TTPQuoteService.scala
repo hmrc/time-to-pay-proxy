@@ -29,7 +29,7 @@ import scala.concurrent.ExecutionContext
 trait TTPQuoteService {
   def generateQuote(timeToPayRequest: GenerateQuoteRequest)(implicit ec: ExecutionContext, hc: HeaderCarrier): TtppEnvelope[GenerateQuoteResponse]
 
-  def getExistingPlan(customerReference: CustomerReference, pegaId: PegaPlanId)(implicit ec: ExecutionContext, hc: HeaderCarrier): TtppEnvelope[ViewPlanResponse]
+  def getExistingPlan(customerReference: CustomerReference, pegaId: PlanId)(implicit ec: ExecutionContext, hc: HeaderCarrier): TtppEnvelope[ViewPlanResponse]
 
   def updateQuote(updateQuoteRequest: UpdateQuoteRequest)(implicit ec: ExecutionContext, hc: HeaderCarrier): TtppEnvelope[UpdateQuoteResponse]
 
@@ -46,7 +46,7 @@ class DefaultTTPQuoteService @Inject()(ttpConnector: TtpConnector)
   ): TtppEnvelope[GenerateQuoteResponse] =
     ttpConnector.generateQuote(timeToPayRequest)
 
-  override def getExistingPlan(customerReference: CustomerReference, pegaPlanId: PegaPlanId)(
+  override def getExistingPlan(customerReference: CustomerReference, pegaPlanId: PlanId)(
     implicit ec: ExecutionContext,
     hc: HeaderCarrier
   ): TtppEnvelope[ViewPlanResponse] = {

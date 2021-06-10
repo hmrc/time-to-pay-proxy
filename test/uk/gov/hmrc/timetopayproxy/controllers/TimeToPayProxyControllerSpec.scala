@@ -78,7 +78,7 @@ class TimeToPayProxyControllerSpec
   private val updateQuoteRequest =
     UpdateQuoteRequest(
       CustomerReference("customerReference"),
-      PegaPlanId("pegaId"),
+      PlanId("pegaId"),
       UpdateType("updateType"),
       CancellationReason("reason"),
       PaymentMethod("method"),
@@ -89,7 +89,7 @@ class TimeToPayProxyControllerSpec
   private val createPlanRequest =
     CreatePlanRequest(
       CustomerReference("customerReference"),
-      PegaPlanId("pegaPlanId"),
+      PlanId("pegaPlanId"),
       "xyz",
       "paymentRed",
       false,
@@ -182,7 +182,7 @@ class TimeToPayProxyControllerSpec
         .returning(Future.successful())
 
       (ttpQuoteService
-        .getExistingPlan(_: CustomerReference, _: PegaPlanId)(
+        .getExistingPlan(_: CustomerReference, _: PlanId)(
           _: ExecutionContext,
           _: HeaderCarrier
         ))
@@ -190,9 +190,9 @@ class TimeToPayProxyControllerSpec
         .returning(
           TtppEnvelope(
             ViewPlanResponse(
-              "someCustomerRef",
-              "somePegaId",
-              "someQuoateStatus",
+              CustomerReference("someCustomerRef"),
+              PlanId("somePegaId"),
+              QuoteType("someQuoateStatus"),
               "xyz",
               "xyz",
               Nil,
@@ -224,7 +224,7 @@ class TimeToPayProxyControllerSpec
 
       val errorFromTtpConnector = ConnectorError(404, "Not Found")
       (ttpQuoteService
-        .getExistingPlan(_: CustomerReference, _: PegaPlanId)(
+        .getExistingPlan(_: CustomerReference, _: PlanId)(
           _: ExecutionContext,
           _: HeaderCarrier
         ))
@@ -255,7 +255,7 @@ class TimeToPayProxyControllerSpec
 
       val errorFromTtpConnector = ConnectorError(500, "Internal Service Error")
       (ttpQuoteService
-        .getExistingPlan(_: CustomerReference, _: PegaPlanId)(
+        .getExistingPlan(_: CustomerReference, _: PlanId)(
           _: ExecutionContext,
           _: HeaderCarrier
         ))
@@ -289,7 +289,7 @@ class TimeToPayProxyControllerSpec
 
         val responseFromTtp = UpdateQuoteResponse(
           CustomerReference("customerReference"),
-          PegaPlanId("pageId"),
+          PlanId("pageId"),
           QuoteStatus("quoteStatus"),
           LocalDate.now
         )
@@ -365,8 +365,8 @@ class TimeToPayProxyControllerSpec
           .returning(Future.successful())
 
         val createPlanResponse = CreatePlanResponse(
-          "customerReference",
-          "pegaPlanId",
+          CustomerReference("customerReference"),
+          PlanId("pegaPlanId"),
           "xyz"
         )
         (ttpQuoteService

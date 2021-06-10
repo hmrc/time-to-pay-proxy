@@ -59,9 +59,9 @@ class TTPQuoteServiceSpec extends UnitSpec {
   )
 
   private val retrievePlanResponse = ViewPlanResponse(
-    "someCustomerRef",
-    "somePegaId",
-    "someQuoateStatus",
+    CustomerReference("someCustomerRef"),
+    PlanId("somePegaId"),
+    QuoteType("someQuoateStatus"),
     "xyz",
     "ref",
     Nil,
@@ -73,7 +73,7 @@ class TTPQuoteServiceSpec extends UnitSpec {
   private val updateQuoteRequest =
     UpdateQuoteRequest(
       CustomerReference("customerReference"),
-      PegaPlanId("pegaPlanId"),
+      PlanId("pegaPlanId"),
       UpdateType("updateType"),
       CancellationReason("reason"),
       PaymentMethod("method"),
@@ -83,7 +83,7 @@ class TTPQuoteServiceSpec extends UnitSpec {
 
   private val updateQuoteResponse = UpdateQuoteResponse(
     CustomerReference("customerReference"),
-    PegaPlanId("pegaPlanId"),
+    PlanId("pegaPlanId"),
     QuoteStatus("quoteStatus"),
     LocalDate.now
   )
@@ -91,7 +91,7 @@ class TTPQuoteServiceSpec extends UnitSpec {
   private val createPlanRequest =
     CreatePlanRequest(
       CustomerReference("customerReference"),
-      PegaPlanId("pegaPlanId"),
+      PlanId("pegaPlanId"),
       "xyz",
       "paymentRed",
       false,
@@ -102,8 +102,8 @@ class TTPQuoteServiceSpec extends UnitSpec {
     )
 
   private val createPlanResponse = CreatePlanResponse(
-    "customerReference",
-    "pegaPlanId",
+    CustomerReference("customerReference"),
+    PlanId("pegaPlanId"),
     "xyz"
   )
 
@@ -168,7 +168,7 @@ class TTPQuoteServiceSpec extends UnitSpec {
       )
       val quoteService = new DefaultTTPQuoteService(connectorStub)
 
-      await(quoteService.getExistingPlan(CustomerReference("someCustomer"), PegaPlanId("somePegaId")).value) shouldBe retrievePlanResponse
+      await(quoteService.getExistingPlan(CustomerReference("someCustomer"), PlanId("somePegaId")).value) shouldBe retrievePlanResponse
         .asRight[TtppError]
     }
 
@@ -181,7 +181,7 @@ class TTPQuoteServiceSpec extends UnitSpec {
       )
       val quoteService = new DefaultTTPQuoteService(connectorStub)
 
-      await(quoteService.getExistingPlan(CustomerReference("someCustomer"), PegaPlanId("somePegaId")).value) shouldBe ConnectorError(
+      await(quoteService.getExistingPlan(CustomerReference("someCustomer"), PlanId("somePegaId")).value) shouldBe ConnectorError(
         500,
         "Internal server error"
       ).asLeft[ViewPlanResponse]
@@ -287,7 +287,7 @@ class TtpConnectorStub(
   ): TtppEnvelope[GenerateQuoteResponse] =
     TtppEnvelope(Future successful generateQuoteResponse)
 
-  override def getExistingQuote(customerReference: CustomerReference, pegaPlanId: PegaPlanId)(
+  override def getExistingQuote(customerReference: CustomerReference, pegaPlanId: PlanId)(
     implicit ec: ExecutionContext,
     hc: HeaderCarrier
   ): TtppEnvelope[ViewPlanResponse] =

@@ -18,7 +18,7 @@ package uk.gov.hmrc.timetopayproxy.models
 
 import play.api.libs.json.Json
 
-final case class CreatePlanResponse(customerReference: String, pegaPlanId: String, planStatus: String)
+final case class CreatePlanResponse(customerReference: CustomerReference, planId: PlanId, planStatus: String)
 
 object CreatePlanResponse {
   implicit val format = Json.format[CreatePlanResponse]

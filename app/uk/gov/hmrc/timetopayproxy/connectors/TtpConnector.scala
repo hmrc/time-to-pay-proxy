@@ -29,7 +29,7 @@ import uk.gov.hmrc.timetopayproxy.config.AppConfig
 @ImplementedBy(classOf[DefaultTtpConnector])
 trait TtpConnector {
   def generateQuote(ttppRequest: GenerateQuoteRequest)(implicit ec: ExecutionContext, hc: HeaderCarrier): TtppEnvelope[GenerateQuoteResponse]
-  def getExistingQuote(customerReference: CustomerReference, pegaId: PegaPlanId)(implicit ec: ExecutionContext, hc: HeaderCarrier): TtppEnvelope[ViewPlanResponse]
+  def getExistingQuote(customerReference: CustomerReference, pegaId: PlanId)(implicit ec: ExecutionContext, hc: HeaderCarrier): TtppEnvelope[ViewPlanResponse]
   def updateQuote(updateQuoteRequest: UpdateQuoteRequest)(implicit ec: ExecutionContext, hc: HeaderCarrier ): TtppEnvelope[UpdateQuoteResponse]
   def createPlan(createPlanRequest: CreatePlanRequest)(implicit ec: ExecutionContext, hc: HeaderCarrier): TtppEnvelope[CreatePlanResponse]
 }
@@ -52,7 +52,7 @@ class DefaultTtpConnector @Inject()(appConfig: AppConfig, httpClient: HttpClient
   }
 
 
-  override def getExistingQuote(customerReference: CustomerReference, pegaPlanId: PegaPlanId)
+  override def getExistingQuote(customerReference: CustomerReference, pegaPlanId: PlanId)
                                (implicit ec: ExecutionContext, hc: HeaderCarrier): TtppEnvelope[ViewPlanResponse] = {
     val path = s"individuals/time-to-pay/quote/${customerReference.value}/${pegaPlanId.value}"
     val url = s"${appConfig.ttpBaseUrl}/$path"

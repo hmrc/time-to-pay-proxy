@@ -21,7 +21,7 @@ import play.api.libs.json.Json
 import java.time.LocalDate
 
 final case class InstalmentPlan(
-                                 dutyId: String,
+                                 dutyId: DutyId,
                                  dueDate: LocalDate,
                                  amountDue: BigDecimal,
                                  balance: BigDecimal,
@@ -34,9 +34,9 @@ object InstalmentPlan {
   implicit val format = Json.format[InstalmentPlan]
 }
 
-final case class ViewPlanResponse(customerReference: String,
-                                  pegaPlanId: String,
-                                  quoteType: String,
+final case class ViewPlanResponse(customerReference: CustomerReference,
+                                  planId: PlanId,
+                                  quoteType: QuoteType,
                                   paymentMethod: String,
                                   paymentReference: String,
                                   instalments: Seq[InstalmentPlan],
