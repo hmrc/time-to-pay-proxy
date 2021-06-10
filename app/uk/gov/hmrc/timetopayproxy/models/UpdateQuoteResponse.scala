@@ -21,10 +21,10 @@ import java.time.LocalDate
 import play.api.libs.json.Json
 
 final case class UpdateQuoteResponse(
-                                customerReference: CustomerReference,
-                                pegaPlanId: PegaPlanId,
-                                quoteStatus: QuoteStatus,
-                                quoteUpdatedDate: LocalDate
+                                      customerReference: CustomerReference,
+                                      pegaPlanId: PlanId,
+                                      quoteStatus: QuoteStatus,
+                                      quoteUpdatedDate: LocalDate
                               )
 
 object UpdateQuoteResponse {

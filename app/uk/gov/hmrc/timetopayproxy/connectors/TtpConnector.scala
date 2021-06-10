@@ -29,16 +29,9 @@ import uk.gov.hmrc.timetopayproxy.config.AppConfig
 @ImplementedBy(classOf[DefaultTtpConnector])
 trait TtpConnector {
   def generateQuote(ttppRequest: GenerateQuoteRequest)(implicit ec: ExecutionContext, hc: HeaderCarrier): TtppEnvelope[GenerateQuoteResponse]
-
-  def getExistingQuote(customerReference: CustomerReference, pegaId: PegaPlanId)(implicit ec: ExecutionContext, hc: HeaderCarrier): TtppEnvelope[RetrievePlanResponse]
-  def updateQuote(
-                   updateQuoteRequest: UpdateQuoteRequest
-                 )
-                 (
-                   implicit ec: ExecutionContext,
-                   hc: HeaderCarrier
-                 ): TtppEnvelope[UpdateQuoteResponse]
-
+  def getExistingQuote(customerReference: CustomerReference, pegaId: PlanId)(implicit ec: ExecutionContext, hc: HeaderCarrier): TtppEnvelope[ViewPlanResponse]
+  def updateQuote(updateQuoteRequest: UpdateQuoteRequest)(implicit ec: ExecutionContext, hc: HeaderCarrier ): TtppEnvelope[UpdateQuoteResponse]
+  def createPlan(createPlanRequest: CreatePlanRequest)(implicit ec: ExecutionContext, hc: HeaderCarrier): TtppEnvelope[CreatePlanResponse]
 }
 
 @Singleton
@@ -59,17 +52,17 @@ class DefaultTtpConnector @Inject()(appConfig: AppConfig, httpClient: HttpClient
   }
 
 
-  override def getExistingQuote(customerReference: CustomerReference, pegaPlanId: PegaPlanId)
-                               (implicit ec: ExecutionContext, hc: HeaderCarrier): TtppEnvelope[RetrievePlanResponse] = {
+  override def getExistingQuote(customerReference: CustomerReference, pegaPlanId: PlanId)
+                               (implicit ec: ExecutionContext, hc: HeaderCarrier): TtppEnvelope[ViewPlanResponse] = {
     val path = s"individuals/time-to-pay/quote/${customerReference.value}/${pegaPlanId.value}"
     val url = s"${appConfig.ttpBaseUrl}/$path"
 
     TtppEnvelope(
-      httpClient.GET[RetrievePlanResponse](url)
+      httpClient.GET[ViewPlanResponse](url)
         .map(r => r.asRight[ConnectorError])
         .recover {
-          case e: HttpException => ConnectorError(e.responseCode, e.message).asLeft[RetrievePlanResponse]
-          case e: UpstreamErrorResponse => ConnectorError(e.statusCode, e.getMessage()).asLeft[RetrievePlanResponse]
+          case e: HttpException => ConnectorError(e.responseCode, e.message).asLeft[ViewPlanResponse]
+          case e: UpstreamErrorResponse => ConnectorError(e.statusCode, e.getMessage()).asLeft[ViewPlanResponse]
         }
     )
 
@@ -95,5 +88,21 @@ class DefaultTtpConnector @Inject()(appConfig: AppConfig, httpClient: HttpClient
         }
 
     TtppEnvelope(response)
+  }
+
+  override def createPlan(createPlanRequest: CreatePlanRequest)(implicit ec: ExecutionContext, hc: HeaderCarrier): TtppEnvelope[CreatePlanResponse] = {
+    val path = "individuals/time-to-pay/quote/arrangement"
+    val url = s"${appConfig.ttpBaseUrl}/$path"
+
+    TtppEnvelope {
+      httpClient
+        .POST[CreatePlanRequest, CreatePlanResponse](url, createPlanRequest)
+        .map(r => r.asRight[ConnectorError])
+        .recover {
+          case e: HttpException => ConnectorError(e.responseCode, e.message).asLeft[CreatePlanResponse]
+          case e: UpstreamErrorResponse => ConnectorError(e.statusCode, e.getMessage()).asLeft[CreatePlanResponse]
+        }
+    }
+
   }
 }

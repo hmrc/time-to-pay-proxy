@@ -16,9 +16,9 @@
 
 package uk.gov.hmrc.timetopayproxy.models
 
-final case class PegaPlanId(value: String) extends AnyVal
+final case class PlanId(value: String) extends AnyVal
 
-object PegaPlanId extends ValueTypeFormatter {
+object PlanId extends ValueTypeFormatter {
   implicit val format =
-    valueTypeFormatter(PegaPlanId.apply, PegaPlanId.unapply)
+    valueTypeFormatter(PlanId.apply, PlanId.unapply)
 }
