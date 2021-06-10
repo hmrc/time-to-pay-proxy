@@ -4,3 +4,4 @@ GET        /hello-world                                                     uk.g
 POST       /individuals/time-to-pay/quote                                   uk.gov.hmrc.timetopayproxy.controllers.TimeToPayProxyController.generateQuote
 GET        /individuals/time-to-pay/quote/:customerReference/:pegaId        uk.gov.hmrc.timetopayproxy.controllers.TimeToPayProxyController.getExistingPlan(customerReference: String, pegaId: String)
 PUT        /individuals/time-to-pay/quote/:customerReference/:pegaId        uk.gov.hmrc.timetopayproxy.controllers.TimeToPayProxyController.updateQuote(customerReference: String, pegaId: String)
+POST       /individuals/time-to-pay/quote/arrangement                       uk.gov.hmrc.timetopayproxy.controllers.TimeToPayProxyController.createPlan

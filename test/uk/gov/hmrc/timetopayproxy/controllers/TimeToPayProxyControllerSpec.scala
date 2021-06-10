@@ -86,6 +86,19 @@ class TimeToPayProxyControllerSpec
       true
     )
 
+  private val createPlanRequest =
+    CreatePlanRequest(
+      CustomerReference("customerReference"),
+      PegaPlanId("pegaPlanId"),
+      "xyz",
+      "paymentRed",
+      false,
+      Nil,
+      "2",
+      10000,
+      0.26
+    )
+
   "POST /individuals/time-to-pay/quote" should {
     "return 200" when {
       "service returns success" in {
@@ -342,4 +355,70 @@ class TimeToPayProxyControllerSpec
     }
   }
 
+  "POST /individuals/time-to-pay/quote/arrangement" should {
+    "return 200" when {
+      "service returns success" in {
+
+        (authConnector
+          .authorise[Unit](_: Predicate, _: Retrieval[Unit])(
+            _: HeaderCarrier,
+            _: ExecutionContext
+          ))
+          .expects(*, *, *, *)
+          .returning(Future.successful())
+
+        val createPlanResponse = CreatePlanResponse(
+          "customerReference",
+          "pegaPlanId",
+          "xyz"
+        )
+        (ttpQuoteService
+          .createPlan(_: CreatePlanRequest)(
+            _: ExecutionContext,
+            _: HeaderCarrier
+          ))
+          .expects(createPlanRequest, *, *)
+          .returning(TtppEnvelope(createPlanResponse))
+
+        val fakeRequest: FakeRequest[JsValue] =
+          FakeRequest("POST", "/individuals/time-to-pay/quote/arrangement")
+            .withHeaders(CONTENT_TYPE -> MimeTypes.JSON)
+            .withBody(Json.toJson[CreatePlanRequest](createPlanRequest))
+        val response: Future[Result] = controller.createPlan()(fakeRequest)
+        status(response) shouldBe Status.OK
+      }
+    }
+    "return 500" when {
+      "service returns failure" in {
+
+        (authConnector
+          .authorise[Unit](_: Predicate, _: Retrieval[Unit])(
+            _: HeaderCarrier,
+            _: ExecutionContext
+          ))
+          .expects(*, *, *, *)
+          .returning(Future.successful())
+
+        val errorFromTtpConnector =
+          ConnectorError(500, "Internal Service Error")
+        (ttpQuoteService
+          .createPlan(_: CreatePlanRequest)(
+            _: ExecutionContext,
+            _: HeaderCarrier
+          ))
+          .expects(createPlanRequest, *, *)
+          .returning(
+            TtppEnvelope(errorFromTtpConnector.asLeft[CreatePlanResponse])
+          )
+
+        val fakeRequest: FakeRequest[JsValue] =
+          FakeRequest("POST", "/individuals/time-to-pay/quote/arrangement")
+            .withHeaders(CONTENT_TYPE -> MimeTypes.JSON)
+            .withBody(Json.toJson[CreatePlanRequest](createPlanRequest))
+        val response: Future[Result] = controller.createPlan()(fakeRequest)
+
+        status(response) shouldBe Status.INTERNAL_SERVER_ERROR
+      }
+    }
+  }
 }

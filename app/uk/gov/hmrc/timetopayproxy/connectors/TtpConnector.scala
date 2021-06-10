@@ -29,16 +29,9 @@ import uk.gov.hmrc.timetopayproxy.config.AppConfig
 @ImplementedBy(classOf[DefaultTtpConnector])
 trait TtpConnector {
   def generateQuote(ttppRequest: GenerateQuoteRequest)(implicit ec: ExecutionContext, hc: HeaderCarrier): TtppEnvelope[GenerateQuoteResponse]
-
   def getExistingQuote(customerReference: CustomerReference, pegaId: PegaPlanId)(implicit ec: ExecutionContext, hc: HeaderCarrier): TtppEnvelope[RetrievePlanResponse]
-  def updateQuote(
-                   updateQuoteRequest: UpdateQuoteRequest
-                 )
-                 (
-                   implicit ec: ExecutionContext,
-                   hc: HeaderCarrier
-                 ): TtppEnvelope[UpdateQuoteResponse]
-
+  def updateQuote(updateQuoteRequest: UpdateQuoteRequest)(implicit ec: ExecutionContext, hc: HeaderCarrier ): TtppEnvelope[UpdateQuoteResponse]
+  def createPlan(createPlanRequest: CreatePlanRequest)(implicit ec: ExecutionContext, hc: HeaderCarrier): TtppEnvelope[CreatePlanResponse]
 }
 
 @Singleton
@@ -95,5 +88,21 @@ class DefaultTtpConnector @Inject()(appConfig: AppConfig, httpClient: HttpClient
         }
 
     TtppEnvelope(response)
+  }
+
+  override def createPlan(createPlanRequest: CreatePlanRequest)(implicit ec: ExecutionContext, hc: HeaderCarrier): TtppEnvelope[CreatePlanResponse] = {
+    val path = "individuals/time-to-pay/quote/arrangement"
+    val url = s"${appConfig.ttpBaseUrl}/$path"
+
+    TtppEnvelope {
+      httpClient
+        .POST[CreatePlanRequest, CreatePlanResponse](url, createPlanRequest)
+        .map(r => r.asRight[ConnectorError])
+        .recover {
+          case e: HttpException => ConnectorError(e.responseCode, e.message).asLeft[CreatePlanResponse]
+          case e: UpstreamErrorResponse => ConnectorError(e.statusCode, e.getMessage()).asLeft[CreatePlanResponse]
+        }
+    }
+
   }
 }

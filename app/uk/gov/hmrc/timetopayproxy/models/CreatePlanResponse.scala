@@ -17,25 +17,9 @@
 package uk.gov.hmrc.timetopayproxy.models
 
 import play.api.libs.json.Json
-import play.api.libs.json.Reads._
 
-import java.time.LocalDate
+final case class CreatePlanResponse(customerReference: String, pegaPlanId: String, planStatus: String)
 
-final case class DutyId(value: String) extends AnyVal
-
-object DutyId extends ValueTypeFormatter {
-  implicit val formatter = valueTypeFormatter[String, DutyId](
-    DutyId.apply,
-    DutyId.unapply
-  )
-}
-
-final case class Duty(dutyId: DutyId,
-                      subtrans: SubTransType,
-                      originalDebtAmount: BigDecimal,
-                      interestStartDate: LocalDate,
-                      breathingSpaces: List[BreathingSpace])
-
-object Duty {
-  implicit val format = Json.format[Duty]
+object CreatePlanResponse {
+  implicit val format = Json.format[CreatePlanResponse]
 }
