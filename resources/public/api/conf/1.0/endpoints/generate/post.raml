@@ -1,0 +1,23 @@
+displayName: Generate TTP Quote Request
+description: "This is an endpoint that triggers request to create a plan for storage from ttp service"
+(annotations.sandboxData): !include ../../scenarios/generate/postResponse.md
+(annotations.scope): "read:time-to-pay-proxy"
+securedBy: [ sec.x-application: { scopes: [ "read:time-to-pay-proxy" ] } ]
+body:
+  application/json:
+    type: !include ../../schemas/generate/postGenerateRequestSchema.json
+    examples:
+      example-1:
+        description: "A post request to create quote"
+        value: !include ../../examples/generate/postGenerateRequest.json
+responses:
+  200:
+    body:
+      text/plain:
+        type: !include ../../schemas/generate/postGenerateResponseSchema.json
+        example: !include ../../examples/generate/postGenerateResponse.json
+  400:
+      body:
+        text/plain:
+          type: !include ../../schemas/errorRequestSchema.json
+          example: !include ../../examples/badRequest.json

@@ -1,0 +1,35 @@
+{
+  "title": "A JSON Schema for TTP API.",
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "type": "object",
+  "properties": {
+    "customerReference": {
+      "type": "string",
+      "description": "Customer reference"
+    },
+    "planId": {
+      "type": "string",
+      "description": "Unique planId"
+    },
+    "updateType": {
+      "type": "string",
+      "description": "Update type - e.g. cancelled"
+    },
+    "cancellationReason": {
+      "type": "string",
+      "description": "Update reason"
+    },
+    "paymentMethod": {
+      "type": "string",
+      "description": "Payment method"
+    },
+    "paymentReference": {
+      "type": "string",
+      "description": "Payment reference"
+    },
+    "thirdPartyBank": {
+      "type": "boolean",
+      "description": "Third party Bank"
+    }
+  }
+}

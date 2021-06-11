@@ -1,0 +1,187 @@
+{
+  "title": "A JSON Schema for TTP API.",
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "type": "object",
+  "properties": {
+    "customerReference": {
+      "type": "string",
+      "description": "Customer reference"
+    },
+    "debtAmount": {
+      "type": "integer",
+      "description": "Debt amount"
+    },
+    "adHocs": {
+      "type": "array",
+      "items": [
+        {
+          "type": "object",
+          "properties": {
+            "adHocDate": {
+              "type": "string",
+              "description": "Ad Hoc date"
+            },
+            "adHocAmount": {
+              "type": "integer",
+              "description": "Ad Hoc amount"
+            }
+          }
+        }
+      ]
+    },
+    "customer": {
+      "type": "array",
+      "items": [
+        {
+          "type": "object",
+          "properties": {
+            "quoteType": {
+              "type": "string",
+              "description": "this will determine what IFS is required to calculate either duration or instalment amount"
+            },
+            "instalmentStartDate": {
+              "type": "string",
+              "description": "Instalment start date"
+            },
+            "instalmentAmount": {
+              "type": "integer",
+              "description": "Instalment amount"
+            },
+            "frequency": {
+              "type": "string",
+              "description": "weekly, 2 weekly, 4 weekly, monthly, quarterly, annually"
+            },
+            "duration": {
+              "type": "string",
+              "description": "Duration"
+            },
+            "initialPaymentAmount": {
+              "type": "integer",
+              "description": "Initial payment amount"
+            },
+            "initialPaymentDate": {
+              "type": "string",
+              "description": "Initial payment date"
+            },
+            "paymentPlanType": {
+              "type": "string",
+              "description": "Payment plan type"
+            }
+          }
+        }
+      ]
+    },
+    "debts": {
+      "type": "array",
+      "items": [
+        {
+          "type": "object",
+          "properties": {
+            "debtId": {
+              "type": "string",
+              "description": "An ID which uniquely identifies a particular debt"
+            },
+            "mainTrans": {
+              "type": "string",
+              "enum": [
+                "5330",
+                "5350",
+                "1085",
+                "1511",
+                "1515",
+                "1520",
+                "1525",
+                "1526",
+                "1530",
+                "1531",
+                "1535",
+                "1536",
+                "1540",
+                "1541",
+                "1545",
+                "1546"
+              ],
+              "description": "Unique MTrans Debt Type ID e.g.1525 also known as M Trans"
+            },
+            "duties": {
+              "type": "array",
+              "items": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "dutyId": {
+                      "type": "string",
+                      "description": "An ID which uniquely identifies a particular duty"
+                    },
+                    "subtrans": {
+                      "type": "string",
+                      "enum": [
+                        "7006",
+                        "7010",
+                        "7011",
+                        "7012",
+                        "7014",
+                        "7013",
+                        "1000",
+                        "1020",
+                        "1025",
+                        "1180",
+                        "2000",
+                        "1090"
+                      ],
+                      "description": "Duty Type description for the UI"
+                    },
+                    "originalDebtAmount": {
+                      "type": "integer",
+                      "description": "Original debt amount"
+                    },
+                    "interestStartDate": {
+                      "type": "string",
+                      "description": "The interest start date"
+                    },
+                    "breathingSpaces": {
+                      "type": "array",
+                      "items": [
+                        {
+                          "type": "object",
+                          "properties": {
+                            "debtRespiteFrom": {
+                              "type": "string",
+                              "description": "Breathing space from date"
+                            },
+                            "debtRespiteTo": {
+                              "type": "string",
+                              "description": "Breathing space to date"
+                            }
+                          }
+                        }
+                      ]
+                    },
+                    "payments": {
+                      "type": "array",
+                      "items": [
+                        {
+                          "type": "object",
+                          "properties": {
+                            "paymentDate": {
+                              "type": "string",
+                              "description": "Payment date"
+                            },
+                            "paymentAmount": {
+                              "type": "integer",
+                              "description": "Payment amount"
+                            }
+                          }
+                        }
+                      ]
+                    }
+                  }
+                }
+              ]
+            }
+          }
+        }
+      ]
+    }
+  }
+}

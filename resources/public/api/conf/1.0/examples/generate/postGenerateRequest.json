@@ -1,0 +1,56 @@
+{
+  "customerReference": "customerRef1234",
+  "debtAmount": 1000,
+  "adHocs": [
+    {
+      "adHocDate": "2021-05-13",
+      "adHocAmount": 100
+    }
+  ],
+  "customer": [
+    {
+      "quoteType": "xyz",
+      "instalmentStartDate": "2021-05-13",
+      "instalmentAmount": 100,
+      "frequency": "weekly",
+      "duration": "12",
+      "initialPaymentAmount": 100,
+      "initialPaymentDate": "2021-05-13",
+      "paymentPlanType": "xyz"
+    }
+  ],
+  "debts": [
+    {
+      "debtId": "debtId1",
+      "mainTrans": "1525",
+      "duties": [
+        {
+          "dutyId": "dutyId1",
+          "subtrans": "1000",
+          "originalDebtAmount": 1000,
+          "interestStartDate": "2021-05-13",
+          "breathingSpaces": [
+            {
+              "debtRespiteFrom": "2021-05-13",
+              "debtRespiteTo": "2021-05-13"
+            },
+            {
+              "debtRespiteFrom": "2021-06-13",
+              "debtRespiteTo": "2021-06-13"
+            }
+          ],
+          "payments": [
+            {
+              "paymentDate": "2021-05-13",
+              "paymentAmount": 100
+            },
+            {
+              "paymentDate": "2021-06-13",
+              "paymentAmount": 100
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
