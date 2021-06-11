@@ -1,0 +1,15 @@
+{
+  "title": "A JSON Schema for TTP API.",
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "type": "object",
+  "properties": {
+    "customerReference": {
+      "type": "string",
+      "description": "Customer reference"
+    },
+    "planId": {
+      "type": "string",
+      "description": "Unique planId"
+    }
+  }
+}

@@ -1,0 +1,73 @@
+{
+  "title": "A JSON Schema for TTP API.",
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "type": "object",
+  "properties": {
+    "quoteReference": {
+      "type": "string",
+      "description": "This is the Quote reference"
+    },
+    "customerReference": {
+      "type": "string",
+      "description": "This is the Customer reference"
+    },
+    "quoteType": {
+      "type": "string",
+      "description": "This is the Quote type"
+    },
+    "instalments": {
+      "type": "array",
+      "items": [
+        {
+          "type": "object",
+          "properties": {
+            "dutyId": {
+              "type": "string",
+              "description": "An ID which uniquely identifies a particular duty"
+            },
+            "debtId": {
+              "type": "string",
+              "description": "An ID which uniquely identifies a particular debt"
+            },
+            "dueDate": {
+              "type": "string",
+              "description": "Due date"
+            },
+            "amountDue": {
+              "type": "integer",
+              "description": "Amount due"
+            },
+            "balance": {
+              "type": "integer",
+              "description": "Balance"
+            },
+            "interestPercentage": {
+              "type": "number",
+              "description": "Interest percentage"
+            },
+            "interestRate": {
+              "type": "number",
+              "description": "Interest rate"
+            },
+            "instalmentNumber": {
+              "type": "integer",
+              "description": "Instalment number"
+            }
+          }
+        }
+      ]
+    },
+    "numberOfInstalments": {
+      "type": "string",
+      "description": "Number of instalments"
+    },
+    "totalDebtAmount": {
+      "type": "integer",
+      "description": "Total debt amount"
+    },
+    "totalInterest": {
+      "type": "number",
+      "description": "Total interest"
+    }
+  }
+}

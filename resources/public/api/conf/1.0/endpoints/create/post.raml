@@ -1,0 +1,23 @@
+displayName: TTP Promote an Arrangement request
+description: "This is an endpoint that triggers a request to generate a draft quote from ttp service"
+(annotations.sandboxData): !include ../../scenarios/create/postResponse.md
+(annotations.scope): "read:time-to-pay-proxy"
+securedBy: [ sec.x-application: { scopes: [ "read:time-to-pay-proxy" ] } ]
+body:
+  application/json:
+    type: !include ../../schemas/create/postCreateRequestSchema.json
+    examples:
+      example-1:
+        description: "A post request to create plan"
+        value: !include ../../examples/create/postCreateRequest.json
+responses:
+  200:
+    body:
+      text/plain:
+        type: !include ../../schemas/create/postCreateResponseSchema.json
+        example: !include ../../examples/create/postCreateReponse.json
+  400:
+      body:
+        text/plain:
+          type: !include ../../schemas/errorRequestSchema.json
+          example: !include ../../examples/badRequest.json
