@@ -25,18 +25,18 @@ uses:
   annotations: https://developer.service.hmrc.gov.uk/api-documentation/assets/common/modules/annotations.raml
   types: https://developer.service.hmrc.gov.uk/api-documentation/assets/common/modules/types.raml
 
-/time-to-pay-proxy:
-  /individuals/time-to-pay/quote:
+'/individuals/time-to-pay':
+  /quote:
     (annotations.group):
       name: Generate TTP Quote Request
       description: Debt Advisors using DAUI trigger a request to generate a draft quote.
     post: !include endpoints/generate/post.raml
-  /individuals/time-to-pay/quote/arrangement:
+  /quote/arrangement:
         (annotations.group):
           name: TTP Promote an Arrangement request
           description: DAUI triggers request to create a plan for storage
         post: !include endpoints/create/post.raml
-  /individuals/time-to-pay/quote/{customerReference}/{planId}:
+  /quote/{customerReference}/{planId}:
         (annotations.group):
           name: Get Existing TTP Plan
           description: Debt Advisors using DAUI trigger a view and update a plan.
