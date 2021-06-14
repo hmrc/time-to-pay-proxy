@@ -39,12 +39,8 @@ uses:
   /individuals/time-to-pay/quote/{customerReference}/{planId}:
         (annotations.group):
           name: Get Existing TTP Plan
-          description: Debt Advisors using DAUI trigger a view a plan.
+          description: Debt Advisors using DAUI trigger a view and update a plan.
         get: !include endpoints/view/get.raml
-  /individuals/time-to-pay/quote/:customerReference/:planId:
-        (annotations.group):
-          name: Update Existing TTP Plan
-          description: DAUI needs to update a TTP plan.
         put: !include endpoints/update/put.raml
   /hello-world:
     get:
