@@ -29,9 +29,9 @@ import scala.concurrent.ExecutionContext
 trait TTPQuoteService {
   def generateQuote(timeToPayRequest: GenerateQuoteRequest)(implicit ec: ExecutionContext, hc: HeaderCarrier): TtppEnvelope[GenerateQuoteResponse]
 
-  def getExistingPlan(customerReference: CustomerReference, pegaId: PlanId)(implicit ec: ExecutionContext, hc: HeaderCarrier): TtppEnvelope[ViewPlanResponse]
+  def getExistingPlan(customerReference: CustomerReference, planId: PlanId)(implicit ec: ExecutionContext, hc: HeaderCarrier): TtppEnvelope[ViewPlanResponse]
 
-  def updateQuote(updateQuoteRequest: UpdateQuoteRequest)(implicit ec: ExecutionContext, hc: HeaderCarrier): TtppEnvelope[UpdateQuoteResponse]
+  def updatePlan(updatePlanRequest: UpdatePlanRequest)(implicit ec: ExecutionContext, hc: HeaderCarrier): TtppEnvelope[UpdatePlanResponse]
 
   def createPlan(createPlanRequest: CreatePlanRequest)(implicit ec: ExecutionContext, hc: HeaderCarrier): TtppEnvelope[CreatePlanResponse]
 }
@@ -46,18 +46,18 @@ class DefaultTTPQuoteService @Inject()(ttpConnector: TtpConnector)
   ): TtppEnvelope[GenerateQuoteResponse] =
     ttpConnector.generateQuote(timeToPayRequest)
 
-  override def getExistingPlan(customerReference: CustomerReference, pegaPlanId: PlanId)(
+  override def getExistingPlan(customerReference: CustomerReference, planId: PlanId)(
     implicit ec: ExecutionContext,
     hc: HeaderCarrier
   ): TtppEnvelope[ViewPlanResponse] = {
-    ttpConnector.getExistingQuote(customerReference, pegaPlanId)
+    ttpConnector.getExistingQuote(customerReference, planId)
   }
 
-  def updateQuote(updateQuoteRequest: UpdateQuoteRequest)(
+  def updatePlan(updatePlanRequest: UpdatePlanRequest)(
     implicit ec: ExecutionContext,
     hc: HeaderCarrier
-  ): TtppEnvelope[UpdateQuoteResponse] =
-    ttpConnector.updateQuote(updateQuoteRequest)
+  ): TtppEnvelope[UpdatePlanResponse] =
+    ttpConnector.updatePlan(updatePlanRequest)
 
   override def createPlan(createPlanRequest: CreatePlanRequest)
                          (implicit ec: ExecutionContext, hc: HeaderCarrier)

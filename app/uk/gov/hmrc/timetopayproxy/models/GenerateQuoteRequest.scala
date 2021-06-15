@@ -34,9 +34,16 @@ package uk.gov.hmrc.timetopayproxy.models
 
 import play.api.libs.json.Json
 
+final case class AdHoc(description: String, adHocAmount: BigDecimal)
+
+object AdHoc {
+  implicit val format = Json.format[AdHoc]
+}
+
 final case class GenerateQuoteRequest(
                              customerReference: String,
                              debtAmount: BigDecimal,
+                             adHocs: List[AdHoc],
                              customer: List[Customer],
                              debts: List[Debt])
 

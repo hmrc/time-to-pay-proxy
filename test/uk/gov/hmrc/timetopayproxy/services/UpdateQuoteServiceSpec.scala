@@ -29,11 +29,11 @@ import uk.gov.hmrc.timetopayproxy.support.UnitSpec
 import scala.concurrent.ExecutionContext
 import scala.concurrent.ExecutionContext.Implicits.global
 
-class UpdateQuoteServiceSpec extends UnitSpec {
+class UpdatePlanServiceSpec extends UnitSpec {
   implicit val hc = HeaderCarrier()
-  val updateQuoteRequest = UpdateQuoteRequest(
+  val updatePlanRequest = UpdatePlanRequest(
     CustomerReference("customerReference"),
-    PlanId("pegaId"),
+    PlanId("planId"),
     UpdateType("updateType"),
     CancellationReason("reason"),
     PaymentMethod("method"),
@@ -44,29 +44,29 @@ class UpdateQuoteServiceSpec extends UnitSpec {
   "Update Quote endpoint" should {
     "return a success response" when {
       "connector returns success" in {
-        val responseFromTtp = UpdateQuoteResponse(
+        val responseFromTtp = UpdatePlanResponse(
           CustomerReference("customerReference"),
-          PlanId("pegaId"),
+          PlanId("planId"),
           QuoteStatus("quoteStatus"),
           LocalDate.now
         )
         val connector = mock[TtpConnector]
         (
           connector
-            .updateQuote(
-              _: UpdateQuoteRequest
+            .updatePlan(
+              _: UpdatePlanRequest
             )
             (
               _: ExecutionContext,
               _: HeaderCarrier
             )
           )
-          .expects(updateQuoteRequest, *, *)
+          .expects(updatePlanRequest, *, *)
           .returning(TtppEnvelope(responseFromTtp))
 
         val ttpQuoteService = new DefaultTTPQuoteService(connector)
         await(
-          ttpQuoteService.updateQuote(updateQuoteRequest).value,
+          ttpQuoteService.updatePlan(updatePlanRequest).value,
           5,
           TimeUnit.SECONDS
         ) shouldBe responseFromTtp.asRight[TtppError]
@@ -79,23 +79,23 @@ class UpdateQuoteServiceSpec extends UnitSpec {
         val connector = mock[TtpConnector]
         (
           connector
-            .updateQuote(
-              _: UpdateQuoteRequest
+            .updatePlan(
+              _: UpdatePlanRequest
             )
             (
               _: ExecutionContext,
               _: HeaderCarrier
             )
           )
-          .expects(updateQuoteRequest, *, *)
-          .returning(TtppEnvelope(errorFromTtpConnector.asLeft[UpdateQuoteResponse]))
+          .expects(updatePlanRequest, *, *)
+          .returning(TtppEnvelope(errorFromTtpConnector.asLeft[UpdatePlanResponse]))
 
         val ttpQuoteService = new DefaultTTPQuoteService(connector)
         await(
-          ttpQuoteService.updateQuote(updateQuoteRequest).value,
+          ttpQuoteService.updatePlan(updatePlanRequest).value,
           5,
           TimeUnit.SECONDS
-        ) shouldBe errorFromTtpConnector.asLeft[UpdateQuoteResponse]
+        ) shouldBe errorFromTtpConnector.asLeft[UpdatePlanResponse]
       }
     }
   }

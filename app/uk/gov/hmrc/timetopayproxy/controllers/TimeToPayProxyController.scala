@@ -21,7 +21,7 @@ import play.api.libs.json.JsValue
 import play.api.mvc.{Action, BaseController, ControllerComponents}
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
 import uk.gov.hmrc.timetopayproxy.actions.auth.AuthoriseAction
-import uk.gov.hmrc.timetopayproxy.models.{CreatePlanRequest, CustomerReference, GenerateQuoteRequest, PlanId, UpdateQuoteRequest}
+import uk.gov.hmrc.timetopayproxy.models.{CreatePlanRequest, CustomerReference, GenerateQuoteRequest, PlanId, UpdatePlanRequest}
 import uk.gov.hmrc.timetopayproxy.models.TimeToPayErrorResponse._
 import uk.gov.hmrc.timetopayproxy.services.TTPQuoteService
 import uk.gov.hmrc.timetopayproxy.utils.TtppErrorHandler._
@@ -48,20 +48,20 @@ class TimeToPayProxyController @Inject()(authoriseAction: AuthoriseAction,
       }
   }
 
-  def viewPlan(customerReference: String, pegaId: String) =
+  def viewPlan(customerReference: String, planId: String) =
     authoriseAction.async { implicit request =>
       timeToPayProxyService
-        .getExistingPlan(CustomerReference(customerReference), PlanId(pegaId))
+        .getExistingPlan(CustomerReference(customerReference), PlanId(planId))
         .leftMap(ttppError => ttppError.toErrorResponse)
         .fold(e => e.toResult, r => r.toResult)
     }
 
-  def updateQuote(customerReference: String, pegaId: String): Action[JsValue] = authoriseAction.async(parse.json) {
+  def updatePlan(customerReference: String, planId: String): Action[JsValue] = authoriseAction.async(parse.json) {
     implicit request =>
-      withJsonBody[UpdateQuoteRequest] {
-        updateQuoteRequest: UpdateQuoteRequest => {
+      withJsonBody[UpdatePlanRequest] {
+        updatePlanRequest: UpdatePlanRequest => {
           timeToPayProxyService
-            .updateQuote(updateQuoteRequest)
+            .updatePlan(updatePlanRequest)
             .leftMap(ttppError => ttppError.toErrorResponse)
             .fold(e => e.toResult, r => r.toResult)
         }

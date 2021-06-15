@@ -33,6 +33,7 @@ class TTPQuoteServiceSpec extends UnitSpec {
   private val timeToPayRequest = GenerateQuoteRequest(
     "customerReference",
     10,
+    List(),
     List(
       Customer(
         QuoteType("quoteType"),
@@ -60,7 +61,7 @@ class TTPQuoteServiceSpec extends UnitSpec {
 
   private val retrievePlanResponse = ViewPlanResponse(
     CustomerReference("someCustomerRef"),
-    PlanId("somePegaId"),
+    PlanId("somePlanId"),
     QuoteType("someQuoateStatus"),
     "xyz",
     "ref",
@@ -70,10 +71,10 @@ class TTPQuoteServiceSpec extends UnitSpec {
     0.26
   )
 
-  private val updateQuoteRequest =
-    UpdateQuoteRequest(
+  private val updatePlanRequest =
+    UpdatePlanRequest(
       CustomerReference("customerReference"),
-      PlanId("pegaPlanId"),
+      PlanId("planId"),
       UpdateType("updateType"),
       CancellationReason("reason"),
       PaymentMethod("method"),
@@ -81,9 +82,9 @@ class TTPQuoteServiceSpec extends UnitSpec {
       true,
     )
 
-  private val updateQuoteResponse = UpdateQuoteResponse(
+  private val updatePlanResponse = UpdatePlanResponse(
     CustomerReference("customerReference"),
-    PlanId("pegaPlanId"),
+    PlanId("planId"),
     QuoteStatus("quoteStatus"),
     LocalDate.now
   )
@@ -91,7 +92,7 @@ class TTPQuoteServiceSpec extends UnitSpec {
   private val createPlanRequest =
     CreatePlanRequest(
       CustomerReference("customerReference"),
-      PlanId("pegaPlanId"),
+      PlanId("planId"),
       "xyz",
       "paymentRed",
       false,
@@ -103,7 +104,7 @@ class TTPQuoteServiceSpec extends UnitSpec {
 
   private val createPlanResponse = CreatePlanResponse(
     CustomerReference("customerReference"),
-    PlanId("pegaPlanId"),
+    PlanId("planId"),
     "xyz"
   )
 
@@ -163,12 +164,12 @@ class TTPQuoteServiceSpec extends UnitSpec {
       val connectorStub = new TtpConnectorStub(
         Right(generateQuoteResponse),
         Right(retrievePlanResponse),
-        Right(updateQuoteResponse),
+        Right(updatePlanResponse),
         Right(createPlanResponse)
       )
       val quoteService = new DefaultTTPQuoteService(connectorStub)
 
-      await(quoteService.getExistingPlan(CustomerReference("someCustomer"), PlanId("somePegaId")).value) shouldBe retrievePlanResponse
+      await(quoteService.getExistingPlan(CustomerReference("someCustomer"), PlanId("somePlanId")).value) shouldBe retrievePlanResponse
         .asRight[TtppError]
     }
 
@@ -176,12 +177,12 @@ class TTPQuoteServiceSpec extends UnitSpec {
       val connectorStub = new TtpConnectorStub(
         Right(generateQuoteResponse),
         Left(ConnectorError(500, "Internal server error")),
-        Right(updateQuoteResponse),
+        Right(updatePlanResponse),
         Right(createPlanResponse)
       )
       val quoteService = new DefaultTTPQuoteService(connectorStub)
 
-      await(quoteService.getExistingPlan(CustomerReference("someCustomer"), PlanId("somePegaId")).value) shouldBe ConnectorError(
+      await(quoteService.getExistingPlan(CustomerReference("someCustomer"), PlanId("somePlanId")).value) shouldBe ConnectorError(
         500,
         "Internal server error"
       ).asLeft[ViewPlanResponse]
@@ -197,20 +198,20 @@ class TTPQuoteServiceSpec extends UnitSpec {
         val connector = mock[TtpConnector]
         (
           connector
-            .updateQuote(_: UpdateQuoteRequest)(
+            .updatePlan(_: UpdatePlanRequest)(
               _: ExecutionContext,
               _: HeaderCarrier
             )
           )
-          .expects(updateQuoteRequest, *, *)
-          .returning(TtppEnvelope(updateQuoteResponse))
+          .expects(updatePlanRequest, *, *)
+          .returning(TtppEnvelope(updatePlanResponse))
 
         val ttpQuoteService = new DefaultTTPQuoteService(connector)
         await(
-          ttpQuoteService.updateQuote(updateQuoteRequest).value,
+          ttpQuoteService.updatePlan(updatePlanRequest).value,
           5,
           TimeUnit.SECONDS
-        ) shouldBe updateQuoteResponse.asRight[TtppError]
+        ) shouldBe updatePlanResponse.asRight[TtppError]
       }
     }
     "return a failure response" when {
@@ -221,22 +222,22 @@ class TTPQuoteServiceSpec extends UnitSpec {
         val connector = mock[TtpConnector]
         (
           connector
-            .updateQuote(_: UpdateQuoteRequest)(
+            .updatePlan(_: UpdatePlanRequest)(
               _: ExecutionContext,
               _: HeaderCarrier
             )
           )
-          .expects(updateQuoteRequest, *, *)
+          .expects(updatePlanRequest, *, *)
           .returning(
-            TtppEnvelope(errorFromTtpConnector.asLeft[UpdateQuoteResponse])
+            TtppEnvelope(errorFromTtpConnector.asLeft[UpdatePlanResponse])
           )
 
         val ttpQuoteService = new DefaultTTPQuoteService(connector)
         await(
-          ttpQuoteService.updateQuote(updateQuoteRequest).value,
+          ttpQuoteService.updatePlan(updatePlanRequest).value,
           5,
           TimeUnit.SECONDS
-        ) shouldBe errorFromTtpConnector.asLeft[UpdateQuoteResponse]
+        ) shouldBe errorFromTtpConnector.asLeft[UpdatePlanResponse]
       }
     }
   }
@@ -247,7 +248,7 @@ class TTPQuoteServiceSpec extends UnitSpec {
       val connectorStub = new TtpConnectorStub(
         Right(generateQuoteResponse),
         Right(retrievePlanResponse),
-        Right(updateQuoteResponse),
+        Right(updatePlanResponse),
         Right(createPlanResponse)
       )
       val quoteService = new DefaultTTPQuoteService(connectorStub)
@@ -260,7 +261,7 @@ class TTPQuoteServiceSpec extends UnitSpec {
       val connectorStub = new TtpConnectorStub(
         Right(generateQuoteResponse),
         Right(retrievePlanResponse),
-        Right(updateQuoteResponse),
+        Right(updatePlanResponse),
         Left(ConnectorError(500, "Internal server error"))
       )
       val quoteService = new DefaultTTPQuoteService(connectorStub)
@@ -277,7 +278,7 @@ class TTPQuoteServiceSpec extends UnitSpec {
 class TtpConnectorStub(
                         generateQuoteResponse: Either[TtppError, GenerateQuoteResponse],
                         retrieveQuoteResponse: Either[TtppError, ViewPlanResponse],
-                        updateQuoteResponse: Either[TtppError, UpdateQuoteResponse],
+                        updatePlanResponse: Either[TtppError, UpdatePlanResponse],
                         createPlanResponse: Either[TtppError, CreatePlanResponse]
 )(implicit ec: ExecutionContext)
     extends TtpConnector {
@@ -287,17 +288,17 @@ class TtpConnectorStub(
   ): TtppEnvelope[GenerateQuoteResponse] =
     TtppEnvelope(Future successful generateQuoteResponse)
 
-  override def getExistingQuote(customerReference: CustomerReference, pegaPlanId: PlanId)(
+  override def getExistingQuote(customerReference: CustomerReference, planId: PlanId)(
     implicit ec: ExecutionContext,
     hc: HeaderCarrier
   ): TtppEnvelope[ViewPlanResponse] =
     TtppEnvelope(Future successful retrieveQuoteResponse)
 
-  override def updateQuote(updateQuoteRequest: UpdateQuoteRequest)(
+  override def updatePlan(updatePlanRequest: UpdatePlanRequest)(
     implicit ec: ExecutionContext,
     hc: HeaderCarrier
-  ): TtppEnvelope[UpdateQuoteResponse] =
-    TtppEnvelope(Future successful updateQuoteResponse)
+  ): TtppEnvelope[UpdatePlanResponse] =
+    TtppEnvelope(Future successful updatePlanResponse)
 
   override def createPlan(createPlanRequest: CreatePlanRequest)
                          (implicit ec: ExecutionContext,
