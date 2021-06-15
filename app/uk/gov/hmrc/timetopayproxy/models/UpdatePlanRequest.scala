@@ -46,8 +46,8 @@ object UpdateType extends ValueTypeFormatter {
     valueTypeFormatter(UpdateType.apply, UpdateType.unapply)
 }
 
-final case class UpdateQuoteRequest(customerReference: CustomerReference,
-                                    pegaPlanId: PlanId,
+final case class UpdatePlanRequest(customerReference: CustomerReference,
+                                    planId: PlanId,
                                     updateType: UpdateType,
                                     cancellationReason: CancellationReason,
                                     paymentMethod: PaymentMethod,
@@ -55,6 +55,6 @@ final case class UpdateQuoteRequest(customerReference: CustomerReference,
                                     thirdPartyBank: Boolean,
 )
 
-object UpdateQuoteRequest {
-  implicit val format = Json.format[UpdateQuoteRequest]
+object UpdatePlanRequest {
+  implicit val format = Json.format[UpdatePlanRequest]
 }

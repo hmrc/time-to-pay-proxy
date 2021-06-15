@@ -29,8 +29,8 @@ import uk.gov.hmrc.timetopayproxy.config.AppConfig
 @ImplementedBy(classOf[DefaultTtpConnector])
 trait TtpConnector {
   def generateQuote(ttppRequest: GenerateQuoteRequest)(implicit ec: ExecutionContext, hc: HeaderCarrier): TtppEnvelope[GenerateQuoteResponse]
-  def getExistingQuote(customerReference: CustomerReference, pegaId: PlanId)(implicit ec: ExecutionContext, hc: HeaderCarrier): TtppEnvelope[ViewPlanResponse]
-  def updateQuote(updateQuoteRequest: UpdateQuoteRequest)(implicit ec: ExecutionContext, hc: HeaderCarrier ): TtppEnvelope[UpdateQuoteResponse]
+  def getExistingQuote(customerReference: CustomerReference, planId: PlanId)(implicit ec: ExecutionContext, hc: HeaderCarrier): TtppEnvelope[ViewPlanResponse]
+  def updatePlan(updatePlanRequest: UpdatePlanRequest)(implicit ec: ExecutionContext, hc: HeaderCarrier ): TtppEnvelope[UpdatePlanResponse]
   def createPlan(createPlanRequest: CreatePlanRequest)(implicit ec: ExecutionContext, hc: HeaderCarrier): TtppEnvelope[CreatePlanResponse]
 }
 
@@ -52,9 +52,9 @@ class DefaultTtpConnector @Inject()(appConfig: AppConfig, httpClient: HttpClient
   }
 
 
-  override def getExistingQuote(customerReference: CustomerReference, pegaPlanId: PlanId)
+  override def getExistingQuote(customerReference: CustomerReference, planId: PlanId)
                                (implicit ec: ExecutionContext, hc: HeaderCarrier): TtppEnvelope[ViewPlanResponse] = {
-    val path = s"individuals/time-to-pay/quote/${customerReference.value}/${pegaPlanId.value}"
+    val path = s"individuals/time-to-pay/quote/${customerReference.value}/${planId.value}"
     val url = s"${appConfig.ttpBaseUrl}/$path"
 
     TtppEnvelope(
@@ -68,23 +68,23 @@ class DefaultTtpConnector @Inject()(appConfig: AppConfig, httpClient: HttpClient
 
   }
 
-  def updateQuote(
-                   updateQuoteRequest: UpdateQuoteRequest
+  def updatePlan(
+                   updatePlanRequest: UpdatePlanRequest
                  )
                  (
                    implicit ec: ExecutionContext,
                    hc: HeaderCarrier
-                 ): TtppEnvelope[UpdateQuoteResponse] = {
+                 ): TtppEnvelope[UpdatePlanResponse] = {
     val path = "individuals/time-to-pay/quote"
-    val url = s"${appConfig.ttpBaseUrl}/$path/${updateQuoteRequest.customerReference.value}/${updateQuoteRequest.pegaPlanId.value}"
+    val url = s"${appConfig.ttpBaseUrl}/$path/${updatePlanRequest.customerReference.value}/${updatePlanRequest.planId.value}"
 
-    val response: Future[Either[ConnectorError, UpdateQuoteResponse]] =
+    val response: Future[Either[ConnectorError, UpdatePlanResponse]] =
       httpClient
-        .PUT[UpdateQuoteRequest, UpdateQuoteResponse](url, updateQuoteRequest)
+        .PUT[UpdatePlanRequest, UpdatePlanResponse](url, updatePlanRequest)
         .map(r => r.asRight[ConnectorError])
         .recover {
-          case e: HttpException => ConnectorError(e.responseCode, e.message).asLeft[UpdateQuoteResponse]
-          case e: UpstreamErrorResponse => ConnectorError(e.statusCode, e.getMessage()).asLeft[UpdateQuoteResponse]
+          case e: HttpException => ConnectorError(e.responseCode, e.message).asLeft[UpdatePlanResponse]
+          case e: UpstreamErrorResponse => ConnectorError(e.statusCode, e.getMessage()).asLeft[UpdatePlanResponse]
         }
 
     TtppEnvelope(response)

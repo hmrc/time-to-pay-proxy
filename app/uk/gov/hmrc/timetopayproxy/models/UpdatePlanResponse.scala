@@ -20,13 +20,13 @@ import java.time.LocalDate
 
 import play.api.libs.json.Json
 
-final case class UpdateQuoteResponse(
+final case class UpdatePlanResponse(
                                       customerReference: CustomerReference,
-                                      pegaPlanId: PlanId,
+                                      planId: PlanId,
                                       quoteStatus: QuoteStatus,
                                       quoteUpdatedDate: LocalDate
                               )
 
-object UpdateQuoteResponse {
-  implicit val format = Json.format[UpdateQuoteResponse]
+object UpdatePlanResponse {
+  implicit val format = Json.format[UpdatePlanResponse]
 }
