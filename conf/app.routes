@@ -1,7 +1,7 @@
 # microservice specific routes
 
-GET        /hello-world                                                     uk.gov.hmrc.timetopayproxy.controllers.MicroserviceHelloWorldController.hello
-POST       /individuals/time-to-pay/quote                                   uk.gov.hmrc.timetopayproxy.controllers.TimeToPayProxyController.generateQuote
-GET        /individuals/time-to-pay/quote/:customerReference/:planId        uk.gov.hmrc.timetopayproxy.controllers.TimeToPayProxyController.viewPlan(customerReference: String, planId: String)
-PUT        /individuals/time-to-pay/quote/:customerReference/:planId        uk.gov.hmrc.timetopayproxy.controllers.TimeToPayProxyController.updatePlan(customerReference: String, planId: String)
-POST       /individuals/time-to-pay/quote/arrangement                       uk.gov.hmrc.timetopayproxy.controllers.TimeToPayProxyController.createPlan
+GET        /hello-world                             uk.gov.hmrc.timetopayproxy.controllers.MicroserviceHelloWorldController.hello
+POST       /quote                                   uk.gov.hmrc.timetopayproxy.controllers.TimeToPayProxyController.generateQuote
+GET        /quote/:customerReference/:planId        uk.gov.hmrc.timetopayproxy.controllers.TimeToPayProxyController.viewPlan(customerReference: String, planId: String)
+PUT        /quote/:customerReference/:planId        uk.gov.hmrc.timetopayproxy.controllers.TimeToPayProxyController.updatePlan(customerReference: String, planId: String)
+POST       /quote/arrangement                       uk.gov.hmrc.timetopayproxy.controllers.TimeToPayProxyController.createPlan
