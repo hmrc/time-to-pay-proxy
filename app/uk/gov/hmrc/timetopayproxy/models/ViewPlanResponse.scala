@@ -22,6 +22,7 @@ import java.time.LocalDate
 
 final case class InstalmentPlan(
                                  dutyId: DutyId,
+                                 debtId: DebtId,
                                  dueDate: LocalDate,
                                  amountDue: BigDecimal,
                                  balance: BigDecimal,
