@@ -25,7 +25,7 @@ final case class PlanInstalment(dutyId: DutyId,
                                 debtId: DebtId,
                                 dueDate: LocalDate,
                                 amountDue: BigDecimal,
-                                balance: BigDecimal,
+                                expectedPayment: BigDecimal,
                                 interest: Double,
                                 interestRate: Double,
                                 instalmentNumber: Int)
