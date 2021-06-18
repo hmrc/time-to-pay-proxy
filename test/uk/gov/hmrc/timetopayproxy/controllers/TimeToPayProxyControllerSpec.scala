@@ -59,7 +59,6 @@ class TimeToPayProxyControllerSpec
 
   private val generateQuoteRequest = GenerateQuoteRequest(
     "customerReference",
-    10,
     List(),
     List(
       Customer(
@@ -116,7 +115,7 @@ class TimeToPayProxyControllerSpec
           QuoteReference("quoteReference"),
           CustomerReference("customerReference"),
           QuoteType("quoteType"),
-          List(Instalment(DutyId("dutyId"), DebtId("debtId"), LocalDate.parse("2022-01-01"), 100, 0.1, 1)),
+          List(Instalment(DutyId("dutyId"), DebtId("debtId"), LocalDate.parse("2022-01-01"), 100, 100, 0.1, 1)),
           "1",
           100,
           0.1

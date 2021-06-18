@@ -32,9 +32,11 @@ package uk.gov.hmrc.timetopayproxy.models
  * limitations under the License.
  */
 
+import java.time.LocalDate
+
 import play.api.libs.json.Json
 
-final case class AdHoc(description: String, adHocAmount: BigDecimal)
+final case class AdHoc(adHocDate: LocalDate, adHocAmount: BigDecimal)
 
 object AdHoc {
   implicit val format = Json.format[AdHoc]
@@ -42,7 +44,6 @@ object AdHoc {
 
 final case class GenerateQuoteRequest(
                              customerReference: String,
-                             debtAmount: BigDecimal,
                              adHocs: List[AdHoc],
                              customer: List[Customer],
                              debts: List[Debt])

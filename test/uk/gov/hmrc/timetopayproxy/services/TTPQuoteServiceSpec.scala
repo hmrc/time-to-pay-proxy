@@ -32,7 +32,6 @@ class TTPQuoteServiceSpec extends UnitSpec {
   implicit val hc = HeaderCarrier()
   private val timeToPayRequest = GenerateQuoteRequest(
     "customerReference",
-    10,
     List(),
     List(
       Customer(
@@ -53,7 +52,7 @@ class TTPQuoteServiceSpec extends UnitSpec {
     QuoteReference("quoteReference"),
     CustomerReference("customerReference"),
     QuoteType("quoteType"),
-    List(Instalment(DutyId("dutyId"), DebtId("debtId"), LocalDate.parse("2022-01-01"), 100, 0.1, 1)),
+    List(Instalment(DutyId("dutyId"), DebtId("debtId"), LocalDate.parse("2022-01-01"), 100, 100, 0.1, 1)),
     "1",
     100,
     0.1
