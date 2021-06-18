@@ -21,25 +21,13 @@ import play.api.libs.json.Json
 
 import java.time.LocalDate
 
-final case class PlanInstalment(dutyId: DutyId,
-                                debtId: DebtId,
-                                dueDate: LocalDate,
-                                amountDue: BigDecimal,
-                                expectedPayment: BigDecimal,
-                                interestRate: Double,
-                                instalmentNumber: Int)
-
-object PlanInstalment {
-  implicit val format = Json.format[PlanInstalment]
-}
-
 final case class CreatePlanRequest(
                                     customerReference: CustomerReference,
                                     planId: PlanId,
                                     paymentMethod: String,
                                     paymentReference: String,
                                     thirdPartyBank: Boolean,
-                                    instalments: Seq[PlanInstalment],
+                                    instalments: Seq[Instalment],
                                     numberOfInstalments: String,
                                     totalDebtAmount: BigDecimal,
                                     totalInterest: Double

@@ -34,7 +34,8 @@ final case class Duty(dutyId: DutyId,
                       subtrans: SubTransType,
                       originalDebtAmount: BigDecimal,
                       interestStartDate: LocalDate,
-                      breathingSpaces: List[BreathingSpace])
+                      breathingSpaces: List[BreathingSpace],
+                      payments: List[Payment])
 
 object Duty {
   implicit val format = Json.format[Duty]
