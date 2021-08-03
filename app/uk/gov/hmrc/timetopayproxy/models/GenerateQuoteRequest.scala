@@ -36,17 +36,36 @@ import java.time.LocalDate
 
 import play.api.libs.json.Json
 
-final case class AdHoc(adHocDate: LocalDate, adHocAmount: BigDecimal)
+final case class ChannelIdentifier(channelIdentifier: String) extends AnyVal
 
-object AdHoc {
-  implicit val format = Json.format[AdHoc]
+object ChannelIdentifier extends ValueTypeFormatter {
+  implicit val format =
+    valueTypeFormatter(ChannelIdentifier.apply, ChannelIdentifier.unapply)
 }
 
+final case class Plan(
+                      quoteType: QuoteType,
+                      quoteDate: LocalDate,
+                      instalmentStartDate: LocalDate,
+                      instalmentAmount: BigDecimal,
+                      frequency: Frequency,
+                      duration: Duration,
+                      initialPaymentAmount: BigDecimal,
+                      initialPaymentDate: LocalDate,
+                      paymentPlanType: PaymentPlanType
+                     )
+
+object Plan {
+  implicit val format = Json.format[Plan]
+}
+
+
 final case class GenerateQuoteRequest(
-                             customerReference: String,
-                             adHocs: List[AdHoc],
-                             customer: List[Customer],
-                             debts: List[Debt])
+                             customerReference: CustomerReference,
+                             channelIdentifier: ChannelIdentifier,
+                             plan: Plan,
+                             customerPostCodes: List[CustomerPostCode],
+                             debtItems: List[DebtItem])
 
 
 object GenerateQuoteRequest {

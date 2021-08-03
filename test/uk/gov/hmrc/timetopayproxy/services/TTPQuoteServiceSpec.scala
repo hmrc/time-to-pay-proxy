@@ -31,20 +31,20 @@ import uk.gov.hmrc.timetopayproxy.models.TtppEnvelope.TtppEnvelope
 class TTPQuoteServiceSpec extends UnitSpec {
   implicit val hc = HeaderCarrier()
   private val timeToPayRequest = GenerateQuoteRequest(
-    "customerReference",
-    List(),
-    List(
-      Customer(
-        QuoteType("quoteType"),
-        LocalDate.of(2021, 1, 1),
-        1,
-        Frequency("some frequency"),
-        Duration("some duration"),
-        1,
-        LocalDate.now(),
-        PaymentPlanType("paymentPlanType")
-      )
+    CustomerReference("customerReference"),
+    ChannelIdentifier("channelIdentifier"),
+    Plan(
+      QuoteType("quoteType"),
+      LocalDate.of(2021, 1, 1),
+      LocalDate.of(2021, 1, 1),
+      1,
+      Frequency("some frequency"),
+      Duration(12),
+      1,
+      LocalDate.now(),
+      PaymentPlanType("paymentPlanType")
     ),
+    List(),
     List()
   )
 
@@ -52,10 +52,24 @@ class TTPQuoteServiceSpec extends UnitSpec {
     QuoteReference("quoteReference"),
     CustomerReference("customerReference"),
     QuoteType("quoteType"),
-    List(Instalment(DutyId("dutyId"), DebtId("debtId"), LocalDate.parse("2022-01-01"), 100, 100, 0.1, 1)),
-    "1",
+    LocalDate.now(),
+    1,
+    1.5,
     100,
-    0.1
+    0.1,
+    List(
+      Instalment(
+        DebtItemChargeId("dutyId"),
+        DebtItemId("debtId"),
+        LocalDate.parse("2022-01-01"),
+        100,
+        100,
+        0.1,
+        1,
+        0.5,
+        50
+      )
+    )
   )
 
   private val retrievePlanResponse = ViewPlanResponse(
@@ -168,7 +182,14 @@ class TTPQuoteServiceSpec extends UnitSpec {
       )
       val quoteService = new DefaultTTPQuoteService(connectorStub)
 
-      await(quoteService.getExistingPlan(CustomerReference("someCustomer"), PlanId("somePlanId")).value) shouldBe retrievePlanResponse
+      await(
+        quoteService
+          .getExistingPlan(
+            CustomerReference("someCustomer"),
+            PlanId("somePlanId")
+          )
+          .value
+      ) shouldBe retrievePlanResponse
         .asRight[TtppError]
     }
 
@@ -181,10 +202,15 @@ class TTPQuoteServiceSpec extends UnitSpec {
       )
       val quoteService = new DefaultTTPQuoteService(connectorStub)
 
-      await(quoteService.getExistingPlan(CustomerReference("someCustomer"), PlanId("somePlanId")).value) shouldBe ConnectorError(
-        500,
-        "Internal server error"
-      ).asLeft[ViewPlanResponse]
+      await(
+        quoteService
+          .getExistingPlan(
+            CustomerReference("someCustomer"),
+            PlanId("somePlanId")
+          )
+          .value
+      ) shouldBe ConnectorError(500, "Internal server error")
+        .asLeft[ViewPlanResponse]
 
     }
   }
@@ -275,10 +301,10 @@ class TTPQuoteServiceSpec extends UnitSpec {
 }
 
 class TtpConnectorStub(
-                        generateQuoteResponse: Either[TtppError, GenerateQuoteResponse],
-                        retrieveQuoteResponse: Either[TtppError, ViewPlanResponse],
-                        updatePlanResponse: Either[TtppError, UpdatePlanResponse],
-                        createPlanResponse: Either[TtppError, CreatePlanResponse]
+  generateQuoteResponse: Either[TtppError, GenerateQuoteResponse],
+  retrieveQuoteResponse: Either[TtppError, ViewPlanResponse],
+  updatePlanResponse: Either[TtppError, UpdatePlanResponse],
+  createPlanResponse: Either[TtppError, CreatePlanResponse]
 )(implicit ec: ExecutionContext)
     extends TtpConnector {
   override def generateQuote(ttppRequest: GenerateQuoteRequest)(
@@ -287,7 +313,8 @@ class TtpConnectorStub(
   ): TtppEnvelope[GenerateQuoteResponse] =
     TtppEnvelope(Future successful generateQuoteResponse)
 
-  override def getExistingQuote(customerReference: CustomerReference, planId: PlanId)(
+  override def getExistingQuote(customerReference: CustomerReference,
+                                planId: PlanId)(
     implicit ec: ExecutionContext,
     hc: HeaderCarrier
   ): TtppEnvelope[ViewPlanResponse] =
@@ -299,8 +326,9 @@ class TtpConnectorStub(
   ): TtppEnvelope[UpdatePlanResponse] =
     TtppEnvelope(Future successful updatePlanResponse)
 
-  override def createPlan(createPlanRequest: CreatePlanRequest)
-                         (implicit ec: ExecutionContext,
-                          hc: HeaderCarrier): TtppEnvelope[CreatePlanResponse] =
+  override def createPlan(createPlanRequest: CreatePlanRequest)(
+    implicit ec: ExecutionContext,
+    hc: HeaderCarrier
+  ): TtppEnvelope[CreatePlanResponse] =
     TtppEnvelope(Future successful createPlanResponse)
 }

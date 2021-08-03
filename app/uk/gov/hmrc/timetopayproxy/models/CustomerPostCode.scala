@@ -15,20 +15,19 @@
  */
 
 package uk.gov.hmrc.timetopayproxy.models
+import java.time.LocalDate
 
 import play.api.libs.json.Json
 
-final case class DebtId(value: String) extends AnyVal
+final case class PostCode(value: String) extends AnyVal
 
-object DebtId extends ValueTypeFormatter {
-  implicit val format = valueTypeFormatter(DebtId.apply, DebtId.unapply)
+object PostCode extends ValueTypeFormatter {
+  implicit val format =
+    valueTypeFormatter(PostCode.apply, PostCode.unapply)
 }
 
-final case class Debt(
-                        debtId: DebtId,
-                        mainTrans: MainTransType,
-                        duties: Seq[Duty])
+final case class CustomerPostCode(addressPostCode: PostCode, postCodeDate: LocalDate)
 
-object Debt {
-  implicit val format = Json.format[Debt]
+object CustomerPostCode {
+  implicit val format = Json.format[CustomerPostCode]
 }
