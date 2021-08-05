@@ -65,7 +65,7 @@ class TimeToPayProxyControllerSpec
       LocalDate.of(2021, 1, 1),
       LocalDate.of(2021, 1, 1),
       1,
-      Frequency("some frequency"),
+      Frequency.Annually,
       Duration(12),
       1,
       LocalDate.now(),
