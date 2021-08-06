@@ -40,8 +40,8 @@ class TTPQuoteServiceSpec extends UnitSpec {
       1,
       Frequency.TwoWeekly,
       Duration(12),
-      1,
-      LocalDate.now(),
+      Some(1),
+      Some(LocalDate.now()),
       PaymentPlanType("paymentPlanType")
     ),
     List(),

@@ -67,8 +67,8 @@ class TimeToPayProxyControllerSpec
       1,
       Frequency.Annually,
       Duration(12),
-      1,
-      LocalDate.now(),
+      Some(1),
+      Some(LocalDate.now()),
       PaymentPlanType("paymentPlanType")
     ),
     List(),

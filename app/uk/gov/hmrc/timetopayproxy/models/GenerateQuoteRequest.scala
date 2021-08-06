@@ -50,8 +50,8 @@ final case class Plan(
                       instalmentAmount: BigDecimal,
                       frequency: Frequency,
                       duration: Duration,
-                      initialPaymentAmount: BigDecimal,
-                      initialPaymentDate: LocalDate,
+                      initialPaymentAmount: Option[BigDecimal],
+                      initialPaymentDate: Option[LocalDate],
                       paymentPlanType: PaymentPlanType
                      )
 
