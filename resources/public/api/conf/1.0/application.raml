@@ -42,6 +42,16 @@ uses:
           description: Debt Advisors using DAUI trigger a view and update a plan.
         get: !include endpoints/view/get.raml
         put: !include endpoints/update/put.raml
+  /test-only/requests:
+        (annotations.group):
+           name: TTP Test only request
+           description: Test only request for TTP service to be used for polling script
+        get: !include endpoints/test/get.raml
+  /test-only/response:
+        (annotations.group):
+           name: TTP Test only response
+           description: Test only response for TTP service to be used for polling script
+        post: !include endpoints/test/post.raml
   /hello-world:
     get:
       displayName: Say hello world
