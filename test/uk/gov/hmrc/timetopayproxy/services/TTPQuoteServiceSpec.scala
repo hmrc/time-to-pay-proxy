@@ -32,9 +32,9 @@ class TTPQuoteServiceSpec extends UnitSpec {
   implicit val hc = HeaderCarrier()
   private val timeToPayRequest = GenerateQuoteRequest(
     CustomerReference("customerReference"),
-    ChannelIdentifier("channelIdentifier"),
+    ChannelIdentifier.Advisor,
     Plan(
-      QuoteType("quoteType"),
+      QuoteType.InstalmentAmount,
       LocalDate.of(2021, 1, 1),
       LocalDate.of(2021, 1, 1),
       1,
@@ -42,7 +42,7 @@ class TTPQuoteServiceSpec extends UnitSpec {
       Duration(12),
       Some(1),
       Some(LocalDate.now()),
-      PaymentPlanType("paymentPlanType")
+      PaymentPlanType.TimeToPay
     ),
     List(),
     List()
@@ -51,7 +51,7 @@ class TTPQuoteServiceSpec extends UnitSpec {
   private val generateQuoteResponse = GenerateQuoteResponse(
     QuoteReference("quoteReference"),
     CustomerReference("customerReference"),
-    QuoteType("quoteType"),
+    QuoteType.InstalmentAmount,
     LocalDate.now(),
     1,
     1.5,
@@ -75,7 +75,7 @@ class TTPQuoteServiceSpec extends UnitSpec {
   private val retrievePlanResponse = ViewPlanResponse(
     CustomerReference("someCustomerRef"),
     PlanId("somePlanId"),
-    QuoteType("someQuoateStatus"),
+    QuoteType.InstalmentAmount,
     "xyz",
     "ref",
     Nil,

@@ -25,9 +25,9 @@ import play.api.libs.functional.syntax._
 class GenerateQuoteRequestSpec extends AnyWordSpec with Matchers {
   val generateQuoteRequest = GenerateQuoteRequest(
     CustomerReference("uniqRef1234"),
-    ChannelIdentifier("selfService"),
+    ChannelIdentifier.SelfService,
     Plan(
-      QuoteType("instalmentAmount"),
+      QuoteType.InstalmentAmount,
       LocalDate.of(2021, 5, 13),
       LocalDate.of(2021, 5, 13),
       100,
@@ -35,7 +35,7 @@ class GenerateQuoteRequestSpec extends AnyWordSpec with Matchers {
       Duration(12),
       Some(100),
       Some(LocalDate.of(2021, 5, 13)),
-      PaymentPlanType("timeToPay")
+      PaymentPlanType.TimeToPay
     ),
     List(CustomerPostCode(PostCode("NW9 5XW"), LocalDate.of(2021, 5, 13))),
     List(
@@ -52,9 +52,9 @@ class GenerateQuoteRequestSpec extends AnyWordSpec with Matchers {
   )
   val generateQuoteRequestWithMissingOptionalValues = GenerateQuoteRequest(
     CustomerReference("uniqRef1234"),
-    ChannelIdentifier("selfService"),
+    ChannelIdentifier.SelfService,
     Plan(
-      QuoteType("instalmentAmount"),
+      QuoteType.InstalmentAmount,
       LocalDate.of(2021, 5, 13),
       LocalDate.of(2021, 5, 13),
       100,
@@ -62,7 +62,7 @@ class GenerateQuoteRequestSpec extends AnyWordSpec with Matchers {
       Duration(12),
       None,
       None,
-      PaymentPlanType("timeToPay")
+      PaymentPlanType.TimeToPay
     ),
     List(CustomerPostCode(PostCode("NW9 5XW"), LocalDate.of(2021, 5, 13))),
     List(
@@ -93,8 +93,8 @@ class GenerateQuoteRequestSpec extends AnyWordSpec with Matchers {
                |  },
                |  "customerPostCodes": [
                |    {
-               |      "addressPostCode": "NW9 5XW",
-               |      "postCodeDate": "2021-05-13"
+               |      "addressPostcode": "NW9 5XW",
+               |      "postcodeDate": "2021-05-13"
                |    }
                |  ],
                |  "debtItems": [
@@ -130,8 +130,8 @@ class GenerateQuoteRequestSpec extends AnyWordSpec with Matchers {
                |  },
                |  "customerPostCodes": [
                |    {
-               |      "addressPostCode": "NW9 5XW",
-               |      "postCodeDate": "2021-05-13"
+               |      "addressPostcode": "NW9 5XW",
+               |      "postcodeDate": "2021-05-13"
                |    }
                |  ],
                |  "debtItems": [

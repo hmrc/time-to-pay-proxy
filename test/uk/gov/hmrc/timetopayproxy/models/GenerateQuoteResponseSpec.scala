@@ -26,7 +26,7 @@ class GenerateQuoteResponseSpec extends AnyWordSpec with Matchers {
   val generateQuoteResponse = GenerateQuoteResponse(
     QuoteReference("quoteRef1234"),
     CustomerReference("custRef1234"),
-    QuoteType("instalmentAmount"),
+    QuoteType.InstalmentAmount,
     LocalDate.parse("2021-05-13"),
     1,
     10,
@@ -65,7 +65,7 @@ class GenerateQuoteResponseSpec extends AnyWordSpec with Matchers {
                |      "expectedPayment": 100,
                |      "interestRate": 0.24,
                |      "instalmentNumber": 1,
-               |      "instalmentInterest": 10,
+               |      "instalmentInterestAccrued": 10,
                |      "instalmentBalance": 10
                |    }
                |  ]

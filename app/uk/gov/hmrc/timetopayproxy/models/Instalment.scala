@@ -27,7 +27,7 @@ final case class Instalment(debtItemChargeId: DebtItemChargeId,
                             expectedPayment: BigDecimal,
                             interestRate: Double,
                             instalmentNumber: Int,
-                            instalmentInterest: BigDecimal,
+                            instalmentInterestAccrued: BigDecimal,
                             instalmentBalance: BigDecimal)
 
 object Instalment {

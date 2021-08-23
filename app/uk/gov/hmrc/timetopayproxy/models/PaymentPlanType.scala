@@ -15,11 +15,17 @@
  */
 
 package uk.gov.hmrc.timetopayproxy.models
+import enumeratum.{Enum, EnumEntry, PlayJsonEnum}
 
-final case class PaymentPlanType(value: String) extends AnyVal
+import scala.collection.immutable
 
-object PaymentPlanType extends ValueTypeFormatter {
-  implicit val format =
-    valueTypeFormatter(PaymentPlanType.apply, PaymentPlanType.unapply)
+sealed abstract class PaymentPlanType(override val entryName: String) extends EnumEntry
+
+object PaymentPlanType extends Enum[PaymentPlanType] with PlayJsonEnum[PaymentPlanType] {
+  val values: immutable.IndexedSeq[PaymentPlanType] = findValues
+
+  case object TimeToPay extends PaymentPlanType("timeToPay")
+  case object InstalmentOrder extends PaymentPlanType("instalmentOrder")
+  case object ChildBenefits extends PaymentPlanType("childBenefits")
+  case object FieldCollections extends PaymentPlanType("fieldCollections")
 }
-

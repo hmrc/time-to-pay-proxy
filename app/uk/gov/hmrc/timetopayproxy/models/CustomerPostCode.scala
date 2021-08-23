@@ -26,7 +26,7 @@ object PostCode extends ValueTypeFormatter {
     valueTypeFormatter(PostCode.apply, PostCode.unapply)
 }
 
-final case class CustomerPostCode(addressPostCode: PostCode, postCodeDate: LocalDate)
+final case class CustomerPostCode(addressPostcode: PostCode, postcodeDate: LocalDate)
 
 object CustomerPostCode {
   implicit val format = Json.format[CustomerPostCode]

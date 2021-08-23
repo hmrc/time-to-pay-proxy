@@ -59,9 +59,9 @@ class TimeToPayProxyControllerSpec
 
   private val generateQuoteRequest = GenerateQuoteRequest(
     CustomerReference("customerReference"),
-    ChannelIdentifier("channelIdentifier"),
+    ChannelIdentifier.Advisor,
     Plan(
-      QuoteType("quoteType"),
+      QuoteType.Duration,
       LocalDate.of(2021, 1, 1),
       LocalDate.of(2021, 1, 1),
       1,
@@ -69,7 +69,7 @@ class TimeToPayProxyControllerSpec
       Duration(12),
       Some(1),
       Some(LocalDate.now()),
-      PaymentPlanType("paymentPlanType")
+      PaymentPlanType.TimeToPay
     ),
     List(),
     List()
@@ -114,7 +114,7 @@ class TimeToPayProxyControllerSpec
         val responseFromTtp = GenerateQuoteResponse(
           QuoteReference("quoteReference"),
           CustomerReference("customerReference"),
-          QuoteType("quoteType"),
+          QuoteType.Duration,
           LocalDate.now(),
           1,
           100,
@@ -206,7 +206,7 @@ class TimeToPayProxyControllerSpec
             ViewPlanResponse(
               CustomerReference("someCustomerRef"),
               PlanId("somePlanId"),
-              QuoteType("someQuoateStatus"),
+              QuoteType.Duration,
               "xyz",
               "xyz",
               Nil,
