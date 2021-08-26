@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.timetopayproxy.models
 
-case class Duration(value: String) extends AnyVal
+case class Duration(value: Int) extends AnyVal
 
 object Duration extends ValueTypeFormatter {
   implicit val format =

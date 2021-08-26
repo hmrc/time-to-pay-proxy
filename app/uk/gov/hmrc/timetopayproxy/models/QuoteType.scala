@@ -15,9 +15,16 @@
  */
 
 package uk.gov.hmrc.timetopayproxy.models
+import enumeratum.{Enum, EnumEntry, PlayJsonEnum}
 
-final case class QuoteType(value: String) extends AnyVal
+import scala.collection.immutable
 
-object QuoteType extends ValueTypeFormatter {
-  implicit val format = valueTypeFormatter(QuoteType.apply, QuoteType.unapply)
+
+sealed abstract class QuoteType(override val entryName: String) extends EnumEntry
+
+object QuoteType extends Enum[QuoteType] with PlayJsonEnum[QuoteType] {
+  val values: immutable.IndexedSeq[QuoteType] = findValues
+
+  case object Duration extends QuoteType("duration")
+  case object InstalmentAmount extends QuoteType("instalmentAmount")
 }

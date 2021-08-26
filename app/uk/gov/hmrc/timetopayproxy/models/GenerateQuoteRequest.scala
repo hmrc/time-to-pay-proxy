@@ -34,19 +34,43 @@ package uk.gov.hmrc.timetopayproxy.models
 
 import java.time.LocalDate
 
+import enumeratum.{Enum, EnumEntry, PlayJsonEnum}
 import play.api.libs.json.Json
 
-final case class AdHoc(adHocDate: LocalDate, adHocAmount: BigDecimal)
+import scala.collection.immutable
 
-object AdHoc {
-  implicit val format = Json.format[AdHoc]
+sealed abstract class ChannelIdentifier(override val entryName: String) extends EnumEntry
+
+object ChannelIdentifier extends Enum[ChannelIdentifier] with PlayJsonEnum[ChannelIdentifier] {
+  val values: immutable.IndexedSeq[ChannelIdentifier] = findValues
+
+  case object Advisor extends ChannelIdentifier("advisor")
+  case object SelfService extends ChannelIdentifier("selfService")
 }
 
+final case class Plan(
+                      quoteType: QuoteType,
+                      quoteDate: LocalDate,
+                      instalmentStartDate: LocalDate,
+                      instalmentAmount: BigDecimal,
+                      frequency: Frequency,
+                      duration: Duration,
+                      initialPaymentAmount: Option[BigDecimal],
+                      initialPaymentDate: Option[LocalDate],
+                      paymentPlanType: PaymentPlanType
+                     )
+
+object Plan {
+  implicit val format = Json.format[Plan]
+}
+
+
 final case class GenerateQuoteRequest(
-                             customerReference: String,
-                             adHocs: List[AdHoc],
-                             customer: List[Customer],
-                             debts: List[Debt])
+                             customerReference: CustomerReference,
+                             channelIdentifier: ChannelIdentifier,
+                             plan: Plan,
+                             customerPostCodes: List[CustomerPostCode],
+                             debtItems: List[DebtItem])
 
 
 object GenerateQuoteRequest {

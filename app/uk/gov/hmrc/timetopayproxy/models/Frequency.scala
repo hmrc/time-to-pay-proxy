@@ -15,17 +15,22 @@
  */
 
 package uk.gov.hmrc.timetopayproxy.models
+
 import enumeratum.{Enum, EnumEntry, PlayJsonEnum}
 
 import scala.collection.immutable
 
-sealed abstract class PaymentPlanType(override val entryName: String) extends EnumEntry
+sealed abstract class Frequency(override val entryName: String) extends EnumEntry
 
-object PaymentPlanType extends Enum[PaymentPlanType] with PlayJsonEnum[PaymentPlanType] {
-  val values: immutable.IndexedSeq[PaymentPlanType] = findValues
+object Frequency extends Enum[Frequency] with PlayJsonEnum[Frequency] {
+  val values: immutable.IndexedSeq[Frequency] = findValues
 
-  case object TimeToPay extends PaymentPlanType("timeToPay")
-  case object InstalmentOrder extends PaymentPlanType("instalmentOrder")
-  case object ChildBenefits extends PaymentPlanType("childBenefits")
-  case object FieldCollections extends PaymentPlanType("fieldCollections")
+  case object Single extends Frequency("single")
+  case object Weekly extends Frequency("weekly")
+  case object TwoWeekly extends Frequency("2Weekly")
+  case object FourWeekly extends Frequency("4Weekly")
+  case object Monthly extends Frequency("monthly")
+  case object Quarterly extends Frequency("quarterly")
+  case object SixMonthly extends Frequency("6Monthly")
+  case object Annually extends Frequency("annually")
 }

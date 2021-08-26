@@ -58,20 +58,20 @@ class TimeToPayProxyControllerSpec
     new TimeToPayProxyController(authoriseAction, cc, ttpQuoteService)
 
   private val generateQuoteRequest = GenerateQuoteRequest(
-    "customerReference",
-    List(),
-    List(
-      Customer(
-        QuoteType("quoteType"),
-        LocalDate.of(2021, 1, 1),
-        1,
-        Frequency("some frequency"),
-        Duration("some duration"),
-        1,
-        LocalDate.now(),
-        PaymentPlanType("paymentPlanType")
-      )
+    CustomerReference("customerReference"),
+    ChannelIdentifier.Advisor,
+    Plan(
+      QuoteType.Duration,
+      LocalDate.of(2021, 1, 1),
+      LocalDate.of(2021, 1, 1),
+      1,
+      Frequency.Annually,
+      Duration(12),
+      Some(1),
+      Some(LocalDate.now()),
+      PaymentPlanType.TimeToPay
     ),
+    List(),
     List()
   )
 
@@ -114,11 +114,25 @@ class TimeToPayProxyControllerSpec
         val responseFromTtp = GenerateQuoteResponse(
           QuoteReference("quoteReference"),
           CustomerReference("customerReference"),
-          QuoteType("quoteType"),
-          List(Instalment(DutyId("dutyId"), DebtId("debtId"), LocalDate.parse("2022-01-01"), 100, 100, 0.1, 1)),
-          "1",
+          QuoteType.Duration,
+          LocalDate.now(),
+          1,
           100,
-          0.1
+          0.6,
+          0.9,
+          List(
+            Instalment(
+              DebtItemChargeId("dutyId"),
+              DebtItemId("debtId"),
+              LocalDate.parse("2022-01-01"),
+              100,
+              100,
+              0.1,
+              1,
+              0.5,
+              10
+            )
+          )
         )
         (ttpQuoteService
           .generateQuote(_: GenerateQuoteRequest)(
@@ -192,7 +206,7 @@ class TimeToPayProxyControllerSpec
             ViewPlanResponse(
               CustomerReference("someCustomerRef"),
               PlanId("somePlanId"),
-              QuoteType("someQuoateStatus"),
+              QuoteType.Duration,
               "xyz",
               "xyz",
               Nil,
@@ -229,9 +243,7 @@ class TimeToPayProxyControllerSpec
           _: HeaderCarrier
         ))
         .expects(*, *, *, *)
-        .returning(
-          TtppEnvelope(errorFromTtpConnector.asLeft[ViewPlanResponse])
-        )
+        .returning(TtppEnvelope(errorFromTtpConnector.asLeft[ViewPlanResponse]))
 
       val fakeRequest = FakeRequest(
         "GET",
@@ -260,9 +272,7 @@ class TimeToPayProxyControllerSpec
           _: HeaderCarrier
         ))
         .expects(*, *, *, *)
-        .returning(
-          TtppEnvelope(errorFromTtpConnector.asLeft[ViewPlanResponse])
-        )
+        .returning(TtppEnvelope(errorFromTtpConnector.asLeft[ViewPlanResponse]))
 
       val fakeRequest = FakeRequest(
         "GET",
@@ -306,7 +316,10 @@ class TimeToPayProxyControllerSpec
           s"/individuals/time-to-pay/quote/${updatePlanRequest.customerReference.value}/${updatePlanRequest.planId.value}"
         ).withHeaders(CONTENT_TYPE -> MimeTypes.JSON)
           .withBody(Json.toJson[UpdatePlanRequest](updatePlanRequest))
-        val response: Future[Result] = controller.updatePlan(updatePlanRequest.customerReference.value, updatePlanRequest.planId.value)(fakeRequest)
+        val response: Future[Result] = controller.updatePlan(
+          updatePlanRequest.customerReference.value,
+          updatePlanRequest.planId.value
+        )(fakeRequest)
         status(response) shouldBe Status.OK
         Json.fromJson[UpdatePlanResponse](contentAsJson(response)) shouldBe JsSuccess(
           responseFromTtp
@@ -342,7 +355,10 @@ class TimeToPayProxyControllerSpec
           s"/individuals/time-to-pay/quote/${updatePlanRequest.customerReference.value}/${updatePlanRequest.planId.value}"
         ).withHeaders(CONTENT_TYPE -> MimeTypes.JSON)
           .withBody(Json.toJson[UpdatePlanRequest](updatePlanRequest))
-        val response: Future[Result] = controller.updatePlan(updatePlanRequest.customerReference.value, updatePlanRequest.planId.value)(fakeRequest)
+        val response: Future[Result] = controller.updatePlan(
+          updatePlanRequest.customerReference.value,
+          updatePlanRequest.planId.value
+        )(fakeRequest)
 
         status(response) shouldBe Status.INTERNAL_SERVER_ERROR
         Json.fromJson[TimeToPayErrorResponse](contentAsJson(response)) shouldBe JsSuccess(
