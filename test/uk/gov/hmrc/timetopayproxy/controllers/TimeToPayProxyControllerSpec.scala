@@ -60,7 +60,7 @@ class TimeToPayProxyControllerSpec
   private val generateQuoteRequest = GenerateQuoteRequest(
     CustomerReference("customerReference"),
     ChannelIdentifier.Advisor,
-    Plan(
+    PlanToGenerateQuote(
       QuoteType.Duration,
       LocalDate.of(2021, 1, 1),
       LocalDate.of(2021, 1, 1),
@@ -81,7 +81,7 @@ class TimeToPayProxyControllerSpec
       PlanId("planId"),
       UpdateType("updateType"),
       CancellationReason("reason"),
-      PaymentMethod("method"),
+      PaymentMethod.Bacs,
       PaymentReference("reference"),
       true
     )
@@ -89,14 +89,50 @@ class TimeToPayProxyControllerSpec
   private val createPlanRequest =
     CreatePlanRequest(
       CustomerReference("customerReference"),
-      PlanId("planId"),
-      "xyz",
-      "paymentRed",
-      false,
-      Nil,
-      "2",
-      10000,
-      0.26
+      QuoteReference("quoteReference"),
+      ChannelIdentifier.Advisor,
+      PlanToCreatePlan(
+        QuoteId("quoteId"),
+        QuoteType.Duration,
+        LocalDate.now(),
+        LocalDate.now(),
+        PaymentPlanType.TimeToPay,
+        None,
+        false,
+        2,
+        Frequency.Single,
+        Duration(2),
+        100,
+        10,
+        10,
+        10
+      ),
+      List(
+        DebtItem(
+          DebtItemId("debtItemId"),
+          DebtItemChargeId("debtItemChargeId"),
+          MainTransType.TPSSAccTaxAssessment,
+          SubTransType.IT,
+          100,
+          LocalDate.now(),
+          List(Payment(LocalDate.parse("2020-01-01"), 100))
+        )
+      ),
+      List(PaymentInformation(PaymentMethod.Bacs, PaymentReference("ref123"))),
+      List(CustomerPostCode(PostCode("NW1 AB1"), LocalDate.now())),
+      List(
+        Instalment(
+          DebtItemChargeId("id1"),
+          DebtItemId("id2"),
+          LocalDate.now(),
+          100,
+          100,
+          0.24,
+          1,
+          10,
+          90
+        )
+      )
     )
 
   "POST /individuals/time-to-pay/quote" should {
@@ -383,7 +419,8 @@ class TimeToPayProxyControllerSpec
         val createPlanResponse = CreatePlanResponse(
           CustomerReference("customerReference"),
           PlanId("planId"),
-          "xyz"
+          CaseId("caseId"),
+          PlanStatus.Success
         )
         (ttpQuoteService
           .createPlan(_: CreatePlanRequest)(

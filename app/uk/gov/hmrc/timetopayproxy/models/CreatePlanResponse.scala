@@ -16,9 +16,27 @@
 
 package uk.gov.hmrc.timetopayproxy.models
 
+import enumeratum.{Enum, EnumEntry, PlayJsonEnum}
 import play.api.libs.json.Json
 
-final case class CreatePlanResponse(customerReference: CustomerReference, planId: PlanId, planStatus: String)
+final case class CaseId(value: String) extends AnyVal
+
+object CaseId extends ValueTypeFormatter {
+  implicit val format =
+    valueTypeFormatter(CaseId.apply, CaseId.unapply)
+}
+
+sealed abstract class PlanStatus(override val entryName: String) extends EnumEntry
+
+object PlanStatus extends Enum[PlanStatus] with PlayJsonEnum[PlanStatus] {
+  val values: scala.collection.immutable.IndexedSeq[PlanStatus] = findValues
+
+  case object Success extends PlanStatus("success")
+  case object Failure extends PlanStatus("failure")
+
+}
+
+final case class CreatePlanResponse(customerReference: CustomerReference, planId: PlanId, caseId: CaseId, planStatus: PlanStatus)
 
 object CreatePlanResponse {
   implicit val format = Json.format[CreatePlanResponse]

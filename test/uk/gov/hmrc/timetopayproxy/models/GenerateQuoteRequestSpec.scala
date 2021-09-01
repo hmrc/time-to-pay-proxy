@@ -26,7 +26,7 @@ class GenerateQuoteRequestSpec extends AnyWordSpec with Matchers {
   val generateQuoteRequest = GenerateQuoteRequest(
     CustomerReference("uniqRef1234"),
     ChannelIdentifier.SelfService,
-    Plan(
+    PlanToGenerateQuote(
       QuoteType.InstalmentAmount,
       LocalDate.of(2021, 5, 13),
       LocalDate.of(2021, 5, 13),
@@ -53,7 +53,7 @@ class GenerateQuoteRequestSpec extends AnyWordSpec with Matchers {
   val generateQuoteRequestWithMissingOptionalValues = GenerateQuoteRequest(
     CustomerReference("uniqRef1234"),
     ChannelIdentifier.SelfService,
-    Plan(
+    PlanToGenerateQuote(
       QuoteType.InstalmentAmount,
       LocalDate.of(2021, 5, 13),
       LocalDate.of(2021, 5, 13),

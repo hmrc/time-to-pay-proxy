@@ -36,7 +36,7 @@ class UpdatePlanServiceSpec extends UnitSpec {
     PlanId("planId"),
     UpdateType("updateType"),
     CancellationReason("reason"),
-    PaymentMethod("method"),
+    PaymentMethod.Bacs,
     PaymentReference("reference"),
     true
   )
