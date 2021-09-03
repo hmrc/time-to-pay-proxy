@@ -121,4 +121,139 @@ class TTPTestServiceSpec extends UnitSpec {
       }
     }
   }
+
+  "Retrieve error details" should {
+    "return all the request details retrieved from the stub" when {
+      "connector returns success" in {
+        val connector = mock[TtpTestConnector]
+        (
+          connector
+            .getErrors()(
+              _: ExecutionContext,
+              _: HeaderCarrier
+            )
+          )
+          .expects(*, *)
+          .returning(TtppEnvelope(requestDetails))
+
+        val testService = new DefaultTTPTestService(connector)
+        await(testService.getErrors().value) shouldBe requestDetails.asRight[TtppError]
+      }
+    }
+
+    "return a failure response" when {
+      "connector returns failure" in {
+        val errorFromTtpConnector =
+          ConnectorError(500, "Internal Service Error")
+
+        val connector = mock[TtpTestConnector]
+        (
+          connector
+            .getErrors()(
+              _: ExecutionContext,
+              _: HeaderCarrier
+            )
+          )
+          .expects(*, *)
+          .returning(
+            TtppEnvelope(errorFromTtpConnector.asLeft[Seq[RequestDetails]])
+          )
+
+        val testService = new DefaultTTPTestService(connector)
+        await(testService.getErrors().value) shouldBe errorFromTtpConnector.asLeft[Seq[RequestDetails]]
+      }
+    }
+  }
+
+  "Save error details" should {
+    "save the request details retrieved from the stub" when {
+      "connector returns success" in {
+        val details = RequestDetails("someId", "content", Some("www.uri.com"), true)
+        val connector = mock[TtpTestConnector]
+        (
+          connector
+            .saveError(_: RequestDetails)(
+              _: ExecutionContext,
+              _: HeaderCarrier
+            )
+          )
+          .expects(details, *, *)
+          .returning(TtppEnvelope(()))
+
+        val testService = new DefaultTTPTestService(connector)
+        await(testService.saveError(details).value) shouldBe ().asRight[TtppError]
+      }
+    }
+
+    "return a failure response" when {
+      "connector returns failure" in {
+        val details = RequestDetails("someId", "content", Some("www.uri.com"), true)
+
+        val errorFromTtpConnector =
+          ConnectorError(500, "Internal Service Error")
+
+        val connector = mock[TtpTestConnector]
+        (
+          connector
+            .saveError(_: RequestDetails)(
+              _: ExecutionContext,
+              _: HeaderCarrier
+            )
+          )
+          .expects(*, *, *)
+          .returning(
+            TtppEnvelope(errorFromTtpConnector.asLeft[Unit])
+          )
+
+        val testService = new DefaultTTPTestService(connector)
+        await(testService.saveError(details).value) shouldBe errorFromTtpConnector.asLeft[Seq[RequestDetails]]
+      }
+    }
+  }
+
+  "Delete request details" should {
+    "Delete a request identified by the requestId in the parameters" when {
+      "connector returns success" in {
+        val id = "1"
+        val connector = mock[TtpTestConnector]
+        (
+          connector
+            .deleteRequest(_: String)(
+              _: ExecutionContext,
+              _: HeaderCarrier
+            )
+          )
+          .expects(id, *, *)
+          .returning(TtppEnvelope(()))
+
+        val testService = new DefaultTTPTestService(connector)
+        await(testService.deleteRequestDetails(id).value) shouldBe ().asRight[TtppError]
+      }
+    }
+
+    "return a failure response" when {
+      "connector returns failure" in {
+        val id = "2"
+
+        val errorFromTtpConnector =
+          ConnectorError(500, "Internal Service Error")
+
+        val connector = mock[TtpTestConnector]
+        (
+          connector
+            .deleteRequest(_: String)(
+              _: ExecutionContext,
+              _: HeaderCarrier
+            )
+          )
+          .expects(*, *, *)
+          .returning(
+            TtppEnvelope(errorFromTtpConnector.asLeft[Unit])
+          )
+
+        val testService = new DefaultTTPTestService(connector)
+        await(testService.deleteRequestDetails(id).value) shouldBe errorFromTtpConnector.asLeft[Seq[RequestDetails]]
+      }
+    }
+  }
 }

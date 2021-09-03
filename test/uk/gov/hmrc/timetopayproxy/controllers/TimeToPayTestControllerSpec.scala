@@ -164,4 +164,171 @@ class TimeToPayTestControllerSpec extends UnitSpec {
     }
   }
 
+  "GET /test-only/errors" should {
+    "return a 200 given a successful response" in {
+
+      (ttpTestService
+        .getErrors()(
+          _: ExecutionContext,
+          _: HeaderCarrier
+        ))
+        .expects(*, *)
+        .returning(
+          TtppEnvelope(requestDetails)
+        )
+
+      val fakeRequest = FakeRequest(
+        "GET",
+        "/test-only/errors"
+      )
+      val response: Future[Result] =
+        controller.getErrors()(fakeRequest)
+
+      status(response) shouldBe Status.OK
+    }
+
+    "return a 404 if the quote is not found" in {
+      val errorFromTtpConnector = ConnectorError(404, "Not Found")
+      (ttpTestService
+        .getErrors()(
+          _: ExecutionContext,
+          _: HeaderCarrier
+        ))
+        .expects(*, *)
+        .returning(
+          TtppEnvelope(errorFromTtpConnector.asLeft[Seq[RequestDetails]])
+        )
+
+      val fakeRequest = FakeRequest(
+        "GET",
+        "/test-only/errors"
+      )
+      val response: Future[Result] =
+        controller.getErrors()(fakeRequest)
+
+      status(response) shouldBe Status.NOT_FOUND
+    }
+
+    "return 500 if the underlying service fails" in {
+      val errorFromTtpConnector = ConnectorError(500, "Internal Server Error")
+
+      (ttpTestService
+        .getErrors()(
+          _: ExecutionContext,
+          _: HeaderCarrier
+        ))
+        .expects(*, *)
+        .returning(
+          TtppEnvelope(errorFromTtpConnector.asLeft[Seq[RequestDetails]])
+        )
+
+      val fakeRequest = FakeRequest(
+        "GET",
+        "/test-only/errors"
+      )
+      val response: Future[Result] =
+        controller.getErrors()(fakeRequest)
+
+      status(response) shouldBe Status.INTERNAL_SERVER_ERROR
+    }
+  }
+
+  "POST /test-only/errors" should {
+    "return 200" when {
+      "service returns success" in {
+
+        (ttpTestService
+          .saveError(_: RequestDetails)(
+            _: ExecutionContext,
+            _: HeaderCarrier
+          ))
+          .expects(responseDetails, *, *)
+          .returning(
+            TtppEnvelope(())
+          )
+
+        val fakeRequest: FakeRequest[JsValue] =
+          FakeRequest("POST", "/test-only/errors")
+            .withHeaders(CONTENT_TYPE -> MimeTypes.JSON)
+            .withBody(Json.toJson[RequestDetails](responseDetails))
+
+        val response: Future[Result] = controller.saveError()(fakeRequest)
+        status(response) shouldBe Status.OK
+      }
+    }
+
+    "return 500" when {
+      "service returns failure" in {
+        val errorFromTtpConnector =
+          ConnectorError(500, "Internal Service Error")
+
+        (ttpTestService
+          .saveError(_: RequestDetails)(
+            _: ExecutionContext,
+            _: HeaderCarrier
+          ))
+          .expects(responseDetails, *, *)
+          .returning(
+            TtppEnvelope(errorFromTtpConnector.asLeft[Unit])
+          )
+
+        val fakeRequest: FakeRequest[JsValue] =
+          FakeRequest("POST", "/test-only/errors")
+            .withHeaders(CONTENT_TYPE -> MimeTypes.JSON)
+            .withBody(Json.toJson[RequestDetails](responseDetails))
+
+        val response: Future[Result] = controller.saveError()(fakeRequest)
+
+        status(response) shouldBe Status.INTERNAL_SERVER_ERROR
+      }
+    }
+  }
+
+  "DELETE /test-only/request/:requestId" should {
+    "return a 200 given a successful response" in {
+
+      (ttpTestService
+        .deleteRequestDetails(_: String)(
+          _: ExecutionContext,
+          _: HeaderCarrier
+        ))
+        .expects(*, *, *)
+        .returning(
+          TtppEnvelope(Unit)
+        )
+
+      val fakeRequest = FakeRequest(
+        "DELETE",
+        "/test-only/request/1"
+      )
+      val response: Future[Result] =
+        controller.deleteRequest("1")(fakeRequest)
+
+      status(response) shouldBe Status.OK
+    }
+
+    "return 500 if the underlying service fails" in {
+      val errorFromTtpConnector = ConnectorError(500, "Internal Server Error")
+
+      (ttpTestService
+        .deleteRequestDetails(_: String)(
+          _: ExecutionContext,
+          _: HeaderCarrier
+        ))
+        .expects(*, *, *)
+        .returning(
+          TtppEnvelope(errorFromTtpConnector.asLeft)
+        )
+
+      val fakeRequest = FakeRequest(
+        "DELETE",
+        "/test-only/request/2"
+      )
+      val response: Future[Result] =
+        controller.deleteRequest("2")(fakeRequest)
+
+      status(response) shouldBe Status.INTERNAL_SERVER_ERROR
+    }
+  }
+
 }

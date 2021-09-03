@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.timetopayproxy.controllers
 
-import play.api.libs.json.JsValue
+import play.api.libs.json.{JsValue, Json}
 import play.api.mvc.{Action, AnyContent, BaseController, ControllerComponents, Results}
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
 import uk.gov.hmrc.timetopayproxy.models.RequestDetails
@@ -40,6 +40,11 @@ class TimeToPayTestController @Inject()(cc: ControllerComponents,
       .fold(e => e.toResult, r => r.toResult)
   }
 
+  def deleteRequest(requestId: String): Action[AnyContent] = Action.async { implicit request =>
+    ttpTestService.deleteRequestDetails(requestId).leftMap(ttppError => ttppError.toErrorResponse)
+      .fold(e => e.toResult, - => Results.Ok)
+  }
+
   def response: Action[JsValue] = Action.async(parse.json) {
     implicit request =>
       withJsonBody[RequestDetails] {
@@ -50,5 +55,24 @@ class TimeToPayTestController @Inject()(cc: ControllerComponents,
             .fold(e => e.toResult, _ => Results.Ok)
         }
       }
+  }
+
+  def saveError(): Action[JsValue] = Action.async(parse.json) {
+    implicit request =>
+      withJsonBody[RequestDetails] {
+        details: RequestDetails => {
+          ttpTestService
+            .saveError(details)
+            .leftMap(ttppError => ttppError.toErrorResponse)
+            .fold(e => e.toResult, _ => Results.Ok)
+        }
+      }
+  }
+
+  def getErrors(): Action[AnyContent] = Action.async { implicit request =>
+    ttpTestService
+      .getErrors()
+      .leftMap(ttppError => ttppError.toErrorResponse)
+      .fold(e => e.toResult, r => r.toResult)
   }
 }

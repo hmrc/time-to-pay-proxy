@@ -29,6 +29,9 @@ import scala.concurrent.ExecutionContext
 trait TTPTestService {
   def retrieveRequestDetails()(implicit ec: ExecutionContext, hc: HeaderCarrier): TtppEnvelope[Seq[RequestDetails]]
   def saveResponseDetails(details: RequestDetails)(implicit ec: ExecutionContext, hc: HeaderCarrier): TtppEnvelope[Unit]
+  def deleteRequestDetails(requestId: String)(implicit ec: ExecutionContext, hc: HeaderCarrier): TtppEnvelope[Unit]
+  def saveError(details: RequestDetails)(implicit ec: ExecutionContext, hc: HeaderCarrier): TtppEnvelope[Unit]
+  def getErrors()(implicit ec: ExecutionContext, hc: HeaderCarrier): TtppEnvelope[Seq[RequestDetails]]
 }
 
 @Singleton
@@ -38,4 +41,13 @@ class DefaultTTPTestService @Inject()(connector: TtpTestConnector) extends TTPTe
 
   override def saveResponseDetails(details: RequestDetails)(implicit ec: ExecutionContext, hc: HeaderCarrier): TtppEnvelope[Unit] =
     connector.saveResponseDetails(details)
+
+  override def deleteRequestDetails(requestId: String)(implicit ec: ExecutionContext, hc: HeaderCarrier): TtppEnvelope[Unit] =
+    connector.deleteRequest(requestId)
+
+  override def saveError(details: RequestDetails)(implicit ec: ExecutionContext, hc: HeaderCarrier): TtppEnvelope[Unit] =
+    connector.saveError(details)
+
+  override def getErrors()(implicit ec: ExecutionContext, hc: HeaderCarrier): TtppEnvelope[Seq[RequestDetails]] =
+    connector.getErrors()
 }
