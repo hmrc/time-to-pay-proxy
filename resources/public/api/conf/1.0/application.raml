@@ -47,7 +47,7 @@ uses:
            name: TTP Test only request
            description: Test only request for TTP service to be used for polling script
         get: !include endpoints/test/get.raml
-  /test-only/request/:requestId:
+  /test-only/request/{requestId}:
         (annotations.group):
            name: TTP Test only request
            description: Test only request for TTP service to be used for polling script
