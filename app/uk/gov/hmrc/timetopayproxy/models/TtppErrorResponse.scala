@@ -18,8 +18,8 @@ package uk.gov.hmrc.timetopayproxy.models
 
 import play.api.libs.json.Json
 
-final case class TimeToPayErrorResponse(status: Int, message: String)
+final case class TtppErrorResponse(statusCode: Int, errorMessage: String)
 
-object TimeToPayErrorResponse {
-  implicit val format = Json.format[TimeToPayErrorResponse]
+object TtppErrorResponse {
+  implicit val format = Json.format[TtppErrorResponse]
 }

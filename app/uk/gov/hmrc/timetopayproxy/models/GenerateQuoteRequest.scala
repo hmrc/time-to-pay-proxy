@@ -55,8 +55,8 @@ final case class PlanToGenerateQuote(
                       instalmentAmount: BigDecimal,
                       frequency: Frequency,
                       duration: Duration,
-                      initialPaymentAmount: Option[BigDecimal],
-                      initialPaymentDate: Option[LocalDate],
+                      initialPaymentAmount: BigDecimal,
+                      initialPaymentDate: LocalDate,
                       paymentPlanType: PaymentPlanType
                      )
 
@@ -70,7 +70,9 @@ final case class GenerateQuoteRequest(
                              channelIdentifier: ChannelIdentifier,
                              plan: PlanToGenerateQuote,
                              customerPostCodes: List[CustomerPostCode],
-                             debtItems: List[DebtItem])
+                             debtItems: List[DebtItem]) {
+  require(!customerReference.value.trim().isEmpty(), "customerReference should not be empty")
+}
 
 
 object GenerateQuoteRequest {

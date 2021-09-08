@@ -21,8 +21,8 @@ import play.api.mvc.{Action, AnyContent, BaseController, ControllerComponents, R
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
 import uk.gov.hmrc.timetopayproxy.models.RequestDetails
 import uk.gov.hmrc.timetopayproxy.services.TTPTestService
-import uk.gov.hmrc.timetopayproxy.utils.TtppErrorHandler.FromErrorToResult
-import uk.gov.hmrc.timetopayproxy.utils.TtppResultConverter.ToResult
+import uk.gov.hmrc.timetopayproxy.utils.TtppErrorHandler.FromErrorToResponse
+import uk.gov.hmrc.timetopayproxy.utils.TtppResponseConverter.ToResponse
 
 import javax.inject.{Inject, Singleton}
 
@@ -37,7 +37,7 @@ class TimeToPayTestController @Inject()(cc: ControllerComponents,
     ttpTestService
       .retrieveRequestDetails()
       .leftMap(ttppError => ttppError.toErrorResponse)
-      .fold(e => e.toResult, r => r.toResult)
+      .fold(e => e.toResponse, r => r.toResponse)
   }
 
   def response: Action[JsValue] = Action.async(parse.json) {
@@ -47,7 +47,7 @@ class TimeToPayTestController @Inject()(cc: ControllerComponents,
           ttpTestService
             .saveResponseDetails(details)
             .leftMap(ttppError => ttppError.toErrorResponse)
-            .fold(e => e.toResult, _ => Results.Ok)
+            .fold(e => e.toResponse, _ => Results.Ok)
         }
       }
   }

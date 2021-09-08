@@ -18,15 +18,17 @@ package uk.gov.hmrc.timetopayproxy.utils
 
 import play.api.libs.json.{Format, Json}
 import play.api.mvc.{Result, Results}
-import uk.gov.hmrc.timetopayproxy.models.TimeToPayErrorResponse
+import uk.gov.hmrc.timetopayproxy.models.TtppErrorResponse
 
-object TtppResultConverter {
+object TtppResponseConverter {
 
-  implicit class ToResult[T](r: T) {
-    def toResult(implicit format: Format[T]): Result = r match {
-      case TimeToPayErrorResponse(status, _) =>
-        Results.Status(status)(Json.toJson(r))
-      case _ => Results.Ok(Json.toJson(r))
+  implicit class ToResponse[T](response: T) {
+    def toResponse(implicit format: Format[T]): Result = {
+      response match {
+        case TtppErrorResponse(statusCode, _) =>
+          Results.Status(statusCode)(Json.toJson(response))
+        case _ => Results.Ok(Json.toJson(response))
+      }
     }
   }
 

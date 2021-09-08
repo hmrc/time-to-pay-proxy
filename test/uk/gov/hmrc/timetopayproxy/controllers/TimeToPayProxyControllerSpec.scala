@@ -67,8 +67,8 @@ class TimeToPayProxyControllerSpec
       1,
       Frequency.Annually,
       Duration(12),
-      Some(1),
-      Some(LocalDate.now()),
+      1,
+      LocalDate.now(),
       PaymentPlanType.TimeToPay
     ),
     List(),
@@ -96,12 +96,14 @@ class TimeToPayProxyControllerSpec
         QuoteType.Duration,
         LocalDate.now(),
         LocalDate.now(),
+        100,
         PaymentPlanType.TimeToPay,
-        None,
         false,
         2,
         Frequency.Single,
         Duration(2),
+        LocalDate.now(),
+        100,
         100,
         10,
         10,
@@ -141,9 +143,9 @@ class TimeToPayProxyControllerSpec
 
         (authConnector
           .authorise[Unit](_: Predicate, _: Retrieval[Unit])(
-            _: HeaderCarrier,
-            _: ExecutionContext
-          ))
+          _: HeaderCarrier,
+          _: ExecutionContext
+        ))
           .expects(*, *, *, *)
           .returning(Future.successful())
 
@@ -184,8 +186,31 @@ class TimeToPayProxyControllerSpec
             .withBody(Json.toJson[GenerateQuoteRequest](generateQuoteRequest))
         val response: Future[Result] = controller.generateQuote()(fakeRequest)
         status(response) shouldBe Status.OK
+        contentAsJson(response) shouldBe Json.toJson[GenerateQuoteResponse](responseFromTtp)
       }
     }
+    "return 400" when {
+      "request body is in wrong format" in {
+        (authConnector
+          .authorise[Unit](_: Predicate, _: Retrieval[Unit])(
+          _: HeaderCarrier,
+          _: ExecutionContext
+        ))
+          .expects(*, *, *, *)
+          .returning(Future.successful())
+
+        val fakeRequest: FakeRequest[JsValue] =
+          FakeRequest("POST", "/individuals/time-to-pay/quote")
+            .withHeaders(CONTENT_TYPE -> MimeTypes.JSON)
+          .withBody(Json.toJson[String]("Wrong Format"))
+
+        val response: Future[Result] = controller.generateQuote()(fakeRequest)
+
+        status(response) shouldBe Status.BAD_REQUEST
+        (contentAsJson(response) \ "errorMessage").as[String].startsWith( "Invalid GenerateQuoteRequest payload") shouldBe(true)
+      }
+    }
+
     "return 500" when {
       "service returns failure" in {
 
@@ -216,6 +241,8 @@ class TimeToPayProxyControllerSpec
         val response: Future[Result] = controller.generateQuote()(fakeRequest)
 
         status(response) shouldBe Status.INTERNAL_SERVER_ERROR
+        (contentAsJson(response) \ "errorMessage").as[String] shouldBe("Internal Service Error")
+
       }
     }
   }
@@ -396,9 +423,10 @@ class TimeToPayProxyControllerSpec
           updatePlanRequest.planId.value
         )(fakeRequest)
 
-        status(response) shouldBe Status.INTERNAL_SERVER_ERROR
-        Json.fromJson[TimeToPayErrorResponse](contentAsJson(response)) shouldBe JsSuccess(
-          TimeToPayErrorResponse(500, "Internal Service Error")
+        val errorResponse = Status.INTERNAL_SERVER_ERROR
+        status(response) shouldBe errorResponse.intValue()
+        Json.fromJson[TtppErrorResponse](contentAsJson(response)) shouldBe JsSuccess(
+          TtppErrorResponse(errorResponse.intValue(), "Internal Service Error")
         )
       }
     }
@@ -436,6 +464,7 @@ class TimeToPayProxyControllerSpec
             .withBody(Json.toJson[CreatePlanRequest](createPlanRequest))
         val response: Future[Result] = controller.createPlan()(fakeRequest)
         status(response) shouldBe Status.OK
+        contentAsJson(response) shouldBe Json.toJson[CreatePlanResponse](createPlanResponse)
       }
     }
     "return 500" when {
