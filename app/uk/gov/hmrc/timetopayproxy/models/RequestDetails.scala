@@ -18,7 +18,7 @@ package uk.gov.hmrc.timetopayproxy.models
 
 import play.api.libs.json.Json
 
-final case class RequestDetails(requestId: String, content: String, uri: Option[String], isResponse: Boolean)
+final case class RequestDetails(requestId: String, content: String, uri: Option[String], isResponse: Boolean, status: Option[Int] = None)
 
 object RequestDetails {
   implicit val format = Json.format[RequestDetails]
