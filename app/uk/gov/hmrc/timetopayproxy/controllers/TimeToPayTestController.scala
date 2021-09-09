@@ -42,7 +42,7 @@ class TimeToPayTestController @Inject()(cc: ControllerComponents,
 
   def deleteRequest(requestId: String): Action[AnyContent] = Action.async { implicit request =>
     ttpTestService.deleteRequestDetails(requestId).leftMap(ttppError => ttppError.toErrorResponse)
-      .fold(e => e.toResult, - => Results.Ok)
+      .fold(e => e.toResponse, - => Results.Ok)
   }
 
   def response: Action[JsValue] = Action.async(parse.json) {
@@ -64,7 +64,7 @@ class TimeToPayTestController @Inject()(cc: ControllerComponents,
           ttpTestService
             .saveError(details)
             .leftMap(ttppError => ttppError.toErrorResponse)
-            .fold(e => e.toResult, _ => Results.Ok)
+            .fold(e => e.toResponse, _ => Results.Ok)
         }
       }
   }
@@ -73,6 +73,6 @@ class TimeToPayTestController @Inject()(cc: ControllerComponents,
     ttpTestService
       .getErrors()
       .leftMap(ttppError => ttppError.toErrorResponse)
-      .fold(e => e.toResult, r => r.toResult)
+      .fold(e => e.toResponse, r => r.toResponse)
   }
 }
