@@ -33,15 +33,15 @@ class TTPQuoteServiceSpec extends UnitSpec {
   private val timeToPayRequest = GenerateQuoteRequest(
     CustomerReference("customerReference"),
     ChannelIdentifier.Advisor,
-    Plan(
+    PlanToGenerateQuote(
       QuoteType.InstalmentAmount,
       LocalDate.of(2021, 1, 1),
       LocalDate.of(2021, 1, 1),
       1,
       Frequency.TwoWeekly,
       Duration(12),
-      Some(1),
-      Some(LocalDate.now()),
+      1,
+      LocalDate.now(),
       PaymentPlanType.TimeToPay
     ),
     List(),
@@ -90,7 +90,7 @@ class TTPQuoteServiceSpec extends UnitSpec {
       PlanId("planId"),
       UpdateType("updateType"),
       CancellationReason("reason"),
-      PaymentMethod("method"),
+      PaymentMethod.Bacs,
       PaymentReference("reference"),
       true,
     )
@@ -105,20 +105,59 @@ class TTPQuoteServiceSpec extends UnitSpec {
   private val createPlanRequest =
     CreatePlanRequest(
       CustomerReference("customerReference"),
-      PlanId("planId"),
-      "xyz",
-      "paymentRed",
-      false,
-      Nil,
-      "2",
-      10000,
-      0.26
+      QuoteReference("quoteReference"),
+      ChannelIdentifier.Advisor,
+      PlanToCreatePlan(
+        QuoteId("quoteId"),
+        QuoteType.Duration,
+        LocalDate.now(),
+        LocalDate.now(),
+        100,
+        PaymentPlanType.TimeToPay,
+        false,
+        2,
+        Frequency.Single,
+        Duration(2),
+        LocalDate.now(),
+        100,
+        100,
+        10,
+        10,
+        10
+      ),
+      List(
+        DebtItem(
+          DebtItemId("debtItemId"),
+          DebtItemChargeId("debtItemChargeId"),
+          MainTransType.TPSSAccTaxAssessment,
+          SubTransType.IT,
+          100,
+          LocalDate.now(),
+          List(Payment(LocalDate.parse("2020-01-01"), 100))
+        )
+      ),
+      List(PaymentInformation(PaymentMethod.Bacs, PaymentReference("ref123"))),
+      List(CustomerPostCode(PostCode("NW1 AB1"), LocalDate.now())),
+      List(
+        Instalment(
+          DebtItemChargeId("id1"),
+          DebtItemId("id2"),
+          LocalDate.now(),
+          100,
+          100,
+          0.24,
+          1,
+          10,
+          90
+        )
+      )
     )
 
   private val createPlanResponse = CreatePlanResponse(
     CustomerReference("customerReference"),
     PlanId("planId"),
-    "xyz"
+    CaseId("caseId"),
+    PlanStatus.Success
   )
 
   "Generate Quote endpoint" should {

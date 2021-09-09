@@ -16,23 +16,53 @@
 
 package uk.gov.hmrc.timetopayproxy.models
 
-
 import play.api.libs.json.Json
 
 import java.time.LocalDate
 
-final case class CreatePlanRequest(
-                                    customerReference: CustomerReference,
-                                    planId: PlanId,
-                                    paymentMethod: String,
-                                    paymentReference: String,
-                                    thirdPartyBank: Boolean,
-                                    instalments: Seq[Instalment],
-                                    numberOfInstalments: String,
-                                    totalDebtAmount: BigDecimal,
-                                    totalInterest: Double
-                                  )
+final case class PlanToCreatePlan(quoteId: QuoteId,
+                                  quoteType: QuoteType,
+                                  quoteDate: LocalDate,
+                                  instalmentStartDate: LocalDate,
+                                  instalmentAmount: BigDecimal,
+                                  paymentPlanType: PaymentPlanType,
+                                  thirdPartyBank: Boolean,
+                                  numberOfInstalments: Int,
+                                  frequency: Frequency,
+                                  duration: Duration,
+                                  initialPaymentDate: LocalDate,
+                                  initialPaymentAmount: BigDecimal,
+                                  totalDebtincInt: BigDecimal,
+                                  totalInterest: BigDecimal,
+                                  interestAccrued: BigDecimal,
+                                  planInterest: BigDecimal) {
+  require(!quoteId.value.trim().isEmpty(), "quoteId should not be empty")
+}
 
+object PlanToCreatePlan {
+  implicit val format = Json.format[PlanToCreatePlan]
+}
+
+final case class PaymentInformation(paymentMethod: PaymentMethod, paymentReference: PaymentReference) {
+  require(!paymentReference.value.trim().isEmpty(), "paymentReference should not be empty")
+}
+
+object PaymentInformation {
+  implicit val format = Json.format[PaymentInformation]
+}
+
+final case class CreatePlanRequest(customerReference: CustomerReference,
+                                   quoteReference: QuoteReference,
+                                   channelIdentifier: ChannelIdentifier,
+                                   plan: PlanToCreatePlan,
+                                   debtItems: Seq[DebtItem],
+                                   payments: Seq[PaymentInformation],
+                                   customerPostCodes: Seq[CustomerPostCode],
+                                   instalments: Seq[Instalment]
+                                  ) {
+  require(!customerReference.value.trim().isEmpty(), "customerReference should not be empty")
+  require(!quoteReference.value.trim().isEmpty(), "quoteReference should not be empty")
+}
 
 object CreatePlanRequest {
   implicit val format = Json.format[CreatePlanRequest]

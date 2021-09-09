@@ -15,21 +15,11 @@
  */
 
 package uk.gov.hmrc.timetopayproxy.models
-import java.time.LocalDate
 
 import play.api.libs.json.Json
 
-final case class PostCode(value: String) extends AnyVal
+final case class TtppErrorResponse(statusCode: Int, errorMessage: String)
 
-object PostCode extends ValueTypeFormatter {
-  implicit val format =
-    valueTypeFormatter(PostCode.apply, PostCode.unapply)
-}
-
-final case class CustomerPostCode(addressPostcode: PostCode, postcodeDate: LocalDate) {
-  require(!addressPostcode.value.trim().isEmpty(), "addressPostcode should not be empty")
-}
-
-object CustomerPostCode {
-  implicit val format = Json.format[CustomerPostCode]
+object TtppErrorResponse {
+  implicit val format = Json.format[TtppErrorResponse]
 }

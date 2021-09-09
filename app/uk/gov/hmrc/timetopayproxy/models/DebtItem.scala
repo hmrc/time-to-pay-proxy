@@ -39,7 +39,10 @@ final case class DebtItem(debtItemId: DebtItemId,
                           subTrans: SubTransType,
                           originalDebtAmount: BigDecimal,
                           interestStartDate: LocalDate,
-                          paymentHistory: Seq[Payment])
+                          paymentHistory: Seq[Payment]) {
+  require(!debtItemId.value.trim().isEmpty(), "debtItemId should not be empty")
+  require(!debtItemChargeId.value.trim().isEmpty(), "debtItemChargeId should not be empty")
+}
 
 object DebtItem {
   implicit val format = Json.format[DebtItem]

@@ -14,20 +14,11 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.timetopayproxy.utils
+package uk.gov.hmrc.timetopayproxy.models
 
-import play.api.libs.json.{Format, Json}
-import play.api.mvc.{Result, Results}
-import uk.gov.hmrc.timetopayproxy.models.TimeToPayErrorResponse
+final case class QuoteId(value: String) extends AnyVal
 
-object TtppResultConverter {
-
-  implicit class ToResult[T](r: T) {
-    def toResult(implicit format: Format[T]): Result = r match {
-      case TimeToPayErrorResponse(status, _) =>
-        Results.Status(status)(Json.toJson(r))
-      case _ => Results.Ok(Json.toJson(r))
-    }
-  }
-
+object QuoteId extends ValueTypeFormatter {
+  implicit val format =
+    valueTypeFormatter(QuoteId.apply, QuoteId.unapply)
 }

@@ -17,16 +17,19 @@
 package uk.gov.hmrc.timetopayproxy.controllers
 
 import javax.inject.{Inject, Singleton}
-import play.api.libs.json.JsValue
-import play.api.mvc.{Action, BaseController, ControllerComponents}
+import play.api.libs.json.{JsError, JsSuccess, JsValue, Reads}
+import play.api.mvc._
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
 import uk.gov.hmrc.timetopayproxy.actions.auth.AuthoriseAction
-import uk.gov.hmrc.timetopayproxy.models.{CreatePlanRequest, CustomerReference, GenerateQuoteRequest, PlanId, UpdatePlanRequest}
-import uk.gov.hmrc.timetopayproxy.models.TimeToPayErrorResponse._
+import uk.gov.hmrc.timetopayproxy.models._
+import uk.gov.hmrc.timetopayproxy.models.TtppErrorResponse._
 import uk.gov.hmrc.timetopayproxy.services.TTPQuoteService
 import uk.gov.hmrc.timetopayproxy.utils.TtppErrorHandler._
-import uk.gov.hmrc.timetopayproxy.utils.TtppResultConverter._
+import uk.gov.hmrc.timetopayproxy.utils.TtppResponseConverter._
 import uk.gov.hmrc.timetopayproxy.models.GenerateQuoteResponse._
+
+import scala.concurrent.Future
+import scala.util.{Failure, Success, Try}
 
 @Singleton()
 class TimeToPayProxyController @Inject()(authoriseAction: AuthoriseAction,
@@ -43,7 +46,7 @@ class TimeToPayProxyController @Inject()(authoriseAction: AuthoriseAction,
           timeToPayProxyService
             .generateQuote(timeToPayRequest)
             .leftMap(ttppError => ttppError.toErrorResponse)
-            .fold(e => e.toResult, r => r.toResult)
+            .fold(e => e.toResponse, r => r.toResponse)
         }
       }
   }
@@ -53,29 +56,52 @@ class TimeToPayProxyController @Inject()(authoriseAction: AuthoriseAction,
       timeToPayProxyService
         .getExistingPlan(CustomerReference(customerReference), PlanId(planId))
         .leftMap(ttppError => ttppError.toErrorResponse)
-        .fold(e => e.toResult, r => r.toResult)
+        .fold(e => e.toResponse, r => r.toResponse)
     }
 
-  def updatePlan(customerReference: String, planId: String): Action[JsValue] = authoriseAction.async(parse.json) {
-    implicit request =>
-      withJsonBody[UpdatePlanRequest] {
-        updatePlanRequest: UpdatePlanRequest => {
-          timeToPayProxyService
-            .updatePlan(updatePlanRequest)
-            .leftMap(ttppError => ttppError.toErrorResponse)
-            .fold(e => e.toResult, r => r.toResult)
-        }
+  def updatePlan(customerReference: String, planId: String): Action[JsValue] =
+    authoriseAction.async(parse.json) { implicit request =>
+      withJsonBody[UpdatePlanRequest] { updatePlanRequest: UpdatePlanRequest => {
+        timeToPayProxyService
+          .updatePlan(updatePlanRequest)
+          .leftMap(ttppError => ttppError.toErrorResponse)
+          .fold(e => e.toResponse, r => r.toResponse)
       }
+      }
+    }
+
+  def createPlan = authoriseAction.async(parse.json) { implicit request =>
+    withJsonBody[CreatePlanRequest] { createPlanRequest: CreatePlanRequest => {
+      timeToPayProxyService
+        .createPlan(createPlanRequest)
+        .leftMap(ttppError => ttppError.toErrorResponse)
+        .fold(e => e.toResponse, r => r.toResponse)
+    }
+    }
   }
 
-  def createPlan = authoriseAction.async(parse.json) {
-    implicit request =>
-      withJsonBody[CreatePlanRequest] {
-        createPlanRequest: CreatePlanRequest => {
-          timeToPayProxyService.createPlan(createPlanRequest)
-            .leftMap(ttppError => ttppError.toErrorResponse)
-            .fold(e => e.toResult, r => r.toResult)
-        }
-      }
+  override def withJsonBody[T](f: T => Future[Result])(
+    implicit request: Request[JsValue],
+    m: Manifest[T],
+    reads: Reads[T]
+  ): Future[Result] = {
+    Try(request.body.validate[T]) match {
+      case Success(JsSuccess(payload, _)) => f(payload)
+      case Success(JsError(errs)) =>
+        Future.successful(
+          TtppErrorResponse(
+            BAD_REQUEST.intValue(),
+            s"Invalid ${m.runtimeClass.getSimpleName} payload: $errs"
+          ).toResponse
+        )
+      case Failure(e) =>
+        Future.successful(
+          TtppErrorResponse(
+            BAD_REQUEST.intValue(),
+            s"Could not parse body due to ${e.getMessage}"
+          ).toResponse
+        )
+    }
+
   }
 }
