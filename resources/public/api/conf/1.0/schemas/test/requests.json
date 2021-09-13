@@ -18,6 +18,10 @@
     "isResponse": {
       "type": "boolean",
       "description": "isResponse"
+    },
+    "status": {
+      "type" : "number",
+      "description": "statusCode"
     }
   }
 }
