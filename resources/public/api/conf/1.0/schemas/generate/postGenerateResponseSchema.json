@@ -5,15 +5,48 @@
   "properties": {
     "quoteReference": {
       "type": "string",
+      "minLength": 1,
+      "maxLength": 15,
       "description": "This is the Quote reference"
     },
     "customerReference": {
       "type": "string",
-      "description": "This is the Customer reference"
+      "minLength": 1,
+      "maxLength": 15,
+      "description": "Unique Customer reference"
     },
     "quoteType": {
       "type": "string",
-      "description": "This is the Quote type"
+      "enum": [
+        "duration",
+        "instalmentAmount"
+      ],
+      "description": "this will determine what IFS is required to calculate either duration or instalment amount"
+    },
+    "quoteDate": {
+      "type": "string",
+      "format": "date",
+      "description": "This is the Quote date"
+    },
+    "numberOfInstalments": {
+      "type": "integer",
+      "description": "Number of instalments"
+    },
+    "totalDebtIncInt": {
+      "type": "integer",
+      "description": "This is the total debt plus interest for the plan"
+    },
+    "interestAccrued": {
+      "type": "integer",
+      "description": "This is the total interest accrued prior up to the quote"
+    },
+    "planInterest": {
+      "type": "number",
+      "description": "Interest accrued to the life of the plan"
+    },
+    "totalInterest": {
+      "type": "number",
+      "description": "This is the total interest accrued for the duration of the plan"
     },
     "instalments": {
       "type": "array",
@@ -21,29 +54,24 @@
         {
           "type": "object",
           "properties": {
-            "dutyId": {
+            "dedbtItemChargeId": {
               "type": "string",
+              "minLength": 1,
+              "maxLength": 16,
               "description": "An ID which uniquely identifies a particular duty"
-            },
-            "debtId": {
-              "type": "string",
-              "description": "An ID which uniquely identifies a particular debt"
             },
             "dueDate": {
               "type": "string",
+              "format": "date",
               "description": "Due date"
             },
             "amountDue": {
               "type": "integer",
               "description": "Amount due"
             },
-            "balance": {
+            "expectedPayment": {
               "type": "integer",
-              "description": "Balance"
-            },
-            "interestPercentage": {
-              "type": "number",
-              "description": "Interest percentage"
+              "description": "Expected payment"
             },
             "interestRate": {
               "type": "number",
@@ -52,22 +80,18 @@
             "instalmentNumber": {
               "type": "integer",
               "description": "Instalment number"
+            },
+            "instalmentInterestAccrued": {
+              "type": "integer",
+              "description": "Instalment interest"
+            },
+            "instalmentBalance": {
+              "type": "integer",
+              "description": "Instalment balance"
             }
           }
         }
       ]
-    },
-    "numberOfInstalments": {
-      "type": "string",
-      "description": "Number of instalments"
-    },
-    "totalDebtAmount": {
-      "type": "integer",
-      "description": "Total debt amount"
-    },
-    "totalInterest": {
-      "type": "number",
-      "description": "Total interest"
     }
   }
 }

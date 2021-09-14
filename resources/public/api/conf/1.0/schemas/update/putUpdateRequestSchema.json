@@ -5,31 +5,86 @@
   "properties": {
     "customerReference": {
       "type": "string",
+      "minLength": 1,
+      "maxLength": 15,
       "description": "Customer reference"
     },
     "planId": {
       "type": "string",
+      "minLength": 1,
+      "maxLength": 15,
       "description": "Unique planId"
     },
     "updateType": {
       "type": "string",
-      "description": "Update type - e.g. cancelled"
+      "enum": [
+        "paymentDetails",
+        "planStatus"
+      ],
+      "description": "This is where there is an update to the plan and doesn’t include status changes, e.g change tp [payment reference, payment method third party bank. Validation will be needed to ensure payment details are provided where update is being given"
+    },
+    "planStatus": {
+      "type": "string",
+      "enum": [
+        "cancelled",
+        "complete"
+      ],
+      "description": "This could be cancelled or complete"
+    },
+    "completeReason": {
+      "type": "string",
+      "enum": [
+        "earlyRepayment",
+        "paidWithinTolerance",
+        "endOfSchedule",
+        "reductionOfCharges",
+        "remission"
+      ],
+      "description": "This needs to be added as a validation where status update is complete"
     },
     "cancellationReason": {
       "type": "string",
-      "description": "Update reason"
-    },
-    "paymentMethod": {
-      "type": "string",
-      "description": "Payment method"
-    },
-    "paymentReference": {
-      "type": "string",
-      "description": "Payment reference"
+      "description": "This needs to be added as a validation where status update is cancelled"
     },
     "thirdPartyBank": {
       "type": "boolean",
       "description": "Third party Bank"
+    },
+    "payments": {
+      "type": "array",
+      "items": [
+        {
+          "type": "object",
+          "properties": {
+            "paymentMethod": {
+              "type": "string",
+              "enum": [
+                "directDebit",
+                "BACS",
+                "cheque",
+                "cardPayment"
+              ],
+              "description": "Payment method (Direct debit, BACS, Cheque, Card)"
+            },
+            "paymentReference": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 15,
+              "description": "Payment Method reference"
+            }
+          }
+        }
+      ],
+      "required": [
+        "paymentMethod",
+        "paymentReference"
+      ]
     }
-  }
+  },
+  "required": [
+    "customerReference",
+    "planId",
+    "updateType",
+    "planStatus"
+  ]
 }

@@ -5,19 +5,30 @@
   "properties": {
     "customerReference": {
       "type": "string",
+      "minLength": 1,
+      "maxLength": 15,
       "description": "Customer reference"
     },
     "planId": {
       "type": "string",
+      "minLength": 1,
+      "maxLength": 15,
       "description": "Unique planId"
     },
-    "quoteStatus": {
+    "planStatus": {
       "type": "string",
-      "description": "Quote status"
+      "enum": [
+        "complete",
+        "cancelled"
+      ],
+
+      "description": "This could be cancelled and complete"
     },
-    "quoteUpdatedDate": {
+    "planUpdatedDate": {
       "type": "string",
-      "description": "Quote updated date"
+      "format": "date",
+      "description": "This is the date for either the status change or the update"
     }
   }
 }
+

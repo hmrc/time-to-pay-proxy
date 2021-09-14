@@ -5,183 +5,184 @@
   "properties": {
     "customerReference": {
       "type": "string",
-      "description": "Customer reference"
+      "minLength": 1,
+      "maxLength": 15,
+      "description": "Unique Customer reference"
     },
-    "debtAmount": {
-      "type": "integer",
-      "description": "Debt amount"
+    "channelIdentifier": {
+      "type": "string",
+      "enum": [
+        "advisor",
+        "selfService"
+      ],
+      "description": "Attribute to identify where the request is coming"
     },
-    "adHocs": {
+    "plan": {
+      "type": "object",
+      "properties": {
+        "quoteType": {
+          "type": "string",
+          "enum": [
+            "duration",
+            "instalmentAmount"
+          ],
+          "description": "this will determine what IFS is required to calculate either duration or instalment amount"
+        },
+        "quoteDate": {
+          "type": "string",
+          "format": "date",
+          "description": "Quote date"
+        },
+        "instalmentStartDate": {
+          "type": "string",
+          "format": "date",
+          "description": "Instalment start date"
+        },
+        "instalmentAmount": {
+          "type": "number",
+          "description": "Instalment amount"
+        },
+        "frequency": {
+          "type": "string",
+          "enum": [
+            "single",
+            "weekly",
+            "2Weekly",
+            "4Weekly",
+            "monthly",
+            "quarterly",
+            "6Monthly",
+            "annually"
+          ],
+          "description": "payment frequency"
+        },
+        "duration": {
+          "type": "integer",
+          "description": "Duration for the payment frequency"
+        },
+        "initialPaymentAmount": {
+          "type": "integer",
+          "description": "Initial payment amount"
+        },
+        "initialPaymentDate": {
+          "type": "string",
+          "format": "date",
+          "description": "Initial payment date"
+        },
+        "paymentPlanType": {
+          "type": "string",
+          "enum": [
+            "timeToPay",
+            "instalmentOrder",
+            "childBenefits",
+            "fieldCollections"
+          ],
+          "description": "Payment plan type"
+        }
+      },
+      "required": [
+        "quoteType",
+        "quoteDate",
+        "instalmentStartDate",
+        "instalmentAmount",
+        "frequency",
+        "duration",
+        "paymentPlanType"
+      ]
+    },
+    "customerPostCodes": {
       "type": "array",
       "items": [
         {
           "type": "object",
           "properties": {
-            "adHocDate": {
+            "addressPostcode": {
               "type": "string",
-              "description": "Ad Hoc date"
+              "description": "Customer postcode this will be a list of postcodes"
             },
-            "adHocAmount": {
-              "type": "integer",
-              "description": "Ad Hoc amount"
+            "postcodeDate": {
+              "type": "string",
+              "format": "date",
+              "description": "Date the customer used this postcode from"
             }
-          }
+          },
+          "required": [
+            "addressPostcode",
+            "postcodeDate"
+          ]
         }
       ]
     },
-    "customer": {
+    "debtItemCharges": {
       "type": "array",
       "items": [
         {
           "type": "object",
           "properties": {
-            "quoteType": {
+            "debtItemChargeId": {
               "type": "string",
-              "description": "this will determine what IFS is required to calculate either duration or instalment amount"
-            },
-            "instalmentStartDate": {
-              "type": "string",
-              "description": "Instalment start date"
-            },
-            "instalmentAmount": {
-              "type": "integer",
-              "description": "Instalment amount"
-            },
-            "frequency": {
-              "type": "string",
-              "description": "weekly, 2 weekly, 4 weekly, monthly, quarterly, annually"
-            },
-            "duration": {
-              "type": "string",
-              "description": "Duration"
-            },
-            "initialPaymentAmount": {
-              "type": "integer",
-              "description": "Initial payment amount"
-            },
-            "initialPaymentDate": {
-              "type": "string",
-              "description": "Initial payment date"
-            },
-            "paymentPlanType": {
-              "type": "string",
-              "description": "Payment plan type"
-            }
-          }
-        }
-      ]
-    },
-    "debts": {
-      "type": "array",
-      "items": [
-        {
-          "type": "object",
-          "properties": {
-            "debtId": {
-              "type": "string",
-              "description": "An ID which uniquely identifies a particular debt"
+              "minLength": 1,
+              "maxLength": 16,
+              "description": "An ID which uniquely identifies a particular duty"
             },
             "mainTrans": {
               "type": "string",
-              "enum": [
-                "5330",
-                "5350",
-                "1085",
-                "1511",
-                "1515",
-                "1520",
-                "1525",
-                "1526",
-                "1530",
-                "1531",
-                "1535",
-                "1536",
-                "1540",
-                "1541",
-                "1545",
-                "1546"
-              ],
+              "minLength": 4,
+              "maxLength": 8,
               "description": "Unique MTrans Debt Type ID e.g.1525 also known as M Trans"
             },
-            "duties": {
+            "subTrans": {
+              "type": "string",
+              "minLength": 4,
+              "maxLength": 8,
+              "description": "Duty Type description for the UI"
+            },
+            "originalDebtAmount": {
+              "type": "integer",
+              "description": "Original debt amount"
+            },
+            "interestStartDate": {
+              "type": "string",
+              "format": "date",
+              "description": "The interest start date"
+            },
+            "paymentHistory": {
               "type": "array",
               "items": [
                 {
                   "type": "object",
                   "properties": {
-                    "dutyId": {
+                    "paymentDate": {
                       "type": "string",
-                      "description": "An ID which uniquely identifies a particular duty"
+                      "format": "date",
+                      "description": "Payment date"
                     },
-                    "subtrans": {
-                      "type": "string",
-                      "enum": [
-                        "7006",
-                        "7010",
-                        "7011",
-                        "7012",
-                        "7014",
-                        "7013",
-                        "1000",
-                        "1020",
-                        "1025",
-                        "1180",
-                        "2000",
-                        "1090"
-                      ],
-                      "description": "Duty Type description for the UI"
-                    },
-                    "originalDebtAmount": {
+                    "paymentAmount": {
                       "type": "integer",
-                      "description": "Original debt amount"
-                    },
-                    "interestStartDate": {
-                      "type": "string",
-                      "description": "The interest start date"
-                    },
-                    "breathingSpaces": {
-                      "type": "array",
-                      "items": [
-                        {
-                          "type": "object",
-                          "properties": {
-                            "debtRespiteFrom": {
-                              "type": "string",
-                              "description": "Breathing space from date"
-                            },
-                            "debtRespiteTo": {
-                              "type": "string",
-                              "description": "Breathing space to date"
-                            }
-                          }
-                        }
-                      ]
-                    },
-                    "payments": {
-                      "type": "array",
-                      "items": [
-                        {
-                          "type": "object",
-                          "properties": {
-                            "paymentDate": {
-                              "type": "string",
-                              "description": "Payment date"
-                            },
-                            "paymentAmount": {
-                              "type": "integer",
-                              "description": "Payment amount"
-                            }
-                          }
-                        }
-                      ]
+                      "description": "Payment amount"
                     }
                   }
                 }
+              ],
+              "required": [
+                "paymentDate",
+                "paymentAmount"
               ]
             }
           }
         }
+      ],
+      "required": [
+        "debtItemChargeId",
+        "mainTrans",
+        "subTrans",
+        "originalDebtAmount",
+        "interestStartDate"
       ]
     }
-  }
+  },
+  "required": [
+    "customerReference",
+    "channelIdentifier"
+  ]
 }
