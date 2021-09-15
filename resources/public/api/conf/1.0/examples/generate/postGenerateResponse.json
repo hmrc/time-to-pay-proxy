@@ -10,7 +10,7 @@
   "totalInterest": 12.25,
   "instalments": [
     {
-      "debtItemChargeId": "debtItemChargeId1",
+      "debtItemChargeId": "debtChargeId1",
       "dueDate": "2021-05-13",
       "amountDue": 100,
       "expectedPayment": 100,
