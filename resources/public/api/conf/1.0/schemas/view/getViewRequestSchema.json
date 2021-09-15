@@ -5,11 +5,19 @@
   "properties": {
     "customerReference": {
       "type": "string",
-      "description": "Customer reference"
+      "minLength": 1,
+      "maxLength": 15,
+      "description": "The Unique Customer reference"
     },
     "planId": {
       "type": "string",
+      "minLength": 1,
+      "maxLength": 15,
       "description": "Unique planId"
     }
-  }
+  },
+  "required": [
+    "customerReference",
+    "planId"
+  ]
 }

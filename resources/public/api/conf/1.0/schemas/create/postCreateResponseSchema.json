@@ -5,14 +5,26 @@
   "properties": {
     "customerReference": {
       "type": "string",
-      "description": "The Customer reference"
+      "minLength": 1,
+      "maxLength": 15,
+      "description": "The Unique Customer reference"
     },
     "planId": {
       "type": "string",
+      "minLength": 1,
+      "maxLength": 15,
       "description": "Unique planId"
+    },
+    "caseId": {
+      "type": "string",
+      "description": "Unique caseId"
     },
     "planStatus": {
       "type": "string",
+      "enum": [
+        "success",
+        "failure"
+      ],
       "description": "This is the Plan status"
     }
   }

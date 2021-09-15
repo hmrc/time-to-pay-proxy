@@ -1,9 +1,15 @@
 {
-  "customerReference": "customerRef1234",
-  "planId": "planId1234",
-  "updateType": "cancelled",
-  "cancellationReason": "xyz",
-  "paymentMethod": "BACS",
-  "paymentReference": "paymentRef1234",
-  "thirdPartyBank": false
+  "customerReference": "custRef123",
+  "planId": "planId1",
+  "updateType": "paymentDetails",
+  "planStatus": "complete",
+  "completeReason": "earlyRepayment",
+  "cancellationReason": "",
+  "thirdPartyBank": true,
+  "payments": [
+    {
+      "paymentMethod": "",
+      "paymentReference": ""
+    }
+  ]
 }

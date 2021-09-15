@@ -5,23 +5,248 @@
   "properties": {
     "customerReference": {
       "type": "string",
-      "description": "This is the customer reference"
+      "minLength": 1,
+      "maxLength": 15,
+      "description": "Unique Customer reference"
     },
-    "planId": {
+    "quoteReference": {
       "type": "string",
-      "description": "This is unique plan id"
+      "minLength": 1,
+      "maxLength": 15,
+      "description": "This is the Quote reference"
     },
-    "paymentMethod": {
+    "channelIdentifier": {
       "type": "string",
-      "description": "Payment method (Direct debit, BACS, Cheque, Card - combination of these could be used)"
+      "enum": [
+        "advisor",
+        "selfService"
+      ],
+      "description": "Attribute to identify where the request is coming"
     },
-    "paymentReference": {
-      "type": "string",
-      "description": "Payment Method reference"
+    "plan": {
+      "type": "object",
+      "properties": {
+        "quoteId": {
+          "type": "string",
+          "description": "This is the ID for the quote associated with the plan)"
+        },
+        "quoteType": {
+          "type": "string",
+          "enum": [
+            "duration",
+            "instalmentAmount"
+          ],
+          "description": "this will determine what IFS is required to calculate either duration or instalment amount"
+        },
+        "quoteDate": {
+          "type": "string",
+          "format": "date",
+          "description": "Quote date"
+        },
+        "instalmentStartDate": {
+          "type": "string",
+          "format": "date",
+          "description": "Instalment start date"
+        },
+        "instalmentAmount": {
+          "type": "number",
+          "description": "Instalment amount"
+        },
+        "paymentPlanType": {
+          "type": "string",
+          "enum": [
+            "timeToPay",
+            "instalmentOrder",
+            "childBenefits",
+            "fieldCollections"
+          ],
+          "description": "Payment Plan Type"
+        },
+        "thirdPartyBank": {
+          "type": "boolean",
+          "description": "Third party bank"
+        },
+        "numberOfInstalments": {
+          "type": "integer",
+          "description": "Number of instalments"
+        },
+        "frequency": {
+          "type": "string",
+          "enum": [
+            "single",
+            "weekly",
+            "2Weekly",
+            "4Weekly",
+            "monthly",
+            "quarterly",
+            "6Monthly",
+            "annually"
+          ],
+          "description": "payment frequency"
+        },
+        "duration": {
+          "type": "integer",
+          "description": "Duration for the payment frequency"
+        },
+        "initialPaymentAmount": {
+          "type": "integer",
+          "description": "Initial payment amount"
+        },
+        "initialPaymentDate": {
+          "type": "string",
+          "format": "date",
+          "description": "Initial payment date"
+        },
+        "totalDebtIncInt": {
+          "type": "number",
+          "description": "This is the total debt plus interest for the plan"
+        },
+        "totalInterest": {
+          "type": "number",
+          "description": "This is the total interest accrued for the duration of the plan"
+        },
+        "interestAccrued": {
+          "type": "integer",
+          "description": "This is the total interest accrued prior to plan start"
+        },
+        "planInterest": {
+          "type": "number",
+          "description": "Interest accrued to the life of the plan"
+        }
+      },
+      "required": [
+        "quoteType",
+        "quoteDate",
+        "instalmentStartDate",
+        "instalmentAmount",
+        "paymentPlanType",
+        "numberOfInstalments",
+        "frequency",
+        "duration",
+        "totalDebtIncInt",
+        "totalInterest",
+        "interestAccrued",
+        "planInterest"
+      ]
     },
-    "thirdPartyBank": {
-      "type": "boolean",
-      "description": "Third party bank"
+    "debtItemCharges": {
+      "type": "array",
+      "items": [
+        {
+          "type": "object",
+          "properties": {
+            "debtItemChargeId": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 16,
+              "description": "An ID which uniquely identifies a particular duty"
+            },
+            "mainTrans": {
+              "type": "string",
+              "minLength": 4,
+              "maxLength": 8,
+              "description": "Unique MTrans Debt Type ID e.g.1525 also known as M Trans"
+            },
+            "subTrans": {
+              "type": "string",
+              "minLength": 4,
+              "maxLength": 8,
+              "description": "Duty Type description for the UI"
+            },
+            "originalDebtAmount": {
+              "type": "integer",
+              "description": "Original debt amount"
+            },
+            "interestStartDate": {
+              "type": "string",
+              "format": "date",
+              "description": "The interest start date"
+            },
+            "paymentHistory": {
+              "type": "array",
+              "items": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "paymentDate": {
+                      "type": "string",
+                      "format": "date",
+                      "description": "Payment date"
+                    },
+                    "paymentAmount": {
+                      "type": "integer",
+                      "description": "Payment amount"
+                    }
+                  }
+                }
+              ],
+              "required": [
+                "paymentDate",
+                "paymentAmount"
+              ]
+            }
+          }
+        }
+      ],
+      "required": [
+        "debtItemChargeId",
+        "mainTrans",
+        "subTrans",
+        "originalDebtAmount",
+        "interestStartDate"
+      ]
+    },
+    "payments": {
+      "type": "array",
+      "items": [
+        {
+          "type": "object",
+          "properties": {
+            "paymentMethod": {
+              "type": "string",
+              "enum": [
+                "directDebit",
+                "BACS",
+                "cheque",
+                "cardPayment"
+              ],
+              "description": "Payment method (Direct debit, BACS, Cheque, Card)"
+            },
+            "paymentReference": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 15,
+              "description": "Payment Method reference"
+            }
+          }
+        }
+      ],
+      "required": [
+        "paymentMethod"
+      ]
+    },
+    "customerPostCodes": {
+      "type": "array",
+      "items": [
+        {
+          "type": "object",
+          "properties": {
+            "addressPostcode": {
+              "type": "string",
+              "description": "Customer postcode this will be a list of postcodes"
+            },
+            "postcodeDate": {
+              "type": "string",
+              "format": "date",
+              "description": "Date the customer used this postcode from"
+            }
+          },
+          "required": [
+            "addressPostcode",
+            "postcodeDate"
+          ]
+        }
+      ]
     },
     "instalments": {
       "type": "array",
@@ -29,29 +254,24 @@
         {
           "type": "object",
           "properties": {
-            "dutyId": {
+            "debtItemChargeId": {
               "type": "string",
+              "minLength": 1,
+              "maxLength": 32,
               "description": "An ID which uniquely identifies a particular duty"
-            },
-            "debtId": {
-              "type": "string",
-              "description": "An ID which uniquely identifies a particular debt"
             },
             "dueDate": {
               "type": "string",
+              "format": "date",
               "description": "Due date"
             },
             "amountDue": {
               "type": "integer",
               "description": "Amount due"
             },
-            "balance": {
+            "expectedPayment": {
               "type": "integer",
-              "description": "Balance"
-            },
-            "interestPercentage": {
-              "type": "number",
-              "description": "Interest percentage"
+              "description": "Expected payment"
             },
             "interestRate": {
               "type": "number",
@@ -60,22 +280,33 @@
             "instalmentNumber": {
               "type": "integer",
               "description": "Instalment number"
+            },
+            "instalmentInterestAccrued": {
+              "type": "integer",
+              "description": "Instalment interest"
+            },
+            "instalmentBalance": {
+              "type": "integer",
+              "description": "Instalment balance"
             }
           }
         }
+      ],
+      "required": [
+        "debtItemChargeId",
+        "dueDate",
+        "amountDue",
+        "expectedPayment",
+        "interestRate",
+        "instalmentNumber",
+        "instalmentInterestAccrued",
+        "instalmentBalance"
       ]
-    },
-    "numberOfInstalments": {
-      "type": "string",
-      "description": "Number of instalments"
-    },
-    "totalDebtAmount": {
-      "type": "integer",
-      "description": "Total debt amount"
-    },
-    "totalInterest": {
-      "type": "number",
-      "description": "Total interest"
     }
-  }
+  },
+  "required": [
+    "customerReference",
+    "quoteReference",
+    "channelIdentifier"
+  ]
 }
