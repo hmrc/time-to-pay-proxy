@@ -91,7 +91,7 @@ class TimeToPayProxyController @Inject()(authoriseAction: AuthoriseAction,
         Future.successful(
           TtppErrorResponse(
             BAD_REQUEST.intValue(),
-            s"Invalid ${m.runtimeClass.getSimpleName} payload: $errs"
+            s"Invalid ${m.runtimeClass.getSimpleName} payload: Payload has a missing field or an invalid format in the following json path: ${errs(0)._1}"
           ).toResponse
         )
       case Failure(e) =>

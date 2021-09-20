@@ -189,6 +189,30 @@ class TimeToPayProxyControllerSpec
         contentAsJson(response) shouldBe Json.toJson[GenerateQuoteResponse](responseFromTtp)
       }
     }
+    val wrongFormattedBody = """{
+                                  "customerReference": "uniqRef1234",
+                                  "quoteReference": "quoteRef1234",
+                                  "channelIdentifier": "advisor",
+                                  "plan": {
+                                    "quoteType": "instalmentAmount",
+                                    "quoteDate": "2021-09-08",
+                                    "instalmentStartDate": "2021-05-13",
+                                    "instalmentAmount": true,
+                                    "initialPaymentDate": "2021-05-13",
+                                    "paymentPlanType": "timeToPay",
+                                    "thirdPartyBank": true,
+                                    "numberOfInstalments": 1,
+                                    "frequency": "annually",
+                                    "duration": 12,
+                                    "initialPaymentAmount": 100,
+                                    "totalDebtincInt": 10,
+                                    "totalInterest": 0.14,
+                                    "interestAccrued": 10,
+                                    "planInterest": 0.24
+                                  },
+                                  "debtItems": [],
+                                  "customerPostCodes": []
+                                }"""
     "return 400" when {
       "request body is in wrong format" in {
         (authConnector
@@ -202,12 +226,12 @@ class TimeToPayProxyControllerSpec
         val fakeRequest: FakeRequest[JsValue] =
           FakeRequest("POST", "/individuals/time-to-pay/quote")
             .withHeaders(CONTENT_TYPE -> MimeTypes.JSON)
-          .withBody(Json.toJson[String]("Wrong Format"))
+          .withBody(Json.parse(wrongFormattedBody))
 
         val response: Future[Result] = controller.generateQuote()(fakeRequest)
 
         status(response) shouldBe Status.BAD_REQUEST
-        (contentAsJson(response) \ "errorMessage").as[String].startsWith( "Invalid GenerateQuoteRequest payload") shouldBe(true)
+        (contentAsJson(response) \ "errorMessage").as[String] shouldBe "Invalid GenerateQuoteRequest payload: Payload has a missing field or an invalid format in the following json path: /plan/instalmentAmount"
       }
     }
 
