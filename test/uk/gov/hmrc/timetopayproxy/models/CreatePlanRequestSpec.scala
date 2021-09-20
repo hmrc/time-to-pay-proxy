@@ -60,7 +60,9 @@ class CreatePlanRequestSpec extends AnyWordSpec with Matchers {
         )
       ),
       List(PaymentInformation(PaymentMethod.Bacs, PaymentReference("ref123"))),
-      List(CustomerPostCode(PostCode("NW9 5XW"), LocalDate.parse("2021-05-13"))),
+      List(
+        CustomerPostCode(PostCode("NW9 5XW"), LocalDate.parse("2021-05-13"))
+      ),
       List(
         Instalment(
           DebtItemChargeId("debtItemChargeId1"),
@@ -142,11 +144,29 @@ class CreatePlanRequestSpec extends AnyWordSpec with Matchers {
                |}
                """.stripMargin
 
-  private def getJsonWithEmptyReference(
-                                         quoteReference: QuoteReference = QuoteReference("quoteReference"),
-                                         customerReference: CustomerReference = CustomerReference("customerReference"),
-                                         paymentReference: PaymentReference = PaymentReference("ref123")
-                                       ) =
+  private def getJsonWithInvalidReference(
+    quoteReference: QuoteReference = QuoteReference("quoteReference"),
+    customerReference: CustomerReference = CustomerReference(
+      "customerReference"
+    ),
+    paymentReference: PaymentReference = PaymentReference("ref123"),
+    instalmentAmount: BigDecimal = 100,
+    numberOfInstalments: Int = 1,
+    initialPaymentAmount: BigDecimal = 100,
+    totalDebtincInt: BigDecimal = 100,
+    totalInterest: BigDecimal = 10,
+    interestAccrued: BigDecimal = 10,
+    planInterest: BigDecimal = 10,
+    originalDebtAmount: BigDecimal = 100,
+    paymentAmount: BigDecimal = 100,
+    amountDue: BigDecimal = 100,
+    expectedPayment: BigDecimal = 100,
+    interestRate: Double = 0.25,
+    instalmentNumber: Int = 1,
+    instalmentInterestAccrued: BigDecimal = 10,
+    instalmentBalance: BigDecimal = 90
+
+  ) =
     s"""{
       |  "customerReference": "${customerReference.value}",
       |  "quoteReference":"${quoteReference.value}",
@@ -156,18 +176,18 @@ class CreatePlanRequestSpec extends AnyWordSpec with Matchers {
       |    "quoteType": "instalmentAmount",
       |    "quoteDate": "2021-05-13",
       |    "instalmentStartDate": "2021-05-13",
-      |    "instalmentAmount": 100,
+      |    "instalmentAmount": ${instalmentAmount},
       |    "paymentPlanType": "timeToPay",
       |    "thirdPartyBank": true,
-      |    "numberOfInstalments": 1,
+      |    "numberOfInstalments": ${numberOfInstalments},
       |    "frequency": "annually",
       |    "duration": 12,
       |    "initialPaymentDate": "2021-05-13",
-      |    "initialPaymentAmount": 100,
-      |    "totalDebtincInt": 100,
-      |    "totalInterest": 10,
-      |    "interestAccrued": 10,
-      |    "planInterest": 10
+      |    "initialPaymentAmount": ${initialPaymentAmount},
+      |    "totalDebtincInt": ${totalDebtincInt},
+      |    "totalInterest": ${totalInterest},
+      |    "interestAccrued": ${interestAccrued},
+      |    "planInterest": ${planInterest}
       |  },
       |  "debtItems": [
       |    {
@@ -175,12 +195,12 @@ class CreatePlanRequestSpec extends AnyWordSpec with Matchers {
       |      "debtItemChargeId": "debtItemChargeId1",
       |      "mainTrans": "1525",
       |      "subTrans": "1000",
-      |      "originalDebtAmount": 100,
+      |      "originalDebtAmount": $originalDebtAmount,
       |      "interestStartDate": "2021-05-13",
       |      "paymentHistory": [
       |        {
       |          "paymentDate": "2021-05-13",
-      |          "paymentAmount": 100
+      |          "paymentAmount": $paymentAmount
       |        }
       |      ]
       |    }
@@ -202,12 +222,12 @@ class CreatePlanRequestSpec extends AnyWordSpec with Matchers {
       |    "debtItemChargeId": "debtItemChargeId1",
       |    "debtItemId": "debtItemId1",
       |    "dueDate": "2021-05-13",
-      |    "amountDue": 100,
-      |    "expectedPayment": 100,
-      |    "interestRate": 0.25,
-      |    "instalmentNumber": 1,
-      |    "instalmentInterestAccrued": 10,
-      |    "instalmentBalance": 90
+      |    "amountDue": $amountDue,
+      |    "expectedPayment": $expectedPayment,
+      |    "interestRate": $interestRate,
+      |    "instalmentNumber": $instalmentNumber,
+      |    "instalmentInterestAccrued": $instalmentInterestAccrued,
+      |    "instalmentBalance": $instalmentBalance
       |  }
       |  ]
       |}
@@ -223,7 +243,9 @@ class CreatePlanRequestSpec extends AnyWordSpec with Matchers {
 
       Try(
         Json
-          .parse(getJsonWithEmptyReference(paymentReference = PaymentReference("")))
+          .parse(
+            getJsonWithInvalidReference(paymentReference = PaymentReference(""))
+          )
           .validate[CreatePlanRequest]
       ) match {
         case Failure(t) =>
@@ -237,7 +259,11 @@ class CreatePlanRequestSpec extends AnyWordSpec with Matchers {
 
       Try(
         Json
-          .parse(getJsonWithEmptyReference(customerReference = CustomerReference("")))
+          .parse(
+            getJsonWithInvalidReference(
+              customerReference = CustomerReference("")
+            )
+          )
           .validate[CreatePlanRequest]
       ) match {
         case Failure(t) =>
@@ -251,12 +277,247 @@ class CreatePlanRequestSpec extends AnyWordSpec with Matchers {
 
       Try(
         Json
-          .parse(getJsonWithEmptyReference(quoteReference = QuoteReference("")))
+          .parse(
+            getJsonWithInvalidReference(quoteReference = QuoteReference(""))
+          )
           .validate[CreatePlanRequest]
       ) match {
         case Failure(t) =>
           t.toString() shouldBe "java.lang.IllegalArgumentException: requirement failed: quoteReference should not be empty"
         case _ => fail()
+      }
+    }
+
+    "fail decoding if instalmentAmount is negative" in {
+      import play.api.libs.json._
+
+      Try(
+        Json
+          .parse(
+            getJsonWithInvalidReference(instalmentAmount = -10)
+          )
+          .validate[CreatePlanRequest]
+      ) match {
+        case Failure(t) =>
+          t.toString() shouldBe "java.lang.IllegalArgumentException: requirement failed: instalmentAmount should be a positive amount."
+        case e => fail("Response should be a validation error")
+      }
+    }
+    "fail decoding if numberOfInstalments is negative" in {
+      import play.api.libs.json._
+
+      Try(
+        Json
+          .parse(
+            getJsonWithInvalidReference(numberOfInstalments = -1)
+          )
+          .validate[CreatePlanRequest]
+      ) match {
+        case Failure(t) =>
+          t.toString() shouldBe "java.lang.IllegalArgumentException: requirement failed: numberOfInstalments should be positive."
+        case e => fail("Response should be a validation error")
+      }
+    }
+
+    "fail decoding if initialPaymentAmount is zero" in {
+      import play.api.libs.json._
+
+      Try(
+        Json
+          .parse(
+            getJsonWithInvalidReference(initialPaymentAmount = 0)
+          )
+          .validate[CreatePlanRequest]
+      ) match {
+        case Failure(t) =>
+          t.toString() shouldBe "java.lang.IllegalArgumentException: requirement failed: initialPaymentAmount should be a positive amount."
+        case e => fail("Response should be a validation error")
+      }
+    }
+
+    "fail decoding if totalDebtincInt is zero" in {
+      import play.api.libs.json._
+
+      Try(
+        Json
+          .parse(
+            getJsonWithInvalidReference(totalDebtincInt = 0)
+          )
+          .validate[CreatePlanRequest]
+      ) match {
+        case Failure(t) =>
+          t.toString() shouldBe "java.lang.IllegalArgumentException: requirement failed: totalDebtincInt should be a positive amount."
+        case e => fail("Response should be a validation error")
+      }
+    }
+
+    "fail decoding if totalInterest is negative" in {
+      import play.api.libs.json._
+
+      Try(
+        Json
+          .parse(
+            getJsonWithInvalidReference(totalInterest = -15)
+          )
+          .validate[CreatePlanRequest]
+      ) match {
+        case Failure(t) =>
+          t.toString() shouldBe "java.lang.IllegalArgumentException: requirement failed: totalInterest should be a positive amount."
+        case e => fail("Response should be a validation error")
+      }
+    }
+
+    "fail decoding if interestAccrued is negative" in {
+      import play.api.libs.json._
+
+      Try(
+        Json
+          .parse(
+            getJsonWithInvalidReference(interestAccrued = -25)
+          )
+          .validate[CreatePlanRequest]
+      ) match {
+        case Failure(t) =>
+          t.toString() shouldBe "java.lang.IllegalArgumentException: requirement failed: interestAccrued should be a positive amount."
+        case e => fail("Response should be a validation error")
+      }
+    }
+
+    "fail decoding if planInterest is negative" in {
+      import play.api.libs.json._
+
+      Try(
+        Json
+          .parse(
+            getJsonWithInvalidReference(planInterest = -5)
+          )
+          .validate[CreatePlanRequest]
+      ) match {
+        case Failure(t) =>
+          t.toString() shouldBe "java.lang.IllegalArgumentException: requirement failed: planInterest should be a positive amount."
+        case e => fail("Response should be a validation error")
+      }
+    }
+
+    "fail decoding if originalDebtAmount is negative" in {
+      import play.api.libs.json._
+
+      Try(
+        Json
+          .parse(
+            getJsonWithInvalidReference(originalDebtAmount = -5)
+          )
+          .validate[CreatePlanRequest]
+      ) match {
+        case Failure(t) =>
+          t.toString() shouldBe "java.lang.IllegalArgumentException: requirement failed: originalDebtAmount should be a positive amount."
+        case e => fail("Response should be a validation error")
+      }
+    }
+    "fail decoding if paymentAmount is negative" in {
+      import play.api.libs.json._
+
+      Try(
+        Json
+          .parse(
+            getJsonWithInvalidReference(paymentAmount = -5)
+          )
+          .validate[CreatePlanRequest]
+      ) match {
+        case Failure(t) =>
+          t.toString() shouldBe "java.lang.IllegalArgumentException: requirement failed: paymentAmount should be a positive amount."
+        case e => fail("Response should be a validation error")
+      }
+    }
+    "fail decoding if amountDue is negative" in {
+      import play.api.libs.json._
+
+      Try(
+        Json
+          .parse(
+            getJsonWithInvalidReference(amountDue = -5)
+          )
+          .validate[CreatePlanRequest]
+      ) match {
+        case Failure(t) =>
+          t.toString() shouldBe "java.lang.IllegalArgumentException: requirement failed: amountDue should be a positive amount."
+        case e => fail("Response should be a validation error")
+      }
+    }
+    "fail decoding if expectedPayment is negative" in {
+      import play.api.libs.json._
+
+      Try(
+        Json
+          .parse(
+            getJsonWithInvalidReference(expectedPayment = -5)
+          )
+          .validate[CreatePlanRequest]
+      ) match {
+        case Failure(t) =>
+          t.toString() shouldBe "java.lang.IllegalArgumentException: requirement failed: expectedPayment should be a positive amount."
+        case e => fail("Response should be a validation error")
+      }
+    }
+    "fail decoding if interestRate is negative" in {
+      import play.api.libs.json._
+
+      Try(
+        Json
+          .parse(
+            getJsonWithInvalidReference(interestRate = -5)
+          )
+          .validate[CreatePlanRequest]
+      ) match {
+        case Failure(t) =>
+          t.toString() shouldBe "java.lang.IllegalArgumentException: requirement failed: interestRate should be a positive amount."
+        case e => fail("Response should be a validation error")
+      }
+    }
+    "fail decoding if instalmentNumber is negative" in {
+      import play.api.libs.json._
+
+      Try(
+        Json
+          .parse(
+            getJsonWithInvalidReference(instalmentNumber = -5)
+          )
+          .validate[CreatePlanRequest]
+      ) match {
+        case Failure(t) =>
+          t.toString() shouldBe "java.lang.IllegalArgumentException: requirement failed: instalmentNumber should be a positive amount."
+        case e => fail("Response should be a validation error")
+      }
+    }
+
+    "fail decoding if instalmentInterestAccrued is negative" in {
+      import play.api.libs.json._
+
+      Try(
+        Json
+          .parse(
+            getJsonWithInvalidReference(instalmentInterestAccrued = -5)
+          )
+          .validate[CreatePlanRequest]
+      ) match {
+        case Failure(t) =>
+          t.toString() shouldBe "java.lang.IllegalArgumentException: requirement failed: instalmentInterestAccrued should be a positive amount."
+        case e => fail("Response should be a validation error")
+      }
+    }
+    "fail decoding if instalmentBalance is negative" in {
+      import play.api.libs.json._
+
+      Try(
+        Json
+          .parse(
+            getJsonWithInvalidReference(instalmentBalance = -5)
+          )
+          .validate[CreatePlanRequest]
+      ) match {
+        case Failure(t) =>
+          t.toString() shouldBe "java.lang.IllegalArgumentException: requirement failed: instalmentBalance should be a positive amount."
+        case e => fail("Response should be a validation error")
       }
     }
 

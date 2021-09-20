@@ -42,6 +42,7 @@ final case class DebtItem(debtItemId: DebtItemId,
                           paymentHistory: Seq[Payment]) {
   require(!debtItemId.value.trim().isEmpty(), "debtItemId should not be empty")
   require(!debtItemChargeId.value.trim().isEmpty(), "debtItemChargeId should not be empty")
+  require(originalDebtAmount > 0, "originalDebtAmount should be a positive amount.")
 }
 
 object DebtItem {

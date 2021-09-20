@@ -20,7 +20,9 @@ import play.api.libs.json.Json
 
 import java.time.LocalDate
 
-final case class Payment(paymentDate: LocalDate, paymentAmount: BigDecimal)
+final case class Payment(paymentDate: LocalDate, paymentAmount: BigDecimal) {
+  require(paymentAmount > 0, "paymentAmount should be a positive amount.")
+}
 
 object Payment {
   implicit val format = Json.format[Payment]

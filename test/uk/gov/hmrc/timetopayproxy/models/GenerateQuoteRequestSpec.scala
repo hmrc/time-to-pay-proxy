@@ -93,17 +93,23 @@ class GenerateQuoteRequestSpec extends AnyWordSpec with Matchers {
                |}
                """.stripMargin
 
-  val jsonWithEmptyCustomerReference = """{
-               |  "customerReference": "",
+  def getJsonWithInvalidReference(
+    customerReference: String = "uniqRef1234",
+    instalmentAmount: BigDecimal = 100,
+    initialPaymentAmount: BigDecimal = 100,
+    originalDebtAmount: BigDecimal = 100,
+    paymentAmount: BigDecimal = 100
+                                 ) = s"""{
+               |  "customerReference": "$customerReference",
                |  "channelIdentifier": "selfService",
                |  "plan": {
                |    "quoteType": "instalmentAmount",
                |    "quoteDate": "2021-05-13",
                |    "instalmentStartDate": "2021-05-13",
-               |    "instalmentAmount": 100,
+               |    "instalmentAmount": $instalmentAmount,
                |    "frequency": "annually",
                |    "duration": 12,
-               |    "initialPaymentAmount": 100,
+               |    "initialPaymentAmount": $initialPaymentAmount,
                |    "initialPaymentDate": "2021-05-13",
                |    "paymentPlanType": "timeToPay"
                |  },
@@ -119,12 +125,12 @@ class GenerateQuoteRequestSpec extends AnyWordSpec with Matchers {
                |      "debtItemChargeId": "debtItemChargeId1",
                |      "mainTrans": "5330",
                |      "subTrans": "1180",
-               |      "originalDebtAmount": 100,
+               |      "originalDebtAmount": $originalDebtAmount,
                |      "interestStartDate": "2021-05-13",
                |      "paymentHistory": [
                |        {
                |          "paymentDate": "2021-05-13",
-               |          "paymentAmount": 100
+               |          "paymentAmount": $paymentAmount
                |        }
                |      ]
                |    }
@@ -137,11 +143,48 @@ class GenerateQuoteRequestSpec extends AnyWordSpec with Matchers {
       Json.toJson(generateQuoteRequest) shouldEqual (Json.parse(json))
     }
 
-    "fail docoding if customerReference is empty" in {
+    "fail decoding if customerReference is empty" in {
       import play.api.libs.json._
 
-      Try(Json.parse(jsonWithEmptyCustomerReference).validate[GenerateQuoteRequest]) match {
+      Try(Json.parse(getJsonWithInvalidReference(customerReference = "")).validate[GenerateQuoteRequest]) match {
         case Failure(t) => t.toString() shouldBe "java.lang.IllegalArgumentException: requirement failed: customerReference should not be empty"
+        case _ => fail()
+      }
+    }
+
+
+    "fail decoding if instalmentAmount is negative" in {
+      import play.api.libs.json._
+
+      Try(Json.parse(getJsonWithInvalidReference(instalmentAmount = -10)).validate[GenerateQuoteRequest]) match {
+        case Failure(t) => t.toString() shouldBe "java.lang.IllegalArgumentException: requirement failed: instalmentAmount should be a positive amount."
+        case _ => fail()
+      }
+    }
+
+    "fail decoding if initialPaymentAmount is negative" in {
+      import play.api.libs.json._
+
+      Try(Json.parse(getJsonWithInvalidReference(initialPaymentAmount = -200)).validate[GenerateQuoteRequest]) match {
+        case Failure(t) => t.toString() shouldBe "java.lang.IllegalArgumentException: requirement failed: initialPaymentAmount should be a positive amount."
+        case _ => fail()
+      }
+    }
+
+    "fail decoding if originalDebtAmount is negative" in {
+      import play.api.libs.json._
+
+      Try(Json.parse(getJsonWithInvalidReference(originalDebtAmount = -200)).validate[GenerateQuoteRequest]) match {
+        case Failure(t) => t.toString() shouldBe "java.lang.IllegalArgumentException: requirement failed: originalDebtAmount should be a positive amount."
+        case _ => fail()
+      }
+    }
+
+    "fail decoding if paymentAmount is zero" in {
+      import play.api.libs.json._
+
+      Try(Json.parse(getJsonWithInvalidReference(paymentAmount = 0)).validate[GenerateQuoteRequest]) match {
+        case Failure(t) => t.toString() shouldBe "java.lang.IllegalArgumentException: requirement failed: paymentAmount should be a positive amount."
         case _ => fail()
       }
     }
