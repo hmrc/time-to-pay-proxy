@@ -17,7 +17,7 @@
 package uk.gov.hmrc.timetopayproxy.controllers
 
 import javax.inject.{Inject, Singleton}
-import play.api.libs.json.{JsError, JsSuccess, JsValue, Reads}
+import play.api.libs.json._
 import play.api.mvc._
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
 import uk.gov.hmrc.timetopayproxy.actions.auth.AuthoriseAction
@@ -80,6 +80,29 @@ class TimeToPayProxyController @Inject()(authoriseAction: AuthoriseAction,
     }
   }
 
+  private def extractFieldFromJsPath(jsPath: JsPath): String = {
+    s"${jsPath.path.reverse.headOption.fold("-")(_.toString.replace("/", ""))}"
+  }
+  private def generateReadableMessageFromError(errs: Seq[(JsPath, Seq[JsonValidationError])]): String = {
+
+    val fieldInfo = errs.headOption.map(x => {
+      val (jsPath, _) = x
+      s"Field name: ${extractFieldFromJsPath(jsPath)}"
+    }).getOrElse("")
+
+    val detailedMessageMaybe = for {
+      (_, valErrors) <- errs.headOption
+      jsonValidationError <- valErrors.headOption
+      message <- jsonValidationError.messages.headOption
+    } yield message match {
+        case m if m.startsWith("error.expected.date.isoformat") => "Date format should be correctly provided"
+        case m if m.startsWith("error.expected.validenumvalue") => "Valid enum value should be provided"
+        case _ => ""
+      }
+    val detailedMessage = detailedMessageMaybe.getOrElse("")
+    s"$fieldInfo. $detailedMessage"
+  }
+
   override def withJsonBody[T](f: T => Future[Result])(
     implicit request: Request[JsValue],
     m: Manifest[T],
@@ -87,13 +110,16 @@ class TimeToPayProxyController @Inject()(authoriseAction: AuthoriseAction,
   ): Future[Result] = {
     Try(request.body.validate[T]) match {
       case Success(JsSuccess(payload, _)) => f(payload)
-      case Success(JsError(errs)) =>
+
+      case Success(JsError(errs)) => {
+
         Future.successful(
           TtppErrorResponse(
             BAD_REQUEST.intValue(),
-            s"Invalid ${m.runtimeClass.getSimpleName} payload: Payload has a missing field or an invalid format in the following json path: ${errs(0)._1}"
+            s"Invalid ${m.runtimeClass.getSimpleName} payload: Payload has a missing field or an invalid format. ${generateReadableMessageFromError(errs)}"
           ).toResponse
         )
+      }
       case Failure(e) =>
         Future.successful(
           TtppErrorResponse(

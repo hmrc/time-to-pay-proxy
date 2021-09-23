@@ -231,7 +231,7 @@ class TimeToPayProxyControllerSpec
         val response: Future[Result] = controller.generateQuote()(fakeRequest)
 
         status(response) shouldBe Status.BAD_REQUEST
-        (contentAsJson(response) \ "errorMessage").as[String] shouldBe "Invalid GenerateQuoteRequest payload: Payload has a missing field or an invalid format in the following json path: /plan/instalmentAmount"
+        (contentAsJson(response) \ "errorMessage").as[String] shouldBe "Invalid GenerateQuoteRequest payload: Payload has a missing field or an invalid format. Field name: instalmentAmount. "
       }
     }
 
