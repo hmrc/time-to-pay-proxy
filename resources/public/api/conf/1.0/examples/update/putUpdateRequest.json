@@ -4,12 +4,12 @@
   "updateType": "paymentDetails",
   "planStatus": "complete",
   "completeReason": "earlyRepayment",
-  "cancellationReason": "",
+  "cancellationReason": "debt-resolved",
   "thirdPartyBank": true,
   "payments": [
     {
-      "paymentMethod": "",
-      "paymentReference": ""
+      "paymentMethod": "cheque",
+      "paymentReference": "paymentRef"
     }
   ]
 }
