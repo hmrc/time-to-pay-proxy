@@ -58,7 +58,10 @@ final case class PlanToGenerateQuote(
                       initialPaymentAmount: BigDecimal,
                       initialPaymentDate: LocalDate,
                       paymentPlanType: PaymentPlanType
-                     )
+                     ) {
+  require(instalmentAmount > 0, "instalmentAmount should be a positive amount.")
+  require(initialPaymentAmount > 0, "initialPaymentAmount should be a positive amount.")
+}
 
 object PlanToGenerateQuote {
   implicit val format = Json.format[PlanToGenerateQuote]
