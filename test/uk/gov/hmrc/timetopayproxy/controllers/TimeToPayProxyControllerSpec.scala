@@ -17,7 +17,6 @@
 package uk.gov.hmrc.timetopayproxy.controllers
 
 import java.time.LocalDate
-
 import org.scalamock.scalatest.MockFactory
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
@@ -29,10 +28,7 @@ import uk.gov.hmrc.auth.core.PlayAuthConnector
 import uk.gov.hmrc.auth.core.authorise.Predicate
 import uk.gov.hmrc.auth.core.retrieve.Retrieval
 import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.timetopayproxy.actions.auth.{
-  AuthoriseAction,
-  AuthoriseActionImpl
-}
+import uk.gov.hmrc.timetopayproxy.actions.auth.{AuthoriseAction, AuthoriseActionImpl}
 import uk.gov.hmrc.timetopayproxy.services.TTPQuoteService
 import uk.gov.hmrc.timetopayproxy.models._
 import play.api.test.{FakeRequest, Helpers}
@@ -41,6 +37,8 @@ import scala.concurrent.{ExecutionContext, Future}
 import scala.concurrent.ExecutionContext.Implicits.global
 import play.api.test.Helpers._
 import cats.syntax.either._
+import uk.gov.hmrc.timetopayproxy.models.MainTransType.TPSSContractSettlementINT
+import uk.gov.hmrc.timetopayproxy.models.SubTransType.TGPEN
 
 class TimeToPayProxyControllerSpec
     extends AnyWordSpec
@@ -111,7 +109,6 @@ class TimeToPayProxyControllerSpec
       ),
       List(
         DebtItem(
-          DebtItemId("debtItemId"),
           DebtItemChargeId("debtItemChargeId"),
           MainTransType.TPSSAccTaxAssessment,
           SubTransType.IT,
@@ -136,6 +133,59 @@ class TimeToPayProxyControllerSpec
         )
       )
     )
+
+  val viewPlanResponse: ViewPlanResponse = ViewPlanResponse(
+    CustomerReference("customerRef1234"),
+    ChannelIdentifier.Advisor,
+    Plan(
+      PlanId("planId123"),
+      QuoteId("quoteId"),
+      LocalDate.now(),
+      QuoteType.InstalmentAmount,
+      PaymentPlanType.TimeToPay,
+      thirdPartyBank = true,
+      0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ),
+    Seq(DebtItem(
+      DebtItemChargeId("debtItemChargeId1"),
+      TPSSContractSettlementINT,
+      TGPEN,
+      100,
+      LocalDate.parse("2021-05-13"),
+      List(
+        Payment(LocalDate.parse("2021-05-13"), 100),
+      )
+    )),
+    Seq.empty[PaymentInformation],
+    Seq.empty[CustomerPostCode],
+    Seq(Instalment(
+      DebtItemChargeId("debtItemChargeId"),
+      DebtItemId("debtItemId"),
+      LocalDate.parse("2021-05-01"),
+      100,
+      100,
+      0.26,
+      1,
+      10.20,
+      100
+    ),
+      Instalment(
+        DebtItemChargeId("debtItemChargeId"),
+        DebtItemId("debtItemId"),
+        LocalDate.parse("2021-06-01"),
+        100,
+        100,
+        0.26,
+        2,
+        10.20,
+        100
+      )
+    )
+  )
 
   "POST /individuals/time-to-pay/quote" should {
     "return 200" when {
@@ -289,19 +339,7 @@ class TimeToPayProxyControllerSpec
         ))
         .expects(*, *, *, *)
         .returning(
-          TtppEnvelope(
-            ViewPlanResponse(
-              CustomerReference("someCustomerRef"),
-              PlanId("somePlanId"),
-              QuoteType.Duration,
-              "xyz",
-              "xyz",
-              Nil,
-              "2",
-              100,
-              0.26
-            )
-          )
+          TtppEnvelope(viewPlanResponse)
         )
 
       val fakeRequest = FakeRequest(

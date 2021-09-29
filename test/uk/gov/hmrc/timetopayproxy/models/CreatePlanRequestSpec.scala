@@ -50,7 +50,6 @@ class CreatePlanRequestSpec extends AnyWordSpec with Matchers {
       ),
       List(
         DebtItem(
-          DebtItemId("debtItemId1"),
           DebtItemChargeId("debtItemChargeId1"),
           MainTransType.TPSSAccTaxAssessment,
           SubTransType.IT,
@@ -102,7 +101,6 @@ class CreatePlanRequestSpec extends AnyWordSpec with Matchers {
                |  },
                |  "debtItems": [
                |    {
-               |      "debtItemId": "debtItemId1",
                |      "debtItemChargeId": "debtItemChargeId1",
                |      "mainTrans": "1525",
                |      "subTrans": "1000",
