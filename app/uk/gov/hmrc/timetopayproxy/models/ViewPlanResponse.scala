@@ -23,7 +23,7 @@ import java.time.LocalDate
 final case class ViewPlanResponse(customerReference: CustomerReference,
                                   channelIdentifier: ChannelIdentifier,
                                   plan: Plan,
-                                  debtItemCharges: Seq[DebtItem],
+                                  debtItemCharges: Seq[DebtItemCharge],
                                   payments: Seq[PaymentInformation],
                                   customerPostcodes: Seq[CustomerPostCode],
                                   instalments: Seq[Instalment])

@@ -21,7 +21,6 @@ import play.api.libs.json.Json
 import java.time.LocalDate
 
 final case class Instalment(debtItemChargeId: DebtItemChargeId,
-                            debtItemId: DebtItemId,
                             dueDate: LocalDate,
                             amountDue: BigDecimal,
                             expectedPayment: BigDecimal,

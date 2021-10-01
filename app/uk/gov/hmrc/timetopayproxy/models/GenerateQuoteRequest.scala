@@ -73,7 +73,7 @@ final case class GenerateQuoteRequest(
                              channelIdentifier: ChannelIdentifier,
                              plan: PlanToGenerateQuote,
                              customerPostCodes: List[CustomerPostCode],
-                             debtItems: List[DebtItem]) {
+                             debtItemCharges: List[DebtItemCharge]) {
   require(!customerReference.value.trim().isEmpty(), "customerReference should not be empty")
 }
 

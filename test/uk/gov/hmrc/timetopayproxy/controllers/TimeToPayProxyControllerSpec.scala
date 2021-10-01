@@ -28,7 +28,10 @@ import uk.gov.hmrc.auth.core.PlayAuthConnector
 import uk.gov.hmrc.auth.core.authorise.Predicate
 import uk.gov.hmrc.auth.core.retrieve.Retrieval
 import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.timetopayproxy.actions.auth.{AuthoriseAction, AuthoriseActionImpl}
+import uk.gov.hmrc.timetopayproxy.actions.auth.{
+  AuthoriseAction,
+  AuthoriseActionImpl
+}
 import uk.gov.hmrc.timetopayproxy.services.TTPQuoteService
 import uk.gov.hmrc.timetopayproxy.models._
 import play.api.test.{FakeRequest, Helpers}
@@ -113,13 +116,13 @@ class TimeToPayProxyControllerSpec
         10
       ),
       List(
-        DebtItem(
+        DebtItemCharge(
           DebtItemChargeId("debtItemChargeId"),
           MainTransType.TPSSAccTaxAssessment,
           SubTransType.IT,
           100,
           LocalDate.now(),
-          List(Payment(LocalDate.parse("2020-01-01"), 100))
+          Some(List(Payment(LocalDate.parse("2020-01-01"), 100)))
         )
       ),
       List(PaymentInformation(PaymentMethod.Bacs, PaymentReference("ref123"))),
@@ -127,7 +130,6 @@ class TimeToPayProxyControllerSpec
       List(
         Instalment(
           DebtItemChargeId("id1"),
-          DebtItemId("id2"),
           LocalDate.now(),
           100,
           100,
@@ -155,32 +157,31 @@ class TimeToPayProxyControllerSpec
       0.0,
       0.0
     ),
-    Seq(DebtItem(
-      DebtItemChargeId("debtItemChargeId1"),
-      TPSSContractSettlementINT,
-      TGPEN,
-      100,
-      LocalDate.parse("2021-05-13"),
-      List(
-        Payment(LocalDate.parse("2021-05-13"), 100),
+    Seq(
+      DebtItemCharge(
+        DebtItemChargeId("debtItemChargeId1"),
+        TPSSContractSettlementINT,
+        TGPEN,
+        100,
+        LocalDate.parse("2021-05-13"),
+        Some(List(Payment(LocalDate.parse("2021-05-13"), 100)))
       )
-    )),
+    ),
     Seq.empty[PaymentInformation],
     Seq.empty[CustomerPostCode],
-    Seq(Instalment(
-      DebtItemChargeId("debtItemChargeId"),
-      DebtItemId("debtItemId"),
-      LocalDate.parse("2021-05-01"),
-      100,
-      100,
-      0.26,
-      1,
-      10.20,
-      100
-    ),
+    Seq(
       Instalment(
         DebtItemChargeId("debtItemChargeId"),
-        DebtItemId("debtItemId"),
+        LocalDate.parse("2021-05-01"),
+        100,
+        100,
+        0.26,
+        1,
+        10.20,
+        100
+      ),
+      Instalment(
+        DebtItemChargeId("debtItemChargeId"),
         LocalDate.parse("2021-06-01"),
         100,
         100,
@@ -216,7 +217,6 @@ class TimeToPayProxyControllerSpec
           List(
             Instalment(
               DebtItemChargeId("dutyId"),
-              DebtItemId("debtId"),
               LocalDate.parse("2022-01-01"),
               100,
               100,
@@ -267,7 +267,7 @@ class TimeToPayProxyControllerSpec
                                     "interestAccrued": 10,
                                     "planInterest": 0.24
                                   },
-                                  "debtItems": [],
+                                  "debtItemCharges": [],
                                   "customerPostCodes": []
                                 }"""
     "return 400" when {
@@ -347,9 +347,7 @@ class TimeToPayProxyControllerSpec
           _: HeaderCarrier
         ))
         .expects(*, *, *, *)
-        .returning(
-          TtppEnvelope(viewPlanResponse)
-        )
+        .returning(TtppEnvelope(viewPlanResponse))
 
       val fakeRequest = FakeRequest(
         "GET",

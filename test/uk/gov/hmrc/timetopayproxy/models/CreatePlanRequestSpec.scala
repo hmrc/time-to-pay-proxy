@@ -49,13 +49,13 @@ class CreatePlanRequestSpec extends AnyWordSpec with Matchers {
         10
       ),
       List(
-        DebtItem(
+        DebtItemCharge(
           DebtItemChargeId("debtItemChargeId1"),
           MainTransType.TPSSAccTaxAssessment,
           SubTransType.IT,
           100,
           LocalDate.parse("2021-05-13"),
-          List(Payment(LocalDate.parse("2021-05-13"), 100))
+          Some(List(Payment(LocalDate.parse("2021-05-13"), 100)))
         )
       ),
       List(PaymentInformation(PaymentMethod.Bacs, PaymentReference("ref123"))),
@@ -65,7 +65,6 @@ class CreatePlanRequestSpec extends AnyWordSpec with Matchers {
       List(
         Instalment(
           DebtItemChargeId("debtItemChargeId1"),
-          DebtItemId("debtItemId1"),
           LocalDate.parse("2021-05-13"),
           100,
           100,
@@ -99,7 +98,7 @@ class CreatePlanRequestSpec extends AnyWordSpec with Matchers {
                |    "interestAccrued": 10,
                |    "planInterest": 10
                |  },
-               |  "debtItems": [
+               |  "debtItemCharges": [
                |    {
                |      "debtItemChargeId": "debtItemChargeId1",
                |      "mainTrans": "1525",
@@ -129,7 +128,6 @@ class CreatePlanRequestSpec extends AnyWordSpec with Matchers {
                |  "instalments": [
                |  {
                |    "debtItemChargeId": "debtItemChargeId1",
-               |    "debtItemId": "debtItemId1",
                |    "dueDate": "2021-05-13",
                |    "amountDue": 100,
                |    "expectedPayment": 100,
@@ -163,7 +161,6 @@ class CreatePlanRequestSpec extends AnyWordSpec with Matchers {
     instalmentNumber: Int = 1,
     instalmentInterestAccrued: BigDecimal = 10,
     instalmentBalance: BigDecimal = 90
-
   ) =
     s"""{
       |  "customerReference": "${customerReference.value}",
@@ -187,9 +184,8 @@ class CreatePlanRequestSpec extends AnyWordSpec with Matchers {
       |    "interestAccrued": ${interestAccrued},
       |    "planInterest": ${planInterest}
       |  },
-      |  "debtItems": [
+      |  "debtItemCharges": [
       |    {
-      |      "debtItemId": "debtItemId1",
       |      "debtItemChargeId": "debtItemChargeId1",
       |      "mainTrans": "1525",
       |      "subTrans": "1000",
@@ -218,7 +214,6 @@ class CreatePlanRequestSpec extends AnyWordSpec with Matchers {
       |  "instalments": [
       |  {
       |    "debtItemChargeId": "debtItemChargeId1",
-      |    "debtItemId": "debtItemId1",
       |    "dueDate": "2021-05-13",
       |    "amountDue": $amountDue,
       |    "expectedPayment": $expectedPayment,
@@ -291,9 +286,7 @@ class CreatePlanRequestSpec extends AnyWordSpec with Matchers {
 
       Try(
         Json
-          .parse(
-            getJsonWithInvalidReference(instalmentAmount = -10)
-          )
+          .parse(getJsonWithInvalidReference(instalmentAmount = -10))
           .validate[CreatePlanRequest]
       ) match {
         case Failure(t) =>
@@ -306,9 +299,7 @@ class CreatePlanRequestSpec extends AnyWordSpec with Matchers {
 
       Try(
         Json
-          .parse(
-            getJsonWithInvalidReference(numberOfInstalments = -1)
-          )
+          .parse(getJsonWithInvalidReference(numberOfInstalments = -1))
           .validate[CreatePlanRequest]
       ) match {
         case Failure(t) =>
@@ -322,9 +313,7 @@ class CreatePlanRequestSpec extends AnyWordSpec with Matchers {
 
       Try(
         Json
-          .parse(
-            getJsonWithInvalidReference(initialPaymentAmount = 0)
-          )
+          .parse(getJsonWithInvalidReference(initialPaymentAmount = 0))
           .validate[CreatePlanRequest]
       ) match {
         case Failure(t) =>
@@ -338,9 +327,7 @@ class CreatePlanRequestSpec extends AnyWordSpec with Matchers {
 
       Try(
         Json
-          .parse(
-            getJsonWithInvalidReference(totalDebtincInt = 0)
-          )
+          .parse(getJsonWithInvalidReference(totalDebtincInt = 0))
           .validate[CreatePlanRequest]
       ) match {
         case Failure(t) =>
@@ -354,9 +341,7 @@ class CreatePlanRequestSpec extends AnyWordSpec with Matchers {
 
       Try(
         Json
-          .parse(
-            getJsonWithInvalidReference(totalInterest = -15)
-          )
+          .parse(getJsonWithInvalidReference(totalInterest = -15))
           .validate[CreatePlanRequest]
       ) match {
         case Failure(t) =>
@@ -370,9 +355,7 @@ class CreatePlanRequestSpec extends AnyWordSpec with Matchers {
 
       Try(
         Json
-          .parse(
-            getJsonWithInvalidReference(interestAccrued = -25)
-          )
+          .parse(getJsonWithInvalidReference(interestAccrued = -25))
           .validate[CreatePlanRequest]
       ) match {
         case Failure(t) =>
@@ -386,9 +369,7 @@ class CreatePlanRequestSpec extends AnyWordSpec with Matchers {
 
       Try(
         Json
-          .parse(
-            getJsonWithInvalidReference(planInterest = -5)
-          )
+          .parse(getJsonWithInvalidReference(planInterest = -5))
           .validate[CreatePlanRequest]
       ) match {
         case Failure(t) =>
@@ -402,9 +383,7 @@ class CreatePlanRequestSpec extends AnyWordSpec with Matchers {
 
       Try(
         Json
-          .parse(
-            getJsonWithInvalidReference(originalDebtAmount = -5)
-          )
+          .parse(getJsonWithInvalidReference(originalDebtAmount = -5))
           .validate[CreatePlanRequest]
       ) match {
         case Failure(t) =>
@@ -417,9 +396,7 @@ class CreatePlanRequestSpec extends AnyWordSpec with Matchers {
 
       Try(
         Json
-          .parse(
-            getJsonWithInvalidReference(paymentAmount = -5)
-          )
+          .parse(getJsonWithInvalidReference(paymentAmount = -5))
           .validate[CreatePlanRequest]
       ) match {
         case Failure(t) =>
@@ -432,9 +409,7 @@ class CreatePlanRequestSpec extends AnyWordSpec with Matchers {
 
       Try(
         Json
-          .parse(
-            getJsonWithInvalidReference(amountDue = -5)
-          )
+          .parse(getJsonWithInvalidReference(amountDue = -5))
           .validate[CreatePlanRequest]
       ) match {
         case Failure(t) =>
@@ -447,9 +422,7 @@ class CreatePlanRequestSpec extends AnyWordSpec with Matchers {
 
       Try(
         Json
-          .parse(
-            getJsonWithInvalidReference(expectedPayment = -5)
-          )
+          .parse(getJsonWithInvalidReference(expectedPayment = -5))
           .validate[CreatePlanRequest]
       ) match {
         case Failure(t) =>
@@ -462,9 +435,7 @@ class CreatePlanRequestSpec extends AnyWordSpec with Matchers {
 
       Try(
         Json
-          .parse(
-            getJsonWithInvalidReference(interestRate = -5)
-          )
+          .parse(getJsonWithInvalidReference(interestRate = -5))
           .validate[CreatePlanRequest]
       ) match {
         case Failure(t) =>
@@ -477,9 +448,7 @@ class CreatePlanRequestSpec extends AnyWordSpec with Matchers {
 
       Try(
         Json
-          .parse(
-            getJsonWithInvalidReference(instalmentNumber = -5)
-          )
+          .parse(getJsonWithInvalidReference(instalmentNumber = -5))
           .validate[CreatePlanRequest]
       ) match {
         case Failure(t) =>
@@ -493,9 +462,7 @@ class CreatePlanRequestSpec extends AnyWordSpec with Matchers {
 
       Try(
         Json
-          .parse(
-            getJsonWithInvalidReference(instalmentInterestAccrued = -5)
-          )
+          .parse(getJsonWithInvalidReference(instalmentInterestAccrued = -5))
           .validate[CreatePlanRequest]
       ) match {
         case Failure(t) =>
@@ -508,9 +475,7 @@ class CreatePlanRequestSpec extends AnyWordSpec with Matchers {
 
       Try(
         Json
-          .parse(
-            getJsonWithInvalidReference(instalmentBalance = -5)
-          )
+          .parse(getJsonWithInvalidReference(instalmentBalance = -5))
           .validate[CreatePlanRequest]
       ) match {
         case Failure(t) =>
