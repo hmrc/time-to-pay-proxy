@@ -43,7 +43,6 @@ class GenerateQuoteRequestSpec extends AnyWordSpec with Matchers {
     List(CustomerPostCode(PostCode("NW9 5XW"), LocalDate.of(2021, 5, 13))),
     List(
       DebtItem(
-        DebtItemId("debtItemId1"),
         DebtItemChargeId("debtItemChargeId1"),
         MainTransType.ChBDebt,
         SubTransType.HIPG,
@@ -76,7 +75,6 @@ class GenerateQuoteRequestSpec extends AnyWordSpec with Matchers {
                |  ],
                |  "debtItems": [
                |    {
-               |      "debtItemId": "debtItemId1",
                |      "debtItemChargeId": "debtItemChargeId1",
                |      "mainTrans": "5330",
                |      "subTrans": "1180",
@@ -121,7 +119,6 @@ class GenerateQuoteRequestSpec extends AnyWordSpec with Matchers {
                |  ],
                |  "debtItems": [
                |    {
-               |      "debtItemId": "debtItemId1",
                |      "debtItemChargeId": "debtItemChargeId1",
                |      "mainTrans": "5330",
                |      "subTrans": "1180",

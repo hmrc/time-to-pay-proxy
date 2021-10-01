@@ -20,14 +20,18 @@ import play.api.libs.json.Json
 
 import java.time.LocalDate
 
-final case class ViewPlanResponse(customerReference: CustomerReference,
-                                  channelIdentifier: ChannelIdentifier,
-                                  plan: Plan,
-                                  debtItemCharges: Seq[DebtItem],
-                                  payments: Seq[PaymentInformation],
-                                  customerPostcodes: Seq[CustomerPostCode],
-                                  instalments: Seq[Instalment])
+final case class Plan(planId: PlanId,
+                      quoteId: QuoteId,
+                      quoteDate: LocalDate,
+                      quoteType: QuoteType,
+                      paymentPlanType: PaymentPlanType,
+                      thirdPartyBank: Boolean,
+                      numberOfInstalments: Int,
+                      totalDebtIncInt: BigDecimal,
+                      totalInterest: BigDecimal,
+                      interestAccrued: BigDecimal,
+                      planInterest: BigDecimal)
 
-object ViewPlanResponse {
-  implicit val format = Json.format[ViewPlanResponse]
+object Plan {
+  implicit val format = Json.format[Plan]
 }

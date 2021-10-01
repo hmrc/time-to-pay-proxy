@@ -26,6 +26,8 @@ import uk.gov.hmrc.timetopayproxy.support.UnitSpec
 import scala.concurrent.{ExecutionContext, Future}
 import scala.concurrent.ExecutionContext.Implicits.global
 import cats.syntax.either._
+import uk.gov.hmrc.timetopayproxy.models.MainTransType.TPSSContractSettlementINT
+import uk.gov.hmrc.timetopayproxy.models.SubTransType.TGPEN
 import uk.gov.hmrc.timetopayproxy.models.TtppEnvelope.TtppEnvelope
 
 class TTPQuoteServiceSpec extends UnitSpec {
@@ -73,15 +75,56 @@ class TTPQuoteServiceSpec extends UnitSpec {
   )
 
   private val retrievePlanResponse = ViewPlanResponse(
-    CustomerReference("someCustomerRef"),
-    PlanId("somePlanId"),
-    QuoteType.InstalmentAmount,
-    "xyz",
-    "ref",
-    Nil,
-    "2",
-    100,
-    0.26
+    CustomerReference("customerRef1234"),
+    ChannelIdentifier.Advisor,
+    Plan(
+      PlanId("planId123"),
+      QuoteId("quoteId"),
+      LocalDate.now(),
+      QuoteType.InstalmentAmount,
+      PaymentPlanType.TimeToPay,
+      thirdPartyBank = true,
+      0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ),
+    Seq(DebtItem(
+      DebtItemChargeId("debtItemChargeId1"),
+      TPSSContractSettlementINT,
+      TGPEN,
+      100,
+      LocalDate.parse("2021-05-13"),
+      List(
+        Payment(LocalDate.parse("2021-05-13"), 100),
+      )
+    )),
+    Seq.empty[PaymentInformation],
+    Seq.empty[CustomerPostCode],
+    Seq(Instalment(
+      DebtItemChargeId("debtItemChargeId"),
+      DebtItemId("debtItemId"),
+      LocalDate.parse("2021-05-01"),
+      100,
+      100,
+      0.26,
+      1,
+      10.20,
+      100
+    ),
+      Instalment(
+        DebtItemChargeId("debtItemChargeId"),
+        DebtItemId("debtItemId"),
+        LocalDate.parse("2021-06-01"),
+        100,
+        100,
+        0.26,
+        2,
+        10.20,
+        100
+      )
+    )
   )
 
   private val updatePlanRequest =
@@ -127,7 +170,6 @@ class TTPQuoteServiceSpec extends UnitSpec {
       ),
       List(
         DebtItem(
-          DebtItemId("debtItemId"),
           DebtItemChargeId("debtItemChargeId"),
           MainTransType.TPSSAccTaxAssessment,
           SubTransType.IT,
