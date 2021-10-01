@@ -33,6 +33,8 @@ object PlanStatus extends Enum[PlanStatus] with PlayJsonEnum[PlanStatus] {
 
   case object Success extends PlanStatus("success")
   case object Failure extends PlanStatus("failure")
+  case object Complete extends PlanStatus("complete")
+  case object Cancelled extends PlanStatus("cancelled")
 
 }
 

@@ -132,10 +132,15 @@ class TTPQuoteServiceSpec extends UnitSpec {
       CustomerReference("customerReference"),
       PlanId("planId"),
       UpdateType("updateType"),
-      CancellationReason("reason"),
-      PaymentMethod.Bacs,
-      PaymentReference("reference"),
-      true,
+      PlanStatus.Complete,
+      Some(CompleteReason.EarlyRepayment),
+      None,
+      Some(true),
+      Some(
+        List(
+          PaymentInformation(PaymentMethod.Bacs, PaymentReference("reference"))
+        )
+      )
     )
 
   private val updatePlanResponse = UpdatePlanResponse(
