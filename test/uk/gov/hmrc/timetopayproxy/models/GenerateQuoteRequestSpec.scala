@@ -42,13 +42,13 @@ class GenerateQuoteRequestSpec extends AnyWordSpec with Matchers {
     ),
     List(CustomerPostCode(PostCode("NW9 5XW"), LocalDate.of(2021, 5, 13))),
     List(
-      DebtItem(
+      DebtItemCharge(
         DebtItemChargeId("debtItemChargeId1"),
         MainTransType.ChBDebt,
         SubTransType.HIPG,
         100,
         LocalDate.of(2021, 5, 13),
-        List(Payment(LocalDate.of(2021, 5, 13), 100))
+        Some(List(Payment(LocalDate.of(2021, 5, 13), 100)))
       )
     )
   )
@@ -73,7 +73,7 @@ class GenerateQuoteRequestSpec extends AnyWordSpec with Matchers {
                |      "postcodeDate": "2021-05-13"
                |    }
                |  ],
-               |  "debtItems": [
+               |  "debtItemCharges": [
                |    {
                |      "debtItemChargeId": "debtItemChargeId1",
                |      "mainTrans": "5330",
@@ -91,13 +91,11 @@ class GenerateQuoteRequestSpec extends AnyWordSpec with Matchers {
                |}
                """.stripMargin
 
-  def getJsonWithInvalidReference(
-    customerReference: String = "uniqRef1234",
-    instalmentAmount: BigDecimal = 100,
-    initialPaymentAmount: BigDecimal = 100,
-    originalDebtAmount: BigDecimal = 100,
-    paymentAmount: BigDecimal = 100
-                                 ) = s"""{
+  def getJsonWithInvalidReference(customerReference: String = "uniqRef1234",
+                                  instalmentAmount: BigDecimal = 100,
+                                  initialPaymentAmount: BigDecimal = 100,
+                                  originalDebtAmount: BigDecimal = 100,
+                                  paymentAmount: BigDecimal = 100) = s"""{
                |  "customerReference": "$customerReference",
                |  "channelIdentifier": "selfService",
                |  "plan": {
@@ -117,7 +115,7 @@ class GenerateQuoteRequestSpec extends AnyWordSpec with Matchers {
                |      "postcodeDate": "2021-05-13"
                |    }
                |  ],
-               |  "debtItems": [
+               |  "debtItemCharges": [
                |    {
                |      "debtItemChargeId": "debtItemChargeId1",
                |      "mainTrans": "5330",
@@ -143,18 +141,27 @@ class GenerateQuoteRequestSpec extends AnyWordSpec with Matchers {
     "fail decoding if customerReference is empty" in {
       import play.api.libs.json._
 
-      Try(Json.parse(getJsonWithInvalidReference(customerReference = "")).validate[GenerateQuoteRequest]) match {
-        case Failure(t) => t.toString() shouldBe "java.lang.IllegalArgumentException: requirement failed: customerReference should not be empty"
+      Try(
+        Json
+          .parse(getJsonWithInvalidReference(customerReference = ""))
+          .validate[GenerateQuoteRequest]
+      ) match {
+        case Failure(t) =>
+          t.toString() shouldBe "java.lang.IllegalArgumentException: requirement failed: customerReference should not be empty"
         case _ => fail()
       }
     }
 
-
     "fail decoding if instalmentAmount is negative" in {
       import play.api.libs.json._
 
-      Try(Json.parse(getJsonWithInvalidReference(instalmentAmount = -10)).validate[GenerateQuoteRequest]) match {
-        case Failure(t) => t.toString() shouldBe "java.lang.IllegalArgumentException: requirement failed: instalmentAmount should be a positive amount."
+      Try(
+        Json
+          .parse(getJsonWithInvalidReference(instalmentAmount = -10))
+          .validate[GenerateQuoteRequest]
+      ) match {
+        case Failure(t) =>
+          t.toString() shouldBe "java.lang.IllegalArgumentException: requirement failed: instalmentAmount should be a positive amount."
         case _ => fail()
       }
     }
@@ -162,8 +169,13 @@ class GenerateQuoteRequestSpec extends AnyWordSpec with Matchers {
     "fail decoding if initialPaymentAmount is negative" in {
       import play.api.libs.json._
 
-      Try(Json.parse(getJsonWithInvalidReference(initialPaymentAmount = -200)).validate[GenerateQuoteRequest]) match {
-        case Failure(t) => t.toString() shouldBe "java.lang.IllegalArgumentException: requirement failed: initialPaymentAmount should be a positive amount."
+      Try(
+        Json
+          .parse(getJsonWithInvalidReference(initialPaymentAmount = -200))
+          .validate[GenerateQuoteRequest]
+      ) match {
+        case Failure(t) =>
+          t.toString() shouldBe "java.lang.IllegalArgumentException: requirement failed: initialPaymentAmount should be a positive amount."
         case _ => fail()
       }
     }
@@ -171,8 +183,13 @@ class GenerateQuoteRequestSpec extends AnyWordSpec with Matchers {
     "fail decoding if originalDebtAmount is negative" in {
       import play.api.libs.json._
 
-      Try(Json.parse(getJsonWithInvalidReference(originalDebtAmount = -200)).validate[GenerateQuoteRequest]) match {
-        case Failure(t) => t.toString() shouldBe "java.lang.IllegalArgumentException: requirement failed: originalDebtAmount should be a positive amount."
+      Try(
+        Json
+          .parse(getJsonWithInvalidReference(originalDebtAmount = -200))
+          .validate[GenerateQuoteRequest]
+      ) match {
+        case Failure(t) =>
+          t.toString() shouldBe "java.lang.IllegalArgumentException: requirement failed: originalDebtAmount should be a positive amount."
         case _ => fail()
       }
     }
@@ -180,8 +197,13 @@ class GenerateQuoteRequestSpec extends AnyWordSpec with Matchers {
     "fail decoding if paymentAmount is zero" in {
       import play.api.libs.json._
 
-      Try(Json.parse(getJsonWithInvalidReference(paymentAmount = 0)).validate[GenerateQuoteRequest]) match {
-        case Failure(t) => t.toString() shouldBe "java.lang.IllegalArgumentException: requirement failed: paymentAmount should be a positive amount."
+      Try(
+        Json
+          .parse(getJsonWithInvalidReference(paymentAmount = 0))
+          .validate[GenerateQuoteRequest]
+      ) match {
+        case Failure(t) =>
+          t.toString() shouldBe "java.lang.IllegalArgumentException: requirement failed: paymentAmount should be a positive amount."
         case _ => fail()
       }
     }

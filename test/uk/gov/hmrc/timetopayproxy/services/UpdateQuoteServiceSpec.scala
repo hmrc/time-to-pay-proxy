@@ -35,10 +35,15 @@ class UpdatePlanServiceSpec extends UnitSpec {
     CustomerReference("customerReference"),
     PlanId("planId"),
     UpdateType("updateType"),
-    CancellationReason("reason"),
-    PaymentMethod.Bacs,
-    PaymentReference("reference"),
-    true
+    PlanStatus.Cancelled,
+    None,
+    Some(CancellationReason("reason")),
+    Some(true),
+    Some(
+      List(
+        PaymentInformation(PaymentMethod.Bacs, PaymentReference("reference"))
+      )
+    )
   )
 
   "Update Quote endpoint" should {
@@ -53,10 +58,7 @@ class UpdatePlanServiceSpec extends UnitSpec {
         val connector = mock[TtpConnector]
         (
           connector
-            .updatePlan(
-              _: UpdatePlanRequest
-            )
-            (
+            .updatePlan(_: UpdatePlanRequest)(
               _: ExecutionContext,
               _: HeaderCarrier
             )
@@ -75,20 +77,20 @@ class UpdatePlanServiceSpec extends UnitSpec {
     "return a failure response" when {
       "connector returns failure" in {
 
-        val errorFromTtpConnector = ConnectorError(500, "Internal Service Error")
+        val errorFromTtpConnector =
+          ConnectorError(500, "Internal Service Error")
         val connector = mock[TtpConnector]
         (
           connector
-            .updatePlan(
-              _: UpdatePlanRequest
-            )
-            (
+            .updatePlan(_: UpdatePlanRequest)(
               _: ExecutionContext,
               _: HeaderCarrier
             )
           )
           .expects(updatePlanRequest, *, *)
-          .returning(TtppEnvelope(errorFromTtpConnector.asLeft[UpdatePlanResponse]))
+          .returning(
+            TtppEnvelope(errorFromTtpConnector.asLeft[UpdatePlanResponse])
+          )
 
         val ttpQuoteService = new DefaultTTPQuoteService(connector)
         await(

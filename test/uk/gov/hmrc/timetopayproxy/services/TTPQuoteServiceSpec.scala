@@ -62,7 +62,6 @@ class TTPQuoteServiceSpec extends UnitSpec {
     List(
       Instalment(
         DebtItemChargeId("dutyId"),
-        DebtItemId("debtId"),
         LocalDate.parse("2022-01-01"),
         100,
         100,
@@ -90,32 +89,31 @@ class TTPQuoteServiceSpec extends UnitSpec {
       0.0,
       0.0
     ),
-    Seq(DebtItem(
-      DebtItemChargeId("debtItemChargeId1"),
-      TPSSContractSettlementINT,
-      TGPEN,
-      100,
-      LocalDate.parse("2021-05-13"),
-      List(
-        Payment(LocalDate.parse("2021-05-13"), 100),
+    Seq(
+      DebtItemCharge(
+        DebtItemChargeId("debtItemChargeId1"),
+        TPSSContractSettlementINT,
+        TGPEN,
+        100,
+        LocalDate.parse("2021-05-13"),
+        Some(List(Payment(LocalDate.parse("2021-05-13"), 100)))
       )
-    )),
+    ),
     Seq.empty[PaymentInformation],
     Seq.empty[CustomerPostCode],
-    Seq(Instalment(
-      DebtItemChargeId("debtItemChargeId"),
-      DebtItemId("debtItemId"),
-      LocalDate.parse("2021-05-01"),
-      100,
-      100,
-      0.26,
-      1,
-      10.20,
-      100
-    ),
+    Seq(
       Instalment(
         DebtItemChargeId("debtItemChargeId"),
-        DebtItemId("debtItemId"),
+        LocalDate.parse("2021-05-01"),
+        100,
+        100,
+        0.26,
+        1,
+        10.20,
+        100
+      ),
+      Instalment(
+        DebtItemChargeId("debtItemChargeId"),
         LocalDate.parse("2021-06-01"),
         100,
         100,
@@ -132,10 +130,15 @@ class TTPQuoteServiceSpec extends UnitSpec {
       CustomerReference("customerReference"),
       PlanId("planId"),
       UpdateType("updateType"),
-      CancellationReason("reason"),
-      PaymentMethod.Bacs,
-      PaymentReference("reference"),
-      true,
+      PlanStatus.Complete,
+      Some(CompleteReason.EarlyRepayment),
+      None,
+      Some(true),
+      Some(
+        List(
+          PaymentInformation(PaymentMethod.Bacs, PaymentReference("reference"))
+        )
+      )
     )
 
   private val updatePlanResponse = UpdatePlanResponse(
@@ -169,13 +172,13 @@ class TTPQuoteServiceSpec extends UnitSpec {
         10
       ),
       List(
-        DebtItem(
+        DebtItemCharge(
           DebtItemChargeId("debtItemChargeId"),
           MainTransType.TPSSAccTaxAssessment,
           SubTransType.IT,
           100,
           LocalDate.now(),
-          List(Payment(LocalDate.parse("2020-01-01"), 100))
+          Some(List(Payment(LocalDate.parse("2020-01-01"), 100)))
         )
       ),
       List(PaymentInformation(PaymentMethod.Bacs, PaymentReference("ref123"))),
@@ -183,7 +186,6 @@ class TTPQuoteServiceSpec extends UnitSpec {
       List(
         Instalment(
           DebtItemChargeId("id1"),
-          DebtItemId("id2"),
           LocalDate.now(),
           100,
           100,

@@ -28,7 +28,10 @@ import uk.gov.hmrc.auth.core.PlayAuthConnector
 import uk.gov.hmrc.auth.core.authorise.Predicate
 import uk.gov.hmrc.auth.core.retrieve.Retrieval
 import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.timetopayproxy.actions.auth.{AuthoriseAction, AuthoriseActionImpl}
+import uk.gov.hmrc.timetopayproxy.actions.auth.{
+  AuthoriseAction,
+  AuthoriseActionImpl
+}
 import uk.gov.hmrc.timetopayproxy.services.TTPQuoteService
 import uk.gov.hmrc.timetopayproxy.models._
 import play.api.test.{FakeRequest, Helpers}
@@ -78,10 +81,15 @@ class TimeToPayProxyControllerSpec
       CustomerReference("customerReference"),
       PlanId("planId"),
       UpdateType("updateType"),
-      CancellationReason("reason"),
-      PaymentMethod.Bacs,
-      PaymentReference("reference"),
-      true
+      PlanStatus.Success,
+      None,
+      Some(CancellationReason("reason")),
+      Some(true),
+      Some(
+        List(
+          PaymentInformation(PaymentMethod.Bacs, PaymentReference("reference"))
+        )
+      )
     )
 
   private val createPlanRequest =
@@ -108,13 +116,13 @@ class TimeToPayProxyControllerSpec
         10
       ),
       List(
-        DebtItem(
+        DebtItemCharge(
           DebtItemChargeId("debtItemChargeId"),
           MainTransType.TPSSAccTaxAssessment,
           SubTransType.IT,
           100,
           LocalDate.now(),
-          List(Payment(LocalDate.parse("2020-01-01"), 100))
+          Some(List(Payment(LocalDate.parse("2020-01-01"), 100)))
         )
       ),
       List(PaymentInformation(PaymentMethod.Bacs, PaymentReference("ref123"))),
@@ -122,7 +130,6 @@ class TimeToPayProxyControllerSpec
       List(
         Instalment(
           DebtItemChargeId("id1"),
-          DebtItemId("id2"),
           LocalDate.now(),
           100,
           100,
@@ -150,32 +157,31 @@ class TimeToPayProxyControllerSpec
       0.0,
       0.0
     ),
-    Seq(DebtItem(
-      DebtItemChargeId("debtItemChargeId1"),
-      TPSSContractSettlementINT,
-      TGPEN,
-      100,
-      LocalDate.parse("2021-05-13"),
-      List(
-        Payment(LocalDate.parse("2021-05-13"), 100),
+    Seq(
+      DebtItemCharge(
+        DebtItemChargeId("debtItemChargeId1"),
+        TPSSContractSettlementINT,
+        TGPEN,
+        100,
+        LocalDate.parse("2021-05-13"),
+        Some(List(Payment(LocalDate.parse("2021-05-13"), 100)))
       )
-    )),
+    ),
     Seq.empty[PaymentInformation],
     Seq.empty[CustomerPostCode],
-    Seq(Instalment(
-      DebtItemChargeId("debtItemChargeId"),
-      DebtItemId("debtItemId"),
-      LocalDate.parse("2021-05-01"),
-      100,
-      100,
-      0.26,
-      1,
-      10.20,
-      100
-    ),
+    Seq(
       Instalment(
         DebtItemChargeId("debtItemChargeId"),
-        DebtItemId("debtItemId"),
+        LocalDate.parse("2021-05-01"),
+        100,
+        100,
+        0.26,
+        1,
+        10.20,
+        100
+      ),
+      Instalment(
+        DebtItemChargeId("debtItemChargeId"),
         LocalDate.parse("2021-06-01"),
         100,
         100,
@@ -193,9 +199,9 @@ class TimeToPayProxyControllerSpec
 
         (authConnector
           .authorise[Unit](_: Predicate, _: Retrieval[Unit])(
-          _: HeaderCarrier,
-          _: ExecutionContext
-        ))
+            _: HeaderCarrier,
+            _: ExecutionContext
+          ))
           .expects(*, *, *, *)
           .returning(Future.successful())
 
@@ -211,7 +217,6 @@ class TimeToPayProxyControllerSpec
           List(
             Instalment(
               DebtItemChargeId("dutyId"),
-              DebtItemId("debtId"),
               LocalDate.parse("2022-01-01"),
               100,
               100,
@@ -236,7 +241,9 @@ class TimeToPayProxyControllerSpec
             .withBody(Json.toJson[GenerateQuoteRequest](generateQuoteRequest))
         val response: Future[Result] = controller.generateQuote()(fakeRequest)
         status(response) shouldBe Status.OK
-        contentAsJson(response) shouldBe Json.toJson[GenerateQuoteResponse](responseFromTtp)
+        contentAsJson(response) shouldBe Json.toJson[GenerateQuoteResponse](
+          responseFromTtp
+        )
       }
     }
     val wrongFormattedBody = """{
@@ -260,28 +267,29 @@ class TimeToPayProxyControllerSpec
                                     "interestAccrued": 10,
                                     "planInterest": 0.24
                                   },
-                                  "debtItems": [],
+                                  "debtItemCharges": [],
                                   "customerPostCodes": []
                                 }"""
     "return 400" when {
       "request body is in wrong format" in {
         (authConnector
           .authorise[Unit](_: Predicate, _: Retrieval[Unit])(
-          _: HeaderCarrier,
-          _: ExecutionContext
-        ))
+            _: HeaderCarrier,
+            _: ExecutionContext
+          ))
           .expects(*, *, *, *)
           .returning(Future.successful())
 
         val fakeRequest: FakeRequest[JsValue] =
           FakeRequest("POST", "/individuals/time-to-pay/quote")
             .withHeaders(CONTENT_TYPE -> MimeTypes.JSON)
-          .withBody(Json.parse(wrongFormattedBody))
+            .withBody(Json.parse(wrongFormattedBody))
 
         val response: Future[Result] = controller.generateQuote()(fakeRequest)
 
         status(response) shouldBe Status.BAD_REQUEST
-        (contentAsJson(response) \ "errorMessage").as[String] shouldBe "Invalid GenerateQuoteRequest payload: Payload has a missing field or an invalid format. Field name: instalmentAmount. "
+        (contentAsJson(response) \ "errorMessage")
+          .as[String] shouldBe "Invalid GenerateQuoteRequest payload: Payload has a missing field or an invalid format. Field name: instalmentAmount. "
       }
     }
 
@@ -315,7 +323,8 @@ class TimeToPayProxyControllerSpec
         val response: Future[Result] = controller.generateQuote()(fakeRequest)
 
         status(response) shouldBe Status.INTERNAL_SERVER_ERROR
-        (contentAsJson(response) \ "errorMessage").as[String] shouldBe("Internal Service Error")
+        (contentAsJson(response) \ "errorMessage")
+          .as[String] shouldBe ("Internal Service Error")
 
       }
     }
@@ -338,9 +347,7 @@ class TimeToPayProxyControllerSpec
           _: HeaderCarrier
         ))
         .expects(*, *, *, *)
-        .returning(
-          TtppEnvelope(viewPlanResponse)
-        )
+        .returning(TtppEnvelope(viewPlanResponse))
 
       val fakeRequest = FakeRequest(
         "GET",
@@ -526,7 +533,9 @@ class TimeToPayProxyControllerSpec
             .withBody(Json.toJson[CreatePlanRequest](createPlanRequest))
         val response: Future[Result] = controller.createPlan()(fakeRequest)
         status(response) shouldBe Status.OK
-        contentAsJson(response) shouldBe Json.toJson[CreatePlanResponse](createPlanResponse)
+        contentAsJson(response) shouldBe Json.toJson[CreatePlanResponse](
+          createPlanResponse
+        )
       }
     }
     "return 500" when {

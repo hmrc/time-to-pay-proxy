@@ -35,7 +35,6 @@ class GenerateQuoteResponseSpec extends AnyWordSpec with Matchers {
     List(
       Instalment(
         DebtItemChargeId("debtItemChargeId1"),
-        DebtItemId("debtItemId1"),
         LocalDate.parse("2021-05-13"),
         100,
         100,
@@ -59,7 +58,6 @@ class GenerateQuoteResponseSpec extends AnyWordSpec with Matchers {
                |  "instalments": [
                |    {
                |      "debtItemChargeId": "debtItemChargeId1",
-               |      "debtItemId": "debtItemId1",
                |      "dueDate": "2021-05-13",
                |      "amountDue": 100,
                |      "expectedPayment": 100,

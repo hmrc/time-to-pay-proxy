@@ -62,7 +62,7 @@ final case class CreatePlanRequest(customerReference: CustomerReference,
                                    quoteReference: QuoteReference,
                                    channelIdentifier: ChannelIdentifier,
                                    plan: PlanToCreatePlan,
-                                   debtItems: Seq[DebtItem],
+                                   debtItemCharges: Seq[DebtItemCharge],
                                    payments: Seq[PaymentInformation],
                                    customerPostCodes: Seq[CustomerPostCode],
                                    instalments: Seq[Instalment]

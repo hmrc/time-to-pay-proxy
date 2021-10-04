@@ -19,6 +19,20 @@ package uk.gov.hmrc.timetopayproxy.models
 import play.api.libs.json.Json
 import enumeratum.{Enum, EnumEntry, PlayJsonEnum}
 
+import scala.collection.immutable
+
+sealed abstract class CompleteReason(override val entryName: String) extends EnumEntry
+
+object CompleteReason extends Enum[CompleteReason] with PlayJsonEnum[CompleteReason] {
+  val values: immutable.IndexedSeq[CompleteReason] = findValues
+
+  case object EarlyRepayment extends CompleteReason("earlyRepayment")
+  case object PaidWithinTolerance extends CompleteReason("paidWithinTolerance")
+  case object EndOfSchedule extends CompleteReason("endOfSchedule")
+  case object ReductionOfCharges extends CompleteReason("reductionOfCharges")
+  case object Remission extends CompleteReason("remission")
+}
+
 final case class CancellationReason(value: String) extends AnyVal
 
 object CancellationReason extends ValueTypeFormatter {
@@ -54,10 +68,11 @@ object UpdateType extends ValueTypeFormatter {
 final case class UpdatePlanRequest(customerReference: CustomerReference,
                                     planId: PlanId,
                                     updateType: UpdateType,
-                                    cancellationReason: CancellationReason,
-                                    paymentMethod: PaymentMethod,
-                                    paymentReference: PaymentReference,
-                                    thirdPartyBank: Boolean,
+                                    planStatus: PlanStatus,
+                                    completeReason: Option[CompleteReason],
+                                    cancellationReason: Option[CancellationReason],
+                                    thirdPartyBank: Option[Boolean],
+                                    payments: Option[List[PaymentInformation]]
 )
 
 object UpdatePlanRequest {

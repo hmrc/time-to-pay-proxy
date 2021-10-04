@@ -19,13 +19,6 @@ import java.time.LocalDate
 
 import play.api.libs.json.Json
 
-final case class DebtItemId(value: String) extends AnyVal
-
-object DebtItemId extends ValueTypeFormatter {
-  implicit val format =
-    valueTypeFormatter(DebtItemId.apply, DebtItemId.unapply)
-}
-
 final case class DebtItemChargeId(value: String) extends AnyVal
 
 object DebtItemChargeId extends ValueTypeFormatter {
@@ -33,16 +26,16 @@ object DebtItemChargeId extends ValueTypeFormatter {
     valueTypeFormatter(DebtItemChargeId.apply, DebtItemChargeId.unapply)
 }
 
-final case class DebtItem(debtItemChargeId: DebtItemChargeId,
+final case class DebtItemCharge(debtItemChargeId: DebtItemChargeId,
                           mainTrans: MainTransType,
                           subTrans: SubTransType,
                           originalDebtAmount: BigDecimal,
                           interestStartDate: LocalDate,
-                          paymentHistory: Seq[Payment]) {
+                          paymentHistory: Option[Seq[Payment]]) {
   require(!debtItemChargeId.value.trim().isEmpty(), "debtItemChargeId should not be empty")
   require(originalDebtAmount > 0, "originalDebtAmount should be a positive amount.")
 }
 
-object DebtItem {
-  implicit val format = Json.format[DebtItem]
+object DebtItemCharge {
+  implicit val format = Json.format[DebtItemCharge]
 }
