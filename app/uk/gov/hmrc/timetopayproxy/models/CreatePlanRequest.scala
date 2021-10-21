@@ -24,23 +24,24 @@ final case class PlanToCreatePlan(quoteId: QuoteId,
                                   quoteType: QuoteType,
                                   quoteDate: LocalDate,
                                   instalmentStartDate: LocalDate,
-                                  instalmentAmount: BigDecimal,
+                                  instalmentAmount: Option[BigDecimal],
                                   paymentPlanType: PaymentPlanType,
                                   thirdPartyBank: Boolean,
                                   numberOfInstalments: Int,
-                                  frequency: Frequency,
-                                  duration: Duration,
-                                  initialPaymentDate: LocalDate,
-                                  initialPaymentAmount: BigDecimal,
-                                  totalDebtincInt: BigDecimal,
+                                  frequency: Option[Frequency],
+                                  duration: Option[Duration],
+                                  initialPaymentDate: Option[LocalDate],
+                                  initialPaymentAmount: Option[BigDecimal],
+                                  totalDebtIncInt: BigDecimal,
                                   totalInterest: BigDecimal,
                                   interestAccrued: BigDecimal,
-                                  planInterest: BigDecimal) {
+                                  planInterest: BigDecimal
+                                 ) {
   require(!quoteId.value.trim().isEmpty(), "quoteId should not be empty")
-  require(instalmentAmount > 0, "instalmentAmount should be a positive amount.")
+  require(instalmentAmount.exists(_ > 0), "instalmentAmount should be a positive amount.")
   require(numberOfInstalments > 0, "numberOfInstalments should be positive.")
-  require(initialPaymentAmount > 0, "initialPaymentAmount should be a positive amount.")
-  require(totalDebtincInt > 0, "totalDebtincInt should be a positive amount.")
+  require(initialPaymentAmount.exists(_ > 0), "initialPaymentAmount should be a positive amount.")
+  require(totalDebtIncInt > 0, "totalDebtincInt should be a positive amount.")
   require(totalInterest > 0, "totalInterest should be a positive amount.")
   require(interestAccrued > 0, "interestAccrued should be a positive amount.")
   require(planInterest > 0, "planInterest should be a positive amount.")

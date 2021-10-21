@@ -32,6 +32,7 @@ class GenerateQuoteResponseSpec extends AnyWordSpec with Matchers {
     10,
     10,
     0.25,
+    0.25,
     List(
       Instalment(
         DebtItemChargeId("debtItemChargeId1"),
@@ -52,9 +53,10 @@ class GenerateQuoteResponseSpec extends AnyWordSpec with Matchers {
                |  "quoteType": "instalmentAmount",
                |  "quoteDate": "2021-05-13",
                |  "numberOfInstalments": 1,
-               |  "totalDebtincInt": 10,
+               |  "totalDebtIncInt": 10,
                |  "interestAccrued": 10,
                |  "planInterest": 0.25,
+               |  "totalInterest": 0.25,
                |  "instalments": [
                |    {
                |      "debtItemChargeId": "debtItemChargeId1",

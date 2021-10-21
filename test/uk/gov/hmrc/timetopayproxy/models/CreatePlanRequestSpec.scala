@@ -35,14 +35,14 @@ class CreatePlanRequestSpec extends AnyWordSpec with Matchers {
         QuoteType.InstalmentAmount,
         LocalDate.parse("2021-05-13"),
         LocalDate.parse("2021-05-13"),
-        100,
+        Some(100),
         PaymentPlanType.TimeToPay,
         true,
         1,
-        Frequency.Annually,
-        Duration(12),
-        LocalDate.parse("2021-05-13"),
-        100,
+        Some(Frequency.Annually),
+        Some(Duration(12)),
+        Some(LocalDate.parse("2021-05-13")),
+        Some(100),
         100,
         10,
         10,
@@ -93,7 +93,7 @@ class CreatePlanRequestSpec extends AnyWordSpec with Matchers {
                |    "duration": 12,
                |    "initialPaymentDate": "2021-05-13",
                |    "initialPaymentAmount": 100,
-               |    "totalDebtincInt": 100,
+               |    "totalDebtIncInt": 100,
                |    "totalInterest": 10,
                |    "interestAccrued": 10,
                |    "planInterest": 10
@@ -149,7 +149,7 @@ class CreatePlanRequestSpec extends AnyWordSpec with Matchers {
     instalmentAmount: BigDecimal = 100,
     numberOfInstalments: Int = 1,
     initialPaymentAmount: BigDecimal = 100,
-    totalDebtincInt: BigDecimal = 100,
+    totalDebtIncInt: BigDecimal = 100,
     totalInterest: BigDecimal = 10,
     interestAccrued: BigDecimal = 10,
     planInterest: BigDecimal = 10,
@@ -179,7 +179,7 @@ class CreatePlanRequestSpec extends AnyWordSpec with Matchers {
       |    "duration": 12,
       |    "initialPaymentDate": "2021-05-13",
       |    "initialPaymentAmount": ${initialPaymentAmount},
-      |    "totalDebtincInt": ${totalDebtincInt},
+      |    "totalDebtIncInt": ${totalDebtIncInt},
       |    "totalInterest": ${totalInterest},
       |    "interestAccrued": ${interestAccrued},
       |    "planInterest": ${planInterest}
@@ -322,12 +322,12 @@ class CreatePlanRequestSpec extends AnyWordSpec with Matchers {
       }
     }
 
-    "fail decoding if totalDebtincInt is zero" in {
+    "fail decoding if totalDebtIncInt is zero" in {
       import play.api.libs.json._
 
       Try(
         Json
-          .parse(getJsonWithInvalidReference(totalDebtincInt = 0))
+          .parse(getJsonWithInvalidReference(totalDebtIncInt = 0))
           .validate[CreatePlanRequest]
       ) match {
         case Failure(t) =>

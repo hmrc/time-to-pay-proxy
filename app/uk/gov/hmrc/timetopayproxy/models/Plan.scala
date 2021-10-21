@@ -21,6 +21,7 @@ import play.api.libs.json.Json
 import java.time.LocalDate
 
 final case class Plan(planId: PlanId,
+                      caseId: CaseId,
                       quoteId: QuoteId,
                       quoteDate: LocalDate,
                       quoteType: QuoteType,

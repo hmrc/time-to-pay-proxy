@@ -33,7 +33,6 @@ package uk.gov.hmrc.timetopayproxy.models
  */
 
 import java.time.LocalDate
-
 import enumeratum.{Enum, EnumEntry, PlayJsonEnum}
 import play.api.libs.json.Json
 
@@ -52,15 +51,15 @@ final case class PlanToGenerateQuote(
                       quoteType: QuoteType,
                       quoteDate: LocalDate,
                       instalmentStartDate: LocalDate,
-                      instalmentAmount: BigDecimal,
-                      frequency: Frequency,
-                      duration: Duration,
-                      initialPaymentAmount: BigDecimal,
-                      initialPaymentDate: LocalDate,
+                      instalmentAmount: Option[BigDecimal],
+                      frequency: Option[Frequency],
+                      duration: Option[Duration],
+                      initialPaymentAmount: Option[BigDecimal],
+                      initialPaymentDate: Option[LocalDate],
                       paymentPlanType: PaymentPlanType
                      ) {
-  require(instalmentAmount > 0, "instalmentAmount should be a positive amount.")
-  require(initialPaymentAmount > 0, "initialPaymentAmount should be a positive amount.")
+  require(instalmentAmount.exists(_ > 0), "instalmentAmount should be a positive amount.")
+  require(initialPaymentAmount.exists(_ > 0), "initialPaymentAmount should be a positive amount.")
 }
 
 object PlanToGenerateQuote {
