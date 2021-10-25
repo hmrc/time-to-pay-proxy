@@ -26,9 +26,10 @@ final case class GenerateQuoteResponse(
                               quoteType: QuoteType,
                               quoteDate: LocalDate,
                               numberOfInstalments: Int,
-                              totalDebtincInt: BigDecimal,
+                              totalDebtIncInt: BigDecimal,
                               interestAccrued: BigDecimal,
                               planInterest: BigDecimal,
+                              totalInterest: BigDecimal,
                               instalments: List[Instalment]
 )
 
