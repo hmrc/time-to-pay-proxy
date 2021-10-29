@@ -38,7 +38,6 @@ trait TtpConnector {
 class DefaultTtpConnector @Inject()(appConfig: AppConfig, httpClient: HttpClient) extends TtpConnector {
 
   val ifHeaders = Seq(
-    "Environment"   -> appConfig.ttpEnvironment,
     "Authorization" -> s"Bearer ${appConfig.ttpToken}"
   )
 
