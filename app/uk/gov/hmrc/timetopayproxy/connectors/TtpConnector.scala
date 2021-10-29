@@ -23,8 +23,11 @@ import uk.gov.hmrc.timetopayproxy.models._
 import uk.gov.hmrc.timetopayproxy.models.TtppEnvelope.TtppEnvelope
 import cats.syntax.either._
 import com.google.inject.ImplementedBy
+
 import javax.inject.{Inject, Singleton}
 import uk.gov.hmrc.timetopayproxy.config.AppConfig
+
+import java.util.UUID
 
 @ImplementedBy(classOf[DefaultTtpConnector])
 trait TtpConnector {
@@ -37,8 +40,9 @@ trait TtpConnector {
 @Singleton
 class DefaultTtpConnector @Inject()(appConfig: AppConfig, httpClient: HttpClient) extends TtpConnector {
 
-  val ifHeaders = Seq(
-    "Authorization" -> s"Bearer ${appConfig.ttpToken}"
+  val ifHeaders = (guid: String) => Seq(
+    "Authorization" -> s"Bearer ${appConfig.ttpToken}",
+    "CorrelationId" -> s"$guid"
   )
 
   def generateQuote(ttppRequest: GenerateQuoteRequest)(implicit ec: ExecutionContext, hc: HeaderCarrier): TtppEnvelope[GenerateQuoteResponse] = {
@@ -47,7 +51,7 @@ class DefaultTtpConnector @Inject()(appConfig: AppConfig, httpClient: HttpClient
 
     TtppEnvelope {
       httpClient
-        .POST[GenerateQuoteRequest, GenerateQuoteResponse](url, ttppRequest, ifHeaders)
+        .POST[GenerateQuoteRequest, GenerateQuoteResponse](url, ttppRequest, ifHeaders(UUID.randomUUID().toString))
         .map(r => r.asRight[ConnectorError])
         .recover {
           case e: HttpException => ConnectorError(e.responseCode, e.message).asLeft[GenerateQuoteResponse]
@@ -101,7 +105,7 @@ class DefaultTtpConnector @Inject()(appConfig: AppConfig, httpClient: HttpClient
 
     TtppEnvelope {
       httpClient
-        .POST[CreatePlanRequest, CreatePlanResponse](url, createPlanRequest, ifHeaders)
+        .POST[CreatePlanRequest, CreatePlanResponse](url, createPlanRequest, ifHeaders(UUID.randomUUID().toString))
         .map(r => r.asRight[ConnectorError])
         .recover {
           case e: HttpException => ConnectorError(e.responseCode, e.message).asLeft[CreatePlanResponse]
