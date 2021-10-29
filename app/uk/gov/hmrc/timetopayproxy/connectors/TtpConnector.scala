@@ -36,13 +36,19 @@ trait TtpConnector {
 
 @Singleton
 class DefaultTtpConnector @Inject()(appConfig: AppConfig, httpClient: HttpClient) extends TtpConnector {
+
+  val ifHeaders = Seq(
+    "Environment"   -> appConfig.ttpEnvironment,
+    "Authorization" -> s"Bearer ${appConfig.ttpToken}"
+  )
+
   def generateQuote(ttppRequest: GenerateQuoteRequest)(implicit ec: ExecutionContext, hc: HeaderCarrier): TtppEnvelope[GenerateQuoteResponse] = {
-    val path = "individuals/time-to-pay/quote"
+    val path = "individuals/debts/time-to-pay/quote"
     val url = s"${appConfig.ttpBaseUrl}/$path"
 
     TtppEnvelope {
       httpClient
-        .POST[GenerateQuoteRequest, GenerateQuoteResponse](url, ttppRequest)
+        .POST[GenerateQuoteRequest, GenerateQuoteResponse](url, ttppRequest, ifHeaders)
         .map(r => r.asRight[ConnectorError])
         .recover {
           case e: HttpException => ConnectorError(e.responseCode, e.message).asLeft[GenerateQuoteResponse]
@@ -91,12 +97,12 @@ class DefaultTtpConnector @Inject()(appConfig: AppConfig, httpClient: HttpClient
   }
 
   override def createPlan(createPlanRequest: CreatePlanRequest)(implicit ec: ExecutionContext, hc: HeaderCarrier): TtppEnvelope[CreatePlanResponse] = {
-    val path = "individuals/time-to-pay/quote/arrangement"
+    val path = "individuals/debts/time-to-pay/quote/arrangement"
     val url = s"${appConfig.ttpBaseUrl}/$path"
 
     TtppEnvelope {
       httpClient
-        .POST[CreatePlanRequest, CreatePlanResponse](url, createPlanRequest)
+        .POST[CreatePlanRequest, CreatePlanResponse](url, createPlanRequest, ifHeaders)
         .map(r => r.asRight[ConnectorError])
         .recover {
           case e: HttpException => ConnectorError(e.responseCode, e.message).asLeft[CreatePlanResponse]

@@ -29,6 +29,8 @@ class AppConfig @Inject()
 
   val authBaseUrl: String = servicesConfig.baseUrl("auth")
   val ttpBaseUrl: String = servicesConfig.baseUrl("ttp")
+  val ttpToken: String = config.get[String]("microservice.services.ttp.token")
+  val ttpEnvironment: String = config.get[String]("microservice.services.ttp.environment")
   val auditingEnabled: Boolean = config.get[Boolean]("auditing.enabled")
   val graphiteHost: String     = config.get[String]("microservice.metrics.graphite.host")
 }
