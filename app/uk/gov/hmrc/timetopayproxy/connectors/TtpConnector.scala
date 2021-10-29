@@ -23,8 +23,11 @@ import uk.gov.hmrc.timetopayproxy.models._
 import uk.gov.hmrc.timetopayproxy.models.TtppEnvelope.TtppEnvelope
 import cats.syntax.either._
 import com.google.inject.ImplementedBy
+
 import javax.inject.{Inject, Singleton}
 import uk.gov.hmrc.timetopayproxy.config.AppConfig
+
+import java.util.UUID
 
 @ImplementedBy(classOf[DefaultTtpConnector])
 trait TtpConnector {
@@ -36,13 +39,19 @@ trait TtpConnector {
 
 @Singleton
 class DefaultTtpConnector @Inject()(appConfig: AppConfig, httpClient: HttpClient) extends TtpConnector {
+
+  val ifHeaders = (guid: String) => Seq(
+    "Authorization" -> s"Bearer ${appConfig.ttpToken}",
+    "CorrelationId" -> s"$guid"
+  )
+
   def generateQuote(ttppRequest: GenerateQuoteRequest)(implicit ec: ExecutionContext, hc: HeaderCarrier): TtppEnvelope[GenerateQuoteResponse] = {
-    val path = "individuals/time-to-pay/quote"
+    val path = "individuals/debts/time-to-pay/quote"
     val url = s"${appConfig.ttpBaseUrl}/$path"
 
     TtppEnvelope {
       httpClient
-        .POST[GenerateQuoteRequest, GenerateQuoteResponse](url, ttppRequest)
+        .POST[GenerateQuoteRequest, GenerateQuoteResponse](url, ttppRequest, ifHeaders(UUID.randomUUID().toString))
         .map(r => r.asRight[ConnectorError])
         .recover {
           case e: HttpException => ConnectorError(e.responseCode, e.message).asLeft[GenerateQuoteResponse]
@@ -91,12 +100,12 @@ class DefaultTtpConnector @Inject()(appConfig: AppConfig, httpClient: HttpClient
   }
 
   override def createPlan(createPlanRequest: CreatePlanRequest)(implicit ec: ExecutionContext, hc: HeaderCarrier): TtppEnvelope[CreatePlanResponse] = {
-    val path = "individuals/time-to-pay/quote/arrangement"
+    val path = "individuals/debts/time-to-pay/quote/arrangement"
     val url = s"${appConfig.ttpBaseUrl}/$path"
 
     TtppEnvelope {
       httpClient
-        .POST[CreatePlanRequest, CreatePlanResponse](url, createPlanRequest)
+        .POST[CreatePlanRequest, CreatePlanResponse](url, createPlanRequest, ifHeaders(UUID.randomUUID().toString))
         .map(r => r.asRight[ConnectorError])
         .recover {
           case e: HttpException => ConnectorError(e.responseCode, e.message).asLeft[CreatePlanResponse]
