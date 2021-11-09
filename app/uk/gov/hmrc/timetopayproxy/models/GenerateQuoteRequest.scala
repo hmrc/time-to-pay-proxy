@@ -59,7 +59,7 @@ final case class PlanToGenerateQuote(
                       paymentPlanType: PaymentPlanType
                      ) {
   require(instalmentAmount.exists(_ > 0), "instalmentAmount should be a positive amount.")
-  require(initialPaymentAmount.exists(_ > 0), "initialPaymentAmount should be a positive amount.")
+  require(initialPaymentAmount.forall(_ > 0), "initialPaymentAmount should be a positive amount.")
 }
 
 object PlanToGenerateQuote {
