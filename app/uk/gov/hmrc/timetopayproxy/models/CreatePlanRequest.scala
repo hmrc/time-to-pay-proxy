@@ -42,9 +42,9 @@ final case class PlanToCreatePlan(quoteId: QuoteId,
   require(numberOfInstalments > 0, "numberOfInstalments should be positive.")
   require(initialPaymentAmount.forall(_ > 0), "initialPaymentAmount should be a positive amount.")
   require(totalDebtIncInt > 0, "totalDebtincInt should be a positive amount.")
-  require(totalInterest > 0, "totalInterest should be a positive amount.")
-  require(interestAccrued > 0, "interestAccrued should be a positive amount.")
-  require(planInterest > 0, "planInterest should be a positive amount.")
+  require(totalInterest >= 0, "totalInterest should be a positive amount.")
+  require(interestAccrued >= 0, "interestAccrued should be a positive amount.")
+  require(planInterest >= 0, "planInterest should be a positive amount.")
 }
 
 object PlanToCreatePlan {
