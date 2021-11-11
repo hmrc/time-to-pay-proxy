@@ -40,7 +40,7 @@ final case class PlanToCreatePlan(quoteId: QuoteId,
   require(!quoteId.value.trim().isEmpty(), "quoteId should not be empty")
   require(instalmentAmount.exists(_ > 0), "instalmentAmount should be a positive amount.")
   require(numberOfInstalments > 0, "numberOfInstalments should be positive.")
-  require(initialPaymentAmount.exists(_ > 0), "initialPaymentAmount should be a positive amount.")
+  require(initialPaymentAmount.forall(_ > 0), "initialPaymentAmount should be a positive amount.")
   require(totalDebtIncInt > 0, "totalDebtincInt should be a positive amount.")
   require(totalInterest > 0, "totalInterest should be a positive amount.")
   require(interestAccrued > 0, "interestAccrued should be a positive amount.")
