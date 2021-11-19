@@ -540,6 +540,46 @@ class TimeToPayProxyControllerSpec
         )
       }
     }
+    "return 200" when {
+      "interestAccrued, planInterest or totalInterest is zero" in {
+
+        (authConnector
+          .authorise[Unit](_: Predicate, _: Retrieval[Unit])(
+          _: HeaderCarrier,
+          _: ExecutionContext
+        ))
+          .expects(*, *, *, *)
+          .returning(Future.successful())
+        val createPlanRequestWithZeroValues = createPlanRequest.copy(plan = createPlanRequest.plan.copy(
+          interestAccrued = createPlanRequest.plan.interestAccrued,
+          planInterest = createPlanRequest.plan.planInterest,
+          totalInterest = createPlanRequest.plan.totalInterest
+        ))
+        val createPlanResponse = CreatePlanResponse(
+          CustomerReference("customerReference"),
+          PlanId("planId"),
+          CaseId("caseId"),
+          PlanStatus.Success
+        )
+        (ttpQuoteService
+          .createPlan(_: CreatePlanRequest)(
+            _: ExecutionContext,
+            _: HeaderCarrier
+          ))
+          .expects(createPlanRequestWithZeroValues, *, *)
+          .returning(TtppEnvelope(createPlanResponse))
+
+        val fakeRequest: FakeRequest[JsValue] =
+          FakeRequest("POST", "/individuals/time-to-pay/quote/arrangement")
+            .withHeaders(CONTENT_TYPE -> MimeTypes.JSON)
+            .withBody(Json.toJson[CreatePlanRequest](createPlanRequest))
+        val response: Future[Result] = controller.createPlan()(fakeRequest)
+        status(response) shouldBe Status.OK
+        contentAsJson(response) shouldBe Json.toJson[CreatePlanResponse](
+          createPlanResponse
+        )
+      }
+    }
     "return 500" when {
       "service returns failure" in {
 
@@ -573,4 +613,5 @@ class TimeToPayProxyControllerSpec
       }
     }
   }
+
 }
