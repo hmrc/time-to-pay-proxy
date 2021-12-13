@@ -32,26 +32,33 @@ import java.util.UUID
 @ImplementedBy(classOf[DefaultTtpConnector])
 trait TtpConnector {
   def generateQuote(ttppRequest: GenerateQuoteRequest)(implicit ec: ExecutionContext, hc: HeaderCarrier): TtppEnvelope[GenerateQuoteResponse]
+
   def getExistingQuote(customerReference: CustomerReference, planId: PlanId)(implicit ec: ExecutionContext, hc: HeaderCarrier): TtppEnvelope[ViewPlanResponse]
-  def updatePlan(updatePlanRequest: UpdatePlanRequest)(implicit ec: ExecutionContext, hc: HeaderCarrier ): TtppEnvelope[UpdatePlanResponse]
+
+  def updatePlan(updatePlanRequest: UpdatePlanRequest)(implicit ec: ExecutionContext, hc: HeaderCarrier): TtppEnvelope[UpdatePlanResponse]
+
   def createPlan(createPlanRequest: CreatePlanRequest)(implicit ec: ExecutionContext, hc: HeaderCarrier): TtppEnvelope[CreatePlanResponse]
 }
 
 @Singleton
 class DefaultTtpConnector @Inject()(appConfig: AppConfig, httpClient: HttpClient) extends TtpConnector {
 
-  val ifHeaders = (guid: String) => Seq(
-    "Authorization" -> s"Bearer ${appConfig.ttpToken}",
-    "CorrelationId" -> s"$guid"
-  )
+  val headers = (guid: String) => if (appConfig.useIf) {
+    Seq(
+      "Authorization" -> s"Bearer ${appConfig.ttpToken}",
+      "CorrelationId" -> s"$guid"
+    )
+  } else {
+    Seq()
+  }
 
   def generateQuote(ttppRequest: GenerateQuoteRequest)(implicit ec: ExecutionContext, hc: HeaderCarrier): TtppEnvelope[GenerateQuoteResponse] = {
-    val path = "individuals/debts/time-to-pay/quote"
+    val path = if (appConfig.useIf) "individuals/debts/time-to-pay/quote" else "debts/time-to-pay/quote"
     val url = s"${appConfig.ttpBaseUrl}/$path"
 
     TtppEnvelope {
       httpClient
-        .POST[GenerateQuoteRequest, GenerateQuoteResponse](url, ttppRequest, ifHeaders(UUID.randomUUID().toString))
+        .POST[GenerateQuoteRequest, GenerateQuoteResponse](url, ttppRequest, headers(UUID.randomUUID().toString))
         .map(r => r.asRight[ConnectorError])
         .recover {
           case e: HttpException => ConnectorError(e.responseCode, e.message).asLeft[GenerateQuoteResponse]
@@ -63,7 +70,11 @@ class DefaultTtpConnector @Inject()(appConfig: AppConfig, httpClient: HttpClient
 
   override def getExistingQuote(customerReference: CustomerReference, planId: PlanId)
                                (implicit ec: ExecutionContext, hc: HeaderCarrier): TtppEnvelope[ViewPlanResponse] = {
-    val path = s"individuals/time-to-pay/quote/${customerReference.value}/${planId.value}"
+    val path = if (appConfig.useIf)
+      s"individuals/time-to-pay/quote/${customerReference.value}/${planId.value}"
+    else
+      s"debts/time-to-pay/quote/${customerReference.value}/${planId.value}"
+
     val url = s"${appConfig.ttpBaseUrl}/$path"
 
     TtppEnvelope(
@@ -78,13 +89,13 @@ class DefaultTtpConnector @Inject()(appConfig: AppConfig, httpClient: HttpClient
   }
 
   def updatePlan(
-                   updatePlanRequest: UpdatePlanRequest
-                 )
-                 (
-                   implicit ec: ExecutionContext,
-                   hc: HeaderCarrier
-                 ): TtppEnvelope[UpdatePlanResponse] = {
-    val path = "individuals/time-to-pay/quote"
+                  updatePlanRequest: UpdatePlanRequest
+                )
+                (
+                  implicit ec: ExecutionContext,
+                  hc: HeaderCarrier
+                ): TtppEnvelope[UpdatePlanResponse] = {
+    val path = if(appConfig.useIf) "individuals/time-to-pay/quote" else "debts/time-to-pay/quote"
     val url = s"${appConfig.ttpBaseUrl}/$path/${updatePlanRequest.customerReference.value}/${updatePlanRequest.planId.value}"
 
     val response: Future[Either[ConnectorError, UpdatePlanResponse]] =
@@ -100,12 +111,12 @@ class DefaultTtpConnector @Inject()(appConfig: AppConfig, httpClient: HttpClient
   }
 
   override def createPlan(createPlanRequest: CreatePlanRequest)(implicit ec: ExecutionContext, hc: HeaderCarrier): TtppEnvelope[CreatePlanResponse] = {
-    val path = "individuals/debts/time-to-pay/quote/arrangement"
+    val path = if(appConfig.useIf) "individuals/debts/time-to-pay/quote/arrangement" else "debts/time-to-pay/quote/arrangement"
     val url = s"${appConfig.ttpBaseUrl}/$path"
 
     TtppEnvelope {
       httpClient
-        .POST[CreatePlanRequest, CreatePlanResponse](url, createPlanRequest, ifHeaders(UUID.randomUUID().toString))
+        .POST[CreatePlanRequest, CreatePlanResponse](url, createPlanRequest, headers(UUID.randomUUID().toString))
         .map(r => r.asRight[ConnectorError])
         .recover {
           case e: HttpException => ConnectorError(e.responseCode, e.message).asLeft[CreatePlanResponse]
