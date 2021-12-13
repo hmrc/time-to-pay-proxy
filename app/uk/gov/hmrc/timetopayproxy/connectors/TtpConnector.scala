@@ -16,7 +16,8 @@
 
 package uk.gov.hmrc.timetopayproxy.connectors
 
-import uk.gov.hmrc.http.{HeaderCarrier, HttpClient, HttpException, UpstreamErrorResponse}
+import cats.data.EitherT
+import uk.gov.hmrc.http.{BadRequestException, HeaderCarrier, HttpClient, HttpException, UpstreamErrorResponse}
 
 import scala.concurrent.{ExecutionContext, Future}
 import uk.gov.hmrc.timetopayproxy.models._
@@ -41,7 +42,7 @@ trait TtpConnector {
 }
 
 @Singleton
-class DefaultTtpConnector @Inject()(appConfig: AppConfig, httpClient: HttpClient) extends TtpConnector {
+class DefaultTtpConnector @Inject()(appConfig: AppConfig, httpClient: HttpClient) extends TtpConnector with HttpParser {
 
   val headers = (guid: String) => if (appConfig.useIf) {
     Seq(
@@ -56,15 +57,11 @@ class DefaultTtpConnector @Inject()(appConfig: AppConfig, httpClient: HttpClient
     val path = if (appConfig.useIf) "individuals/debts/time-to-pay/quote" else "debts/time-to-pay/quote"
     val url = s"${appConfig.ttpBaseUrl}/$path"
 
-    TtppEnvelope {
-      httpClient
-        .POST[GenerateQuoteRequest, GenerateQuoteResponse](url, ttppRequest, headers(UUID.randomUUID().toString))
-        .map(r => r.asRight[ConnectorError])
-        .recover {
-          case e: HttpException => ConnectorError(e.responseCode, e.message).asLeft[GenerateQuoteResponse]
-          case e: UpstreamErrorResponse => ConnectorError(e.statusCode, e.getMessage()).asLeft[GenerateQuoteResponse]
-        }
-    }
+      EitherT(
+        httpClient
+        .POST[GenerateQuoteRequest, Either[TtppError, GenerateQuoteResponse]](url, ttppRequest, headers(UUID.randomUUID().toString))
+      )
+
   }
 
 
@@ -77,13 +74,8 @@ class DefaultTtpConnector @Inject()(appConfig: AppConfig, httpClient: HttpClient
 
     val url = s"${appConfig.ttpBaseUrl}/$path"
 
-    TtppEnvelope(
-      httpClient.GET[ViewPlanResponse](url)
-        .map(r => r.asRight[ConnectorError])
-        .recover {
-          case e: HttpException => ConnectorError(e.responseCode, e.message).asLeft[ViewPlanResponse]
-          case e: UpstreamErrorResponse => ConnectorError(e.statusCode, e.getMessage()).asLeft[ViewPlanResponse]
-        }
+    EitherT(
+      httpClient.GET[Either[TtppError, ViewPlanResponse]](url)
     )
 
   }
@@ -95,34 +87,22 @@ class DefaultTtpConnector @Inject()(appConfig: AppConfig, httpClient: HttpClient
                   implicit ec: ExecutionContext,
                   hc: HeaderCarrier
                 ): TtppEnvelope[UpdatePlanResponse] = {
-    val path = if(appConfig.useIf) "individuals/time-to-pay/quote" else "debts/time-to-pay/quote"
+    val path = if (appConfig.useIf) "individuals/time-to-pay/quote" else "debts/time-to-pay/quote"
     val url = s"${appConfig.ttpBaseUrl}/$path/${updatePlanRequest.customerReference.value}/${updatePlanRequest.planId.value}"
 
-    val response: Future[Either[ConnectorError, UpdatePlanResponse]] =
+    EitherT(
       httpClient
-        .PUT[UpdatePlanRequest, UpdatePlanResponse](url, updatePlanRequest)
-        .map(r => r.asRight[ConnectorError])
-        .recover {
-          case e: HttpException => ConnectorError(e.responseCode, e.message).asLeft[UpdatePlanResponse]
-          case e: UpstreamErrorResponse => ConnectorError(e.statusCode, e.getMessage()).asLeft[UpdatePlanResponse]
-        }
-
-    TtppEnvelope(response)
+        .PUT[UpdatePlanRequest, Either[TtppError, UpdatePlanResponse]](url, updatePlanRequest)
+    )
   }
 
   override def createPlan(createPlanRequest: CreatePlanRequest)(implicit ec: ExecutionContext, hc: HeaderCarrier): TtppEnvelope[CreatePlanResponse] = {
-    val path = if(appConfig.useIf) "individuals/debts/time-to-pay/quote/arrangement" else "debts/time-to-pay/quote/arrangement"
+    val path = if (appConfig.useIf) "individuals/debts/time-to-pay/quote/arrangement" else "debts/time-to-pay/quote/arrangement"
     val url = s"${appConfig.ttpBaseUrl}/$path"
 
-    TtppEnvelope {
+    EitherT {
       httpClient
-        .POST[CreatePlanRequest, CreatePlanResponse](url, createPlanRequest, headers(UUID.randomUUID().toString))
-        .map(r => r.asRight[ConnectorError])
-        .recover {
-          case e: HttpException => ConnectorError(e.responseCode, e.message).asLeft[CreatePlanResponse]
-          case e: UpstreamErrorResponse => ConnectorError(e.statusCode, e.getMessage()).asLeft[CreatePlanResponse]
-        }
+        .POST[CreatePlanRequest, Either[TtppError, CreatePlanResponse]](url, createPlanRequest, headers(UUID.randomUUID().toString))
     }
-
   }
 }
