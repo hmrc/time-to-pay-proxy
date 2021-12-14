@@ -58,7 +58,7 @@ final case class PlanToGenerateQuote(
                       initialPaymentDate: Option[LocalDate],
                       paymentPlanType: PaymentPlanType
                      ) {
-  require(instalmentAmount.exists(_ > 0), "instalmentAmount should be a positive amount.")
+  require(instalmentAmount.forall(_ > 0), "instalmentAmount should be a positive amount.")
   require(initialPaymentAmount.forall(_ > 0), "initialPaymentAmount should be a positive amount.")
 }
 
