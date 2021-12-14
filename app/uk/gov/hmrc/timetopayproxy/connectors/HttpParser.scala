@@ -23,22 +23,32 @@ import play.api.libs.json.Reads
 import uk.gov.hmrc.http.{HeaderCarrier, HttpReads}
 import uk.gov.hmrc.timetopayproxy.models.{ConnectorError, Error, TimeToPayError, TtppError}
 import cats.syntax.either._
+import play.mvc.BodyParser.Json
 import uk.gov.hmrc.timetopayproxy.models.TtppEnvelope.TtppEnvelope
+
+import scala.util.{Failure, Success, Try}
+
+
 trait HttpParser {
 
 
   implicit def httpReads[T](implicit headerCarrier: HeaderCarrier, rds: Reads[T]): HttpReads[Either[TtppError, T]] = (_, _, response) => {
     response.status match {
-      case Status.OK =>
+      case Status.OK | Status.CREATED =>
         response.json.validate[T].fold(
           error => ConnectorError(503, "Couldn't parse body from upstream").asLeft[T],
           Right(_)
         )
       case status =>
-          response.json.validate[TimeToPayError].fold(
-            _ => ConnectorError(503, "Couldn't parse body from upstream"),
-            error => ConnectorError(status, error.failures.headOption.map(_.reason).getOrElse("An unknown error has occurred"))
-          ).asLeft[T]
+        Try(response.json) match {
+          case Success(value) =>
+            value.validate[TimeToPayError].fold(
+              _ => ConnectorError(503, "Couldn't parse body from upstream"),
+              error => ConnectorError(status, error.failures.headOption.map(_.reason).getOrElse("An unknown error has occurred"))
+            ).asLeft[T]
+          case Failure(_) => ConnectorError(status, "Couldn't parse body from upstream").asLeft[T]
+        }
+
     }
   }
 }

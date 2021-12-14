@@ -14,13 +14,14 @@ object AppDependencies {
   )
 
   val test = Seq(
-    "uk.gov.hmrc"             %% "bootstrap-test-play-28"     % "5.3.0"             % allTestEnvs,
-    "com.github.tomakehurst"  %  "wiremock"                   % "2.27.2"            % allTestEnvs,
-    "org.scalatest"           %% "scalatest"                  % "3.2.5"             % allTestEnvs,
-    "org.scalamock"           %% "scalamock"                  % "5.1.0"             % allTestEnvs,
-    "com.typesafe.play"       %% "play-test"                  % PlayVersion.current % allTestEnvs,
-    "com.vladsch.flexmark"    %  "flexmark-all"               % "0.36.8"            % allTestEnvs,
-    "org.scalatestplus.play"  %% "scalatestplus-play"         % "5.1.0"             % allTestEnvs
+    "uk.gov.hmrc"                  %% "bootstrap-test-play-28"     % "5.3.0"             % allTestEnvs,
+    "com.github.tomakehurst"       %  "wiremock"                   % "2.27.2"            % allTestEnvs,
+    "org.scalatest"                %% "scalatest"                  % "3.2.5"             % allTestEnvs,
+    "org.scalamock"                %% "scalamock"                  % "5.1.0"             % allTestEnvs,
+    "com.typesafe.play"            %% "play-test"                  % PlayVersion.current % allTestEnvs,
+    "com.fasterxml.jackson.module" %% "jackson-module-scala"       % "2.12.2"            % allTestEnvs,
+    "com.vladsch.flexmark"         %  "flexmark-all"               % "0.36.8"            % allTestEnvs,
+    "org.scalatestplus.play"       %% "scalatestplus-play"         % "5.1.0"             % allTestEnvs
   )
   val overrides: Seq[ModuleID] = {
     val jettyFromWiremockVersion = "9.4.35.v20201120"
