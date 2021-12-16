@@ -23,7 +23,7 @@ import play.api.mvc._
 import uk.gov.hmrc.auth.core._
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.http.HeaderCarrierConverter
-import play.api.mvc.Results.{Forbidden, Unauthorized}
+import play.api.mvc.Results.{Forbidden, ServiceUnavailable}
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.control.NonFatal
@@ -53,7 +53,8 @@ class AuthoriseActionImpl @Inject()(
         logger.debug(s"Forbidden request - Insufficient Enrolments: ${ie.reason}")
         Forbidden
       case NonFatal(ex) =>
-        Unauthorized
+        logger.error(s"Caught an unexpected exception", ex)
+        ServiceUnavailable
     }(cc.executionContext)
   }
 
