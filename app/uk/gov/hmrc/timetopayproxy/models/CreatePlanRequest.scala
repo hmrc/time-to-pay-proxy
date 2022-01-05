@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 HM Revenue & Customs
+ * Copyright 2022 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,7 +38,7 @@ final case class PlanToCreatePlan(quoteId: QuoteId,
                                   planInterest: BigDecimal
                                  ) {
   require(!quoteId.value.trim().isEmpty(), "quoteId should not be empty")
-  require(instalmentAmount.exists(_ > 0), "instalmentAmount should be a positive amount.")
+  require(instalmentAmount.forall(_ > 0), "instalmentAmount should be a positive amount.")
   require(numberOfInstalments > 0, "numberOfInstalments should be positive.")
   require(initialPaymentAmount.forall(_ > 0), "initialPaymentAmount should be a positive amount.")
   require(totalDebtIncInt > 0, "totalDebtincInt should be a positive amount.")
