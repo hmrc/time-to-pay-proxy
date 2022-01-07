@@ -58,7 +58,7 @@ class CreatePlanRequestSpec extends AnyWordSpec with Matchers {
           Some(List(Payment(LocalDate.parse("2021-05-13"), 100)))
         )
       ),
-      List(PaymentInformation(PaymentMethod.Bacs, PaymentReference("ref123"))),
+      List(PaymentInformation(PaymentMethod.Bacs, Some(PaymentReference("ref123")))),
       List(
         CustomerPostCode(PostCode("NW9 5XW"), LocalDate.parse("2021-05-13"))
       ),

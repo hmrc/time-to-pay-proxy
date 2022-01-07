@@ -41,7 +41,7 @@ class UpdatePlanServiceSpec extends UnitSpec {
     Some(true),
     Some(
       List(
-        PaymentInformation(PaymentMethod.Bacs, PaymentReference("reference"))
+        PaymentInformation(PaymentMethod.Bacs, Some(PaymentReference("reference")))
       )
     )
   )
