@@ -138,7 +138,7 @@ class TTPQuoteServiceSpec extends UnitSpec {
       Some(true),
       Some(
         List(
-          PaymentInformation(PaymentMethod.Bacs, PaymentReference("reference"))
+          PaymentInformation(PaymentMethod.Bacs, Some(PaymentReference("reference")))
         )
       )
     )
@@ -183,7 +183,7 @@ class TTPQuoteServiceSpec extends UnitSpec {
           Some(List(Payment(LocalDate.parse("2020-01-01"), 100)))
         )
       ),
-      List(PaymentInformation(PaymentMethod.Bacs, PaymentReference("ref123"))),
+      List(PaymentInformation(PaymentMethod.Bacs, Some(PaymentReference("ref123")))),
       List(CustomerPostCode(PostCode("NW1 AB1"), LocalDate.now())),
       List(
         Instalment(
