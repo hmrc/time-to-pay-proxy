@@ -76,6 +76,8 @@ class TimeToPayProxyControllerSpec
     List()
   )
 
+  val queryParameterNotMatchingPayload = "customerReference and planId in the query parameters should match the ones in the request payload"
+
   private val updatePlanRequest =
     UpdatePlanRequest(
       CustomerReference("customerReference"),
@@ -434,7 +436,7 @@ class TimeToPayProxyControllerSpec
         val responseFromTtp = UpdatePlanResponse(
           CustomerReference("customerReference"),
           PlanId("pageId"),
-          QuoteStatus("quoteStatus"),
+          PlanStatus.Success,
           LocalDate.now
         )
         (ttpQuoteService
@@ -500,6 +502,62 @@ class TimeToPayProxyControllerSpec
           TtppErrorResponse(errorResponse.intValue(), "Internal Service Error")
         )
       }
+    }
+
+    "return 400" when {
+      "customerReference on query parameters do not match customer reference in payload" in {
+        (authConnector
+          .authorise[Unit](_: Predicate, _: Retrieval[Unit])(
+          _: HeaderCarrier,
+          _: ExecutionContext
+        ))
+          .expects(*, *, *, *)
+          .returning(Future.successful())
+
+        val wrongCustomerReferenceInQueryParameters = s"${updatePlanRequest.customerReference.value}-wrong"
+        val fakeRequest: FakeRequest[JsValue] = FakeRequest(
+          "POST",
+          s"/individuals/time-to-pay/quote/$wrongCustomerReferenceInQueryParameters/${updatePlanRequest.planId.value}"
+        ).withHeaders(CONTENT_TYPE -> MimeTypes.JSON)
+          .withBody(Json.toJson[UpdatePlanRequest](updatePlanRequest))
+        val response: Future[Result] = controller.updatePlan(
+          wrongCustomerReferenceInQueryParameters,
+          updatePlanRequest.planId.value
+        )(fakeRequest)
+
+        val errorResponse = Status.BAD_REQUEST
+        status(response) shouldBe errorResponse.intValue()
+        Json.fromJson[TtppErrorResponse](contentAsJson(response)) shouldBe JsSuccess(
+          TtppErrorResponse(errorResponse.intValue(), queryParameterNotMatchingPayload)
+        )
+      }
+      "planId on query parameters do not match customer reference in payload" in {
+        (authConnector
+          .authorise[Unit](_: Predicate, _: Retrieval[Unit])(
+          _: HeaderCarrier,
+          _: ExecutionContext
+        ))
+          .expects(*, *, *, *)
+          .returning(Future.successful())
+
+        val wrongPlanIdInQueryParameters = s"${updatePlanRequest.planId.value}-wrong"
+        val fakeRequest: FakeRequest[JsValue] = FakeRequest(
+          "POST",
+          s"/individuals/time-to-pay/quote/${updatePlanRequest.customerReference.value}/$wrongPlanIdInQueryParameters"
+        ).withHeaders(CONTENT_TYPE -> MimeTypes.JSON)
+          .withBody(Json.toJson[UpdatePlanRequest](updatePlanRequest))
+        val response: Future[Result] = controller.updatePlan(
+          wrongPlanIdInQueryParameters,
+          updatePlanRequest.planId.value
+        )(fakeRequest)
+
+        val errorResponse = Status.BAD_REQUEST
+        status(response) shouldBe errorResponse.intValue()
+        Json.fromJson[TtppErrorResponse](contentAsJson(response)) shouldBe JsSuccess(
+          TtppErrorResponse(errorResponse.intValue(), queryParameterNotMatchingPayload)
+        )
+      }
+
     }
   }
 

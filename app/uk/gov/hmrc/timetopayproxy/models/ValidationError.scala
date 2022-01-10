@@ -16,16 +16,4 @@
 
 package uk.gov.hmrc.timetopayproxy.models
 
-import java.time.LocalDate
-
-import play.api.libs.json.Json
-
-final case class UpdatePlanResponse(
-                                     customerReference: CustomerReference,
-                                     planId:            PlanId,
-                                     planStatus:        PlanStatus,
-                                     planUpdatedDate:   LocalDate)
-
-object UpdatePlanResponse {
-  implicit val format = Json.format[UpdatePlanResponse]
-}
+final case class ValidationError(message: String) extends TtppError

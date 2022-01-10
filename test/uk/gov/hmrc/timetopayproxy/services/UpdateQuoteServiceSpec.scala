@@ -52,7 +52,7 @@ class UpdatePlanServiceSpec extends UnitSpec {
         val responseFromTtp = UpdatePlanResponse(
           CustomerReference("customerReference"),
           PlanId("planId"),
-          QuoteStatus("quoteStatus"),
+          PlanStatus.Success,
           LocalDate.now
         )
         val connector = mock[TtpConnector]
