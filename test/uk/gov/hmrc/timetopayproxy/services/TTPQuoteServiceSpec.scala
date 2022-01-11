@@ -146,7 +146,7 @@ class TTPQuoteServiceSpec extends UnitSpec {
   private val updatePlanResponse = UpdatePlanResponse(
     CustomerReference("customerReference"),
     PlanId("planId"),
-    QuoteStatus("quoteStatus"),
+    PlanStatus.Success,
     LocalDate.now
   )
 

@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.timetopayproxy.utils
 
-import uk.gov.hmrc.timetopayproxy.models.{ConnectorError, TtppErrorResponse, TtppError}
+import uk.gov.hmrc.timetopayproxy.models.{ConnectorError, TtppError, TtppErrorResponse, ValidationError}
 
 object TtppErrorHandler {
 
@@ -24,6 +24,8 @@ object TtppErrorHandler {
     def toErrorResponse:  TtppErrorResponse = error match {
       case ConnectorError(status, message) =>
         TtppErrorResponse(status, s"$message")
+      case ValidationError(message) =>
+        TtppErrorResponse(400, s"$message")
       case e => TtppErrorResponse(500, s"${e.toString}")
     }
   }

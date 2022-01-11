@@ -27,7 +27,8 @@ import uk.gov.hmrc.timetopayproxy.services.TTPQuoteService
 import uk.gov.hmrc.timetopayproxy.utils.TtppErrorHandler._
 import uk.gov.hmrc.timetopayproxy.utils.TtppResponseConverter._
 import uk.gov.hmrc.timetopayproxy.models.GenerateQuoteResponse._
-
+import uk.gov.hmrc.timetopayproxy.models.TtppEnvelope.TtppEnvelope
+import cats.syntax.either._
 import scala.concurrent.Future
 import scala.util.{Failure, Success, Try}
 
@@ -38,6 +39,8 @@ class TimeToPayProxyController @Inject()(authoriseAction: AuthoriseAction,
     extends BackendController(cc)
     with BaseController {
   implicit val ec = cc.executionContext
+
+  private val queryParameterNotMatchingPayload = "customerReference and planId in the query parameters should match the ones in the request payload"
 
   def generateQuote: Action[JsValue] = authoriseAction.async(parse.json) {
     implicit request =>
@@ -62,8 +65,13 @@ class TimeToPayProxyController @Inject()(authoriseAction: AuthoriseAction,
   def updatePlan(customerReference: String, planId: String): Action[JsValue] =
     authoriseAction.async(parse.json) { implicit request =>
       withJsonBody[UpdatePlanRequest] { updatePlanRequest: UpdatePlanRequest => {
-        timeToPayProxyService
-          .updatePlan(updatePlanRequest)
+
+        val result = for {
+          validatedUpdatePlanRequest <- validateUpdateRequestMatchesQueryParams(customerReference, planId, updatePlanRequest)
+          response <- timeToPayProxyService.updatePlan(validatedUpdatePlanRequest)
+        } yield response
+
+        result
           .leftMap(ttppError => ttppError.toErrorResponse)
           .fold(e => e.toResponse, r => r.toResponse)
       }
@@ -80,6 +88,12 @@ class TimeToPayProxyController @Inject()(authoriseAction: AuthoriseAction,
     }
   }
 
+  private def validateUpdateRequestMatchesQueryParams(customerReference: String, planId: String, updatePlanRequest: UpdatePlanRequest): TtppEnvelope[UpdatePlanRequest] = {
+    (updatePlanRequest.customerReference, updatePlanRequest.planId) match {
+      case (CustomerReference(cr), PlanId(pid)) if (cr.trim == customerReference) && (pid.trim == planId) => TtppEnvelope(updatePlanRequest)
+      case _ => TtppEnvelope(ValidationError(queryParameterNotMatchingPayload).asLeft[UpdatePlanRequest])
+    }
+  }
   private def extractFieldFromJsPath(jsPath: JsPath): String = {
     s"${jsPath.path.reverse.headOption.fold("-")(_.toString.replace("/", ""))}"
   }
