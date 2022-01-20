@@ -35,9 +35,7 @@
       "type": "string",
       "enum": [
         "earlyRepayment",
-        "paidWithinTolerance",
-        "endOfSchedule",
-        "reductionOfCharges",
+        "amendmentOfCharges",
         "remission"
       ],
       "description": "This needs to be added as a validation where status update is complete"

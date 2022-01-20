@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.timetopayproxy.models
 
-import play.api.libs.json.Json
+import play.api.libs.json.{Format, Json}
 import enumeratum.{Enum, EnumEntry, PlayJsonEnum}
 
 import scala.collection.immutable
@@ -27,9 +27,7 @@ object CompleteReason extends Enum[CompleteReason] with PlayJsonEnum[CompleteRea
   val values: immutable.IndexedSeq[CompleteReason] = findValues
 
   case object EarlyRepayment extends CompleteReason("earlyRepayment")
-  case object PaidWithinTolerance extends CompleteReason("paidWithinTolerance")
-  case object EndOfSchedule extends CompleteReason("endOfSchedule")
-  case object ReductionOfCharges extends CompleteReason("reductionOfCharges")
+  case object AmendmentOfCharges extends CompleteReason("amendmentOfCharges")
   case object Remission extends CompleteReason("remission")
 }
 
