@@ -123,7 +123,7 @@ class TimeToPayProxyControllerSpec
           MainTransType.TPSSAccTaxAssessment,
           SubTransType.IT,
           100,
-          LocalDate.now(),
+          Some(LocalDate.now()),
           Some(List(Payment(LocalDate.parse("2020-01-01"), 100)))
         )
       ),
@@ -166,7 +166,7 @@ class TimeToPayProxyControllerSpec
         TPSSContractSettlementINT,
         TGPEN,
         100,
-        LocalDate.parse("2021-05-13"),
+        Some(LocalDate.parse("2021-05-13")),
         Some(List(Payment(LocalDate.parse("2021-05-13"), 100)))
       )
     ),
