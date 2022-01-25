@@ -695,6 +695,51 @@ class TimeToPayProxyControllerSpec
               JsArray(
                 List(
                   Json.obj(
+                    "paymentMethod" -> "directDebit"
+                  )
+                )
+              )
+          )
+
+        val fakeRequest: FakeRequest[JsValue] =
+          FakeRequest(
+            "PUT",
+            s"/individuals/time-to-pay/quote/customerRef1234/planId1234"
+          )
+            .withHeaders(CONTENT_TYPE -> MimeTypes.JSON)
+            .withBody(invalidJsonBody)
+
+        val response: Future[Result] =
+          controller.updatePlan(
+            "customerRef1234",
+            "planId1234"
+          )(fakeRequest)
+
+        val errorResponse = Status.BAD_REQUEST
+        status(response) shouldBe errorResponse.intValue()
+        Json.fromJson[TtppErrorResponse](contentAsJson(response)) shouldBe JsSuccess(
+          TtppErrorResponse(errorResponse.intValue(), "Could not parse body due to requirement failed: Direct Debit should always have payment reference")
+        )
+      }
+      "paymentReference is empty in payments when paymentMethod is directDebit" in {
+        (authConnector
+          .authorise[Unit](_: Predicate, _: Retrieval[Unit])(
+            _: HeaderCarrier,
+            _: ExecutionContext
+          ))
+          .expects(*, *, *, *)
+          .returning(Future.successful())
+
+        val invalidJsonBody: JsValue =
+          Json.obj(
+            "customerReference" -> "customerRef1234",
+            "planId" -> "planId1234",
+            "updateType" -> "paymentDetails",
+            "thirdPartyBank" -> false,
+            "payments" ->
+              JsArray(
+                List(
+                  Json.obj(
                     "paymentMethod" -> "directDebit",
                     "paymentReference" -> ""
                   )
