@@ -458,6 +458,69 @@ class TimeToPayProxyControllerSpec
           responseFromTtp
         )
       }
+      "when paymentMethod is not directDebit and paymentReference is missing" in {
+
+        (authConnector
+          .authorise[Unit](_: Predicate, _: Retrieval[Unit])(
+            _: HeaderCarrier,
+            _: ExecutionContext
+          ))
+          .expects(*, *, *, *)
+          .returning(Future.successful())
+
+        val updatePlanRequestMissingPaymentReference: UpdatePlanRequest =
+          Json.obj(
+            "customerReference" -> "customerRef1234",
+            "planId" -> "planId1234",
+            "updateType" -> "paymentDetails",
+            "thirdPartyBank" -> false,
+            "payments" ->
+              JsArray(
+                List(
+                  Json.obj(
+                    "paymentMethod" -> "cardPayment"
+                  )
+                )
+              )
+          ).as[UpdatePlanRequest]
+
+        println()
+        println("Vinnie")
+        println(Json.prettyPrint(Json.toJson(updatePlanRequestMissingPaymentReference)))
+        val fakeRequest: FakeRequest[JsValue] =
+          FakeRequest(
+            "PUT",
+            s"/individuals/time-to-pay/quote/${updatePlanRequestMissingPaymentReference.customerReference.value}/${updatePlanRequestMissingPaymentReference.planId.value}"
+          )
+            .withHeaders(CONTENT_TYPE -> MimeTypes.JSON)
+            .withBody(Json.toJson(updatePlanRequestMissingPaymentReference))
+
+        val responseFromTtp = UpdatePlanResponse(
+          CustomerReference("customerRef1234"),
+          PlanId("planId1234"),
+          PlanStatus.Success,
+          LocalDate.now
+        )
+        (ttpQuoteService
+          .updatePlan(_: UpdatePlanRequest)(
+            _: ExecutionContext,
+            _: HeaderCarrier
+          ))
+          .expects(updatePlanRequestMissingPaymentReference, *, *)
+          .returning(TtppEnvelope(responseFromTtp))
+
+
+        val response: Future[Result] =
+          controller.updatePlan(
+            updatePlanRequestMissingPaymentReference.customerReference.value,
+            updatePlanRequestMissingPaymentReference.planId.value
+          )(fakeRequest)
+
+        status(response) shouldBe Status.OK
+        Json.fromJson[UpdatePlanResponse](contentAsJson(response)) shouldBe JsSuccess(
+          responseFromTtp
+        )
+      }
     }
 
     "return 500" when {
@@ -528,7 +591,7 @@ class TimeToPayProxyControllerSpec
           TtppErrorResponse(errorResponse.intValue(), queryParameterNotMatchingPayload)
         )
       }
-      "planId on query parameters do not match customer reference in payload" in {
+      "planId on query parameters do not match planId in payload" in {
         (authConnector
           .authorise[Unit](_: Predicate, _: Retrieval[Unit])(
           _: HeaderCarrier,
@@ -554,7 +617,7 @@ class TimeToPayProxyControllerSpec
           TtppErrorResponse(errorResponse.intValue(), queryParameterNotMatchingPayload)
         )
       }
-      "missing paymentReference" in {
+      "missing paymentReference in payments when paymentMethod is directDebit" in {
         (authConnector
           .authorise[Unit](_: Predicate, _: Retrieval[Unit])(
             _: HeaderCarrier,
@@ -563,7 +626,7 @@ class TimeToPayProxyControllerSpec
           .expects(*, *, *, *)
           .returning(Future.successful())
 
-        val invalidJsonBody: JsValue =
+        val invalidUpdatePlaneRequest: UpdatePlanRequest =
           Json.obj(
             "customerReference" -> "customerRef1234",
             "planId" -> "planId1234",
@@ -573,35 +636,35 @@ class TimeToPayProxyControllerSpec
               JsArray(
                 List(
                   Json.obj(
-                    "paymentMethod" -> "cardPayment"
+                    "paymentMethod" -> "directDebit"
                   )
                 )
               )
-          )
+          ).as[UpdatePlanRequest]
 
         val fakeRequest: FakeRequest[JsValue] =
           FakeRequest(
             "PUT",
-            s"/individuals/time-to-pay/quote/${updatePlanRequest.customerReference.value}/${updatePlanRequest.planId.value}"
+            s"/individuals/time-to-pay/quote/${invalidUpdatePlaneRequest.customerReference.value}/${invalidUpdatePlaneRequest.planId.value}"
           )
           .withHeaders(CONTENT_TYPE -> MimeTypes.JSON)
-          .withBody(invalidJsonBody)
+          .withBody(Json.toJson(invalidUpdatePlaneRequest))
 
         val response: Future[Result] =
           controller.updatePlan(
-            updatePlanRequest.customerReference.value,
-            updatePlanRequest.planId.value
+            invalidUpdatePlaneRequest.customerReference.value,
+            invalidUpdatePlaneRequest.planId.value
           )(fakeRequest)
 
         val errorResponse = Status.BAD_REQUEST
         status(response) shouldBe errorResponse.intValue()
         Json.fromJson[TtppErrorResponse](contentAsJson(response)) shouldBe JsSuccess(
-          TtppErrorResponse(errorResponse.intValue(), "Could not parse body due to requirement failed: paymentReference should not be empty")
+          TtppErrorResponse(errorResponse.intValue(), "Could not parse body due to requirement failed: Direct Debit should always have payment reference")
         )
       }
     }
 
-    "missing planStatus" in {
+    "paymentReference in payments is empty" in {
       (authConnector
         .authorise[Unit](_: Predicate, _: Retrieval[Unit])(
           _: HeaderCarrier,
@@ -612,7 +675,7 @@ class TimeToPayProxyControllerSpec
 
       val invalidJsonBody: JsValue =
         Json.obj(
-          "customerReference" -> "custReference1234",
+          "customerReference" -> "customerRef1234",
           "planId" -> "planId1234",
           "updateType" -> "paymentDetails",
           "thirdPartyBank" -> false,
@@ -621,7 +684,7 @@ class TimeToPayProxyControllerSpec
               List(
                 Json.obj(
                   "paymentMethod" -> "cardPayment",
-                  "paymentReference" -> "paymentReference"
+                  "paymentReference" -> ""
                 )
               )
             )
@@ -644,9 +707,56 @@ class TimeToPayProxyControllerSpec
       val errorResponse = Status.BAD_REQUEST
       status(response) shouldBe errorResponse.intValue()
       Json.fromJson[TtppErrorResponse](contentAsJson(response)) shouldBe JsSuccess(
-        TtppErrorResponse(errorResponse.intValue(), "Invalid UpdatePlanRequest payload: Payload has a missing field or an invalid format. Field name: planStatus. ")
+        TtppErrorResponse(errorResponse.intValue(), "Could not parse body due to requirement failed: paymentReference should not be empty")
       )
     }
+
+//    "missing planStatus" in { TODO: update scenario 2 for DTD-890 later
+//      (authConnector
+//        .authorise[Unit](_: Predicate, _: Retrieval[Unit])(
+//          _: HeaderCarrier,
+//          _: ExecutionContext
+//        ))
+//        .expects(*, *, *, *)
+//        .returning(Future.successful())
+//
+//      val invalidJsonBody: JsValue =
+//        Json.obj(
+//          "customerReference" -> "custReference1234",
+//          "planId" -> "planId1234",
+//          "updateType" -> "paymentDetails",
+//          "thirdPartyBank" -> false,
+//          "payments" ->
+//            JsArray(
+//              List(
+//                Json.obj(
+//                  "paymentMethod" -> "cardPayment",
+//                  "paymentReference" -> "paymentReference"
+//                )
+//              )
+//            )
+//        )
+//
+//      val fakeRequest: FakeRequest[JsValue] =
+//        FakeRequest(
+//          "PUT",
+//          s"/individuals/time-to-pay/quote/${updatePlanRequest.customerReference.value}/${updatePlanRequest.planId.value}"
+//        )
+//          .withHeaders(CONTENT_TYPE -> MimeTypes.JSON)
+//          .withBody(invalidJsonBody)
+//
+//      val response: Future[Result] =
+//        controller.updatePlan(
+//          updatePlanRequest.customerReference.value,
+//          updatePlanRequest.planId.value
+//        )(fakeRequest)
+//
+//      val errorResponse = Status.BAD_REQUEST
+//      status(response) shouldBe errorResponse.intValue()
+//      Json.fromJson[TtppErrorResponse](contentAsJson(response)) shouldBe JsSuccess(
+//        TtppErrorResponse(errorResponse.intValue(), "Invalid UpdatePlanRequest payload: Payload has a missing field or an invalid format. Field name: planStatus. ")
+//      )
+//    }
   }
 
   "POST /individuals/time-to-pay/quote/arrangement" should {
