@@ -52,16 +52,15 @@ object PlanToCreatePlan {
 }
 
 final case class PaymentInformation(paymentMethod: PaymentMethod, paymentReference: Option[PaymentReference]) {
-  if (paymentMethod == PaymentMethod.DirectDebit)
-    require(
-      !paymentReference.forall(_.value.trim().isEmpty()),
-      "Direct Debit should always have payment reference"
-    )
-  if (!paymentReference.isEmpty)
-    require(
-      !paymentReference.forall(_.value.trim().isEmpty()),
-      "paymentReference should not be empty"
-    )
+  require(
+    (paymentMethod != PaymentMethod.DirectDebit) || (paymentMethod == PaymentMethod.DirectDebit) && !paymentReference.forall(_.value.trim().isEmpty()),
+    "Direct Debit should always have payment reference"
+  )
+
+  require(
+    paymentReference.isEmpty || !paymentReference.forall(_.value.trim().isEmpty()),
+    "paymentReference should not be empty"
+  )
 }
 
 object PaymentInformation {

@@ -72,9 +72,8 @@ final case class UpdatePlanRequest(customerReference: CustomerReference,
                                     thirdPartyBank: Option[Boolean],
                                     payments: Option[List[PaymentInformation]]
 ) {
-  if (updateType.value == "planStatus")
   require(
-    !planStatus.isEmpty,
+    !(updateType.value == "planStatus") || !planStatus.isEmpty,
     "Invalid UpdatePlanRequest payload: Payload has a missing field or an invalid format. Field name: planStatus."
   )
 }
