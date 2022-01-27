@@ -24,211 +24,18 @@ import play.api.libs.json._
 
 import scala.util.{Failure, Try}
 
-class CreatePlanRequestSpec extends AnyWordSpec with Matchers {
-  private val createPlanRequest =
-    CreatePlanRequest(
-      CustomerReference("customerReference"),
-      QuoteReference("quoteReference"),
-      ChannelIdentifier.Advisor,
-      PlanToCreatePlan(
-        QuoteId("quoteId1"),
-        QuoteType.InstalmentAmount,
-        LocalDate.parse("2021-05-13"),
-        LocalDate.parse("2021-05-13"),
-        Some(100),
-        PaymentPlanType.TimeToPay,
-        true,
-        1,
-        Some(Frequency.Annually),
-        Some(Duration(12)),
-        Some(LocalDate.parse("2021-05-13")),
-        Some(100),
-        100,
-        10,
-        10,
-        10
-      ),
-      List(
-        DebtItemCharge(
-          DebtItemChargeId("debtItemChargeId1"),
-          MainTransType.TPSSAccTaxAssessment,
-          SubTransType.IT,
-          100,
-          Some(LocalDate.parse("2021-05-13")),
-          Some(List(Payment(LocalDate.parse("2021-05-13"), 100)))
-        )
-      ),
-      List(PaymentInformation(PaymentMethod.Bacs, Some(PaymentReference("ref123")))),
-      List(
-        CustomerPostCode(PostCode("NW9 5XW"), LocalDate.parse("2021-05-13"))
-      ),
-      List(
-        Instalment(
-          DebtItemChargeId("debtItemChargeId1"),
-          LocalDate.parse("2021-05-13"),
-          100,
-          100,
-          0.25,
-          1,
-          10,
-          90
-        )
-      )
-    )
-
-  val json = """{
-               |  "customerReference": "customerReference",
-               |  "quoteReference":"quoteReference",
-               |  "channelIdentifier": "advisor",
-               |  "plan": {
-               |    "quoteId": "quoteId1",
-               |    "quoteType": "instalmentAmount",
-               |    "quoteDate": "2021-05-13",
-               |    "instalmentStartDate": "2021-05-13",
-               |    "instalmentAmount": 100,
-               |    "paymentPlanType": "timeToPay",
-               |    "thirdPartyBank": true,
-               |    "numberOfInstalments": 1,
-               |    "frequency": "annually",
-               |    "duration": 12,
-               |    "initialPaymentDate": "2021-05-13",
-               |    "initialPaymentAmount": 100,
-               |    "totalDebtIncInt": 100,
-               |    "totalInterest": 10,
-               |    "interestAccrued": 10,
-               |    "planInterest": 10
-               |  },
-               |  "debtItemCharges": [
-               |    {
-               |      "debtItemChargeId": "debtItemChargeId1",
-               |      "mainTrans": "1525",
-               |      "subTrans": "1000",
-               |      "originalDebtAmount": 100,
-               |      "interestStartDate": "2021-05-13",
-               |      "paymentHistory": [
-               |        {
-               |          "paymentDate": "2021-05-13",
-               |          "paymentAmount": 100
-               |        }
-               |      ]
-               |    }
-               |  ],
-               |  "payments": [
-               |    {
-               |      "paymentMethod": "BACS",
-               |      "paymentReference": "ref123"
-               |    }
-               |  ],
-               |  "customerPostCodes": [
-               |    {
-               |      "addressPostcode": "NW9 5XW",
-               |      "postcodeDate": "2021-05-13"
-               |    }
-               |  ],
-               |  "instalments": [
-               |  {
-               |    "debtItemChargeId": "debtItemChargeId1",
-               |    "dueDate": "2021-05-13",
-               |    "amountDue": 100,
-               |    "expectedPayment": 100,
-               |    "interestRate": 0.25,
-               |    "instalmentNumber": 1,
-               |    "instalmentInterestAccrued": 10,
-               |    "instalmentBalance": 90
-               |  }
-               |  ]
-               |}
-               """.stripMargin
-
-  private def getJsonWithInvalidReference(
-    quoteReference: QuoteReference = QuoteReference("quoteReference"),
-    customerReference: CustomerReference = CustomerReference(
-      "customerReference"
-    ),
-    paymentReference: PaymentReference = PaymentReference("ref123"),
-    instalmentAmount: BigDecimal = 100,
-    numberOfInstalments: Int = 1,
-    initialPaymentAmount: BigDecimal = 100,
-    totalDebtIncInt: BigDecimal = 100,
-    totalInterest: BigDecimal = 10,
-    interestAccrued: BigDecimal = 10,
-    planInterest: BigDecimal = 10,
-    originalDebtAmount: BigDecimal = 100,
-    paymentAmount: BigDecimal = 100,
-    amountDue: BigDecimal = 100,
-    expectedPayment: BigDecimal = 100,
-    interestRate: Double = 0.25,
-    instalmentNumber: Int = 1,
-    instalmentInterestAccrued: BigDecimal = 10,
-    instalmentBalance: BigDecimal = 90
-  ) =
-    s"""{
-      |  "customerReference": "${customerReference.value}",
-      |  "quoteReference":"${quoteReference.value}",
-      |  "channelIdentifier": "advisor",
-      |  "plan": {
-      |    "quoteId": "quoteId1",
-      |    "quoteType": "instalmentAmount",
-      |    "quoteDate": "2021-05-13",
-      |    "instalmentStartDate": "2021-05-13",
-      |    "instalmentAmount": ${instalmentAmount},
-      |    "paymentPlanType": "timeToPay",
-      |    "thirdPartyBank": true,
-      |    "numberOfInstalments": ${numberOfInstalments},
-      |    "frequency": "annually",
-      |    "duration": 12,
-      |    "initialPaymentDate": "2021-05-13",
-      |    "initialPaymentAmount": ${initialPaymentAmount},
-      |    "totalDebtIncInt": ${totalDebtIncInt},
-      |    "totalInterest": ${totalInterest},
-      |    "interestAccrued": ${interestAccrued},
-      |    "planInterest": ${planInterest}
-      |  },
-      |  "debtItemCharges": [
-      |    {
-      |      "debtItemChargeId": "debtItemChargeId1",
-      |      "mainTrans": "1525",
-      |      "subTrans": "1000",
-      |      "originalDebtAmount": $originalDebtAmount,
-      |      "interestStartDate": "2021-05-13",
-      |      "paymentHistory": [
-      |        {
-      |          "paymentDate": "2021-05-13",
-      |          "paymentAmount": $paymentAmount
-      |        }
-      |      ]
-      |    }
-      |  ],
-      |  "payments": [
-      |    {
-      |      "paymentMethod": "BACS",
-      |      "paymentReference": "${paymentReference.value}"
-      |    }
-      |  ],
-      |  "customerPostCodes": [
-      |    {
-      |      "addressPostcode": "NW9 5XW",
-      |      "postcodeDate": "2021-05-13"
-      |    }
-      |  ],
-      |  "instalments": [
-      |  {
-      |    "debtItemChargeId": "debtItemChargeId1",
-      |    "dueDate": "2021-05-13",
-      |    "amountDue": $amountDue,
-      |    "expectedPayment": $expectedPayment,
-      |    "interestRate": $interestRate,
-      |    "instalmentNumber": $instalmentNumber,
-      |    "instalmentInterestAccrued": $instalmentInterestAccrued,
-      |    "instalmentBalance": $instalmentBalance
-      |  }
-      |  ]
-      |}
-    """.stripMargin
+class CreatePlanRequestSpec extends AnyWordSpec with Matchers with CreatePlanRequestFixture {
 
   "CreatePlanRequest" should {
     "be correctly encoded and decoded" in {
       Json.toJson(createPlanRequest) shouldEqual (Json.parse(json))
+      (Json.parse(json)).as[CreatePlanRequest] shouldEqual createPlanRequest
+
+    }
+
+    "be correctly encoded and decoded with payment reference None for methods except direct debit" in {
+      (Json.parse(jsonWithEmptyReference)).as[CreatePlanRequest] shouldEqual createPlanRequestWithEmptyReference
+      Json.toJson(createPlanRequestWithEmptyReference) shouldEqual (Json.parse(jsonWithEmptyReference))
     }
 
     "fail decoding if paymentReference is empty" in {
@@ -485,4 +292,331 @@ class CreatePlanRequestSpec extends AnyWordSpec with Matchers {
     }
 
   }
+}
+
+trait CreatePlanRequestFixture {
+  protected val createPlanRequest =
+    CreatePlanRequest(
+      CustomerReference("customerReference"),
+      QuoteReference("quoteReference"),
+      ChannelIdentifier.Advisor,
+      PlanToCreatePlan(
+        QuoteId("quoteId1"),
+        QuoteType.InstalmentAmount,
+        LocalDate.parse("2021-05-13"),
+        LocalDate.parse("2021-05-13"),
+        Some(100),
+        PaymentPlanType.TimeToPay,
+        true,
+        1,
+        Some(Frequency.Annually),
+        Some(Duration(12)),
+        Some(LocalDate.parse("2021-05-13")),
+        Some(100),
+        100,
+        10,
+        10,
+        10
+      ),
+      List(
+        DebtItemCharge(
+          DebtItemChargeId("debtItemChargeId1"),
+          MainTransType.TPSSAccTaxAssessment,
+          SubTransType.IT,
+          100,
+          Some(LocalDate.parse("2021-05-13")),
+          Some(List(Payment(LocalDate.parse("2021-05-13"), 100)))
+        )
+      ),
+      List(PaymentInformation(PaymentMethod.Bacs, Some(PaymentReference("ref123")))),
+      List(
+        CustomerPostCode(PostCode("NW9 5XW"), LocalDate.parse("2021-05-13"))
+      ),
+      List(
+        Instalment(
+          DebtItemChargeId("debtItemChargeId1"),
+          LocalDate.parse("2021-05-13"),
+          100,
+          100,
+          0.25,
+          1,
+          10,
+          90
+        )
+      )
+    )
+  protected val json = """{
+               |  "customerReference": "customerReference",
+               |  "quoteReference":"quoteReference",
+               |  "channelIdentifier": "advisor",
+               |  "plan": {
+               |    "quoteId": "quoteId1",
+               |    "quoteType": "instalmentAmount",
+               |    "quoteDate": "2021-05-13",
+               |    "instalmentStartDate": "2021-05-13",
+               |    "instalmentAmount": 100,
+               |    "paymentPlanType": "timeToPay",
+               |    "thirdPartyBank": true,
+               |    "numberOfInstalments": 1,
+               |    "frequency": "annually",
+               |    "duration": 12,
+               |    "initialPaymentDate": "2021-05-13",
+               |    "initialPaymentAmount": 100,
+               |    "totalDebtIncInt": 100,
+               |    "totalInterest": 10,
+               |    "interestAccrued": 10,
+               |    "planInterest": 10
+               |  },
+               |  "debtItemCharges": [
+               |    {
+               |      "debtItemChargeId": "debtItemChargeId1",
+               |      "mainTrans": "1525",
+               |      "subTrans": "1000",
+               |      "originalDebtAmount": 100,
+               |      "interestStartDate": "2021-05-13",
+               |      "paymentHistory": [
+               |        {
+               |          "paymentDate": "2021-05-13",
+               |          "paymentAmount": 100
+               |        }
+               |      ]
+               |    }
+               |  ],
+               |  "payments": [
+               |    {
+               |      "paymentMethod": "BACS",
+               |      "paymentReference": "ref123"
+               |    }
+               |  ],
+               |  "customerPostCodes": [
+               |    {
+               |      "addressPostcode": "NW9 5XW",
+               |      "postcodeDate": "2021-05-13"
+               |    }
+               |  ],
+               |  "instalments": [
+               |  {
+               |    "debtItemChargeId": "debtItemChargeId1",
+               |    "dueDate": "2021-05-13",
+               |    "amountDue": 100,
+               |    "expectedPayment": 100,
+               |    "interestRate": 0.25,
+               |    "instalmentNumber": 1,
+               |    "instalmentInterestAccrued": 10,
+               |    "instalmentBalance": 90
+               |  }
+               |  ]
+               |}
+               """.stripMargin
+  protected val jsonWithEmptyReference = """{
+                                 |  "customerReference": "customerReference",
+                                 |  "quoteReference":"quoteReference",
+                                 |  "channelIdentifier": "advisor",
+                                 |  "plan": {
+                                 |    "quoteId": "quoteId1",
+                                 |    "quoteType": "instalmentAmount",
+                                 |    "quoteDate": "2021-05-13",
+                                 |    "instalmentStartDate": "2021-05-13",
+                                 |    "instalmentAmount": 100,
+                                 |    "paymentPlanType": "timeToPay",
+                                 |    "thirdPartyBank": true,
+                                 |    "numberOfInstalments": 1,
+                                 |    "frequency": "annually",
+                                 |    "duration": 12,
+                                 |    "initialPaymentDate": "2021-05-13",
+                                 |    "initialPaymentAmount": 100,
+                                 |    "totalDebtIncInt": 100,
+                                 |    "totalInterest": 10,
+                                 |    "interestAccrued": 10,
+                                 |    "planInterest": 10
+                                 |  },
+                                 |  "debtItemCharges": [
+                                 |    {
+                                 |      "debtItemChargeId": "debtItemChargeId1",
+                                 |      "mainTrans": "1525",
+                                 |      "subTrans": "1000",
+                                 |      "originalDebtAmount": 100,
+                                 |      "interestStartDate": "2021-05-13",
+                                 |      "paymentHistory": [
+                                 |        {
+                                 |          "paymentDate": "2021-05-13",
+                                 |          "paymentAmount": 100
+                                 |        }
+                                 |      ]
+                                 |    }
+                                 |  ],
+                                 |  "payments": [
+                                 |    {
+                                 |      "paymentMethod": "BACS"
+                                 |    }
+                                 |  ],
+                                 |  "customerPostCodes": [
+                                 |    {
+                                 |      "addressPostcode": "NW9 5XW",
+                                 |      "postcodeDate": "2021-05-13"
+                                 |    }
+                                 |  ],
+                                 |  "instalments": [
+                                 |  {
+                                 |    "debtItemChargeId": "debtItemChargeId1",
+                                 |    "dueDate": "2021-05-13",
+                                 |    "amountDue": 100,
+                                 |    "expectedPayment": 100,
+                                 |    "interestRate": 0.25,
+                                 |    "instalmentNumber": 1,
+                                 |    "instalmentInterestAccrued": 10,
+                                 |    "instalmentBalance": 90
+                                 |  }
+                                 |  ]
+                                 |}
+               """.stripMargin
+  protected val jsonWithDirectDebitAndEmptyReference = """{
+                                               |  "customerReference": "customerReference",
+                                               |  "quoteReference":"quoteReference",
+                                               |  "channelIdentifier": "advisor",
+                                               |  "plan": {
+                                               |    "quoteId": "quoteId1",
+                                               |    "quoteType": "instalmentAmount",
+                                               |    "quoteDate": "2021-05-13",
+                                               |    "instalmentStartDate": "2021-05-13",
+                                               |    "instalmentAmount": 100,
+                                               |    "paymentPlanType": "timeToPay",
+                                               |    "thirdPartyBank": true,
+                                               |    "numberOfInstalments": 1,
+                                               |    "frequency": "annually",
+                                               |    "duration": 12,
+                                               |    "initialPaymentDate": "2021-05-13",
+                                               |    "initialPaymentAmount": 100,
+                                               |    "totalDebtIncInt": 100,
+                                               |    "totalInterest": 10,
+                                               |    "interestAccrued": 10,
+                                               |    "planInterest": 10
+                                               |  },
+                                               |  "debtItemCharges": [
+                                               |    {
+                                               |      "debtItemChargeId": "debtItemChargeId1",
+                                               |      "mainTrans": "1525",
+                                               |      "subTrans": "1000",
+                                               |      "originalDebtAmount": 100,
+                                               |      "interestStartDate": "2021-05-13",
+                                               |      "paymentHistory": [
+                                               |        {
+                                               |          "paymentDate": "2021-05-13",
+                                               |          "paymentAmount": 100
+                                               |        }
+                                               |      ]
+                                               |    }
+                                               |  ],
+                                               |  "payments": [
+                                               |    {
+                                               |      "paymentMethod": "directDebit"
+                                               |    }
+                                               |  ],
+                                               |  "customerPostCodes": [
+                                               |    {
+                                               |      "addressPostcode": "NW9 5XW",
+                                               |      "postcodeDate": "2021-05-13"
+                                               |    }
+                                               |  ],
+                                               |  "instalments": [
+                                               |  {
+                                               |    "debtItemChargeId": "debtItemChargeId1",
+                                               |    "dueDate": "2021-05-13",
+                                               |    "amountDue": 100,
+                                               |    "expectedPayment": 100,
+                                               |    "interestRate": 0.25,
+                                               |    "instalmentNumber": 1,
+                                               |    "instalmentInterestAccrued": 10,
+                                               |    "instalmentBalance": 90
+                                               |  }
+                                               |  ]
+                                               |}
+               """.stripMargin
+  protected def getJsonWithInvalidReference(
+                                           quoteReference:            QuoteReference = QuoteReference("quoteReference"),
+                                           customerReference:         CustomerReference = CustomerReference("customerReference"),
+                                           paymentReference:          PaymentReference = PaymentReference("ref123"),
+                                           instalmentAmount:          BigDecimal = 100,
+                                           numberOfInstalments:       Int = 1,
+                                           initialPaymentAmount:      BigDecimal = 100,
+                                           totalDebtIncInt:           BigDecimal = 100,
+                                           totalInterest:             BigDecimal = 10,
+                                           interestAccrued:           BigDecimal = 10,
+                                           planInterest:              BigDecimal = 10,
+                                           originalDebtAmount:        BigDecimal = 100,
+                                           paymentAmount:             BigDecimal = 100,
+                                           amountDue:                 BigDecimal = 100,
+                                           expectedPayment:           BigDecimal = 100,
+                                           interestRate:              Double = 0.25,
+                                           instalmentNumber:          Int = 1,
+                                           instalmentInterestAccrued: BigDecimal = 10,
+                                           instalmentBalance:         BigDecimal = 90
+                                         ) =
+    s"""{
+       |  "customerReference": "${customerReference.value}",
+       |  "quoteReference":"${quoteReference.value}",
+       |  "channelIdentifier": "advisor",
+       |  "plan": {
+       |    "quoteId": "quoteId1",
+       |    "quoteType": "instalmentAmount",
+       |    "quoteDate": "2021-05-13",
+       |    "instalmentStartDate": "2021-05-13",
+       |    "instalmentAmount": ${instalmentAmount},
+       |    "paymentPlanType": "timeToPay",
+       |    "thirdPartyBank": true,
+       |    "numberOfInstalments": ${numberOfInstalments},
+       |    "frequency": "annually",
+       |    "duration": 12,
+       |    "initialPaymentDate": "2021-05-13",
+       |    "initialPaymentAmount": ${initialPaymentAmount},
+       |    "totalDebtIncInt": ${totalDebtIncInt},
+       |    "totalInterest": ${totalInterest},
+       |    "interestAccrued": ${interestAccrued},
+       |    "planInterest": ${planInterest}
+       |  },
+       |  "debtItemCharges": [
+       |    {
+       |      "debtItemChargeId": "debtItemChargeId1",
+       |      "mainTrans": "1525",
+       |      "subTrans": "1000",
+       |      "originalDebtAmount": $originalDebtAmount,
+       |      "interestStartDate": "2021-05-13",
+       |      "paymentHistory": [
+       |        {
+       |          "paymentDate": "2021-05-13",
+       |          "paymentAmount": $paymentAmount
+       |        }
+       |      ]
+       |    }
+       |  ],
+       |  "payments": [
+       |    {
+       |      "paymentMethod": "BACS",
+       |      "paymentReference": "${paymentReference.value}"
+       |    }
+       |  ],
+       |  "customerPostCodes": [
+       |    {
+       |      "addressPostcode": "NW9 5XW",
+       |      "postcodeDate": "2021-05-13"
+       |    }
+       |  ],
+       |  "instalments": [
+       |  {
+       |    "debtItemChargeId": "debtItemChargeId1",
+       |    "dueDate": "2021-05-13",
+       |    "amountDue": $amountDue,
+       |    "expectedPayment": $expectedPayment,
+       |    "interestRate": $interestRate,
+       |    "instalmentNumber": $instalmentNumber,
+       |    "instalmentInterestAccrued": $instalmentInterestAccrued,
+       |    "instalmentBalance": $instalmentBalance
+       |  }
+       |  ]
+       |}
+    """.stripMargin
+
+  protected val createPlanRequestWithEmptyReference =
+    createPlanRequest.copy(payments = List(createPlanRequest.payments.head.copy(paymentReference = None)))
+
 }

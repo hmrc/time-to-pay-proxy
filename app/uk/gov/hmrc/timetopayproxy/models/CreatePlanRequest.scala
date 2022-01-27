@@ -52,7 +52,7 @@ object PlanToCreatePlan {
 }
 
 final case class PaymentInformation(paymentMethod: PaymentMethod, paymentReference: Option[PaymentReference]) {
-  require(!paymentReference.forall(_.value.trim().isEmpty()), "paymentReference should not be empty")
+  require(paymentReference.forall(x => !(x.value.trim().isEmpty())), "paymentReference should not be empty")
 }
 
 object PaymentInformation {
