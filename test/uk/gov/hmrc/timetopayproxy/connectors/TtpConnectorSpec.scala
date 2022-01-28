@@ -171,7 +171,7 @@ class TtpConnectorSpec extends PlaySpec with DefaultAwaitTimeout with FutureAwai
       "parse an error response from an upstream service" in new Setup {
         stubPutWithResponseBody("/individuals/time-to-pay/quote/CustRef1234/PlanId1234", 400, errorResponse("BAD_REQUEST", "Invalid request body"))
         val result = connector.updatePlan(UpdatePlanRequest(
-          CustomerReference("CustRef1234"), PlanId("PlanId1234"), UpdateType("Cancel"), PlanStatus.ResolvedCancelled, None,
+          CustomerReference("CustRef1234"), PlanId("PlanId1234"), UpdateType("Cancel"), Some(PlanStatus.ResolvedCancelled), None,
           None, None, None
         ))
 
@@ -183,7 +183,7 @@ class TtpConnectorSpec extends PlaySpec with DefaultAwaitTimeout with FutureAwai
       "parse an error response from an upstream service" in new Setup(false) {
         stubPutWithResponseBody("/debts/time-to-pay/quote/CustRef1234/PlanId1234", 400, errorResponse("BAD_REQUEST", "Invalid request body"))
         val result = connector.updatePlan(UpdatePlanRequest(
-          CustomerReference("CustRef1234"), PlanId("PlanId1234"), UpdateType("Cancel"), PlanStatus.ResolvedCancelled, None,
+          CustomerReference("CustRef1234"), PlanId("PlanId1234"), UpdateType("Cancel"), Some(PlanStatus.ResolvedCancelled), None,
           None, Some(true), None
         ))
 
