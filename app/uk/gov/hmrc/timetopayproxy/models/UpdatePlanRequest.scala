@@ -66,12 +66,17 @@ object UpdateType extends ValueTypeFormatter {
 final case class UpdatePlanRequest(customerReference: CustomerReference,
                                     planId: PlanId,
                                     updateType: UpdateType,
-                                    planStatus: PlanStatus,
+                                    planStatus: Option[PlanStatus],
                                     completeReason: Option[CompleteReason],
                                     cancellationReason: Option[CancellationReason],
                                     thirdPartyBank: Option[Boolean],
                                     payments: Option[List[PaymentInformation]]
-)
+) {
+  require(
+    !(updateType.value == "planStatus") || !planStatus.isEmpty,
+    "Invalid UpdatePlanRequest payload: Payload has a missing field or an invalid format. Field name: planStatus."
+  )
+}
 
 object UpdatePlanRequest {
   implicit val format = Json.format[UpdatePlanRequest]
