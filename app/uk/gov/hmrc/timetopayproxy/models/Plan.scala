@@ -28,9 +28,9 @@ final case class Plan(planId: PlanId,
                       paymentPlanType: PaymentPlanType,
                       thirdPartyBank: Boolean,
                       numberOfInstalments: Int,
-                      totalDebtIncInt: BigDecimal,
+                      totalDebtIncInt: BigInt,
                       totalInterest: BigDecimal,
-                      interestAccrued: BigDecimal,
+                      interestAccrued: BigInt,
                       planInterest: BigDecimal)
 
 object Plan {
