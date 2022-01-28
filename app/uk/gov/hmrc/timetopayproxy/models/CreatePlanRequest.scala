@@ -53,7 +53,7 @@ object PlanToCreatePlan {
 
 final case class PaymentInformation(paymentMethod: PaymentMethod, paymentReference: Option[PaymentReference]) {
   require(
-    (paymentMethod != PaymentMethod.DirectDebit) || (paymentMethod == PaymentMethod.DirectDebit) && paymentReference.forall(x => !x.value.trim().isEmpty()),
+    (paymentMethod != PaymentMethod.DirectDebit) || ((paymentMethod == PaymentMethod.DirectDebit) && paymentReference.forall(x => !x.value.trim().isEmpty()) && !paymentReference.isEmpty),
     "Direct Debit should always have payment reference"
   )
 

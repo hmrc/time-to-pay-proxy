@@ -676,7 +676,7 @@ class TimeToPayProxyControllerSpec
           TtppErrorResponse(errorResponse.intValue(), queryParameterNotMatchingPayload)
         )
       }
-      "missing paymentReference in payments when paymentMethod is directDebit" in {
+      "missing paymentReference in payments and paymentMethod is directDebit" in {
         (authConnector
           .authorise[Unit](_: Predicate, _: Retrieval[Unit])(
             _: HeaderCarrier,
