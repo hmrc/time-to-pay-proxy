@@ -33,8 +33,34 @@ object PlanStatus extends Enum[PlanStatus] with PlayJsonEnum[PlanStatus] {
 
   case object Success extends PlanStatus("success")
   case object Failure extends PlanStatus("failure")
-  case object Complete extends PlanStatus("complete")
-  case object Cancelled extends PlanStatus("cancelled")
+  case object TtpArrangementInProgress extends PlanStatus("TTP Arrangement - In Progress")
+  case object ResolvedTTPAmended extends PlanStatus("Resolved - TTP Amended")
+  case object InDefaultClericalReview extends PlanStatus("In Default - Clerical Review")
+  case object PendingFirstReminder extends PlanStatus("Pending - First Reminder")
+  case object InDefaultFirstReminder extends PlanStatus("In default - First Reminder")
+  case object PendingSecondReminder extends PlanStatus("Pending - Second Reminder")
+  case object InDefaultSecondReminder extends PlanStatus("In default - Second Reminder")
+  case object PendingCancellation extends PlanStatus("Pending - Cancellation")
+  case object PendingCompletion extends PlanStatus("Pending - Completion")
+  case object ResolvedCancelled extends PlanStatus("Resolved - Cancelled")
+  case object ResolvedCompleted extends PlanStatus("Resolved - Completed")
+
+  def valueOf(value: String): PlanStatus =
+    value match {
+      case "success"   => Success
+      case "failure"   => Failure
+      case "TTP Arrangement - In Progress" => TtpArrangementInProgress
+      case "Resolved - TTP Amended" => ResolvedTTPAmended
+      case "In Default - Clerical Review" => InDefaultClericalReview
+      case "Pending - First Reminder" => PendingFirstReminder
+      case "In default - First Reminder" => InDefaultFirstReminder
+      case "Pending - Second Reminder" => PendingSecondReminder
+      case "In default - Second Reminder" => InDefaultSecondReminder
+      case "Pending - Cancellation" => PendingCancellation
+      case "Pending - Completion" => PendingCompletion
+      case "Resolved - Cancelled" => ResolvedCancelled
+      case "Resolved - Completed" => ResolvedCompleted
+    }
 
 }
 
