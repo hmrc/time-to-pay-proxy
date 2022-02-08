@@ -25,7 +25,7 @@ final case class ViewPlanResponse(customerReference: CustomerReference,
                                   plan: Plan,
                                   debtItemCharges: Seq[DebtItemCharge],
                                   payments: Seq[PaymentInformation],
-                                  customerPostcodes: Seq[CustomerPostCode],
+                                  customerPostCodes: Seq[CustomerPostCode],
                                   instalments: Seq[Instalment])
 
 object ViewPlanResponse {
