@@ -20,14 +20,14 @@ import play.api.libs.json.Json
 
 import java.time.LocalDate
 
-final case class Instalment(debtItemChargeId: DebtItemChargeId,
-                            dueDate: LocalDate,
-                            amountDue: BigDecimal,
-                            expectedPayment: BigDecimal,
-                            interestRate: Double,
-                            instalmentNumber: Int,
+final case class Instalment(debtItemChargeId:          DebtItemChargeId,
+                            dueDate:                   LocalDate,
+                            amountDue:                 BigDecimal,
+                            expectedPayment:           BigDecimal,
+                            interestRate:              Double,
+                            instalmentNumber:          Int,
                             instalmentInterestAccrued: BigDecimal,
-                            instalmentBalance: BigDecimal) {
+                            instalmentBalance:         BigDecimal) {
   require(amountDue > 0, "amountDue should be a positive amount.")
   require(expectedPayment > 0, "expectedPayment should be a positive amount.")
   require(interestRate >= 0, "interestRate should be a positive amount.")

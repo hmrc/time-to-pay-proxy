@@ -43,10 +43,11 @@ sealed abstract class PaymentMethod(override val entryName: String) extends Enum
 object PaymentMethod extends Enum[PaymentMethod] with PlayJsonEnum[PaymentMethod] {
   val values: scala.collection.immutable.IndexedSeq[PaymentMethod] = findValues
 
-  case object DirectDebit extends PaymentMethod("directDebit")
-  case object Bacs extends PaymentMethod("BACS")
-  case object Cheque extends PaymentMethod("cheque")
-  case object CardPayment extends PaymentMethod("cardPayment")
+  case object DirectDebit  extends PaymentMethod("directDebit")
+  case object Bacs         extends PaymentMethod("BACS")
+  case object Cheque       extends PaymentMethod("cheque")
+  case object CardPayment  extends PaymentMethod("cardPayment")
+  case object OnGoingAward extends PaymentMethod("onGoingAward")
 }
 
 final case class PaymentReference(value: String) extends AnyVal

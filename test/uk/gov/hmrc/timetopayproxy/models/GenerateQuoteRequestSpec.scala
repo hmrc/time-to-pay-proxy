@@ -48,7 +48,7 @@ class GenerateQuoteRequestSpec extends AnyWordSpec with Matchers {
         SubTransType.HIPG,
         100,
         Some(LocalDate.of(2021, 5, 13)),
-        Some(List(Payment(LocalDate.of(2021, 5, 13), 100)))
+        List(Payment(LocalDate.of(2021, 5, 13), 100))
       )
     )
   )

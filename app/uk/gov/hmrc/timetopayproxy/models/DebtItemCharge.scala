@@ -26,12 +26,12 @@ object DebtItemChargeId extends ValueTypeFormatter {
     valueTypeFormatter(DebtItemChargeId.apply, DebtItemChargeId.unapply)
 }
 
-final case class DebtItemCharge(debtItemChargeId: DebtItemChargeId,
-                          mainTrans: MainTransType,
-                          subTrans: SubTransType,
-                          originalDebtAmount: BigDecimal,
-                          interestStartDate: Option[LocalDate],
-                          paymentHistory: Option[Seq[Payment]]) {
+final case class DebtItemCharge(debtItemChargeId:   DebtItemChargeId,
+                                mainTrans:          MainTransType,
+                                subTrans:           SubTransType,
+                                originalDebtAmount: BigDecimal,
+                                interestStartDate:  Option[LocalDate],
+                                paymentHistory:     Seq[Payment]) {
   require(!debtItemChargeId.value.trim().isEmpty(), "debtItemChargeId should not be empty")
   require(originalDebtAmount > 0, "originalDebtAmount should be a positive amount.")
 }

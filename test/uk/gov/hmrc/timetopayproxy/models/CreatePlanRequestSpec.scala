@@ -325,7 +325,7 @@ trait CreatePlanRequestFixture {
           SubTransType.IT,
           100,
           Some(LocalDate.parse("2021-05-13")),
-          Some(List(Payment(LocalDate.parse("2021-05-13"), 100)))
+          List(Payment(LocalDate.parse("2021-05-13"), 100))
         )
       ),
       List(PaymentInformation(PaymentMethod.Bacs, Some(PaymentReference("ref123")))),
