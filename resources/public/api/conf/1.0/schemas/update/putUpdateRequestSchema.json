@@ -34,8 +34,8 @@
     "completeReason": {
       "type": "string",
       "enum": [
-        "earlyRepayment",
-        "amendmentOfCharges",
+        "Payment in Full",
+        "Amendment of Charges to Nil",
         "remission"
       ],
       "description": "This needs to be added as a validation where status update is complete"
