@@ -26,9 +26,9 @@ sealed abstract class CompleteReason(override val entryName: String) extends Enu
 object CompleteReason extends Enum[CompleteReason] with PlayJsonEnum[CompleteReason] {
   val values: immutable.IndexedSeq[CompleteReason] = findValues
 
-  case object EarlyRepayment      extends CompleteReason("earlyRepayment")
-  case object AmendmentOfCharges  extends CompleteReason("amendmentOfCharges")
-  case object Remission           extends CompleteReason("remission")
+  case object PaymentInFull extends CompleteReason("Payment in Full")
+  case object AmendmentOfChargesToNil extends CompleteReason("Amendment of Charges to Nil")
+  case object Remission extends CompleteReason("Remission")
   case object PaidWithinTolerance extends CompleteReason("Paid within Tolerance")
 }
 
@@ -48,7 +48,7 @@ object PaymentMethod extends Enum[PaymentMethod] with PlayJsonEnum[PaymentMethod
   case object Bacs         extends PaymentMethod("BACS")
   case object Cheque       extends PaymentMethod("cheque")
   case object CardPayment  extends PaymentMethod("cardPayment")
-  case object OnGoingAward extends PaymentMethod("onGoingAward")
+  case object OnGoingAward extends PaymentMethod("Ongoing award")
 }
 
 final case class PaymentReference(value: String) extends AnyVal

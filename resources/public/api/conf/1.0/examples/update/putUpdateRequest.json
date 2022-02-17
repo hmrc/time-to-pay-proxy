@@ -3,7 +3,7 @@
   "planId": "planId1",
   "updateType": "paymentDetails",
   "planStatus": "complete",
-  "completeReason": "earlyRepayment",
+  "completeReason": "Payment in Full",
   "cancellationReason": "debt-resolved",
   "thirdPartyBank": true,
   "payments": [

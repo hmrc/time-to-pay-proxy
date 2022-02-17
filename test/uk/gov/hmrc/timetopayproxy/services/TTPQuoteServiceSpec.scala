@@ -133,7 +133,7 @@ class TTPQuoteServiceSpec extends UnitSpec {
       PlanId("planId"),
       UpdateType("updateType"),
       Some(PlanStatus.ResolvedCompleted),
-      Some(CompleteReason.EarlyRepayment),
+      Some(CompleteReason.PaymentInFull),
       None,
       Some(true),
       Some(
