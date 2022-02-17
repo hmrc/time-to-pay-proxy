@@ -45,7 +45,7 @@ class DefaultTtpTestConnector @Inject()(appConfig: AppConfig, httpClient: HttpCl
 
   override def retrieveRequestDetails()(implicit ec: ExecutionContext, hc: HeaderCarrier): TtppEnvelope[Seq[RequestDetails]] = {
     val path = "/test-only/requests"
-    val url = s"${appConfig.ttpBaseUrl}$path"
+    val url = s"${appConfig.stubBaseUrl}$path"
 
     TtppEnvelope {
       httpClient.GET[Seq[RequestDetails]](url)
@@ -59,7 +59,7 @@ class DefaultTtpTestConnector @Inject()(appConfig: AppConfig, httpClient: HttpCl
 
   override def saveResponseDetails(details: RequestDetails)(implicit ec: ExecutionContext, hc: HeaderCarrier): TtppEnvelope[Unit] = {
     val path = "/test-only/response"
-    val url = s"${appConfig.ttpBaseUrl}$path"
+    val url = s"${appConfig.stubBaseUrl}$path"
 
     TtppEnvelope {
       httpClient.POST[RequestDetails, HttpResponse](url, details)
@@ -78,7 +78,7 @@ class DefaultTtpTestConnector @Inject()(appConfig: AppConfig, httpClient: HttpCl
 
   override def deleteRequest(requestId: String)(implicit ec: ExecutionContext, hc: HeaderCarrier): TtppEnvelope[Unit] = {
     val path = s"/test-only/request/$requestId"
-    val url = s"${appConfig.ttpBaseUrl}$path"
+    val url = s"${appConfig.stubBaseUrl}$path"
 
     TtppEnvelope {
       httpClient.DELETE(url)
@@ -99,7 +99,7 @@ class DefaultTtpTestConnector @Inject()(appConfig: AppConfig, httpClient: HttpCl
 
   override def saveError(details: RequestDetails)(implicit ec: ExecutionContext, hc: HeaderCarrier): TtppEnvelope[Unit] = {
     val path = "/test-only/errors"
-    val url = s"${appConfig.ttpBaseUrl}$path"
+    val url = s"${appConfig.stubBaseUrl}$path"
 
     TtppEnvelope {
       httpClient.POST[RequestDetails, HttpResponse](url, details)
@@ -118,7 +118,7 @@ class DefaultTtpTestConnector @Inject()(appConfig: AppConfig, httpClient: HttpCl
 
   override def getErrors()(implicit ec: ExecutionContext, hc: HeaderCarrier): TtppEnvelope[Seq[RequestDetails]] = {
     val path = "/test-only/errors"
-    val url = s"${appConfig.ttpBaseUrl}$path"
+    val url = s"${appConfig.stubBaseUrl}$path"
 
     TtppEnvelope {
       httpClient.GET[Seq[RequestDetails]](url)

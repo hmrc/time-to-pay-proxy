@@ -29,6 +29,7 @@ class AppConfig @Inject()
 
   val authBaseUrl: String = servicesConfig.baseUrl("auth")
   val ttpBaseUrl: String = servicesConfig.baseUrl("ttp")
+  val stubBaseUrl: String = servicesConfig.baseUrl("stub")
   val ttpToken: String = config.get[String]("microservice.services.ttp.token")
   val useIf: Boolean = config.get[Boolean]("microservice.services.ttp.useIf")
   val auditingEnabled: Boolean = config.get[Boolean]("auditing.enabled")
