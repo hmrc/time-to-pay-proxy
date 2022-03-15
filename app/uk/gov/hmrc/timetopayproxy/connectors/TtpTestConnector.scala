@@ -18,11 +18,12 @@ package uk.gov.hmrc.timetopayproxy.connectors
 
 import cats.implicits.catsSyntaxEitherId
 import com.google.inject.ImplementedBy
-import play.api.http.Status.{OK, NO_CONTENT}
+import play.api.http.Status.{NO_CONTENT, OK}
 import uk.gov.hmrc.http.{HeaderCarrier, HttpClient, HttpException, HttpResponse, UpstreamErrorResponse}
 import uk.gov.hmrc.timetopayproxy.config.AppConfig
 import uk.gov.hmrc.timetopayproxy.models.TtppEnvelope.TtppEnvelope
 import uk.gov.hmrc.timetopayproxy.models.{ConnectorError, RequestDetails, TtppEnvelope}
+import uk.gov.hmrc.http.HttpReads.Implicits
 
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.ExecutionContext

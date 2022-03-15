@@ -18,8 +18,6 @@ package uk.gov.hmrc.timetopayproxy.models
 
 import play.api.libs.json.Json
 
-import java.time.LocalDate
-
 final case class ViewPlanResponse(customerReference: CustomerReference,
                                   channelIdentifier: ChannelIdentifier,
                                   plan: Plan,

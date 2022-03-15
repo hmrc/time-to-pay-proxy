@@ -17,12 +17,11 @@
 package uk.gov.hmrc.timetopayproxy.connectors
 
 import cats.data.EitherT
-import uk.gov.hmrc.http.{BadRequestException, HeaderCarrier, HttpClient, HttpException, UpstreamErrorResponse}
+import uk.gov.hmrc.http.{HeaderCarrier, HttpClient}
 
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.ExecutionContext
 import uk.gov.hmrc.timetopayproxy.models._
 import uk.gov.hmrc.timetopayproxy.models.TtppEnvelope.TtppEnvelope
-import cats.syntax.either._
 import com.google.inject.ImplementedBy
 
 import javax.inject.{Inject, Singleton}

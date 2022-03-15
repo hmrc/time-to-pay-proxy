@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.timetopayproxy.controllers
 
-import play.api.libs.json.{JsValue, Json}
+import play.api.libs.json.JsValue
 import play.api.mvc.{Action, AnyContent, BaseController, ControllerComponents, Results}
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
 import uk.gov.hmrc.timetopayproxy.models.RequestDetails
