@@ -20,19 +20,16 @@ package uk.gov.hmrc.timetopayproxy.connectors
 
 import play.api.http.Status
 import play.api.libs.json.Reads
-import uk.gov.hmrc.http.{HeaderCarrier, HttpReads}
-import uk.gov.hmrc.timetopayproxy.models.{ConnectorError, Error, TimeToPayError, TtppError}
+import uk.gov.hmrc.http.HttpReads
+import uk.gov.hmrc.timetopayproxy.models.{ConnectorError, TimeToPayError, TtppError}
 import cats.syntax.either._
-import play.mvc.BodyParser.Json
-import uk.gov.hmrc.timetopayproxy.models.TtppEnvelope.TtppEnvelope
-
 import scala.util.{Failure, Success, Try}
 
 
 trait HttpParser {
 
 
-  implicit def httpReads[T](implicit headerCarrier: HeaderCarrier, rds: Reads[T]): HttpReads[Either[TtppError, T]] = (_, _, response) => {
+  implicit def httpReads[T](implicit rds: Reads[T]): HttpReads[Either[TtppError, T]] = (_, _, response) => {
     response.status match {
       case Status.OK | Status.CREATED =>
         response.json.validate[T].fold(
