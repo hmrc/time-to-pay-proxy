@@ -25,6 +25,8 @@ import uk.gov.hmrc.timetopayproxy.models.TtppEnvelope.TtppEnvelope
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.ExecutionContext
 
+// $COVERAGE-OFF$
+//Coverage disabled for non-prod source
 @ImplementedBy(classOf[DefaultTTPTestService])
 trait TTPTestService {
   def retrieveRequestDetails()(implicit ec: ExecutionContext, hc: HeaderCarrier): TtppEnvelope[Seq[RequestDetails]]
@@ -51,3 +53,4 @@ class DefaultTTPTestService @Inject()(connector: TtpTestConnector) extends TTPTe
   override def getErrors()(implicit ec: ExecutionContext, hc: HeaderCarrier): TtppEnvelope[Seq[RequestDetails]] =
     connector.getErrors()
 }
+// $COVERAGE-ON$

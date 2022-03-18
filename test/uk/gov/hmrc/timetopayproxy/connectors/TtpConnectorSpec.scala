@@ -150,6 +150,25 @@ class TtpConnectorSpec extends PlaySpec with DefaultAwaitTimeout with FutureAwai
     }
   }
 
+  "Receiving an unrecognised body from an upstream" when {
+    "The status code is 200" must {
+      "Return a TTP error" in new Setup {
+        stubGetWithResponseBody("/individuals/time-to-pay/quote/CustRef1234/Plan1234", 200, """{ "unrecognised":"body" }""")
+        val result = connector.getExistingQuote(CustomerReference("CustRef1234"), PlanId("Plan1234"))
+
+        await(result.value) mustBe Left(ConnectorError(503, "Couldn't parse body from upstream"))
+      }
+    }
+    "The status code is 503" must {
+      "Return a TTP error" in new Setup {
+        stubGetWithResponseBody("/individuals/time-to-pay/quote/CustRef1234/Plan1234", 503, """{ "unrecognised":"body" }""")
+        val result = connector.getExistingQuote(CustomerReference("CustRef1234"), PlanId("Plan1234"))
+
+        await(result.value) mustBe Left(ConnectorError(503, "Couldn't parse body from upstream"))
+      }
+    }
+  }
+
   "Get plan" when {
     "using IF" must {
       "parse an error response from an upstream service" in new Setup {

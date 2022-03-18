@@ -25,6 +25,7 @@ import cats.syntax.either._
 
 import scala.concurrent.ExecutionContext
 
+
 class TTPTestServiceSpec extends UnitSpec {
   implicit val hc = HeaderCarrier()
 
