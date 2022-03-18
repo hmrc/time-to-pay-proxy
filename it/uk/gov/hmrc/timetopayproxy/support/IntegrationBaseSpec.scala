@@ -16,16 +16,25 @@
 
 package uk.gov.hmrc.timetopayproxy.support
 
-import org.scalatest.{BeforeAndAfterAll, BeforeAndAfterEach}
+import org.scalamock.scalatest.MockFactory
+import org.scalatest.matchers.should.Matchers
+import org.scalatest.wordspec.AnyWordSpec
+import org.scalatest.{BeforeAndAfterAll, BeforeAndAfterEach, EitherValues}
 import org.scalatestplus.play.guice.GuiceOneServerPerSuite
 import play.api.{Application, Environment, Mode}
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.{JsValue, Json}
 import play.api.libs.ws.{WSClient, WSRequest, WSResponse}
+import play.api.test.{DefaultAwaitTimeout, FutureAwaits}
 
 import scala.concurrent.ExecutionContext
 
-trait IntegrationBaseSpec extends UnitSpec with WireMockHelper with GuiceOneServerPerSuite
+trait IntegrationBaseSpec extends AnyWordSpec
+  with MockFactory
+  with EitherValues
+  with Matchers
+  with FutureAwaits
+  with DefaultAwaitTimeout with WireMockHelper with GuiceOneServerPerSuite
   with BeforeAndAfterEach with BeforeAndAfterAll {
 
   val mockHost: String = WireMockHelper.host

@@ -23,11 +23,13 @@ import uk.gov.hmrc.http.{HeaderCarrier, HttpClient, HttpException, HttpResponse,
 import uk.gov.hmrc.timetopayproxy.config.AppConfig
 import uk.gov.hmrc.timetopayproxy.models.TtppEnvelope.TtppEnvelope
 import uk.gov.hmrc.timetopayproxy.models.{ConnectorError, RequestDetails, TtppEnvelope}
-import uk.gov.hmrc.http.HttpReads.Implicits
+
 
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.ExecutionContext
 
+// $COVERAGE-OFF$
+//Coverage disabled for non-prod source
 @ImplementedBy(classOf[DefaultTtpTestConnector])
 trait TtpTestConnector {
   def retrieveRequestDetails()(implicit ec: ExecutionContext, hc: HeaderCarrier): TtppEnvelope[Seq[RequestDetails]]
@@ -131,3 +133,4 @@ class DefaultTtpTestConnector @Inject()(appConfig: AppConfig, httpClient: HttpCl
     }
   }
 }
+// $COVERAGE-ON$

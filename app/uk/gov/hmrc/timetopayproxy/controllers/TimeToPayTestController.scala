@@ -26,6 +26,8 @@ import uk.gov.hmrc.timetopayproxy.utils.TtppResponseConverter.ToResponse
 
 import javax.inject.{Inject, Singleton}
 
+// $COVERAGE-OFF$
+//Coverage disabled for non-prod source
 @Singleton()
 class TimeToPayTestController @Inject()(cc: ControllerComponents,
                                         ttpTestService: TTPTestService)
@@ -76,3 +78,4 @@ class TimeToPayTestController @Inject()(cc: ControllerComponents,
       .fold(e => e.toResponse, r => r.toResponse)
   }
 }
+// $COVERAGE-ON$
