@@ -38,11 +38,11 @@ class TimeToPayTestControllerSpec extends UnitSpec {
     new TimeToPayTestController(cc, ttpTestService)
 
   val requestDetails = Seq(
-    RequestDetails("someId", "content", Some("www.uri.com"), false),
-    RequestDetails("someId", "content", Some("www.uri.com"), true)
+    RequestDetails("someId", Json.parse("{}"), Some("www.uri.com"), false),
+    RequestDetails("someId", Json.parse("{}"), Some("www.uri.com"), true)
   )
 
-  val responseDetails = RequestDetails("someId", "content", Some("www.uri.com"), true)
+  val responseDetails = RequestDetails("someId", Json.parse("{}"), Some("www.uri.com"), true)
 
   "GET /test-only/requests" should {
     "return a 200 given a successful response" in {

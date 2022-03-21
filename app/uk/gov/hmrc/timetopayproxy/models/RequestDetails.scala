@@ -16,11 +16,11 @@
 
 package uk.gov.hmrc.timetopayproxy.models
 
-import play.api.libs.json.{ Json, JsObject }
+import play.api.libs.json.{ Json, JsValue }
 
 final case class RequestDetails(
   requestId: String,
-  content: JsObject,
+  content: JsValue,
   uri: Option[String],
   isResponse: Boolean,
   method: Option[String] = None,
