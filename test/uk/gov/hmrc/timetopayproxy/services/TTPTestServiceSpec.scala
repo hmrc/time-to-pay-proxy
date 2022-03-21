@@ -22,7 +22,7 @@ import uk.gov.hmrc.timetopayproxy.models.{ConnectorError, RequestDetails, TtppEn
 import uk.gov.hmrc.timetopayproxy.support.UnitSpec
 import scala.concurrent.ExecutionContext.Implicits.global
 import cats.syntax.either._
-
+import play.api.libs.json.Json
 import scala.concurrent.ExecutionContext
 
 
@@ -30,8 +30,8 @@ class TTPTestServiceSpec extends UnitSpec {
   implicit val hc = HeaderCarrier()
 
   val requestDetails = Seq(
-    RequestDetails("someId", "content", Some("www.uri.com"), false),
-    RequestDetails("someId", "content", Some("www.uri.com"), true)
+    RequestDetails("someId", Json.parse("{}"), Some("www.uri.com"), false),
+    RequestDetails("someId", Json.parse("{}"), Some("www.uri.com"), true)
   )
 
   "Retrieve request details" should {
@@ -80,7 +80,7 @@ class TTPTestServiceSpec extends UnitSpec {
   "Save response details" should {
     "save the request details retrieved from the stub" when {
       "connector returns success" in {
-        val details = RequestDetails("someId", "content", Some("www.uri.com"), true)
+        val details = RequestDetails("someId", Json.parse("{}"), Some("www.uri.com"), true)
         val connector = mock[TtpTestConnector]
         (
           connector
@@ -99,7 +99,7 @@ class TTPTestServiceSpec extends UnitSpec {
 
     "return a failure response" when {
       "connector returns failure" in {
-        val details = RequestDetails("someId", "content", Some("www.uri.com"), true)
+        val details = RequestDetails("someId", Json.parse("{}"), Some("www.uri.com"), true)
 
         val errorFromTtpConnector =
           ConnectorError(500, "Internal Service Error")
@@ -169,7 +169,7 @@ class TTPTestServiceSpec extends UnitSpec {
   "Save error details" should {
     "save the request details retrieved from the stub" when {
       "connector returns success" in {
-        val details = RequestDetails("someId", "content", Some("www.uri.com"), true)
+        val details = RequestDetails("someId", Json.parse("{}"), Some("www.uri.com"), true)
         val connector = mock[TtpTestConnector]
         (
           connector
@@ -188,7 +188,7 @@ class TTPTestServiceSpec extends UnitSpec {
 
     "return a failure response" when {
       "connector returns failure" in {
-        val details = RequestDetails("someId", "content", Some("www.uri.com"), true)
+        val details = RequestDetails("someId", Json.parse("{}"), Some("www.uri.com"), true)
 
         val errorFromTtpConnector =
           ConnectorError(500, "Internal Service Error")
