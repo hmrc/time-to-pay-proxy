@@ -24,7 +24,8 @@ final case class RequestDetails(
   uri: Option[String],
   isResponse: Boolean,
   method: Option[String] = None,
-  status: Option[Int] = None
+  status: Option[Int] = None,
+  headers: Option[Map[String, String]] = None,
 )
 
 object RequestDetails {
