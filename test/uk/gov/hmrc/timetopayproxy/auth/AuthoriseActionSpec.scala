@@ -16,9 +16,6 @@
 
 package uk.gov.hmrc.timetopayproxy.auth
 
-import org.scalatest.matchers.should.Matchers
-import org.scalatest.wordspec.AnyWordSpec
-import org.scalatestplus.play.guice.GuiceOneServerPerSuite
 import play.api.mvc.{Action, AnyContent, InjectedController}
 import uk.gov.hmrc.auth.core.PlayAuthConnector
 import uk.gov.hmrc.timetopayproxy.actions.auth.{AuthoriseAction, AuthoriseActionImpl}

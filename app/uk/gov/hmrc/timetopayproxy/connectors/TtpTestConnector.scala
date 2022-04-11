@@ -45,7 +45,7 @@ trait TtpTestConnector {
 
 @Singleton
 class DefaultTtpTestConnector @Inject()(appConfig: AppConfig, httpClient: HttpClient) extends TtpTestConnector {
-
+  @annotation.nowarn
   override def retrieveRequestDetails()(implicit ec: ExecutionContext, hc: HeaderCarrier): TtppEnvelope[Seq[RequestDetails]] = {
     val path = "/test-only/requests"
     val url = s"${appConfig.stubBaseUrl}$path"
@@ -59,7 +59,7 @@ class DefaultTtpTestConnector @Inject()(appConfig: AppConfig, httpClient: HttpCl
         }
     }
   }
-
+  @annotation.nowarn
   override def saveResponseDetails(details: RequestDetails)(implicit ec: ExecutionContext, hc: HeaderCarrier): TtppEnvelope[Unit] = {
     val path = "/test-only/response"
     val url = s"${appConfig.stubBaseUrl}$path"
@@ -78,7 +78,7 @@ class DefaultTtpTestConnector @Inject()(appConfig: AppConfig, httpClient: HttpCl
         }
     }
   }
-
+  @annotation.nowarn
   override def deleteRequest(requestId: String)(implicit ec: ExecutionContext, hc: HeaderCarrier): TtppEnvelope[Unit] = {
     val path = s"/test-only/request/$requestId"
     val url = s"${appConfig.stubBaseUrl}$path"
@@ -99,7 +99,7 @@ class DefaultTtpTestConnector @Inject()(appConfig: AppConfig, httpClient: HttpCl
     }
 
   }
-
+  @annotation.nowarn
   override def saveError(details: RequestDetails)(implicit ec: ExecutionContext, hc: HeaderCarrier): TtppEnvelope[Unit] = {
     val path = "/test-only/errors"
     val url = s"${appConfig.stubBaseUrl}$path"
@@ -118,7 +118,7 @@ class DefaultTtpTestConnector @Inject()(appConfig: AppConfig, httpClient: HttpCl
         }
     }
   }
-
+  @annotation.nowarn
   override def getErrors()(implicit ec: ExecutionContext, hc: HeaderCarrier): TtppEnvelope[Seq[RequestDetails]] = {
     val path = "/test-only/errors"
     val url = s"${appConfig.stubBaseUrl}$path"
