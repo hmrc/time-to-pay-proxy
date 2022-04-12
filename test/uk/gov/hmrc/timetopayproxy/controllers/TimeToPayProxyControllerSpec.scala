@@ -21,7 +21,7 @@ import org.scalamock.scalatest.MockFactory
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
 import play.api.http.{MimeTypes, Status}
-import play.api.libs.json.{JsArray, JsObject, JsSuccess, JsValue, Json}
+import play.api.libs.json.{JsArray, JsSuccess, JsValue, Json}
 import play.api.mvc.{ControllerComponents, Result}
 import play.api.test.Helpers.status
 import uk.gov.hmrc.auth.core.PlayAuthConnector
@@ -203,7 +203,7 @@ class TimeToPayProxyControllerSpec
             _: ExecutionContext
           ))
           .expects(*, *, *, *)
-          .returning(Future.successful())
+          .returning(Future.successful(()))
 
         val responseFromTtp = GenerateQuoteResponse(
           QuoteReference("quoteReference"),
@@ -279,7 +279,7 @@ class TimeToPayProxyControllerSpec
             _: ExecutionContext
           ))
           .expects(*, *, *, *)
-          .returning(Future.successful())
+          .returning(Future.successful(()))
 
         val fakeRequest: FakeRequest[JsValue] =
           FakeRequest("POST", "/individuals/time-to-pay/quote")
@@ -303,7 +303,7 @@ class TimeToPayProxyControllerSpec
             _: ExecutionContext
           ))
           .expects(*, *, *, *)
-          .returning(Future.successful())
+          .returning(Future.successful(()))
 
         val errorFromTtpConnector =
           ConnectorError(500, "Internal Service Error")
@@ -340,7 +340,7 @@ class TimeToPayProxyControllerSpec
           _: ExecutionContext
         ))
         .expects(*, *, *, *)
-        .returning(Future.successful())
+        .returning(Future.successful(()))
 
       (ttpQuoteService
         .getExistingPlan(_: CustomerReference, _: PlanId)(
@@ -367,7 +367,7 @@ class TimeToPayProxyControllerSpec
           _: ExecutionContext
         ))
         .expects(*, *, *, *)
-        .returning(Future.successful())
+        .returning(Future.successful(()))
 
       val errorFromTtpConnector = ConnectorError(404, "Not Found")
       (ttpQuoteService
@@ -396,7 +396,7 @@ class TimeToPayProxyControllerSpec
           _: ExecutionContext
         ))
         .expects(*, *, *, *)
-        .returning(Future.successful())
+        .returning(Future.successful(()))
 
       val errorFromTtpConnector = ConnectorError(500, "Internal Service Error")
       (ttpQuoteService
@@ -428,7 +428,7 @@ class TimeToPayProxyControllerSpec
             _: ExecutionContext
           ))
           .expects(*, *, *, *)
-          .returning(Future.successful())
+          .returning(Future.successful(()))
 
         val responseFromTtp = UpdatePlanResponse(
           CustomerReference("customerReference"),
@@ -466,7 +466,7 @@ class TimeToPayProxyControllerSpec
             _: ExecutionContext
           ))
           .expects(*, *, *, *)
-          .returning(Future.successful())
+          .returning(Future.successful(()))
 
         val updatePlanRequestMissingPaymentReference: UpdatePlanRequest =
           Json.obj(
@@ -528,7 +528,7 @@ class TimeToPayProxyControllerSpec
             _: ExecutionContext
           ))
           .expects(*, *, *, *)
-          .returning(Future.successful())
+          .returning(Future.successful(()))
 
         val updatePlanRequestMissingPlanStatus: UpdatePlanRequest =
           Json.obj(
@@ -591,7 +591,7 @@ class TimeToPayProxyControllerSpec
             _: ExecutionContext
           ))
           .expects(*, *, *, *)
-          .returning(Future.successful())
+          .returning(Future.successful(()))
 
         val errorFromTtpConnector =
           ConnectorError(500, "Internal Service Error")
@@ -631,7 +631,7 @@ class TimeToPayProxyControllerSpec
             _: ExecutionContext
           ))
           .expects(*, *, *, *)
-          .returning(Future.successful())
+          .returning(Future.successful(()))
 
         val wrongCustomerReferenceInQueryParameters = s"${updatePlanRequest.customerReference.value}-wrong"
         val fakeRequest: FakeRequest[JsValue] = FakeRequest(
@@ -657,7 +657,7 @@ class TimeToPayProxyControllerSpec
             _: ExecutionContext
           ))
           .expects(*, *, *, *)
-          .returning(Future.successful())
+          .returning(Future.successful(()))
 
         val wrongPlanIdInQueryParameters = s"${updatePlanRequest.planId.value}-wrong"
         val fakeRequest: FakeRequest[JsValue] = FakeRequest(
@@ -683,7 +683,7 @@ class TimeToPayProxyControllerSpec
             _: ExecutionContext
           ))
           .expects(*, *, *, *)
-          .returning(Future.successful())
+          .returning(Future.successful(()))
 
         val invalidJsonBody: JsValue =
           Json.obj(
@@ -728,7 +728,7 @@ class TimeToPayProxyControllerSpec
             _: ExecutionContext
           ))
           .expects(*, *, *, *)
-          .returning(Future.successful())
+          .returning(Future.successful(()))
 
         val invalidJsonBody: JsValue =
           Json.obj(
@@ -775,7 +775,7 @@ class TimeToPayProxyControllerSpec
             _: ExecutionContext
           ))
           .expects(*, *, *, *)
-          .returning(Future.successful())
+          .returning(Future.successful(()))
 
         val invalidJsonBody: JsValue =
           Json.obj(
@@ -822,7 +822,7 @@ class TimeToPayProxyControllerSpec
             _: ExecutionContext
           ))
           .expects(*, *, *, *)
-          .returning(Future.successful())
+          .returning(Future.successful(()))
 
         val invalidJsonBody: JsValue =
           Json.obj(
@@ -865,7 +865,7 @@ class TimeToPayProxyControllerSpec
             _: ExecutionContext
           ))
           .expects(*, *, *, *)
-          .returning(Future.successful())
+          .returning(Future.successful(()))
 
         val createPlanResponse = CreatePlanResponse(
           CustomerReference("customerReference"),
@@ -901,7 +901,7 @@ class TimeToPayProxyControllerSpec
             _: ExecutionContext
           ))
           .expects(*, *, *, *)
-          .returning(Future.successful())
+          .returning(Future.successful(()))
 
         val errorFromTtpConnector =
           ConnectorError(500, "Internal Service Error")

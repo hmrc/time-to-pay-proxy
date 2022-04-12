@@ -390,8 +390,7 @@ class TtpConnectorStub(
   retrieveQuoteResponse: Either[TtppError, ViewPlanResponse],
   updatePlanResponse: Either[TtppError, UpdatePlanResponse],
   createPlanResponse: Either[TtppError, CreatePlanResponse]
-)(implicit ec: ExecutionContext)
-    extends TtpConnector {
+) extends TtpConnector {
   override def generateQuote(ttppRequest: GenerateQuoteRequest)(
     implicit ec: ExecutionContext,
     hc: HeaderCarrier
