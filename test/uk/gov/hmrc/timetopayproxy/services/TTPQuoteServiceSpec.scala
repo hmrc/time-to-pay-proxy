@@ -23,7 +23,7 @@ import uk.gov.hmrc.timetopayproxy.connectors.TtpConnector
 import uk.gov.hmrc.timetopayproxy.models._
 import uk.gov.hmrc.timetopayproxy.support.UnitSpec
 
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.{ ExecutionContext, Future }
 import scala.concurrent.ExecutionContext.Implicits.global
 import cats.syntax.either._
 import uk.gov.hmrc.timetopayproxy.models.MainTransType.TPSSContractSettlementINT
@@ -391,27 +391,26 @@ class TtpConnectorStub(
   updatePlanResponse: Either[TtppError, UpdatePlanResponse],
   createPlanResponse: Either[TtppError, CreatePlanResponse]
 ) extends TtpConnector {
-  override def generateQuote(ttppRequest: GenerateQuoteRequest)(
-    implicit ec: ExecutionContext,
+  override def generateQuote(ttppRequest: GenerateQuoteRequest)(implicit
+    ec: ExecutionContext,
     hc: HeaderCarrier
   ): TtppEnvelope[GenerateQuoteResponse] =
     TtppEnvelope(Future successful generateQuoteResponse)
 
-  override def getExistingQuote(customerReference: CustomerReference,
-                                planId: PlanId)(
-    implicit ec: ExecutionContext,
+  override def getExistingQuote(customerReference: CustomerReference, planId: PlanId)(implicit
+    ec: ExecutionContext,
     hc: HeaderCarrier
   ): TtppEnvelope[ViewPlanResponse] =
     TtppEnvelope(Future successful retrieveQuoteResponse)
 
-  override def updatePlan(updatePlanRequest: UpdatePlanRequest)(
-    implicit ec: ExecutionContext,
+  override def updatePlan(updatePlanRequest: UpdatePlanRequest)(implicit
+    ec: ExecutionContext,
     hc: HeaderCarrier
   ): TtppEnvelope[UpdatePlanResponse] =
     TtppEnvelope(Future successful updatePlanResponse)
 
-  override def createPlan(createPlanRequest: CreatePlanRequest)(
-    implicit ec: ExecutionContext,
+  override def createPlan(createPlanRequest: CreatePlanRequest)(implicit
+    ec: ExecutionContext,
     hc: HeaderCarrier
   ): TtppEnvelope[CreatePlanResponse] =
     TtppEnvelope(Future successful createPlanResponse)

@@ -23,19 +23,16 @@ import play.api.mvc._
 import uk.gov.hmrc.auth.core._
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.http.HeaderCarrierConverter
-import play.api.mvc.Results.{Forbidden, ServiceUnavailable}
+import play.api.mvc.Results.{ Forbidden, ServiceUnavailable }
 
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.{ ExecutionContext, Future }
 import scala.util.control.NonFatal
 
 @ImplementedBy(classOf[AuthoriseActionImpl])
 trait AuthoriseAction extends ActionBuilder[Request, AnyContent]
 
-
-class AuthoriseActionImpl @Inject()(
-                           override val authConnector: PlayAuthConnector,
-                           cc: ControllerComponents)
-  extends AuthoriseAction with AuthorisedFunctions {
+class AuthoriseActionImpl @Inject() (override val authConnector: PlayAuthConnector, cc: ControllerComponents)
+    extends AuthoriseAction with AuthorisedFunctions {
   private val DTDEnrolment = "read:time-to-pay-proxy"
   private val logger = Logger(classOf[AuthoriseActionImpl])
   override def parser: BodyParser[AnyContent] = cc.parsers.defaultBodyParser
@@ -61,4 +58,3 @@ class AuthoriseActionImpl @Inject()(
   override protected def executionContext: ExecutionContext = cc.executionContext
 
 }
-

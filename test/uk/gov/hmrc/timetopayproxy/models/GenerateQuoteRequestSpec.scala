@@ -20,7 +20,7 @@ import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
 import play.api.libs.json._
 
-import scala.util.{Failure, Try}
+import scala.util.{ Failure, Try }
 
 class GenerateQuoteRequestSpec extends AnyWordSpec with Matchers {
   val generateQuoteRequest = GenerateQuoteRequest(
@@ -88,46 +88,48 @@ class GenerateQuoteRequestSpec extends AnyWordSpec with Matchers {
                |}
                """.stripMargin
 
-  def getJsonWithInvalidReference(customerReference: String = "uniqRef1234",
-                                  instalmentAmount: BigDecimal = 100,
-                                  initialPaymentAmount: BigDecimal = 100,
-                                  originalDebtAmount: BigDecimal = 100,
-                                  paymentAmount: BigDecimal = 100) = s"""{
-               |  "customerReference": "$customerReference",
-               |  "channelIdentifier": "selfService",
-               |  "plan": {
-               |    "quoteType": "instalmentAmount",
-               |    "quoteDate": "2021-05-13",
-               |    "instalmentStartDate": "2021-05-13",
-               |    "instalmentAmount": $instalmentAmount,
-               |    "frequency": "annually",
-               |    "duration": 12,
-               |    "initialPaymentAmount": $initialPaymentAmount,
-               |    "initialPaymentDate": "2021-05-13",
-               |    "paymentPlanType": "timeToPay"
-               |  },
-               |  "customerPostCodes": [
-               |    {
-               |      "addressPostcode": "NW9 5XW",
-               |      "postcodeDate": "2021-05-13"
-               |    }
-               |  ],
-               |  "debtItemCharges": [
-               |    {
-               |      "debtItemChargeId": "debtItemChargeId1",
-               |      "mainTrans": "5330",
-               |      "subTrans": "1180",
-               |      "originalDebtAmount": $originalDebtAmount,
-               |      "interestStartDate": "2021-05-13",
-               |      "paymentHistory": [
-               |        {
-               |          "paymentDate": "2021-05-13",
-               |          "paymentAmount": $paymentAmount
-               |        }
-               |      ]
-               |    }
-               |  ]
-               |}
+  def getJsonWithInvalidReference(
+    customerReference: String = "uniqRef1234",
+    instalmentAmount: BigDecimal = 100,
+    initialPaymentAmount: BigDecimal = 100,
+    originalDebtAmount: BigDecimal = 100,
+    paymentAmount: BigDecimal = 100
+  ) = s"""{
+         |  "customerReference": "$customerReference",
+         |  "channelIdentifier": "selfService",
+         |  "plan": {
+         |    "quoteType": "instalmentAmount",
+         |    "quoteDate": "2021-05-13",
+         |    "instalmentStartDate": "2021-05-13",
+         |    "instalmentAmount": $instalmentAmount,
+         |    "frequency": "annually",
+         |    "duration": 12,
+         |    "initialPaymentAmount": $initialPaymentAmount,
+         |    "initialPaymentDate": "2021-05-13",
+         |    "paymentPlanType": "timeToPay"
+         |  },
+         |  "customerPostCodes": [
+         |    {
+         |      "addressPostcode": "NW9 5XW",
+         |      "postcodeDate": "2021-05-13"
+         |    }
+         |  ],
+         |  "debtItemCharges": [
+         |    {
+         |      "debtItemChargeId": "debtItemChargeId1",
+         |      "mainTrans": "5330",
+         |      "subTrans": "1180",
+         |      "originalDebtAmount": $originalDebtAmount,
+         |      "interestStartDate": "2021-05-13",
+         |      "paymentHistory": [
+         |        {
+         |          "paymentDate": "2021-05-13",
+         |          "paymentAmount": $paymentAmount
+         |        }
+         |      ]
+         |    }
+         |  ]
+         |}
              """.stripMargin
 
   "GenerateQuoteRequest" should {

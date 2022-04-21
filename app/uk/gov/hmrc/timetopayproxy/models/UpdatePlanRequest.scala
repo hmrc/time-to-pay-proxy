@@ -17,7 +17,7 @@
 package uk.gov.hmrc.timetopayproxy.models
 
 import play.api.libs.json.Json
-import enumeratum.{Enum, EnumEntry, PlayJsonEnum}
+import enumeratum.{ Enum, EnumEntry, PlayJsonEnum }
 
 import scala.collection.immutable
 
@@ -44,10 +44,10 @@ sealed abstract class PaymentMethod(override val entryName: String) extends Enum
 object PaymentMethod extends Enum[PaymentMethod] with PlayJsonEnum[PaymentMethod] {
   val values: scala.collection.immutable.IndexedSeq[PaymentMethod] = findValues
 
-  case object DirectDebit  extends PaymentMethod("directDebit")
-  case object Bacs         extends PaymentMethod("BACS")
-  case object Cheque       extends PaymentMethod("cheque")
-  case object CardPayment  extends PaymentMethod("cardPayment")
+  case object DirectDebit extends PaymentMethod("directDebit")
+  case object Bacs extends PaymentMethod("BACS")
+  case object Cheque extends PaymentMethod("cheque")
+  case object CardPayment extends PaymentMethod("cardPayment")
   case object OnGoingAward extends PaymentMethod("Ongoing award")
 }
 
@@ -65,14 +65,15 @@ object UpdateType extends ValueTypeFormatter {
     valueTypeFormatter(UpdateType.apply, UpdateType.unapply)
 }
 
-final case class UpdatePlanRequest(customerReference: CustomerReference,
-                                    planId: PlanId,
-                                    updateType: UpdateType,
-                                    planStatus: Option[PlanStatus],
-                                    completeReason: Option[CompleteReason],
-                                    cancellationReason: Option[CancellationReason],
-                                    thirdPartyBank: Option[Boolean],
-                                    payments: Option[List[PaymentInformation]]
+final case class UpdatePlanRequest(
+  customerReference: CustomerReference,
+  planId: PlanId,
+  updateType: UpdateType,
+  planStatus: Option[PlanStatus],
+  completeReason: Option[CompleteReason],
+  cancellationReason: Option[CancellationReason],
+  thirdPartyBank: Option[Boolean],
+  payments: Option[List[PaymentInformation]]
 ) {
   require(
     !(updateType.value == "planStatus") || !planStatus.isEmpty,

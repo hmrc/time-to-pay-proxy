@@ -17,22 +17,20 @@
 package uk.gov.hmrc.timetopayproxy.controllers
 
 import play.api.libs.json.JsValue
-import play.api.mvc.{Action, AnyContent, BaseController, ControllerComponents, Results}
+import play.api.mvc.{ Action, AnyContent, BaseController, ControllerComponents, Results }
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
 import uk.gov.hmrc.timetopayproxy.models.RequestDetails
 import uk.gov.hmrc.timetopayproxy.services.TTPTestService
 import uk.gov.hmrc.timetopayproxy.utils.TtppErrorHandler.FromErrorToResponse
 import uk.gov.hmrc.timetopayproxy.utils.TtppResponseConverter.ToResponse
 
-import javax.inject.{Inject, Singleton}
+import javax.inject.{ Inject, Singleton }
 
 // $COVERAGE-OFF$
 //Coverage disabled for non-prod source
 @Singleton()
-class TimeToPayTestController @Inject()(cc: ControllerComponents,
-                                        ttpTestService: TTPTestService)
-  extends BackendController(cc)
-    with BaseController {
+class TimeToPayTestController @Inject()(cc: ControllerComponents, ttpTestService: TTPTestService)
+    extends BackendController(cc) with BaseController {
   implicit val ec = cc.executionContext
 
   def requests: Action[AnyContent] = Action.async { implicit request =>
@@ -43,32 +41,28 @@ class TimeToPayTestController @Inject()(cc: ControllerComponents,
   }
 
   def deleteRequest(requestId: String): Action[AnyContent] = Action.async { implicit request =>
-    ttpTestService.deleteRequestDetails(requestId).leftMap(ttppError => ttppError.toErrorResponse)
-      .fold(e => e.toResponse, - => Results.Ok)
+    ttpTestService
+      .deleteRequestDetails(requestId)
+      .leftMap(ttppError => ttppError.toErrorResponse)
+      .fold(e => e.toResponse, _ => Results.Ok)
   }
 
-  def response: Action[JsValue] = Action.async(parse.json) {
-    implicit request =>
-      withJsonBody[RequestDetails] {
-        details: RequestDetails => {
-          ttpTestService
-            .saveResponseDetails(details)
-            .leftMap(ttppError => ttppError.toErrorResponse)
-            .fold(e => e.toResponse, _ => Results.Ok)
-        }
-      }
+  def response: Action[JsValue] = Action.async(parse.json) { implicit request =>
+    withJsonBody[RequestDetails] { details: RequestDetails =>
+      ttpTestService
+        .saveResponseDetails(details)
+        .leftMap(ttppError => ttppError.toErrorResponse)
+        .fold(e => e.toResponse, _ => Results.Ok)
+    }
   }
 
-  def saveError(): Action[JsValue] = Action.async(parse.json) {
-    implicit request =>
-      withJsonBody[RequestDetails] {
-        details: RequestDetails => {
-          ttpTestService
-            .saveError(details)
-            .leftMap(ttppError => ttppError.toErrorResponse)
-            .fold(e => e.toResponse, _ => Results.Ok)
-        }
-      }
+  def saveError(): Action[JsValue] = Action.async(parse.json) { implicit request =>
+    withJsonBody[RequestDetails] { details: RequestDetails =>
+      ttpTestService
+        .saveError(details)
+        .leftMap(ttppError => ttppError.toErrorResponse)
+        .fold(e => e.toResponse, _ => Results.Ok)
+    }
   }
 
   def getErrors(): Action[AnyContent] = Action.async { implicit request =>

@@ -16,12 +16,12 @@
 
 package uk.gov.hmrc.timetopayproxy.utils
 
-import uk.gov.hmrc.timetopayproxy.models.{ConnectorError, TtppError, TtppErrorResponse, ValidationError}
+import uk.gov.hmrc.timetopayproxy.models.{ ConnectorError, TtppError, TtppErrorResponse, ValidationError }
 
 object TtppErrorHandler {
 
   implicit class FromErrorToResponse(error: TtppError) {
-    def toErrorResponse:  TtppErrorResponse = error match {
+    def toErrorResponse: TtppErrorResponse = error match {
       case ConnectorError(status, message) =>
         TtppErrorResponse(status, s"$message")
       case ValidationError(message) =>

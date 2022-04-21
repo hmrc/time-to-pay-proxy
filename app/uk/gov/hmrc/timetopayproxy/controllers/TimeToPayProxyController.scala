@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.timetopayproxy.controllers
 
-import javax.inject.{Inject, Singleton}
+import javax.inject.{ Inject, Singleton }
 import play.api.libs.json._
 import play.api.mvc._
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
@@ -30,28 +30,26 @@ import uk.gov.hmrc.timetopayproxy.models.GenerateQuoteResponse._
 import uk.gov.hmrc.timetopayproxy.models.TtppEnvelope.TtppEnvelope
 import cats.syntax.either._
 import scala.concurrent.Future
-import scala.util.{Failure, Success, Try}
+import scala.util.{ Failure, Success, Try }
 
 @Singleton()
-class TimeToPayProxyController @Inject()(authoriseAction: AuthoriseAction,
-                                         cc: ControllerComponents,
-                                         timeToPayProxyService: TTPQuoteService)
-    extends BackendController(cc)
-    with BaseController {
+class TimeToPayProxyController @Inject() (
+  authoriseAction: AuthoriseAction,
+  cc: ControllerComponents,
+  timeToPayProxyService: TTPQuoteService
+) extends BackendController(cc) with BaseController {
   implicit val ec = cc.executionContext
 
-  private val queryParameterNotMatchingPayload = "customerReference and planId in the query parameters should match the ones in the request payload"
+  private val queryParameterNotMatchingPayload =
+    "customerReference and planId in the query parameters should match the ones in the request payload"
 
-  def generateQuote: Action[JsValue] = authoriseAction.async(parse.json) {
-    implicit request =>
-      withJsonBody[GenerateQuoteRequest] {
-        timeToPayRequest: GenerateQuoteRequest => {
-          timeToPayProxyService
-            .generateQuote(timeToPayRequest)
-            .leftMap(ttppError => ttppError.toErrorResponse)
-            .fold(e => e.toResponse, r => r.toResponse)
-        }
-      }
+  def generateQuote: Action[JsValue] = authoriseAction.async(parse.json) { implicit request =>
+    withJsonBody[GenerateQuoteRequest] { timeToPayRequest: GenerateQuoteRequest =>
+      timeToPayProxyService
+        .generateQuote(timeToPayRequest)
+        .leftMap(ttppError => ttppError.toErrorResponse)
+        .fold(e => e.toResponse, r => r.toResponse)
+    }
   }
 
   def viewPlan(customerReference: String, planId: String) =
@@ -64,10 +62,10 @@ class TimeToPayProxyController @Inject()(authoriseAction: AuthoriseAction,
 
   def updatePlan(customerReference: String, planId: String): Action[JsValue] =
     authoriseAction.async(parse.json) { implicit request =>
-      withJsonBody[UpdatePlanRequest] { updatePlanRequest: UpdatePlanRequest => {
-
+      withJsonBody[UpdatePlanRequest] { updatePlanRequest: UpdatePlanRequest =>
         val result = for {
-          validatedUpdatePlanRequest <- validateUpdateRequestMatchesQueryParams(customerReference, planId, updatePlanRequest)
+          validatedUpdatePlanRequest <-
+            validateUpdateRequestMatchesQueryParams(customerReference, planId, updatePlanRequest)
           response <- timeToPayProxyService.updatePlan(validatedUpdatePlanRequest)
         } yield response
 
@@ -75,65 +73,66 @@ class TimeToPayProxyController @Inject()(authoriseAction: AuthoriseAction,
           .leftMap(ttppError => ttppError.toErrorResponse)
           .fold(e => e.toResponse, r => r.toResponse)
       }
-      }
     }
 
   def createPlan = authoriseAction.async(parse.json) { implicit request =>
-    withJsonBody[CreatePlanRequest] { createPlanRequest: CreatePlanRequest => {
+    withJsonBody[CreatePlanRequest] { createPlanRequest: CreatePlanRequest =>
       timeToPayProxyService
         .createPlan(createPlanRequest)
         .leftMap(ttppError => ttppError.toErrorResponse)
         .fold(e => e.toResponse, r => r.toResponse)
     }
-    }
   }
 
-  private def validateUpdateRequestMatchesQueryParams(customerReference: String, planId: String, updatePlanRequest: UpdatePlanRequest): TtppEnvelope[UpdatePlanRequest] = {
+  private def validateUpdateRequestMatchesQueryParams(
+    customerReference: String,
+    planId: String,
+    updatePlanRequest: UpdatePlanRequest
+  ): TtppEnvelope[UpdatePlanRequest] =
     (updatePlanRequest.customerReference, updatePlanRequest.planId) match {
-      case (CustomerReference(cr), PlanId(pid)) if (cr.trim == customerReference) && (pid.trim == planId) => TtppEnvelope(updatePlanRequest)
+      case (CustomerReference(cr), PlanId(pid)) if (cr.trim == customerReference) && (pid.trim == planId) =>
+        TtppEnvelope(updatePlanRequest)
       case _ => TtppEnvelope(ValidationError(queryParameterNotMatchingPayload).asLeft[UpdatePlanRequest])
     }
-  }
-  private def extractFieldFromJsPath(jsPath: JsPath): String = {
+  private def extractFieldFromJsPath(jsPath: JsPath): String =
     s"${jsPath.path.reverse.headOption.fold("-")(_.toString.replace("/", ""))}"
-  }
   private def generateReadableMessageFromError(errs: Seq[(JsPath, Seq[JsonValidationError])]): String = {
 
-    val fieldInfo = errs.headOption.map(x => {
-      val (jsPath, _) = x
-      s"Field name: ${extractFieldFromJsPath(jsPath)}"
-    }).getOrElse("")
+    val fieldInfo = errs.headOption
+      .map { x =>
+        val (jsPath, _) = x
+        s"Field name: ${extractFieldFromJsPath(jsPath)}"
+      }
+      .getOrElse("")
 
     val detailedMessageMaybe = for {
-      (_, valErrors) <- errs.headOption
+      (_, valErrors)      <- errs.headOption
       jsonValidationError <- valErrors.headOption
-      message <- jsonValidationError.messages.headOption
+      message             <- jsonValidationError.messages.headOption
     } yield message match {
-        case m if m.startsWith("error.expected.date.isoformat") => "Date format should be correctly provided"
-        case m if m.startsWith("error.expected.validenumvalue") => "Valid enum value should be provided"
-        case _ => ""
-      }
+      case m if m.startsWith("error.expected.date.isoformat") => "Date format should be correctly provided"
+      case m if m.startsWith("error.expected.validenumvalue") => "Valid enum value should be provided"
+      case _                                                  => ""
+    }
     val detailedMessage = detailedMessageMaybe.getOrElse("")
     s"$fieldInfo. $detailedMessage"
   }
 
-  override def withJsonBody[T](f: T => Future[Result])(
-    implicit request: Request[JsValue],
+  override def withJsonBody[T](f: T => Future[Result])(implicit
+    request: Request[JsValue],
     m: Manifest[T],
     reads: Reads[T]
-  ): Future[Result] = {
+  ): Future[Result] =
     Try(request.body.validate[T]) match {
       case Success(JsSuccess(payload, _)) => f(payload)
 
-      case Success(JsError(errs)) => {
-
+      case Success(JsError(errs)) =>
         Future.successful(
           TtppErrorResponse(
             BAD_REQUEST.intValue(),
             s"Invalid ${m.runtimeClass.getSimpleName} payload: Payload has a missing field or an invalid format. ${generateReadableMessageFromError(errs)}"
           ).toResponse
         )
-      }
       case Failure(e) =>
         Future.successful(
           TtppErrorResponse(
@@ -143,5 +142,4 @@ class TimeToPayProxyController @Inject()(authoriseAction: AuthoriseAction,
         )
     }
 
-  }
 }

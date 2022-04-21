@@ -15,10 +15,9 @@
  */
 
 package uk.gov.hmrc.timetopayproxy.models
-import enumeratum.{Enum, EnumEntry, PlayJsonEnum}
+import enumeratum.{ Enum, EnumEntry, PlayJsonEnum }
 
 import scala.collection.immutable
-
 
 sealed abstract class QuoteType(override val entryName: String) extends EnumEntry
 

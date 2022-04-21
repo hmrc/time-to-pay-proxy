@@ -17,18 +17,18 @@
 package uk.gov.hmrc.timetopayproxy.controllers
 
 import cats.implicits.catsSyntaxEitherId
-import play.api.http.{MimeTypes, Status}
-import play.api.libs.json.{JsValue, Json}
-import play.api.mvc.{ControllerComponents, Result}
-import play.api.test.Helpers.{CONTENT_TYPE, status}
-import play.api.test.{FakeRequest, Helpers}
+import play.api.http.{ MimeTypes, Status }
+import play.api.libs.json.{ JsValue, Json }
+import play.api.mvc.{ ControllerComponents, Result }
+import play.api.test.Helpers.{ CONTENT_TYPE, status }
+import play.api.test.{ FakeRequest, Helpers }
 import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.timetopayproxy.models.{ConnectorError, RequestDetails, TtppEnvelope}
+import uk.gov.hmrc.timetopayproxy.models.{ ConnectorError, RequestDetails, TtppEnvelope }
 import uk.gov.hmrc.timetopayproxy.services.TTPTestService
 import uk.gov.hmrc.timetopayproxy.support.UnitSpec
 
 import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.{ ExecutionContext, Future }
 
 class TimeToPayTestControllerSpec extends UnitSpec {
   private val cc: ControllerComponents = Helpers.stubControllerComponents()

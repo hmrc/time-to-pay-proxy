@@ -20,23 +20,24 @@ import play.api.libs.json.Json
 
 import java.time.LocalDate
 
-final case class PlanToCreatePlan(quoteId: QuoteId,
-                                  quoteType: QuoteType,
-                                  quoteDate: LocalDate,
-                                  instalmentStartDate: LocalDate,
-                                  instalmentAmount: Option[BigDecimal],
-                                  paymentPlanType: PaymentPlanType,
-                                  thirdPartyBank: Boolean,
-                                  numberOfInstalments: Int,
-                                  frequency: Option[Frequency],
-                                  duration: Option[Duration],
-                                  initialPaymentDate: Option[LocalDate],
-                                  initialPaymentAmount: Option[BigDecimal],
-                                  totalDebtIncInt: BigDecimal,
-                                  totalInterest: BigDecimal,
-                                  interestAccrued: BigDecimal,
-                                  planInterest: BigDecimal
-                                 ) {
+final case class PlanToCreatePlan(
+  quoteId: QuoteId,
+  quoteType: QuoteType,
+  quoteDate: LocalDate,
+  instalmentStartDate: LocalDate,
+  instalmentAmount: Option[BigDecimal],
+  paymentPlanType: PaymentPlanType,
+  thirdPartyBank: Boolean,
+  numberOfInstalments: Int,
+  frequency: Option[Frequency],
+  duration: Option[Duration],
+  initialPaymentDate: Option[LocalDate],
+  initialPaymentAmount: Option[BigDecimal],
+  totalDebtIncInt: BigDecimal,
+  totalInterest: BigDecimal,
+  interestAccrued: BigDecimal,
+  planInterest: BigDecimal
+) {
   require(!quoteId.value.trim().isEmpty(), "quoteId should not be empty")
   require(instalmentAmount.forall(_ > 0), "instalmentAmount should be a positive amount.")
   require(numberOfInstalments > 0, "numberOfInstalments should be positive.")
@@ -53,7 +54,8 @@ object PlanToCreatePlan {
 
 final case class PaymentInformation(paymentMethod: PaymentMethod, paymentReference: Option[PaymentReference]) {
   require(
-    (paymentMethod != PaymentMethod.DirectDebit) || ((paymentMethod == PaymentMethod.DirectDebit) && paymentReference.forall(x => !x.value.trim().isEmpty()) && !paymentReference.isEmpty),
+    (paymentMethod != PaymentMethod.DirectDebit) || ((paymentMethod == PaymentMethod.DirectDebit) && paymentReference
+      .forall(x => !x.value.trim().isEmpty()) && !paymentReference.isEmpty),
     "Direct Debit should always have payment reference"
   )
 
@@ -67,15 +69,16 @@ object PaymentInformation {
   implicit val format = Json.format[PaymentInformation]
 }
 
-final case class CreatePlanRequest(customerReference: CustomerReference,
-                                   quoteReference: QuoteReference,
-                                   channelIdentifier: ChannelIdentifier,
-                                   plan: PlanToCreatePlan,
-                                   debtItemCharges: Seq[DebtItemCharge],
-                                   payments: Seq[PaymentInformation],
-                                   customerPostCodes: Seq[CustomerPostCode],
-                                   instalments: Seq[Instalment]
-                                  ) {
+final case class CreatePlanRequest(
+  customerReference: CustomerReference,
+  quoteReference: QuoteReference,
+  channelIdentifier: ChannelIdentifier,
+  plan: PlanToCreatePlan,
+  debtItemCharges: Seq[DebtItemCharge],
+  payments: Seq[PaymentInformation],
+  customerPostCodes: Seq[CustomerPostCode],
+  instalments: Seq[Instalment]
+) {
   require(!customerReference.value.trim().isEmpty(), "customerReference should not be empty")
   require(!quoteReference.value.trim().isEmpty(), "quoteReference should not be empty")
 }

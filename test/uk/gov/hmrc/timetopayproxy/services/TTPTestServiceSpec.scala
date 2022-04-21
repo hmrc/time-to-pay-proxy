@@ -18,13 +18,12 @@ package uk.gov.hmrc.timetopayproxy.services
 
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.timetopayproxy.connectors.TtpTestConnector
-import uk.gov.hmrc.timetopayproxy.models.{ConnectorError, RequestDetails, TtppEnvelope, TtppError}
+import uk.gov.hmrc.timetopayproxy.models.{ ConnectorError, RequestDetails, TtppEnvelope, TtppError }
 import uk.gov.hmrc.timetopayproxy.support.UnitSpec
 import scala.concurrent.ExecutionContext.Implicits.global
 import cats.syntax.either._
 import play.api.libs.json.Json
 import scala.concurrent.ExecutionContext
-
 
 class TTPTestServiceSpec extends UnitSpec {
   implicit val hc = HeaderCarrier()

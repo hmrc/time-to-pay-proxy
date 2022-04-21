@@ -20,11 +20,7 @@ import org.scalamock.scalatest.MockFactory
 import org.scalatest.EitherValues
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
-import play.api.test.{DefaultAwaitTimeout, FutureAwaits}
+import play.api.test.{ DefaultAwaitTimeout, FutureAwaits }
 
-trait UnitSpec extends AnyWordSpec
-  with MockFactory
-  with EitherValues
-  with Matchers
-  with FutureAwaits
-  with DefaultAwaitTimeout
+trait UnitSpec
+    extends AnyWordSpec with MockFactory with EitherValues with Matchers with FutureAwaits with DefaultAwaitTimeout

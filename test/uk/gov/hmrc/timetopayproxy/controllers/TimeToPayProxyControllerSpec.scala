@@ -20,30 +20,27 @@ import java.time.LocalDate
 import org.scalamock.scalatest.MockFactory
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
-import play.api.http.{MimeTypes, Status}
-import play.api.libs.json.{JsArray, JsSuccess, JsValue, Json}
-import play.api.mvc.{ControllerComponents, Result}
+import play.api.http.{ MimeTypes, Status }
+import play.api.libs.json.{ JsArray, JsSuccess, JsValue, Json }
+import play.api.mvc.{ ControllerComponents, Result }
 import play.api.test.Helpers.status
 import uk.gov.hmrc.auth.core.PlayAuthConnector
 import uk.gov.hmrc.auth.core.authorise.Predicate
 import uk.gov.hmrc.auth.core.retrieve.Retrieval
 import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.timetopayproxy.actions.auth.{AuthoriseAction, AuthoriseActionImpl}
+import uk.gov.hmrc.timetopayproxy.actions.auth.{ AuthoriseAction, AuthoriseActionImpl }
 import uk.gov.hmrc.timetopayproxy.services.TTPQuoteService
 import uk.gov.hmrc.timetopayproxy.models._
-import play.api.test.{FakeRequest, Helpers}
+import play.api.test.{ FakeRequest, Helpers }
 
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.{ ExecutionContext, Future }
 import scala.concurrent.ExecutionContext.Implicits.global
 import play.api.test.Helpers._
 import cats.syntax.either._
 import uk.gov.hmrc.timetopayproxy.models.MainTransType.TPSSContractSettlementINT
 import uk.gov.hmrc.timetopayproxy.models.SubTransType.TGPEN
 
-class TimeToPayProxyControllerSpec
-    extends AnyWordSpec
-    with Matchers
-    with MockFactory {
+class TimeToPayProxyControllerSpec extends AnyWordSpec with Matchers with MockFactory {
 
   private val authConnector: PlayAuthConnector = mock[PlayAuthConnector]
 
@@ -73,7 +70,8 @@ class TimeToPayProxyControllerSpec
     List()
   )
 
-  val queryParameterNotMatchingPayload = "customerReference and planId in the query parameters should match the ones in the request payload"
+  val queryParameterNotMatchingPayload =
+    "customerReference and planId in the query parameters should match the ones in the request payload"
 
   private val updatePlanRequest =
     UpdatePlanRequest(
@@ -325,7 +323,7 @@ class TimeToPayProxyControllerSpec
 
         status(response) shouldBe Status.INTERNAL_SERVER_ERROR
         (contentAsJson(response) \ "errorMessage")
-          .as[String] shouldBe ("Internal Service Error")
+          .as[String] shouldBe "Internal Service Error"
 
       }
     }
@@ -469,21 +467,23 @@ class TimeToPayProxyControllerSpec
           .returning(Future.successful(()))
 
         val updatePlanRequestMissingPaymentReference: UpdatePlanRequest =
-          Json.obj(
-            "customerReference" -> "customerRef1234",
-            "planId" -> "planId1234",
-            "planStatus" -> "success",
-            "updateType" -> "paymentDetails",
-            "thirdPartyBank" -> false,
-            "payments" ->
-              JsArray(
-                List(
-                  Json.obj(
-                    "paymentMethod" -> "cardPayment"
+          Json
+            .obj(
+              "customerReference" -> "customerRef1234",
+              "planId"            -> "planId1234",
+              "planStatus"        -> "success",
+              "updateType"        -> "paymentDetails",
+              "thirdPartyBank"    -> false,
+              "payments" ->
+                JsArray(
+                  List(
+                    Json.obj(
+                      "paymentMethod" -> "cardPayment"
+                    )
                   )
                 )
-              )
-          ).as[UpdatePlanRequest]
+            )
+            .as[UpdatePlanRequest]
 
         val fakeRequest: FakeRequest[JsValue] =
           FakeRequest(
@@ -506,7 +506,6 @@ class TimeToPayProxyControllerSpec
           ))
           .expects(updatePlanRequestMissingPaymentReference, *, *)
           .returning(TtppEnvelope(responseFromTtp))
-
 
         val response: Future[Result] =
           controller.updatePlan(
@@ -531,20 +530,22 @@ class TimeToPayProxyControllerSpec
           .returning(Future.successful(()))
 
         val updatePlanRequestMissingPlanStatus: UpdatePlanRequest =
-          Json.obj(
-            "customerReference" -> "customerRef1234",
-            "planId" -> "planId1234",
-            "updateType" -> "paymentDetails",
-            "thirdPartyBank" -> false,
-            "payments" ->
-              JsArray(
-                List(
-                  Json.obj(
-                    "paymentMethod" -> "cardPayment"
+          Json
+            .obj(
+              "customerReference" -> "customerRef1234",
+              "planId"            -> "planId1234",
+              "updateType"        -> "paymentDetails",
+              "thirdPartyBank"    -> false,
+              "payments" ->
+                JsArray(
+                  List(
+                    Json.obj(
+                      "paymentMethod" -> "cardPayment"
+                    )
                   )
                 )
-              )
-          ).as[UpdatePlanRequest]
+            )
+            .as[UpdatePlanRequest]
 
         val fakeRequest: FakeRequest[JsValue] =
           FakeRequest(
@@ -567,7 +568,6 @@ class TimeToPayProxyControllerSpec
           ))
           .expects(updatePlanRequestMissingPlanStatus, *, *)
           .returning(TtppEnvelope(responseFromTtp))
-
 
         val response: Future[Result] =
           controller.updatePlan(
@@ -688,9 +688,9 @@ class TimeToPayProxyControllerSpec
         val invalidJsonBody: JsValue =
           Json.obj(
             "customerReference" -> "customerRef1234",
-            "planId" -> "planId1234",
-            "updateType" -> "paymentDetails",
-            "thirdPartyBank" -> false,
+            "planId"            -> "planId1234",
+            "updateType"        -> "paymentDetails",
+            "thirdPartyBank"    -> false,
             "payments" ->
               JsArray(
                 List(
@@ -718,7 +718,10 @@ class TimeToPayProxyControllerSpec
         val errorResponse = Status.BAD_REQUEST
         status(response) shouldBe errorResponse.intValue()
         Json.fromJson[TtppErrorResponse](contentAsJson(response)) shouldBe JsSuccess(
-          TtppErrorResponse(errorResponse.intValue(), "Could not parse body due to requirement failed: Direct Debit should always have payment reference")
+          TtppErrorResponse(
+            errorResponse.intValue(),
+            "Could not parse body due to requirement failed: Direct Debit should always have payment reference"
+          )
         )
       }
       "paymentReference is empty in payments when paymentMethod is directDebit" in {
@@ -733,14 +736,14 @@ class TimeToPayProxyControllerSpec
         val invalidJsonBody: JsValue =
           Json.obj(
             "customerReference" -> "customerRef1234",
-            "planId" -> "planId1234",
-            "updateType" -> "paymentDetails",
-            "thirdPartyBank" -> false,
+            "planId"            -> "planId1234",
+            "updateType"        -> "paymentDetails",
+            "thirdPartyBank"    -> false,
             "payments" ->
               JsArray(
                 List(
                   Json.obj(
-                    "paymentMethod" -> "directDebit",
+                    "paymentMethod"    -> "directDebit",
                     "paymentReference" -> ""
                   )
                 )
@@ -764,7 +767,10 @@ class TimeToPayProxyControllerSpec
         val errorResponse = Status.BAD_REQUEST
         status(response) shouldBe errorResponse.intValue()
         Json.fromJson[TtppErrorResponse](contentAsJson(response)) shouldBe JsSuccess(
-          TtppErrorResponse(errorResponse.intValue(), "Could not parse body due to requirement failed: Direct Debit should always have payment reference")
+          TtppErrorResponse(
+            errorResponse.intValue(),
+            "Could not parse body due to requirement failed: Direct Debit should always have payment reference"
+          )
         )
       }
 
@@ -780,14 +786,14 @@ class TimeToPayProxyControllerSpec
         val invalidJsonBody: JsValue =
           Json.obj(
             "customerReference" -> "customerRef1234",
-            "planId" -> "planId1234",
-            "updateType" -> "paymentDetails",
-            "thirdPartyBank" -> false,
+            "planId"            -> "planId1234",
+            "updateType"        -> "paymentDetails",
+            "thirdPartyBank"    -> false,
             "payments" ->
               JsArray(
                 List(
                   Json.obj(
-                    "paymentMethod" -> "cardPayment",
+                    "paymentMethod"    -> "cardPayment",
                     "paymentReference" -> ""
                   )
                 )
@@ -811,7 +817,10 @@ class TimeToPayProxyControllerSpec
         val errorResponse = Status.BAD_REQUEST
         status(response) shouldBe errorResponse.intValue()
         Json.fromJson[TtppErrorResponse](contentAsJson(response)) shouldBe JsSuccess(
-          TtppErrorResponse(errorResponse.intValue(), "Could not parse body due to requirement failed: paymentReference should not be empty")
+          TtppErrorResponse(
+            errorResponse.intValue(),
+            "Could not parse body due to requirement failed: paymentReference should not be empty"
+          )
         )
       }
 
@@ -827,9 +836,9 @@ class TimeToPayProxyControllerSpec
         val invalidJsonBody: JsValue =
           Json.obj(
             "customerReference" -> "custReference1234",
-            "planId" -> "planId1234",
-            "updateType" -> "planStatus",
-            "thirdPartyBank" -> false
+            "planId"            -> "planId1234",
+            "updateType"        -> "planStatus",
+            "thirdPartyBank"    -> false
           )
 
         val fakeRequest: FakeRequest[JsValue] =
@@ -849,7 +858,10 @@ class TimeToPayProxyControllerSpec
         val errorResponse = Status.BAD_REQUEST
         status(response) shouldBe errorResponse.intValue()
         Json.fromJson[TtppErrorResponse](contentAsJson(response)) shouldBe JsSuccess(
-          TtppErrorResponse(errorResponse.intValue(), "Could not parse body due to requirement failed: Invalid UpdatePlanRequest payload: Payload has a missing field or an invalid format. Field name: planStatus.")
+          TtppErrorResponse(
+            errorResponse.intValue(),
+            "Could not parse body due to requirement failed: Invalid UpdatePlanRequest payload: Payload has a missing field or an invalid format. Field name: planStatus."
+          )
         )
       }
     }

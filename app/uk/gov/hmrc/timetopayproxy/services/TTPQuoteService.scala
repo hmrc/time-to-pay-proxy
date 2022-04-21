@@ -17,7 +17,7 @@
 package uk.gov.hmrc.timetopayproxy.services
 
 import com.google.inject.ImplementedBy
-import javax.inject.{Inject, Singleton}
+import javax.inject.{ Inject, Singleton }
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.timetopayproxy.connectors.TtpConnector
 import uk.gov.hmrc.timetopayproxy.models._
@@ -27,40 +27,47 @@ import scala.concurrent.ExecutionContext
 
 @ImplementedBy(classOf[DefaultTTPQuoteService])
 trait TTPQuoteService {
-  def generateQuote(timeToPayRequest: GenerateQuoteRequest)(implicit ec: ExecutionContext, hc: HeaderCarrier): TtppEnvelope[GenerateQuoteResponse]
+  def generateQuote(
+    timeToPayRequest: GenerateQuoteRequest
+  )(implicit ec: ExecutionContext, hc: HeaderCarrier): TtppEnvelope[GenerateQuoteResponse]
 
-  def getExistingPlan(customerReference: CustomerReference, planId: PlanId)(implicit ec: ExecutionContext, hc: HeaderCarrier): TtppEnvelope[ViewPlanResponse]
+  def getExistingPlan(customerReference: CustomerReference, planId: PlanId)(implicit
+    ec: ExecutionContext,
+    hc: HeaderCarrier
+  ): TtppEnvelope[ViewPlanResponse]
 
-  def updatePlan(updatePlanRequest: UpdatePlanRequest)(implicit ec: ExecutionContext, hc: HeaderCarrier): TtppEnvelope[UpdatePlanResponse]
+  def updatePlan(
+    updatePlanRequest: UpdatePlanRequest
+  )(implicit ec: ExecutionContext, hc: HeaderCarrier): TtppEnvelope[UpdatePlanResponse]
 
-  def createPlan(createPlanRequest: CreatePlanRequest)(implicit ec: ExecutionContext, hc: HeaderCarrier): TtppEnvelope[CreatePlanResponse]
+  def createPlan(
+    createPlanRequest: CreatePlanRequest
+  )(implicit ec: ExecutionContext, hc: HeaderCarrier): TtppEnvelope[CreatePlanResponse]
 }
 
 @Singleton
-class DefaultTTPQuoteService @Inject()(ttpConnector: TtpConnector)
-    extends TTPQuoteService {
+class DefaultTTPQuoteService @Inject() (ttpConnector: TtpConnector) extends TTPQuoteService {
 
-  def generateQuote(timeToPayRequest: GenerateQuoteRequest)(
-    implicit ec: ExecutionContext,
+  def generateQuote(timeToPayRequest: GenerateQuoteRequest)(implicit
+    ec: ExecutionContext,
     hc: HeaderCarrier
   ): TtppEnvelope[GenerateQuoteResponse] =
     ttpConnector.generateQuote(timeToPayRequest)
 
-  override def getExistingPlan(customerReference: CustomerReference, planId: PlanId)(
-    implicit ec: ExecutionContext,
+  override def getExistingPlan(customerReference: CustomerReference, planId: PlanId)(implicit
+    ec: ExecutionContext,
     hc: HeaderCarrier
-  ): TtppEnvelope[ViewPlanResponse] = {
+  ): TtppEnvelope[ViewPlanResponse] =
     ttpConnector.getExistingQuote(customerReference, planId)
-  }
 
-  def updatePlan(updatePlanRequest: UpdatePlanRequest)(
-    implicit ec: ExecutionContext,
+  def updatePlan(updatePlanRequest: UpdatePlanRequest)(implicit
+    ec: ExecutionContext,
     hc: HeaderCarrier
   ): TtppEnvelope[UpdatePlanResponse] =
     ttpConnector.updatePlan(updatePlanRequest)
 
-  override def createPlan(createPlanRequest: CreatePlanRequest)
-                         (implicit ec: ExecutionContext, hc: HeaderCarrier)
-  : TtppEnvelope[CreatePlanResponse] =
+  override def createPlan(
+    createPlanRequest: CreatePlanRequest
+  )(implicit ec: ExecutionContext, hc: HeaderCarrier): TtppEnvelope[CreatePlanResponse] =
     ttpConnector.createPlan(createPlanRequest)
 }

@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.timetopayproxy.models
 
-import enumeratum.{Enum, EnumEntry, PlayJsonEnum}
+import enumeratum.{ Enum, EnumEntry, PlayJsonEnum }
 import play.api.libs.json.Json
 
 final case class CaseId(value: String) extends AnyVal
@@ -47,24 +47,29 @@ object PlanStatus extends Enum[PlanStatus] with PlayJsonEnum[PlanStatus] {
 
   def valueOf(value: String): PlanStatus =
     value match {
-      case "success"   => Success
-      case "failure"   => Failure
+      case "success"                       => Success
+      case "failure"                       => Failure
       case "TTP Arrangement - In Progress" => TtpArrangementInProgress
-      case "Resolved - TTP Amended" => ResolvedTTPAmended
-      case "In Default - Clerical Review" => InDefaultClericalReview
-      case "Pending - First Reminder" => PendingFirstReminder
-      case "In Default - First Reminder" => InDefaultFirstReminder
-      case "Pending - Second Reminder" => PendingSecondReminder
-      case "In Default - Second Reminder" => InDefaultSecondReminder
-      case "Pending - Cancellation" => PendingCancellation
-      case "Pending - Completion" => PendingCompletion
-      case "Resolved - Cancelled" => ResolvedCancelled
-      case "Resolved - Completed" => ResolvedCompleted
+      case "Resolved - TTP Amended"        => ResolvedTTPAmended
+      case "In Default - Clerical Review"  => InDefaultClericalReview
+      case "Pending - First Reminder"      => PendingFirstReminder
+      case "In Default - First Reminder"   => InDefaultFirstReminder
+      case "Pending - Second Reminder"     => PendingSecondReminder
+      case "In Default - Second Reminder"  => InDefaultSecondReminder
+      case "Pending - Cancellation"        => PendingCancellation
+      case "Pending - Completion"          => PendingCompletion
+      case "Resolved - Cancelled"          => ResolvedCancelled
+      case "Resolved - Completed"          => ResolvedCompleted
     }
 
 }
 
-final case class CreatePlanResponse(customerReference: CustomerReference, planId: PlanId, caseId: CaseId, planStatus: PlanStatus)
+final case class CreatePlanResponse(
+  customerReference: CustomerReference,
+  planId: PlanId,
+  caseId: CaseId,
+  planStatus: PlanStatus
+)
 
 object CreatePlanResponse {
   implicit val format = Json.format[CreatePlanResponse]

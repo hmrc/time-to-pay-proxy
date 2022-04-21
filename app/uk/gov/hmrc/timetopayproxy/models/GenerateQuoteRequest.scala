@@ -33,7 +33,7 @@ package uk.gov.hmrc.timetopayproxy.models
  */
 
 import java.time.LocalDate
-import enumeratum.{Enum, EnumEntry, PlayJsonEnum}
+import enumeratum.{ Enum, EnumEntry, PlayJsonEnum }
 import play.api.libs.json.Json
 
 import scala.collection.immutable
@@ -48,16 +48,16 @@ object ChannelIdentifier extends Enum[ChannelIdentifier] with PlayJsonEnum[Chann
 }
 
 final case class PlanToGenerateQuote(
-                      quoteType: QuoteType,
-                      quoteDate: LocalDate,
-                      instalmentStartDate: LocalDate,
-                      instalmentAmount: Option[BigDecimal],
-                      frequency: Option[Frequency],
-                      duration: Option[Duration],
-                      initialPaymentAmount: Option[BigDecimal],
-                      initialPaymentDate: Option[LocalDate],
-                      paymentPlanType: PaymentPlanType
-                     ) {
+  quoteType: QuoteType,
+  quoteDate: LocalDate,
+  instalmentStartDate: LocalDate,
+  instalmentAmount: Option[BigDecimal],
+  frequency: Option[Frequency],
+  duration: Option[Duration],
+  initialPaymentAmount: Option[BigDecimal],
+  initialPaymentDate: Option[LocalDate],
+  paymentPlanType: PaymentPlanType
+) {
   require(instalmentAmount.forall(_ > 0), "instalmentAmount should be a positive amount.")
   require(initialPaymentAmount.forall(_ > 0), "initialPaymentAmount should be a positive amount.")
 }
@@ -66,19 +66,16 @@ object PlanToGenerateQuote {
   implicit val format = Json.format[PlanToGenerateQuote]
 }
 
-
 final case class GenerateQuoteRequest(
-                             customerReference: CustomerReference,
-                             channelIdentifier: ChannelIdentifier,
-                             plan: PlanToGenerateQuote,
-                             customerPostCodes: List[CustomerPostCode],
-                             debtItemCharges: List[DebtItemCharge]) {
+  customerReference: CustomerReference,
+  channelIdentifier: ChannelIdentifier,
+  plan: PlanToGenerateQuote,
+  customerPostCodes: List[CustomerPostCode],
+  debtItemCharges: List[DebtItemCharge]
+) {
   require(!customerReference.value.trim().isEmpty(), "customerReference should not be empty")
 }
-
 
 object GenerateQuoteRequest {
   implicit val format = Json.format[GenerateQuoteRequest]
 }
-
-
