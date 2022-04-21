@@ -23,7 +23,11 @@ import play.api.mvc.{ControllerComponents, Result}
 import play.api.test.Helpers.{CONTENT_TYPE, status}
 import play.api.test.{FakeRequest, Helpers}
 import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.timetopayproxy.models.{ConnectorError, RequestDetails, TtppEnvelope}
+import uk.gov.hmrc.timetopayproxy.models.{
+  ConnectorError,
+  RequestDetails,
+  TtppEnvelope
+}
 import uk.gov.hmrc.timetopayproxy.services.TTPTestService
 import uk.gov.hmrc.timetopayproxy.support.UnitSpec
 
@@ -42,7 +46,8 @@ class TimeToPayTestControllerSpec extends UnitSpec {
     RequestDetails("someId", Json.parse("{}"), Some("www.uri.com"), true)
   )
 
-  val responseDetails = RequestDetails("someId", Json.parse("{}"), Some("www.uri.com"), true)
+  val responseDetails =
+    RequestDetails("someId", Json.parse("{}"), Some("www.uri.com"), true)
 
   "GET /test-only/requests" should {
     "return a 200 given a successful response" in {

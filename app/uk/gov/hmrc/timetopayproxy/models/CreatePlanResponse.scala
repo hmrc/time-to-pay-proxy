@@ -26,20 +26,27 @@ object CaseId extends ValueTypeFormatter {
     valueTypeFormatter(CaseId.apply, CaseId.unapply)
 }
 
-sealed abstract class PlanStatus(override val entryName: String) extends EnumEntry
+sealed abstract class PlanStatus(override val entryName: String)
+    extends EnumEntry
 
 object PlanStatus extends Enum[PlanStatus] with PlayJsonEnum[PlanStatus] {
   val values: scala.collection.immutable.IndexedSeq[PlanStatus] = findValues
 
   case object Success extends PlanStatus("success")
   case object Failure extends PlanStatus("failure")
-  case object TtpArrangementInProgress extends PlanStatus("TTP Arrangement - In Progress")
+  case object TtpArrangementInProgress
+      extends PlanStatus("TTP Arrangement - In Progress")
   case object ResolvedTTPAmended extends PlanStatus("Resolved - TTP Amended")
-  case object InDefaultClericalReview extends PlanStatus("In Default - Clerical Review")
-  case object PendingFirstReminder extends PlanStatus("Pending - First Reminder")
-  case object InDefaultFirstReminder extends PlanStatus("In Default - First Reminder")
-  case object PendingSecondReminder extends PlanStatus("Pending - Second Reminder")
-  case object InDefaultSecondReminder extends PlanStatus("In Default - Second Reminder")
+  case object InDefaultClericalReview
+      extends PlanStatus("In Default - Clerical Review")
+  case object PendingFirstReminder
+      extends PlanStatus("Pending - First Reminder")
+  case object InDefaultFirstReminder
+      extends PlanStatus("In Default - First Reminder")
+  case object PendingSecondReminder
+      extends PlanStatus("Pending - Second Reminder")
+  case object InDefaultSecondReminder
+      extends PlanStatus("In Default - Second Reminder")
   case object PendingCancellation extends PlanStatus("Pending - Cancellation")
   case object PendingCompletion extends PlanStatus("Pending - Completion")
   case object ResolvedCancelled extends PlanStatus("Resolved - Cancelled")
@@ -47,24 +54,29 @@ object PlanStatus extends Enum[PlanStatus] with PlayJsonEnum[PlanStatus] {
 
   def valueOf(value: String): PlanStatus =
     value match {
-      case "success"   => Success
-      case "failure"   => Failure
+      case "success"                       => Success
+      case "failure"                       => Failure
       case "TTP Arrangement - In Progress" => TtpArrangementInProgress
-      case "Resolved - TTP Amended" => ResolvedTTPAmended
-      case "In Default - Clerical Review" => InDefaultClericalReview
-      case "Pending - First Reminder" => PendingFirstReminder
-      case "In Default - First Reminder" => InDefaultFirstReminder
-      case "Pending - Second Reminder" => PendingSecondReminder
-      case "In Default - Second Reminder" => InDefaultSecondReminder
-      case "Pending - Cancellation" => PendingCancellation
-      case "Pending - Completion" => PendingCompletion
-      case "Resolved - Cancelled" => ResolvedCancelled
-      case "Resolved - Completed" => ResolvedCompleted
+      case "Resolved - TTP Amended"        => ResolvedTTPAmended
+      case "In Default - Clerical Review"  => InDefaultClericalReview
+      case "Pending - First Reminder"      => PendingFirstReminder
+      case "In Default - First Reminder"   => InDefaultFirstReminder
+      case "Pending - Second Reminder"     => PendingSecondReminder
+      case "In Default - Second Reminder"  => InDefaultSecondReminder
+      case "Pending - Cancellation"        => PendingCancellation
+      case "Pending - Completion"          => PendingCompletion
+      case "Resolved - Cancelled"          => ResolvedCancelled
+      case "Resolved - Completed"          => ResolvedCompleted
     }
 
 }
 
-final case class CreatePlanResponse(customerReference: CustomerReference, planId: PlanId, caseId: CaseId, planStatus: PlanStatus)
+final case class CreatePlanResponse(
+    customerReference: CustomerReference,
+    planId: PlanId,
+    caseId: CaseId,
+    planStatus: PlanStatus
+)
 
 object CreatePlanResponse {
   implicit val format = Json.format[CreatePlanResponse]

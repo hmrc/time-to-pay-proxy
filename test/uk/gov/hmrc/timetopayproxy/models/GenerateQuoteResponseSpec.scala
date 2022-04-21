@@ -74,7 +74,7 @@ class GenerateQuoteResponseSpec extends AnyWordSpec with Matchers {
 
   "GenerateQuoteResponse" should {
     "be correctly encoded and decoded" in {
-      Json.toJson(generateQuoteResponse) shouldEqual(Json.parse(json))
+      Json.toJson(generateQuoteResponse) shouldEqual (Json.parse(json))
     }
   }
 }

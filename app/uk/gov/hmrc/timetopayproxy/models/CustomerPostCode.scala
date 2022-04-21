@@ -26,8 +26,14 @@ object PostCode extends ValueTypeFormatter {
     valueTypeFormatter(PostCode.apply, PostCode.unapply)
 }
 
-final case class CustomerPostCode(addressPostcode: PostCode, postcodeDate: LocalDate) {
-  require(!addressPostcode.value.trim().isEmpty(), "addressPostcode should not be empty")
+final case class CustomerPostCode(
+    addressPostcode: PostCode,
+    postcodeDate: LocalDate
+) {
+  require(
+    !addressPostcode.value.trim().isEmpty(),
+    "addressPostcode should not be empty"
+  )
 }
 
 object CustomerPostCode {

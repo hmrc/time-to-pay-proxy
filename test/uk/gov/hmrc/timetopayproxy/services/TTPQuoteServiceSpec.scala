@@ -138,7 +138,10 @@ class TTPQuoteServiceSpec extends UnitSpec {
       Some(true),
       Some(
         List(
-          PaymentInformation(PaymentMethod.Bacs, Some(PaymentReference("reference")))
+          PaymentInformation(
+            PaymentMethod.Bacs,
+            Some(PaymentReference("reference"))
+          )
         )
       )
     )
@@ -183,7 +186,9 @@ class TTPQuoteServiceSpec extends UnitSpec {
           List(Payment(LocalDate.parse("2020-01-01"), 100))
         )
       ),
-      List(PaymentInformation(PaymentMethod.Bacs, Some(PaymentReference("ref123")))),
+      List(
+        PaymentInformation(PaymentMethod.Bacs, Some(PaymentReference("ref123")))
+      ),
       List(CustomerPostCode(PostCode("NW1 AB1"), LocalDate.now())),
       List(
         Instalment(
@@ -363,7 +368,9 @@ class TTPQuoteServiceSpec extends UnitSpec {
       )
       val quoteService = new DefaultTTPQuoteService(connectorStub)
 
-      await(quoteService.createPlan(createPlanRequest).value) shouldBe createPlanResponse
+      await(
+        quoteService.createPlan(createPlanRequest).value
+      ) shouldBe createPlanResponse
         .asRight[TtppError]
     }
 
@@ -376,7 +383,9 @@ class TTPQuoteServiceSpec extends UnitSpec {
       )
       val quoteService = new DefaultTTPQuoteService(connectorStub)
 
-      await(quoteService.createPlan(createPlanRequest).value) shouldBe ConnectorError(
+      await(
+        quoteService.createPlan(createPlanRequest).value
+      ) shouldBe ConnectorError(
         500,
         "Internal server error"
       ).asLeft[CreatePlanResponse]
@@ -386,33 +395,35 @@ class TTPQuoteServiceSpec extends UnitSpec {
 }
 
 class TtpConnectorStub(
-  generateQuoteResponse: Either[TtppError, GenerateQuoteResponse],
-  retrieveQuoteResponse: Either[TtppError, ViewPlanResponse],
-  updatePlanResponse: Either[TtppError, UpdatePlanResponse],
-  createPlanResponse: Either[TtppError, CreatePlanResponse]
+    generateQuoteResponse: Either[TtppError, GenerateQuoteResponse],
+    retrieveQuoteResponse: Either[TtppError, ViewPlanResponse],
+    updatePlanResponse: Either[TtppError, UpdatePlanResponse],
+    createPlanResponse: Either[TtppError, CreatePlanResponse]
 ) extends TtpConnector {
-  override def generateQuote(ttppRequest: GenerateQuoteRequest)(
-    implicit ec: ExecutionContext,
-    hc: HeaderCarrier
+  override def generateQuote(ttppRequest: GenerateQuoteRequest)(implicit
+      ec: ExecutionContext,
+      hc: HeaderCarrier
   ): TtppEnvelope[GenerateQuoteResponse] =
     TtppEnvelope(Future successful generateQuoteResponse)
 
-  override def getExistingQuote(customerReference: CustomerReference,
-                                planId: PlanId)(
-    implicit ec: ExecutionContext,
-    hc: HeaderCarrier
+  override def getExistingQuote(
+      customerReference: CustomerReference,
+      planId: PlanId
+  )(implicit
+      ec: ExecutionContext,
+      hc: HeaderCarrier
   ): TtppEnvelope[ViewPlanResponse] =
     TtppEnvelope(Future successful retrieveQuoteResponse)
 
-  override def updatePlan(updatePlanRequest: UpdatePlanRequest)(
-    implicit ec: ExecutionContext,
-    hc: HeaderCarrier
+  override def updatePlan(updatePlanRequest: UpdatePlanRequest)(implicit
+      ec: ExecutionContext,
+      hc: HeaderCarrier
   ): TtppEnvelope[UpdatePlanResponse] =
     TtppEnvelope(Future successful updatePlanResponse)
 
-  override def createPlan(createPlanRequest: CreatePlanRequest)(
-    implicit ec: ExecutionContext,
-    hc: HeaderCarrier
+  override def createPlan(createPlanRequest: CreatePlanRequest)(implicit
+      ec: ExecutionContext,
+      hc: HeaderCarrier
   ): TtppEnvelope[CreatePlanResponse] =
     TtppEnvelope(Future successful createPlanResponse)
 }

@@ -38,9 +38,12 @@ import play.api.libs.json.Json
 
 import scala.collection.immutable
 
-sealed abstract class ChannelIdentifier(override val entryName: String) extends EnumEntry
+sealed abstract class ChannelIdentifier(override val entryName: String)
+    extends EnumEntry
 
-object ChannelIdentifier extends Enum[ChannelIdentifier] with PlayJsonEnum[ChannelIdentifier] {
+object ChannelIdentifier
+    extends Enum[ChannelIdentifier]
+    with PlayJsonEnum[ChannelIdentifier] {
   val values: immutable.IndexedSeq[ChannelIdentifier] = findValues
 
   case object Advisor extends ChannelIdentifier("advisor")
@@ -48,37 +51,43 @@ object ChannelIdentifier extends Enum[ChannelIdentifier] with PlayJsonEnum[Chann
 }
 
 final case class PlanToGenerateQuote(
-                      quoteType: QuoteType,
-                      quoteDate: LocalDate,
-                      instalmentStartDate: LocalDate,
-                      instalmentAmount: Option[BigDecimal],
-                      frequency: Option[Frequency],
-                      duration: Option[Duration],
-                      initialPaymentAmount: Option[BigDecimal],
-                      initialPaymentDate: Option[LocalDate],
-                      paymentPlanType: PaymentPlanType
-                     ) {
-  require(instalmentAmount.forall(_ > 0), "instalmentAmount should be a positive amount.")
-  require(initialPaymentAmount.forall(_ > 0), "initialPaymentAmount should be a positive amount.")
+    quoteType: QuoteType,
+    quoteDate: LocalDate,
+    instalmentStartDate: LocalDate,
+    instalmentAmount: Option[BigDecimal],
+    frequency: Option[Frequency],
+    duration: Option[Duration],
+    initialPaymentAmount: Option[BigDecimal],
+    initialPaymentDate: Option[LocalDate],
+    paymentPlanType: PaymentPlanType
+) {
+  require(
+    instalmentAmount.forall(_ > 0),
+    "instalmentAmount should be a positive amount."
+  )
+  require(
+    initialPaymentAmount.forall(_ > 0),
+    "initialPaymentAmount should be a positive amount."
+  )
 }
 
 object PlanToGenerateQuote {
   implicit val format = Json.format[PlanToGenerateQuote]
 }
 
-
 final case class GenerateQuoteRequest(
-                             customerReference: CustomerReference,
-                             channelIdentifier: ChannelIdentifier,
-                             plan: PlanToGenerateQuote,
-                             customerPostCodes: List[CustomerPostCode],
-                             debtItemCharges: List[DebtItemCharge]) {
-  require(!customerReference.value.trim().isEmpty(), "customerReference should not be empty")
+    customerReference: CustomerReference,
+    channelIdentifier: ChannelIdentifier,
+    plan: PlanToGenerateQuote,
+    customerPostCodes: List[CustomerPostCode],
+    debtItemCharges: List[DebtItemCharge]
+) {
+  require(
+    !customerReference.value.trim().isEmpty(),
+    "customerReference should not be empty"
+  )
 }
-
 
 object GenerateQuoteRequest {
   implicit val format = Json.format[GenerateQuoteRequest]
 }
-
-

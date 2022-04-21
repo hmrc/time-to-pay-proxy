@@ -18,7 +18,10 @@ package uk.gov.hmrc.timetopayproxy.auth
 
 import play.api.mvc.{Action, AnyContent, InjectedController}
 import uk.gov.hmrc.auth.core.PlayAuthConnector
-import uk.gov.hmrc.timetopayproxy.actions.auth.{AuthoriseAction, AuthoriseActionImpl}
+import uk.gov.hmrc.timetopayproxy.actions.auth.{
+  AuthoriseAction,
+  AuthoriseActionImpl
+}
 import uk.gov.hmrc.timetopayproxy.support.UnitSpec
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -26,14 +29,22 @@ import uk.gov.hmrc.auth.core.authorise.Predicate
 import uk.gov.hmrc.auth.core.retrieve.Retrieval
 import play.api.test.FakeRequest
 import play.api.test.Helpers.stubControllerComponents
-import uk.gov.hmrc.auth.core.{InsufficientEnrolments, PlayAuthConnector, SessionRecordNotFound}
+import uk.gov.hmrc.auth.core.{
+  InsufficientEnrolments,
+  PlayAuthConnector,
+  SessionRecordNotFound
+}
 import uk.gov.hmrc.http.HeaderCarrier
 import play.api.http.Status
 import play.api.mvc.{Action, AnyContent, InjectedController}
 import play.api.test.FakeRequest
 import uk.gov.hmrc.auth.core.authorise.Predicate
 import uk.gov.hmrc.auth.core.retrieve.Retrieval
-import uk.gov.hmrc.auth.core.{InsufficientEnrolments, PlayAuthConnector, SessionRecordNotFound}
+import uk.gov.hmrc.auth.core.{
+  InsufficientEnrolments,
+  PlayAuthConnector,
+  SessionRecordNotFound
+}
 import uk.gov.hmrc.http.HeaderCarrier
 import play.api.test.Helpers.stubControllerComponents
 
@@ -50,7 +61,11 @@ class AuthoriseActionSpec extends UnitSpec {
   lazy val mockAuthConnector: PlayAuthConnector = mock[PlayAuthConnector]
   lazy val cc = stubControllerComponents()
   class Setup(val authConnectorResponse: Future[Unit]) {
-    (mockAuthConnector.authorise[Unit](_: Predicate, _: Retrieval[Unit])(_: HeaderCarrier, _: ExecutionContext))
+    (mockAuthConnector
+      .authorise[Unit](_: Predicate, _: Retrieval[Unit])(
+        _: HeaderCarrier,
+        _: ExecutionContext
+      ))
       .expects(*, *, *, *)
       .returning(authConnectorResponse)
     val authAction = new AuthoriseActionImpl(mockAuthConnector, cc)
@@ -71,7 +86,8 @@ class AuthoriseActionSpec extends UnitSpec {
       val authConnectorResponse = Future.successful(())
       val setup = new Setup(authConnectorResponse)
 
-      val result = await(setup.controller.onPageLoad()(FakeRequest("GET", "/test")))
+      val result =
+        await(setup.controller.onPageLoad()(FakeRequest("GET", "/test")))
 
       result.header.status shouldBe Status.OK
     }
@@ -79,7 +95,8 @@ class AuthoriseActionSpec extends UnitSpec {
       val authConnectorResponse = Future.failed(new InsufficientEnrolments)
       val setup = new Setup(authConnectorResponse)
 
-      val result = await(setup.controller.onPageLoad()(FakeRequest("GET", "/test")))
+      val result =
+        await(setup.controller.onPageLoad()(FakeRequest("GET", "/test")))
 
       result.header.status shouldBe Status.FORBIDDEN
     }
@@ -91,7 +108,8 @@ class AuthoriseActionSpec extends UnitSpec {
         val authConnectorResponse = Future.successful(())
         val setup = new Setup(authConnectorResponse)
 
-        val result = await(setup.controller.onPageLoad()(FakeRequest("GET", "/test")))
+        val result =
+          await(setup.controller.onPageLoad()(FakeRequest("GET", "/test")))
 
         result.header.status shouldBe Status.OK
       }

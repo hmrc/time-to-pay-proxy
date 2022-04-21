@@ -18,13 +18,17 @@ package uk.gov.hmrc.timetopayproxy.services
 
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.timetopayproxy.connectors.TtpTestConnector
-import uk.gov.hmrc.timetopayproxy.models.{ConnectorError, RequestDetails, TtppEnvelope, TtppError}
+import uk.gov.hmrc.timetopayproxy.models.{
+  ConnectorError,
+  RequestDetails,
+  TtppEnvelope,
+  TtppError
+}
 import uk.gov.hmrc.timetopayproxy.support.UnitSpec
 import scala.concurrent.ExecutionContext.Implicits.global
 import cats.syntax.either._
 import play.api.libs.json.Json
 import scala.concurrent.ExecutionContext
-
 
 class TTPTestServiceSpec extends UnitSpec {
   implicit val hc = HeaderCarrier()
@@ -49,7 +53,9 @@ class TTPTestServiceSpec extends UnitSpec {
           .returning(TtppEnvelope(requestDetails))
 
         val testService = new DefaultTTPTestService(connector)
-        await(testService.retrieveRequestDetails().value) shouldBe requestDetails.asRight[TtppError]
+        await(
+          testService.retrieveRequestDetails().value
+        ) shouldBe requestDetails.asRight[TtppError]
       }
     }
 
@@ -72,7 +78,9 @@ class TTPTestServiceSpec extends UnitSpec {
           )
 
         val testService = new DefaultTTPTestService(connector)
-        await(testService.retrieveRequestDetails().value) shouldBe errorFromTtpConnector.asLeft[Seq[RequestDetails]]
+        await(
+          testService.retrieveRequestDetails().value
+        ) shouldBe errorFromTtpConnector.asLeft[Seq[RequestDetails]]
       }
     }
   }
@@ -80,7 +88,8 @@ class TTPTestServiceSpec extends UnitSpec {
   "Save response details" should {
     "save the request details retrieved from the stub" when {
       "connector returns success" in {
-        val details = RequestDetails("someId", Json.parse("{}"), Some("www.uri.com"), true)
+        val details =
+          RequestDetails("someId", Json.parse("{}"), Some("www.uri.com"), true)
         val connector = mock[TtpTestConnector]
         (
           connector
@@ -93,13 +102,15 @@ class TTPTestServiceSpec extends UnitSpec {
           .returning(TtppEnvelope(()))
 
         val testService = new DefaultTTPTestService(connector)
-        await(testService.saveResponseDetails(details).value) shouldBe ().asRight[TtppError]
+        await(testService.saveResponseDetails(details).value) shouldBe ()
+          .asRight[TtppError]
       }
     }
 
     "return a failure response" when {
       "connector returns failure" in {
-        val details = RequestDetails("someId", Json.parse("{}"), Some("www.uri.com"), true)
+        val details =
+          RequestDetails("someId", Json.parse("{}"), Some("www.uri.com"), true)
 
         val errorFromTtpConnector =
           ConnectorError(500, "Internal Service Error")
@@ -118,7 +129,9 @@ class TTPTestServiceSpec extends UnitSpec {
           )
 
         val testService = new DefaultTTPTestService(connector)
-        await(testService.saveResponseDetails(details).value) shouldBe errorFromTtpConnector.asLeft[Seq[RequestDetails]]
+        await(
+          testService.saveResponseDetails(details).value
+        ) shouldBe errorFromTtpConnector.asLeft[Seq[RequestDetails]]
       }
     }
   }
@@ -138,7 +151,8 @@ class TTPTestServiceSpec extends UnitSpec {
           .returning(TtppEnvelope(requestDetails))
 
         val testService = new DefaultTTPTestService(connector)
-        await(testService.getErrors().value) shouldBe requestDetails.asRight[TtppError]
+        await(testService.getErrors().value) shouldBe requestDetails
+          .asRight[TtppError]
       }
     }
 
@@ -161,7 +175,8 @@ class TTPTestServiceSpec extends UnitSpec {
           )
 
         val testService = new DefaultTTPTestService(connector)
-        await(testService.getErrors().value) shouldBe errorFromTtpConnector.asLeft[Seq[RequestDetails]]
+        await(testService.getErrors().value) shouldBe errorFromTtpConnector
+          .asLeft[Seq[RequestDetails]]
       }
     }
   }
@@ -169,7 +184,8 @@ class TTPTestServiceSpec extends UnitSpec {
   "Save error details" should {
     "save the request details retrieved from the stub" when {
       "connector returns success" in {
-        val details = RequestDetails("someId", Json.parse("{}"), Some("www.uri.com"), true)
+        val details =
+          RequestDetails("someId", Json.parse("{}"), Some("www.uri.com"), true)
         val connector = mock[TtpTestConnector]
         (
           connector
@@ -182,13 +198,15 @@ class TTPTestServiceSpec extends UnitSpec {
           .returning(TtppEnvelope(()))
 
         val testService = new DefaultTTPTestService(connector)
-        await(testService.saveError(details).value) shouldBe ().asRight[TtppError]
+        await(testService.saveError(details).value) shouldBe ()
+          .asRight[TtppError]
       }
     }
 
     "return a failure response" when {
       "connector returns failure" in {
-        val details = RequestDetails("someId", Json.parse("{}"), Some("www.uri.com"), true)
+        val details =
+          RequestDetails("someId", Json.parse("{}"), Some("www.uri.com"), true)
 
         val errorFromTtpConnector =
           ConnectorError(500, "Internal Service Error")
@@ -207,7 +225,9 @@ class TTPTestServiceSpec extends UnitSpec {
           )
 
         val testService = new DefaultTTPTestService(connector)
-        await(testService.saveError(details).value) shouldBe errorFromTtpConnector.asLeft[Seq[RequestDetails]]
+        await(
+          testService.saveError(details).value
+        ) shouldBe errorFromTtpConnector.asLeft[Seq[RequestDetails]]
       }
     }
   }
@@ -228,7 +248,8 @@ class TTPTestServiceSpec extends UnitSpec {
           .returning(TtppEnvelope(()))
 
         val testService = new DefaultTTPTestService(connector)
-        await(testService.deleteRequestDetails(id).value) shouldBe ().asRight[TtppError]
+        await(testService.deleteRequestDetails(id).value) shouldBe ()
+          .asRight[TtppError]
       }
     }
 
@@ -253,7 +274,9 @@ class TTPTestServiceSpec extends UnitSpec {
           )
 
         val testService = new DefaultTTPTestService(connector)
-        await(testService.deleteRequestDetails(id).value) shouldBe errorFromTtpConnector.asLeft[Seq[RequestDetails]]
+        await(
+          testService.deleteRequestDetails(id).value
+        ) shouldBe errorFromTtpConnector.asLeft[Seq[RequestDetails]]
       }
     }
   }

@@ -31,16 +31,19 @@ import scala.util.control.NonFatal
 @ImplementedBy(classOf[AuthoriseActionImpl])
 trait AuthoriseAction extends ActionBuilder[Request, AnyContent]
 
-
-class AuthoriseActionImpl @Inject()(
-                           override val authConnector: PlayAuthConnector,
-                           cc: ControllerComponents)
-  extends AuthoriseAction with AuthorisedFunctions {
+class AuthoriseActionImpl @Inject() (
+    override val authConnector: PlayAuthConnector,
+    cc: ControllerComponents
+) extends AuthoriseAction
+    with AuthorisedFunctions {
   private val DTDEnrolment = "read:time-to-pay-proxy"
   private val logger = Logger(classOf[AuthoriseActionImpl])
   override def parser: BodyParser[AnyContent] = cc.parsers.defaultBodyParser
 
-  override def invokeBlock[A](request: Request[A], block: Request[A] => Future[Result]): Future[Result] = {
+  override def invokeBlock[A](
+      request: Request[A],
+      block: Request[A] => Future[Result]
+  ): Future[Result] = {
     implicit val hc: HeaderCarrier =
       HeaderCarrierConverter.fromRequest(request)
 
@@ -50,7 +53,9 @@ class AuthoriseActionImpl @Inject()(
 
     result.recover {
       case ie: InsufficientEnrolments =>
-        logger.debug(s"Forbidden request - Insufficient Enrolments: ${ie.reason}")
+        logger.debug(
+          s"Forbidden request - Insufficient Enrolments: ${ie.reason}"
+        )
         Forbidden
       case NonFatal(ex) =>
         logger.error(s"Caught an unexpected exception", ex)
@@ -58,7 +63,7 @@ class AuthoriseActionImpl @Inject()(
     }(cc.executionContext)
   }
 
-  override protected def executionContext: ExecutionContext = cc.executionContext
+  override protected def executionContext: ExecutionContext =
+    cc.executionContext
 
 }
-
