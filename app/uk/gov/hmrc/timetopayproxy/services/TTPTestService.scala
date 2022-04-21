@@ -29,28 +29,53 @@ import scala.concurrent.ExecutionContext
 //Coverage disabled for non-prod source
 @ImplementedBy(classOf[DefaultTTPTestService])
 trait TTPTestService {
-  def retrieveRequestDetails()(implicit ec: ExecutionContext, hc: HeaderCarrier): TtppEnvelope[Seq[RequestDetails]]
-  def saveResponseDetails(details: RequestDetails)(implicit ec: ExecutionContext, hc: HeaderCarrier): TtppEnvelope[Unit]
-  def deleteRequestDetails(requestId: String)(implicit ec: ExecutionContext, hc: HeaderCarrier): TtppEnvelope[Unit]
-  def saveError(details: RequestDetails)(implicit ec: ExecutionContext, hc: HeaderCarrier): TtppEnvelope[Unit]
-  def getErrors()(implicit ec: ExecutionContext, hc: HeaderCarrier): TtppEnvelope[Seq[RequestDetails]]
+  def retrieveRequestDetails()(implicit
+      ec: ExecutionContext,
+      hc: HeaderCarrier
+  ): TtppEnvelope[Seq[RequestDetails]]
+  def saveResponseDetails(
+      details: RequestDetails
+  )(implicit ec: ExecutionContext, hc: HeaderCarrier): TtppEnvelope[Unit]
+  def deleteRequestDetails(
+      requestId: String
+  )(implicit ec: ExecutionContext, hc: HeaderCarrier): TtppEnvelope[Unit]
+  def saveError(
+      details: RequestDetails
+  )(implicit ec: ExecutionContext, hc: HeaderCarrier): TtppEnvelope[Unit]
+  def getErrors()(implicit
+      ec: ExecutionContext,
+      hc: HeaderCarrier
+  ): TtppEnvelope[Seq[RequestDetails]]
 }
 
 @Singleton
-class DefaultTTPTestService @Inject()(connector: TtpTestConnector) extends TTPTestService {
-  override def retrieveRequestDetails()(implicit ec: ExecutionContext, hc: HeaderCarrier): TtppEnvelope[Seq[RequestDetails]] =
+class DefaultTTPTestService @Inject() (connector: TtpTestConnector)
+    extends TTPTestService {
+  override def retrieveRequestDetails()(implicit
+      ec: ExecutionContext,
+      hc: HeaderCarrier
+  ): TtppEnvelope[Seq[RequestDetails]] =
     connector.retrieveRequestDetails()
 
-  override def saveResponseDetails(details: RequestDetails)(implicit ec: ExecutionContext, hc: HeaderCarrier): TtppEnvelope[Unit] =
+  override def saveResponseDetails(
+      details: RequestDetails
+  )(implicit ec: ExecutionContext, hc: HeaderCarrier): TtppEnvelope[Unit] =
     connector.saveResponseDetails(details)
 
-  override def deleteRequestDetails(requestId: String)(implicit ec: ExecutionContext, hc: HeaderCarrier): TtppEnvelope[Unit] =
+  override def deleteRequestDetails(
+      requestId: String
+  )(implicit ec: ExecutionContext, hc: HeaderCarrier): TtppEnvelope[Unit] =
     connector.deleteRequest(requestId)
 
-  override def saveError(details: RequestDetails)(implicit ec: ExecutionContext, hc: HeaderCarrier): TtppEnvelope[Unit] =
+  override def saveError(
+      details: RequestDetails
+  )(implicit ec: ExecutionContext, hc: HeaderCarrier): TtppEnvelope[Unit] =
     connector.saveError(details)
 
-  override def getErrors()(implicit ec: ExecutionContext, hc: HeaderCarrier): TtppEnvelope[Seq[RequestDetails]] =
+  override def getErrors()(implicit
+      ec: ExecutionContext,
+      hc: HeaderCarrier
+  ): TtppEnvelope[Seq[RequestDetails]] =
     connector.getErrors()
 }
 // $COVERAGE-ON$

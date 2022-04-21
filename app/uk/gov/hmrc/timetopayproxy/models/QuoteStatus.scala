@@ -19,5 +19,6 @@ package uk.gov.hmrc.timetopayproxy.models
 case class QuoteStatus(value: String) extends AnyVal
 
 object QuoteStatus extends ValueTypeFormatter {
-  implicit val format = valueTypeFormatter(QuoteStatus.apply, QuoteStatus.unapply)
+  implicit val format =
+    valueTypeFormatter(QuoteStatus.apply, QuoteStatus.unapply)
 }

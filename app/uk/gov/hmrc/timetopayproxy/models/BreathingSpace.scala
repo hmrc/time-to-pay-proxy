@@ -19,8 +19,7 @@ import java.time.LocalDate
 
 import play.api.libs.json.Json
 
-case class BreathingSpace(debtRespiteFrom: LocalDate,
-                          debtRespiteTo: LocalDate)
+case class BreathingSpace(debtRespiteFrom: LocalDate, debtRespiteTo: LocalDate)
 
 object BreathingSpace {
   implicit val format = Json.format[BreathingSpace]

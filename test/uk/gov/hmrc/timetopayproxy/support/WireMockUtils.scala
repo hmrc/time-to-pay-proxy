@@ -32,12 +32,17 @@ import org.scalatestplus.play.PlaySpec
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.inject.guice.GuiceApplicationBuilder
 
-trait WireMockUtils extends BeforeAndAfterEach with BeforeAndAfterAll with GuiceOneAppPerSuite {
+trait WireMockUtils
+    extends BeforeAndAfterEach
+    with BeforeAndAfterAll
+    with GuiceOneAppPerSuite {
   self: PlaySpec =>
 
   val wireMockPort = 11111
 
-  val wireMockServer: WireMockServer = new WireMockServer(wireMockConfig().port(wireMockPort))
+  val wireMockServer: WireMockServer = new WireMockServer(
+    wireMockConfig().port(wireMockPort)
+  )
 
   override implicit lazy val app = GuiceApplicationBuilder()
     .configure("auditing.enabled" -> "false")
@@ -60,41 +65,67 @@ trait WireMockUtils extends BeforeAndAfterEach with BeforeAndAfterAll with Guice
     reset()
   }
 
-  def stubGetWithResponseBody(url: String, status: Int, response: String): StubMapping =
-    stubFor(get(urlMatching(url))
-      .willReturn(
-        aResponse()
-          .withStatus(status)
-          .withBody(response)
-          .withHeader("Content-Type", "application/json; charset=utf-8")))
+  def stubGetWithResponseBody(
+      url: String,
+      status: Int,
+      response: String
+  ): StubMapping =
+    stubFor(
+      get(urlMatching(url))
+        .willReturn(
+          aResponse()
+            .withStatus(status)
+            .withBody(response)
+            .withHeader("Content-Type", "application/json; charset=utf-8")
+        )
+    )
 
-  def stubPostWithResponseBody(url: String, status: Int, responseBody: String): StubMapping =
-    stubFor(post(urlEqualTo(url))
-      .willReturn(
-        aResponse()
-          .withStatus(status)
-          .withBody(responseBody)
-          .withHeader("Content-Type", "application/json; charset=utf-8")))
+  def stubPostWithResponseBody(
+      url: String,
+      status: Int,
+      responseBody: String
+  ): StubMapping =
+    stubFor(
+      post(urlEqualTo(url))
+        .willReturn(
+          aResponse()
+            .withStatus(status)
+            .withBody(responseBody)
+            .withHeader("Content-Type", "application/json; charset=utf-8")
+        )
+    )
 
   def stubPostWithoutResponseBody(url: String, status: Int): StubMapping =
-    stubFor(post(urlEqualTo(url))
-      .willReturn(
-        aResponse()
-          .withStatus(status)
-          .withHeader("Content-Type", "application/json; charset=utf-8")))
+    stubFor(
+      post(urlEqualTo(url))
+        .willReturn(
+          aResponse()
+            .withStatus(status)
+            .withHeader("Content-Type", "application/json; charset=utf-8")
+        )
+    )
 
   def stubPut(url: String, status: Int): StubMapping =
-    stubFor(put(urlMatching(url))
-      .willReturn(
-        aResponse()
-          .withStatus(status)))
+    stubFor(
+      put(urlMatching(url))
+        .willReturn(
+          aResponse()
+            .withStatus(status)
+        )
+    )
 
-  def stubPutWithResponseBody(url: String, status: Int, responseBody:String): StubMapping =
-    stubFor(put(urlMatching(url))
-      .willReturn(
-        aResponse()
-          .withStatus(status)
-          .withBody(responseBody)
-          .withHeader("Content-Type", "application/json; charset=utf-8")))
+  def stubPutWithResponseBody(
+      url: String,
+      status: Int,
+      responseBody: String
+  ): StubMapping =
+    stubFor(
+      put(urlMatching(url))
+        .willReturn(
+          aResponse()
+            .withStatus(status)
+            .withBody(responseBody)
+            .withHeader("Content-Type", "application/json; charset=utf-8")
+        )
+    )
 }
-

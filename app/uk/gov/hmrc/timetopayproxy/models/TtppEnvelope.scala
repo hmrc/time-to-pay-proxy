@@ -23,9 +23,12 @@ import scala.concurrent.{ExecutionContext, Future}
 object TtppEnvelope {
   type TtppEnvelope[T] = EitherT[Future, TtppError, T]
 
-  def apply[T](arg: T)(implicit ec: ExecutionContext): TtppEnvelope[T] = EitherT.pure[Future, TtppError](arg)
+  def apply[T](arg: T)(implicit ec: ExecutionContext): TtppEnvelope[T] =
+    EitherT.pure[Future, TtppError](arg)
 
   def apply[T](f: Future[Either[TtppError, T]]): TtppEnvelope[T] = EitherT(f)
 
-  def apply[T](eitherArg: Either[TtppError, T])(implicit ec: ExecutionContext): TtppEnvelope[T] = EitherT.fromEither[Future](eitherArg)
+  def apply[T](eitherArg: Either[TtppError, T])(implicit
+      ec: ExecutionContext
+  ): TtppEnvelope[T] = EitherT.fromEither[Future](eitherArg)
 }

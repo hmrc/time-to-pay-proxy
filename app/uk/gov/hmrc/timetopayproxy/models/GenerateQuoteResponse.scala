@@ -21,20 +21,18 @@ import java.time.LocalDate
 import play.api.libs.json.Json
 
 final case class GenerateQuoteResponse(
-                              quoteReference: QuoteReference,
-                              customerReference: CustomerReference,
-                              quoteType: QuoteType,
-                              quoteDate: LocalDate,
-                              numberOfInstalments: Int,
-                              totalDebtIncInt: BigDecimal,
-                              interestAccrued: BigDecimal,
-                              planInterest: BigDecimal,
-                              totalInterest: BigDecimal,
-                              instalments: List[Instalment]
+    quoteReference: QuoteReference,
+    customerReference: CustomerReference,
+    quoteType: QuoteType,
+    quoteDate: LocalDate,
+    numberOfInstalments: Int,
+    totalDebtIncInt: BigDecimal,
+    interestAccrued: BigDecimal,
+    planInterest: BigDecimal,
+    totalInterest: BigDecimal,
+    instalments: List[Instalment]
 )
 
 object GenerateQuoteResponse {
   implicit val format = Json.format[GenerateQuoteResponse]
 }
-
-

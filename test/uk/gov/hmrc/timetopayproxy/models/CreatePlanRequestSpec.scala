@@ -24,7 +24,10 @@ import play.api.libs.json._
 
 import scala.util.{Failure, Try}
 
-class CreatePlanRequestSpec extends AnyWordSpec with Matchers with CreatePlanRequestFixture {
+class CreatePlanRequestSpec
+    extends AnyWordSpec
+    with Matchers
+    with CreatePlanRequestFixture {
 
   "CreatePlanRequest" should {
     "be correctly encoded and decoded" in {
@@ -34,8 +37,12 @@ class CreatePlanRequestSpec extends AnyWordSpec with Matchers with CreatePlanReq
     }
 
     "be correctly encoded and decoded with payment reference None for methods except direct debit" in {
-      (Json.parse(jsonWithEmptyReference)).as[CreatePlanRequest] shouldEqual createPlanRequestWithEmptyReference
-      Json.toJson(createPlanRequestWithEmptyReference) shouldEqual (Json.parse(jsonWithEmptyReference))
+      (Json
+        .parse(jsonWithEmptyReference))
+        .as[CreatePlanRequest] shouldEqual createPlanRequestWithEmptyReference
+      Json.toJson(createPlanRequestWithEmptyReference) shouldEqual (Json.parse(
+        jsonWithEmptyReference
+      ))
     }
 
     "fail decoding if paymentReference is empty" in {
@@ -328,7 +335,9 @@ trait CreatePlanRequestFixture {
           List(Payment(LocalDate.parse("2021-05-13"), 100))
         )
       ),
-      List(PaymentInformation(PaymentMethod.Bacs, Some(PaymentReference("ref123")))),
+      List(
+        PaymentInformation(PaymentMethod.Bacs, Some(PaymentReference("ref123")))
+      ),
       List(
         CustomerPostCode(PostCode("NW9 5XW"), LocalDate.parse("2021-05-13"))
       ),
@@ -533,25 +542,27 @@ trait CreatePlanRequestFixture {
                                                |}
                """.stripMargin
   protected def getJsonWithInvalidReference(
-                                           quoteReference:            QuoteReference = QuoteReference("quoteReference"),
-                                           customerReference:         CustomerReference = CustomerReference("customerReference"),
-                                           paymentReference:          PaymentReference = PaymentReference("ref123"),
-                                           instalmentAmount:          BigDecimal = 100,
-                                           numberOfInstalments:       Int = 1,
-                                           initialPaymentAmount:      BigDecimal = 100,
-                                           totalDebtIncInt:           BigDecimal = 100,
-                                           totalInterest:             BigDecimal = 10,
-                                           interestAccrued:           BigDecimal = 10,
-                                           planInterest:              BigDecimal = 10,
-                                           originalDebtAmount:        BigDecimal = 100,
-                                           paymentAmount:             BigDecimal = 100,
-                                           amountDue:                 BigDecimal = 100,
-                                           expectedPayment:           BigDecimal = 100,
-                                           interestRate:              Double = 0.25,
-                                           instalmentNumber:          Int = 1,
-                                           instalmentInterestAccrued: BigDecimal = 10,
-                                           instalmentBalance:         BigDecimal = 90
-                                         ) =
+      quoteReference: QuoteReference = QuoteReference("quoteReference"),
+      customerReference: CustomerReference = CustomerReference(
+        "customerReference"
+      ),
+      paymentReference: PaymentReference = PaymentReference("ref123"),
+      instalmentAmount: BigDecimal = 100,
+      numberOfInstalments: Int = 1,
+      initialPaymentAmount: BigDecimal = 100,
+      totalDebtIncInt: BigDecimal = 100,
+      totalInterest: BigDecimal = 10,
+      interestAccrued: BigDecimal = 10,
+      planInterest: BigDecimal = 10,
+      originalDebtAmount: BigDecimal = 100,
+      paymentAmount: BigDecimal = 100,
+      amountDue: BigDecimal = 100,
+      expectedPayment: BigDecimal = 100,
+      interestRate: Double = 0.25,
+      instalmentNumber: Int = 1,
+      instalmentInterestAccrued: BigDecimal = 10,
+      instalmentBalance: BigDecimal = 90
+  ) =
     s"""{
        |  "customerReference": "${customerReference.value}",
        |  "quoteReference":"${quoteReference.value}",
@@ -617,6 +628,8 @@ trait CreatePlanRequestFixture {
     """.stripMargin
 
   protected val createPlanRequestWithEmptyReference =
-    createPlanRequest.copy(payments = List(createPlanRequest.payments.head.copy(paymentReference = None)))
+    createPlanRequest.copy(payments =
+      List(createPlanRequest.payments.head.copy(paymentReference = None))
+    )
 
 }

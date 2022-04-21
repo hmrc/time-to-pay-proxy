@@ -16,16 +16,16 @@
 
 package uk.gov.hmrc.timetopayproxy.models
 
-import play.api.libs.json.{ Json, JsValue }
+import play.api.libs.json.{Json, JsValue}
 
 final case class RequestDetails(
-  requestId: String,
-  content: JsValue,
-  uri: Option[String],
-  isResponse: Boolean,
-  method: Option[String] = None,
-  status: Option[Int] = None,
-  headers: Option[Map[String, String]] = None,
+    requestId: String,
+    content: JsValue,
+    uri: Option[String],
+    isResponse: Boolean,
+    method: Option[String] = None,
+    status: Option[Int] = None,
+    headers: Option[Map[String, String]] = None
 )
 
 object RequestDetails {

@@ -20,7 +20,8 @@ import enumeratum.{Enum, EnumEntry, PlayJsonEnum}
 
 import scala.collection.immutable
 
-sealed abstract class Frequency(override val entryName: String) extends EnumEntry
+sealed abstract class Frequency(override val entryName: String)
+    extends EnumEntry
 
 object Frequency extends Enum[Frequency] with PlayJsonEnum[Frequency] {
   val values: immutable.IndexedSeq[Frequency] = findValues

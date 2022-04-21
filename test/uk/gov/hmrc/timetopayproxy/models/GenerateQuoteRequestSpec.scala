@@ -88,11 +88,13 @@ class GenerateQuoteRequestSpec extends AnyWordSpec with Matchers {
                |}
                """.stripMargin
 
-  def getJsonWithInvalidReference(customerReference: String = "uniqRef1234",
-                                  instalmentAmount: BigDecimal = 100,
-                                  initialPaymentAmount: BigDecimal = 100,
-                                  originalDebtAmount: BigDecimal = 100,
-                                  paymentAmount: BigDecimal = 100) = s"""{
+  def getJsonWithInvalidReference(
+      customerReference: String = "uniqRef1234",
+      instalmentAmount: BigDecimal = 100,
+      initialPaymentAmount: BigDecimal = 100,
+      originalDebtAmount: BigDecimal = 100,
+      paymentAmount: BigDecimal = 100
+  ) = s"""{
                |  "customerReference": "$customerReference",
                |  "channelIdentifier": "selfService",
                |  "plan": {
