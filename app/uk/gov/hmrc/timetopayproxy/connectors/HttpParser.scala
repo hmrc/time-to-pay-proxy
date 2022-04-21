@@ -45,7 +45,7 @@ trait HttpParser {
                   ConnectorError(
                     status,
                     error.failures.headOption.map(_.reason).getOrElse("An unknown error has occurred")
-                )
+                  )
               )
               .asLeft[T]
           case Failure(_) => ConnectorError(status, "Couldn't parse body from upstream").asLeft[T]

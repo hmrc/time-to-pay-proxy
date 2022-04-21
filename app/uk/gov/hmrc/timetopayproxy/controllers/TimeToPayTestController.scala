@@ -29,7 +29,7 @@ import javax.inject.{ Inject, Singleton }
 // $COVERAGE-OFF$
 //Coverage disabled for non-prod source
 @Singleton()
-class TimeToPayTestController @Inject()(cc: ControllerComponents, ttpTestService: TTPTestService)
+class TimeToPayTestController @Inject() (cc: ControllerComponents, ttpTestService: TTPTestService)
     extends BackendController(cc) with BaseController {
   implicit val ec = cc.executionContext
 

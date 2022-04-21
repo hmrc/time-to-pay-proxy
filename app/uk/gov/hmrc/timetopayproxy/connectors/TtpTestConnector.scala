@@ -44,11 +44,11 @@ trait TtpTestConnector {
 }
 
 @Singleton
-class DefaultTtpTestConnector @Inject()(appConfig: AppConfig, httpClient: HttpClient) extends TtpTestConnector {
-  override def retrieveRequestDetails()(
-    implicit
+class DefaultTtpTestConnector @Inject() (appConfig: AppConfig, httpClient: HttpClient) extends TtpTestConnector {
+  override def retrieveRequestDetails()(implicit
     ec: ExecutionContext,
-    hc: HeaderCarrier): TtppEnvelope[Seq[RequestDetails]] = {
+    hc: HeaderCarrier
+  ): TtppEnvelope[Seq[RequestDetails]] = {
     val path = "/test-only/requests"
     val url = s"${appConfig.stubBaseUrl}$path"
 
