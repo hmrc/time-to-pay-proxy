@@ -20,33 +20,27 @@ import java.time.LocalDate
 import org.scalamock.scalatest.MockFactory
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
-import play.api.http.{MimeTypes, Status}
-import play.api.libs.json.{JsArray, JsSuccess, JsValue, Json}
-import play.api.mvc.{ControllerComponents, Result}
+import play.api.http.{ MimeTypes, Status }
+import play.api.libs.json.{ JsArray, JsSuccess, JsValue, Json }
+import play.api.mvc.{ ControllerComponents, Result }
 import play.api.test.Helpers.status
 import uk.gov.hmrc.auth.core.PlayAuthConnector
 import uk.gov.hmrc.auth.core.authorise.Predicate
 import uk.gov.hmrc.auth.core.retrieve.Retrieval
 import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.timetopayproxy.actions.auth.{
-  AuthoriseAction,
-  AuthoriseActionImpl
-}
+import uk.gov.hmrc.timetopayproxy.actions.auth.{ AuthoriseAction, AuthoriseActionImpl }
 import uk.gov.hmrc.timetopayproxy.services.TTPQuoteService
 import uk.gov.hmrc.timetopayproxy.models._
-import play.api.test.{FakeRequest, Helpers}
+import play.api.test.{ FakeRequest, Helpers }
 
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.{ ExecutionContext, Future }
 import scala.concurrent.ExecutionContext.Implicits.global
 import play.api.test.Helpers._
 import cats.syntax.either._
 import uk.gov.hmrc.timetopayproxy.models.MainTransType.TPSSContractSettlementINT
 import uk.gov.hmrc.timetopayproxy.models.SubTransType.TGPEN
 
-class TimeToPayProxyControllerSpec
-    extends AnyWordSpec
-    with Matchers
-    with MockFactory {
+class TimeToPayProxyControllerSpec extends AnyWordSpec with Matchers with MockFactory {
 
   private val authConnector: PlayAuthConnector = mock[PlayAuthConnector]
 
@@ -90,10 +84,7 @@ class TimeToPayProxyControllerSpec
       Some(true),
       Some(
         List(
-          PaymentInformation(
-            PaymentMethod.Bacs,
-            Some(PaymentReference("reference"))
-          )
+          PaymentInformation(PaymentMethod.Bacs, Some(PaymentReference("reference")))
         )
       )
     )
@@ -131,9 +122,7 @@ class TimeToPayProxyControllerSpec
           List(Payment(LocalDate.parse("2020-01-01"), 100))
         )
       ),
-      List(
-        PaymentInformation(PaymentMethod.Bacs, Some(PaymentReference("ref123")))
-      ),
+      List(PaymentInformation(PaymentMethod.Bacs, Some(PaymentReference("ref123")))),
       List(CustomerPostCode(PostCode("NW1 AB1"), LocalDate.now())),
       List(
         Instalment(
@@ -334,7 +323,7 @@ class TimeToPayProxyControllerSpec
 
         status(response) shouldBe Status.INTERNAL_SERVER_ERROR
         (contentAsJson(response) \ "errorMessage")
-          .as[String] shouldBe ("Internal Service Error")
+          .as[String] shouldBe "Internal Service Error"
 
       }
     }
@@ -463,9 +452,7 @@ class TimeToPayProxyControllerSpec
           updatePlanRequest.planId.value
         )(fakeRequest)
         status(response) shouldBe Status.OK
-        Json.fromJson[UpdatePlanResponse](
-          contentAsJson(response)
-        ) shouldBe JsSuccess(
+        Json.fromJson[UpdatePlanResponse](contentAsJson(response)) shouldBe JsSuccess(
           responseFromTtp
         )
       }
@@ -483,10 +470,10 @@ class TimeToPayProxyControllerSpec
           Json
             .obj(
               "customerReference" -> "customerRef1234",
-              "planId" -> "planId1234",
-              "planStatus" -> "success",
-              "updateType" -> "paymentDetails",
-              "thirdPartyBank" -> false,
+              "planId"            -> "planId1234",
+              "planStatus"        -> "success",
+              "updateType"        -> "paymentDetails",
+              "thirdPartyBank"    -> false,
               "payments" ->
                 JsArray(
                   List(
@@ -527,9 +514,7 @@ class TimeToPayProxyControllerSpec
           )(fakeRequest)
 
         status(response) shouldBe Status.OK
-        Json.fromJson[UpdatePlanResponse](
-          contentAsJson(response)
-        ) shouldBe JsSuccess(
+        Json.fromJson[UpdatePlanResponse](contentAsJson(response)) shouldBe JsSuccess(
           responseFromTtp
         )
       }
@@ -548,9 +533,9 @@ class TimeToPayProxyControllerSpec
           Json
             .obj(
               "customerReference" -> "customerRef1234",
-              "planId" -> "planId1234",
-              "updateType" -> "paymentDetails",
-              "thirdPartyBank" -> false,
+              "planId"            -> "planId1234",
+              "updateType"        -> "paymentDetails",
+              "thirdPartyBank"    -> false,
               "payments" ->
                 JsArray(
                   List(
@@ -591,9 +576,7 @@ class TimeToPayProxyControllerSpec
           )(fakeRequest)
 
         status(response) shouldBe Status.OK
-        Json.fromJson[UpdatePlanResponse](
-          contentAsJson(response)
-        ) shouldBe JsSuccess(
+        Json.fromJson[UpdatePlanResponse](contentAsJson(response)) shouldBe JsSuccess(
           responseFromTtp
         )
       }
@@ -634,9 +617,7 @@ class TimeToPayProxyControllerSpec
 
         val errorResponse = Status.INTERNAL_SERVER_ERROR
         status(response) shouldBe errorResponse.intValue()
-        Json.fromJson[TtppErrorResponse](
-          contentAsJson(response)
-        ) shouldBe JsSuccess(
+        Json.fromJson[TtppErrorResponse](contentAsJson(response)) shouldBe JsSuccess(
           TtppErrorResponse(errorResponse.intValue(), "Internal Service Error")
         )
       }
@@ -652,8 +633,7 @@ class TimeToPayProxyControllerSpec
           .expects(*, *, *, *)
           .returning(Future.successful(()))
 
-        val wrongCustomerReferenceInQueryParameters =
-          s"${updatePlanRequest.customerReference.value}-wrong"
+        val wrongCustomerReferenceInQueryParameters = s"${updatePlanRequest.customerReference.value}-wrong"
         val fakeRequest: FakeRequest[JsValue] = FakeRequest(
           "PUT",
           s"/individuals/time-to-pay/quote/$wrongCustomerReferenceInQueryParameters/${updatePlanRequest.planId.value}"
@@ -666,13 +646,8 @@ class TimeToPayProxyControllerSpec
 
         val errorResponse = Status.BAD_REQUEST
         status(response) shouldBe errorResponse.intValue()
-        Json.fromJson[TtppErrorResponse](
-          contentAsJson(response)
-        ) shouldBe JsSuccess(
-          TtppErrorResponse(
-            errorResponse.intValue(),
-            queryParameterNotMatchingPayload
-          )
+        Json.fromJson[TtppErrorResponse](contentAsJson(response)) shouldBe JsSuccess(
+          TtppErrorResponse(errorResponse.intValue(), queryParameterNotMatchingPayload)
         )
       }
       "planId on query parameters do not match planId in payload" in {
@@ -684,8 +659,7 @@ class TimeToPayProxyControllerSpec
           .expects(*, *, *, *)
           .returning(Future.successful(()))
 
-        val wrongPlanIdInQueryParameters =
-          s"${updatePlanRequest.planId.value}-wrong"
+        val wrongPlanIdInQueryParameters = s"${updatePlanRequest.planId.value}-wrong"
         val fakeRequest: FakeRequest[JsValue] = FakeRequest(
           "PUT",
           s"/individuals/time-to-pay/quote/${updatePlanRequest.customerReference.value}/$wrongPlanIdInQueryParameters"
@@ -698,13 +672,8 @@ class TimeToPayProxyControllerSpec
 
         val errorResponse = Status.BAD_REQUEST
         status(response) shouldBe errorResponse.intValue()
-        Json.fromJson[TtppErrorResponse](
-          contentAsJson(response)
-        ) shouldBe JsSuccess(
-          TtppErrorResponse(
-            errorResponse.intValue(),
-            queryParameterNotMatchingPayload
-          )
+        Json.fromJson[TtppErrorResponse](contentAsJson(response)) shouldBe JsSuccess(
+          TtppErrorResponse(errorResponse.intValue(), queryParameterNotMatchingPayload)
         )
       }
       "missing paymentReference in payments and paymentMethod is directDebit" in {
@@ -719,9 +688,9 @@ class TimeToPayProxyControllerSpec
         val invalidJsonBody: JsValue =
           Json.obj(
             "customerReference" -> "customerRef1234",
-            "planId" -> "planId1234",
-            "updateType" -> "paymentDetails",
-            "thirdPartyBank" -> false,
+            "planId"            -> "planId1234",
+            "updateType"        -> "paymentDetails",
+            "thirdPartyBank"    -> false,
             "payments" ->
               JsArray(
                 List(
@@ -748,9 +717,7 @@ class TimeToPayProxyControllerSpec
 
         val errorResponse = Status.BAD_REQUEST
         status(response) shouldBe errorResponse.intValue()
-        Json.fromJson[TtppErrorResponse](
-          contentAsJson(response)
-        ) shouldBe JsSuccess(
+        Json.fromJson[TtppErrorResponse](contentAsJson(response)) shouldBe JsSuccess(
           TtppErrorResponse(
             errorResponse.intValue(),
             "Could not parse body due to requirement failed: Direct Debit should always have payment reference"
@@ -769,14 +736,14 @@ class TimeToPayProxyControllerSpec
         val invalidJsonBody: JsValue =
           Json.obj(
             "customerReference" -> "customerRef1234",
-            "planId" -> "planId1234",
-            "updateType" -> "paymentDetails",
-            "thirdPartyBank" -> false,
+            "planId"            -> "planId1234",
+            "updateType"        -> "paymentDetails",
+            "thirdPartyBank"    -> false,
             "payments" ->
               JsArray(
                 List(
                   Json.obj(
-                    "paymentMethod" -> "directDebit",
+                    "paymentMethod"    -> "directDebit",
                     "paymentReference" -> ""
                   )
                 )
@@ -799,9 +766,7 @@ class TimeToPayProxyControllerSpec
 
         val errorResponse = Status.BAD_REQUEST
         status(response) shouldBe errorResponse.intValue()
-        Json.fromJson[TtppErrorResponse](
-          contentAsJson(response)
-        ) shouldBe JsSuccess(
+        Json.fromJson[TtppErrorResponse](contentAsJson(response)) shouldBe JsSuccess(
           TtppErrorResponse(
             errorResponse.intValue(),
             "Could not parse body due to requirement failed: Direct Debit should always have payment reference"
@@ -821,14 +786,14 @@ class TimeToPayProxyControllerSpec
         val invalidJsonBody: JsValue =
           Json.obj(
             "customerReference" -> "customerRef1234",
-            "planId" -> "planId1234",
-            "updateType" -> "paymentDetails",
-            "thirdPartyBank" -> false,
+            "planId"            -> "planId1234",
+            "updateType"        -> "paymentDetails",
+            "thirdPartyBank"    -> false,
             "payments" ->
               JsArray(
                 List(
                   Json.obj(
-                    "paymentMethod" -> "cardPayment",
+                    "paymentMethod"    -> "cardPayment",
                     "paymentReference" -> ""
                   )
                 )
@@ -851,9 +816,7 @@ class TimeToPayProxyControllerSpec
 
         val errorResponse = Status.BAD_REQUEST
         status(response) shouldBe errorResponse.intValue()
-        Json.fromJson[TtppErrorResponse](
-          contentAsJson(response)
-        ) shouldBe JsSuccess(
+        Json.fromJson[TtppErrorResponse](contentAsJson(response)) shouldBe JsSuccess(
           TtppErrorResponse(
             errorResponse.intValue(),
             "Could not parse body due to requirement failed: paymentReference should not be empty"
@@ -873,9 +836,9 @@ class TimeToPayProxyControllerSpec
         val invalidJsonBody: JsValue =
           Json.obj(
             "customerReference" -> "custReference1234",
-            "planId" -> "planId1234",
-            "updateType" -> "planStatus",
-            "thirdPartyBank" -> false
+            "planId"            -> "planId1234",
+            "updateType"        -> "planStatus",
+            "thirdPartyBank"    -> false
           )
 
         val fakeRequest: FakeRequest[JsValue] =
@@ -894,9 +857,7 @@ class TimeToPayProxyControllerSpec
 
         val errorResponse = Status.BAD_REQUEST
         status(response) shouldBe errorResponse.intValue()
-        Json.fromJson[TtppErrorResponse](
-          contentAsJson(response)
-        ) shouldBe JsSuccess(
+        Json.fromJson[TtppErrorResponse](contentAsJson(response)) shouldBe JsSuccess(
           TtppErrorResponse(
             errorResponse.intValue(),
             "Could not parse body due to requirement failed: Invalid UpdatePlanRequest payload: Payload has a missing field or an invalid format. Field name: planStatus."

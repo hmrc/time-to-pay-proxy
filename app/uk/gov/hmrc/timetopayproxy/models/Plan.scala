@@ -21,18 +21,18 @@ import play.api.libs.json.Json
 import java.time.LocalDate
 
 final case class Plan(
-    planId: PlanId,
-    caseId: CaseId,
-    quoteId: QuoteId,
-    quoteDate: LocalDate,
-    quoteType: QuoteType,
-    paymentPlanType: PaymentPlanType,
-    thirdPartyBank: Boolean,
-    numberOfInstalments: Int,
-    totalDebtIncInt: BigInt,
-    totalInterest: BigDecimal,
-    interestAccrued: BigInt,
-    planInterest: BigDecimal
+  planId: PlanId,
+  caseId: CaseId,
+  quoteId: QuoteId,
+  quoteDate: LocalDate,
+  quoteType: QuoteType,
+  paymentPlanType: PaymentPlanType,
+  thirdPartyBank: Boolean,
+  numberOfInstalments: Int,
+  totalDebtIncInt: BigInt,
+  totalInterest: BigDecimal,
+  interestAccrued: BigInt,
+  planInterest: BigDecimal
 )
 
 object Plan {

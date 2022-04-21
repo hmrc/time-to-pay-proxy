@@ -19,13 +19,12 @@ import play.api.libs.json._
 
 trait ValueTypeFormatter {
   def valueTypeFormatter[T, U](
-      apply: T => U,
-      unapply: U => Option[T]
+    apply: T => U,
+    unapply: U => Option[T]
   )(implicit readsT: Reads[T], writesT: Writes[T]): Format[U] =
     new Format[U] {
-      override def reads(json: JsValue): JsResult[U] = {
+      override def reads(json: JsValue): JsResult[U] =
         json.validate[T].map(apply)
-      }
 
       override def writes(o: U): JsValue =
         unapply(o) match {

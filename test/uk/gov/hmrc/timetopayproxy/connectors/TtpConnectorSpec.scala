@@ -18,9 +18,9 @@ package uk.gov.hmrc.timetopayproxy.connectors
 
 import org.scalamock.scalatest.MockFactory
 import org.scalatestplus.play.PlaySpec
-import play.api.test.{DefaultAwaitTimeout, FutureAwaits}
-import play.api.{ConfigLoader, Configuration}
-import uk.gov.hmrc.http.{HeaderCarrier, HttpClient}
+import play.api.test.{ DefaultAwaitTimeout, FutureAwaits }
+import play.api.{ ConfigLoader, Configuration }
+import uk.gov.hmrc.http.{ HeaderCarrier, HttpClient }
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 import uk.gov.hmrc.timetopayproxy.config.AppConfig
 import uk.gov.hmrc.timetopayproxy.models._
@@ -29,12 +29,7 @@ import uk.gov.hmrc.timetopayproxy.support.WireMockUtils
 import java.time.LocalDate
 import scala.concurrent.ExecutionContext
 
-class TtpConnectorSpec
-    extends PlaySpec
-    with DefaultAwaitTimeout
-    with FutureAwaits
-    with MockFactory
-    with WireMockUtils {
+class TtpConnectorSpec extends PlaySpec with DefaultAwaitTimeout with FutureAwaits with MockFactory with WireMockUtils {
 
   val config = mock[Configuration]
   val servicesConfig = mock[ServicesConfig]
@@ -81,11 +76,9 @@ class TtpConnectorSpec
       .once()
       .returns("http://localhost:11111")
 
-    val mockConfiguration: AppConfig =
-      new MockAppConfig(config, servicesConfig, ifImpl)
+    val mockConfiguration: AppConfig = new MockAppConfig(config, servicesConfig, ifImpl)
 
-    val connector: TtpConnector =
-      new DefaultTtpConnector(mockConfiguration, httpClient)
+    val connector: TtpConnector = new DefaultTtpConnector(mockConfiguration, httpClient)
   }
 
   "Generate quote" when {
@@ -116,19 +109,13 @@ class TtpConnectorSpec
           )
         )
 
-        await(result.value) mustBe Left(
-          ConnectorError(400, "Invalid request body")
-        )
+        await(result.value) mustBe Left(ConnectorError(400, "Invalid request body"))
       }
     }
 
     "using TTP" must {
       "parse an error response from an upstream service" in new Setup(false) {
-        stubPostWithResponseBody(
-          "/debts/time-to-pay/quote",
-          400,
-          errorResponse("BAD_REQUEST", "Invalid request body")
-        )
+        stubPostWithResponseBody("/debts/time-to-pay/quote", 400, errorResponse("BAD_REQUEST", "Invalid request body"))
         val result = connector.generateQuote(
           GenerateQuoteRequest(
             CustomerReference("CustRef1234"),
@@ -149,9 +136,7 @@ class TtpConnectorSpec
           )
         )
 
-        await(result.value) mustBe Left(
-          ConnectorError(400, "Invalid request body")
-        )
+        await(result.value) mustBe Left(ConnectorError(400, "Invalid request body"))
       }
     }
   }
@@ -194,9 +179,7 @@ class TtpConnectorSpec
           )
         )
 
-        await(result.value) mustBe Left(
-          ConnectorError(400, "Invalid request body")
-        )
+        await(result.value) mustBe Left(ConnectorError(400, "Invalid request body"))
       }
     }
 
@@ -237,9 +220,7 @@ class TtpConnectorSpec
           )
         )
 
-        await(result.value) mustBe Left(
-          ConnectorError(400, "Invalid request body")
-        )
+        await(result.value) mustBe Left(ConnectorError(400, "Invalid request body"))
       }
     }
   }
@@ -252,14 +233,9 @@ class TtpConnectorSpec
           200,
           """{ "unrecognised":"body" }"""
         )
-        val result = connector.getExistingQuote(
-          CustomerReference("CustRef1234"),
-          PlanId("Plan1234")
-        )
+        val result = connector.getExistingQuote(CustomerReference("CustRef1234"), PlanId("Plan1234"))
 
-        await(result.value) mustBe Left(
-          ConnectorError(503, "Couldn't parse body from upstream")
-        )
+        await(result.value) mustBe Left(ConnectorError(503, "Couldn't parse body from upstream"))
       }
     }
     "The status code is 503" must {
@@ -269,14 +245,9 @@ class TtpConnectorSpec
           503,
           """{ "unrecognised":"body" }"""
         )
-        val result = connector.getExistingQuote(
-          CustomerReference("CustRef1234"),
-          PlanId("Plan1234")
-        )
+        val result = connector.getExistingQuote(CustomerReference("CustRef1234"), PlanId("Plan1234"))
 
-        await(result.value) mustBe Left(
-          ConnectorError(503, "Couldn't parse body from upstream")
-        )
+        await(result.value) mustBe Left(ConnectorError(503, "Couldn't parse body from upstream"))
       }
     }
   }
@@ -289,14 +260,9 @@ class TtpConnectorSpec
           400,
           errorResponse("BAD_REQUEST", "Invalid request body")
         )
-        val result = connector.getExistingQuote(
-          CustomerReference("CustRef1234"),
-          PlanId("Plan1234")
-        )
+        val result = connector.getExistingQuote(CustomerReference("CustRef1234"), PlanId("Plan1234"))
 
-        await(result.value) mustBe Left(
-          ConnectorError(400, "Invalid request body")
-        )
+        await(result.value) mustBe Left(ConnectorError(400, "Invalid request body"))
       }
     }
 
@@ -307,14 +273,9 @@ class TtpConnectorSpec
           400,
           errorResponse("BAD_REQUEST", "Invalid request body")
         )
-        val result = connector.getExistingQuote(
-          CustomerReference("CustRef1234"),
-          PlanId("Plan1234")
-        )
+        val result = connector.getExistingQuote(CustomerReference("CustRef1234"), PlanId("Plan1234"))
 
-        await(result.value) mustBe Left(
-          ConnectorError(400, "Invalid request body")
-        )
+        await(result.value) mustBe Left(ConnectorError(400, "Invalid request body"))
       }
     }
   }
@@ -340,9 +301,7 @@ class TtpConnectorSpec
           )
         )
 
-        await(result.value) mustBe Left(
-          ConnectorError(400, "Invalid request body")
-        )
+        await(result.value) mustBe Left(ConnectorError(400, "Invalid request body"))
       }
     }
 
@@ -366,14 +325,12 @@ class TtpConnectorSpec
           )
         )
 
-        await(result.value) mustBe Left(
-          ConnectorError(400, "Invalid request body")
-        )
+        await(result.value) mustBe Left(ConnectorError(400, "Invalid request body"))
       }
     }
   }
 
-  private def errorResponse(code: String, reason: String): String = {
+  private def errorResponse(code: String, reason: String): String =
     s"""
        |{
        | "failures":[
@@ -384,5 +341,4 @@ class TtpConnectorSpec
        | ]
        |}
        |""".stripMargin
-  }
 }

@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.timetopayproxy.models
 
-import enumeratum.{Enum, EnumEntry, PlayJsonEnum}
+import enumeratum.{ Enum, EnumEntry, PlayJsonEnum }
 import play.api.libs.json.Json
 
 final case class CaseId(value: String) extends AnyVal
@@ -26,27 +26,20 @@ object CaseId extends ValueTypeFormatter {
     valueTypeFormatter(CaseId.apply, CaseId.unapply)
 }
 
-sealed abstract class PlanStatus(override val entryName: String)
-    extends EnumEntry
+sealed abstract class PlanStatus(override val entryName: String) extends EnumEntry
 
 object PlanStatus extends Enum[PlanStatus] with PlayJsonEnum[PlanStatus] {
   val values: scala.collection.immutable.IndexedSeq[PlanStatus] = findValues
 
   case object Success extends PlanStatus("success")
   case object Failure extends PlanStatus("failure")
-  case object TtpArrangementInProgress
-      extends PlanStatus("TTP Arrangement - In Progress")
+  case object TtpArrangementInProgress extends PlanStatus("TTP Arrangement - In Progress")
   case object ResolvedTTPAmended extends PlanStatus("Resolved - TTP Amended")
-  case object InDefaultClericalReview
-      extends PlanStatus("In Default - Clerical Review")
-  case object PendingFirstReminder
-      extends PlanStatus("Pending - First Reminder")
-  case object InDefaultFirstReminder
-      extends PlanStatus("In Default - First Reminder")
-  case object PendingSecondReminder
-      extends PlanStatus("Pending - Second Reminder")
-  case object InDefaultSecondReminder
-      extends PlanStatus("In Default - Second Reminder")
+  case object InDefaultClericalReview extends PlanStatus("In Default - Clerical Review")
+  case object PendingFirstReminder extends PlanStatus("Pending - First Reminder")
+  case object InDefaultFirstReminder extends PlanStatus("In Default - First Reminder")
+  case object PendingSecondReminder extends PlanStatus("Pending - Second Reminder")
+  case object InDefaultSecondReminder extends PlanStatus("In Default - Second Reminder")
   case object PendingCancellation extends PlanStatus("Pending - Cancellation")
   case object PendingCompletion extends PlanStatus("Pending - Completion")
   case object ResolvedCancelled extends PlanStatus("Resolved - Cancelled")
@@ -72,10 +65,10 @@ object PlanStatus extends Enum[PlanStatus] with PlayJsonEnum[PlanStatus] {
 }
 
 final case class CreatePlanResponse(
-    customerReference: CustomerReference,
-    planId: PlanId,
-    caseId: CaseId,
-    planStatus: PlanStatus
+  customerReference: CustomerReference,
+  planId: PlanId,
+  caseId: CaseId,
+  planStatus: PlanStatus
 )
 
 object CreatePlanResponse {

@@ -15,12 +15,11 @@
  */
 
 package uk.gov.hmrc.timetopayproxy.models
-import enumeratum.{Enum, EnumEntry, PlayJsonEnum}
+import enumeratum.{ Enum, EnumEntry, PlayJsonEnum }
 
 import scala.collection.immutable
 
-sealed abstract class QuoteType(override val entryName: String)
-    extends EnumEntry
+sealed abstract class QuoteType(override val entryName: String) extends EnumEntry
 
 object QuoteType extends Enum[QuoteType] with PlayJsonEnum[QuoteType] {
   val values: immutable.IndexedSeq[QuoteType] = findValues

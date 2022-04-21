@@ -17,48 +17,41 @@
 package uk.gov.hmrc.timetopayproxy.connectors
 
 import cats.data.EitherT
-import uk.gov.hmrc.http.{HeaderCarrier, HttpClient}
+import uk.gov.hmrc.http.{ HeaderCarrier, HttpClient }
 
 import scala.concurrent.ExecutionContext
 import uk.gov.hmrc.timetopayproxy.models._
 import uk.gov.hmrc.timetopayproxy.models.TtppEnvelope.TtppEnvelope
 import com.google.inject.ImplementedBy
 
-import javax.inject.{Inject, Singleton}
+import javax.inject.{ Inject, Singleton }
 import uk.gov.hmrc.timetopayproxy.config.AppConfig
 
 import java.util.UUID
 
 @ImplementedBy(classOf[DefaultTtpConnector])
 trait TtpConnector {
-  def generateQuote(ttppRequest: GenerateQuoteRequest)(implicit
-      ec: ExecutionContext,
-      hc: HeaderCarrier
-  ): TtppEnvelope[GenerateQuoteResponse]
+  def generateQuote(
+    ttppRequest: GenerateQuoteRequest
+  )(implicit ec: ExecutionContext, hc: HeaderCarrier): TtppEnvelope[GenerateQuoteResponse]
 
-  def getExistingQuote(customerReference: CustomerReference, planId: PlanId)(
-      implicit
-      ec: ExecutionContext,
-      hc: HeaderCarrier
+  def getExistingQuote(customerReference: CustomerReference, planId: PlanId)(implicit
+    ec: ExecutionContext,
+    hc: HeaderCarrier
   ): TtppEnvelope[ViewPlanResponse]
 
-  def updatePlan(updatePlanRequest: UpdatePlanRequest)(implicit
-      ec: ExecutionContext,
-      hc: HeaderCarrier
-  ): TtppEnvelope[UpdatePlanResponse]
+  def updatePlan(
+    updatePlanRequest: UpdatePlanRequest
+  )(implicit ec: ExecutionContext, hc: HeaderCarrier): TtppEnvelope[UpdatePlanResponse]
 
-  def createPlan(createPlanRequest: CreatePlanRequest)(implicit
-      ec: ExecutionContext,
-      hc: HeaderCarrier
-  ): TtppEnvelope[CreatePlanResponse]
+  def createPlan(
+    createPlanRequest: CreatePlanRequest
+  )(implicit ec: ExecutionContext, hc: HeaderCarrier): TtppEnvelope[CreatePlanResponse]
 }
 
 @Singleton
-class DefaultTtpConnector @Inject() (
-    appConfig: AppConfig,
-    httpClient: HttpClient
-) extends TtpConnector
-    with HttpParser {
+class DefaultTtpConnector @Inject() (appConfig: AppConfig, httpClient: HttpClient)
+    extends TtpConnector with HttpParser {
 
   val headers = (guid: String) =>
     if (appConfig.useIf) {
@@ -70,13 +63,10 @@ class DefaultTtpConnector @Inject() (
       Seq()
     }
 
-  def generateQuote(ttppRequest: GenerateQuoteRequest)(implicit
-      ec: ExecutionContext,
-      hc: HeaderCarrier
-  ): TtppEnvelope[GenerateQuoteResponse] = {
-    val path =
-      if (appConfig.useIf) "individuals/debts/time-to-pay/quote"
-      else "debts/time-to-pay/quote"
+  def generateQuote(
+    ttppRequest: GenerateQuoteRequest
+  )(implicit ec: ExecutionContext, hc: HeaderCarrier): TtppEnvelope[GenerateQuoteResponse] = {
+    val path = if (appConfig.useIf) "individuals/debts/time-to-pay/quote" else "debts/time-to-pay/quote"
     val url = s"${appConfig.ttpBaseUrl}/$path"
 
     EitherT(
@@ -90,17 +80,15 @@ class DefaultTtpConnector @Inject() (
 
   }
 
-  override def getExistingQuote(
-      customerReference: CustomerReference,
-      planId: PlanId
-  )(implicit
-      ec: ExecutionContext,
-      hc: HeaderCarrier
+  override def getExistingQuote(customerReference: CustomerReference, planId: PlanId)(implicit
+    ec: ExecutionContext,
+    hc: HeaderCarrier
   ): TtppEnvelope[ViewPlanResponse] = {
-    val path = if (appConfig.useIf)
-      s"individuals/time-to-pay/quote/${customerReference.value}/${planId.value}"
-    else
-      s"debts/time-to-pay/quote/${customerReference.value}/${planId.value}"
+    val path =
+      if (appConfig.useIf)
+        s"individuals/time-to-pay/quote/${customerReference.value}/${planId.value}"
+      else
+        s"debts/time-to-pay/quote/${customerReference.value}/${planId.value}"
 
     val url = s"${appConfig.ttpBaseUrl}/$path"
 
@@ -111,33 +99,26 @@ class DefaultTtpConnector @Inject() (
   }
 
   def updatePlan(
-      updatePlanRequest: UpdatePlanRequest
+    updatePlanRequest: UpdatePlanRequest
   )(implicit
-      ec: ExecutionContext,
-      hc: HeaderCarrier
+    ec: ExecutionContext,
+    hc: HeaderCarrier
   ): TtppEnvelope[UpdatePlanResponse] = {
-    val path =
-      if (appConfig.useIf) "individuals/time-to-pay/quote"
-      else "debts/time-to-pay/quote"
+    val path = if (appConfig.useIf) "individuals/time-to-pay/quote" else "debts/time-to-pay/quote"
     val url =
       s"${appConfig.ttpBaseUrl}/$path/${updatePlanRequest.customerReference.value}/${updatePlanRequest.planId.value}"
 
     EitherT(
       httpClient
-        .PUT[UpdatePlanRequest, Either[TtppError, UpdatePlanResponse]](
-          url,
-          updatePlanRequest
-        )
+        .PUT[UpdatePlanRequest, Either[TtppError, UpdatePlanResponse]](url, updatePlanRequest)
     )
   }
 
-  override def createPlan(createPlanRequest: CreatePlanRequest)(implicit
-      ec: ExecutionContext,
-      hc: HeaderCarrier
-  ): TtppEnvelope[CreatePlanResponse] = {
+  override def createPlan(
+    createPlanRequest: CreatePlanRequest
+  )(implicit ec: ExecutionContext, hc: HeaderCarrier): TtppEnvelope[CreatePlanResponse] = {
     val path =
-      if (appConfig.useIf) "individuals/debts/time-to-pay/quote/arrangement"
-      else "debts/time-to-pay/quote/arrangement"
+      if (appConfig.useIf) "individuals/debts/time-to-pay/quote/arrangement" else "debts/time-to-pay/quote/arrangement"
     val url = s"${appConfig.ttpBaseUrl}/$path"
 
     EitherT {

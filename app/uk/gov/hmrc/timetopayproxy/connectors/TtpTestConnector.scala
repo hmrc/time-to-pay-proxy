@@ -18,61 +18,36 @@ package uk.gov.hmrc.timetopayproxy.connectors
 
 import cats.implicits.catsSyntaxEitherId
 import com.google.inject.ImplementedBy
-import play.api.http.Status.{NO_CONTENT, OK}
-import uk.gov.hmrc.http.{
-  HeaderCarrier,
-  HttpClient,
-  HttpException,
-  HttpResponse,
-  UpstreamErrorResponse
-}
+import play.api.http.Status.{ NO_CONTENT, OK }
+import uk.gov.hmrc.http.{ HeaderCarrier, HttpClient, HttpException, HttpResponse, UpstreamErrorResponse }
 import uk.gov.hmrc.timetopayproxy.config.AppConfig
 import uk.gov.hmrc.timetopayproxy.models.TtppEnvelope.TtppEnvelope
-import uk.gov.hmrc.timetopayproxy.models.{
-  ConnectorError,
-  RequestDetails,
-  TtppEnvelope
-}
+import uk.gov.hmrc.timetopayproxy.models.{ ConnectorError, RequestDetails, TtppEnvelope }
+import uk.gov.hmrc.http.HttpReads.Implicits._
 
-import javax.inject.{Inject, Singleton}
+import javax.inject.{ Inject, Singleton }
 import scala.concurrent.ExecutionContext
 
 // $COVERAGE-OFF$
 //Coverage disabled for non-prod source
 @ImplementedBy(classOf[DefaultTtpTestConnector])
 trait TtpTestConnector {
-  def retrieveRequestDetails()(implicit
-      ec: ExecutionContext,
-      hc: HeaderCarrier
-  ): TtppEnvelope[Seq[RequestDetails]]
+  def retrieveRequestDetails()(implicit ec: ExecutionContext, hc: HeaderCarrier): TtppEnvelope[Seq[RequestDetails]]
 
-  def saveResponseDetails(
-      details: RequestDetails
-  )(implicit ec: ExecutionContext, hc: HeaderCarrier): TtppEnvelope[Unit]
+  def saveResponseDetails(details: RequestDetails)(implicit ec: ExecutionContext, hc: HeaderCarrier): TtppEnvelope[Unit]
 
-  def deleteRequest(
-      requestId: String
-  )(implicit ec: ExecutionContext, hc: HeaderCarrier): TtppEnvelope[Unit]
+  def deleteRequest(requestId: String)(implicit ec: ExecutionContext, hc: HeaderCarrier): TtppEnvelope[Unit]
 
-  def saveError(
-      details: RequestDetails
-  )(implicit ec: ExecutionContext, hc: HeaderCarrier): TtppEnvelope[Unit]
+  def saveError(details: RequestDetails)(implicit ec: ExecutionContext, hc: HeaderCarrier): TtppEnvelope[Unit]
 
-  def getErrors()(implicit
-      ec: ExecutionContext,
-      hc: HeaderCarrier
-  ): TtppEnvelope[Seq[RequestDetails]]
+  def getErrors()(implicit ec: ExecutionContext, hc: HeaderCarrier): TtppEnvelope[Seq[RequestDetails]]
 }
 
 @Singleton
-class DefaultTtpTestConnector @Inject() (
-    appConfig: AppConfig,
-    httpClient: HttpClient
-) extends TtpTestConnector {
-  @annotation.nowarn
+class DefaultTtpTestConnector @Inject() (appConfig: AppConfig, httpClient: HttpClient) extends TtpTestConnector {
   override def retrieveRequestDetails()(implicit
-      ec: ExecutionContext,
-      hc: HeaderCarrier
+    ec: ExecutionContext,
+    hc: HeaderCarrier
   ): TtppEnvelope[Seq[RequestDetails]] = {
     val path = "/test-only/requests"
     val url = s"${appConfig.stubBaseUrl}$path"
@@ -82,18 +57,13 @@ class DefaultTtpTestConnector @Inject() (
         .GET[Seq[RequestDetails]](url)
         .map(r => r.asRight[ConnectorError])
         .recover {
-          case e: HttpException =>
-            ConnectorError(e.responseCode, e.message)
-              .asLeft[Seq[RequestDetails]]
-          case e: UpstreamErrorResponse =>
-            ConnectorError(e.statusCode, e.getMessage())
-              .asLeft[Seq[RequestDetails]]
+          case e: HttpException         => ConnectorError(e.responseCode, e.message).asLeft[Seq[RequestDetails]]
+          case e: UpstreamErrorResponse => ConnectorError(e.statusCode, e.getMessage()).asLeft[Seq[RequestDetails]]
         }
     }
   }
-  @annotation.nowarn
   override def saveResponseDetails(
-      details: RequestDetails
+    details: RequestDetails
   )(implicit ec: ExecutionContext, hc: HeaderCarrier): TtppEnvelope[Unit] = {
     val path = "/test-only/response"
     val url = s"${appConfig.stubBaseUrl}$path"
@@ -104,22 +74,17 @@ class DefaultTtpTestConnector @Inject() (
         .map { response =>
           response.status match {
             case OK => ()
-            case _ =>
-              ConnectorError(response.status, "Unexpected response code")
-                .asLeft[Unit]
+            case _  => ConnectorError(response.status, "Unexpected response code").asLeft[Unit]
           }
         }
         .recover {
-          case e: HttpException =>
-            ConnectorError(e.responseCode, e.message).asLeft[Unit]
-          case e: UpstreamErrorResponse =>
-            ConnectorError(e.statusCode, e.getMessage()).asLeft[Unit]
+          case e: HttpException         => ConnectorError(e.responseCode, e.message).asLeft[Unit]
+          case e: UpstreamErrorResponse => ConnectorError(e.statusCode, e.getMessage()).asLeft[Unit]
         }
     }
   }
-  @annotation.nowarn
   override def deleteRequest(
-      requestId: String
+    requestId: String
   )(implicit ec: ExecutionContext, hc: HeaderCarrier): TtppEnvelope[Unit] = {
     val path = s"/test-only/request/$requestId"
     val url = s"${appConfig.stubBaseUrl}$path"
@@ -131,22 +96,18 @@ class DefaultTtpTestConnector @Inject() (
           response.status match {
             case OK         => Unit
             case NO_CONTENT => Unit
-            case _ =>
-              ConnectorError(response.status, "Unexpected response code").asLeft
+            case _          => ConnectorError(response.status, "Unexpected response code").asLeft
           }
         }
         .recover {
-          case e: HttpException =>
-            ConnectorError(e.responseCode, e.message).asLeft
-          case e: UpstreamErrorResponse =>
-            ConnectorError(e.statusCode, e.getMessage()).asLeft
+          case e: HttpException         => ConnectorError(e.responseCode, e.message).asLeft
+          case e: UpstreamErrorResponse => ConnectorError(e.statusCode, e.getMessage()).asLeft
         }
     }
 
   }
-  @annotation.nowarn
   override def saveError(
-      details: RequestDetails
+    details: RequestDetails
   )(implicit ec: ExecutionContext, hc: HeaderCarrier): TtppEnvelope[Unit] = {
     val path = "/test-only/errors"
     val url = s"${appConfig.stubBaseUrl}$path"
@@ -157,24 +118,16 @@ class DefaultTtpTestConnector @Inject() (
         .map { response =>
           response.status match {
             case OK => ()
-            case _ =>
-              ConnectorError(response.status, "Unexpected response code")
-                .asLeft[Unit]
+            case _  => ConnectorError(response.status, "Unexpected response code").asLeft[Unit]
           }
         }
         .recover {
-          case e: HttpException =>
-            ConnectorError(e.responseCode, e.message).asLeft[Unit]
-          case e: UpstreamErrorResponse =>
-            ConnectorError(e.statusCode, e.getMessage()).asLeft[Unit]
+          case e: HttpException         => ConnectorError(e.responseCode, e.message).asLeft[Unit]
+          case e: UpstreamErrorResponse => ConnectorError(e.statusCode, e.getMessage()).asLeft[Unit]
         }
     }
   }
-  @annotation.nowarn
-  override def getErrors()(implicit
-      ec: ExecutionContext,
-      hc: HeaderCarrier
-  ): TtppEnvelope[Seq[RequestDetails]] = {
+  override def getErrors()(implicit ec: ExecutionContext, hc: HeaderCarrier): TtppEnvelope[Seq[RequestDetails]] = {
     val path = "/test-only/errors"
     val url = s"${appConfig.stubBaseUrl}$path"
 
@@ -183,12 +136,8 @@ class DefaultTtpTestConnector @Inject() (
         .GET[Seq[RequestDetails]](url)
         .map(r => r.asRight[ConnectorError])
         .recover {
-          case e: HttpException =>
-            ConnectorError(e.responseCode, e.message)
-              .asLeft[Seq[RequestDetails]]
-          case e: UpstreamErrorResponse =>
-            ConnectorError(e.statusCode, e.getMessage())
-              .asLeft[Seq[RequestDetails]]
+          case e: HttpException         => ConnectorError(e.responseCode, e.message).asLeft[Seq[RequestDetails]]
+          case e: UpstreamErrorResponse => ConnectorError(e.statusCode, e.getMessage()).asLeft[Seq[RequestDetails]]
         }
     }
   }

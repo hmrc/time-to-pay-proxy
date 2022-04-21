@@ -16,14 +16,14 @@
 
 package uk.gov.hmrc.timetopayproxy.config
 
-import javax.inject.{Inject, Singleton}
+import javax.inject.{ Inject, Singleton }
 import play.api.Configuration
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 
 @Singleton
 class AppConfig @Inject() (
-    config: Configuration,
-    servicesConfig: ServicesConfig
+  config: Configuration,
+  servicesConfig: ServicesConfig
 ) {
 
   val authBaseUrl: String = servicesConfig.baseUrl("auth")
@@ -32,6 +32,5 @@ class AppConfig @Inject() (
   val ttpToken: String = config.get[String]("microservice.services.ttp.token")
   val useIf: Boolean = config.get[Boolean]("microservice.services.ttp.useIf")
   val auditingEnabled: Boolean = config.get[Boolean]("auditing.enabled")
-  val graphiteHost: String =
-    config.get[String]("microservice.metrics.graphite.host")
+  val graphiteHost: String = config.get[String]("microservice.metrics.graphite.host")
 }

@@ -17,24 +17,19 @@
 package uk.gov.hmrc.timetopayproxy.models
 
 import play.api.libs.json.Json
-import enumeratum.{Enum, EnumEntry, PlayJsonEnum}
+import enumeratum.{ Enum, EnumEntry, PlayJsonEnum }
 
 import scala.collection.immutable
 
-sealed abstract class CompleteReason(override val entryName: String)
-    extends EnumEntry
+sealed abstract class CompleteReason(override val entryName: String) extends EnumEntry
 
-object CompleteReason
-    extends Enum[CompleteReason]
-    with PlayJsonEnum[CompleteReason] {
+object CompleteReason extends Enum[CompleteReason] with PlayJsonEnum[CompleteReason] {
   val values: immutable.IndexedSeq[CompleteReason] = findValues
 
   case object PaymentInFull extends CompleteReason("Payment in Full")
-  case object AmendmentOfChargesToNil
-      extends CompleteReason("Amendment of Charges to Nil")
+  case object AmendmentOfChargesToNil extends CompleteReason("Amendment of Charges to Nil")
   case object Remission extends CompleteReason("Remission")
-  case object PaidWithinTolerance
-      extends CompleteReason("Paid within Tolerance")
+  case object PaidWithinTolerance extends CompleteReason("Paid within Tolerance")
 }
 
 final case class CancellationReason(value: String) extends AnyVal
@@ -44,12 +39,9 @@ object CancellationReason extends ValueTypeFormatter {
     valueTypeFormatter(CancellationReason.apply, CancellationReason.unapply)
 }
 
-sealed abstract class PaymentMethod(override val entryName: String)
-    extends EnumEntry
+sealed abstract class PaymentMethod(override val entryName: String) extends EnumEntry
 
-object PaymentMethod
-    extends Enum[PaymentMethod]
-    with PlayJsonEnum[PaymentMethod] {
+object PaymentMethod extends Enum[PaymentMethod] with PlayJsonEnum[PaymentMethod] {
   val values: scala.collection.immutable.IndexedSeq[PaymentMethod] = findValues
 
   case object DirectDebit extends PaymentMethod("directDebit")
@@ -74,14 +66,14 @@ object UpdateType extends ValueTypeFormatter {
 }
 
 final case class UpdatePlanRequest(
-    customerReference: CustomerReference,
-    planId: PlanId,
-    updateType: UpdateType,
-    planStatus: Option[PlanStatus],
-    completeReason: Option[CompleteReason],
-    cancellationReason: Option[CancellationReason],
-    thirdPartyBank: Option[Boolean],
-    payments: Option[List[PaymentInformation]]
+  customerReference: CustomerReference,
+  planId: PlanId,
+  updateType: UpdateType,
+  planStatus: Option[PlanStatus],
+  completeReason: Option[CompleteReason],
+  cancellationReason: Option[CancellationReason],
+  thirdPartyBank: Option[Boolean],
+  payments: Option[List[PaymentInformation]]
 ) {
   require(
     !(updateType.value == "planStatus") || !planStatus.isEmpty,

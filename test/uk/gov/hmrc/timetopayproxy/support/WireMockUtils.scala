@@ -27,22 +27,17 @@ import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.client.WireMock._
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig
 import com.github.tomakehurst.wiremock.stubbing.StubMapping
-import org.scalatest.{BeforeAndAfterAll, BeforeAndAfterEach}
+import org.scalatest.{ BeforeAndAfterAll, BeforeAndAfterEach }
 import org.scalatestplus.play.PlaySpec
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.inject.guice.GuiceApplicationBuilder
 
-trait WireMockUtils
-    extends BeforeAndAfterEach
-    with BeforeAndAfterAll
-    with GuiceOneAppPerSuite {
+trait WireMockUtils extends BeforeAndAfterEach with BeforeAndAfterAll with GuiceOneAppPerSuite {
   self: PlaySpec =>
 
   val wireMockPort = 11111
 
-  val wireMockServer: WireMockServer = new WireMockServer(
-    wireMockConfig().port(wireMockPort)
-  )
+  val wireMockServer: WireMockServer = new WireMockServer(wireMockConfig().port(wireMockPort))
 
   override implicit lazy val app = GuiceApplicationBuilder()
     .configure("auditing.enabled" -> "false")
@@ -65,11 +60,7 @@ trait WireMockUtils
     reset()
   }
 
-  def stubGetWithResponseBody(
-      url: String,
-      status: Int,
-      response: String
-  ): StubMapping =
+  def stubGetWithResponseBody(url: String, status: Int, response: String): StubMapping =
     stubFor(
       get(urlMatching(url))
         .willReturn(
@@ -80,11 +71,7 @@ trait WireMockUtils
         )
     )
 
-  def stubPostWithResponseBody(
-      url: String,
-      status: Int,
-      responseBody: String
-  ): StubMapping =
+  def stubPostWithResponseBody(url: String, status: Int, responseBody: String): StubMapping =
     stubFor(
       post(urlEqualTo(url))
         .willReturn(
@@ -114,11 +101,7 @@ trait WireMockUtils
         )
     )
 
-  def stubPutWithResponseBody(
-      url: String,
-      status: Int,
-      responseBody: String
-  ): StubMapping =
+  def stubPutWithResponseBody(url: String, status: Int, responseBody: String): StubMapping =
     stubFor(
       put(urlMatching(url))
         .willReturn(
