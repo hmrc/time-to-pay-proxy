@@ -3,7 +3,7 @@
     {
       "key": "read:time-to-pay-proxy",
       "name": "Time to pay proxy",
-      "description": "Allow Read access to time to pay proxy"
+      "description": "Allow read access to time to pay proxy"
     }
   ],
   "api": {
