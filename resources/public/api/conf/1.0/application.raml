@@ -42,3 +42,37 @@ uses:
           description: Debt Advisors using DAUI trigger a view and update a plan.
         get: !include endpoints/view/get.raml
         put: !include endpoints/update/put.raml
+  /test-only/requests:
+        (annotations.group):
+           name: TTP Test only request
+           description: Test only request for TTP service to be used for polling script
+        get: !include endpoints/test/get.raml
+  /test-only/request/{requestId}:
+        (annotations.group):
+           name: TTP Test only request
+           description: Test only request for TTP service to be used for polling script
+        delete: !include endpoints/test/delete.raml
+  /test-only/response:
+        (annotations.group):
+           name: TTP Test only response
+           description: Test only response for TTP service to be used for polling script
+        post: !include endpoints/test/post.raml
+  /test-only/errors:
+        (annotations.group):
+           name: TTP Test only response
+           description: Test only response for TTP service to be used for polling script
+        get: !include endpoints/test/get.raml
+        post: !include endpoints/test/post.raml
+
+  /hello-world:
+    get:
+      displayName: Say hello world
+      description: |
+        An example for integrating with Time To Pay Proxy service.
+        Any request to this endpoint initiates a 'Hello world' response.
+      responses:
+        200:
+          body:
+            text/html:
+              example: |
+                "Hello world"
