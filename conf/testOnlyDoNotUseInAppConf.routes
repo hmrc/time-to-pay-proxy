@@ -10,4 +10,11 @@
 # Failing to follow this rule may result in test routes deployed in production.
 
 # Add all the application routes to the prod.routes file
+
+GET        /test-only/requests                      uk.gov.hmrc.timetopayproxy.controllers.TimeToPayTestController.requests
+POST       /test-only/response                      uk.gov.hmrc.timetopayproxy.controllers.TimeToPayTestController.response
+DELETE     /test-only/request/:requestId            uk.gov.hmrc.timetopayproxy.controllers.TimeToPayTestController.deleteRequest(requestId: String)
+GET        /test-only/errors                        uk.gov.hmrc.timetopayproxy.controllers.TimeToPayTestController.getErrors
+POST       /test-only/errors                        uk.gov.hmrc.timetopayproxy.controllers.TimeToPayTestController.saveError
+
 ->         /                          prod.Routes

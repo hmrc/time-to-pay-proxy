@@ -4,9 +4,3 @@ POST       /quote                                   uk.gov.hmrc.timetopayproxy.c
 GET        /quote/:customerReference/:planId        uk.gov.hmrc.timetopayproxy.controllers.TimeToPayProxyController.viewPlan(customerReference: String, planId: String)
 PUT        /quote/:customerReference/:planId        uk.gov.hmrc.timetopayproxy.controllers.TimeToPayProxyController.updatePlan(customerReference: String, planId: String)
 POST       /quote/arrangement                       uk.gov.hmrc.timetopayproxy.controllers.TimeToPayProxyController.createPlan
-
-GET        /test-only/requests                      uk.gov.hmrc.timetopayproxy.controllers.TimeToPayTestController.requests
-POST       /test-only/response                      uk.gov.hmrc.timetopayproxy.controllers.TimeToPayTestController.response
-DELETE     /test-only/request/:requestId            uk.gov.hmrc.timetopayproxy.controllers.TimeToPayTestController.deleteRequest(requestId: String)
-GET        /test-only/errors                        uk.gov.hmrc.timetopayproxy.controllers.TimeToPayTestController.getErrors
-POST       /test-only/errors                        uk.gov.hmrc.timetopayproxy.controllers.TimeToPayTestController.saveError
