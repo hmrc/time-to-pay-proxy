@@ -16,24 +16,24 @@
 
 package uk.gov.hmrc.timetopayproxy.models
 
-import java.time.LocalDate
-
 import play.api.libs.json.Json
 
-final case class GenerateQuoteResponse(
-  quoteReference: QuoteReference,
-  customerReference: CustomerReference,
-  quoteType: QuoteType,
-  quoteDate: LocalDate,
-  numberOfInstalments: Int,
-  totalDebtIncInt: BigDecimal,
-  interestAccrued: BigDecimal,
-  planInterest: BigDecimal,
-  totalInterest: BigDecimal,
-  instalments: List[Instalment],
-  collections: Collections
-)
+import java.time.LocalDate
 
-object GenerateQuoteResponse {
-  implicit val format = Json.format[GenerateQuoteResponse]
+final case class InitialCollection(dueDate: LocalDate, amountDue: BigDecimal)
+
+object InitialCollection {
+  implicit val format = Json.format[InitialCollection]
+}
+
+final case class RegularCollection(dueDate: LocalDate, amountDue: BigDecimal)
+
+object RegularCollection {
+  implicit val format = Json.format[RegularCollection]
+}
+
+final case class Collections(initialCollection: Option[InitialCollection], regularCollections: List[RegularCollection])
+
+object Collections {
+  implicit val format = Json.format[Collections]
 }

@@ -56,15 +56,15 @@ class TimeToPayProxyControllerSpec extends AnyWordSpec with Matchers with MockFa
     CustomerReference("customerReference"),
     ChannelIdentifier.Advisor,
     PlanToGenerateQuote(
-      QuoteType.Duration,
-      LocalDate.of(2021, 1, 1),
-      LocalDate.of(2021, 1, 1),
-      Some(1),
-      Some(Frequency.Annually),
-      Some(Duration(12)),
-      Some(1),
-      Some(LocalDate.now()),
-      PaymentPlanType.TimeToPay
+      quoteType = QuoteType.Duration,
+      quoteDate = LocalDate.of(2021, 1, 1),
+      instalmentStartDate = LocalDate.of(2021, 1, 1),
+      instalmentAmount = Some(1),
+      frequency = Some(Frequency.Annually),
+      duration = Some(Duration(12)),
+      initialPaymentAmount = Some(1),
+      initialPaymentDate = Some(LocalDate.now()),
+      paymentPlanType = PaymentPlanType.TimeToPay
     ),
     List(),
     List()
@@ -215,17 +215,21 @@ class TimeToPayProxyControllerSpec extends AnyWordSpec with Matchers with MockFa
           0.9,
           List(
             Instalment(
-              DebtItemChargeId("dutyId"),
-              LocalDate.parse("2022-01-01"),
-              100,
-              100,
-              0.1,
-              1,
-              0.5,
-              10
+              debtItemChargeId = DebtItemChargeId("dutyId"),
+              dueDate = LocalDate.parse("2022-01-01"),
+              amountDue = 100,
+              expectedPayment = 100,
+              interestRate = 0.1,
+              instalmentNumber = 1,
+              instalmentInterestAccrued = 0.5,
+              instalmentBalance = 10
             )
-          )
+          ),
+          Collections(
+            Some(InitialCollection(LocalDate.now(), 1)),
+            List(RegularCollection(LocalDate.parse("2022-01-01"), 100)))
         )
+
         (ttpQuoteService
           .generateQuote(_: GenerateQuoteRequest)(
             _: ExecutionContext,
@@ -489,8 +493,7 @@ class TimeToPayProxyControllerSpec extends AnyWordSpec with Matchers with MockFa
           FakeRequest(
             "PUT",
             s"/individuals/time-to-pay/quote/${updatePlanRequestMissingPaymentReference.customerReference.value}/${updatePlanRequestMissingPaymentReference.planId.value}"
-          )
-            .withHeaders(CONTENT_TYPE -> MimeTypes.JSON)
+          ).withHeaders(CONTENT_TYPE -> MimeTypes.JSON)
             .withBody(Json.toJson(updatePlanRequestMissingPaymentReference))
 
         val responseFromTtp = UpdatePlanResponse(
@@ -551,8 +554,7 @@ class TimeToPayProxyControllerSpec extends AnyWordSpec with Matchers with MockFa
           FakeRequest(
             "PUT",
             s"/individuals/time-to-pay/quote/${updatePlanRequestMissingPlanStatus.customerReference.value}/${updatePlanRequestMissingPlanStatus.planId.value}"
-          )
-            .withHeaders(CONTENT_TYPE -> MimeTypes.JSON)
+          ).withHeaders(CONTENT_TYPE -> MimeTypes.JSON)
             .withBody(Json.toJson(updatePlanRequestMissingPlanStatus))
 
         val responseFromTtp = UpdatePlanResponse(
@@ -705,8 +707,7 @@ class TimeToPayProxyControllerSpec extends AnyWordSpec with Matchers with MockFa
           FakeRequest(
             "PUT",
             s"/individuals/time-to-pay/quote/customerRef1234/planId1234"
-          )
-            .withHeaders(CONTENT_TYPE -> MimeTypes.JSON)
+          ).withHeaders(CONTENT_TYPE -> MimeTypes.JSON)
             .withBody(invalidJsonBody)
 
         val response: Future[Result] =
@@ -754,8 +755,7 @@ class TimeToPayProxyControllerSpec extends AnyWordSpec with Matchers with MockFa
           FakeRequest(
             "PUT",
             s"/individuals/time-to-pay/quote/customerRef1234/planId1234"
-          )
-            .withHeaders(CONTENT_TYPE -> MimeTypes.JSON)
+          ).withHeaders(CONTENT_TYPE -> MimeTypes.JSON)
             .withBody(invalidJsonBody)
 
         val response: Future[Result] =
@@ -804,8 +804,7 @@ class TimeToPayProxyControllerSpec extends AnyWordSpec with Matchers with MockFa
           FakeRequest(
             "PUT",
             s"/individuals/time-to-pay/quote/customerRef1234/planId1234"
-          )
-            .withHeaders(CONTENT_TYPE -> MimeTypes.JSON)
+          ).withHeaders(CONTENT_TYPE -> MimeTypes.JSON)
             .withBody(invalidJsonBody)
 
         val response: Future[Result] =
@@ -845,8 +844,7 @@ class TimeToPayProxyControllerSpec extends AnyWordSpec with Matchers with MockFa
           FakeRequest(
             "PUT",
             s"/individuals/time-to-pay/quote/custReference1234/planId1234"
-          )
-            .withHeaders(CONTENT_TYPE -> MimeTypes.JSON)
+          ).withHeaders(CONTENT_TYPE -> MimeTypes.JSON)
             .withBody(invalidJsonBody)
 
         val response: Future[Result] =
