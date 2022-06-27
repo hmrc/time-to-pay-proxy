@@ -227,7 +227,8 @@ class TimeToPayProxyControllerSpec extends AnyWordSpec with Matchers with MockFa
           ),
           Collections(
             Some(InitialCollection(LocalDate.now(), 1)),
-            List(RegularCollection(LocalDate.parse("2022-01-01"), 100)))
+            List(RegularCollection(LocalDate.parse("2022-01-01"), 100))
+          )
         )
 
         (ttpQuoteService

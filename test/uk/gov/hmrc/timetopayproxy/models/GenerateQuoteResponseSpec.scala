@@ -49,7 +49,8 @@ class GenerateQuoteResponseSpec extends AnyWordSpec with Matchers {
       Some(InitialCollection(LocalDate.parse("2022-06-18"), 1000)),
       List(
         RegularCollection(LocalDate.parse("2022-07-08"), 1628.21),
-        RegularCollection(LocalDate.parse("2022-08-08"), 1628.21))
+        RegularCollection(LocalDate.parse("2022-08-08"), 1628.21)
+      )
     )
   )
 
