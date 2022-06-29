@@ -17,7 +17,7 @@
       ],
       "description": "Attribute to identify where the request is coming"
     },
-    "plan": {
+    "quote": {
       "type": "object",
       "properties": {
         "quoteType": {
@@ -75,114 +75,115 @@
             "timeToPay",
             "instalmentOrder",
             "childBenefits",
-            "fieldCollections"
+            "fieldCollections",
+            "LFC"
           ],
           "description": "Payment plan type"
         }
+
       },
+      "additionalProperties": false,
       "required": [
         "quoteType",
         "quoteDate",
         "instalmentStartDate",
-        "instalmentAmount",
         "frequency",
-        "duration",
         "paymentPlanType"
       ]
     },
     "customerPostCodes": {
       "type": "array",
-      "items": [
-        {
-          "type": "object",
-          "properties": {
-            "addressPostcode": {
-              "type": "string",
-              "description": "Customer postcode this will be a list of postcodes"
-            },
-            "postcodeDate": {
-              "type": "string",
-              "format": "date",
-              "description": "Date the customer used this postcode from"
-            }
+      "items": {
+        "type": "object",
+        "properties": {
+          "addressPostcode": {
+            "type": "string",
+            "description": "Customer postcode this will be a list of postcodes"
           },
-          "required": [
-            "addressPostcode",
-            "postcodeDate"
-          ]
-        }
-      ]
+          "postcodeDate": {
+            "type": "string",
+            "format": "date",
+            "description": "Date the customer used this postcode from"
+          }
+        },
+        "additionalProperties": false,
+        "required": [
+          "addressPostcode",
+          "postcodeDate"
+        ]
+      }
     },
     "debtItemCharges": {
       "type": "array",
-      "items": [
-        {
-          "type": "object",
-          "properties": {
-            "debtItemChargeId": {
-              "type": "string",
-              "minLength": 1,
-              "maxLength": 16,
-              "description": "An ID which uniquely identifies a particular duty"
-            },
-            "mainTrans": {
-              "type": "string",
-              "minLength": 4,
-              "maxLength": 8,
-              "description": "Unique MTrans Debt Type ID e.g.1525 also known as M Trans"
-            },
-            "subTrans": {
-              "type": "string",
-              "minLength": 4,
-              "maxLength": 8,
-              "description": "Duty Type description for the UI"
-            },
-            "originalDebtAmount": {
-              "type": "integer",
-              "description": "Original debt amount"
-            },
-            "interestStartDate": {
-              "type": "string",
-              "format": "date",
-              "description": "The interest start date"
-            },
-            "paymentHistory": {
-              "type": "array",
-              "items": [
-                {
-                  "type": "object",
-                  "properties": {
-                    "paymentDate": {
-                      "type": "string",
-                      "format": "date",
-                      "description": "Payment date"
-                    },
-                    "paymentAmount": {
-                      "type": "integer",
-                      "description": "Payment amount"
-                    }
-                  }
+      "items": {
+        "type": "object",
+        "properties": {
+          "debtItemChargeId": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 16,
+            "description": "An ID which uniquely identifies a particular duty"
+          },
+          "mainTrans": {
+            "type": "string",
+            "minLength": 4,
+            "maxLength": 8,
+            "description": "Unique MTrans Debt Type ID e.g.1525 also known as M Trans"
+          },
+          "subTrans": {
+            "type": "string",
+            "minLength": 4,
+            "maxLength": 8,
+            "description": "Duty Type description for the UI"
+          },
+          "originalDebtAmount": {
+            "type": "integer",
+            "description": "Original debt amount"
+          },
+          "interestStartDate": {
+            "type": "string",
+            "format": "date",
+            "description": "The interest start date"
+          },
+          "paymentHistory": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "paymentDate": {
+                  "type": "string",
+                  "format": "date",
+                  "description": "Payment date"
+                },
+                "paymentAmount": {
+                  "type": "integer",
+                  "description": "Payment amount"
                 }
-              ],
+
+              },
+              "additionalProperties": false,
               "required": [
                 "paymentDate",
                 "paymentAmount"
               ]
             }
           }
-        }
-      ],
-      "required": [
-        "debtItemChargeId",
-        "mainTrans",
-        "subTrans",
-        "originalDebtAmount",
-        "interestStartDate"
-      ]
+        },
+        "additionalProperties": false,
+        "required": [
+          "debtItemChargeId",
+          "mainTrans",
+          "subTrans",
+          "originalDebtAmount"
+        ]
+      }
     }
   },
+  "additionalProperties": false,
   "required": [
     "customerReference",
-    "channelIdentifier"
+    "channelIdentifier",
+    "quote",
+    "debtItemCharges"
   ]
 }

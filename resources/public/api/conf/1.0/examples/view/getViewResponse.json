@@ -1,6 +1,7 @@
 {
   "customereference": "uniqRef1234",
   "channelIdentifier": "advisor",
+  "caseId": "caseId1",
   "plan": {
     "planId": "planId1",
     "quoteId": "quoteId1",
@@ -16,7 +17,7 @@
   },
   "debtItemCharges": [
     {
-      "debtItemChargeId": "debtChargeId1",
+      "debtItemChargeId": "debtItemChargeId1",
       "mainTrans": "1546",
       "subTrans": "1090",
       "originalDebtAmount": 100,
@@ -43,7 +44,7 @@
   ],
   "instalments": [
     {
-      "debtItemChargeId": "debtChargeId1",
+      "debtItemChargeId": "debtItemChargeId1",
       "dueDate": "2021-05-13",
       "amountDue": 100,
       "expectedPayment": 10,

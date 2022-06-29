@@ -35,7 +35,7 @@ class TTPQuoteServiceSpec extends UnitSpec {
   private val timeToPayRequest = GenerateQuoteRequest(
     CustomerReference("customerReference"),
     ChannelIdentifier.Advisor,
-    PlanToGenerateQuote(
+    Quote(
       QuoteType.InstalmentAmount,
       LocalDate.of(2021, 1, 1),
       LocalDate.of(2021, 1, 1),
@@ -391,27 +391,27 @@ class TtpConnectorStub(
   updatePlanResponse: Either[TtppError, UpdatePlanResponse],
   createPlanResponse: Either[TtppError, CreatePlanResponse]
 ) extends TtpConnector {
-  override def generateQuote(ttppRequest: GenerateQuoteRequest)(implicit
+  override def generateQuote(ttppRequest: GenerateQuoteRequest)(
+    implicit
     ec: ExecutionContext,
-    hc: HeaderCarrier
-  ): TtppEnvelope[GenerateQuoteResponse] =
+    hc: HeaderCarrier): TtppEnvelope[GenerateQuoteResponse] =
     TtppEnvelope(Future successful generateQuoteResponse)
 
-  override def getExistingQuote(customerReference: CustomerReference, planId: PlanId)(implicit
+  override def getExistingQuote(customerReference: CustomerReference, planId: PlanId)(
+    implicit
     ec: ExecutionContext,
-    hc: HeaderCarrier
-  ): TtppEnvelope[ViewPlanResponse] =
+    hc: HeaderCarrier): TtppEnvelope[ViewPlanResponse] =
     TtppEnvelope(Future successful retrieveQuoteResponse)
 
-  override def updatePlan(updatePlanRequest: UpdatePlanRequest)(implicit
+  override def updatePlan(updatePlanRequest: UpdatePlanRequest)(
+    implicit
     ec: ExecutionContext,
-    hc: HeaderCarrier
-  ): TtppEnvelope[UpdatePlanResponse] =
+    hc: HeaderCarrier): TtppEnvelope[UpdatePlanResponse] =
     TtppEnvelope(Future successful updatePlanResponse)
 
-  override def createPlan(createPlanRequest: CreatePlanRequest)(implicit
+  override def createPlan(createPlanRequest: CreatePlanRequest)(
+    implicit
     ec: ExecutionContext,
-    hc: HeaderCarrier
-  ): TtppEnvelope[CreatePlanResponse] =
+    hc: HeaderCarrier): TtppEnvelope[CreatePlanResponse] =
     TtppEnvelope(Future successful createPlanResponse)
 }

@@ -28,4 +28,5 @@ object PaymentPlanType extends Enum[PaymentPlanType] with PlayJsonEnum[PaymentPl
   case object InstalmentOrder extends PaymentPlanType("instalmentOrder")
   case object ChildBenefits extends PaymentPlanType("childBenefits")
   case object FieldCollections extends PaymentPlanType("fieldCollections")
+  case object LFC extends PaymentPlanType("LFC")
 }
