@@ -71,6 +71,10 @@ class TTPQuoteServiceSpec extends UnitSpec {
         0.5,
         50
       )
+    ),
+    Collections(
+      Some(InitialCollection(LocalDate.now(), 1)),
+      List(RegularCollection(LocalDate.parse("2022-01-01"), 100))
     )
   )
 
@@ -391,10 +395,9 @@ class TtpConnectorStub(
   updatePlanResponse: Either[TtppError, UpdatePlanResponse],
   createPlanResponse: Either[TtppError, CreatePlanResponse]
 ) extends TtpConnector {
-  override def generateQuote(ttppRequest: GenerateQuoteRequest)(implicit
-    ec: ExecutionContext,
-    hc: HeaderCarrier
-  ): TtppEnvelope[GenerateQuoteResponse] =
+  override def generateQuote(
+    ttppRequest: GenerateQuoteRequest
+  )(implicit ec: ExecutionContext, hc: HeaderCarrier): TtppEnvelope[GenerateQuoteResponse] =
     TtppEnvelope(Future successful generateQuoteResponse)
 
   override def getExistingQuote(customerReference: CustomerReference, planId: PlanId)(implicit
@@ -403,15 +406,13 @@ class TtpConnectorStub(
   ): TtppEnvelope[ViewPlanResponse] =
     TtppEnvelope(Future successful retrieveQuoteResponse)
 
-  override def updatePlan(updatePlanRequest: UpdatePlanRequest)(implicit
-    ec: ExecutionContext,
-    hc: HeaderCarrier
-  ): TtppEnvelope[UpdatePlanResponse] =
+  override def updatePlan(
+    updatePlanRequest: UpdatePlanRequest
+  )(implicit ec: ExecutionContext, hc: HeaderCarrier): TtppEnvelope[UpdatePlanResponse] =
     TtppEnvelope(Future successful updatePlanResponse)
 
-  override def createPlan(createPlanRequest: CreatePlanRequest)(implicit
-    ec: ExecutionContext,
-    hc: HeaderCarrier
-  ): TtppEnvelope[CreatePlanResponse] =
+  override def createPlan(
+    createPlanRequest: CreatePlanRequest
+  )(implicit ec: ExecutionContext, hc: HeaderCarrier): TtppEnvelope[CreatePlanResponse] =
     TtppEnvelope(Future successful createPlanResponse)
 }

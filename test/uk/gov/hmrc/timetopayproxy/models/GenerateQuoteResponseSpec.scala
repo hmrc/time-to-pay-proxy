@@ -44,6 +44,13 @@ class GenerateQuoteResponseSpec extends AnyWordSpec with Matchers {
         10,
         10
       )
+    ),
+    Collections(
+      Some(InitialCollection(LocalDate.parse("2022-06-18"), 1000)),
+      List(
+        RegularCollection(LocalDate.parse("2022-07-08"), 1628.21),
+        RegularCollection(LocalDate.parse("2022-08-08"), 1628.21)
+      )
     )
   )
 
@@ -68,8 +75,20 @@ class GenerateQuoteResponseSpec extends AnyWordSpec with Matchers {
                |      "instalmentInterestAccrued": 10,
                |      "instalmentBalance": 10
                |    }
-               |  ]
-               |
+               |  ],
+               | "collections": {
+               |    "initialCollection": {
+               |      "dueDate": "2022-06-18",
+               |      "amountDue": 1000
+               |    },
+               |    "regularCollections": [{
+               |      "dueDate": "2022-07-08",
+               |      "amountDue": 1628.21
+               |    }, {
+               |      "dueDate": "2022-08-08",
+               |      "amountDue": 1628.21
+               |    }]
+               |  }
                |}""".stripMargin
 
   "GenerateQuoteResponse" should {
