@@ -71,6 +71,10 @@ class TTPQuoteServiceSpec extends UnitSpec {
         0.5,
         50
       )
+    ),
+    Collections(
+      Some(InitialCollection(LocalDate.now(), 1)),
+      List(RegularCollection(LocalDate.parse("2022-01-01"), 100))
     )
   )
 

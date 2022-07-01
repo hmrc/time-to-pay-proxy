@@ -215,17 +215,22 @@ class TimeToPayProxyControllerSpec extends AnyWordSpec with Matchers with MockFa
           0.9,
           List(
             Instalment(
-              DebtItemChargeId("dutyId"),
-              LocalDate.parse("2022-01-01"),
-              100,
-              100,
-              0.1,
-              1,
-              0.5,
-              10
+              debtItemChargeId = DebtItemChargeId("dutyId"),
+              dueDate = LocalDate.parse("2022-01-01"),
+              amountDue = 100,
+              expectedPayment = 100,
+              interestRate = 0.1,
+              instalmentNumber = 1,
+              instalmentInterestAccrued = 0.5,
+              instalmentBalance = 10
             )
+          ),
+          Collections(
+            Some(InitialCollection(LocalDate.now(), 1)),
+            List(RegularCollection(LocalDate.parse("2022-01-01"), 100))
           )
         )
+
         (ttpQuoteService
           .generateQuote(_: GenerateQuoteRequest)(
             _: ExecutionContext,
