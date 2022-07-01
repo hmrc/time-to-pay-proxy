@@ -1,5 +1,5 @@
 {
-  "customereference": "uniqRef1234",
+  "customerReference": "uniqRef1234",
   "channelIdentifier": "advisor",
   "caseId": "caseId1",
   "plan": {

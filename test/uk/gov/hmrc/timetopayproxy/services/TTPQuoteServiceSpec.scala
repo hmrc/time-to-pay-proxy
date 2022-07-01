@@ -81,9 +81,9 @@ class TTPQuoteServiceSpec extends UnitSpec {
   private val retrievePlanResponse = ViewPlanResponse(
     CustomerReference("customerRef1234"),
     ChannelIdentifier.Advisor,
-    Plan(
+    CaseId("caseId123"),
+    ViewPlanResponsePlan(
       PlanId("planId123"),
-      CaseId("caseId123"),
       QuoteId("quoteId"),
       LocalDate.now(),
       QuoteType.InstalmentAmount,
@@ -400,10 +400,10 @@ class TtpConnectorStub(
   )(implicit ec: ExecutionContext, hc: HeaderCarrier): TtppEnvelope[GenerateQuoteResponse] =
     TtppEnvelope(Future successful generateQuoteResponse)
 
-  override def getExistingQuote(customerReference: CustomerReference, planId: PlanId)(implicit
+  override def getExistingQuote(customerReference: CustomerReference, planId: PlanId)(
+    implicit
     ec: ExecutionContext,
-    hc: HeaderCarrier
-  ): TtppEnvelope[ViewPlanResponse] =
+    hc: HeaderCarrier): TtppEnvelope[ViewPlanResponse] =
     TtppEnvelope(Future successful retrieveQuoteResponse)
 
   override def updatePlan(

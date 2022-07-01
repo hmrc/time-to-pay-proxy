@@ -139,11 +139,11 @@ class TimeToPayProxyControllerSpec extends AnyWordSpec with Matchers with MockFa
     )
 
   val viewPlanResponse: ViewPlanResponse = ViewPlanResponse(
-    CustomerReference("customerRef1234"),
+    CustomerReference(value = "customerRef1234"),
     ChannelIdentifier.Advisor,
-    Plan(
+    CaseId("caseId123"),
+    ViewPlanResponsePlan(
       PlanId("planId123"),
-      CaseId("caseId123"),
       QuoteId("quoteId"),
       LocalDate.now(),
       QuoteType.InstalmentAmount,
