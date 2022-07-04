@@ -21,7 +21,7 @@ import com.networknt.schema.{ JsonSchema, JsonSchemaFactory, SpecVersion }
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
 import play.api.libs.json.Json
-import uk.gov.hmrc.timetopayproxy.models.{ CreatePlanRequest, GenerateQuoteRequest, GenerateQuoteResponse, ViewPlanResponse }
+import uk.gov.hmrc.timetopayproxy.models.{ CreatePlanRequest, GenerateQuoteRequest, GenerateQuoteResponse, UpdatePlanRequest, UpdatePlanResponse, ViewPlanResponse }
 
 import java.nio.file.Paths
 import scala.collection.JavaConverters.asScalaSetConverter
@@ -114,6 +114,7 @@ class SchemaValidatorSpec extends AnyWordSpec with Matchers {
       Json.parse(raw).as[CreatePlanRequest]
     }
   }
+
   "The viewPlan response schema" should {
 
     "be valid according to the meta schema" in {
@@ -137,6 +138,59 @@ class SchemaValidatorSpec extends AnyWordSpec with Matchers {
         .fromFile("resources/public/api/conf/1.0/examples/view/getViewResponse.json")
         .mkString
       Json.parse(raw).as[ViewPlanResponse]
+    }
+  }
+
+  "The updatePlan request schema" should {
+
+    "be valid according to the meta schema" in {
+      val schema = loadSchema("resources/public/api/conf/1.0/schemas/metaSchema.json")
+      val json = loadJson("resources/public/api/conf/1.0/schemas/update/putUpdateRequestSchema.json")
+      val errors = schema.validate(json).asScala
+
+      errors shouldEqual Set.empty
+    }
+
+    "validate an example request" in {
+      val schema = loadSchema("resources/public/api/conf/1.0/schemas/update/putUpdateRequestSchema.json")
+      val json = loadJson("resources/public/api/conf/1.0/examples/update/putUpdateRequest.json")
+      val errors = schema.validate(json).asScala
+
+      errors shouldEqual Set.empty
+    }
+
+    "should parse to the model" in {
+      val raw = scala.io.Source
+        .fromFile("resources/public/api/conf/1.0/examples/update/putUpdateRequest.json")
+        .mkString
+      Json.parse(raw).as[UpdatePlanRequest]
+    }
+
+  }
+
+  "The updatePlan response schema" should {
+
+    "be valid according to the meta schema" in {
+      val schema = loadSchema("resources/public/api/conf/1.0/schemas/metaSchema.json")
+      val json = loadJson("resources/public/api/conf/1.0/schemas/update/putUpdateResponseSchema.json")
+      val errors = schema.validate(json).asScala
+
+      errors shouldEqual Set.empty
+    }
+
+    "validate an example response" in {
+      val schema = loadSchema("resources/public/api/conf/1.0/schemas/update/putUpdateResponseSchema.json")
+      val json = loadJson("resources/public/api/conf/1.0/examples/update/putUpdateReponse.json")
+      val errors = schema.validate(json).asScala
+
+      errors shouldEqual Set.empty
+    }
+
+    "should parse to the modelvb" in {
+      val raw = scala.io.Source
+        .fromFile("resources/public/api/conf/1.0/examples/update/putUpdateReponse.json")
+        .mkString
+      Json.parse(raw).as[UpdatePlanResponse]
     }
 
   }

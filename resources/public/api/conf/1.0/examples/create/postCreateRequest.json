@@ -13,6 +13,8 @@
     "numberOfInstalments": 1,
     "frequency": "annually",
     "duration": 12,
+    "initialPaymentMethod": "BACS",
+    "initialPaymentReference": "paymentRef1234",
     "initialPaymentAmount": 100,
     "initialPaymentDate": "2021-05-13",
     "totalDebtIncInt": 10,
@@ -22,7 +24,7 @@
   },
   "debtItemCharges": [
     {
-      "debtItemChargeId": "debtItemChargeId1",
+      "debtItemChargeId": "debtItemChrgId1",
       "mainTrans": "1546",
       "subTrans": "1090",
       "originalDebtAmount": 100,
@@ -49,7 +51,7 @@
   ],
   "instalments": [
     {
-      "debtItemChargeId": "debtItemChargeId1",
+      "debtItemChargeId": "debtItemChrgId1",
       "dueDate": "2021-05-13",
       "amountDue": 100,
       "expectedPayment": 10,
@@ -60,3 +62,5 @@
     }
   ]
 }
+
+

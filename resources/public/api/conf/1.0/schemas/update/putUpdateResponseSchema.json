@@ -18,8 +18,8 @@
     "planStatus": {
       "type": "string",
       "enum": [
-        "complete",
-        "cancelled"
+        "success",
+        "failure"
       ],
 
       "description": "This could be cancelled and complete"
@@ -31,4 +31,3 @@
     }
   }
 }
-

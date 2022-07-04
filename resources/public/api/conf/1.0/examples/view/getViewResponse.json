@@ -17,7 +17,7 @@
   },
   "debtItemCharges": [
     {
-      "debtItemChargeId": "debtItemChargeId1",
+      "debtItemChargeId": "debtItemChrgId1",
       "mainTrans": "1546",
       "subTrans": "1090",
       "originalDebtAmount": 100,
@@ -44,7 +44,7 @@
   ],
   "instalments": [
     {
-      "debtItemChargeId": "debtItemChargeId1",
+      "debtItemChargeId": "debtItemChrgId1",
       "dueDate": "2021-05-13",
       "amountDue": 100,
       "expectedPayment": 10,

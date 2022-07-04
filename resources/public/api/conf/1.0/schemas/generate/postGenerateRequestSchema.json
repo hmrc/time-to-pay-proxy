@@ -80,7 +80,6 @@
           ],
           "description": "Payment plan type"
         }
-
       },
       "additionalProperties": false,
       "required": [
@@ -159,7 +158,6 @@
                   "type": "integer",
                   "description": "Payment amount"
                 }
-
               },
               "additionalProperties": false,
               "required": [

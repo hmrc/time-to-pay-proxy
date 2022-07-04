@@ -9,6 +9,14 @@
       "maxLength": 15,
       "description": "This is the customer reference"
     },
+    "channelIdentifier": {
+      "type": "string",
+      "enum": [
+        "advisor",
+        "selfService"
+      ],
+      "description": "Attribute to identify where the request is coming"
+    },
     "caseId": {
       "type": "string",
       "description": "This is the unique case id"
@@ -45,7 +53,8 @@
             "timeToPay",
             "instalmentOrder",
             "childBenefits",
-            "fieldCollections"
+            "fieldCollections",
+            "LFC"
           ],
           "description": "Payment Plan Type"
         },
@@ -82,6 +91,10 @@
         "interestAccrued": {
           "type": "integer",
           "description": "This is the total interest accrued prior to plan start"
+        },
+        "planInterest": {
+          "type": "number",
+          "description": "Interest accrued to the life of the plan"
         }
       }
     },
@@ -153,7 +166,8 @@
                 "directDebit",
                 "BACS",
                 "cheque",
-                "cardPayment"
+                "cardPayment",
+                "On going award"
               ],
               "description": "Payment method (Direct debit, BACS, Cheque, Card)"
             },

@@ -2,7 +2,7 @@
   "customerReference": "uniqRef1234",
   "channelIdentifier": "selfService",
   "quote": {
-    "quoteType": "instalmentAmount",
+    "quoteType": "duration",
     "quoteDate": "2021-05-13",
     "instalmentStartDate": "2021-05-13",
     "instalmentAmount": 100,
@@ -20,7 +20,7 @@
   ],
   "debtItemCharges": [
     {
-      "debtItemChargeId": "debtItemChargeId1",
+      "debtItemChargeId": "debtItemChrgId1",
       "mainTrans": "1546",
       "subTrans": "1090",
       "originalDebtAmount": 100,
@@ -34,5 +34,3 @@
     }
   ]
 }
-
-
