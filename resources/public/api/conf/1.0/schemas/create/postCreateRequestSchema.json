@@ -89,21 +89,6 @@
           "type": "integer",
           "description": "Duration for the payment frequency"
         },
-        "initialPaymentMethod": {
-          "type": "string",
-          "enum": [
-            "directDebit",
-            "BACS",
-            "cheque",
-            "cardPayment",
-            "Ongoing award"
-          ],
-          "description": "Payment method (Direct debit, BACS, Cheque, Card)"
-        },
-        "initialPaymentReference": {
-          "type": "string",
-          "description": "Payment Method reference"
-        },
         "initialPaymentAmount": {
           "type": "integer",
           "description": "Initial payment amount"

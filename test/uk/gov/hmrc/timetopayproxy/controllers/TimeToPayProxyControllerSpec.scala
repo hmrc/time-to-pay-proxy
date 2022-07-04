@@ -436,7 +436,7 @@ class TimeToPayProxyControllerSpec extends AnyWordSpec with Matchers with MockFa
         val responseFromTtp = UpdatePlanResponse(
           CustomerReference("customerReference"),
           PlanId("pageId"),
-          UpdatePlanStatus.Complete,
+          PlanStatus.Success,
           LocalDate.now
         )
         (ttpQuoteService
@@ -500,7 +500,7 @@ class TimeToPayProxyControllerSpec extends AnyWordSpec with Matchers with MockFa
         val responseFromTtp = UpdatePlanResponse(
           CustomerReference("customerRef1234"),
           PlanId("planId1234"),
-          UpdatePlanStatus.Complete,
+          PlanStatus.Success,
           LocalDate.now
         )
         (ttpQuoteService
@@ -561,7 +561,7 @@ class TimeToPayProxyControllerSpec extends AnyWordSpec with Matchers with MockFa
         val responseFromTtp = UpdatePlanResponse(
           CustomerReference("customerRef1234"),
           PlanId("planId1234"),
-          UpdatePlanStatus.Complete,
+          PlanStatus.Success,
           LocalDate.now
         )
         (ttpQuoteService

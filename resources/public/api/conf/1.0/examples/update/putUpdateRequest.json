@@ -2,8 +2,8 @@
   "customerReference": "custRef123",
   "planId": "planId1",
   "updateType": "paymentDetails",
-  "planStatus": "success",
-  "completeReason": "Payment in full",
+  "planStatus": "complete",
+  "completeReason": "Payment in Full",
   "cancellationReason": "debt-resolved",
   "thirdPartyBank": true,
   "payments": [
