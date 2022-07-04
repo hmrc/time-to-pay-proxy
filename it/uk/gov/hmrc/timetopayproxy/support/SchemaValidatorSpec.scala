@@ -180,15 +180,15 @@ class SchemaValidatorSpec extends AnyWordSpec with Matchers {
 
     "validate an example response" in {
       val schema = loadSchema("resources/public/api/conf/1.0/schemas/update/putUpdateResponseSchema.json")
-      val json = loadJson("resources/public/api/conf/1.0/examples/update/putUpdateReponse.json")
+      val json = loadJson("resources/public/api/conf/1.0/examples/update/putUpdateResponse.json")
       val errors = schema.validate(json).asScala
 
       errors shouldEqual Set.empty
     }
 
-    "should parse to the modelvb" in {
+    "should parse to the model" in {
       val raw = scala.io.Source
-        .fromFile("resources/public/api/conf/1.0/examples/update/putUpdateReponse.json")
+        .fromFile("resources/public/api/conf/1.0/examples/update/putUpdateResponse.json")
         .mkString
       Json.parse(raw).as[UpdatePlanResponse]
     }

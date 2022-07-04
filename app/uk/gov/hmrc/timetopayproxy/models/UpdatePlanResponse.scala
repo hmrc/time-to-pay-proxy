@@ -16,14 +16,31 @@
 
 package uk.gov.hmrc.timetopayproxy.models
 
-import java.time.LocalDate
+import enumeratum.{ Enum, EnumEntry, PlayJsonEnum }
 
+import java.time.LocalDate
 import play.api.libs.json.Json
+
+sealed abstract class UpdatePlanStatus(override val entryName: String) extends EnumEntry
+
+object UpdatePlanStatus extends Enum[UpdatePlanStatus] with PlayJsonEnum[UpdatePlanStatus] {
+  val values: scala.collection.immutable.IndexedSeq[UpdatePlanStatus] = findValues
+
+  case object Complete extends UpdatePlanStatus("complete")
+  case object Cancelled extends UpdatePlanStatus("cancelled")
+
+  def valueOf(value: String): UpdatePlanStatus =
+    value match {
+      case "complete"  => Complete
+      case "cancelled" => Cancelled
+    }
+
+}
 
 final case class UpdatePlanResponse(
   customerReference: CustomerReference,
   planId: PlanId,
-  planStatus: PlanStatus,
+  planStatus: UpdatePlanStatus,
   planUpdatedDate: LocalDate
 )
 
