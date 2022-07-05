@@ -33,7 +33,7 @@ import scala.concurrent.Future
 import scala.util.{ Failure, Success, Try }
 
 @Singleton()
-class TimeToPayProxyController @Inject() (
+class TimeToPayProxyController @Inject()(
   authoriseAction: AuthoriseAction,
   cc: ControllerComponents,
   timeToPayProxyService: TTPQuoteService
@@ -46,7 +46,7 @@ class TimeToPayProxyController @Inject() (
   def generateQuote: Action[JsValue] = authoriseAction.async(parse.json) { implicit request =>
     withJsonBody[GenerateQuoteRequest] { timeToPayRequest: GenerateQuoteRequest =>
       timeToPayProxyService
-        .generateQuote(timeToPayRequest)
+        .generateQuote(timeToPayRequest, request.queryString)
         .leftMap(ttppError => ttppError.toErrorResponse)
         .fold(e => e.toResponse, r => r.toResponse)
     }
@@ -64,8 +64,10 @@ class TimeToPayProxyController @Inject() (
     authoriseAction.async(parse.json) { implicit request =>
       withJsonBody[UpdatePlanRequest] { updatePlanRequest: UpdatePlanRequest =>
         val result = for {
-          validatedUpdatePlanRequest <-
-            validateUpdateRequestMatchesQueryParams(customerReference, planId, updatePlanRequest)
+          validatedUpdatePlanRequest <- validateUpdateRequestMatchesQueryParams(
+                                         customerReference,
+                                         planId,
+                                         updatePlanRequest)
           response <- timeToPayProxyService.updatePlan(validatedUpdatePlanRequest)
         } yield response
 
@@ -109,20 +111,21 @@ class TimeToPayProxyController @Inject() (
       (_, valErrors)      <- errs.headOption
       jsonValidationError <- valErrors.headOption
       message             <- jsonValidationError.messages.headOption
-    } yield message match {
-      case m if m.startsWith("error.expected.date.isoformat") => "Date format should be correctly provided"
-      case m if m.startsWith("error.expected.validenumvalue") => "Valid enum value should be provided"
-      case _                                                  => ""
-    }
+    } yield
+      message match {
+        case m if m.startsWith("error.expected.date.isoformat") => "Date format should be correctly provided"
+        case m if m.startsWith("error.expected.validenumvalue") => "Valid enum value should be provided"
+        case _                                                  => ""
+      }
     val detailedMessage = detailedMessageMaybe.getOrElse("")
     s"$fieldInfo. $detailedMessage"
   }
 
-  override def withJsonBody[T](f: T => Future[Result])(implicit
+  override def withJsonBody[T](f: T => Future[Result])(
+    implicit
     request: Request[JsValue],
     m: Manifest[T],
-    reads: Reads[T]
-  ): Future[Result] =
+    reads: Reads[T]): Future[Result] =
     Try(request.body.validate[T]) match {
       case Success(JsSuccess(payload, _)) => f(payload)
 

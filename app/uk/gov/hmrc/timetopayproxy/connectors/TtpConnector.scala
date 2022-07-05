@@ -27,18 +27,20 @@ import com.google.inject.ImplementedBy
 import javax.inject.{ Inject, Singleton }
 import uk.gov.hmrc.timetopayproxy.config.AppConfig
 
+import java.net.URLEncoder
 import java.util.UUID
 
 @ImplementedBy(classOf[DefaultTtpConnector])
 trait TtpConnector {
   def generateQuote(
-    ttppRequest: GenerateQuoteRequest
+    ttppRequest: GenerateQuoteRequest,
+    queryParams: Seq[(String, String)] = Seq.empty
   )(implicit ec: ExecutionContext, hc: HeaderCarrier): TtppEnvelope[GenerateQuoteResponse]
 
-  def getExistingQuote(customerReference: CustomerReference, planId: PlanId)(implicit
+  def getExistingQuote(customerReference: CustomerReference, planId: PlanId)(
+    implicit
     ec: ExecutionContext,
-    hc: HeaderCarrier
-  ): TtppEnvelope[ViewPlanResponse]
+    hc: HeaderCarrier): TtppEnvelope[ViewPlanResponse]
 
   def updatePlan(
     updatePlanRequest: UpdatePlanRequest
@@ -50,8 +52,7 @@ trait TtpConnector {
 }
 
 @Singleton
-class DefaultTtpConnector @Inject() (appConfig: AppConfig, httpClient: HttpClient)
-    extends TtpConnector with HttpParser {
+class DefaultTtpConnector @Inject()(appConfig: AppConfig, httpClient: HttpClient) extends TtpConnector with HttpParser {
 
   val headers = (guid: String) =>
     if (appConfig.useIf) {
@@ -61,13 +62,17 @@ class DefaultTtpConnector @Inject() (appConfig: AppConfig, httpClient: HttpClien
       )
     } else {
       Seq()
-    }
+  }
 
   def generateQuote(
-    ttppRequest: GenerateQuoteRequest
+    ttppRequest: GenerateQuoteRequest,
+    queryParams: Seq[(String, String)] = Seq.empty
   )(implicit ec: ExecutionContext, hc: HeaderCarrier): TtppEnvelope[GenerateQuoteResponse] = {
     val path = if (appConfig.useIf) "individuals/debts/time-to-pay/quote" else "debts/time-to-pay/quote"
-    val url = s"${appConfig.ttpBaseUrl}/$path"
+
+    val pathWithQueryParameters = path + makeQueryString(queryParams)
+
+    val url = s"${appConfig.ttpBaseUrl}/$pathWithQueryParameters"
 
     EitherT(
       httpClient
@@ -80,10 +85,10 @@ class DefaultTtpConnector @Inject() (appConfig: AppConfig, httpClient: HttpClien
 
   }
 
-  override def getExistingQuote(customerReference: CustomerReference, planId: PlanId)(implicit
+  override def getExistingQuote(customerReference: CustomerReference, planId: PlanId)(
+    implicit
     ec: ExecutionContext,
-    hc: HeaderCarrier
-  ): TtppEnvelope[ViewPlanResponse] = {
+    hc: HeaderCarrier): TtppEnvelope[ViewPlanResponse] = {
     val path =
       if (appConfig.useIf)
         s"individuals/time-to-pay/quote/${customerReference.value}/${planId.value}"
@@ -100,10 +105,10 @@ class DefaultTtpConnector @Inject() (appConfig: AppConfig, httpClient: HttpClien
 
   def updatePlan(
     updatePlanRequest: UpdatePlanRequest
-  )(implicit
+  )(
+    implicit
     ec: ExecutionContext,
-    hc: HeaderCarrier
-  ): TtppEnvelope[UpdatePlanResponse] = {
+    hc: HeaderCarrier): TtppEnvelope[UpdatePlanResponse] = {
     val path = if (appConfig.useIf) "individuals/time-to-pay/quote" else "debts/time-to-pay/quote"
     val url =
       s"${appConfig.ttpBaseUrl}/$path/${updatePlanRequest.customerReference.value}/${updatePlanRequest.planId.value}"
@@ -129,5 +134,10 @@ class DefaultTtpConnector @Inject() (appConfig: AppConfig, httpClient: HttpClien
           headers(UUID.randomUUID().toString)
         )
     }
+  }
+
+  private def makeQueryString(queryParams: Seq[(String, String)]): String = {
+    val paramPairs = queryParams.map { case (k, v) => s"$k=${URLEncoder.encode(v, "utf-8")}" }
+    if (paramPairs.isEmpty) "" else paramPairs.mkString("?", "&", "")
   }
 }
