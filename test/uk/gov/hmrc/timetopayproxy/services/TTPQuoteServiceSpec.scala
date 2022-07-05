@@ -35,7 +35,7 @@ class TTPQuoteServiceSpec extends UnitSpec {
   private val timeToPayRequest = GenerateQuoteRequest(
     CustomerReference("customerReference"),
     ChannelIdentifier.Advisor,
-    PlanToGenerateQuote(
+    Quote(
       QuoteType.InstalmentAmount,
       LocalDate.of(2021, 1, 1),
       LocalDate.of(2021, 1, 1),
@@ -81,9 +81,9 @@ class TTPQuoteServiceSpec extends UnitSpec {
   private val retrievePlanResponse = ViewPlanResponse(
     CustomerReference("customerRef1234"),
     ChannelIdentifier.Advisor,
-    Plan(
+    CaseId("caseId123"),
+    ViewPlanResponsePlan(
       PlanId("planId123"),
-      CaseId("caseId123"),
       QuoteId("quoteId"),
       LocalDate.now(),
       QuoteType.InstalmentAmount,

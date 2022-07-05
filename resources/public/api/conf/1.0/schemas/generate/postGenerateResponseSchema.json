@@ -17,7 +17,10 @@
     },
     "quoteType": {
       "type": "string",
-      "enum": ["duration", "instalmentAmount"],
+      "enum": [
+        "duration",
+        "instalmentAmount"
+      ],
       "description": "this will determine what IFS is required to calculate either duration or instalment amount"
     },
     "quoteDate": {
@@ -47,46 +50,48 @@
     },
     "instalments": {
       "type": "array",
-      "items": [{
-        "type": "object",
-        "properties": {
-          "debtItemChargeId": {
-            "type": "string",
-            "minLength": 1,
-            "maxLength": 16,
-            "description": "An ID which uniquely identifies a particular duty"
-          },
-          "dueDate": {
-            "type": "string",
-            "format": "date",
-            "description": "Due date"
-          },
-          "amountDue": {
-            "type": "integer",
-            "description": "Amount due"
-          },
-          "expectedPayment": {
-            "type": "integer",
-            "description": "Expected payment"
-          },
-          "interestRate": {
-            "type": "number",
-            "description": "Interest rate"
-          },
-          "instalmentNumber": {
-            "type": "integer",
-            "description": "Instalment number"
-          },
-          "instalmentInterestAccrued": {
-            "type": "integer",
-            "description": "Instalment interest"
-          },
-          "instalmentBalance": {
-            "type": "integer",
-            "description": "Instalment balance"
+      "items": [
+        {
+          "type": "object",
+          "properties": {
+            "debtItemChargeId": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 16,
+              "description": "An ID which uniquely identifies a particular duty"
+            },
+            "dueDate": {
+              "type": "string",
+              "format": "date",
+              "description": "Due date"
+            },
+            "amountDue": {
+              "type": "integer",
+              "description": "Amount due"
+            },
+            "expectedPayment": {
+              "type": "integer",
+              "description": "Expected payment"
+            },
+            "interestRate": {
+              "type": "number",
+              "description": "Interest rate"
+            },
+            "instalmentNumber": {
+              "type": "integer",
+              "description": "Instalment number"
+            },
+            "instalmentInterestAccrued": {
+              "type": "integer",
+              "description": "Instalment interest"
+            },
+            "instalmentBalance": {
+              "type": "integer",
+              "description": "Instalment balance"
+            }
           }
         }
-      }]
+      ]
     },
     "collections": {
       "type": "object",

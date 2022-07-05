@@ -55,16 +55,16 @@ class TimeToPayProxyControllerSpec extends AnyWordSpec with Matchers with MockFa
   private val generateQuoteRequest = GenerateQuoteRequest(
     CustomerReference("customerReference"),
     ChannelIdentifier.Advisor,
-    PlanToGenerateQuote(
-      quoteType = QuoteType.Duration,
-      quoteDate = LocalDate.of(2021, 1, 1),
-      instalmentStartDate = LocalDate.of(2021, 1, 1),
-      instalmentAmount = Some(1),
-      frequency = Some(Frequency.Annually),
-      duration = Some(Duration(12)),
-      initialPaymentAmount = Some(1),
-      initialPaymentDate = Some(LocalDate.now()),
-      paymentPlanType = PaymentPlanType.TimeToPay
+    Quote(
+      QuoteType.Duration,
+      LocalDate.of(2021, 1, 1),
+      LocalDate.of(2021, 1, 1),
+      Some(1),
+      Some(Frequency.Annually),
+      Some(Duration(12)),
+      Some(1),
+      Some(LocalDate.now()),
+      PaymentPlanType.TimeToPay
     ),
     List(),
     List()
@@ -139,11 +139,11 @@ class TimeToPayProxyControllerSpec extends AnyWordSpec with Matchers with MockFa
     )
 
   val viewPlanResponse: ViewPlanResponse = ViewPlanResponse(
-    CustomerReference("customerRef1234"),
+    CustomerReference(value = "customerRef1234"),
     ChannelIdentifier.Advisor,
-    Plan(
+    CaseId("caseId123"),
+    ViewPlanResponsePlan(
       PlanId("planId123"),
-      CaseId("caseId123"),
       QuoteId("quoteId"),
       LocalDate.now(),
       QuoteType.InstalmentAmount,
@@ -254,7 +254,7 @@ class TimeToPayProxyControllerSpec extends AnyWordSpec with Matchers with MockFa
                                   "customerReference": "uniqRef1234",
                                   "quoteReference": "quoteRef1234",
                                   "channelIdentifier": "advisor",
-                                  "plan": {
+                                  "quote": {
                                     "quoteType": "instalmentAmount",
                                     "quoteDate": "2021-09-08",
                                     "instalmentStartDate": "2021-05-13",

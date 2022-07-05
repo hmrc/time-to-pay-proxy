@@ -47,7 +47,7 @@ object ChannelIdentifier extends Enum[ChannelIdentifier] with PlayJsonEnum[Chann
   case object SelfService extends ChannelIdentifier("selfService")
 }
 
-final case class PlanToGenerateQuote(
+final case class Quote(
   quoteType: QuoteType,
   quoteDate: LocalDate,
   instalmentStartDate: LocalDate,
@@ -62,14 +62,14 @@ final case class PlanToGenerateQuote(
   require(initialPaymentAmount.forall(_ > 0), "initialPaymentAmount should be a positive amount.")
 }
 
-object PlanToGenerateQuote {
-  implicit val format = Json.format[PlanToGenerateQuote]
+object Quote {
+  implicit val format = Json.format[Quote]
 }
 
 final case class GenerateQuoteRequest(
   customerReference: CustomerReference,
   channelIdentifier: ChannelIdentifier,
-  plan: PlanToGenerateQuote,
+  quote: Quote,
   customerPostCodes: List[CustomerPostCode],
   debtItemCharges: List[DebtItemCharge]
 ) {
