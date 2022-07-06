@@ -32,10 +32,10 @@ trait TTPQuoteService {
     requestQuery: Map[String, Seq[String]]
   )(implicit ec: ExecutionContext, hc: HeaderCarrier): TtppEnvelope[GenerateQuoteResponse]
 
-  def getExistingPlan(customerReference: CustomerReference, planId: PlanId)(
-    implicit
+  def getExistingPlan(customerReference: CustomerReference, planId: PlanId)(implicit
     ec: ExecutionContext,
-    hc: HeaderCarrier): TtppEnvelope[ViewPlanResponse]
+    hc: HeaderCarrier
+  ): TtppEnvelope[ViewPlanResponse]
 
   def updatePlan(
     updatePlanRequest: UpdatePlanRequest
@@ -47,24 +47,23 @@ trait TTPQuoteService {
 }
 
 @Singleton
-class DefaultTTPQuoteService @Inject()(ttpConnector: TtpConnector) extends TTPQuoteService {
+class DefaultTTPQuoteService @Inject() (ttpConnector: TtpConnector) extends TTPQuoteService {
 
-  def generateQuote(timeToPayRequest: GenerateQuoteRequest, requestQuery: Map[String, Seq[String]])(
-    implicit
+  def generateQuote(timeToPayRequest: GenerateQuoteRequest, requestQuery: Map[String, Seq[String]])(implicit
     ec: ExecutionContext,
-    hc: HeaderCarrier): TtppEnvelope[GenerateQuoteResponse] =
+    hc: HeaderCarrier
+  ): TtppEnvelope[GenerateQuoteResponse] =
     ttpConnector.generateQuote(timeToPayRequest, requestQuery.mapValues(_.head).toSeq)
 
-  override def getExistingPlan(customerReference: CustomerReference, planId: PlanId)(
-    implicit
+  override def getExistingPlan(customerReference: CustomerReference, planId: PlanId)(implicit
     ec: ExecutionContext,
-    hc: HeaderCarrier): TtppEnvelope[ViewPlanResponse] =
+    hc: HeaderCarrier
+  ): TtppEnvelope[ViewPlanResponse] =
     ttpConnector.getExistingQuote(customerReference, planId)
 
-  def updatePlan(updatePlanRequest: UpdatePlanRequest)(
-    implicit
-    ec: ExecutionContext,
-    hc: HeaderCarrier): TtppEnvelope[UpdatePlanResponse] =
+  def updatePlan(
+    updatePlanRequest: UpdatePlanRequest
+  )(implicit ec: ExecutionContext, hc: HeaderCarrier): TtppEnvelope[UpdatePlanResponse] =
     ttpConnector.updatePlan(updatePlanRequest)
 
   override def createPlan(

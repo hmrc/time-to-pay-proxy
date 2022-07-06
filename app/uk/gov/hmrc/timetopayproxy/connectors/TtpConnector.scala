@@ -37,10 +37,10 @@ trait TtpConnector {
     queryParams: Seq[(String, String)] = Seq.empty
   )(implicit ec: ExecutionContext, hc: HeaderCarrier): TtppEnvelope[GenerateQuoteResponse]
 
-  def getExistingQuote(customerReference: CustomerReference, planId: PlanId)(
-    implicit
+  def getExistingQuote(customerReference: CustomerReference, planId: PlanId)(implicit
     ec: ExecutionContext,
-    hc: HeaderCarrier): TtppEnvelope[ViewPlanResponse]
+    hc: HeaderCarrier
+  ): TtppEnvelope[ViewPlanResponse]
 
   def updatePlan(
     updatePlanRequest: UpdatePlanRequest
@@ -52,7 +52,8 @@ trait TtpConnector {
 }
 
 @Singleton
-class DefaultTtpConnector @Inject()(appConfig: AppConfig, httpClient: HttpClient) extends TtpConnector with HttpParser {
+class DefaultTtpConnector @Inject() (appConfig: AppConfig, httpClient: HttpClient)
+    extends TtpConnector with HttpParser {
 
   val headers = (guid: String) =>
     if (appConfig.useIf) {
@@ -62,7 +63,7 @@ class DefaultTtpConnector @Inject()(appConfig: AppConfig, httpClient: HttpClient
       )
     } else {
       Seq()
-  }
+    }
 
   def generateQuote(
     ttppRequest: GenerateQuoteRequest,
@@ -85,10 +86,10 @@ class DefaultTtpConnector @Inject()(appConfig: AppConfig, httpClient: HttpClient
 
   }
 
-  override def getExistingQuote(customerReference: CustomerReference, planId: PlanId)(
-    implicit
+  override def getExistingQuote(customerReference: CustomerReference, planId: PlanId)(implicit
     ec: ExecutionContext,
-    hc: HeaderCarrier): TtppEnvelope[ViewPlanResponse] = {
+    hc: HeaderCarrier
+  ): TtppEnvelope[ViewPlanResponse] = {
     val path =
       if (appConfig.useIf)
         s"individuals/time-to-pay/quote/${customerReference.value}/${planId.value}"
@@ -105,10 +106,7 @@ class DefaultTtpConnector @Inject()(appConfig: AppConfig, httpClient: HttpClient
 
   def updatePlan(
     updatePlanRequest: UpdatePlanRequest
-  )(
-    implicit
-    ec: ExecutionContext,
-    hc: HeaderCarrier): TtppEnvelope[UpdatePlanResponse] = {
+  )(implicit ec: ExecutionContext, hc: HeaderCarrier): TtppEnvelope[UpdatePlanResponse] = {
     val path = if (appConfig.useIf) "individuals/time-to-pay/quote" else "debts/time-to-pay/quote"
     val url =
       s"${appConfig.ttpBaseUrl}/$path/${updatePlanRequest.customerReference.value}/${updatePlanRequest.planId.value}"
