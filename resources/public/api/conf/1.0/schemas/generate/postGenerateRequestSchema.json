@@ -17,7 +17,7 @@
       ],
       "description": "Attribute to identify where the request is coming"
     },
-    "quote": {
+    "plan": {
       "type": "object",
       "properties": {
         "quoteType": {
@@ -181,7 +181,7 @@
   "required": [
     "customerReference",
     "channelIdentifier",
-    "quote",
+    "plan",
     "debtItemCharges"
   ]
 }

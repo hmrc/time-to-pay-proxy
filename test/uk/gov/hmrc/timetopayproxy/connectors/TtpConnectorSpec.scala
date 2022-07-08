@@ -93,7 +93,7 @@ class TtpConnectorSpec extends PlaySpec with DefaultAwaitTimeout with FutureAwai
           GenerateQuoteRequest(
             CustomerReference("CustRef1234"),
             ChannelIdentifier.Advisor,
-            Quote(
+            PlanToGenerateQuote(
               QuoteType.Duration,
               LocalDate.now(),
               LocalDate.now(),
@@ -120,7 +120,7 @@ class TtpConnectorSpec extends PlaySpec with DefaultAwaitTimeout with FutureAwai
           GenerateQuoteRequest(
             CustomerReference("CustRef1234"),
             ChannelIdentifier.Advisor,
-            Quote(
+            PlanToGenerateQuote(
               QuoteType.Duration,
               LocalDate.now(),
               LocalDate.now(),

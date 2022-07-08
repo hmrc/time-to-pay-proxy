@@ -55,7 +55,7 @@ class TimeToPayProxyControllerSpec extends AnyWordSpec with Matchers with MockFa
   private val generateQuoteRequest = GenerateQuoteRequest(
     CustomerReference("customerReference"),
     ChannelIdentifier.Advisor,
-    Quote(
+    PlanToGenerateQuote(
       QuoteType.Duration,
       LocalDate.of(2021, 1, 1),
       LocalDate.of(2021, 1, 1),
@@ -254,7 +254,7 @@ class TimeToPayProxyControllerSpec extends AnyWordSpec with Matchers with MockFa
                                   "customerReference": "uniqRef1234",
                                   "quoteReference": "quoteRef1234",
                                   "channelIdentifier": "advisor",
-                                  "quote": {
+                                  "plan": {
                                     "quoteType": "instalmentAmount",
                                     "quoteDate": "2021-09-08",
                                     "instalmentStartDate": "2021-05-13",
