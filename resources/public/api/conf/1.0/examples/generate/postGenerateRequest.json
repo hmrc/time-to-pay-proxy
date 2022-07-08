@@ -1,7 +1,7 @@
 {
   "customerReference": "uniqRef1234",
   "channelIdentifier": "selfService",
-  "quote": {
+  "plan": {
     "quoteType": "duration",
     "quoteDate": "2021-05-13",
     "instalmentStartDate": "2021-05-13",
