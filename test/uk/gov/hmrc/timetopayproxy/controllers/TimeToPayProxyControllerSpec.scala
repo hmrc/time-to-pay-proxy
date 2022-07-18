@@ -885,11 +885,11 @@ class TimeToPayProxyControllerSpec extends AnyWordSpec with Matchers with MockFa
           PlanStatus.Success
         )
         (ttpQuoteService
-          .createPlan(_: CreatePlanRequest)(
+          .createPlan(_: CreatePlanRequest, _: Map[String, Seq[String]])(
             _: ExecutionContext,
             _: HeaderCarrier
           ))
-          .expects(createPlanRequest, *, *)
+          .expects(createPlanRequest, *, *, *)
           .returning(TtppEnvelope(createPlanResponse))
 
         val fakeRequest: FakeRequest[JsValue] =
@@ -917,11 +917,11 @@ class TimeToPayProxyControllerSpec extends AnyWordSpec with Matchers with MockFa
         val errorFromTtpConnector =
           ConnectorError(500, "Internal Service Error")
         (ttpQuoteService
-          .createPlan(_: CreatePlanRequest)(
+          .createPlan(_: CreatePlanRequest, _: Map[String, Seq[String]])(
             _: ExecutionContext,
             _: HeaderCarrier
           ))
-          .expects(createPlanRequest, *, *)
+          .expects(createPlanRequest, *, *, *)
           .returning(
             TtppEnvelope(errorFromTtpConnector.asLeft[CreatePlanResponse])
           )

@@ -42,7 +42,8 @@ trait TTPQuoteService {
   )(implicit ec: ExecutionContext, hc: HeaderCarrier): TtppEnvelope[UpdatePlanResponse]
 
   def createPlan(
-    createPlanRequest: CreatePlanRequest
+    createPlanRequest: CreatePlanRequest,
+    requestQuery: Map[String, Seq[String]]
   )(implicit ec: ExecutionContext, hc: HeaderCarrier): TtppEnvelope[CreatePlanResponse]
 }
 
@@ -67,7 +68,8 @@ class DefaultTTPQuoteService @Inject() (ttpConnector: TtpConnector) extends TTPQ
     ttpConnector.updatePlan(updatePlanRequest)
 
   override def createPlan(
-    createPlanRequest: CreatePlanRequest
+    createPlanRequest: CreatePlanRequest,
+    requestQuery: Map[String, Seq[String]]
   )(implicit ec: ExecutionContext, hc: HeaderCarrier): TtppEnvelope[CreatePlanResponse] =
-    ttpConnector.createPlan(createPlanRequest)
+    ttpConnector.createPlan(createPlanRequest, requestQuery.mapValues(_.head).toSeq)
 }
