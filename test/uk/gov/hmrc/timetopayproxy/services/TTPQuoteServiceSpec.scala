@@ -367,7 +367,7 @@ class TTPQuoteServiceSpec extends UnitSpec {
       )
       val quoteService = new DefaultTTPQuoteService(connectorStub)
 
-      await(quoteService.createPlan(createPlanRequest).value) shouldBe createPlanResponse
+      await(quoteService.createPlan(createPlanRequest, Map.empty).value) shouldBe createPlanResponse
         .asRight[TtppError]
     }
 
@@ -380,7 +380,7 @@ class TTPQuoteServiceSpec extends UnitSpec {
       )
       val quoteService = new DefaultTTPQuoteService(connectorStub)
 
-      await(quoteService.createPlan(createPlanRequest).value) shouldBe ConnectorError(
+      await(quoteService.createPlan(createPlanRequest, Map.empty).value) shouldBe ConnectorError(
         500,
         "Internal server error"
       ).asLeft[CreatePlanResponse]
@@ -413,7 +413,8 @@ class TtpConnectorStub(
     TtppEnvelope(Future successful updatePlanResponse)
 
   override def createPlan(
-    createPlanRequest: CreatePlanRequest
+    createPlanRequest: CreatePlanRequest,
+    queryParams: Seq[(String, String)] = Seq.empty
   )(implicit ec: ExecutionContext, hc: HeaderCarrier): TtppEnvelope[CreatePlanResponse] =
     TtppEnvelope(Future successful createPlanResponse)
 }

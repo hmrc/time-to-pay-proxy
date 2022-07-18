@@ -78,7 +78,7 @@ class TimeToPayProxyController @Inject() (
   def createPlan = authoriseAction.async(parse.json) { implicit request =>
     withJsonBody[CreatePlanRequest] { createPlanRequest: CreatePlanRequest =>
       timeToPayProxyService
-        .createPlan(createPlanRequest)
+        .createPlan(createPlanRequest, request.queryString)
         .leftMap(ttppError => ttppError.toErrorResponse)
         .fold(e => e.toResponse, r => r.toResponse)
     }

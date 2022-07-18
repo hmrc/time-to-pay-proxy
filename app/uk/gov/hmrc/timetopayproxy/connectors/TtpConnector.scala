@@ -47,7 +47,8 @@ trait TtpConnector {
   )(implicit ec: ExecutionContext, hc: HeaderCarrier): TtppEnvelope[UpdatePlanResponse]
 
   def createPlan(
-    createPlanRequest: CreatePlanRequest
+    createPlanRequest: CreatePlanRequest,
+    queryParams: Seq[(String, String)] = Seq.empty
   )(implicit ec: ExecutionContext, hc: HeaderCarrier): TtppEnvelope[CreatePlanResponse]
 }
 
@@ -118,11 +119,15 @@ class DefaultTtpConnector @Inject() (appConfig: AppConfig, httpClient: HttpClien
   }
 
   override def createPlan(
-    createPlanRequest: CreatePlanRequest
+    createPlanRequest: CreatePlanRequest,
+    queryParams: Seq[(String, String)] = Seq.empty
   )(implicit ec: ExecutionContext, hc: HeaderCarrier): TtppEnvelope[CreatePlanResponse] = {
     val path =
       if (appConfig.useIf) "individuals/debts/time-to-pay/quote/arrangement" else "debts/time-to-pay/quote/arrangement"
-    val url = s"${appConfig.ttpBaseUrl}/$path"
+
+    val pathWithQueryParameters = path + makeQueryString(queryParams)
+
+    val url = s"${appConfig.ttpBaseUrl}/$pathWithQueryParameters"
 
     EitherT {
       httpClient
