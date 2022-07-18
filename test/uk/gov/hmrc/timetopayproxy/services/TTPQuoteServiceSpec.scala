@@ -216,17 +216,17 @@ class TTPQuoteServiceSpec extends UnitSpec {
         val connector = mock[TtpConnector]
         (
           connector
-            .generateQuote(_: GenerateQuoteRequest)(
+            .generateQuote(_: GenerateQuoteRequest, _: Seq[(String, String)])(
               _: ExecutionContext,
               _: HeaderCarrier
             )
           )
-          .expects(timeToPayRequest, *, *)
+          .expects(timeToPayRequest, *, *, *)
           .returning(TtppEnvelope(generateQuoteResponse))
 
         val quoteService = new DefaultTTPQuoteService(connector)
         await(
-          quoteService.generateQuote(timeToPayRequest).value,
+          quoteService.generateQuote(timeToPayRequest, Map.empty).value,
           5,
           TimeUnit.SECONDS
         ) shouldBe generateQuoteResponse.asRight[TtppError]
@@ -240,19 +240,19 @@ class TTPQuoteServiceSpec extends UnitSpec {
         val connector = mock[TtpConnector]
         (
           connector
-            .generateQuote(_: GenerateQuoteRequest)(
+            .generateQuote(_: GenerateQuoteRequest, _: Seq[(String, String)])(
               _: ExecutionContext,
               _: HeaderCarrier
             )
           )
-          .expects(timeToPayRequest, *, *)
+          .expects(timeToPayRequest, *, *, *)
           .returning(
             TtppEnvelope(errorFromTtpConnector.asLeft[GenerateQuoteResponse])
           )
 
         val quoteService = new DefaultTTPQuoteService(connector)
         await(
-          quoteService.generateQuote(timeToPayRequest).value,
+          quoteService.generateQuote(timeToPayRequest, Map.empty).value,
           5,
           TimeUnit.SECONDS
         ) shouldBe errorFromTtpConnector.asLeft[GenerateQuoteResponse]
@@ -396,7 +396,8 @@ class TtpConnectorStub(
   createPlanResponse: Either[TtppError, CreatePlanResponse]
 ) extends TtpConnector {
   override def generateQuote(
-    ttppRequest: GenerateQuoteRequest
+    ttppRequest: GenerateQuoteRequest,
+    queryParams: Seq[(String, String)] = Seq.empty
   )(implicit ec: ExecutionContext, hc: HeaderCarrier): TtppEnvelope[GenerateQuoteResponse] =
     TtppEnvelope(Future successful generateQuoteResponse)
 

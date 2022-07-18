@@ -46,7 +46,7 @@ class TimeToPayProxyController @Inject() (
   def generateQuote: Action[JsValue] = authoriseAction.async(parse.json) { implicit request =>
     withJsonBody[GenerateQuoteRequest] { timeToPayRequest: GenerateQuoteRequest =>
       timeToPayProxyService
-        .generateQuote(timeToPayRequest)
+        .generateQuote(timeToPayRequest, request.queryString)
         .leftMap(ttppError => ttppError.toErrorResponse)
         .fold(e => e.toResponse, r => r.toResponse)
     }
@@ -118,11 +118,9 @@ class TimeToPayProxyController @Inject() (
     s"$fieldInfo. $detailedMessage"
   }
 
-  override def withJsonBody[T](f: T => Future[Result])(implicit
-    request: Request[JsValue],
-    m: Manifest[T],
-    reads: Reads[T]
-  ): Future[Result] =
+  override def withJsonBody[T](
+    f: T => Future[Result]
+  )(implicit request: Request[JsValue], m: Manifest[T], reads: Reads[T]): Future[Result] =
     Try(request.body.validate[T]) match {
       case Success(JsSuccess(payload, _)) => f(payload)
 

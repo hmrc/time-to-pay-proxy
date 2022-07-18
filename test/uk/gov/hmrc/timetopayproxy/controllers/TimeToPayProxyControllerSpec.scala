@@ -232,11 +232,11 @@ class TimeToPayProxyControllerSpec extends AnyWordSpec with Matchers with MockFa
         )
 
         (ttpQuoteService
-          .generateQuote(_: GenerateQuoteRequest)(
+          .generateQuote(_: GenerateQuoteRequest, _: Map[String, Seq[String]])(
             _: ExecutionContext,
             _: HeaderCarrier
           ))
-          .expects(generateQuoteRequest, *, *)
+          .expects(generateQuoteRequest, *, *, *)
           .returning(TtppEnvelope(responseFromTtp))
 
         val fakeRequest: FakeRequest[JsValue] =
@@ -311,11 +311,11 @@ class TimeToPayProxyControllerSpec extends AnyWordSpec with Matchers with MockFa
         val errorFromTtpConnector =
           ConnectorError(500, "Internal Service Error")
         (ttpQuoteService
-          .generateQuote(_: GenerateQuoteRequest)(
+          .generateQuote(_: GenerateQuoteRequest, _: Map[String, Seq[String]])(
             _: ExecutionContext,
             _: HeaderCarrier
           ))
-          .expects(generateQuoteRequest, *, *)
+          .expects(generateQuoteRequest, *, *, *)
           .returning(
             TtppEnvelope(errorFromTtpConnector.asLeft[GenerateQuoteResponse])
           )

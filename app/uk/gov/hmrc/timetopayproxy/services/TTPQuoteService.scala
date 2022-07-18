@@ -28,7 +28,8 @@ import scala.concurrent.ExecutionContext
 @ImplementedBy(classOf[DefaultTTPQuoteService])
 trait TTPQuoteService {
   def generateQuote(
-    timeToPayRequest: GenerateQuoteRequest
+    timeToPayRequest: GenerateQuoteRequest,
+    requestQuery: Map[String, Seq[String]]
   )(implicit ec: ExecutionContext, hc: HeaderCarrier): TtppEnvelope[GenerateQuoteResponse]
 
   def getExistingPlan(customerReference: CustomerReference, planId: PlanId)(implicit
@@ -48,11 +49,11 @@ trait TTPQuoteService {
 @Singleton
 class DefaultTTPQuoteService @Inject() (ttpConnector: TtpConnector) extends TTPQuoteService {
 
-  def generateQuote(timeToPayRequest: GenerateQuoteRequest)(implicit
+  def generateQuote(timeToPayRequest: GenerateQuoteRequest, requestQuery: Map[String, Seq[String]])(implicit
     ec: ExecutionContext,
     hc: HeaderCarrier
   ): TtppEnvelope[GenerateQuoteResponse] =
-    ttpConnector.generateQuote(timeToPayRequest)
+    ttpConnector.generateQuote(timeToPayRequest, requestQuery.mapValues(_.head).toSeq)
 
   override def getExistingPlan(customerReference: CustomerReference, planId: PlanId)(implicit
     ec: ExecutionContext,
@@ -60,10 +61,9 @@ class DefaultTTPQuoteService @Inject() (ttpConnector: TtpConnector) extends TTPQ
   ): TtppEnvelope[ViewPlanResponse] =
     ttpConnector.getExistingQuote(customerReference, planId)
 
-  def updatePlan(updatePlanRequest: UpdatePlanRequest)(implicit
-    ec: ExecutionContext,
-    hc: HeaderCarrier
-  ): TtppEnvelope[UpdatePlanResponse] =
+  def updatePlan(
+    updatePlanRequest: UpdatePlanRequest
+  )(implicit ec: ExecutionContext, hc: HeaderCarrier): TtppEnvelope[UpdatePlanResponse] =
     ttpConnector.updatePlan(updatePlanRequest)
 
   override def createPlan(
