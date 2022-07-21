@@ -10,6 +10,8 @@
     "paymentPlanType": "timeToPay",
     "thirdPartyBank": true,
     "numberOfInstalments": 0,
+    "initialPaymentMethod": "BACS",
+    "initialPaymentReference": "paymentRef1234",
     "totalDebtIncInt": 0,
     "totalInterest": 0,
     "interestAccrued": 0,
@@ -53,5 +55,21 @@
       "instalmentInterestAccrued": 10,
       "instalmentBalance": 100
     }
-  ]
+  ],
+  "collections": {
+    "initialCollection": {
+      "dueDate": "2022-06-18",
+      "amountDue": 1000
+    },
+    "regularCollections": [
+      {
+        "dueDate": "2022-07-08",
+        "amountDue": 1628.21
+      },
+      {
+        "dueDate": "2022-08-08",
+        "amountDue": 1628.21
+      }
+    ]
+  }
 }

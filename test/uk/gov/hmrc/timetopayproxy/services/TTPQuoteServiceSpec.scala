@@ -79,54 +79,61 @@ class TTPQuoteServiceSpec extends UnitSpec {
   )
 
   private val retrievePlanResponse = ViewPlanResponse(
-    CustomerReference("customerRef1234"),
-    ChannelIdentifier.Advisor,
-    CaseId("caseId123"),
-    ViewPlanResponsePlan(
-      PlanId("planId123"),
-      QuoteId("quoteId"),
-      LocalDate.now(),
-      QuoteType.InstalmentAmount,
-      PaymentPlanType.TimeToPay,
+    customerReference = CustomerReference("customerRef1234"),
+    channelIdentifier = ChannelIdentifier.Advisor,
+    caseId = CaseId("caseId123"),
+    plan = ViewPlanResponsePlan(
+      planId = PlanId("planId123"),
+      quoteId = QuoteId("quoteId"),
+      quoteDate = LocalDate.now(),
+      quoteType = QuoteType.InstalmentAmount,
+      paymentPlanType = PaymentPlanType.TimeToPay,
       thirdPartyBank = true,
-      0,
-      0,
-      0.0,
-      0,
-      0.0
+      numberOfInstalments = 0,
+      totalDebtIncInt = 0,
+      totalInterest = 0.0,
+      interestAccrued = 0,
+      planInterest = 0.0
     ),
-    Seq(
+    debtItemCharges = Seq(
       DebtItemCharge(
-        DebtItemChargeId("debtItemChargeId1"),
-        TPSSContractSettlementINT,
-        TGPEN,
-        100,
-        Some(LocalDate.parse("2021-05-13")),
-        List(Payment(LocalDate.parse("2021-05-13"), 100))
+        debtItemChargeId = DebtItemChargeId("debtItemChargeId1"),
+        mainTrans = TPSSContractSettlementINT,
+        subTrans = TGPEN,
+        originalDebtAmount = 100,
+        interestStartDate = Some(LocalDate.parse("2021-05-13")),
+        paymentHistory = List(Payment(LocalDate.parse("2021-05-13"), 100))
       )
     ),
-    Seq.empty[PaymentInformation],
-    Seq.empty[CustomerPostCode],
-    Seq(
+    payments = Seq.empty[PaymentInformation],
+    customerPostCodes = Seq.empty[CustomerPostCode],
+    instalments = Seq(
       Instalment(
-        DebtItemChargeId("debtItemChargeId"),
-        LocalDate.parse("2021-05-01"),
-        100,
-        100,
-        0.26,
-        1,
-        10.20,
-        100
+        debtItemChargeId = DebtItemChargeId("debtItemChargeId"),
+        dueDate = LocalDate.parse("2021-05-01"),
+        amountDue = 100,
+        expectedPayment = 100,
+        interestRate = 0.26,
+        instalmentNumber = 1,
+        instalmentInterestAccrued = 10.20,
+        instalmentBalance = 100
       ),
       Instalment(
-        DebtItemChargeId("debtItemChargeId"),
-        LocalDate.parse("2021-06-01"),
-        100,
-        100,
-        0.26,
-        2,
-        10.20,
-        100
+        debtItemChargeId = DebtItemChargeId("debtItemChargeId"),
+        dueDate = LocalDate.parse("2021-06-01"),
+        amountDue = 100,
+        expectedPayment = 100,
+        interestRate = 0.26,
+        instalmentNumber = 2,
+        instalmentInterestAccrued = 10.20,
+        instalmentBalance = 100
+      )
+    ),
+    collections = Collections(
+      None,
+      List(
+        RegularCollection(dueDate = LocalDate.parse("2021-05-01"), amountDue = 100),
+        RegularCollection(dueDate = LocalDate.parse("2021-06-01"), amountDue = 100)
       )
     )
   )
