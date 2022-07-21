@@ -29,6 +29,8 @@ final case class ViewPlanResponsePlan(
   paymentPlanType: PaymentPlanType,
   thirdPartyBank: Boolean,
   numberOfInstalments: Int,
+  initialPaymentMethod: Option[PaymentMethod],
+  initialPaymentReference: Option[PaymentReference],
   totalDebtIncInt: BigInt,
   totalInterest: BigDecimal,
   interestAccrued: BigInt,

@@ -31,6 +31,8 @@ final case class PlanToCreatePlan(
   numberOfInstalments: Int,
   frequency: Option[Frequency],
   duration: Option[Duration],
+  initialPaymentMethod: Option[PaymentMethod],
+  initialPaymentReference: Option[PaymentReference],
   initialPaymentDate: Option[LocalDate],
   initialPaymentAmount: Option[BigDecimal],
   totalDebtIncInt: BigDecimal,
