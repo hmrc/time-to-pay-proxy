@@ -37,6 +37,7 @@ import scala.concurrent.{ ExecutionContext, Future }
 import scala.concurrent.ExecutionContext.Implicits.global
 import play.api.test.Helpers._
 import cats.syntax.either._
+import uk.gov.hmrc.timetopayproxy.config.FeatureSwitch
 import uk.gov.hmrc.timetopayproxy.models.MainTransType.TPSSContractSettlementINT
 import uk.gov.hmrc.timetopayproxy.models.SubTransType.TGPEN
 
@@ -49,8 +50,9 @@ class TimeToPayProxyControllerSpec extends AnyWordSpec with Matchers with MockFa
     new AuthoriseActionImpl(authConnector, cc)
 
   private val ttpQuoteService = mock[TTPQuoteService]
+  private val fs: FeatureSwitch = mock[FeatureSwitch]
   private val controller =
-    new TimeToPayProxyController(authoriseAction, cc, ttpQuoteService)
+    new TimeToPayProxyController(authoriseAction, cc, ttpQuoteService, fs)
 
   private val generateQuoteRequest = GenerateQuoteRequest(
     CustomerReference("customerReference"),
@@ -141,9 +143,9 @@ class TimeToPayProxyControllerSpec extends AnyWordSpec with Matchers with MockFa
   val viewPlanResponse: ViewPlanResponse = ViewPlanResponse(
     CustomerReference(value = "customerRef1234"),
     ChannelIdentifier.Advisor,
-    CaseId("caseId123"),
     ViewPlanResponsePlan(
       PlanId("planId123"),
+      CaseId("caseId123"),
       QuoteId("quoteId"),
       LocalDate.now(),
       QuoteType.InstalmentAmount,
@@ -353,6 +355,9 @@ class TimeToPayProxyControllerSpec extends AnyWordSpec with Matchers with MockFa
         .expects(*, *, *, *)
         .returning(TtppEnvelope(viewPlanResponse))
 
+      (fs.isTTPDropTwo _).expects
+        .returning(true)
+
       val fakeRequest = FakeRequest(
         "GET",
         "/individuals/time-to-pay/quote/customerReference/planId"
@@ -380,6 +385,9 @@ class TimeToPayProxyControllerSpec extends AnyWordSpec with Matchers with MockFa
         ))
         .expects(*, *, *, *)
         .returning(TtppEnvelope(errorFromTtpConnector.asLeft[ViewPlanResponse]))
+
+      (fs.isTTPDropTwo _).expects
+        .returning(true)
 
       val fakeRequest = FakeRequest(
         "GET",
@@ -409,6 +417,9 @@ class TimeToPayProxyControllerSpec extends AnyWordSpec with Matchers with MockFa
         ))
         .expects(*, *, *, *)
         .returning(TtppEnvelope(errorFromTtpConnector.asLeft[ViewPlanResponse]))
+
+      (fs.isTTPDropTwo _).expects
+        .returning(true)
 
       val fakeRequest = FakeRequest(
         "GET",

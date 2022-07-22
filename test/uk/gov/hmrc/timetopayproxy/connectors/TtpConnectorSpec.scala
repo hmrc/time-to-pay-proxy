@@ -75,6 +75,11 @@ class TtpConnectorSpec extends PlaySpec with DefaultAwaitTimeout with FutureAwai
       .expects("microservice.metrics.graphite.host", *)
       .once()
       .returns("http://localhost:11111")
+    (config
+      .getOptional(_: String)(_: ConfigLoader[Option[Configuration]]))
+      .expects("feature-switch", *)
+      .once()
+      .returns(None)
 
     val mockConfiguration: AppConfig = new MockAppConfig(config, servicesConfig, ifImpl)
 

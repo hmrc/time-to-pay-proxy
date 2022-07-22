@@ -137,7 +137,7 @@ class SchemaValidatorSpec extends AnyWordSpec with Matchers {
       val raw = scala.io.Source
         .fromFile("resources/public/api/conf/1.0/examples/view/getViewResponse.json")
         .mkString
-      Json.parse(raw).as[ViewPlanResponse]
+      Json.parse(raw).as[ViewPlanResponseDropTwo]
     }
   }
 

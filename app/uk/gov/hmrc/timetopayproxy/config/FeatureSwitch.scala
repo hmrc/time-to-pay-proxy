@@ -14,20 +14,13 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.timetopayproxy.models
+package uk.gov.hmrc.timetopayproxy.config
 
-import play.api.libs.json.Json
+import play.api.Configuration
 
-final case class ViewPlanResponse(
-  customerReference: CustomerReference,
-  channelIdentifier: ChannelIdentifier,
-  plan: ViewPlanResponsePlan,
-  debtItemCharges: Seq[DebtItemCharge],
-  payments: Seq[PaymentInformation],
-  customerPostCodes: Seq[CustomerPostCode],
-  instalments: Seq[Instalment]
-)
+case class FeatureSwitch(value: Option[Configuration]) {
 
-object ViewPlanResponse {
-  implicit val format = Json.format[ViewPlanResponse]
+  def isTTPDropTwo: Boolean =
+    value.flatMap(_.getOptional[Boolean]("ttpDropTwoEnabled")).getOrElse(false)
+
 }
