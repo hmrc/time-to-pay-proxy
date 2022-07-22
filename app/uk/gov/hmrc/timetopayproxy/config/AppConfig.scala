@@ -33,4 +33,5 @@ class AppConfig @Inject() (
   val useIf: Boolean = config.get[Boolean]("microservice.services.ttp.useIf")
   val auditingEnabled: Boolean = config.get[Boolean]("auditing.enabled")
   val graphiteHost: String = config.get[String]("microservice.metrics.graphite.host")
+  val featureSwitch: Option[Configuration] = config.getOptional[Configuration](s"feature-switch")
 }

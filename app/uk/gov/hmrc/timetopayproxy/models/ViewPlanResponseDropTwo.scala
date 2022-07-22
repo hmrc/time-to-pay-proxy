@@ -18,10 +18,11 @@ package uk.gov.hmrc.timetopayproxy.models
 
 import play.api.libs.json.Json
 
-final case class ViewPlanResponse(
+final case class ViewPlanResponseDropTwo(
   customerReference: CustomerReference,
   channelIdentifier: ChannelIdentifier,
-  plan: ViewPlanResponsePlan,
+  caseId: CaseId,
+  plan: ViewPlanResponsePlanDropTwo,
   debtItemCharges: Seq[DebtItemCharge],
   payments: Seq[PaymentInformation],
   customerPostCodes: Seq[CustomerPostCode],
@@ -29,6 +30,6 @@ final case class ViewPlanResponse(
   collections: Collections
 )
 
-object ViewPlanResponse {
-  implicit val format = Json.format[ViewPlanResponse]
+object ViewPlanResponseDropTwo {
+  implicit val format = Json.format[ViewPlanResponseDropTwo]
 }

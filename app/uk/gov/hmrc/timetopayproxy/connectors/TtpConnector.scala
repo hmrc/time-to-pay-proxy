@@ -23,6 +23,7 @@ import scala.concurrent.ExecutionContext
 import uk.gov.hmrc.timetopayproxy.models._
 import uk.gov.hmrc.timetopayproxy.models.TtppEnvelope.TtppEnvelope
 import com.google.inject.ImplementedBy
+import play.api.libs.json.Reads
 
 import javax.inject.{ Inject, Singleton }
 import uk.gov.hmrc.timetopayproxy.config.AppConfig
@@ -41,6 +42,11 @@ trait TtpConnector {
     ec: ExecutionContext,
     hc: HeaderCarrier
   ): TtppEnvelope[ViewPlanResponse]
+
+  def getExistingQuoteDropTwo(customerReference: CustomerReference, planId: PlanId)(implicit
+    ec: ExecutionContext,
+    hc: HeaderCarrier
+  ): TtppEnvelope[ViewPlanResponseDropTwo]
 
   def updatePlan(
     updatePlanRequest: UpdatePlanRequest
@@ -90,7 +96,20 @@ class DefaultTtpConnector @Inject() (appConfig: AppConfig, httpClient: HttpClien
   override def getExistingQuote(customerReference: CustomerReference, planId: PlanId)(implicit
     ec: ExecutionContext,
     hc: HeaderCarrier
-  ): TtppEnvelope[ViewPlanResponse] = {
+  ): TtppEnvelope[ViewPlanResponse] =
+    getExistingQuoteG[ViewPlanResponse](customerReference, planId)
+
+  override def getExistingQuoteDropTwo(customerReference: CustomerReference, planId: PlanId)(implicit
+    ec: ExecutionContext,
+    hc: HeaderCarrier
+  ): TtppEnvelope[ViewPlanResponseDropTwo] =
+    getExistingQuoteG[ViewPlanResponseDropTwo](customerReference, planId)
+
+  private def getExistingQuoteG[Response](customerReference: CustomerReference, planId: PlanId)(implicit
+    ec: ExecutionContext,
+    hc: HeaderCarrier,
+    reads: Reads[Response]
+  ): TtppEnvelope[Response] = {
     val path =
       if (appConfig.useIf)
         s"individuals/time-to-pay/quote/${customerReference.value}/${planId.value}"
@@ -100,7 +119,7 @@ class DefaultTtpConnector @Inject() (appConfig: AppConfig, httpClient: HttpClien
     val url = s"${appConfig.ttpBaseUrl}/$path"
 
     EitherT(
-      httpClient.GET[Either[TtppError, ViewPlanResponse]](url)
+      httpClient.GET[Either[TtppError, Response]](url)
     )
 
   }

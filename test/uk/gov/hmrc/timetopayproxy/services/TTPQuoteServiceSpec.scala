@@ -79,10 +79,70 @@ class TTPQuoteServiceSpec extends UnitSpec {
   )
 
   private val retrievePlanResponse = ViewPlanResponse(
+    CustomerReference("customerRef1234"),
+    ChannelIdentifier.Advisor,
+    ViewPlanResponsePlan(
+      PlanId("planId123"),
+      CaseId("caseId123"),
+      QuoteId("quoteId"),
+      LocalDate.now(),
+      QuoteType.InstalmentAmount,
+      PaymentPlanType.TimeToPay,
+      thirdPartyBank = true,
+      0,
+      0,
+      0.0,
+      0,
+      0.0
+    ),
+    Seq(
+      DebtItemCharge(
+        DebtItemChargeId("debtItemChargeId1"),
+        TPSSContractSettlementINT,
+        TGPEN,
+        100,
+        Some(LocalDate.parse("2021-05-13")),
+        List(Payment(LocalDate.parse("2021-05-13"), 100))
+      )
+    ),
+    Seq.empty[PaymentInformation],
+    Seq.empty[CustomerPostCode],
+    Seq(
+      Instalment(
+        DebtItemChargeId("debtItemChargeId"),
+        LocalDate.parse("2021-05-01"),
+        100,
+        100,
+        0.26,
+        1,
+        10.20,
+        100
+      ),
+      Instalment(
+        debtItemChargeId = DebtItemChargeId("debtItemChargeId"),
+        dueDate = LocalDate.parse("2021-06-01"),
+        amountDue = 100,
+        expectedPayment = 100,
+        interestRate = 0.26,
+        instalmentNumber = 2,
+        instalmentInterestAccrued = 10.20,
+        instalmentBalance = 100
+      )
+    ),
+    collections = Collections(
+      None,
+      List(
+        RegularCollection(dueDate = LocalDate.parse("2021-05-01"), amountDue = 100),
+        RegularCollection(dueDate = LocalDate.parse("2021-06-01"), amountDue = 100)
+      )
+    )
+  )
+
+  private val retrievePlanResponseDropTwo: ViewPlanResponseDropTwo = ViewPlanResponseDropTwo(
     customerReference = CustomerReference("customerRef1234"),
     channelIdentifier = ChannelIdentifier.Advisor,
     caseId = CaseId("caseId123"),
-    plan = ViewPlanResponsePlan(
+    plan = ViewPlanResponsePlanDropTwo(
       planId = PlanId("planId123"),
       quoteId = QuoteId("quoteId"),
       quoteDate = LocalDate.now(),
@@ -97,36 +157,36 @@ class TTPQuoteServiceSpec extends UnitSpec {
     ),
     debtItemCharges = Seq(
       DebtItemCharge(
-        debtItemChargeId = DebtItemChargeId("debtItemChargeId1"),
-        mainTrans = TPSSContractSettlementINT,
-        subTrans = TGPEN,
-        originalDebtAmount = 100,
-        interestStartDate = Some(LocalDate.parse("2021-05-13")),
-        paymentHistory = List(Payment(LocalDate.parse("2021-05-13"), 100))
+        DebtItemChargeId("debtItemChargeId1"),
+        TPSSContractSettlementINT,
+        TGPEN,
+        100,
+        Some(LocalDate.parse("2021-05-13")),
+        List(Payment(LocalDate.parse("2021-05-13"), 100))
       )
     ),
     payments = Seq.empty[PaymentInformation],
     customerPostCodes = Seq.empty[CustomerPostCode],
     instalments = Seq(
       Instalment(
-        debtItemChargeId = DebtItemChargeId("debtItemChargeId"),
-        dueDate = LocalDate.parse("2021-05-01"),
-        amountDue = 100,
-        expectedPayment = 100,
-        interestRate = 0.26,
-        instalmentNumber = 1,
-        instalmentInterestAccrued = 10.20,
-        instalmentBalance = 100
+        DebtItemChargeId("debtItemChargeId"),
+        LocalDate.parse("2021-05-01"),
+        100,
+        100,
+        0.26,
+        1,
+        10.20,
+        100
       ),
       Instalment(
-        debtItemChargeId = DebtItemChargeId("debtItemChargeId"),
-        dueDate = LocalDate.parse("2021-06-01"),
-        amountDue = 100,
-        expectedPayment = 100,
-        interestRate = 0.26,
-        instalmentNumber = 2,
-        instalmentInterestAccrued = 10.20,
-        instalmentBalance = 100
+        DebtItemChargeId("debtItemChargeId"),
+        LocalDate.parse("2021-06-01"),
+        100,
+        100,
+        0.26,
+        2,
+        10.20,
+        100
       )
     ),
     collections = Collections(
@@ -273,6 +333,7 @@ class TTPQuoteServiceSpec extends UnitSpec {
       val connectorStub = new TtpConnectorStub(
         Right(generateQuoteResponse),
         Right(retrievePlanResponse),
+        Right(retrievePlanResponseDropTwo),
         Right(updatePlanResponse),
         Right(createPlanResponse)
       )
@@ -293,6 +354,7 @@ class TTPQuoteServiceSpec extends UnitSpec {
       val connectorStub = new TtpConnectorStub(
         Right(generateQuoteResponse),
         Left(ConnectorError(500, "Internal server error")),
+        Right(retrievePlanResponseDropTwo),
         Right(updatePlanResponse),
         Right(createPlanResponse)
       )
@@ -369,6 +431,7 @@ class TTPQuoteServiceSpec extends UnitSpec {
       val connectorStub = new TtpConnectorStub(
         Right(generateQuoteResponse),
         Right(retrievePlanResponse),
+        Right(retrievePlanResponseDropTwo),
         Right(updatePlanResponse),
         Right(createPlanResponse)
       )
@@ -382,6 +445,7 @@ class TTPQuoteServiceSpec extends UnitSpec {
       val connectorStub = new TtpConnectorStub(
         Right(generateQuoteResponse),
         Right(retrievePlanResponse),
+        Right(retrievePlanResponseDropTwo),
         Right(updatePlanResponse),
         Left(ConnectorError(500, "Internal server error"))
       )
@@ -399,6 +463,7 @@ class TTPQuoteServiceSpec extends UnitSpec {
 class TtpConnectorStub(
   generateQuoteResponse: Either[TtppError, GenerateQuoteResponse],
   retrieveQuoteResponse: Either[TtppError, ViewPlanResponse],
+  retrieveQuoteResponseDropTwo: Either[TtppError, ViewPlanResponseDropTwo],
   updatePlanResponse: Either[TtppError, UpdatePlanResponse],
   createPlanResponse: Either[TtppError, CreatePlanResponse]
 ) extends TtpConnector {
@@ -413,6 +478,12 @@ class TtpConnectorStub(
     hc: HeaderCarrier
   ): TtppEnvelope[ViewPlanResponse] =
     TtppEnvelope(Future successful retrieveQuoteResponse)
+
+  override def getExistingQuoteDropTwo(customerReference: CustomerReference, planId: PlanId)(implicit
+    ec: ExecutionContext,
+    hc: HeaderCarrier
+  ): TtppEnvelope[ViewPlanResponseDropTwo] =
+    TtppEnvelope(Future successful retrieveQuoteResponseDropTwo)
 
   override def updatePlan(
     updatePlanRequest: UpdatePlanRequest
