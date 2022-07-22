@@ -27,7 +27,9 @@ object CompleteReason extends Enum[CompleteReason] with PlayJsonEnum[CompleteRea
   val values: immutable.IndexedSeq[CompleteReason] = findValues
 
   case object PaymentInFull extends CompleteReason("Payment in full")
+  case object PaymentInFullCaps extends CompleteReason("Payment in Full")
   case object AmendmentOfChargesToNil extends CompleteReason("Amendment of charges to nil")
+  case object AmendmentOfChargesToNilCaps extends CompleteReason("Amendment of Charges to Nil")
   case object Remission extends CompleteReason("Remission")
   case object PaidWithinTolerance extends CompleteReason("Paid within Tolerance")
 }
