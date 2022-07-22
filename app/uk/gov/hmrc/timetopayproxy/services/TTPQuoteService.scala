@@ -37,6 +37,11 @@ trait TTPQuoteService {
     hc: HeaderCarrier
   ): TtppEnvelope[ViewPlanResponse]
 
+  def getExistingPlanDropTwo(customerReference: CustomerReference, planId: PlanId)(implicit
+    ec: ExecutionContext,
+    hc: HeaderCarrier
+  ): TtppEnvelope[ViewPlanResponseDropTwo]
+
   def updatePlan(
     updatePlanRequest: UpdatePlanRequest
   )(implicit ec: ExecutionContext, hc: HeaderCarrier): TtppEnvelope[UpdatePlanResponse]
@@ -61,6 +66,12 @@ class DefaultTTPQuoteService @Inject() (ttpConnector: TtpConnector) extends TTPQ
     hc: HeaderCarrier
   ): TtppEnvelope[ViewPlanResponse] =
     ttpConnector.getExistingQuote(customerReference, planId)
+
+  override def getExistingPlanDropTwo(customerReference: CustomerReference, planId: PlanId)(implicit
+    ec: ExecutionContext,
+    hc: HeaderCarrier
+  ): TtppEnvelope[ViewPlanResponseDropTwo] =
+    ttpConnector.getExistingQuoteDropTwo(customerReference, planId)
 
   def updatePlan(
     updatePlanRequest: UpdatePlanRequest

@@ -22,6 +22,7 @@ import java.time.LocalDate
 
 final case class ViewPlanResponsePlan(
   planId: PlanId,
+  caseId: CaseId,
   quoteId: QuoteId,
   quoteDate: LocalDate,
   quoteType: QuoteType,

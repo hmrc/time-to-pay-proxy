@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.timetopayproxy.config
 
-import com.google.inject.AbstractModule
+import com.google.inject.{ AbstractModule, Provides }
 import uk.gov.hmrc.auth.core.PlayAuthConnector
 import uk.gov.hmrc.play.bootstrap.auth.DefaultAuthConnector
 import uk.gov.hmrc.timetopayproxy.connectors.{ DefaultTtpConnector, TtpConnector }
@@ -36,4 +36,7 @@ class DIModule extends AbstractModule {
       .to(classOf[DefaultTTPQuoteService])
       .asEagerSingleton()
   }
+
+  @Provides protected def provideFeatureSwitch(appConfig: AppConfig): FeatureSwitch =
+    FeatureSwitch(appConfig.featureSwitch)
 }
