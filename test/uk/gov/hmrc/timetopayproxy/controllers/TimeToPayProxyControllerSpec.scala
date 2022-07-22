@@ -356,7 +356,7 @@ class TimeToPayProxyControllerSpec extends AnyWordSpec with Matchers with MockFa
         .returning(TtppEnvelope(viewPlanResponse))
 
       (fs.isTTPDropTwo _).expects
-        .returning(true)
+        .returning(false)
 
       val fakeRequest = FakeRequest(
         "GET",
@@ -387,7 +387,7 @@ class TimeToPayProxyControllerSpec extends AnyWordSpec with Matchers with MockFa
         .returning(TtppEnvelope(errorFromTtpConnector.asLeft[ViewPlanResponse]))
 
       (fs.isTTPDropTwo _).expects
-        .returning(true)
+        .returning(false)
 
       val fakeRequest = FakeRequest(
         "GET",
@@ -419,7 +419,7 @@ class TimeToPayProxyControllerSpec extends AnyWordSpec with Matchers with MockFa
         .returning(TtppEnvelope(errorFromTtpConnector.asLeft[ViewPlanResponse]))
 
       (fs.isTTPDropTwo _).expects
-        .returning(true)
+        .returning(false)
 
       val fakeRequest = FakeRequest(
         "GET",

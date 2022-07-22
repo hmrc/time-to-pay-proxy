@@ -59,12 +59,12 @@ class TimeToPayProxyController @Inject() (
     authoriseAction.async { implicit request =>
       if (fs.isTTPDropTwo)
         timeToPayProxyService
-          .getExistingPlan(CustomerReference(customerReference), PlanId(planId))
+          .getExistingPlanDropTwo(CustomerReference(customerReference), PlanId(planId))
           .leftMap(ttppError => ttppError.toErrorResponse)
           .fold(e => e.toResponse, r => r.toResponse)
       else
         timeToPayProxyService
-          .getExistingPlanDropTwo(CustomerReference(customerReference), PlanId(planId))
+          .getExistingPlan(CustomerReference(customerReference), PlanId(planId))
           .leftMap(ttppError => ttppError.toErrorResponse)
           .fold(e => e.toResponse, r => r.toResponse)
     }
