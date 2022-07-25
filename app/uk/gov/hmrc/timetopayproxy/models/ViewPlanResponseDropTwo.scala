@@ -26,7 +26,8 @@ final case class ViewPlanResponseDropTwo(
   debtItemCharges: Seq[DebtItemCharge],
   payments: Seq[PaymentInformation],
   customerPostCodes: Seq[CustomerPostCode],
-  instalments: Seq[Instalment]
+  instalments: Seq[Instalment],
+  collections: Collections
 )
 
 object ViewPlanResponseDropTwo {

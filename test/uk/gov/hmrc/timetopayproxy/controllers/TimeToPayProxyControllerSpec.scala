@@ -181,14 +181,21 @@ class TimeToPayProxyControllerSpec extends AnyWordSpec with Matchers with MockFa
         100
       ),
       Instalment(
-        DebtItemChargeId("debtItemChargeId"),
-        LocalDate.parse("2021-06-01"),
-        100,
-        100,
-        0.26,
-        2,
-        10.20,
-        100
+        debtItemChargeId = DebtItemChargeId("debtItemChargeId"),
+        dueDate = LocalDate.parse("2021-06-01"),
+        amountDue = 100,
+        expectedPayment = 100,
+        interestRate = 0.26,
+        instalmentNumber = 2,
+        instalmentInterestAccrued = 10.20,
+        instalmentBalance = 100
+      )
+    ),
+    collections = Collections(
+      None,
+      List(
+        RegularCollection(dueDate = LocalDate.parse("2021-05-01"), amountDue = 100),
+        RegularCollection(dueDate = LocalDate.parse("2021-06-01"), amountDue = 100)
       )
     )
   )
