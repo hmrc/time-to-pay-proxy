@@ -17,6 +17,7 @@
 package uk.gov.hmrc.timetopayproxy.models
 
 import enumeratum.{ Enum, EnumEntry, PlayJsonEnum }
+
 import scala.collection.immutable
 
 sealed abstract class SubTransType(override val entryName: String) extends EnumEntry
@@ -37,5 +38,35 @@ object SubTransType extends Enum[SubTransType] with PlayJsonEnum[SubTransType] {
   case object INTIT extends SubTransType("2000")
   case object TGPEN extends SubTransType("1090")
   case object TakingControlFee extends SubTransType("1150")
+
+  case object EOYNonRTIEyerNIC1GB extends SubTransType("1023")
+  case object EOYNonRTIEyeeNIC1GB extends SubTransType("1026")
+  case object InYearCl1ANIC extends SubTransType("1030")
+  case object EOYNonRTISL extends SubTransType("1100")
+  case object ApprenticeshipLevy extends SubTransType("1106")
+  case object INTApprenticehipLevy extends SubTransType("1107")
+  case object EOYNonRTICISDedSuffered extends SubTransType("1250")
+  case object EOYNonRTINICHoliday extends SubTransType("1260")
+  case object EOYNonRTISPP extends SubTransType("1270")
+  case object EOYNonRTISAP extends SubTransType("1280")
+  case object EOYNonRTIShPP extends SubTransType("1290")
+  case object EOYNonRTISSP extends SubTransType("1300")
+  case object EOYNonRTISMP extends SubTransType("1310")
+  case object EOYNonRTINICComponSMP extends SubTransType("1320")
+  case object EOYNonRTINICComponSPP extends SubTransType("1330")
+  case object EOYNonRTINICComponSAP extends SubTransType("1340")
+  case object EOYNonRTINICComponShPP extends SubTransType("1350")
+  case object EmploymentAllowance extends SubTransType("1355")
+  case object SPBP extends SubTransType("1390")
+  case object SPBPandNIcomponSPBP extends SubTransType("1395")
+  case object EOYNonRTINIC1GBINT extends SubTransType("2020")
+  case object EOYNonRTIEYerNIC1GBINT extends SubTransType("2023")
+  case object EOYNonRTIEYeeNIC1GBINT extends SubTransType("2026")
+  case object InterestOnInyearCl1ANIC extends SubTransType("2030")
+  case object EOYNonRTIINTSL extends SubTransType("2100")
+  case object INTEMPAllowance extends SubTransType("2355")
+
+  case object VATDebitCharge extends SubTransType("1174")
+  case object VATInterest extends SubTransType("1175")
 
 }
