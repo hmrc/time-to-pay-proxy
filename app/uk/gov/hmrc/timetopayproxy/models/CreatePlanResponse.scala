@@ -45,6 +45,7 @@ object PlanStatus extends Enum[PlanStatus] with PlayJsonEnum[PlanStatus] {
   case object ResolvedCancelled extends PlanStatus("Resolved - Cancelled")
   case object ResolvedCompleted extends PlanStatus("Resolved - Completed")
   case object MonitoringSuspended extends PlanStatus("TTP - Monitoring suspended")
+  case object PendingCancellationLetter extends PlanStatus("Pending - Cancellation Letter")
 
   def valueOf(value: String): PlanStatus =
     value match {
@@ -62,6 +63,7 @@ object PlanStatus extends Enum[PlanStatus] with PlayJsonEnum[PlanStatus] {
       case "Resolved - Cancelled"          => ResolvedCancelled
       case "Resolved - Completed"          => ResolvedCompleted
       case "TTP - Monitoring suspended"    => MonitoringSuspended
+      case "Pending - Cancellation Letter" => PendingCancellationLetter
     }
 
 }
