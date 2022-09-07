@@ -45,24 +45,9 @@ object PlanStatus extends Enum[PlanStatus] with PlayJsonEnum[PlanStatus] {
   case object ResolvedCancelled extends PlanStatus("Resolved - Cancelled")
   case object ResolvedCompleted extends PlanStatus("Resolved - Completed")
   case object MonitoringSuspended extends PlanStatus("TTP - Monitoring suspended")
+  case object PendingCancellationLetter extends PlanStatus("Pending - Cancellation Letter")
 
-  def valueOf(value: String): PlanStatus =
-    value match {
-      case "success"                       => Success
-      case "failure"                       => Failure
-      case "TTP Arrangement - In Progress" => TtpArrangementInProgress
-      case "Resolved - TTP Amended"        => ResolvedTTPAmended
-      case "In Default - Clerical Review"  => InDefaultClericalReview
-      case "Pending - First Reminder"      => PendingFirstReminder
-      case "In Default - First Reminder"   => InDefaultFirstReminder
-      case "Pending - Second Reminder"     => PendingSecondReminder
-      case "In Default - Second Reminder"  => InDefaultSecondReminder
-      case "Pending - Cancellation"        => PendingCancellation
-      case "Pending - Completion"          => PendingCompletion
-      case "Resolved - Cancelled"          => ResolvedCancelled
-      case "Resolved - Completed"          => ResolvedCompleted
-      case "TTP - Monitoring suspended"    => MonitoringSuspended
-    }
+  def valueOf(value: String): Option[PlanStatus] = PlanStatus.withNameInsensitiveOption(value)
 
 }
 
