@@ -23,9 +23,22 @@
       "type": "string",
       "enum": [
         "success",
-        "failure"
+        "failure",
+        "Resolved - Cancelled",
+        "Resolved - Completed",
+        "TTP Arrangement - In Progress",
+        "Resolved - TTP Amended",
+        "In Default - Clerical Review",
+        "Pending - First Reminder",
+        "In default - First Reminder",
+        "Pending - Second Reminder",
+        "In default - Second Reminder",
+        "Pending - Cancellation",
+        "Pending - Completion",
+        "TTP - Monitoring suspended",
+        "Pending - Cancellation Letter"
       ],
-      "description": "This is the Plan status"
+      "description": "This is the plan status"
     }
   }
 }
