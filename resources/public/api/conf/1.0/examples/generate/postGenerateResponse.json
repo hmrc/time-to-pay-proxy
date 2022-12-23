@@ -10,7 +10,7 @@
   "totalInterest": 12.25,
   "instalments": [
     {
-      "debtItemChargeId": "debtItemChrgId1",
+      "debtItemChargeId": "debtIChargeId1",
       "dueDate": "2021-05-13",
       "amountDue": 100,
       "expectedPayment": 100,
@@ -20,7 +20,7 @@
       "instalmentBalance": 10
     },
     {
-      "debtItemChargeId": "debtItemChargeId2",
+      "debtItemChargeId": "debtIChargeId2",
       "dueDate": "2021-05-13",
       "amountDue": 100,
       "expectedPayment": 100,
@@ -30,7 +30,7 @@
       "instalmentBalance": 10
     },
     {
-      "debtItemChargeId": "debtItemChargeId3",
+      "debtItemChargeId": "debtIChargeId3",
       "dueDate": "2021-05-13",
       "amountDue": 100,
       "expectedPayment": 100,

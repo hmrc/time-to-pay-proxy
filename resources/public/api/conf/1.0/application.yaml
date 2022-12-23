@@ -1,0 +1,1591 @@
+openapi: 3.0.0
+info:
+  title: Time To Pay Proxy
+  description: "This API provides resources related to [Time To Pay] (https://confluence.tools.tax.service.gov.uk/display/DTDT/TTP+1).\nWhen an API changes in a way that is backwards-incompatible, we increase the version number of the API. \nSee our [reference guide](/api-documentation/docs/reference-guide#versioning) for more on\nversioning.\nWe use standard HTTP status codes to show whether an API request succeeded or not. They are usually in the range:\n* 200 to 299 if it succeeded, including code 202 if it was accepted by an API that needs to wait for further action\n* 400 to 499 if it failed because of a client error by your application\n* 500 to 599 if it failed because of an error on our server\n\nErrors specific to each API are shown in the Endpoints section, under Response. \nSee our [reference guide](/api-documentation/docs/reference-guide#errors) for more on errors.\nYou can use the [HMRC Developer Sandbox](https://test-developer.service.hmrc.gov.uk/api-documentation/docs/sandbox/introduction)\nto test the API. The Sandbox is an enhanced testing service that functions as a simulator of HMRC’s production environment.\nHMRC monitors transactions to help protect your customers' confidential data from criminals and fraudsters. \n\n<div class=\"govuk-warning-text warning-icon-fix\">\n  <span class=\"govuk-warning-text__icon warning-icon-ui-fix\" aria-hidden=\"true\">!</span>\n  <strong class=\"govuk-warning-text__text\">\n    <span class=\"govuk-warning-text__assistive\">Warning</span>\n    You are required by law to submit header data for this API. This includes all associated APIs and endpoints.\n  </strong>\n</div>\n\n[Check the data you need to send](/guides/fraud-prevention/). You can also use the [Test API](/api-documentation/docs/api/service/txm-fph-validator-api/1.0) during initial development and as part of your quality assurance checks."
+  contact: {}
+  version: '1.0'
+servers:
+- url: https://api.service.hmrc.gov.uk/
+  variables: {}
+paths:
+  /individuals/time-to-pay-proxy/quote:
+    post:
+      tags:
+      - individuals
+      summary: Generate TTP Quote Request
+      description: This is an endpoint that triggers request to create a plan for storage from ttp service
+      operationId: GenerateTTPQuoteRequest
+      parameters: []
+      security:
+        - applicationRestricted:
+          - read:time-to-pay-proxy
+      requestBody:
+        description: ''
+        content:
+          application/json:
+            schema:
+              allOf:
+              - $ref: '#/components/schemas/AJSONSchemaforTTPAPI.'
+              - example:
+                  customerReference: uniqRef1234
+                  channelIdentifier: selfService
+                  plan:
+                    quoteType: duration
+                    quoteDate: 2021-05-13
+                    instalmentStartDate: 2021-05-13
+                    instalmentAmount: 100
+                    frequency: annually
+                    duration: 12
+                    initialPaymentAmount: 100
+                    initialPaymentDate: 2021-05-13
+                    paymentPlanType: timeToPay
+                  customerPostCodes:
+                  - addressPostcode: NW9 5XW
+                    postcodeDate: 2021-05-13
+                  debtItemCharges:
+                  - debtItemChargeId: debtItemChrgId1
+                    mainTrans: '1546'
+                    subTrans: '1090'
+                    originalDebtAmount: 100
+                    interestStartDate: 2021-05-13
+                    paymentHistory:
+                    - paymentDate: 2021-05-13
+                      paymentAmount: 100
+            examples:
+              example-1:
+                description: A post request to create quote
+                value:
+                  customerReference: uniqRef1234
+                  channelIdentifier: selfService
+                  plan:
+                    quoteType: duration
+                    quoteDate: 2021-05-13
+                    instalmentStartDate: 2021-05-13
+                    instalmentAmount: 100
+                    frequency: annually
+                    duration: 12
+                    initialPaymentAmount: 100
+                    initialPaymentDate: 2021-05-13
+                    paymentPlanType: timeToPay
+                  customerPostCodes:
+                  - addressPostcode: NW9 5XW
+                    postcodeDate: 2021-05-13
+                  debtItemCharges:
+                  - debtItemChargeId: debtItemChrgId1
+                    mainTrans: '1546'
+                    subTrans: '1090'
+                    originalDebtAmount: 100
+                    interestStartDate: 2021-05-13
+                    paymentHistory:
+                    - paymentDate: 2021-05-13
+                      paymentAmount: 100
+        required: true
+      responses:
+        '200':
+          description: ''
+          headers: {}
+          content:
+            text/plain:
+              schema:
+                $ref: '#/components/schemas/AJSONSchemaforTTPAPI.1'
+        '400':
+          description: ''
+          headers: {}
+          content:
+            text/plain:
+              schema:
+                allOf:
+                - $ref: '#/components/schemas/Timetopayproxyendpointerrorcodes'
+                - example:
+                    reason: Field at path '/field' missing or invalid
+                    message: Invalid Json
+              example:
+                reason: Field at path '/field' missing or invalid
+                message: Invalid Json
+      deprecated: false
+  /individuals/time-to-pay-proxy/quote/arrangement:
+    post:
+      tags:
+      - individuals
+      summary: TTP Promote an Arrangement request
+      description: This is an endpoint that triggers a request to generate a draft quote from ttp service
+      operationId: TTPPromoteanArrangementrequest
+      parameters: []
+      security:
+        - applicationRestricted:
+          - read:time-to-pay-proxy
+      requestBody:
+        description: ''
+        content:
+          application/json:
+            schema:
+              allOf:
+              - $ref: '#/components/schemas/AJSONSchemaforTTPAPI.2'
+              - example:
+                  customerReference: uniqRef1234
+                  quoteReference: quoteRef1234
+                  channelIdentifier: advisor
+                  plan:
+                    quoteId: quoteId1
+                    quoteType: instalmentAmount
+                    quoteDate: 2021-05-13
+                    instalmentStartDate: 2021-05-13
+                    instalmentAmount: 100
+                    paymentPlanType: timeToPay
+                    thirdPartyBank: true
+                    numberOfInstalments: 1
+                    frequency: annually
+                    duration: 12
+                    initialPaymentAmount: 100
+                    initialPaymentDate: 2021-05-13
+                    totalDebtIncInt: 10
+                    totalInterest: 0.14
+                    interestAccrued: 10
+                    planInterest: 0.24
+                  debtItemCharges:
+                  - debtItemChargeId: debtItemChrgId1
+                    mainTrans: '1546'
+                    subTrans: '1090'
+                    originalDebtAmount: 100
+                    interestStartDate: 2021-05-13
+                    paymentHistory:
+                    - paymentDate: 2021-05-13
+                      paymentAmount: 100
+                  payments:
+                  - paymentMethod: BACS
+                    paymentReference: paymentRef123
+                  customerPostCodes:
+                  - addressPostcode: NW9 5XW
+                    postcodeDate: 2021-05-13
+                  instalments:
+                  - debtItemChargeId: debtItemChrgId1
+                    dueDate: 2021-05-13
+                    amountDue: 100
+                    expectedPayment: 10
+                    interestRate: 0.25
+                    instalmentNumber: 1
+                    instalmentInterestAccrued: 10
+                    instalmentBalance: 100
+            examples:
+              example-1:
+                description: A post request to create plan
+                value:
+                  customerReference: uniqRef1234
+                  quoteReference: quoteRef1234
+                  channelIdentifier: advisor
+                  plan:
+                    quoteId: quoteId1
+                    quoteType: instalmentAmount
+                    quoteDate: 2021-05-13
+                    instalmentStartDate: 2021-05-13
+                    instalmentAmount: 100
+                    paymentPlanType: timeToPay
+                    thirdPartyBank: true
+                    numberOfInstalments: 1
+                    frequency: annually
+                    duration: 12
+                    initialPaymentAmount: 100
+                    initialPaymentDate: 2021-05-13
+                    totalDebtIncInt: 10
+                    totalInterest: 0.14
+                    interestAccrued: 10
+                    planInterest: 0.24
+                  debtItemCharges:
+                  - debtItemChargeId: debtItemChrgId1
+                    mainTrans: '1546'
+                    subTrans: '1090'
+                    originalDebtAmount: 100
+                    interestStartDate: 2021-05-13
+                    paymentHistory:
+                    - paymentDate: 2021-05-13
+                      paymentAmount: 100
+                  payments:
+                  - paymentMethod: BACS
+                    paymentReference: paymentRef123
+                  customerPostCodes:
+                  - addressPostcode: NW9 5XW
+                    postcodeDate: 2021-05-13
+                  instalments:
+                  - debtItemChargeId: debtItemChrgId1
+                    dueDate: 2021-05-13
+                    amountDue: 100
+                    expectedPayment: 10
+                    interestRate: 0.25
+                    instalmentNumber: 1
+                    instalmentInterestAccrued: 10
+                    instalmentBalance: 100
+        required: true
+      responses:
+        '200':
+          description: ''
+          headers: {}
+          content:
+            text/plain:
+              schema:
+                allOf:
+                - $ref: '#/components/schemas/AJSONSchemaforTTPAPI.3'
+                - example:
+                    customerReference: customerRef1234
+                    planId: planId1234
+                    caseId: caseId1234
+                    planStatus: success
+              example:
+                customerReference: customerRef1234
+                planId: planId1234
+                caseId: caseId1234
+                planStatus: success
+        '400':
+          description: ''
+          headers: {}
+          content:
+            text/plain:
+              schema:
+                allOf:
+                - $ref: '#/components/schemas/Timetopayproxyendpointerrorcodes'
+                - example:
+                    reason: Field at path '/field' missing or invalid
+                    message: Invalid Json
+              example:
+                reason: Field at path '/field' missing or invalid
+                message: Invalid Json
+      deprecated: false
+  /individuals/time-to-pay-proxy/quote/{customerReference}/{planId}:
+    get:
+      tags:
+      - individuals
+      summary: Get Existing TTP Plan
+      description: This is an endpoint that DAUI trigger a view a plan using ttp service
+      operationId: GetExistingTTPPlan
+      parameters:
+      - name: customerReference
+        in: path
+        description: ''
+        required: true
+        style: simple
+        schema:
+          type: string
+      - name: planId
+        in: path
+        description: ''
+        required: true
+        style: simple
+        schema:
+          type: string
+      security:
+        - applicationRestricted:
+          - read:time-to-pay-proxy
+      responses:
+        '200':
+          description: ''
+          headers: {}
+          content:
+            text/plain:
+              schema:
+                allOf:
+                - $ref: '#/components/schemas/AJSONSchemaforTTPAPI.4'
+                - example:
+                    customerReference: uniqRef1234
+                    channelIdentifier: advisor
+                    caseId: caseId1
+                    plan:
+                      planId: planId1
+                      quoteId: quoteId1
+                      quoteDate: 2021-05-13
+                      quoteType: instalmentAmount
+                      paymentPlanType: timeToPay
+                      thirdPartyBank: true
+                      numberOfInstalments: 0
+                      initialPaymentMethod: BACS
+                      initialPaymentReference: paymentRef1234
+                      totalDebtIncInt: 0
+                      totalInterest: 0
+                      interestAccrued: 0
+                      planInterest: 0.24
+                    debtItemCharges:
+                    - debtItemChargeId: debtItemChrgId1
+                      mainTrans: '1546'
+                      subTrans: '1090'
+                      originalDebtAmount: 100
+                      interestStartDate: 2021-05-13
+                      paymentHistory:
+                      - paymentDate: 2021-05-13
+                        paymentAmount: 100
+                    payments:
+                    - paymentMethod: BACS
+                      paymentReference: paymentRef123
+                    customerPostCodes:
+                    - addressPostcode: NW9 5XW
+                      postcodeDate: 2021-05-13
+                    instalments:
+                    - debtItemChargeId: debtItemChrgId1
+                      dueDate: 2021-05-13
+                      amountDue: 100
+                      expectedPayment: 10
+                      interestRate: 0.25
+                      instalmentNumber: 1
+                      instalmentInterestAccrued: 10
+                      instalmentBalance: 100
+                    collections:
+                      initialCollection:
+                        dueDate: 2022-06-18
+                        amountDue: 1000
+                      regularCollections:
+                      - dueDate: 2022-07-08
+                        amountDue: 1628.21
+                      - dueDate: 2022-08-08
+                        amountDue: 1628.21
+              example:
+                customerReference: uniqRef1234
+                channelIdentifier: advisor
+                caseId: caseId1
+                plan:
+                  planId: planId1
+                  quoteId: quoteId1
+                  quoteDate: 2021-05-13
+                  quoteType: instalmentAmount
+                  paymentPlanType: timeToPay
+                  thirdPartyBank: true
+                  numberOfInstalments: 0
+                  initialPaymentMethod: BACS
+                  initialPaymentReference: paymentRef1234
+                  totalDebtIncInt: 0
+                  totalInterest: 0
+                  interestAccrued: 0
+                  planInterest: 0.24
+                debtItemCharges:
+                - debtItemChargeId: debtItemChrgId1
+                  mainTrans: '1546'
+                  subTrans: '1090'
+                  originalDebtAmount: 100
+                  interestStartDate: 2021-05-13
+                  paymentHistory:
+                  - paymentDate: 2021-05-13
+                    paymentAmount: 100
+                payments:
+                - paymentMethod: BACS
+                  paymentReference: paymentRef123
+                customerPostCodes:
+                - addressPostcode: NW9 5XW
+                  postcodeDate: 2021-05-13
+                instalments:
+                - debtItemChargeId: debtItemChrgId1
+                  dueDate: 2021-05-13
+                  amountDue: 100
+                  expectedPayment: 10
+                  interestRate: 0.25
+                  instalmentNumber: 1
+                  instalmentInterestAccrued: 10
+                  instalmentBalance: 100
+                collections:
+                  initialCollection:
+                    dueDate: 2022-06-18
+                    amountDue: 1000
+                  regularCollections:
+                  - dueDate: 2022-07-08
+                    amountDue: 1628.21
+                  - dueDate: 2022-08-08
+                    amountDue: 1628.21
+        '400':
+          description: ''
+          headers: {}
+          content:
+            text/plain:
+              schema:
+                allOf:
+                - $ref: '#/components/schemas/Timetopayproxyendpointerrorcodes'
+                - example:
+                    reason: Field at path '/field' missing or invalid
+                    message: Invalid Json
+              example:
+                reason: Field at path '/field' missing or invalid
+                message: Invalid Json
+      deprecated: false
+    put:
+      tags:
+      - individuals
+      summary: Update Existing TTP Plan
+      description: This is an endpoint that DAUI needs to update a TTP plan using ttp service
+      operationId: UpdateExistingTTPPlan
+      parameters:
+      - name: customerReference
+        in: path
+        description: ''
+        required: true
+        style: simple
+        schema:
+          type: string
+      - name: planId
+        in: path
+        description: ''
+        required: true
+        style: simple
+        schema:
+          type: string
+      security:
+        - applicationRestricted:
+          - read:time-to-pay-proxy
+      requestBody:
+        description: ''
+        content:
+          application/json:
+            schema:
+              allOf:
+              - $ref: '#/components/schemas/AJSONSchemaforTTPAPI.5'
+              - example:
+                  customerReference: custRef123
+                  planId: planId1
+                  updateType: paymentDetails
+                  planStatus: Resolved - Completed
+                  completeReason: Payment in Full
+                  cancellationReason: debt-resolved
+                  thirdPartyBank: true
+                  payments:
+                  - paymentMethod: cheque
+                    paymentReference: paymentRef
+            examples:
+              example-1:
+                description: A put request to update existing quote
+                value:
+                  customerReference: custRef123
+                  planId: planId1
+                  updateType: paymentDetails
+                  planStatus: Resolved - Completed
+                  completeReason: Payment in Full
+                  cancellationReason: debt-resolved
+                  thirdPartyBank: true
+                  payments:
+                  - paymentMethod: cheque
+                    paymentReference: paymentRef
+        required: true
+      responses:
+        '200':
+          description: ''
+          headers: {}
+          content:
+            text/plain:
+              schema:
+                allOf:
+                - $ref: '#/components/schemas/AJSONSchemaforTTPAPI.6'
+                - example:
+                    customerReference: custRef1234
+                    planId: planId1234
+                    planStatus: Resolved - Completed
+                    planUpdatedDate: 2021-05-13
+              example:
+                customerReference: custRef1234
+                planId: planId1234
+                planStatus: Resolved - Completed
+                planUpdatedDate: 2021-05-13
+        '400':
+          description: ''
+          headers: {}
+          content:
+            text/plain:
+              schema:
+                allOf:
+                - $ref: '#/components/schemas/Timetopayproxyendpointerrorcodes'
+                - example:
+                    reason: Field at path '/field' missing or invalid
+                    message: Invalid Json
+              example:
+                reason: Field at path '/field' missing or invalid
+                message: Invalid Json
+      deprecated: false
+  /individuals/time-to-pay-proxy/test-only/requests:
+    get:
+      tags:
+      - individuals
+      summary: Test Only Requests
+      description: This is an endpoint for testing the ttp service in different env - not to be used apart from debt transformation
+      operationId: TestOnlyRequests
+      parameters: []
+      security:
+        - applicationRestricted:
+          - read:time-to-pay-proxy
+      responses:
+        '200':
+          description: ''
+          headers: {}
+          content:
+            text/plain:
+              schema:
+                $ref: '#/components/schemas/AJSONSchemaforTTPAPI.7'
+        '400':
+          description: ''
+          headers: {}
+          content:
+            text/plain:
+              schema:
+                allOf:
+                - $ref: '#/components/schemas/Timetopayproxyendpointerrorcodes'
+                - example:
+                    reason: Field at path '/field' missing or invalid
+                    message: Invalid Json
+              example:
+                reason: Field at path '/field' missing or invalid
+                message: Invalid Json
+      deprecated: false
+  /individuals/time-to-pay-proxy/test-only/request/{requestId}:
+    delete:
+      tags:
+      - individuals
+      summary: Test Only Requests
+      description: This is an endpoint for testing the ttp service in different env - not to be used apart from debt transformation
+      operationId: DeleteTestOnlyRequests
+      parameters:
+      - name: requestId
+        in: path
+        description: ''
+        required: true
+        style: simple
+        schema:
+          type: string
+      security:
+        - applicationRestricted:
+          - read:time-to-pay-proxy
+      responses:
+        '200':
+          description: ''
+          headers: {}
+          content:
+            text/plain:
+              schema:
+                $ref: '#/components/schemas/AJSONSchemaforTTPAPI.7'
+        '400':
+          description: ''
+          headers: {}
+          content:
+            text/plain:
+              schema:
+                allOf:
+                - $ref: '#/components/schemas/Timetopayproxyendpointerrorcodes'
+                - example:
+                    reason: Field at path '/field' missing or invalid
+                    message: Invalid Json
+              example:
+                reason: Field at path '/field' missing or invalid
+                message: Invalid Json
+      deprecated: false
+  /individuals/time-to-pay-proxy/test-only/response:
+    post:
+      tags:
+      - individuals
+      summary: Test Only Response
+      description: This is an endpoint for testing the ttp service in different env - not to be used apart from debt transformation
+      operationId: TestOnlyResponse
+      parameters: []
+      security:
+        - applicationRestricted:
+          - read:time-to-pay-proxy
+      requestBody:
+        description: ''
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AJSONSchemaforTTPAPI.7'
+        required: true
+      responses:
+        '200':
+          description: ''
+          headers: {}
+          content:
+            text/plain:
+              schema:
+                $ref: '#/components/schemas/AJSONSchemaforTTPAPI.7'
+        '400':
+          description: ''
+          headers: {}
+          content:
+            text/plain:
+              schema:
+                allOf:
+                - $ref: '#/components/schemas/Timetopayproxyendpointerrorcodes'
+                - example:
+                    reason: Field at path '/field' missing or invalid
+                    message: Invalid Json
+              example:
+                reason: Field at path '/field' missing or invalid
+                message: Invalid Json
+      deprecated: false
+  /individuals/time-to-pay-proxy/test-only/errors:
+    get:
+      tags:
+      - individuals
+      summary: Test Only Requests1
+      description: This is an endpoint for testing the ttp service in different env - not to be used apart from debt transformation
+      operationId: TestOnlyRequests1
+      parameters: []
+      security:
+        - applicationRestricted:
+          - read:time-to-pay-proxy
+      responses:
+        '200':
+          description: ''
+          headers: {}
+          content:
+            text/plain:
+              schema:
+                $ref: '#/components/schemas/AJSONSchemaforTTPAPI.7'
+        '400':
+          description: ''
+          headers: {}
+          content:
+            text/plain:
+              schema:
+                allOf:
+                - $ref: '#/components/schemas/Timetopayproxyendpointerrorcodes'
+                - example:
+                    reason: Field at path '/field' missing or invalid
+                    message: Invalid Json
+              example:
+                reason: Field at path '/field' missing or invalid
+                message: Invalid Json
+      deprecated: false
+    post:
+      tags:
+      - individuals
+      summary: Test Only Response1
+      description: This is an endpoint for testing the ttp service in different env - not to be used apart from debt transformation
+      operationId: TestOnlyResponse1
+      parameters: []
+      security:
+        - applicationRestricted:
+          - read:time-to-pay-proxy
+      requestBody:
+        description: ''
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AJSONSchemaforTTPAPI.7'
+        required: true
+      responses:
+        '200':
+          description: ''
+          headers: {}
+          content:
+            text/plain:
+              schema:
+                $ref: '#/components/schemas/AJSONSchemaforTTPAPI.7'
+        '400':
+          description: ''
+          headers: {}
+          content:
+            text/plain:
+              schema:
+                allOf:
+                - $ref: '#/components/schemas/Timetopayproxyendpointerrorcodes'
+                - example:
+                    reason: Field at path '/field' missing or invalid
+                    message: Invalid Json
+              example:
+                reason: Field at path '/field' missing or invalid
+                message: Invalid Json
+      deprecated: false
+  /individuals/time-to-pay-proxy/hello-world:
+    get:
+      tags:
+      - individuals
+      summary: Say hello world
+      description: >
+        An example for integrating with Time To Pay Proxy service.
+
+        Any request to this endpoint initiates a 'Hello world' response.
+      operationId: Sayhelloworld
+      parameters: []
+      responses:
+        '200':
+          description: ''
+          headers: {}
+          content:
+            text/html:
+              schema: {}
+      deprecated: false
+components:
+  securitySchemes:
+    userRestricted:
+      type: oauth2
+      description: |
+        HMRC supports OAuth 2.0 for authenticating user restricted API requests using an OAuth 2.0 Bearer Token in the AUTHORIZATION header.
+        See https://developer.service.hmrc.gov.uk/api-documentation/docs/authorisation/user-restricted-endpoints for details.
+      flows:
+        authorizationCode:
+          authorizationUrl: https://api.service.hmrc.gov.uk/oauth/authorize
+          tokenUrl: https://api.service.hmrc.gov.uk/oauth/token
+          refreshUrl: https://api.service.hmrc.gov.uk/oauth/refresh
+          scopes: { }
+    applicationRestricted:
+      type: oauth2
+      description: |
+        HMRC supports OAuth 2.0 for authenticating application restricted API requests using an OAuth 2.0 Bearer Token in the AUTHORIZATION header.
+        See https://developer.service.hmrc.gov.uk/api-documentation/docs/authorisation/application-restricted-endpoints for details.
+      flows:
+        clientCredentials:
+          tokenUrl: https://api.service.hmrc.gov.uk/oauth/token
+          scopes:
+            read:time-to-pay-proxy: read ttp data
+  schemas:
+    errorResponse:
+      title: errorResponse
+      required:
+      - code
+      type: object
+      properties:
+        code:
+          type: string
+    AJSONSchemaforTTPAPI.:
+      title: AJSONSchemaforTTPAPI.
+      required:
+      - customerReference
+      - channelIdentifier
+      - plan
+      - debtItemCharges
+      type: object
+      properties:
+        customerReference:
+          maxLength: 15
+          minLength: 1
+          type: string
+          description: Unique Customer reference
+        channelIdentifier:
+          allOf:
+          - $ref: '#/components/schemas/ChannelIdentifier'
+          - description: Attribute to identify where the request is coming
+        plan:
+          $ref: '#/components/schemas/Plan'
+        customerPostCodes:
+          type: array
+          items:
+            $ref: '#/components/schemas/CustomerPostCode'
+          description: ''
+        debtItemCharges:
+          type: array
+          items:
+            $ref: '#/components/schemas/DebtItemCharge'
+          description: ''
+    AJSONSchemaforTTPAPI.1:
+      title: AJSONSchemaforTTPAPI.1
+      type: object
+      properties:
+        quoteReference:
+          maxLength: 15
+          minLength: 1
+          type: string
+          description: This is the Quote reference
+        customerReference:
+          maxLength: 15
+          minLength: 1
+          type: string
+          description: Unique Customer reference
+        quoteType:
+          allOf:
+          - $ref: '#/components/schemas/QuoteType'
+          - description: this will determine what IFS is required to calculate either duration or instalment amount
+        quoteDate:
+          type: string
+          description: This is the Quote date
+          format: date
+        numberOfInstalments:
+          type: integer
+          description: Number of instalments
+          format: int32
+        totalDebtIncInt:
+          type: integer
+          description: This is the total debt plus interest for the plan
+          format: int32
+        interestAccrued:
+          type: integer
+          description: This is the total interest accrued prior up to the quote
+          format: int32
+        planInterest:
+          type: number
+          description: Interest accrued to the life of the plan
+        totalInterest:
+          type: number
+          description: This is the total interest accrued for the duration of the plan
+        instalments:
+          type: array
+          items:
+            $ref: '#/components/schemas/Instalment'
+          description: ''
+        collections:
+          $ref: '#/components/schemas/Collections'
+    AJSONSchemaforTTPAPI.2:
+      title: AJSONSchemaforTTPAPI.2
+      required:
+      - customerReference
+      - quoteReference
+      - channelIdentifier
+      - plan
+      - debtItemCharges
+      - payments
+      - instalments
+      type: object
+      properties:
+        customerReference:
+          maxLength: 15
+          minLength: 1
+          type: string
+          description: Unique Customer reference
+        quoteReference:
+          maxLength: 15
+          minLength: 1
+          type: string
+          description: This is the Quote reference
+        channelIdentifier:
+          allOf:
+          - $ref: '#/components/schemas/ChannelIdentifier'
+          - description: Attribute to identify where the request is coming
+        plan:
+          $ref: '#/components/schemas/Plan1'
+        debtItemCharges:
+          type: array
+          items:
+            $ref: '#/components/schemas/DebtItemCharge'
+          description: ''
+        payments:
+          type: array
+          items:
+            $ref: '#/components/schemas/Payment'
+          description: ''
+        customerPostCodes:
+          type: array
+          items:
+            $ref: '#/components/schemas/CustomerPostCode'
+          description: ''
+        instalments:
+          type: array
+          items:
+            $ref: '#/components/schemas/Instalment1'
+          description: ''
+    AJSONSchemaforTTPAPI.3:
+      title: AJSONSchemaforTTPAPI.3
+      type: object
+      properties:
+        customerReference:
+          maxLength: 15
+          minLength: 1
+          type: string
+          description: The Unique Customer reference
+        planId:
+          maxLength: 15
+          minLength: 1
+          type: string
+          description: Unique planId
+        caseId:
+          type: string
+          description: Unique caseId
+        planStatus:
+          allOf:
+          - $ref: '#/components/schemas/PlanStatus'
+          - description: This is the plan status
+    AJSONSchemaforTTPAPI.4:
+      title: AJSONSchemaforTTPAPI.4
+      type: object
+      properties:
+        customerReference:
+          maxLength: 15
+          minLength: 1
+          type: string
+          description: This is the customer reference
+        channelIdentifier:
+          allOf:
+          - $ref: '#/components/schemas/ChannelIdentifier'
+          - description: Attribute to identify where the request is coming
+        caseId:
+          type: string
+          description: This is the unique case id
+        plan:
+          $ref: '#/components/schemas/Plan2'
+        debtItemCharges:
+          type: array
+          items:
+            $ref: '#/components/schemas/DebtItemCharge2'
+          description: ''
+        payments:
+          type: array
+          items:
+            $ref: '#/components/schemas/Payment1'
+          description: ''
+        customerPostCodes:
+          type: array
+          items:
+            $ref: '#/components/schemas/CustomerPostCode2'
+          description: ''
+        instalments:
+          type: array
+          items:
+            $ref: '#/components/schemas/Instalment'
+          description: ''
+        collections:
+          $ref: '#/components/schemas/Collections'
+    AJSONSchemaforTTPAPI.5:
+      title: AJSONSchemaforTTPAPI.5
+      required:
+      - customerReference
+      - planId
+      - updateType
+      - planStatus
+      type: object
+      properties:
+        customerReference:
+          maxLength: 15
+          minLength: 1
+          type: string
+          description: Customer reference
+        planId:
+          maxLength: 15
+          minLength: 1
+          type: string
+          description: Unique planId
+        updateType:
+          allOf:
+          - $ref: '#/components/schemas/UpdateType'
+          - description: This is where there is an update to the plan and doesn’t include status changes, e.g change tp [payment reference, payment method third party bank. Validation will be needed to ensure payment details are provided where update is being given
+        planStatus:
+          allOf:
+          - $ref: '#/components/schemas/PlanStatus'
+          - description: This is the plan status
+        completeReason:
+          allOf:
+          - $ref: '#/components/schemas/CompleteReason'
+          - description: This needs to be added as a validation where status update is complete
+        cancellationReason:
+          type: string
+          description: This needs to be added as a validation where status update is cancelled
+        thirdPartyBank:
+          type: boolean
+          description: Third party Bank
+        payments:
+          type: array
+          items:
+            $ref: '#/components/schemas/Payment2'
+          description: ''
+    AJSONSchemaforTTPAPI.6:
+      title: AJSONSchemaforTTPAPI.6
+      type: object
+      properties:
+        customerReference:
+          maxLength: 15
+          minLength: 1
+          type: string
+          description: Customer reference
+        planId:
+          maxLength: 15
+          minLength: 1
+          type: string
+          description: Unique planId
+        planStatus:
+          allOf:
+          - $ref: '#/components/schemas/PlanStatus'
+          - description: This is the plan status
+        planUpdatedDate:
+          type: string
+          description: This is the date for either the status change or the update
+          format: date
+    AJSONSchemaforTTPAPI.7:
+      title: AJSONSchemaforTTPAPI.7
+      type: object
+      properties:
+        requestId:
+          type: string
+          description: request id
+        content:
+          type: string
+          description: content
+        uri:
+          type: string
+          description: uri
+        isResponse:
+          type: boolean
+          description: isResponse
+        status:
+          type: number
+          description: statusCode
+    ChannelIdentifier:
+      title: ChannelIdentifier
+      enum:
+      - advisor
+      - selfService
+      type: string
+      description: Attribute to identify where the request is coming
+    Collections:
+      title: Collections
+      type: object
+      properties:
+        initialCollection:
+          $ref: '#/components/schemas/InitialCollection'
+        regularCollections:
+          type: array
+          items:
+            $ref: '#/components/schemas/RegularCollection'
+          description: ''
+    CompleteReason:
+      title: CompleteReason
+      enum:
+      - Payment in Full
+      - Amendment of Charges to Nil
+      - remission
+      type: string
+      description: This needs to be added as a validation where status update is complete
+    CustomerPostCode:
+      title: CustomerPostCode
+      required:
+      - addressPostcode
+      - postcodeDate
+      type: object
+      properties:
+        addressPostcode:
+          type: string
+          description: Customer postcode this will be a list of postcodes
+        postcodeDate:
+          type: string
+          description: Date the customer used this postcode from
+          format: date
+    CustomerPostCode2:
+      title: CustomerPostCode2
+      type: object
+      properties:
+        addressPostcode:
+          type: string
+          description: Customer postcode this will be a list of postcodes
+        postcodeDate:
+          type: string
+          description: Date the customer used this postcode from
+          format: date
+    DebtItemCharge:
+      title: DebtItemCharge
+      required:
+      - debtItemChargeId
+      - mainTrans
+      - subTrans
+      - originalDebtAmount
+      type: object
+      properties:
+        debtItemChargeId:
+          maxLength: 16
+          minLength: 1
+          type: string
+          description: An ID which uniquely identifies a particular duty
+        mainTrans:
+          maxLength: 8
+          minLength: 4
+          type: string
+          description: Unique MTrans Debt Type ID e.g.1525 also known as M Trans
+        subTrans:
+          maxLength: 8
+          minLength: 4
+          type: string
+          description: Duty Type description for the UI
+        originalDebtAmount:
+          type: integer
+          description: Original debt amount
+          format: int32
+        interestStartDate:
+          type: string
+          description: The interest start date
+          format: date
+        paymentHistory:
+          type: array
+          items:
+            $ref: '#/components/schemas/PaymentHistory'
+          description: ''
+    DebtItemCharge2:
+      title: DebtItemCharge2
+      type: object
+      properties:
+        debtItemChargeId:
+          maxLength: 16
+          minLength: 1
+          type: string
+          description: An ID which uniquely identifies a particular duty
+        mainTrans:
+          maxLength: 8
+          minLength: 4
+          type: string
+          description: Unique MTrans Debt Type ID e.g.1525 also known as M Trans
+        subTrans:
+          maxLength: 8
+          minLength: 4
+          type: string
+          description: Duty Type description for the UI
+        originalDebtAmount:
+          type: integer
+          description: Original debt amount
+          format: int32
+        interestStartDate:
+          type: string
+          description: The interest start date
+          format: date
+        paymentHistory:
+          type: array
+          items:
+            $ref: '#/components/schemas/PaymentHistory2'
+          description: ''
+    Frequency:
+      title: Frequency
+      enum:
+      - single
+      - weekly
+      - 2Weekly
+      - 4Weekly
+      - monthly
+      - quarterly
+      - 6Monthly
+      - annually
+      type: string
+      description: payment frequency
+    InitialCollection:
+      title: InitialCollection
+      type: object
+      properties:
+        dueDate:
+          type: string
+          description: Due date
+          format: date
+        amountDue:
+          type: number
+          description: Amount due
+    InitialPaymentMethod:
+      title: InitialPaymentMethod
+      enum:
+      - directDebit
+      - BACS
+      - cheque
+      - cardPayment
+      - Ongoing award
+      type: string
+      description: Payment method (Direct debit, BACS, Cheque, Card)
+    Instalment:
+      title: Instalment
+      type: object
+      properties:
+        debtItemChargeId:
+          maxLength: 16
+          minLength: 1
+          type: string
+          description: An ID which uniquely identifies a particular duty
+        dueDate:
+          type: string
+          description: Due date
+          format: date
+        amountDue:
+          type: integer
+          description: Amount due
+          format: int32
+        expectedPayment:
+          type: integer
+          description: Expected payment
+          format: int32
+        interestRate:
+          type: number
+          description: Interest rate
+        instalmentNumber:
+          type: integer
+          description: Instalment number
+          format: int32
+        instalmentInterestAccrued:
+          type: integer
+          description: Instalment interest
+          format: int32
+        instalmentBalance:
+          type: integer
+          description: Instalment balance
+          format: int32
+    Instalment1:
+      title: Instalment1
+      required:
+      - debtItemChargeId
+      - dueDate
+      - amountDue
+      - expectedPayment
+      - interestRate
+      - instalmentNumber
+      - instalmentInterestAccrued
+      - instalmentBalance
+      type: object
+      properties:
+        debtItemChargeId:
+          maxLength: 32
+          minLength: 1
+          type: string
+          description: An ID which uniquely identifies a particular duty
+        dueDate:
+          type: string
+          description: Due date
+          format: date
+        amountDue:
+          type: integer
+          description: Amount due
+          format: int32
+        expectedPayment:
+          type: integer
+          description: Expected payment
+          format: int32
+        interestRate:
+          type: number
+          description: Interest rate
+        instalmentNumber:
+          type: integer
+          description: Instalment number
+          format: int32
+        instalmentInterestAccrued:
+          type: integer
+          description: Instalment interest
+          format: int32
+        instalmentBalance:
+          type: integer
+          description: Instalment balance
+          format: int32
+    Payment:
+      title: Payment
+      required:
+      - paymentMethod
+      - paymentReference
+      type: object
+      properties:
+        paymentMethod:
+          allOf:
+          - $ref: '#/components/schemas/PaymentMethod'
+          - description: Payment method (Direct debit, BACS, Cheque, Card)
+        paymentReference:
+          maxLength: 15
+          minLength: 1
+          type: string
+          description: Payment Method reference
+    Payment1:
+      title: Payment1
+      type: object
+      properties:
+        paymentMethod:
+          allOf:
+          - $ref: '#/components/schemas/PaymentMethod1'
+          - description: Payment method (Direct debit, BACS, Cheque, Card)
+        paymentReference:
+          maxLength: 15
+          minLength: 1
+          type: string
+          description: Payment Method reference
+    Payment2:
+      title: Payment2
+      type: object
+      properties:
+        paymentMethod:
+          allOf:
+          - $ref: '#/components/schemas/PaymentMethod2'
+          - description: Payment method (Direct debit, BACS, Cheque, Card)
+        paymentReference:
+          maxLength: 15
+          minLength: 1
+          type: string
+          description: Payment Method reference
+    PaymentHistory:
+      title: PaymentHistory
+      required:
+      - paymentDate
+      - paymentAmount
+      type: object
+      properties:
+        paymentDate:
+          type: string
+          description: Payment date
+          format: date
+        paymentAmount:
+          type: integer
+          description: Payment amount
+          format: int32
+    PaymentHistory2:
+      title: PaymentHistory2
+      type: object
+      properties:
+        paymentDate:
+          type: string
+          description: Payment date
+          format: date
+        paymentAmount:
+          type: integer
+          description: Payment amount
+          format: int32
+    PaymentMethod:
+      title: PaymentMethod
+      enum:
+      - directDebit
+      - BACS
+      - cheque
+      - cardPayment
+      - Ongoing award
+      type: string
+      description: Payment method (Direct debit, BACS, Cheque, Card)
+    PaymentMethod1:
+      title: PaymentMethod1
+      enum:
+      - directDebit
+      - BACS
+      - cheque
+      - cardPayment
+      - On going award
+      type: string
+      description: Payment method (Direct debit, BACS, Cheque, Card)
+    PaymentMethod2:
+      title: PaymentMethod2
+      enum:
+      - directDebit
+      - BACS
+      - cheque
+      - cardPayment
+      type: string
+      description: Payment method (Direct debit, BACS, Cheque, Card)
+    PaymentPlanType:
+      title: PaymentPlanType
+      enum:
+      - timeToPay
+      - instalmentOrder
+      - childBenefits
+      - fieldCollections
+      - LFC
+      type: string
+      description: Payment plan type
+    PaymentPlanType1:
+      title: PaymentPlanType1
+      enum:
+      - timeToPay
+      - instalmentOrder
+      - childBenefits
+      - fieldCollections
+      - LFC
+      type: string
+      description: Payment Plan Type
+    Plan:
+      title: Plan
+      required:
+      - quoteType
+      - quoteDate
+      - instalmentStartDate
+      - frequency
+      - paymentPlanType
+      type: object
+      properties:
+        quoteType:
+          allOf:
+          - $ref: '#/components/schemas/QuoteType'
+          - description: this will determine what IFS is required to calculate either duration or instalment amount
+        quoteDate:
+          type: string
+          description: Quote date
+          format: date
+        instalmentStartDate:
+          type: string
+          description: Instalment start date
+          format: date
+        instalmentAmount:
+          type: number
+          description: Instalment amount
+        frequency:
+          allOf:
+          - $ref: '#/components/schemas/Frequency'
+          - description: payment frequency
+        duration:
+          type: integer
+          description: Duration for the payment frequency
+          format: int32
+        initialPaymentAmount:
+          type: integer
+          description: Initial payment amount
+          format: int32
+        initialPaymentDate:
+          type: string
+          description: Initial payment date
+          format: date
+        paymentPlanType:
+          allOf:
+          - $ref: '#/components/schemas/PaymentPlanType'
+          - description: Payment plan type
+    Plan1:
+      title: Plan1
+      required:
+      - quoteId
+      - quoteType
+      - quoteDate
+      - instalmentStartDate
+      - paymentPlanType
+      - thirdPartyBank
+      - numberOfInstalments
+      - frequency
+      - totalDebtIncInt
+      - totalInterest
+      - interestAccrued
+      - planInterest
+      type: object
+      properties:
+        quoteId:
+          type: string
+          description: This is the ID for the quote associated with the plan)
+        quoteType:
+          allOf:
+          - $ref: '#/components/schemas/QuoteType'
+          - description: this will determine what IFS is required to calculate either duration or instalment amount
+        quoteDate:
+          type: string
+          description: Quote date
+          format: date
+        instalmentStartDate:
+          type: string
+          description: Instalment start date
+          format: date
+        instalmentAmount:
+          type: number
+          description: Instalment amount
+        paymentPlanType:
+          allOf:
+          - $ref: '#/components/schemas/PaymentPlanType1'
+          - description: Payment Plan Type
+        thirdPartyBank:
+          type: boolean
+          description: Third party bank
+        numberOfInstalments:
+          type: integer
+          description: Number of instalments
+          format: int32
+        frequency:
+          allOf:
+          - $ref: '#/components/schemas/Frequency'
+          - description: payment frequency
+        duration:
+          type: integer
+          description: Duration for the payment frequency
+          format: int32
+        initialPaymentAmount:
+          type: integer
+          description: Initial payment amount
+          format: int32
+        initialPaymentDate:
+          type: string
+          description: Initial payment date
+          format: date
+        totalDebtIncInt:
+          type: number
+          description: This is the total debt plus interest for the plan
+        totalInterest:
+          type: number
+          description: This is the total interest accrued for the duration of the plan
+        interestAccrued:
+          type: integer
+          description: This is the total interest accrued prior to plan start
+          format: int32
+        planInterest:
+          type: number
+          description: Interest accrued to the life of the plan
+    Plan2:
+      title: Plan2
+      type: object
+      properties:
+        planId:
+          maxLength: 15
+          minLength: 1
+          type: string
+          description: This is the unique plan id
+        quoteId:
+          type: string
+          description: This is the ID for the quote associated with the plan)
+        quoteDate:
+          type: string
+          description: Quote date
+          format: date
+        quoteType:
+          allOf:
+          - $ref: '#/components/schemas/QuoteType'
+          - description: this will determine what IFS is required to calculate either duration or instalment amount
+        paymentPlanType:
+          allOf:
+          - $ref: '#/components/schemas/PaymentPlanType1'
+          - description: Payment Plan Type
+        thirdPartyBank:
+          type: boolean
+          description: Third party bank
+        numberOfInstalments:
+          type: integer
+          description: Number of instalments
+          format: int32
+        frequency:
+          allOf:
+          - $ref: '#/components/schemas/Frequency'
+          - description: payment frequency
+        initialPaymentMethod:
+          allOf:
+          - $ref: '#/components/schemas/InitialPaymentMethod'
+          - description: Payment method (Direct debit, BACS, Cheque, Card)
+        initialPaymentReference:
+          type: string
+          description: Payment Method reference
+        totalDebtIncInt:
+          type: integer
+          description: This is the total debt plus interest for the plan
+          format: int32
+        totalInterest:
+          type: number
+          description: This is the total interest accrued for the duration of the plan
+        interestAccrued:
+          type: integer
+          description: This is the total interest accrued prior to plan start
+          format: int32
+        planInterest:
+          type: number
+          description: Interest accrued to the life of the plan
+    PlanStatus:
+      title: PlanStatus
+      enum:
+      - success
+      - failure
+      - Resolved - Cancelled
+      - Resolved - Completed
+      - TTP Arrangement - In Progress
+      - Resolved - TTP Amended
+      - In Default - Clerical Review
+      - Pending - First Reminder
+      - In default - First Reminder
+      - Pending - Second Reminder
+      - In default - Second Reminder
+      - Pending - Cancellation
+      - Pending - Completion
+      - TTP - Monitoring suspended
+      - Pending - Cancellation Letter
+      type: string
+      description: This is the plan status
+    QuoteType:
+      title: QuoteType
+      enum:
+      - duration
+      - instalmentAmount
+      type: string
+      description: this will determine what IFS is required to calculate either duration or instalment amount
+    RegularCollection:
+      title: RegularCollection
+      type: object
+      properties:
+        dueDate:
+          type: string
+          description: Due date
+          format: date
+        amountDue:
+          type: number
+          description: Amount due
+    Timetopayproxyendpointerrorcodes:
+      title: Timetopayproxyendpointerrorcodes
+      type: object
+      properties:
+        reason:
+          type: string
+          description: Reason for error
+        message:
+          type: string
+          description: Summary of error response
+      description: Time to pay proxy endpoint error codes response
+    UpdateType:
+      title: UpdateType
+      enum:
+      - paymentDetails
+      - planStatus
+      type: string
+      description: This is where there is an update to the plan and doesn’t include status changes, e.g change tp [payment reference, payment method third party bank. Validation will be needed to ensure payment details are provided where update is being given
+tags:
+- name: individuals
+  description: ''
