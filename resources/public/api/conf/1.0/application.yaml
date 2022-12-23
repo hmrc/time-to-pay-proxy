@@ -16,6 +16,9 @@ paths:
       description: This is an endpoint that triggers request to create a plan for storage from ttp service
       operationId: GenerateTTPQuoteRequest
       parameters: []
+      security:
+        - applicationRestricted:
+          - read:time-to-pay-proxy
       requestBody:
         description: ''
         content:
@@ -108,6 +111,9 @@ paths:
       description: This is an endpoint that triggers a request to generate a draft quote from ttp service
       operationId: TTPPromoteanArrangementrequest
       parameters: []
+      security:
+        - applicationRestricted:
+          - read:time-to-pay-proxy
       requestBody:
         description: ''
         content:
@@ -265,6 +271,9 @@ paths:
         style: simple
         schema:
           type: string
+      security:
+        - applicationRestricted:
+          - read:time-to-pay-proxy
       responses:
         '200':
           description: ''
@@ -412,6 +421,9 @@ paths:
         style: simple
         schema:
           type: string
+      security:
+        - applicationRestricted:
+          - read:time-to-pay-proxy
       requestBody:
         description: ''
         content:
@@ -487,6 +499,9 @@ paths:
       description: This is an endpoint for testing the ttp service in different env - not to be used apart from debt transformation
       operationId: TestOnlyRequests
       parameters: []
+      security:
+        - applicationRestricted:
+          - read:time-to-pay-proxy
       responses:
         '200':
           description: ''
@@ -525,6 +540,9 @@ paths:
         style: simple
         schema:
           type: string
+      security:
+        - applicationRestricted:
+          - read:time-to-pay-proxy
       responses:
         '200':
           description: ''
@@ -556,6 +574,9 @@ paths:
       description: This is an endpoint for testing the ttp service in different env - not to be used apart from debt transformation
       operationId: TestOnlyResponse
       parameters: []
+      security:
+        - applicationRestricted:
+          - read:time-to-pay-proxy
       requestBody:
         description: ''
         content:
@@ -594,6 +615,9 @@ paths:
       description: This is an endpoint for testing the ttp service in different env - not to be used apart from debt transformation
       operationId: TestOnlyRequests1
       parameters: []
+      security:
+        - applicationRestricted:
+          - read:time-to-pay-proxy
       responses:
         '200':
           description: ''
@@ -624,6 +648,9 @@ paths:
       description: This is an endpoint for testing the ttp service in different env - not to be used apart from debt transformation
       operationId: TestOnlyResponse1
       parameters: []
+      security:
+        - applicationRestricted:
+          - read:time-to-pay-proxy
       requestBody:
         description: ''
         content:
@@ -674,6 +701,28 @@ paths:
               schema: {}
       deprecated: false
 components:
+  securitySchemes:
+    userRestricted:
+      type: oauth2
+      description: |
+        HMRC supports OAuth 2.0 for authenticating user restricted API requests using an OAuth 2.0 Bearer Token in the AUTHORIZATION header.
+        See https://developer.service.hmrc.gov.uk/api-documentation/docs/authorisation/user-restricted-endpoints for details.
+      flows:
+        authorizationCode:
+          authorizationUrl: https://api.service.hmrc.gov.uk/oauth/authorize
+          tokenUrl: https://api.service.hmrc.gov.uk/oauth/token
+          refreshUrl: https://api.service.hmrc.gov.uk/oauth/refresh
+          scopes: { }
+    applicationRestricted:
+      type: oauth2
+      description: |
+        HMRC supports OAuth 2.0 for authenticating application restricted API requests using an OAuth 2.0 Bearer Token in the AUTHORIZATION header.
+        See https://developer.service.hmrc.gov.uk/api-documentation/docs/authorisation/application-restricted-endpoints for details.
+      flows:
+        clientCredentials:
+          tokenUrl: https://api.service.hmrc.gov.uk/oauth/token
+          scopes:
+            read:time-to-pay-proxy: read ttp data
   schemas:
     errorResponse:
       title: errorResponse
