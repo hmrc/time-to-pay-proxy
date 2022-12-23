@@ -611,7 +611,7 @@ paths:
     get:
       tags:
       - individuals
-      summary: Test Only Requests1
+      summary: Test Only Requests
       description: This is an endpoint for testing the ttp service in different env - not to be used apart from debt transformation
       operationId: TestOnlyRequests1
       parameters: []
@@ -644,7 +644,7 @@ paths:
     post:
       tags:
       - individuals
-      summary: Test Only Response1
+      summary: Test Only Response
       description: This is an endpoint for testing the ttp service in different env - not to be used apart from debt transformation
       operationId: TestOnlyResponse1
       parameters: []
