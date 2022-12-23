@@ -30,8 +30,8 @@ class DocumentationController @Inject() (
   assets: Assets,
   controllerComponents: ControllerComponents,
   config: Configuration
-)(
-  implicit materializer: Materializer,
+)(implicit
+  materializer: Materializer,
   executionContext: ExecutionContext
 ) extends BackendController(controllerComponents) {
   def definition(): Action[AnyContent] =
