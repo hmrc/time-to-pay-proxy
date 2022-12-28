@@ -6,7 +6,7 @@ import sbt._
 object AppDependencies {
   private val allTestEnvs = "test, it"
   val compile = Seq(
-    "uk.gov.hmrc"   %% "bootstrap-backend-play-28" % "5.3.0",
+    "uk.gov.hmrc"   %% "bootstrap-backend-play-28" % "7.12.0",
     "uk.gov.hmrc"   %% "auth-client"               % "3.3.0-play-27",
     "org.typelevel" %% "cats-core"                 % "2.3.0",
     "com.beachape"  %% "enumeratum-play-json"      % "1.6.1"
