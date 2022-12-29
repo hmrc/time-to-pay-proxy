@@ -23,10 +23,11 @@ import scala.concurrent.ExecutionContext
 import uk.gov.hmrc.timetopayproxy.models._
 import uk.gov.hmrc.timetopayproxy.models.TtppEnvelope.TtppEnvelope
 import com.google.inject.ImplementedBy
-import play.api.libs.json.Reads
+import play.api.libs.json.{ Json, Reads }
 
 import javax.inject.{ Inject, Singleton }
 import uk.gov.hmrc.timetopayproxy.config.AppConfig
+import uk.gov.hmrc.timetopayproxy.logging.RequestAwareLogger
 
 import java.net.URLEncoder
 import java.util.UUID
@@ -61,6 +62,8 @@ trait TtpConnector {
 @Singleton
 class DefaultTtpConnector @Inject() (appConfig: AppConfig, httpClient: HttpClient)
     extends TtpConnector with HttpParser {
+
+  private val logger: RequestAwareLogger = new RequestAwareLogger(classOf[DefaultTtpConnector])
 
   val headers = (guid: String) =>
     if (appConfig.useIf) {
@@ -141,6 +144,8 @@ class DefaultTtpConnector @Inject() (appConfig: AppConfig, httpClient: HttpClien
     createPlanRequest: CreatePlanRequest,
     queryParams: Seq[(String, String)] = Seq.empty
   )(implicit ec: ExecutionContext, hc: HeaderCarrier): TtppEnvelope[CreatePlanResponse] = {
+    logger.info(s"Create plan instalments: \n${Json.toJson(createPlanRequest.instalments)}")
+
     val path =
       if (appConfig.useIf) "individuals/debts/time-to-pay/quote/arrangement" else "debts/time-to-pay/quote/arrangement"
 
