@@ -30,6 +30,7 @@ import uk.gov.hmrc.timetopayproxy.models.GenerateQuoteResponse._
 import uk.gov.hmrc.timetopayproxy.models.TtppEnvelope.TtppEnvelope
 import cats.syntax.either._
 import uk.gov.hmrc.timetopayproxy.config.FeatureSwitch
+import uk.gov.hmrc.timetopayproxy.logging.RequestAwareLogger
 
 import scala.concurrent.Future
 import scala.util.{ Failure, Success, Try }
@@ -41,6 +42,8 @@ class TimeToPayProxyController @Inject() (
   timeToPayProxyService: TTPQuoteService,
   fs: FeatureSwitch
 ) extends BackendController(cc) with BaseController {
+
+  private val logger: RequestAwareLogger = new RequestAwareLogger(classOf[TimeToPayProxyController])
   implicit val ec = cc.executionContext
 
   private val queryParameterNotMatchingPayload =
@@ -79,7 +82,20 @@ class TimeToPayProxyController @Inject() (
         } yield response
 
         result
-          .leftMap(ttppError => ttppError.toErrorResponse)
+          .leftMap { ttppError =>
+            val errorResponse = ttppError.toErrorResponse
+            if (errorResponse.statusCode == 400) {
+              logger.info(
+                s"Request with updateType: [${updatePlanRequest.updateType}], " +
+                  s"planStatus: [${updatePlanRequest.planStatus}], " +
+                  s"thirdPartyBank: [${updatePlanRequest.thirdPartyBank}], " +
+                  s"cancellationReason: [${updatePlanRequest.cancellationReason}], " +
+                  s"completeReason: [${updatePlanRequest.completeReason}] " +
+                  s"and ${updatePlanRequest.payments.size} payments has ${errorResponse.errorMessage}"
+              )
+            }
+            errorResponse
+          }
           .fold(e => e.toResponse, r => r.toResponse)
       }
     }
