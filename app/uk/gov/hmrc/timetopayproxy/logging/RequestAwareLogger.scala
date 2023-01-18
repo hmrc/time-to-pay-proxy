@@ -27,8 +27,8 @@ class RequestAwareLogger(clazz: Class[_]) {
 
   def trace(msg: => String)(implicit hc: HeaderCarrier): Unit = withRequestIDsInMDC(underlying.trace(msg))
   def debug(msg: => String)(implicit hc: HeaderCarrier): Unit = withRequestIDsInMDC(underlying.debug(msg))
-  def info(msg:  => String)(implicit hc: HeaderCarrier): Unit = withRequestIDsInMDC(underlying.info(msg))
-  def warn(msg:  => String)(implicit hc: HeaderCarrier): Unit = withRequestIDsInMDC(underlying.warn(msg))
+  def info(msg: => String)(implicit hc: HeaderCarrier): Unit = withRequestIDsInMDC(underlying.info(msg))
+  def warn(msg: => String)(implicit hc: HeaderCarrier): Unit = withRequestIDsInMDC(underlying.warn(msg))
   def error(msg: => String)(implicit hc: HeaderCarrier): Unit = withRequestIDsInMDC(underlying.error(msg))
 
   private def withRequestIDsInMDC(f: => Unit)(implicit hc: HeaderCarrier): Unit = {

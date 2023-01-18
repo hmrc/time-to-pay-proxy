@@ -18,7 +18,7 @@ package uk.gov.hmrc.timetopayproxy.models
 
 object HeaderNames {
 
-  val RequestIdKey     = "x-request-id"
+  val RequestIdKey = "x-request-id"
   val CorrelationIdKey = "correlationId"
 
 }
