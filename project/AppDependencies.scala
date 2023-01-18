@@ -5,15 +5,17 @@ import sbt._
 
 object AppDependencies {
   private val allTestEnvs = "test, it"
+
+  private val BootstrapPlayVersion = "7.12.0"
+
   val compile = Seq(
-    "uk.gov.hmrc"   %% "bootstrap-backend-play-28" % "7.12.0",
-    "uk.gov.hmrc"   %% "auth-client"               % "3.3.0-play-27",
+    "uk.gov.hmrc"   %% "bootstrap-backend-play-28" % BootstrapPlayVersion,
     "org.typelevel" %% "cats-core"                 % "2.3.0",
     "com.beachape"  %% "enumeratum-play-json"      % "1.6.1"
   )
 
   val test = Seq(
-    "uk.gov.hmrc"                  %% "bootstrap-test-play-28" % "5.3.0"             % allTestEnvs,
+    "uk.gov.hmrc"                  %% "bootstrap-test-play-28" % BootstrapPlayVersion            % allTestEnvs,
     "com.github.tomakehurst"       % "wiremock"                % "2.27.2"            % allTestEnvs,
     "org.scalatest"                %% "scalatest"              % "3.2.5"             % allTestEnvs,
     "org.scalamock"                %% "scalamock"              % "5.1.0"             % allTestEnvs,
