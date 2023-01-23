@@ -692,6 +692,8 @@ paths:
         Any request to this endpoint initiates a 'Hello world' response.
       operationId: Sayhelloworld
       parameters: []
+      security:
+      - {}
       responses:
         '200':
           description: ''
