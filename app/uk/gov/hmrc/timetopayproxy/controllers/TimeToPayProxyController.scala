@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 HM Revenue & Customs
+ * Copyright 2023 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,21 +16,20 @@
 
 package uk.gov.hmrc.timetopayproxy.controllers
 
-import javax.inject.{ Inject, Singleton }
+import cats.syntax.either._
 import play.api.libs.json._
 import play.api.mvc._
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
 import uk.gov.hmrc.timetopayproxy.actions.auth.AuthoriseAction
-import uk.gov.hmrc.timetopayproxy.models._
+import uk.gov.hmrc.timetopayproxy.config.FeatureSwitch
+import uk.gov.hmrc.timetopayproxy.models.TtppEnvelope.TtppEnvelope
 import uk.gov.hmrc.timetopayproxy.models.TtppErrorResponse._
+import uk.gov.hmrc.timetopayproxy.models._
 import uk.gov.hmrc.timetopayproxy.services.TTPQuoteService
 import uk.gov.hmrc.timetopayproxy.utils.TtppErrorHandler._
 import uk.gov.hmrc.timetopayproxy.utils.TtppResponseConverter._
-import uk.gov.hmrc.timetopayproxy.models.GenerateQuoteResponse._
-import uk.gov.hmrc.timetopayproxy.models.TtppEnvelope.TtppEnvelope
-import cats.syntax.either._
-import uk.gov.hmrc.timetopayproxy.config.FeatureSwitch
 
+import javax.inject.{ Inject, Singleton }
 import scala.concurrent.Future
 import scala.util.{ Failure, Success, Try }
 
@@ -137,7 +136,9 @@ class TimeToPayProxyController @Inject() (
         Future.successful(
           TtppErrorResponse(
             BAD_REQUEST.intValue(),
-            s"Invalid ${m.runtimeClass.getSimpleName} payload: Payload has a missing field or an invalid format. ${generateReadableMessageFromError(errs)}"
+            s"Invalid ${m.runtimeClass.getSimpleName} payload: Payload has a missing field or an invalid format. ${generateReadableMessageFromError(
+              errs.toSeq.map(err => (err._1, err._2.toSeq))
+            )}"
           ).toResponse
         )
       case Failure(e) =>

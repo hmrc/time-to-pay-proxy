@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 HM Revenue & Customs
+ * Copyright 2023 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,29 +16,19 @@
 
 package uk.gov.hmrc.timetopayproxy.auth
 
-import play.api.mvc.{ Action, AnyContent, InjectedController }
-import uk.gov.hmrc.auth.core.PlayAuthConnector
-import uk.gov.hmrc.timetopayproxy.actions.auth.{ AuthoriseAction, AuthoriseActionImpl }
-import uk.gov.hmrc.timetopayproxy.support.UnitSpec
-
-import scala.concurrent.{ ExecutionContext, Future }
-import uk.gov.hmrc.auth.core.authorise.Predicate
-import uk.gov.hmrc.auth.core.retrieve.Retrieval
-import play.api.test.FakeRequest
-import play.api.test.Helpers.stubControllerComponents
-import uk.gov.hmrc.auth.core.{ InsufficientEnrolments, PlayAuthConnector, SessionRecordNotFound }
-import uk.gov.hmrc.http.HeaderCarrier
 import play.api.http.Status
 import play.api.mvc.{ Action, AnyContent, InjectedController }
 import play.api.test.FakeRequest
+import play.api.test.Helpers.stubControllerComponents
 import uk.gov.hmrc.auth.core.authorise.Predicate
 import uk.gov.hmrc.auth.core.retrieve.Retrieval
 import uk.gov.hmrc.auth.core.{ InsufficientEnrolments, PlayAuthConnector, SessionRecordNotFound }
 import uk.gov.hmrc.http.HeaderCarrier
-import play.api.test.Helpers.stubControllerComponents
+import uk.gov.hmrc.timetopayproxy.actions.auth.{ AuthoriseAction, AuthoriseActionImpl }
+import uk.gov.hmrc.timetopayproxy.support.UnitSpec
 
-import scala.concurrent.{ ExecutionContext, Future }
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.{ ExecutionContext, Future }
 
 class Harness(authAction: AuthoriseAction) extends InjectedController {
   def onPageLoad(): Action[AnyContent] = authAction { _ =>
