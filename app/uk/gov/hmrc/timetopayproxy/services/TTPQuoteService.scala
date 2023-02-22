@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 HM Revenue & Customs
+ * Copyright 2023 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -59,7 +59,7 @@ class DefaultTTPQuoteService @Inject() (ttpConnector: TtpConnector) extends TTPQ
     ec: ExecutionContext,
     hc: HeaderCarrier
   ): TtppEnvelope[GenerateQuoteResponse] =
-    ttpConnector.generateQuote(timeToPayRequest, requestQuery.mapValues(_.head).toSeq)
+    ttpConnector.generateQuote(timeToPayRequest, requestQuery.view.mapValues(_.head).toSeq)
 
   override def getExistingPlan(customerReference: CustomerReference, planId: PlanId)(implicit
     ec: ExecutionContext,
@@ -82,5 +82,5 @@ class DefaultTTPQuoteService @Inject() (ttpConnector: TtpConnector) extends TTPQ
     createPlanRequest: CreatePlanRequest,
     requestQuery: Map[String, Seq[String]]
   )(implicit ec: ExecutionContext, hc: HeaderCarrier): TtppEnvelope[CreatePlanResponse] =
-    ttpConnector.createPlan(createPlanRequest, requestQuery.mapValues(_.head).toSeq)
+    ttpConnector.createPlan(createPlanRequest, requestQuery.view.mapValues(_.head).toSeq)
 }

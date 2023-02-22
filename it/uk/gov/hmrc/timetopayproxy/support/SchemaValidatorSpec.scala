@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 HM Revenue & Customs
+ * Copyright 2023 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,15 +16,15 @@
 
 package uk.gov.hmrc.timetopayproxy.support
 
-import com.fasterxml.jackson.databind.{ JsonNode, ObjectMapper }
-import com.networknt.schema.{ JsonSchema, JsonSchemaFactory, SpecVersion }
+import com.fasterxml.jackson.databind.{JsonNode, ObjectMapper}
+import com.networknt.schema.{JsonSchema, JsonSchemaFactory, SpecVersion}
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
 import play.api.libs.json.Json
 import uk.gov.hmrc.timetopayproxy.models._
 
 import java.nio.file.Paths
-import scala.collection.JavaConverters.asScalaSetConverter
+import scala.jdk.CollectionConverters.CollectionHasAsScala
 
 class SchemaValidatorSpec extends AnyWordSpec with Matchers {
 
@@ -42,7 +42,7 @@ class SchemaValidatorSpec extends AnyWordSpec with Matchers {
     "be valid according to the meta schema" in {
       val schema = loadSchema("resources/public/api/conf/1.0/schemas/metaSchema.json")
       val json = loadJson("resources/public/api/conf/1.0/schemas/generate/postGenerateRequestSchema.json")
-      val errors = schema.validate(json).asScala
+      val errors = schema.validate(json).asScala.toSet
 
       errors shouldEqual Set.empty
     }
@@ -50,7 +50,7 @@ class SchemaValidatorSpec extends AnyWordSpec with Matchers {
     "validate an example request" in {
       val schema = loadSchema("resources/public/api/conf/1.0/schemas/generate/postGenerateRequestSchema.json")
       val json = loadJson("resources/public/api/conf/1.0/examples/generate/postGenerateRequest.json")
-      val errors = schema.validate(json).asScala
+      val errors = schema.validate(json).asScala.toSet
 
       errors shouldEqual Set.empty
     }
@@ -68,7 +68,7 @@ class SchemaValidatorSpec extends AnyWordSpec with Matchers {
     "be valid according to the meta schema" in {
       val schema = loadSchema("resources/public/api/conf/1.0/schemas/metaSchema.json")
       val json = loadJson("resources/public/api/conf/1.0/schemas/generate/postGenerateResponseSchema.json")
-      val errors = schema.validate(json).asScala
+      val errors = schema.validate(json).asScala.toSet
 
       errors shouldEqual Set.empty
     }
@@ -76,7 +76,7 @@ class SchemaValidatorSpec extends AnyWordSpec with Matchers {
     "validate an example response" in {
       val schema = loadSchema("resources/public/api/conf/1.0/schemas/generate/postGenerateResponseSchema.json")
       val json = loadJson("resources/public/api/conf/1.0/examples/generate/postGenerateResponse.json")
-      val errors = schema.validate(json).asScala
+      val errors = schema.validate(json).asScala.toSet
 
       errors shouldEqual Set.empty
     }
@@ -94,7 +94,7 @@ class SchemaValidatorSpec extends AnyWordSpec with Matchers {
     "be valid according to the meta schema" in {
       val schema = loadSchema("resources/public/api/conf/1.0/schemas/metaSchema.json")
       val json = loadJson("resources/public/api/conf/1.0/schemas/create/postCreateRequestSchema.json")
-      val errors = schema.validate(json).asScala
+      val errors = schema.validate(json).asScala.toSet
 
       errors shouldEqual Set.empty
     }
@@ -102,7 +102,7 @@ class SchemaValidatorSpec extends AnyWordSpec with Matchers {
     "validate an example request" in {
       val schema = loadSchema("resources/public/api/conf/1.0/schemas/create/postCreateRequestSchema.json")
       val json = loadJson("resources/public/api/conf/1.0/examples/create/postCreateRequest.json")
-      val errors = schema.validate(json).asScala
+      val errors = schema.validate(json).asScala.toSet
 
       errors shouldEqual Set.empty
     }
@@ -120,7 +120,7 @@ class SchemaValidatorSpec extends AnyWordSpec with Matchers {
     "be valid according to the meta schema" in {
       val schema = loadSchema("resources/public/api/conf/1.0/schemas/metaSchema.json")
       val json = loadJson("resources/public/api/conf/1.0/schemas/view/getViewResponseSchema.json")
-      val errors = schema.validate(json).asScala
+      val errors = schema.validate(json).asScala.toSet
 
       errors shouldEqual Set.empty
     }
@@ -128,7 +128,7 @@ class SchemaValidatorSpec extends AnyWordSpec with Matchers {
     "validate an example response" in {
       val schema = loadSchema("resources/public/api/conf/1.0/schemas/view/getViewResponseSchema.json")
       val json = loadJson("resources/public/api/conf/1.0/examples/view/getViewResponse.json")
-      val errors = schema.validate(json).asScala
+      val errors = schema.validate(json).asScala.toSet
 
       errors shouldEqual Set.empty
     }
@@ -146,7 +146,7 @@ class SchemaValidatorSpec extends AnyWordSpec with Matchers {
     "be valid according to the meta schema" in {
       val schema = loadSchema("resources/public/api/conf/1.0/schemas/metaSchema.json")
       val json = loadJson("resources/public/api/conf/1.0/schemas/update/putUpdateRequestSchema.json")
-      val errors = schema.validate(json).asScala
+      val errors = schema.validate(json).asScala.toSet
 
       errors shouldEqual Set.empty
     }
@@ -154,17 +154,10 @@ class SchemaValidatorSpec extends AnyWordSpec with Matchers {
     "validate an example request" in {
       val schema = loadSchema("resources/public/api/conf/1.0/schemas/update/putUpdateRequestSchema.json")
       val json = loadJson("resources/public/api/conf/1.0/examples/update/putUpdateRequest.json")
-      val errors = schema.validate(json).asScala
+      val errors = schema.validate(json).asScala.toSet
 
       errors shouldEqual Set.empty
     }
-
-//    "should parse to the model" in {
-//      val raw = scala.io.Source
-//        .fromFile("resources/public/api/conf/1.0/examples/update/putUpdateRequest.json")
-//        .mkString
-//      Json.parse(raw).as[UpdatePlanRequest]
-//    }
 
   }
 
@@ -173,7 +166,7 @@ class SchemaValidatorSpec extends AnyWordSpec with Matchers {
     "be valid according to the meta schema" in {
       val schema = loadSchema("resources/public/api/conf/1.0/schemas/metaSchema.json")
       val json = loadJson("resources/public/api/conf/1.0/schemas/update/putUpdateResponseSchema.json")
-      val errors = schema.validate(json).asScala
+      val errors = schema.validate(json).asScala.toSet
 
       errors shouldEqual Set.empty
     }
@@ -181,17 +174,10 @@ class SchemaValidatorSpec extends AnyWordSpec with Matchers {
     "validate an example response" in {
       val schema = loadSchema("resources/public/api/conf/1.0/schemas/update/putUpdateResponseSchema.json")
       val json = loadJson("resources/public/api/conf/1.0/examples/update/putUpdateResponse.json")
-      val errors = schema.validate(json).asScala
+      val errors = schema.validate(json).asScala.toSet
 
       errors shouldEqual Set.empty
     }
-
-//    "should parse to the model" in {
-//      val raw = scala.io.Source
-//        .fromFile("resources/public/api/conf/1.0/examples/update/putUpdateResponse.json")
-//        .mkString
-//      Json.parse(raw).as[UpdatePlanResponse]
-//    }
 
   }
 }

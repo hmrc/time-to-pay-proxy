@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 HM Revenue & Customs
+ * Copyright 2023 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -91,11 +91,11 @@ class DefaultTtpTestConnector @Inject() (appConfig: AppConfig, httpClient: HttpC
 
     TtppEnvelope {
       httpClient
-        .DELETE(url)
+        .DELETE[HttpResponse](url)
         .map { response =>
           response.status match {
-            case OK         => Unit
-            case NO_CONTENT => Unit
+            case OK         => ()
+            case NO_CONTENT => ()
             case _          => ConnectorError(response.status, "Unexpected response code").asLeft
           }
         }
