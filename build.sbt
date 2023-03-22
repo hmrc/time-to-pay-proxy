@@ -7,7 +7,7 @@ val silencerVersion = "1.7.3"
 lazy val ItTest = config("it") extend Test
 lazy val coverageSettings: Seq[Setting[_]] = {
   Seq(
-    ScoverageKeys.coverageExcludedPackages := "<empty>;Reverse.*;.*Module.*;.*AuthService.*;models\\.data\\..*;uk.gov.hmrc.BuildInfo;app.*;nr.*;res.*;prod.*;.*RuleAST.*;config.*;testOnlyDoNotUseInAppConf.*;definition.*",
+    ScoverageKeys.coverageExcludedPackages := "<empty>;Reverse.*;.*Module.*;.*AuthService.*;models\\.data\\..*;uk.gov.hmrc.BuildInfo;app.*;nr.*;res.*;prod.*;.*RuleAST.*;config.*;testOnlyDoNotUseInAppConf.*;definition.*;.*FeatureSwitch.*",
     ScoverageKeys.coverageMinimumStmtTotal := 90,
     ScoverageKeys.coverageFailOnMinimum := true,
     ScoverageKeys.coverageHighlighting := true
