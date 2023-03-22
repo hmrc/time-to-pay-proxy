@@ -16,9 +16,8 @@
 
 package uk.gov.hmrc.timetopayproxy.models
 
-import enumeratum.{ Enum, EnumEntry, PlayJsonEnum }
+import enumeratum.{Enum, EnumEntry, PlayJsonEnum}
 import play.api.libs.json.Json
-import uk.gov.hmrc.timetopayproxy.models.error.PlanStatusCreateError
 
 final case class CaseId(value: String) extends AnyVal
 
@@ -47,11 +46,6 @@ object PlanStatus extends Enum[PlanStatus] with PlayJsonEnum[PlanStatus] {
   case object ResolvedCompleted extends PlanStatus("Resolved - Completed")
   case object MonitoringSuspended extends PlanStatus("TTP - Monitoring suspended")
   case object PendingCancellationLetter extends PlanStatus("Pending - Cancellation Letter")
-
-  def valueOf(value: String): Either[PlanStatusCreateError, PlanStatus] =
-    PlanStatus
-      .withNameInsensitiveOption(value)
-      .toRight(PlanStatusCreateError(s"Failed to create plan status from $value"))
 
 }
 
