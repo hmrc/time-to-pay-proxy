@@ -6,7 +6,7 @@ import sbt._
 object AppDependencies {
   private val allTestEnvs = "test, it"
 
-  private val BootstrapPlayVersion = "7.12.0"
+  private val BootstrapPlayVersion = "7.15.0"
 
   val compile = Seq(
     "uk.gov.hmrc"   %% "bootstrap-backend-play-28" % BootstrapPlayVersion,
