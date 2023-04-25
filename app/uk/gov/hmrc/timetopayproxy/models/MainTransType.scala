@@ -141,4 +141,8 @@ object MainTransType extends Enum[MainTransType] with PlayJsonEnum[MainTransType
   case object VATFTNRCSLLPI extends MainTransType("4791")
   case object VATFailureToSubmitRCSLLPI extends MainTransType("4794")
   case object VATRPIRecovery extends MainTransType("4797")
+
+  case object IBF extends MainTransType("4618")
+  case object OFP extends MainTransType("3996")
+  case object IBFInterestOnly extends MainTransType("3997")
 }
