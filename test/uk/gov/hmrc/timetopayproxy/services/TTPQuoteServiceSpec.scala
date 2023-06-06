@@ -98,8 +98,8 @@ class TTPQuoteServiceSpec extends UnitSpec {
     Seq(
       DebtItemCharge(
         DebtItemChargeId("debtItemChargeId1"),
-        TPSSContractSettlementINT,
-        TGPEN,
+        "1546",
+        "1090",
         100,
         Some(LocalDate.parse("2021-05-13")),
         List(Payment(LocalDate.parse("2021-05-13"), 100))
@@ -158,8 +158,8 @@ class TTPQuoteServiceSpec extends UnitSpec {
     debtItemCharges = Seq(
       DebtItemCharge(
         DebtItemChargeId("debtItemChargeId1"),
-        TPSSContractSettlementINT,
-        TGPEN,
+        "1546",
+        "1090",
         100,
         Some(LocalDate.parse("2021-05-13")),
         List(Payment(LocalDate.parse("2021-05-13"), 100))

@@ -163,8 +163,8 @@ class TimeToPayProxyControllerSpec extends AnyWordSpec with Matchers with MockFa
     Seq(
       DebtItemCharge(
         DebtItemChargeId("debtItemChargeId1"),
-        TPSSContractSettlementINT,
-        TGPEN,
+        "1546",
+        "1090",
         100,
         Some(LocalDate.parse("2021-05-13")),
         List(Payment(LocalDate.parse("2021-05-13"), 100))
