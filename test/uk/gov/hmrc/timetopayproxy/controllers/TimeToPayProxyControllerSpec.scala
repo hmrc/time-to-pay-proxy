@@ -39,7 +39,6 @@ import play.api.test.Helpers._
 import cats.syntax.either._
 import uk.gov.hmrc.timetopayproxy.config.FeatureSwitch
 
-
 class TimeToPayProxyControllerSpec extends AnyWordSpec with Matchers with MockFactory {
 
   private val authConnector: PlayAuthConnector = mock[PlayAuthConnector]
