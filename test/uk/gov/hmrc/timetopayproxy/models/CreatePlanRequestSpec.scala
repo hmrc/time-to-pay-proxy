@@ -323,8 +323,8 @@ trait CreatePlanRequestFixture {
       List(
         DebtItemCharge(
           DebtItemChargeId("debtItemChargeId1"),
-          MainTransType.TPSSAccTaxAssessment,
-          SubTransType.IT,
+          "1525",
+          "1000",
           100,
           Some(LocalDate.parse("2021-05-13")),
           List(Payment(LocalDate.parse("2021-05-13"), 100))
