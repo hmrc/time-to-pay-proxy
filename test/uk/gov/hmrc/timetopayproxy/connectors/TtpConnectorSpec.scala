@@ -119,6 +119,51 @@ class TtpConnectorSpec extends PlaySpec with DefaultAwaitTimeout with FutureAwai
     }
 
     "using TTP" must {
+      "return a InvalidMainAndOrSubTransTypes error that TTP-proxy passes upstream" in new Setup(false) {
+        stubPostWithResponseBody(
+          "/debts/time-to-pay/quote",
+          400,
+          errorResponse(
+            "BAD_REQUEST",
+            "Invalid MainTransTypes and/or SubTransTypes. MainTransTypes: 1111 SubTransTypes:  values do not match stored charge types"
+          )
+        )
+        val result = connector.generateQuote(
+          GenerateQuoteRequest(
+            CustomerReference("CustRef1234"),
+            ChannelIdentifier.Advisor,
+            PlanToGenerateQuote(
+              QuoteType.Duration,
+              LocalDate.now(),
+              LocalDate.now(),
+              Some(5),
+              Some(Frequency.TwoWeekly),
+              None,
+              Some(1),
+              None,
+              PaymentPlanType.TimeToPay
+            ),
+            List.empty,
+            List(
+              DebtItemCharge(
+                debtItemChargeId = DebtItemChargeId("id"),
+                mainTrans = "1111",
+                subTrans = "7010",
+                originalDebtAmount = 100,
+                interestStartDate = Some(LocalDate.now()),
+                paymentHistory = List()
+              )
+            )
+          )
+        )
+        await(result.value) mustBe Left(
+          ConnectorError(
+            400,
+            "Invalid MainTransTypes and/or SubTransTypes. MainTransTypes: 1111 SubTransTypes:  values do not match stored charge types"
+          )
+        )
+      }
+
       "parse an error response from an upstream service" in new Setup(false) {
         stubPostWithResponseBody("/debts/time-to-pay/quote", 400, errorResponse("BAD_REQUEST", "Invalid request body"))
         val result = connector.generateQuote(
