@@ -130,21 +130,21 @@ class TtpConnectorSpec extends PlaySpec with DefaultAwaitTimeout with FutureAwai
         )
         val result = connector.generateQuote(
           GenerateQuoteRequest(
-            CustomerReference("CustRef1234"),
-            ChannelIdentifier.Advisor,
-            PlanToGenerateQuote(
-              QuoteType.Duration,
-              LocalDate.now(),
-              LocalDate.now(),
-              Some(5),
-              Some(Frequency.TwoWeekly),
-              None,
-              Some(1),
-              None,
-              PaymentPlanType.TimeToPay
+            customerReference = CustomerReference("CustRef1234"),
+            channelIdentifier = ChannelIdentifier.Advisor,
+            plan = PlanToGenerateQuote(
+              quoteType = QuoteType.Duration,
+              quoteDate = LocalDate.now(),
+              instalmentStartDate = LocalDate.now(),
+              instalmentAmount = Some(5),
+              frequency = Some(Frequency.TwoWeekly),
+              duration = None,
+              initialPaymentAmount = Some(1),
+              initialPaymentDate = None,
+              paymentPlanType = PaymentPlanType.TimeToPay
             ),
-            List.empty,
-            List(
+            customerPostCodes = List.empty,
+            debtItemCharges = List(
               DebtItemCharge(
                 debtItemChargeId = DebtItemChargeId("id"),
                 mainTrans = "1111",
