@@ -41,8 +41,8 @@ class GenerateQuoteRequestSpec extends AnyWordSpec with Matchers {
     List(
       DebtItemCharge(
         DebtItemChargeId("debtItemChargeId1"),
-        MainTransType.ChBDebt,
-        SubTransType.HIPG,
+        "5330",
+        "1180",
         100,
         Some(LocalDate.of(2021, 5, 13)),
         List(Payment(LocalDate.of(2021, 5, 13), 100))

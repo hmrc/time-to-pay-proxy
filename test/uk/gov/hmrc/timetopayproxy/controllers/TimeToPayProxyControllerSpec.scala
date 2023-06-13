@@ -38,8 +38,6 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import play.api.test.Helpers._
 import cats.syntax.either._
 import uk.gov.hmrc.timetopayproxy.config.FeatureSwitch
-import uk.gov.hmrc.timetopayproxy.models.MainTransType.TPSSContractSettlementINT
-import uk.gov.hmrc.timetopayproxy.models.SubTransType.TGPEN
 
 class TimeToPayProxyControllerSpec extends AnyWordSpec with Matchers with MockFactory {
 
@@ -119,8 +117,8 @@ class TimeToPayProxyControllerSpec extends AnyWordSpec with Matchers with MockFa
       List(
         DebtItemCharge(
           DebtItemChargeId("debtItemChargeId"),
-          MainTransType.TPSSAccTaxAssessment,
-          SubTransType.IT,
+          "1525",
+          "1000",
           100,
           Some(LocalDate.now()),
           List(Payment(LocalDate.parse("2020-01-01"), 100))
@@ -164,8 +162,8 @@ class TimeToPayProxyControllerSpec extends AnyWordSpec with Matchers with MockFa
     Seq(
       DebtItemCharge(
         DebtItemChargeId("debtItemChargeId1"),
-        TPSSContractSettlementINT,
-        TGPEN,
+        "1546",
+        "1090",
         100,
         Some(LocalDate.parse("2021-05-13")),
         List(Payment(LocalDate.parse("2021-05-13"), 100))

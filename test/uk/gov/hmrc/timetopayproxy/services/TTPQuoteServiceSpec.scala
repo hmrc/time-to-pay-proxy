@@ -26,8 +26,6 @@ import uk.gov.hmrc.timetopayproxy.support.UnitSpec
 import scala.concurrent.{ ExecutionContext, Future }
 import scala.concurrent.ExecutionContext.Implicits.global
 import cats.syntax.either._
-import uk.gov.hmrc.timetopayproxy.models.MainTransType.TPSSContractSettlementINT
-import uk.gov.hmrc.timetopayproxy.models.SubTransType.TGPEN
 import uk.gov.hmrc.timetopayproxy.models.TtppEnvelope.TtppEnvelope
 
 class TTPQuoteServiceSpec extends UnitSpec {
@@ -100,8 +98,8 @@ class TTPQuoteServiceSpec extends UnitSpec {
     Seq(
       DebtItemCharge(
         DebtItemChargeId("debtItemChargeId1"),
-        TPSSContractSettlementINT,
-        TGPEN,
+        "1546",
+        "1090",
         100,
         Some(LocalDate.parse("2021-05-13")),
         List(Payment(LocalDate.parse("2021-05-13"), 100))
@@ -160,8 +158,8 @@ class TTPQuoteServiceSpec extends UnitSpec {
     debtItemCharges = Seq(
       DebtItemCharge(
         DebtItemChargeId("debtItemChargeId1"),
-        TPSSContractSettlementINT,
-        TGPEN,
+        "1546",
+        "1090",
         100,
         Some(LocalDate.parse("2021-05-13")),
         List(Payment(LocalDate.parse("2021-05-13"), 100))
@@ -251,8 +249,8 @@ class TTPQuoteServiceSpec extends UnitSpec {
       List(
         DebtItemCharge(
           DebtItemChargeId("debtItemChargeId"),
-          MainTransType.TPSSAccTaxAssessment,
-          SubTransType.IT,
+          "1525",
+          "1000",
           100,
           Some(LocalDate.now()),
           List(Payment(LocalDate.parse("2020-01-01"), 100))

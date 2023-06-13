@@ -119,6 +119,51 @@ class TtpConnectorSpec extends PlaySpec with DefaultAwaitTimeout with FutureAwai
     }
 
     "using TTP" must {
+      "return a InvalidMainAndOrSubTransTypes error that TTP-proxy passes upstream" in new Setup(false) {
+        stubPostWithResponseBody(
+          "/debts/time-to-pay/quote",
+          400,
+          errorResponse(
+            "BAD_REQUEST",
+            "Invalid MainTransTypes and/or SubTransTypes. MainTransTypes: 1111 SubTransTypes:  values do not match stored charge types"
+          )
+        )
+        val result = connector.generateQuote(
+          GenerateQuoteRequest(
+            customerReference = CustomerReference("CustRef1234"),
+            channelIdentifier = ChannelIdentifier.Advisor,
+            plan = PlanToGenerateQuote(
+              quoteType = QuoteType.Duration,
+              quoteDate = LocalDate.now(),
+              instalmentStartDate = LocalDate.now(),
+              instalmentAmount = Some(5),
+              frequency = Some(Frequency.TwoWeekly),
+              duration = None,
+              initialPaymentAmount = Some(1),
+              initialPaymentDate = None,
+              paymentPlanType = PaymentPlanType.TimeToPay
+            ),
+            customerPostCodes = List.empty,
+            debtItemCharges = List(
+              DebtItemCharge(
+                debtItemChargeId = DebtItemChargeId("id"),
+                mainTrans = "1111",
+                subTrans = "7010",
+                originalDebtAmount = 100,
+                interestStartDate = Some(LocalDate.now()),
+                paymentHistory = List()
+              )
+            )
+          )
+        )
+        await(result.value) mustBe Left(
+          ConnectorError(
+            400,
+            "Invalid MainTransTypes and/or SubTransTypes. MainTransTypes: 1111 SubTransTypes:  values do not match stored charge types"
+          )
+        )
+      }
+
       "parse an error response from an upstream service" in new Setup(false) {
         stubPostWithResponseBody("/debts/time-to-pay/quote", 400, errorResponse("BAD_REQUEST", "Invalid request body"))
         val result = connector.generateQuote(
