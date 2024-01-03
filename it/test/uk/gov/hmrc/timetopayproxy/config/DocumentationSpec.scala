@@ -17,7 +17,7 @@
 package uk.gov.hmrc.timetopayproxy.config
 
 import play.api.http.Status
-import play.api.libs.json.{JsValue, Json}
+import play.api.libs.json.{ JsValue, Json }
 import play.api.libs.ws.WSResponse
 import uk.gov.hmrc.timetopayproxy.support.IntegrationBaseSpec
 

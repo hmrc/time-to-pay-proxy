@@ -16,8 +16,8 @@
 
 package uk.gov.hmrc.timetopayproxy.support
 
-import com.fasterxml.jackson.databind.{JsonNode, ObjectMapper}
-import com.networknt.schema.{JsonSchema, JsonSchemaFactory, SpecVersion}
+import com.fasterxml.jackson.databind.{ JsonNode, ObjectMapper }
+import com.networknt.schema.{ JsonSchema, JsonSchemaFactory, SpecVersion }
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
 import play.api.libs.json.Json
