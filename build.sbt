@@ -1,7 +1,10 @@
-import uk.gov.hmrc.DefaultBuildSettings.integrationTestSettings
+import uk.gov.hmrc.DefaultBuildSettings
 import scoverage.ScoverageKeys
 
 val appName = "time-to-pay-proxy"
+
+ThisBuild / majorVersion := 0
+ThisBuild / scalaVersion := "2.13.12"
 
 val silencerVersion = "1.7.3"
 lazy val ItTest = config("it") extend Test
@@ -16,10 +19,7 @@ lazy val coverageSettings: Seq[Setting[_]] = {
 lazy val microservice = Project(appName, file("."))
   .enablePlugins(play.sbt.PlayScala, SbtAutoBuildPlugin, SbtGitVersioning, SbtDistributablesPlugin)
   .settings(
-    majorVersion                     := 0,
-    scalaVersion                     := "2.13.8",
     libraryDependencies              ++= AppDependencies.compile ++ AppDependencies.test,
-    dependencyOverrides              ++= AppDependencies.overrides,
     scalacOptions ++= Seq(
       "-Wconf:src=routes/.*:s",
       "-Ywarn-dead-code",
@@ -38,8 +38,11 @@ lazy val microservice = Project(appName, file("."))
   .settings(
     Compile / unmanagedResourceDirectories += baseDirectory.value / "resources"
   )
-  .configs(ItTest)
-  .settings(integrationTestSettings(): _*)
   .settings(resolvers += Resolver.jcenterRepo)
   .settings(coverageSettings: _*)
   .disablePlugins(JUnitXmlReportPlugin)
+
+lazy val it = project
+    .enablePlugins(PlayScala)
+    .dependsOn(microservice % "test->test")
+    .settings(DefaultBuildSettings.itSettings())
