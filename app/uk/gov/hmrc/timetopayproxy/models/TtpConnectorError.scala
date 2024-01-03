@@ -15,10 +15,10 @@
  */
 
 package uk.gov.hmrc.timetopayproxy.models
-import play.api.libs.json.Json
+import play.api.libs.json.{ Json, OFormat }
 
 final case class ConnectorError(statusCode: Int, message: String) extends TtppError
 
 object ConnectorError {
-  implicit val format = Json.format[ConnectorError]
+  implicit val format: OFormat[ConnectorError] = Json.format[ConnectorError]
 }

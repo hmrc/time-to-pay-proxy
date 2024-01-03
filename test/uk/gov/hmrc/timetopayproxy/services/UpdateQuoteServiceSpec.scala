@@ -29,7 +29,7 @@ import scala.concurrent.ExecutionContext
 import scala.concurrent.ExecutionContext.Implicits.global
 
 class UpdatePlanServiceSpec extends UnitSpec {
-  implicit val hc = HeaderCarrier()
+  implicit val hc: HeaderCarrier = HeaderCarrier()
   val updatePlanRequest = UpdatePlanRequest(
     CustomerReference("customerReference"),
     PlanId("planId"),

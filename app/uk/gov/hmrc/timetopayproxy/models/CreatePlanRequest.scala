@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.timetopayproxy.models
 
-import play.api.libs.json.Json
+import play.api.libs.json.{ Json, OFormat }
 
 import java.time.LocalDate
 
@@ -51,7 +51,7 @@ final case class PlanToCreatePlan(
 }
 
 object PlanToCreatePlan {
-  implicit val format = Json.format[PlanToCreatePlan]
+  implicit val format: OFormat[PlanToCreatePlan] = Json.format[PlanToCreatePlan]
 }
 
 final case class PaymentInformation(paymentMethod: PaymentMethod, paymentReference: Option[PaymentReference]) {
@@ -68,7 +68,7 @@ final case class PaymentInformation(paymentMethod: PaymentMethod, paymentReferen
 }
 
 object PaymentInformation {
-  implicit val format = Json.format[PaymentInformation]
+  implicit val format: OFormat[PaymentInformation] = Json.format[PaymentInformation]
 }
 
 final case class CreatePlanRequest(
@@ -86,5 +86,5 @@ final case class CreatePlanRequest(
 }
 
 object CreatePlanRequest {
-  implicit val format = Json.format[CreatePlanRequest]
+  implicit val format: OFormat[CreatePlanRequest] = Json.format[CreatePlanRequest]
 }

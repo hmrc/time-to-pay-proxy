@@ -34,7 +34,7 @@ package uk.gov.hmrc.timetopayproxy.models
 
 import java.time.LocalDate
 import enumeratum.{ Enum, EnumEntry, PlayJsonEnum }
-import play.api.libs.json.Json
+import play.api.libs.json.{ Json, OFormat }
 
 import scala.collection.immutable
 
@@ -63,7 +63,7 @@ final case class PlanToGenerateQuote(
 }
 
 object PlanToGenerateQuote {
-  implicit val format = Json.format[PlanToGenerateQuote]
+  implicit val format: OFormat[PlanToGenerateQuote] = Json.format[PlanToGenerateQuote]
 }
 
 final case class GenerateQuoteRequest(
@@ -77,5 +77,5 @@ final case class GenerateQuoteRequest(
 }
 
 object GenerateQuoteRequest {
-  implicit val format = Json.format[GenerateQuoteRequest]
+  implicit val format: OFormat[GenerateQuoteRequest] = Json.format[GenerateQuoteRequest]
 }

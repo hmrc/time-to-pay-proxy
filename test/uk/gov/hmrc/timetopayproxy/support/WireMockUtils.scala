@@ -30,6 +30,7 @@ import com.github.tomakehurst.wiremock.stubbing.StubMapping
 import org.scalatest.{ BeforeAndAfterAll, BeforeAndAfterEach }
 import org.scalatestplus.play.PlaySpec
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
+import play.api.Application
 import play.api.inject.guice.GuiceApplicationBuilder
 
 trait WireMockUtils extends BeforeAndAfterEach with BeforeAndAfterAll with GuiceOneAppPerSuite {
@@ -39,7 +40,7 @@ trait WireMockUtils extends BeforeAndAfterEach with BeforeAndAfterAll with Guice
 
   val wireMockServer: WireMockServer = new WireMockServer(wireMockConfig().port(wireMockPort))
 
-  override implicit lazy val app = GuiceApplicationBuilder()
+  override implicit lazy val app: Application = GuiceApplicationBuilder()
     .configure("auditing.enabled" -> "false")
     .configure("feature-switch.ttpDropTwoEnabled" -> "true")
     .build()

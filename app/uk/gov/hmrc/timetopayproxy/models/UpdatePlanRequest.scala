@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.timetopayproxy.models
 
-import play.api.libs.json.Json
+import play.api.libs.json.{ Format, Json, OFormat }
 import enumeratum.{ Enum, EnumEntry, PlayJsonEnum }
 
 import scala.collection.immutable
@@ -37,7 +37,7 @@ object CompleteReason extends Enum[CompleteReason] with PlayJsonEnum[CompleteRea
 final case class CancellationReason(value: String) extends AnyVal
 
 object CancellationReason extends ValueTypeFormatter {
-  implicit val format =
+  implicit val format: Format[CancellationReason] =
     valueTypeFormatter(CancellationReason.apply, CancellationReason.unapply)
 }
 
@@ -56,14 +56,14 @@ object PaymentMethod extends Enum[PaymentMethod] with PlayJsonEnum[PaymentMethod
 final case class PaymentReference(value: String) extends AnyVal
 
 object PaymentReference extends ValueTypeFormatter {
-  implicit val format =
+  implicit val format: Format[PaymentReference] =
     valueTypeFormatter(PaymentReference.apply, PaymentReference.unapply)
 }
 
 final case class UpdateType(value: String) extends AnyVal
 
 object UpdateType extends ValueTypeFormatter {
-  implicit val format =
+  implicit val format: Format[UpdateType] =
     valueTypeFormatter(UpdateType.apply, UpdateType.unapply)
 }
 
@@ -84,5 +84,5 @@ final case class UpdatePlanRequest(
 }
 
 object UpdatePlanRequest {
-  implicit val format = Json.format[UpdatePlanRequest]
+  implicit val format: OFormat[UpdatePlanRequest] = Json.format[UpdatePlanRequest]
 }

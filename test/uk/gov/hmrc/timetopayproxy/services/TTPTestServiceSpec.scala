@@ -26,7 +26,7 @@ import play.api.libs.json.Json
 import scala.concurrent.ExecutionContext
 
 class TTPTestServiceSpec extends UnitSpec {
-  implicit val hc = HeaderCarrier()
+  implicit val hc: HeaderCarrier = HeaderCarrier()
 
   val requestDetails = Seq(
     RequestDetails("someId", Json.parse("{}"), Some("www.uri.com"), false),
