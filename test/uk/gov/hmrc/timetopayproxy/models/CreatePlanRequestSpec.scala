@@ -291,6 +291,20 @@ class CreatePlanRequestSpec extends AnyWordSpec with Matchers with CreatePlanReq
       }
     }
 
+    "fail decoding if addressPostcode is empty" in {
+      import play.api.libs.json._
+
+      Try(
+        Json
+            .parse(getJsonWithInvalidReference(addressPostcode = ""))
+            .validate[CreatePlanRequest]
+      ) match {
+        case Failure(t) =>
+          t.toString() shouldBe "java.lang.IllegalArgumentException: requirement failed: addressPostcode should not be empty"
+        case _ => fail("Response should be a validation error")
+      }
+    }
+
   }
 }
 
@@ -556,7 +570,8 @@ trait CreatePlanRequestFixture {
     interestRate: Double = 0.25,
     instalmentNumber: Int = 1,
     instalmentInterestAccrued: BigDecimal = 10,
-    instalmentBalance: BigDecimal = 90
+    instalmentBalance: BigDecimal = 90,
+    addressPostcode: String = "NW9 5XW"
   ) =
     s"""{
        |  "customerReference": "${customerReference.value}",
@@ -603,7 +618,7 @@ trait CreatePlanRequestFixture {
        |  ],
        |  "customerPostCodes": [
        |    {
-       |      "addressPostcode": "NW9 5XW",
+       |      "addressPostcode": "$addressPostcode",
        |      "postcodeDate": "2021-05-13"
        |    }
        |  ],

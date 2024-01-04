@@ -93,7 +93,8 @@ class GenerateQuoteRequestSpec extends AnyWordSpec with Matchers {
     instalmentAmount: BigDecimal = 100,
     initialPaymentAmount: BigDecimal = 100,
     originalDebtAmount: BigDecimal = 100,
-    paymentAmount: BigDecimal = 100
+    paymentAmount: BigDecimal = 100,
+    addressPostcode: String = "NW9 5XW"
   ) = s"""{
          |  "customerReference": "$customerReference",
          |  "channelIdentifier": "selfService",
@@ -110,7 +111,7 @@ class GenerateQuoteRequestSpec extends AnyWordSpec with Matchers {
          |  },
          |  "customerPostCodes": [
          |    {
-         |      "addressPostcode": "NW9 5XW",
+         |      "addressPostcode": "$addressPostcode",
          |      "postcodeDate": "2021-05-13"
          |    }
          |  ],
@@ -203,6 +204,20 @@ class GenerateQuoteRequestSpec extends AnyWordSpec with Matchers {
       ) match {
         case Failure(t) =>
           t.toString() shouldBe "java.lang.IllegalArgumentException: requirement failed: paymentAmount should be a positive amount."
+        case _ => fail()
+      }
+    }
+
+    "fail decoding if addressPostcode is empty" in {
+      import play.api.libs.json._
+
+      Try(
+        Json
+            .parse(getJsonWithInvalidReference(addressPostcode = ""))
+            .validate[GenerateQuoteRequest]
+      ) match {
+        case Failure(t) =>
+          t.toString() shouldBe "java.lang.IllegalArgumentException: requirement failed: addressPostcode should not be empty"
         case _ => fail()
       }
     }
