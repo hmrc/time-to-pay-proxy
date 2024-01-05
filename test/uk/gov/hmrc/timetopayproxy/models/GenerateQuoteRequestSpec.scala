@@ -139,8 +139,6 @@ class GenerateQuoteRequestSpec extends AnyWordSpec with Matchers {
     }
 
     "fail decoding if customerReference is empty" in {
-      import play.api.libs.json._
-
       Try(
         Json
           .parse(getJsonWithInvalidReference(customerReference = ""))
@@ -153,8 +151,6 @@ class GenerateQuoteRequestSpec extends AnyWordSpec with Matchers {
     }
 
     "fail decoding if instalmentAmount is negative" in {
-      import play.api.libs.json._
-
       Try(
         Json
           .parse(getJsonWithInvalidReference(instalmentAmount = -10))
@@ -167,8 +163,6 @@ class GenerateQuoteRequestSpec extends AnyWordSpec with Matchers {
     }
 
     "fail decoding if initialPaymentAmount is negative" in {
-      import play.api.libs.json._
-
       Try(
         Json
           .parse(getJsonWithInvalidReference(initialPaymentAmount = -200))
@@ -181,8 +175,6 @@ class GenerateQuoteRequestSpec extends AnyWordSpec with Matchers {
     }
 
     "fail decoding if originalDebtAmount is negative" in {
-      import play.api.libs.json._
-
       Try(
         Json
           .parse(getJsonWithInvalidReference(originalDebtAmount = -200))
@@ -195,8 +187,6 @@ class GenerateQuoteRequestSpec extends AnyWordSpec with Matchers {
     }
 
     "fail decoding if paymentAmount is zero" in {
-      import play.api.libs.json._
-
       Try(
         Json
           .parse(getJsonWithInvalidReference(paymentAmount = 0))
@@ -209,17 +199,11 @@ class GenerateQuoteRequestSpec extends AnyWordSpec with Matchers {
     }
 
     "fail decoding if addressPostcode is empty" in {
-      import play.api.libs.json._
-
       Try(
         Json
           .parse(getJsonWithInvalidReference(addressPostcode = ""))
           .validate[GenerateQuoteRequest]
-      ) match {
-        case Failure(t) =>
-          t.toString() shouldBe "java.lang.IllegalArgumentException: requirement failed: addressPostcode should not be empty"
-        case _ => fail()
-      }
+      ).toString shouldBe Failure(new IllegalArgumentException("requirement failed: addressPostcode should not be empty")).toString
     }
 
   }
