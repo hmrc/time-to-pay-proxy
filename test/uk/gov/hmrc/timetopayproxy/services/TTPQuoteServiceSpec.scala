@@ -29,7 +29,7 @@ import cats.syntax.either._
 import uk.gov.hmrc.timetopayproxy.models.TtppEnvelope.TtppEnvelope
 
 class TTPQuoteServiceSpec extends UnitSpec {
-  implicit val hc = HeaderCarrier()
+  implicit val hc: HeaderCarrier = HeaderCarrier()
   private val timeToPayRequest = GenerateQuoteRequest(
     CustomerReference("customerReference"),
     ChannelIdentifier.Advisor,

@@ -19,23 +19,19 @@ package uk.gov.hmrc.timetopayproxy.support
 import org.scalamock.scalatest.MockFactory
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
-import org.scalatest.{BeforeAndAfterAll, BeforeAndAfterEach, EitherValues}
+import org.scalatest.{ BeforeAndAfterAll, BeforeAndAfterEach, EitherValues }
 import org.scalatestplus.play.guice.GuiceOneServerPerSuite
-import play.api.{Application, Environment, Mode}
 import play.api.inject.guice.GuiceApplicationBuilder
-import play.api.libs.json.{JsValue, Json}
-import play.api.libs.ws.{WSClient, WSRequest, WSResponse}
-import play.api.test.{DefaultAwaitTimeout, FutureAwaits}
+import play.api.libs.json.{ JsValue, Json }
+import play.api.libs.ws.{ WSClient, WSRequest, WSResponse }
+import play.api.test.{ DefaultAwaitTimeout, FutureAwaits }
+import play.api.{ Application, Environment, Mode }
 
 import scala.concurrent.ExecutionContext
 
-trait IntegrationBaseSpec extends AnyWordSpec
-  with MockFactory
-  with EitherValues
-  with Matchers
-  with FutureAwaits
-  with DefaultAwaitTimeout with WireMockHelper with GuiceOneServerPerSuite
-  with BeforeAndAfterEach with BeforeAndAfterAll {
+trait IntegrationBaseSpec
+    extends AnyWordSpec with MockFactory with EitherValues with Matchers with FutureAwaits with DefaultAwaitTimeout
+    with WireMockHelper with GuiceOneServerPerSuite with BeforeAndAfterEach with BeforeAndAfterAll {
 
   val mockHost: String = WireMockHelper.host
   val mockPort: String = WireMockHelper.wireMockPort.toString
@@ -46,7 +42,7 @@ trait IntegrationBaseSpec extends AnyWordSpec
   def servicesConfig: Map[String, Any] = Map(
     "microservice.services.auth.host" -> mockHost,
     "microservice.services.auth.port" -> mockPort,
-    "auditing.consumer.baseUri.port" -> mockPort
+    "auditing.consumer.baseUri.port"  -> mockPort
   )
 
   override implicit lazy val app: Application = new GuiceApplicationBuilder()

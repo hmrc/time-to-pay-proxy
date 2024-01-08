@@ -17,8 +17,7 @@
 package uk.gov.hmrc.timetopayproxy.models
 
 import java.time.LocalDate
-
-import play.api.libs.json.Json
+import play.api.libs.json.{ Json, OFormat }
 
 final case class GenerateQuoteResponse(
   quoteReference: QuoteReference,
@@ -35,5 +34,5 @@ final case class GenerateQuoteResponse(
 )
 
 object GenerateQuoteResponse {
-  implicit val format = Json.format[GenerateQuoteResponse]
+  implicit val format: OFormat[GenerateQuoteResponse] = Json.format[GenerateQuoteResponse]
 }

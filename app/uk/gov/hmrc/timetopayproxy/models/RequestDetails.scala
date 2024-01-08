@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.timetopayproxy.models
 
-import play.api.libs.json.{ JsValue, Json }
+import play.api.libs.json.{ JsValue, Json, OFormat }
 
 final case class RequestDetails(
   requestId: String,
@@ -29,5 +29,5 @@ final case class RequestDetails(
 )
 
 object RequestDetails {
-  implicit val format = Json.format[RequestDetails]
+  implicit val format: OFormat[RequestDetails] = Json.format[RequestDetails]
 }

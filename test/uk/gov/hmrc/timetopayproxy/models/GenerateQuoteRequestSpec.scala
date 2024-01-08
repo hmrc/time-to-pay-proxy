@@ -93,7 +93,8 @@ class GenerateQuoteRequestSpec extends AnyWordSpec with Matchers {
     instalmentAmount: BigDecimal = 100,
     initialPaymentAmount: BigDecimal = 100,
     originalDebtAmount: BigDecimal = 100,
-    paymentAmount: BigDecimal = 100
+    paymentAmount: BigDecimal = 100,
+    addressPostcode: String = "NW9 5XW"
   ) = s"""{
          |  "customerReference": "$customerReference",
          |  "channelIdentifier": "selfService",
@@ -110,7 +111,7 @@ class GenerateQuoteRequestSpec extends AnyWordSpec with Matchers {
          |  },
          |  "customerPostCodes": [
          |    {
-         |      "addressPostcode": "NW9 5XW",
+         |      "addressPostcode": "$addressPostcode",
          |      "postcodeDate": "2021-05-13"
          |    }
          |  ],
@@ -138,8 +139,6 @@ class GenerateQuoteRequestSpec extends AnyWordSpec with Matchers {
     }
 
     "fail decoding if customerReference is empty" in {
-      import play.api.libs.json._
-
       Try(
         Json
           .parse(getJsonWithInvalidReference(customerReference = ""))
@@ -152,8 +151,6 @@ class GenerateQuoteRequestSpec extends AnyWordSpec with Matchers {
     }
 
     "fail decoding if instalmentAmount is negative" in {
-      import play.api.libs.json._
-
       Try(
         Json
           .parse(getJsonWithInvalidReference(instalmentAmount = -10))
@@ -166,8 +163,6 @@ class GenerateQuoteRequestSpec extends AnyWordSpec with Matchers {
     }
 
     "fail decoding if initialPaymentAmount is negative" in {
-      import play.api.libs.json._
-
       Try(
         Json
           .parse(getJsonWithInvalidReference(initialPaymentAmount = -200))
@@ -180,8 +175,6 @@ class GenerateQuoteRequestSpec extends AnyWordSpec with Matchers {
     }
 
     "fail decoding if originalDebtAmount is negative" in {
-      import play.api.libs.json._
-
       Try(
         Json
           .parse(getJsonWithInvalidReference(originalDebtAmount = -200))
@@ -194,8 +187,6 @@ class GenerateQuoteRequestSpec extends AnyWordSpec with Matchers {
     }
 
     "fail decoding if paymentAmount is zero" in {
-      import play.api.libs.json._
-
       Try(
         Json
           .parse(getJsonWithInvalidReference(paymentAmount = 0))
@@ -205,6 +196,16 @@ class GenerateQuoteRequestSpec extends AnyWordSpec with Matchers {
           t.toString() shouldBe "java.lang.IllegalArgumentException: requirement failed: paymentAmount should be a positive amount."
         case _ => fail()
       }
+    }
+
+    "fail decoding if addressPostcode is empty" in {
+      Try(
+        Json
+          .parse(getJsonWithInvalidReference(addressPostcode = ""))
+          .validate[GenerateQuoteRequest]
+      ).toString shouldBe Failure(
+        new IllegalArgumentException("requirement failed: addressPostcode should not be empty")
+      ).toString
     }
 
   }

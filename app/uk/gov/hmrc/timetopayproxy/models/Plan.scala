@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.timetopayproxy.models
 
-import play.api.libs.json.Json
+import play.api.libs.json.{ Json, OFormat }
 
 import java.time.LocalDate
 
@@ -36,5 +36,5 @@ final case class Plan(
 )
 
 object Plan {
-  implicit val format = Json.format[Plan]
+  implicit val format: OFormat[Plan] = Json.format[Plan]
 }

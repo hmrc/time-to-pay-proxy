@@ -1,47 +1,24 @@
 import play.core.PlayVersion
-import play.sbt.PlayImport._
-import sbt.Keys.libraryDependencies
-import sbt._
+import sbt.*
 
 object AppDependencies {
-  private val allTestEnvs = "test, it"
 
-  private val BootstrapPlayVersion = "7.15.0"
+  private val BootstrapPlayVersion = "8.3.0"
 
   val compile = Seq(
-    "uk.gov.hmrc"   %% "bootstrap-backend-play-28" % BootstrapPlayVersion,
+    "uk.gov.hmrc"   %% "bootstrap-backend-play-30" % BootstrapPlayVersion,
     "org.typelevel" %% "cats-core"                 % "2.3.0",
-    "com.beachape"  %% "enumeratum-play-json"      % "1.6.1"
+    "com.beachape"  %% "enumeratum-play-json"      % "1.8.0"
   )
 
   val test = Seq(
-    "uk.gov.hmrc"                  %% "bootstrap-test-play-28" % BootstrapPlayVersion            % allTestEnvs,
-    "com.github.tomakehurst"       % "wiremock"                % "2.27.2"            % allTestEnvs,
-    "org.scalatest"                %% "scalatest"              % "3.2.5"             % allTestEnvs,
-    "org.scalamock"                %% "scalamock"              % "5.1.0"             % allTestEnvs,
-    "com.typesafe.play"            %% "play-test"              % PlayVersion.current % allTestEnvs,
-    "com.fasterxml.jackson.module" %% "jackson-module-scala"   % "2.12.2"            % allTestEnvs,
-    "com.vladsch.flexmark"         % "flexmark-all"            % "0.36.8"            % allTestEnvs,
-    "org.scalatestplus.play"       %% "scalatestplus-play"     % "5.1.0"             % allTestEnvs,
-    "com.networknt"                % "json-schema-validator"   % "1.0.64"            % allTestEnvs,
+    "uk.gov.hmrc"                  %% "bootstrap-test-play-30" % BootstrapPlayVersion            % Test,
+    "org.scalatest"                %% "scalatest"              % "3.2.5"             % Test,
+    "org.scalamock"                %% "scalamock"              % "5.1.0"             % Test,
+    "org.playframework"            %% "play-test"              % PlayVersion.current % Test,
+    "com.fasterxml.jackson.module" %% "jackson-module-scala"   % "2.12.2"            % Test,
+    "com.vladsch.flexmark"         % "flexmark-all"            % "0.36.8"            % Test,
+    "org.scalatestplus.play"       %% "scalatestplus-play"     % "5.1.0"             % Test,
+    "com.networknt"                % "json-schema-validator"   % "1.0.64"            % Test,
   )
-  val overrides: Seq[ModuleID] = {
-    val jettyFromWiremockVersion = "9.4.35.v20201120"
-    Seq(
-      "org.eclipse.jetty"           % "jetty-client"       % jettyFromWiremockVersion,
-      "org.eclipse.jetty"           % "jetty-continuation" % jettyFromWiremockVersion,
-      "org.eclipse.jetty"           % "jetty-http"         % jettyFromWiremockVersion,
-      "org.eclipse.jetty"           % "jetty-io"           % jettyFromWiremockVersion,
-      "org.eclipse.jetty"           % "jetty-security"     % jettyFromWiremockVersion,
-      "org.eclipse.jetty"           % "jetty-server"       % jettyFromWiremockVersion,
-      "org.eclipse.jetty"           % "jetty-servlet"      % jettyFromWiremockVersion,
-      "org.eclipse.jetty"           % "jetty-servlets"     % jettyFromWiremockVersion,
-      "org.eclipse.jetty"           % "jetty-util"         % jettyFromWiremockVersion,
-      "org.eclipse.jetty"           % "jetty-webapp"       % jettyFromWiremockVersion,
-      "org.eclipse.jetty"           % "jetty-xml"          % jettyFromWiremockVersion,
-      "org.eclipse.jetty.websocket" % "websocket-api"      % jettyFromWiremockVersion,
-      "org.eclipse.jetty.websocket" % "websocket-client"   % jettyFromWiremockVersion,
-      "org.eclipse.jetty.websocket" % "websocket-common"   % jettyFromWiremockVersion
-    )
-  }
 }

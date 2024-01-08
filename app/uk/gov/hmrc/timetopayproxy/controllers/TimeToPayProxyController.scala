@@ -30,7 +30,7 @@ import uk.gov.hmrc.timetopayproxy.utils.TtppErrorHandler._
 import uk.gov.hmrc.timetopayproxy.utils.TtppResponseConverter._
 
 import javax.inject.{ Inject, Singleton }
-import scala.concurrent.Future
+import scala.concurrent.{ ExecutionContext, Future }
 import scala.util.{ Failure, Success, Try }
 
 @Singleton()
@@ -40,7 +40,7 @@ class TimeToPayProxyController @Inject() (
   timeToPayProxyService: TTPQuoteService,
   fs: FeatureSwitch
 ) extends BackendController(cc) with BaseController {
-  implicit val ec = cc.executionContext
+  implicit val ec: ExecutionContext = cc.executionContext
 
   private val queryParameterNotMatchingPayload =
     "customerReference and planId in the query parameters should match the ones in the request payload"

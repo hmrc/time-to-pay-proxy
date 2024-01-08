@@ -16,11 +16,10 @@
 
 package uk.gov.hmrc.timetopayproxy.models
 import java.time.LocalDate
-
-import play.api.libs.json.Json
+import play.api.libs.json.{ Json, OFormat }
 
 case class BreathingSpace(debtRespiteFrom: LocalDate, debtRespiteTo: LocalDate)
 
 object BreathingSpace {
-  implicit val format = Json.format[BreathingSpace]
+  implicit val format: OFormat[BreathingSpace] = Json.format[BreathingSpace]
 }

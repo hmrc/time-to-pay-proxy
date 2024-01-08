@@ -16,24 +16,24 @@
 
 package uk.gov.hmrc.timetopayproxy.models
 
-import play.api.libs.json.Json
+import play.api.libs.json.{ Json, OFormat }
 
 import java.time.LocalDate
 
 final case class InitialCollection(dueDate: LocalDate, amountDue: BigDecimal)
 
 object InitialCollection {
-  implicit val format = Json.format[InitialCollection]
+  implicit val format: OFormat[InitialCollection] = Json.format[InitialCollection]
 }
 
 final case class RegularCollection(dueDate: LocalDate, amountDue: BigDecimal)
 
 object RegularCollection {
-  implicit val format = Json.format[RegularCollection]
+  implicit val format: OFormat[RegularCollection] = Json.format[RegularCollection]
 }
 
 final case class Collections(initialCollection: Option[InitialCollection], regularCollections: List[RegularCollection])
 
 object Collections {
-  implicit val format = Json.format[Collections]
+  implicit val format: OFormat[Collections] = Json.format[Collections]
 }

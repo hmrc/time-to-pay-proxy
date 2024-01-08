@@ -39,8 +39,6 @@ class CreatePlanRequestSpec extends AnyWordSpec with Matchers with CreatePlanReq
     }
 
     "fail decoding if paymentReference is empty" in {
-      import play.api.libs.json._
-
       Try(
         Json
           .parse(
@@ -55,8 +53,6 @@ class CreatePlanRequestSpec extends AnyWordSpec with Matchers with CreatePlanReq
     }
 
     "fail decoding if customerReference is empty" in {
-      import play.api.libs.json._
-
       Try(
         Json
           .parse(
@@ -73,8 +69,6 @@ class CreatePlanRequestSpec extends AnyWordSpec with Matchers with CreatePlanReq
     }
 
     "fail decoding if quoteReference is empty" in {
-      import play.api.libs.json._
-
       Try(
         Json
           .parse(
@@ -89,8 +83,6 @@ class CreatePlanRequestSpec extends AnyWordSpec with Matchers with CreatePlanReq
     }
 
     "fail decoding if instalmentAmount is negative" in {
-      import play.api.libs.json._
-
       Try(
         Json
           .parse(getJsonWithInvalidReference(instalmentAmount = -10))
@@ -102,8 +94,6 @@ class CreatePlanRequestSpec extends AnyWordSpec with Matchers with CreatePlanReq
       }
     }
     "fail decoding if numberOfInstalments is negative" in {
-      import play.api.libs.json._
-
       Try(
         Json
           .parse(getJsonWithInvalidReference(numberOfInstalments = -1))
@@ -116,8 +106,6 @@ class CreatePlanRequestSpec extends AnyWordSpec with Matchers with CreatePlanReq
     }
 
     "fail decoding if initialPaymentAmount is zero" in {
-      import play.api.libs.json._
-
       Try(
         Json
           .parse(getJsonWithInvalidReference(initialPaymentAmount = 0))
@@ -130,8 +118,6 @@ class CreatePlanRequestSpec extends AnyWordSpec with Matchers with CreatePlanReq
     }
 
     "fail decoding if totalDebtIncInt is zero" in {
-      import play.api.libs.json._
-
       Try(
         Json
           .parse(getJsonWithInvalidReference(totalDebtIncInt = 0))
@@ -144,8 +130,6 @@ class CreatePlanRequestSpec extends AnyWordSpec with Matchers with CreatePlanReq
     }
 
     "fail decoding if totalInterest is negative" in {
-      import play.api.libs.json._
-
       Try(
         Json
           .parse(getJsonWithInvalidReference(totalInterest = -15))
@@ -158,8 +142,6 @@ class CreatePlanRequestSpec extends AnyWordSpec with Matchers with CreatePlanReq
     }
 
     "fail decoding if interestAccrued is negative" in {
-      import play.api.libs.json._
-
       Try(
         Json
           .parse(getJsonWithInvalidReference(interestAccrued = -25))
@@ -172,8 +154,6 @@ class CreatePlanRequestSpec extends AnyWordSpec with Matchers with CreatePlanReq
     }
 
     "fail decoding if planInterest is negative" in {
-      import play.api.libs.json._
-
       Try(
         Json
           .parse(getJsonWithInvalidReference(planInterest = -5))
@@ -186,8 +166,6 @@ class CreatePlanRequestSpec extends AnyWordSpec with Matchers with CreatePlanReq
     }
 
     "fail decoding if originalDebtAmount is negative" in {
-      import play.api.libs.json._
-
       Try(
         Json
           .parse(getJsonWithInvalidReference(originalDebtAmount = -5))
@@ -199,8 +177,6 @@ class CreatePlanRequestSpec extends AnyWordSpec with Matchers with CreatePlanReq
       }
     }
     "fail decoding if paymentAmount is negative" in {
-      import play.api.libs.json._
-
       Try(
         Json
           .parse(getJsonWithInvalidReference(paymentAmount = -5))
@@ -212,8 +188,6 @@ class CreatePlanRequestSpec extends AnyWordSpec with Matchers with CreatePlanReq
       }
     }
     "fail decoding if amountDue is negative" in {
-      import play.api.libs.json._
-
       Try(
         Json
           .parse(getJsonWithInvalidReference(amountDue = -5))
@@ -225,8 +199,6 @@ class CreatePlanRequestSpec extends AnyWordSpec with Matchers with CreatePlanReq
       }
     }
     "fail decoding if expectedPayment is negative" in {
-      import play.api.libs.json._
-
       Try(
         Json
           .parse(getJsonWithInvalidReference(expectedPayment = -5))
@@ -238,8 +210,6 @@ class CreatePlanRequestSpec extends AnyWordSpec with Matchers with CreatePlanReq
       }
     }
     "fail decoding if interestRate is negative" in {
-      import play.api.libs.json._
-
       Try(
         Json
           .parse(getJsonWithInvalidReference(interestRate = -5))
@@ -251,8 +221,6 @@ class CreatePlanRequestSpec extends AnyWordSpec with Matchers with CreatePlanReq
       }
     }
     "fail decoding if instalmentNumber is negative" in {
-      import play.api.libs.json._
-
       Try(
         Json
           .parse(getJsonWithInvalidReference(instalmentNumber = -5))
@@ -265,8 +233,6 @@ class CreatePlanRequestSpec extends AnyWordSpec with Matchers with CreatePlanReq
     }
 
     "fail decoding if instalmentInterestAccrued is negative" in {
-      import play.api.libs.json._
-
       Try(
         Json
           .parse(getJsonWithInvalidReference(instalmentInterestAccrued = -5))
@@ -278,8 +244,6 @@ class CreatePlanRequestSpec extends AnyWordSpec with Matchers with CreatePlanReq
       }
     }
     "fail decoding if instalmentBalance is negative" in {
-      import play.api.libs.json._
-
       Try(
         Json
           .parse(getJsonWithInvalidReference(instalmentBalance = -5))
@@ -289,6 +253,16 @@ class CreatePlanRequestSpec extends AnyWordSpec with Matchers with CreatePlanReq
           t.toString() shouldBe "java.lang.IllegalArgumentException: requirement failed: instalmentBalance should be a positive amount."
         case _ => fail("Response should be a validation error")
       }
+    }
+
+    "fail decoding if addressPostcode is empty" in {
+      Try(
+        Json
+          .parse(getJsonWithInvalidReference(addressPostcode = ""))
+          .validate[CreatePlanRequest]
+      ).toString shouldBe Failure(
+        new IllegalArgumentException("requirement failed: addressPostcode should not be empty")
+      ).toString
     }
 
   }
@@ -556,7 +530,8 @@ trait CreatePlanRequestFixture {
     interestRate: Double = 0.25,
     instalmentNumber: Int = 1,
     instalmentInterestAccrued: BigDecimal = 10,
-    instalmentBalance: BigDecimal = 90
+    instalmentBalance: BigDecimal = 90,
+    addressPostcode: String = "NW9 5XW"
   ) =
     s"""{
        |  "customerReference": "${customerReference.value}",
@@ -603,7 +578,7 @@ trait CreatePlanRequestFixture {
        |  ],
        |  "customerPostCodes": [
        |    {
-       |      "addressPostcode": "NW9 5XW",
+       |      "addressPostcode": "$addressPostcode",
        |      "postcodeDate": "2021-05-13"
        |    }
        |  ],

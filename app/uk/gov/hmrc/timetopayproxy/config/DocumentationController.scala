@@ -16,12 +16,13 @@
 
 package uk.gov.hmrc.timetopayproxy.config
 
-import akka.stream.Materializer
 import javax.inject.{ Inject, Singleton }
 import controllers.Assets
+import org.apache.pekko.stream.Materializer
 import play.api.Configuration
 import play.api.mvc.{ Action, AnyContent, ControllerComponents }
 import play.filters.cors.CORSActionBuilder
+
 import scala.concurrent.ExecutionContext
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
 

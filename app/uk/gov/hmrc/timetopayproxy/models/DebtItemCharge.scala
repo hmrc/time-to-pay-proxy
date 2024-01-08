@@ -16,13 +16,12 @@
 
 package uk.gov.hmrc.timetopayproxy.models
 import java.time.LocalDate
-
-import play.api.libs.json.Json
+import play.api.libs.json.{ Format, Json, OFormat }
 
 final case class DebtItemChargeId(value: String) extends AnyVal
 
 object DebtItemChargeId extends ValueTypeFormatter {
-  implicit val format =
+  implicit val format: Format[DebtItemChargeId] =
     valueTypeFormatter(DebtItemChargeId.apply, DebtItemChargeId.unapply)
 }
 
@@ -39,5 +38,5 @@ final case class DebtItemCharge(
 }
 
 object DebtItemCharge {
-  implicit val format = Json.format[DebtItemCharge]
+  implicit val format: OFormat[DebtItemCharge] = Json.format[DebtItemCharge]
 }

@@ -25,13 +25,14 @@ import uk.gov.hmrc.timetopayproxy.utils.TtppErrorHandler.FromErrorToResponse
 import uk.gov.hmrc.timetopayproxy.utils.TtppResponseConverter.ToResponse
 
 import javax.inject.{ Inject, Singleton }
+import scala.concurrent.ExecutionContext
 
 // $COVERAGE-OFF$
 //Coverage disabled for non-prod source
 @Singleton()
 class TimeToPayTestController @Inject() (cc: ControllerComponents, ttpTestService: TTPTestService)
     extends BackendController(cc) with BaseController {
-  implicit val ec = cc.executionContext
+  implicit val ec: ExecutionContext = cc.executionContext
 
   def requests: Action[AnyContent] = Action.async { implicit request =>
     ttpTestService
