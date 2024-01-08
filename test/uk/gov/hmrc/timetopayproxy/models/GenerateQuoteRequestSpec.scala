@@ -203,7 +203,9 @@ class GenerateQuoteRequestSpec extends AnyWordSpec with Matchers {
         Json
           .parse(getJsonWithInvalidReference(addressPostcode = ""))
           .validate[GenerateQuoteRequest]
-      ).toString shouldBe Failure(new IllegalArgumentException("requirement failed: addressPostcode should not be empty")).toString
+      ).toString shouldBe Failure(
+        new IllegalArgumentException("requirement failed: addressPostcode should not be empty")
+      ).toString
     }
 
   }

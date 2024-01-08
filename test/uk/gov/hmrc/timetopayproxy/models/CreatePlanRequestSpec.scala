@@ -260,7 +260,9 @@ class CreatePlanRequestSpec extends AnyWordSpec with Matchers with CreatePlanReq
         Json
           .parse(getJsonWithInvalidReference(addressPostcode = ""))
           .validate[CreatePlanRequest]
-      ).toString shouldBe Failure(new IllegalArgumentException("requirement failed: addressPostcode should not be empty")).toString
+      ).toString shouldBe Failure(
+        new IllegalArgumentException("requirement failed: addressPostcode should not be empty")
+      ).toString
     }
 
   }
