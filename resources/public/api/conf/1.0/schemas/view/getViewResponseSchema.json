@@ -17,10 +17,6 @@
       ],
       "description": "Attribute to identify where the request is coming"
     },
-    "caseId": {
-      "type": "string",
-      "description": "This is the unique case id"
-    },
     "plan": {
       "type": "object",
       "properties": {
@@ -29,6 +25,10 @@
           "minLength": 1,
           "maxLength": 15,
           "description": "This is the unique plan id"
+        },
+        "caseId": {
+          "type": "string",
+          "description": "This is the unique case id"
         },
         "quoteId": {
           "type": "string",

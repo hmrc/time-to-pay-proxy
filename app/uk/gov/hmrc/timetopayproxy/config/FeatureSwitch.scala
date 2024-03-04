@@ -18,9 +18,4 @@ package uk.gov.hmrc.timetopayproxy.config
 
 import play.api.Configuration
 
-case class FeatureSwitch(value: Option[Configuration]) {
-
-  def isTTPDropTwo: Boolean =
-    value.flatMap(_.getOptional[Boolean]("ttpDropTwoEnabled")).getOrElse(false)
-
-}
+case class FeatureSwitch(value: Option[Configuration]) {}

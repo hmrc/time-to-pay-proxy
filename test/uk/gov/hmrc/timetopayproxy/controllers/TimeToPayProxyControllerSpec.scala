@@ -16,28 +16,27 @@
 
 package uk.gov.hmrc.timetopayproxy.controllers
 
-import java.time.LocalDate
+import cats.syntax.either._
 import org.scalamock.scalatest.MockFactory
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
 import play.api.http.{ MimeTypes, Status }
 import play.api.libs.json.{ JsArray, JsSuccess, JsValue, Json }
 import play.api.mvc.{ ControllerComponents, Result }
-import play.api.test.Helpers.status
+import play.api.test.Helpers._
+import play.api.test.{ FakeRequest, Helpers }
 import uk.gov.hmrc.auth.core.PlayAuthConnector
 import uk.gov.hmrc.auth.core.authorise.Predicate
 import uk.gov.hmrc.auth.core.retrieve.Retrieval
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.timetopayproxy.actions.auth.{ AuthoriseAction, AuthoriseActionImpl }
-import uk.gov.hmrc.timetopayproxy.services.TTPQuoteService
-import uk.gov.hmrc.timetopayproxy.models._
-import play.api.test.{ FakeRequest, Helpers }
-
-import scala.concurrent.{ ExecutionContext, Future }
-import scala.concurrent.ExecutionContext.Implicits.global
-import play.api.test.Helpers._
-import cats.syntax.either._
 import uk.gov.hmrc.timetopayproxy.config.FeatureSwitch
+import uk.gov.hmrc.timetopayproxy.models._
+import uk.gov.hmrc.timetopayproxy.services.TTPQuoteService
+
+import java.time.LocalDate
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.{ ExecutionContext, Future }
 
 class TimeToPayProxyControllerSpec extends AnyWordSpec with Matchers with MockFactory {
 
@@ -364,10 +363,6 @@ class TimeToPayProxyControllerSpec extends AnyWordSpec with Matchers with MockFa
         .expects(*, *, *, *)
         .returning(TtppEnvelope(viewPlanResponse))
 
-      (() => fs.isTTPDropTwo)
-        .expects()
-        .returning(false)
-
       val fakeRequest = FakeRequest(
         "GET",
         "/individuals/time-to-pay/quote/customerReference/planId"
@@ -395,10 +390,6 @@ class TimeToPayProxyControllerSpec extends AnyWordSpec with Matchers with MockFa
         ))
         .expects(*, *, *, *)
         .returning(TtppEnvelope(errorFromTtpConnector.asLeft[ViewPlanResponse]))
-
-      (() => fs.isTTPDropTwo)
-        .expects()
-        .returning(false)
 
       val fakeRequest = FakeRequest(
         "GET",
@@ -428,10 +419,6 @@ class TimeToPayProxyControllerSpec extends AnyWordSpec with Matchers with MockFa
         ))
         .expects(*, *, *, *)
         .returning(TtppEnvelope(errorFromTtpConnector.asLeft[ViewPlanResponse]))
-
-      (() => fs.isTTPDropTwo)
-        .expects()
-        .returning(false)
 
       val fakeRequest = FakeRequest(
         "GET",

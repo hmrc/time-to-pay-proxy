@@ -1,9 +1,9 @@
 {
   "customerReference": "uniqRef1234",
   "channelIdentifier": "advisor",
-  "caseId": "caseId1",
   "plan": {
     "planId": "planId1",
+    "caseId": "caseId1",
     "quoteId": "quoteId1",
     "quoteDate": "2021-05-13",
     "quoteType": "instalmentAmount",
