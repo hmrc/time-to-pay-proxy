@@ -18,4 +18,6 @@ package uk.gov.hmrc.timetopayproxy.config
 
 import play.api.Configuration
 
-case class FeatureSwitch(value: Option[Configuration]) {}
+case class FeatureSwitch(value: Option[Configuration]) {
+  // Implement feature switch getter methods here.
+}
