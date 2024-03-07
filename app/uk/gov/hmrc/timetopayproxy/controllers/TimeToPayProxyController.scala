@@ -30,6 +30,7 @@ import uk.gov.hmrc.timetopayproxy.utils.TtppErrorHandler._
 import uk.gov.hmrc.timetopayproxy.utils.TtppResponseConverter._
 
 import javax.inject.{ Inject, Singleton }
+import scala.annotation.unused
 import scala.concurrent.{ ExecutionContext, Future }
 import scala.util.{ Failure, Success, Try }
 
@@ -38,6 +39,7 @@ class TimeToPayProxyController @Inject() (
   authoriseAction: AuthoriseAction,
   cc: ControllerComponents,
   timeToPayProxyService: TTPQuoteService,
+  @unused
   fs: FeatureSwitch
 ) extends BackendController(cc) with BaseController {
   implicit val ec: ExecutionContext = cc.executionContext
@@ -56,16 +58,10 @@ class TimeToPayProxyController @Inject() (
 
   def viewPlan(customerReference: String, planId: String) =
     authoriseAction.async { implicit request =>
-      if (fs.isTTPDropTwo)
-        timeToPayProxyService
-          .getExistingPlanDropTwo(CustomerReference(customerReference), PlanId(planId))
-          .leftMap(ttppError => ttppError.toErrorResponse)
-          .fold(e => e.toResponse, r => r.toResponse)
-      else
-        timeToPayProxyService
-          .getExistingPlan(CustomerReference(customerReference), PlanId(planId))
-          .leftMap(ttppError => ttppError.toErrorResponse)
-          .fold(e => e.toResponse, r => r.toResponse)
+      timeToPayProxyService
+        .getExistingPlan(CustomerReference(customerReference), PlanId(planId))
+        .leftMap(ttppError => ttppError.toErrorResponse)
+        .fold(e => e.toResponse, r => r.toResponse)
     }
 
   def updatePlan(customerReference: String, planId: String): Action[JsValue] =

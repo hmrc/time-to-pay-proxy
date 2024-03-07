@@ -44,11 +44,6 @@ trait TtpConnector {
     hc: HeaderCarrier
   ): TtppEnvelope[ViewPlanResponse]
 
-  def getExistingQuoteDropTwo(customerReference: CustomerReference, planId: PlanId)(implicit
-    ec: ExecutionContext,
-    hc: HeaderCarrier
-  ): TtppEnvelope[ViewPlanResponseDropTwo]
-
   def updatePlan(
     updatePlanRequest: UpdatePlanRequest
   )(implicit ec: ExecutionContext, hc: HeaderCarrier): TtppEnvelope[UpdatePlanResponse]
@@ -101,12 +96,6 @@ class DefaultTtpConnector @Inject() (appConfig: AppConfig, httpClient: HttpClien
     hc: HeaderCarrier
   ): TtppEnvelope[ViewPlanResponse] =
     getExistingQuoteG[ViewPlanResponse](customerReference, planId)
-
-  override def getExistingQuoteDropTwo(customerReference: CustomerReference, planId: PlanId)(implicit
-    ec: ExecutionContext,
-    hc: HeaderCarrier
-  ): TtppEnvelope[ViewPlanResponseDropTwo] =
-    getExistingQuoteG[ViewPlanResponseDropTwo](customerReference, planId)
 
   private def getExistingQuoteG[Response](customerReference: CustomerReference, planId: PlanId)(implicit
     ec: ExecutionContext,

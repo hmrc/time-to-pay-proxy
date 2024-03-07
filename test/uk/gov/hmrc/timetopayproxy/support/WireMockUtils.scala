@@ -42,7 +42,6 @@ trait WireMockUtils extends BeforeAndAfterEach with BeforeAndAfterAll with Guice
 
   override implicit lazy val app: Application = GuiceApplicationBuilder()
     .configure("auditing.enabled" -> "false")
-    .configure("feature-switch.ttpDropTwoEnabled" -> "true")
     .build()
 
   override def beforeAll(): Unit = {

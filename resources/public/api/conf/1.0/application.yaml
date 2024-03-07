@@ -286,9 +286,9 @@ paths:
                 - example:
                     customerReference: uniqRef1234
                     channelIdentifier: advisor
-                    caseId: caseId1
                     plan:
                       planId: planId1
+                      caseId: caseId1
                       quoteId: quoteId1
                       quoteDate: 2021-05-13
                       quoteType: instalmentAmount
@@ -337,9 +337,9 @@ paths:
               example:
                 customerReference: uniqRef1234
                 channelIdentifier: advisor
-                caseId: caseId1
                 plan:
                   planId: planId1
+                  caseId: caseId1
                   quoteId: quoteId1
                   quoteDate: 2021-05-13
                   quoteType: instalmentAmount
@@ -893,9 +893,6 @@ components:
           allOf:
           - $ref: '#/components/schemas/ChannelIdentifier'
           - description: Attribute to identify where the request is coming
-        caseId:
-          type: string
-          description: This is the unique case id
         plan:
           $ref: '#/components/schemas/Plan2'
         debtItemCharges:
@@ -1485,6 +1482,9 @@ components:
           minLength: 1
           type: string
           description: This is the unique plan id
+        caseId:
+          type: string
+          description: This is the unique case id
         quoteId:
           type: string
           description: This is the ID for the quote associated with the plan)
