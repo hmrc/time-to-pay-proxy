@@ -17,7 +17,9 @@
 package uk.gov.hmrc.timetopayproxy.support
 
 import com.fasterxml.jackson.databind.{ JsonNode, ObjectMapper }
-import com.networknt.schema.{ JsonSchema, JsonSchemaFactory, SpecVersion }
+import com.fasterxml.jackson.dataformat.yaml.YAMLFactory
+import com.fasterxml.jackson.module.scala.DefaultScalaModule
+import com.networknt.schema.{ JsonSchema, JsonSchemaFactory, SpecVersion, ValidationMessage }
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
 import play.api.libs.json.Json
@@ -25,6 +27,7 @@ import uk.gov.hmrc.timetopayproxy.models._
 
 import java.nio.file.Paths
 import scala.jdk.CollectionConverters.CollectionHasAsScala
+import java.io.File
 
 class SchemaValidatorSpec extends AnyWordSpec with Matchers {
 
@@ -36,6 +39,18 @@ class SchemaValidatorSpec extends AnyWordSpec with Matchers {
 
   def loadJson(path: String): JsonNode =
     objectMapper.readTree(Paths.get(path).toFile)
+
+  def loadYamlAndConvertToJsonSchema(path: String): JsonSchema = {
+    val yamlReader = new ObjectMapper(new YAMLFactory()).registerModule(DefaultScalaModule)
+    val jsonNode = yamlReader.readTree(new File(path))
+
+    schemaFactory.getSchema(jsonNode)
+  }
+
+  def loadYamlAndConvertToJsonNode(path: String): JsonNode = {
+    val yamlReader = new ObjectMapper(new YAMLFactory()).registerModule(DefaultScalaModule)
+    yamlReader.readTree(new File(path))
+  }
 
   "The generateQuote request schema" should {
 
@@ -179,5 +194,49 @@ class SchemaValidatorSpec extends AnyWordSpec with Matchers {
       errors shouldEqual Set.empty
     }
 
+  }
+
+  "application.yaml" should {
+    "be valid according to the meta schema" in {
+      val schema = loadSchema("resources/public/api/conf/1.0/schemas/metaSchema.json")
+      val json = loadYamlAndConvertToJsonNode("resources/public/api/conf/1.0/application.yaml")
+      val errors = schema.validate(json).asScala.toSet
+
+      errors shouldEqual Set.empty
+    }
+  }
+
+  "AffordableQuotes request" should {
+    "be valid according to application.yaml" in {
+      val yaml: JsonSchema = loadYamlAndConvertToJsonSchema("resources/public/api/conf/1.0/application.yaml")
+      val json: JsonNode = loadJson("resources/public/api/conf/1.0/examples/affordableQuote/request.json")
+      val errors: Set[ValidationMessage] = yaml.validate(json).asScala.toSet
+
+      errors shouldEqual Set.empty
+    }
+  }
+
+  "AffordableQuotes response" should {
+    "be valid according to application.yaml" in {
+      val yaml: JsonSchema = loadYamlAndConvertToJsonSchema("resources/public/api/conf/1.0/application.yaml")
+      val json: JsonNode = loadJson("resources/public/api/conf/1.0/examples/affordableQuote/response.json")
+      val errors: Set[ValidationMessage] = yaml.validate(json).asScala.toSet
+
+      errors shouldEqual Set.empty
+    }
+  }
+
+  "AffordableQuotesRequest model" should {
+    "parse to and from json" when {
+      "given only mandatory fields" in {}
+      "given all fields" in {}
+    }
+  }
+
+  "AffordableQuotesResponse model" should {
+    "parse to and from json" when {
+      "given only mandatory fields" in {}
+      "given all fields" in {}
+    }
   }
 }

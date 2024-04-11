@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 HM Revenue & Customs
+ * Copyright 2024 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,11 +17,13 @@
 package uk.gov.hmrc.timetopayproxy.services
 
 import com.google.inject.ImplementedBy
+
 import javax.inject.{ Inject, Singleton }
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.timetopayproxy.connectors.TtpConnector
 import uk.gov.hmrc.timetopayproxy.models._
 import uk.gov.hmrc.timetopayproxy.models.TtppEnvelope.TtppEnvelope
+import uk.gov.hmrc.timetopayproxy.models.affordablequotes.{ AffordableQuoteResponse, AffordableQuotesRequest }
 
 import scala.concurrent.ExecutionContext
 
@@ -45,6 +47,10 @@ trait TTPQuoteService {
     createPlanRequest: CreatePlanRequest,
     requestQuery: Map[String, Seq[String]]
   )(implicit ec: ExecutionContext, hc: HeaderCarrier): TtppEnvelope[CreatePlanResponse]
+
+  def getAffordableQuotes(
+    affordableQuotesRequest: AffordableQuotesRequest
+  )(implicit ec: ExecutionContext, hc: HeaderCarrier): TtppEnvelope[AffordableQuoteResponse]
 }
 
 @Singleton
@@ -72,4 +78,9 @@ class DefaultTTPQuoteService @Inject() (ttpConnector: TtpConnector) extends TTPQ
     requestQuery: Map[String, Seq[String]]
   )(implicit ec: ExecutionContext, hc: HeaderCarrier): TtppEnvelope[CreatePlanResponse] =
     ttpConnector.createPlan(createPlanRequest, requestQuery.view.mapValues(_.head).toSeq)
+
+  def getAffordableQuotes(
+    affordableQuotesRequest: AffordableQuotesRequest
+  )(implicit ec: ExecutionContext, hc: HeaderCarrier): TtppEnvelope[AffordableQuoteResponse] =
+    ttpConnector.getAffordableQuotes(affordableQuotesRequest)
 }

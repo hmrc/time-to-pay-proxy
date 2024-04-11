@@ -17,6 +17,7 @@ object AppDependencies {
     "org.scalamock"                %% "scalamock"              % "5.1.0"             % Test,
     "org.playframework"            %% "play-test"              % PlayVersion.current % Test,
     "com.fasterxml.jackson.module" %% "jackson-module-scala"   % "2.12.2"            % Test,
+    "com.fasterxml.jackson.dataformat" % "jackson-dataformat-yaml" % "2.13.3" % Test,
     "com.vladsch.flexmark"         % "flexmark-all"            % "0.36.8"            % Test,
     "org.scalatestplus.play"       %% "scalatestplus-play"     % "5.1.0"             % Test,
     "com.networknt"                % "json-schema-validator"   % "1.0.64"            % Test,

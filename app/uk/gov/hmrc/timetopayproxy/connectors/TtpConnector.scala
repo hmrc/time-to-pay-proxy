@@ -17,20 +17,19 @@
 package uk.gov.hmrc.timetopayproxy.connectors
 
 import cats.data.EitherT
-import uk.gov.hmrc.http.{ HeaderCarrier, HttpClient }
-
-import scala.concurrent.ExecutionContext
-import uk.gov.hmrc.timetopayproxy.models._
-import uk.gov.hmrc.timetopayproxy.models.TtppEnvelope.TtppEnvelope
 import com.google.inject.ImplementedBy
 import play.api.libs.json.{ Json, Reads }
-
-import javax.inject.{ Inject, Singleton }
+import uk.gov.hmrc.http.{ HeaderCarrier, HttpClient }
 import uk.gov.hmrc.timetopayproxy.config.AppConfig
 import uk.gov.hmrc.timetopayproxy.logging.RequestAwareLogger
+import uk.gov.hmrc.timetopayproxy.models.TtppEnvelope.TtppEnvelope
+import uk.gov.hmrc.timetopayproxy.models._
+import uk.gov.hmrc.timetopayproxy.models.affordablequotes.{ AffordableQuoteResponse, AffordableQuotesRequest }
 
 import java.net.URLEncoder
 import java.util.UUID
+import javax.inject.{ Inject, Singleton }
+import scala.concurrent.ExecutionContext
 
 @ImplementedBy(classOf[DefaultTtpConnector])
 trait TtpConnector {
@@ -52,6 +51,10 @@ trait TtpConnector {
     createPlanRequest: CreatePlanRequest,
     queryParams: Seq[(String, String)] = Seq.empty
   )(implicit ec: ExecutionContext, hc: HeaderCarrier): TtppEnvelope[CreatePlanResponse]
+
+  def getAffordableQuotes(
+    affordableQuotesRequest: AffordableQuotesRequest
+  )(implicit ec: ExecutionContext, hc: HeaderCarrier): TtppEnvelope[AffordableQuoteResponse]
 }
 
 @Singleton
@@ -150,6 +153,20 @@ class DefaultTtpConnector @Inject() (appConfig: AppConfig, httpClient: HttpClien
           headers(UUID.randomUUID().toString)
         )
     }
+  }
+
+  def getAffordableQuotes(
+    affordableQuotesRequest: AffordableQuotesRequest
+  )(implicit ec: ExecutionContext, hc: HeaderCarrier): TtppEnvelope[AffordableQuoteResponse] = {
+    val path =
+      if (appConfig.useIf) "individuals/time-to-pay/affordability/affordable-quotes"
+      else "debts/time-to-pay/affordability/affordable-quotes"
+    val url = s"${appConfig.ttpBaseUrl}/$path"
+
+    EitherT(
+      httpClient
+        .POST[AffordableQuotesRequest, Either[TtppError, AffordableQuoteResponse]](url, affordableQuotesRequest)
+    )
   }
 
   private def makeQueryString(queryParams: Seq[(String, String)]): String = {

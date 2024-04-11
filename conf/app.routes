@@ -4,3 +4,4 @@ POST       /quote                                   uk.gov.hmrc.timetopayproxy.c
 GET        /quote/:customerReference/:planId        uk.gov.hmrc.timetopayproxy.controllers.TimeToPayProxyController.viewPlan(customerReference: String, planId: String)
 PUT        /quote/:customerReference/:planId        uk.gov.hmrc.timetopayproxy.controllers.TimeToPayProxyController.updatePlan(customerReference: String, planId: String)
 POST       /quote/arrangement                       uk.gov.hmrc.timetopayproxy.controllers.TimeToPayProxyController.createPlan
+POST       /self-serve/affordable-quotes            uk.gov.hmrc.timetopayproxy.controllers.TimeToPayProxyController.getAffordableQuotes

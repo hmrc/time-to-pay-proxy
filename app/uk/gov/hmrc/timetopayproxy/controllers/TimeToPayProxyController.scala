@@ -25,6 +25,7 @@ import uk.gov.hmrc.timetopayproxy.config.FeatureSwitch
 import uk.gov.hmrc.timetopayproxy.models.TtppEnvelope.TtppEnvelope
 import uk.gov.hmrc.timetopayproxy.models.TtppErrorResponse._
 import uk.gov.hmrc.timetopayproxy.models._
+import uk.gov.hmrc.timetopayproxy.models.affordablequotes.AffordableQuotesRequest
 import uk.gov.hmrc.timetopayproxy.services.TTPQuoteService
 import uk.gov.hmrc.timetopayproxy.utils.TtppErrorHandler._
 import uk.gov.hmrc.timetopayproxy.utils.TtppResponseConverter._
@@ -83,6 +84,15 @@ class TimeToPayProxyController @Inject() (
     withJsonBody[CreatePlanRequest] { createPlanRequest: CreatePlanRequest =>
       timeToPayProxyService
         .createPlan(createPlanRequest, request.queryString)
+        .leftMap(ttppError => ttppError.toErrorResponse)
+        .fold(e => e.toResponse, r => r.toResponse)
+    }
+  }
+
+  def getAffordableQuotes = authoriseAction.async(parse.json) { implicit request =>
+    withJsonBody[AffordableQuotesRequest] { affordableQuoteRequest: AffordableQuotesRequest =>
+      timeToPayProxyService
+        .getAffordableQuotes(affordableQuoteRequest)
         .leftMap(ttppError => ttppError.toErrorResponse)
         .fold(e => e.toResponse, r => r.toResponse)
     }

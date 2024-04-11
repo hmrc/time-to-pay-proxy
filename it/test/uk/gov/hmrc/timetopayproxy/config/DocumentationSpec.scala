@@ -54,16 +54,16 @@ class DocumentationControllerSpec extends IntegrationBaseSpec {
     """.stripMargin
   )
 
-  "GET /api/definition" should {
-    "return a 200 with the correct response body" in {
+  "GET /api/definition" - {
+    "should return a 200 with the correct response body" in {
       val response: WSResponse = await(buildRequest("/api/definition").get())
       response.status shouldBe Status.OK
       Json.parse(response.body) shouldBe apiDefinitionJson
     }
   }
 
-  "a documentation request" must {
-    "return the OAS documentation" in {
+  "a documentation request" - {
+    "must return the OAS documentation" in {
       val response: WSResponse = await(buildRequest("/api/conf/1.0/application.yaml").get())
 
       response.status shouldBe Status.OK

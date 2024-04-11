@@ -1,0 +1,360 @@
+{
+  "processingDateTime": "2022-03-23T13:49:51.141Z",
+  "paymentPlans": [
+    {
+      "planDuration": 4,
+      "totalDebt": 7451,
+      "totalDebtIncInt": 7512.88,
+      "planInterest": 48.05,
+      "collections": {
+        "initialCollection": {
+          "dueDate": "2022-06-18",
+          "amountDue": 1000
+        },
+        "regularCollections": [
+          {
+            "dueDate": "2022-07-08",
+            "amountDue": 1628.21
+          },
+          {
+            "dueDate": "2022-08-08",
+            "amountDue": 1628.21
+          },
+          {
+            "dueDate": "2022-09-08",
+            "amountDue": 1628.21
+          },
+          {
+            "dueDate": "2022-10-08",
+            "amountDue": 1628.21
+          }
+        ]
+      },
+      "numberOfInstalments": 8,
+      "instalments": [
+        {
+          "instalmentNumber": 1,
+          "dueDate": "2022-06-18",
+          "instalmentInterestAccrued": 4.59,
+          "instalmentBalance": 4808.96,
+          "debtItemChargeId": "XW006559808862",
+          "amountDue": 1000,
+          "debtItemOriginalDueDate": "2022-05-22"
+        },
+        {
+          "instalmentNumber": 2,
+          "dueDate": "2022-07-08",
+          "instalmentInterestAccrued": 7.28,
+          "instalmentBalance": 3808.96,
+          "debtItemChargeId": "XW006559808862",
+          "amountDue": 1628.21,
+          "debtItemOriginalDueDate": "2022-05-22"
+        },
+        {
+          "instalmentNumber": 3,
+          "dueDate": "2022-08-08",
+          "instalmentInterestAccrued": 6.52,
+          "instalmentBalance": 2196.01,
+          "debtItemChargeId": "XW006559808862",
+          "amountDue": 1628.21,
+          "debtItemOriginalDueDate": "2022-05-22"
+        },
+        {
+          "instalmentNumber": 4,
+          "dueDate": "2022-09-08",
+          "instalmentInterestAccrued": 1.73,
+          "instalmentBalance": 583.06,
+          "debtItemChargeId": "XW006559808862",
+          "amountDue": 588.57,
+          "debtItemOriginalDueDate": "2022-05-22"
+        },
+        {
+          "instalmentNumber": 5,
+          "dueDate": "2022-09-08",
+          "instalmentInterestAccrued": 14.35,
+          "instalmentBalance": 1627.06,
+          "debtItemChargeId": "XW005993570327",
+          "amountDue": 1039.64,
+          "debtItemOriginalDueDate": "2022-05-22"
+        },
+        {
+          "instalmentNumber": 6,
+          "dueDate": "2022-10-08",
+          "instalmentInterestAccrued": 1.71,
+          "instalmentBalance": 597.17,
+          "debtItemChargeId": "XW005993570327",
+          "amountDue": 602.82,
+          "debtItemOriginalDueDate": "2022-05-22"
+        },
+        {
+          "instalmentNumber": 7,
+          "dueDate": "2022-10-08",
+          "instalmentInterestAccrued": 10.24,
+          "instalmentBalance": 876,
+          "debtItemChargeId": "XF006579976401",
+          "amountDue": 884.29,
+          "debtItemOriginalDueDate": "2022-05-22"
+        },
+        {
+          "instalmentNumber": 8,
+          "dueDate": "2022-10-08",
+          "instalmentInterestAccrued": 1.63,
+          "instalmentBalance": 139.81,
+          "debtItemChargeId": "XJ006559984746",
+          "amountDue": 141.14,
+          "debtItemOriginalDueDate": "2022-05-22"
+        }
+      ]
+    },
+    {
+      "planDuration": 5,
+      "totalDebt": 7451,
+      "totalDebtIncInt": 7522.38,
+      "planInterest": 57.55,
+      "collections": {
+        "initialCollection": {
+          "dueDate": "2022-06-18",
+          "amountDue": 1000,
+          "interestAccrued": 4.59
+        },
+        "regularCollections": [
+          {
+            "dueDate": "2022-07-08",
+            "amountDue": 1304.47
+          },
+          {
+            "dueDate": "2022-08-08",
+            "amountDue": 1304.47
+          },
+          {
+            "dueDate": "2022-09-08",
+            "amountDue": 1304.47
+          },
+          {
+            "dueDate": "2022-10-08",
+            "amountDue": 1304.47
+          },
+          {
+            "dueDate": "2022-11-08",
+            "amountDue": 1304.47
+          }
+        ]
+      },
+      "numberOfInstalments": 9,
+      "instalments": [
+        {
+          "instalmentNumber": 1,
+          "dueDate": "2022-06-18",
+          "instalmentInterestAccrued": 4.59,
+          "instalmentBalance": 4808.96,
+          "debtItemChargeId": "XW006559808862",
+          "amountDue": 1000,
+          "debtItemOriginalDueDate": "2022-05-22"
+        },
+        {
+          "instalmentNumber": 2,
+          "dueDate": "2022-07-08",
+          "instalmentInterestAccrued": 7.28,
+          "instalmentBalance": 3808.96,
+          "debtItemChargeId": "XW006559808862",
+          "amountDue": 1304.47,
+          "debtItemOriginalDueDate": "2022-05-22"
+        },
+        {
+          "instalmentNumber": 3,
+          "dueDate": "2022-08-08",
+          "instalmentInterestAccrued": 7.41,
+          "instalmentBalance": 2518.60,
+          "debtItemChargeId": "XW006559808862",
+          "amountDue": 1304.47,
+          "debtItemOriginalDueDate": "2022-05-22"
+        },
+        {
+          "instalmentNumber": 4,
+          "dueDate": "2022-09-08",
+          "instalmentInterestAccrued": 3.65,
+          "instalmentBalance": 1228.24,
+          "debtItemChargeId": "XW006559808862",
+          "amountDue": 1241.67,
+          "debtItemOriginalDueDate": "2022-05-22"
+        },
+        {
+          "instalmentNumber": 5,
+          "dueDate": "2022-09-08",
+          "instalmentInterestAccrued": 1.23,
+          "instalmentBalance": 139.81,
+          "debtItemChargeId": "XJ006559984746",
+          "amountDue": 62.8,
+          "debtItemOriginalDueDate": "2022-05-22"
+        },
+        {
+          "instalmentNumber": 6,
+          "dueDate": "2022-10-08",
+          "instalmentInterestAccrued": 0.22,
+          "instalmentBalance": 77.69,
+          "debtItemChargeId": "XJ006559984746",
+          "amountDue": 78.53,
+          "debtItemOriginalDueDate": "2022-05-22"
+        },
+        {
+          "instalmentNumber": 7,
+          "dueDate": "2022-10-08",
+          "instalmentInterestAccrued": 19.03,
+          "instalmentBalance": 1627.06,
+          "debtItemChargeId": "XW005993570327",
+          "amountDue": 1225.94,
+          "debtItemOriginalDueDate": "2022-05-22"
+        },
+        {
+          "instalmentNumber": 8,
+          "dueDate": "2022-11-08",
+          "instalmentInterestAccrued": 1.23,
+          "instalmentBalance": 414.39,
+          "debtItemChargeId": "XW005993570327",
+          "amountDue": 418.92,
+          "debtItemOriginalDueDate": "2022-05-22"
+        },
+        {
+          "instalmentNumber": 9,
+          "dueDate": "2022-11-08",
+          "instalmentInterestAccrued": 12.85,
+          "instalmentBalance": 876,
+          "debtItemChargeId": "XF006579976401",
+          "amountDue": 885.58,
+          "debtItemOriginalDueDate": "2022-05-22"
+        }
+      ]
+    },
+    {
+      "planDuration": 6,
+      "totalDebt": 7451,
+      "totalDebtIncInt": 7531.8,
+      "planInterest": 66.97,
+      "collections": {
+        "initialCollection": {
+          "dueDate": "2022-06-18",
+          "amountDue": 1000
+        },
+        "regularCollections": [
+          {
+            "dueDate": "2022-07-08",
+            "amountDue": 1088.62
+          },
+          {
+            "dueDate": "2022-08-08",
+            "amountDue": 1088.62
+          },
+          {
+            "dueDate": "2022-09-08",
+            "amountDue": 1088.62
+          },
+          {
+            "dueDate": "2022-10-08",
+            "amountDue": 1088.62
+          },
+          {
+            "dueDate": "2022-11-08",
+            "amountDue": 1088.62
+          },
+          {
+            "dueDate": "2022-12-08",
+            "amountDue": 1088.62
+          }
+        ]
+      },
+      "numberOfInstalments": 10,
+      "instalments": [
+        {
+          "instalmentNumber": 1,
+          "dueDate": "2022-06-18",
+          "instalmentInterestAccrued": 4.59,
+          "instalmentBalance": 4808.96,
+          "debtItemChargeId": "XW006559808862",
+          "amountDue": 1000,
+          "debtItemOriginalDueDate": "2022-05-22"
+        },
+        {
+          "instalmentNumber": 2,
+          "dueDate": "2022-07-08",
+          "instalmentInterestAccrued": 7.29,
+          "instalmentBalance": 3808.96,
+          "debtItemChargeId": "XW006559808862",
+          "amountDue": 1088.62,
+          "debtItemOriginalDueDate": "2022-05-22"
+        },
+        {
+          "instalmentNumber": 3,
+          "dueDate": "2022-08-08",
+          "instalmentInterestAccrued": 8.11,
+          "instalmentBalance": 2733.66,
+          "debtItemChargeId": "XW006559808862",
+          "amountDue": 1088.62,
+          "debtItemOriginalDueDate": "2022-05-22"
+        },
+        {
+          "instalmentNumber": 4,
+          "dueDate": "2022-09-08",
+          "instalmentInterestAccrued": 4.92,
+          "instalmentBalance": 1658.36,
+          "debtItemChargeId": "XW006559808862",
+          "amountDue": 1088.62,
+          "debtItemOriginalDueDate": "2022-05-22"
+        },
+        {
+          "instalmentNumber": 5,
+          "dueDate": "2022-10-08",
+          "instalmentInterestAccrued": 1.67,
+          "instalmentBalance": 583.06,
+          "debtItemChargeId": "XW006559808862",
+          "amountDue": 590.28,
+          "debtItemOriginalDueDate": "2022-05-22"
+        },
+        {
+          "instalmentNumber": 6,
+          "dueDate": "2022-10-08",
+          "instalmentInterestAccrued": 19.03,
+          "instalmentBalance": 1627.06,
+          "debtItemChargeId": "XW005993570327",
+          "amountDue": 498.34,
+          "debtItemOriginalDueDate": "2022-05-22"
+        },
+        {
+          "instalmentNumber": 7,
+          "dueDate": "2022-10-08",
+          "instalmentInterestAccrued": 3.37,
+          "instalmentBalance": 1134.82,
+          "debtItemChargeId": "XW005993570327",
+          "amountDue": 1088.62,
+          "debtItemOriginalDueDate": "2022-05-22"
+        },
+        {
+          "instalmentNumber": 8,
+          "dueDate": "2022-12-08",
+          "instalmentInterestAccrued": 0.17,
+          "instalmentBalance": 59.92,
+          "debtItemChargeId": "XJ006559984746",
+          "amountDue": 60.26,
+          "debtItemOriginalDueDate": "2022-05-22"
+        },
+        {
+          "instalmentNumber": 9,
+          "dueDate": "2022-12-08",
+          "instalmentInterestAccrued": 2.45,
+          "instalmentBalance": 139.81,
+          "debtItemChargeId": "XJ006559984746",
+          "amountDue": 141.54,
+          "debtItemOriginalDueDate": "2022-05-22"
+        },
+        {
+          "instalmentNumber": 10,
+          "dueDate": "2022-12-08",
+          "instalmentInterestAccrued": 15.37,
+          "instalmentBalance": 867,
+          "debtItemChargeId": "XF006579976401",
+          "amountDue": 886.9,
+          "debtItemOriginalDueDate": "2022-05-22"
+        }
+      ]
+    }
+  ]
+}
