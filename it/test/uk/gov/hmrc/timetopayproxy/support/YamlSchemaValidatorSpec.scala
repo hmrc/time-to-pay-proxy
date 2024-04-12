@@ -34,29 +34,23 @@ class YamlSchemaValidatorSpec extends AnyWordSpec with Matchers {
   lazy val schemaFactory = JsonSchemaFactory.getInstance(SpecVersion.VersionFlag.V4)
   lazy val objectMapper = new ObjectMapper
 
-  def loadSchema(path: String): JsonSchema =
-    schemaFactory.getSchema(Paths.get(path).toUri)
-
   def loadJson(path: String): JsonNode =
     objectMapper.readTree(Paths.get(path).toFile)
 
   def loadYamlAndConvertToJsonSchema(path: String): JsonSchema = {
-    val yamlReader = new ObjectMapper(new YAMLFactory()).registerModule(DefaultScalaModule)
-    val jsonNode = yamlReader.readTree(new File(path))
-
-    schemaFactory.getSchema(jsonNode)
+    schemaFactory.getSchema(loadYamlAndConvertToJsonNode(path))
   }
 
   def loadYamlAndConvertToJsonNode(path: String): JsonNode = {
     val yamlReader = new ObjectMapper(new YAMLFactory()).registerModule(DefaultScalaModule)
-    yamlReader.readTree(new File(path))
+    yamlReader.readTree(Paths.get(path).toFile)
   }
 
   "application.yaml" should {
     "be valid according to the meta schema" in {
-      val schema = loadSchema("resources/public/api/conf/1.0/schemas/metaSchema.json")
-      val json = loadYamlAndConvertToJsonNode("resources/public/api/conf/1.0/application.yaml")
-      val errors = schema.validate(json).asScala.toSet
+      val schema: JsonSchema = loadYamlAndConvertToJsonSchema("resources/public/api/conf/1.0/yamlSchemas/metaSchema.yaml")
+      val json: JsonNode = loadYamlAndConvertToJsonNode("resources/public/api/conf/1.0/application.yaml")
+      val errors: Set[ValidationMessage] = schema.validate(json).asScala.toSet
 
       errors shouldEqual Set.empty
     }
