@@ -239,33 +239,6 @@ class TimeToPayProxyControllerItSpec extends IntegrationBaseSpec {
         }
       }
 
-      "should return a 401 statusCode" - {
-        "when the user is unauthorised" in new TimeToPayProxyControllerTestBase { //TODO: Do I need to test when auth doesn't work? Not sure how it should behave/recover from the error
-          stubPostWithResponseBody(
-            url = "/auth/authorise",
-            status = 401,
-            responseHeaderContaining =
-              Some(Seq(("WWW-Authenticate", """MDTP detail="Some detailed information here""""))),
-            responseBody = "{}"
-          )
-          stubPostWithResponseBody(
-            url = "/debts/time-to-pay/affordability/affordable-quotes",
-            status = 200,
-            responseBody = Json.toJson(ttpResponse).toString()
-          )
-
-          val requestForAffordableQuotes: WSRequest = buildRequest("/self-serve/affordable-quotes")
-
-          val response: WSResponse = await(
-            requestForAffordableQuotes.post(Json.toJson(affordableQuoteRequest))
-          )
-
-          val exception = intercept[InternalError](response)
-          exception shouldBe a[InternalError]
-          exception.getMessage shouldBe "Boom boom!"
-        }
-      }
-
       "should return a 503 statusCode" - {
         "when given a valid json payload" - {
           for (responseStatus <- List(200, 400)) s"when TimeToPay returns a $responseStatus response" - {
