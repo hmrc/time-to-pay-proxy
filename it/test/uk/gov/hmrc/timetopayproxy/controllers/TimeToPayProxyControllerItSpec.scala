@@ -272,7 +272,8 @@ class TimeToPayProxyControllerItSpec extends IntegrationBaseSpec {
     implicit def ec: ExecutionContext = app.injector.instanceOf[ExecutionContext]
     implicit val hc: HeaderCarrier = HeaderCarrier()
 
-    val ttpResponse: AffordableQuoteResponse = AffordableQuoteResponse(LocalDateTime.now(), Nil)
+    val ttpResponse: AffordableQuoteResponse =
+      AffordableQuoteResponse(LocalDateTime.parse("2025-01-13T10:15:30.975"), Nil)
 
     val affordableQuoteRequest: AffordableQuotesRequest = AffordableQuotesRequest(
       channelIdentifier = "eSSTTP",

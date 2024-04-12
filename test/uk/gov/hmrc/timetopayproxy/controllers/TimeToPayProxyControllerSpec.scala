@@ -979,7 +979,7 @@ class TimeToPayProxyControllerSpec extends AnyWordSpec with Matchers with MockFa
       )
     )
     val affordableQuoteResponse = AffordableQuoteResponse(
-      LocalDateTime.now(), //TODO: Change from "now"
+      LocalDateTime.parse("2025-01-13T10:15:30.975"),
       paymentPlans = List(
         AffordableQuotePaymentPlan(
           numberOfInstalments = 1,
