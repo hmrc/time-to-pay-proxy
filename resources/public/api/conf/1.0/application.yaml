@@ -10,8 +10,10 @@ info:
       |---|-----|------|-----|
       | 1.0.0 | 11-03-2023 | Jorma Pajunen | Baselined Version |
       | 1.0.1 | 27-03-2024 | Jorma Pajunen | Added new affordable quotes endpoint |
+      | 1.0.2 | 12-04-2024 | Jorma Pajunen | Added new affordable quotes endpoint |
+      | 1.0.3 | 16-04-2024 | Vinnie Brice  | Sets InitialCollection to an object and ... |
   contact: {}
-  version: '1.0.1'
+  version: '1.0.3'
 servers:
   - url: https://api.service.hmrc.gov.uk/
     variables: {}
@@ -103,13 +105,13 @@ paths:
             text/plain:
               schema:
                 allOf:
-                  - $ref: '#/components/schemas/Timetopayproxyendpointerrorcodes'
+                  - $ref: '#/components/schemas/ErrorResponse'
                   - example:
-                      reason: Field at path '/field' missing or invalid
-                      message: Invalid Json
+                      statusCode: 400
+                      errorMessage: Invalid JSON error
               example:
-                reason: Field at path '/field' missing or invalid
-                message: Invalid Json
+                statusCode: 400
+                errorMessage: Invalid JSON error
         '401':
           description: ''
           headers: {}
@@ -117,13 +119,13 @@ paths:
             text/plain:
               schema:
                 allOf:
-                  - $ref: '#/components/schemas/Timetopayproxyendpointerrorcodes'
+                  - $ref: '#/components/schemas/ErrorResponse'
                   - example:
-                      reason: A user with no active session will return 401 response
-                      message: ""
+                      statusCode: 401
+                      errorMessage: A user with no active session will return 401 response
               example:
-                reason: A user with no active session will return 401 response
-                message: ""
+                statusCode: 401
+                errorMessage: A user with no active session will return 401 response
         '500':
           description: ''
           headers: {}
@@ -131,13 +133,13 @@ paths:
             text/plain:
               schema:
                 allOf:
-                  - $ref: '#/components/schemas/Timetopayproxyendpointerrorcodes'
+                  - $ref: '#/components/schemas/ErrorResponse'
                   - example:
-                      reason: Internal Service Error
-                      message: Internal Service Error
+                      statusCode: 500
+                      errorMessage: Internal Service Error
               example:
-                reason: Internal Service Error
-                message: Internal Service Error
+                statusCode: 500
+                errorMessage: Internal Service Error
         '503':
           description: ''
           headers: {}
@@ -145,13 +147,13 @@ paths:
             text/plain:
               schema:
                 allOf:
-                  - $ref: '#/components/schemas/Timetopayproxyendpointerrorcodes'
+                  - $ref: '#/components/schemas/ErrorResponse'
                   - example:
-                      reason: Couldn't parse body from upstream
-                      message: Couldn't parse body from upstream
+                      statusCode: 503
+                      errorMessage: Couldn't parse body from upstream
               example:
-                reason: Couldn't parse body from upstream
-                message: Couldn't parse body from upstream
+                statusCode: 503
+                errorMessage: Couldn't parse body from upstream
       deprecated: false
   /individuals/time-to-pay-proxy/quote/arrangement:
     post:
@@ -291,13 +293,13 @@ paths:
             text/plain:
               schema:
                 allOf:
-                  - $ref: '#/components/schemas/Timetopayproxyendpointerrorcodes'
+                  - $ref: '#/components/schemas/ErrorResponse'
                   - example:
-                      reason: Field at path '/field' missing or invalid
-                      message: Invalid Json
+                      statusCode: 400
+                      errorMessage: Invalid JSON error
               example:
-                reason: Field at path '/field' missing or invalid
-                message: Invalid Json
+                statusCode: 400
+                errorMessage: Invalid JSON error
         '401':
           description: ''
           headers: {}
@@ -305,13 +307,13 @@ paths:
             text/plain:
               schema:
                 allOf:
-                  - $ref: '#/components/schemas/Timetopayproxyendpointerrorcodes'
+                  - $ref: '#/components/schemas/ErrorResponse'
                   - example:
-                      reason: A user with no active session will return 401 response
-                      message: ""
+                      statusCode: 401
+                      errorMessage: A user with no active session will return 401 response
               example:
-                reason: A user with no active session will return 401 response
-                message: ""
+                statusCode: 401
+                errorMessage: A user with no active session will return 401 response
         '500':
           description: ''
           headers: {}
@@ -319,13 +321,13 @@ paths:
             text/plain:
               schema:
                 allOf:
-                  - $ref: '#/components/schemas/Timetopayproxyendpointerrorcodes'
+                  - $ref: '#/components/schemas/ErrorResponse'
                   - example:
-                      reason: Internal Service Error
-                      message: Internal Service Error
+                      statusCode: 500
+                      errorMessage: Internal Service Error
               example:
-                reason: Internal Service Error
-                message: Internal Service Error
+                statusCode: 500
+                errorMessage: Internal Service Error
         '503':
           description: ''
           headers: {}
@@ -333,13 +335,13 @@ paths:
             text/plain:
               schema:
                 allOf:
-                  - $ref: '#/components/schemas/Timetopayproxyendpointerrorcodes'
+                  - $ref: '#/components/schemas/ErrorResponse'
                   - example:
-                      reason: Couldn't parse body from upstream
-                      message: Couldn't parse body from upstream
+                      statusCode: 503
+                      errorMessage: Couldn't parse body from upstream
               example:
-                reason: Couldn't parse body from upstream
-                message: Couldn't parse body from upstream
+                statusCode: 503
+                errorMessage: Couldn't parse body from upstream
       deprecated: false
   /individuals/time-to-pay-proxy/quote/{customerReference}/{planId}:
     get:
@@ -484,13 +486,13 @@ paths:
             text/plain:
               schema:
                 allOf:
-                  - $ref: '#/components/schemas/Timetopayproxyendpointerrorcodes'
+                  - $ref: '#/components/schemas/ErrorResponse'
                   - example:
-                      reason: Field at path '/field' missing or invalid
-                      message: Invalid Json
+                      statusCode: 400
+                      errorMessage: Invalid JSON error
               example:
-                reason: Field at path '/field' missing or invalid
-                message: Invalid Json
+                statusCode: 400
+                errorMessage: Invalid JSON error
         '401':
           description: ''
           headers: {}
@@ -498,13 +500,13 @@ paths:
             text/plain:
               schema:
                 allOf:
-                  - $ref: '#/components/schemas/Timetopayproxyendpointerrorcodes'
+                  - $ref: '#/components/schemas/ErrorResponse'
                   - example:
-                      reason: A user with no active session will return 401 response
-                      message: ""
+                      statusCode: 401
+                      errorMessage: A user with no active session will return 401 response
               example:
-                reason: A user with no active session will return 401 response
-                message: ""
+                statusCode: 401
+                errorMessage: A user with no active session will return 401 response
         '500':
           description: ''
           headers: {}
@@ -512,13 +514,13 @@ paths:
             text/plain:
               schema:
                 allOf:
-                  - $ref: '#/components/schemas/Timetopayproxyendpointerrorcodes'
+                  - $ref: '#/components/schemas/ErrorResponse'
                   - example:
-                      reason: Internal Service Error
-                      message: Internal Service Error
+                      statusCode: 500
+                      errorMessage: Internal Service Error
               example:
-                reason: Internal Service Error
-                message: Internal Service Error
+                statusCode: 500
+                errorMessage: Internal Service Error
         '503':
           description: ''
           headers: {}
@@ -526,13 +528,13 @@ paths:
             text/plain:
               schema:
                 allOf:
-                  - $ref: '#/components/schemas/Timetopayproxyendpointerrorcodes'
+                  - $ref: '#/components/schemas/ErrorResponse'
                   - example:
-                      reason: Couldn't parse body from upstream
-                      message: Couldn't parse body from upstream
+                      statusCode: 503
+                      errorMessage: Couldn't parse body from upstream
               example:
-                reason: Couldn't parse body from upstream
-                message: Couldn't parse body from upstream
+                statusCode: 503
+                errorMessage: Couldn't parse body from upstream
       deprecated: false
     put:
       tags:
@@ -617,13 +619,13 @@ paths:
             text/plain:
               schema:
                 allOf:
-                  - $ref: '#/components/schemas/Timetopayproxyendpointerrorcodes'
+                  - $ref: '#/components/schemas/ErrorResponse'
                   - example:
-                      reason: Field at path '/field' missing or invalid
-                      message: Invalid Json
+                      statusCode: 400
+                      errorMessage: Invalid JSON error
               example:
-                reason: Field at path '/field' missing or invalid
-                message: Invalid Json
+                statusCode: 400
+                errorMessage: Invalid JSON error
         '401':
           description: ''
           headers: {}
@@ -631,13 +633,13 @@ paths:
             text/plain:
               schema:
                 allOf:
-                  - $ref: '#/components/schemas/Timetopayproxyendpointerrorcodes'
+                  - $ref: '#/components/schemas/ErrorResponse'
                   - example:
-                      reason: A user with no active session will return 401 response
-                      message: ""
+                      statusCode: 401
+                      errorMessage: A user with no active session will return 401 response
               example:
-                reason: A user with no active session will return 401 response
-                message: ""
+                statusCode: 401
+                errorMessage: A user with no active session will return 401 response
         '500':
           description: ''
           headers: {}
@@ -645,13 +647,13 @@ paths:
             text/plain:
               schema:
                 allOf:
-                  - $ref: '#/components/schemas/Timetopayproxyendpointerrorcodes'
+                  - $ref: '#/components/schemas/ErrorResponse'
                   - example:
-                      reason: Internal Service Error
-                      message: Internal Service Error
+                      statusCode: 500
+                      errorMessage: Internal Service Error
               example:
-                reason: Internal Service Error
-                message: Internal Service Error
+                statusCode: 500
+                errorMessage: Internal Service Error
         '503':
           description: ''
           headers: {}
@@ -659,13 +661,13 @@ paths:
             text/plain:
               schema:
                 allOf:
-                  - $ref: '#/components/schemas/Timetopayproxyendpointerrorcodes'
+                  - $ref: '#/components/schemas/ErrorResponse'
                   - example:
-                      reason: Couldn't parse body from upstream
-                      message: Couldn't parse body from upstream
+                      statusCode: 503
+                      errorMessage: Couldn't parse body from upstream
               example:
-                reason: Couldn't parse body from upstream
-                message: Couldn't parse body from upstream
+                statusCode: 503
+                errorMessage: Couldn't parse body from upstream
       deprecated: false
   /individuals/time-to-pay-proxy/self-serve/affordable-quotes:
     post:
@@ -673,12 +675,12 @@ paths:
         - individuals
       summary: Affordable quotes
       description: |
-        This API allows a request – to return affordable quotes for SA.
+        This API allows a request – to return affordable quotes.
       operationId: AffordableQuotes
       parameters: []
       security:
         - applicationRestricted:
-            - 'read:affordable-quotes'
+            - 'read:time-to-pay-proxy'
       requestBody:
         description: ''
         content:
@@ -784,8 +786,8 @@ paths:
                     planInterest: 48.05
                     collections:
                       initialCollection:
-                      dueDate: 2022-06-18
-                      amountDue: 1000
+                        dueDate: 2022-06-18
+                        amountDue: 1000
                       regularCollections:
                         - dueDate: 2022-07-08
                           amountDue: 1628.21
@@ -795,20 +797,20 @@ paths:
                           amountDue: 1628.21
                     numberOfInstalments: 2
                     instalments:
-                      instalmentNumber: 1
-                      dueDate: 2022-06-18
-                      instalmentInterestAccrued: 4.59
-                      instalmentBalance: 4808.96
-                      debtItemChargeId: XW006559808862
-                      amountDue: 1000
-                      debtItemOriginalDueDate: 2022-05-22
-                    instalmentNumber: 2
-                    dueDate: 2022-07-08
-                    instalmentInterestAccrued: 7.28
-                    instalmentBalance: 3808.96
-                    debtItemChargeId: XW006559808862
-                    amountDue: 1628.21
-                    debtItemOriginalDueDate: 2022-05-22
+                      - instalmentNumber: 1
+                        dueDate: 2022-06-18
+                        instalmentInterestAccrued: 4.59
+                        instalmentBalance: 4808.96
+                        debtItemChargeId: XW006559808862
+                        amountDue: 1000
+                        debtItemOriginalDueDate: 2022-05-22
+                      - instalmentNumber: 2
+                        dueDate: 2022-07-08
+                        instalmentInterestAccrued: 7.28
+                        instalmentBalance: 3808.96
+                        debtItemChargeId: XW006559808862
+                        amountDue: 1628.21
+                        debtItemOriginalDueDate: 2022-05-22
         '400':
           description: ''
           headers: {}
@@ -819,15 +821,13 @@ paths:
                   - $ref: '#/components/schemas/ErrorResponse'
                   - example:
                       statusCode: 400
-                      reason: Field at path '/field' missing or invalid
-                      message: Invalid JSON error from Affordable quotes
+                      errorMessage: Invalid JSON error
               examples:
                 example1:
                   value:
                     failures:
                       statusCode: 400
-                      reason: Field at path '/field' missing or invalid
-                      message: Invalid JSON error from Affordable quotes
+                      errorMessage: Invalid JSON error
         '401':
           description: ''
           headers: {}
@@ -838,12 +838,10 @@ paths:
                   - $ref: '#/components/schemas/ErrorResponse'
                   - example:
                       statusCode: 401
-                      reason: A user with no active session will return 401 response
-                      message: ''
+                      errorMessage: A user with no active session will return 401 response
               example:
                 statusCode: 401
-                reason: A user with no active session will return 401 response
-                message: ''
+                errorMessage: A user with no active session will return 401 response
         '500':
           description: ''
           headers: {}
@@ -854,12 +852,10 @@ paths:
                   - $ref: '#/components/schemas/ErrorResponse'
                   - example:
                       statusCode: 500
-                      reason: Internal Service Error
-                      message: Internal Service Error
+                      errorMessage: Internal Service Error
               example:
                 statusCode: 500
-                reason: Internal Service Error
-                message: Affordable quotes service is currently experiencing problems that require live service intervention
+                errorMessage: Internal Service Error
       deprecated: false
 components:
   securitySchemes:
@@ -906,6 +902,8 @@ components:
           format: int32
         paymentPlanFrequency:
           type: string
+          items:
+            $ref: '#/components/schemas/paymentPlanFrequency'
         paymentPlanMaxLength:
           type: integer
           format: int32
@@ -943,37 +941,14 @@ components:
       properties:
         processingDateTime:
           type: string
-          format: date-time
+          pattern: '^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d{1,3})?$'
+          example: '2022-03-23T13:49:51.123'
         paymentPlans:
           type: array
           minItems: 1
           items:
             $ref: '#/components/schemas/paymentPlans'
           description: An array of paymentPlans
-        collections:
-          type: object
-          properties:
-            initialCollection:
-              type: array
-              minItems: 1
-              items:
-                $ref: '#/components/schemas/initialCollection'
-              description: An array of initialCollection
-            regularCollections:
-              type: array
-              minItems: 1
-              items:
-                $ref: '#/components/schemas/regularCollections'
-              description: An array of regularCollections
-        numberOfInstalments:
-          type: integer
-          format: int32
-        instalments:
-          type: array
-          minItems: 1
-          items:
-            $ref: '#/components/schemas/instalments'
-          description: An array of instalments
     paymentPlans:
       title: PaymentPlans
       required:
@@ -995,20 +970,38 @@ components:
           type: number
         planInterest:
           type: number
-    initialCollection:
+        numberOfInstalments:
+          type: integer
+          format: int32
+        collections:
+          type: object
+          properties:
+            initialCollection:
+              $ref: '#/components/schemas/InitialCollection'
+            regularCollections:
+              type: array
+              minItems: 1
+              items:
+                $ref: '#/components/schemas/RegularCollections'
+              description: An array of regularCollections
+        instalments:
+          type: array
+          minItems: 1
+          items:
+            $ref: '#/components/schemas/instalments'
+          description: An array of instalments
+    InitialCollection:
       title: InitialCollection
       required:
         - dueDate
         - amountDue
-      type: object
       properties:
         dueDate:
           type: string
           format: date
         amountDue:
-          type: integer
-          format: int32
-    regularCollections:
+          type: number
+    RegularCollections:
       title: RegularCollections
       required:
         - dueDate
@@ -1019,8 +1012,7 @@ components:
           type: string
           format: date
         amountDue:
-          type: integer
-          format: int32
+          type: number
     instalments:
       title: Instalments
       required:
@@ -1046,8 +1038,7 @@ components:
         debtItemChargeId:
           type: string
         amountDue:
-          type: integer
-          format: int32
+          type: number
         debtItemOriginalDueDate:
           type: string
           format: date
@@ -1085,6 +1076,18 @@ components:
           pattern: '^\d{4}-[0-1][0-9]-[0-3][0-9]$'
           type: string
           description: Postcode date move in
+    paymentPlanFrequency:
+      title: paymentPlanFrequency
+      type: string
+      enum:
+        - Single
+          Weekly
+          2Weekly
+          4Weekly
+          Monthly
+          Quarterly
+          6Monthly
+          Annually
     ErrorResponse:
       title: ErrorResponse
       type: object
@@ -1092,12 +1095,9 @@ components:
         statusCode:
           type: integer
           description: http status code
-        reason:
+        errorMessage:
           type: string
           description: Reason for error request
-        message:
-          type: string
-          description: Message to identify the error reason
     AJSONSchemaforTTPAPI.:
       title: AJSONSchemaforTTPAPI.
       required:
@@ -1500,17 +1500,6 @@ components:
         - annually
       type: string
       description: payment frequency
-    InitialCollection:
-      title: InitialCollection
-      type: object
-      properties:
-        dueDate:
-          type: string
-          description: Due date
-          format: date
-        amountDue:
-          type: number
-          description: Amount due
     InitialPaymentMethod:
       title: InitialPaymentMethod
       enum:
