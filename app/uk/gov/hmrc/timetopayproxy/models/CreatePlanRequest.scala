@@ -29,7 +29,7 @@ final case class PlanToCreatePlan(
   paymentPlanType: PaymentPlanType,
   thirdPartyBank: Boolean,
   numberOfInstalments: Int,
-  frequency: Option[Frequency],
+  frequency: Option[FrequencyLowercase],
   duration: Option[Duration],
   initialPaymentMethod: Option[PaymentMethod],
   initialPaymentReference: Option[PaymentReference],

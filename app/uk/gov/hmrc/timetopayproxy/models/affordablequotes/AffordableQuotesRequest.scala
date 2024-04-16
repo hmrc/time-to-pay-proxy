@@ -17,14 +17,14 @@
 package uk.gov.hmrc.timetopayproxy.models.affordablequotes
 
 import play.api.libs.json.{ Json, OFormat }
-import uk.gov.hmrc.timetopayproxy.models.{ CustomerPostCode, DebtItemChargeSelfServe, Duration, Frequency }
+import uk.gov.hmrc.timetopayproxy.models.{ CustomerPostCode, DebtItemChargeSelfServe, Duration, FrequencyCapitalised }
 
 import java.time.LocalDate
 
 final case class AffordableQuotesRequest(
   channelIdentifier: String,
   paymentPlanAffordableAmount: BigDecimal,
-  paymentPlanFrequency: Frequency,
+  paymentPlanFrequency: FrequencyCapitalised,
   paymentPlanMaxLength: Duration,
   paymentPlanMinLength: Duration,
   accruedDebtInterest: BigDecimal,

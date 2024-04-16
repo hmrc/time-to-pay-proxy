@@ -24,7 +24,7 @@ final case class Customer(
   quoteType: QuoteType,
   instalmentStartDate: LocalDate,
   instalmentAmount: BigDecimal,
-  frequency: Frequency,
+  frequency: FrequencyLowercase,
   duration: Duration,
   initialPaymentAmount: Int,
   initialPaymentDate: LocalDate,

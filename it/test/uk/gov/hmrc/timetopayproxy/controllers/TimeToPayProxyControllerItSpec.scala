@@ -164,7 +164,7 @@ class TimeToPayProxyControllerItSpec extends IntegrationBaseSpec {
                 .parse("""{
                          |	"channelIdentifier": "eSSTTP",
                          |	"paymentPlanAffordableAmount": 1,
-                         |	"paymentPlanFrequency": "monthly",
+                         |	"paymentPlanFrequency": "Monthly",
                          |	"paymentPlanMaxLength": 6,
                          |	"paymentPlanMinLength": 1,
                          |	"accruedDebtInterest": 1,
@@ -213,7 +213,7 @@ class TimeToPayProxyControllerItSpec extends IntegrationBaseSpec {
                 .parse("""{
                          |	"channelIdentifier": "eSSTTP",
                          |	"paymentPlanAffordableAmount": 1,
-                         |	"paymentPlanFrequency": "monthly",
+                         |	"paymentPlanFrequency": "Monthly",
                          |	"paymentPlanMaxLength": true,
                          |	"paymentPlanMinLength": 1,
                          |	"accruedDebtInterest": 1,
@@ -294,7 +294,7 @@ class TimeToPayProxyControllerItSpec extends IntegrationBaseSpec {
     val affordableQuoteRequest: AffordableQuotesRequest = AffordableQuotesRequest(
       channelIdentifier = "eSSTTP",
       paymentPlanAffordableAmount = 10,
-      paymentPlanFrequency = Frequency.Monthly,
+      paymentPlanFrequency = FrequencyCapitalised.Monthly,
       paymentPlanMinLength = Duration(3),
       paymentPlanMaxLength = Duration(5),
       accruedDebtInterest = 10,

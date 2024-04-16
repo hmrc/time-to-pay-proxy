@@ -53,7 +53,7 @@ class YamlSchemaValidatorSpec extends AnyWordSpec with Matchers {
       AffordableQuotesRequest(
         channelIdentifier = "eSSTTP",
         paymentPlanAffordableAmount = 1310,
-        paymentPlanFrequency = Frequency.Single,
+        paymentPlanFrequency = FrequencyCapitalised.Single,
         paymentPlanMinLength = Duration(1),
         paymentPlanMaxLength = Duration(6),
         accruedDebtInterest = 13.26,
@@ -92,7 +92,7 @@ class YamlSchemaValidatorSpec extends AnyWordSpec with Matchers {
       Json.parse("""{
                    |  "channelIdentifier": "eSSTTP",
                    |  "paymentPlanAffordableAmount": 1310,
-                   |  "paymentPlanFrequency": "single",
+                   |  "paymentPlanFrequency": "Single",
                    |  "paymentPlanMaxLength": 6,
                    |  "paymentPlanMinLength": 1,
                    |  "accruedDebtInterest": 13.26,
@@ -136,7 +136,7 @@ class YamlSchemaValidatorSpec extends AnyWordSpec with Matchers {
       Json.parse("""{
                    |  "channelIdentifier": true,
                    |  "paymentPlanAffordableAmount": "1310",
-                   |  "paymentPlanFrequency": "some string",
+                   |  "paymentPlanFrequency": "monthly",
                    |  "paymentPlanMaxLength": 6.5,
                    |  "paymentPlanMinLength": 1.3,
                    |  "accruedDebtInterest": "13.26",
