@@ -132,6 +132,32 @@ class YamlSchemaValidatorSpec extends AnyWordSpec with Matchers {
                    |"initialPaymentDate": "Not A Date"
                    |}""".stripMargin)
 
+    def jsonBodyContainingManyBrokenFields: JsValue =
+      Json.parse("""{
+                   |  "channelIdentifier": true,
+                   |  "paymentPlanAffordableAmount": "1310",
+                   |  "paymentPlanFrequency": "some string",
+                   |  "paymentPlanMaxLength": 6.5,
+                   |  "paymentPlanMinLength": 1.3,
+                   |  "accruedDebtInterest": "13.26",
+                   |  "paymentPlanStartDate": "2022--08",
+                   |  "debtItemCharges": [
+                   |    {
+                   |      "outstandingDebtAmount": "1487.81",
+                   |      "mainTrans": 5330,
+                   |      "subTrans": 1090,
+                   |      "debtItemChargeId": true,
+                   |      "debtItemOriginalDueDate": "2022-05-"
+                   |    }
+                   |   ],
+                   |  "customerPostcodes": [
+                   |    {
+                   |      "addressPostcode": 123,
+                   |      "postcodeDate": "-05-22"
+                   |    }
+                   |  ]
+                   |}""".stripMargin)
+
     "be valid according to application.yaml using openAPI" when {
       "given only mandatory fields" in new TestBase {
         val requestExample: String =
@@ -210,6 +236,44 @@ class YamlSchemaValidatorSpec extends AnyWordSpec with Matchers {
         errors.keys.toList shouldBe List("validationError")
         errors("validationError") shouldBe List(
           "initialPaymentDate: Value 'Not A Date' does not match format 'date'. (code: 1007)\nFrom: initialPaymentDate.<format>"
+        )
+      }
+
+      "many fields are broken" in new TestBase {
+        val responseExample: String =
+          jsonBodyContainingManyBrokenFields.toString()
+        val errors: Map[String, List[String]] = validate(AffordableQuotesRequestSchema, responseExample)
+
+        errors.keys.toList shouldBe List("validationError")
+        errors("validationError") shouldBe List(
+          "paymentPlanMaxLength: Value '6.5' does not match format 'int32'. (code: 1007)\n" +
+            "From: paymentPlanMaxLength.<format>",
+          "paymentPlanMaxLength: Type expected 'integer', found 'number'. (code: 1027)\n" +
+            "From: paymentPlanMaxLength.<type>",
+          "paymentPlanStartDate: Value '2022--08' does not match format 'date'. (code: 1007)\n" +
+            "From: paymentPlanStartDate.<format>",
+          "channelIdentifier: Type expected 'string', found 'boolean'. (code: 1027)\n" +
+            "From: channelIdentifier.<type>",
+          "debtItemCharges.0.mainTrans: Type expected 'string', found 'integer'. (code: 1027)\n" +
+            "From: debtItemCharges.0.<items>.<#/components/schemas/DebtItem>.mainTrans.<type>",
+          "debtItemCharges.0.debtItemOriginalDueDate: Value '2022-05-' does not match format 'date'. (code: 1007)\n" +
+            "From: debtItemCharges.0.<items>.<#/components/schemas/DebtItem>.debtItemOriginalDueDate.<format>",
+          "debtItemCharges.0.subTrans: Type expected 'string', found 'integer'. (code: 1027)\n" +
+            "From: debtItemCharges.0.<items>.<#/components/schemas/DebtItem>.subTrans.<type>",
+          "debtItemCharges.0.outstandingDebtAmount: Type expected 'number', found 'string'. (code: 1027)\n" +
+            "From: debtItemCharges.0.<items>.<#/components/schemas/DebtItem>.outstandingDebtAmount.<type>",
+          "debtItemCharges.0.debtItemChargeId: Type expected 'string', found 'boolean'. (code: 1027)\n" +
+            "From: debtItemCharges.0.<items>.<#/components/schemas/DebtItem>.debtItemChargeId.<type>",
+          "accruedDebtInterest: Type expected 'number', found 'string'. (code: 1027)\n" +
+            "From: accruedDebtInterest.<type>",
+          "paymentPlanMinLength: Value '1.3' does not match format 'int32'. (code: 1007)\n" +
+            "From: paymentPlanMinLength.<format>",
+          "paymentPlanMinLength: Type expected 'integer', found 'number'. (code: 1027)\n" +
+            "From: paymentPlanMinLength.<type>",
+          "paymentPlanAffordableAmount: Value '1310' does not match format 'int32'. (code: 1007)\n" +
+            "From: paymentPlanAffordableAmount.<format>",
+          "paymentPlanAffordableAmount: Type expected 'integer', found 'string'. (code: 1027)\n" +
+            "From: paymentPlanAffordableAmount.<type>"
         )
       }
     }
@@ -342,6 +406,39 @@ class YamlSchemaValidatorSpec extends AnyWordSpec with Matchers {
                    |  ]
                    |}""".stripMargin)
 
+    def jsonBodyContainingManyBrokenFields: JsValue =
+      Json.parse("""{
+                   |  "processingDateTime": "2022-03-23T13:49:51.141",
+                   |  "paymentPlans": [
+                   |    {
+                   |      "numberOfInstalments": "foo",
+                   |      "planDuration": true,
+                   |      "totalDebt": false,
+                   |      "totalDebtIncInt": null,
+                   |      "planInterest": "48.05",
+                   |      "collections": {
+                   |        "regularCollections": [
+                   |          {
+                   |            "dueDate": "Some date",
+                   |            "amountDue": "1628.21"
+                   |          }
+                   |        ]
+                   |      },
+                   |      "instalments": [
+                   |        {
+                   |          "instalmentNumber": 1.34,
+                   |          "dueDate": "Another date",
+                   |          "instalmentInterestAccrued": "4.59",
+                   |          "instalmentBalance": "4808.96",
+                   |          "debtItemChargeId": 654,
+                   |          "amountDue": "1000",
+                   |          "debtItemOriginalDueDate": "not a date"
+                   |        }
+                   |      ]
+                   |    }
+                   |  ]
+                   |}""".stripMargin)
+
     "be valid according to application.yaml using openAPI" when {
       "given only mandatory fields" in new TestBase {
         val responseExample: String =
@@ -421,6 +518,50 @@ class YamlSchemaValidatorSpec extends AnyWordSpec with Matchers {
         errors("validationError") shouldBe List(
           "paymentPlans.0.collections.initialCollection.dueDate: Value 'Not A Date' does not match format 'date'. (code: 1007)\n" +
             "From: paymentPlans.0.<items>.<#/components/schemas/paymentPlans>.collections.initialCollection.<#/components/schemas/InitialCollection>.dueDate.<format>"
+        )
+      }
+
+      "many fields are broken" in new TestBase {
+        val responseExample: String =
+          jsonBodyContainingManyBrokenFields.toString()
+        val errors: Map[String, List[String]] = validate(AffordableQuotesResponseSchema, responseExample)
+
+        errors.keys.toList shouldBe List("validationError")
+        errors("validationError") shouldBe List(
+          "paymentPlans.0.planDuration: Value 'true' does not match format 'int32'. (code: 1007)\n" +
+            "From: paymentPlans.0.<items>.<#/components/schemas/paymentPlans>.planDuration.<format>",
+          "paymentPlans.0.planDuration: Type expected 'integer', found 'boolean'. (code: 1027)\n" +
+            "From: paymentPlans.0.<items>.<#/components/schemas/paymentPlans>.planDuration.<type>",
+          "paymentPlans.0.collections.regularCollections.0.amountDue: Type expected 'number', found 'string'. (code: 1027)\n" +
+            "From: paymentPlans.0.<items>.<#/components/schemas/paymentPlans>.collections.regularCollections.0.<items>.<#/components/schemas/RegularCollections>.amountDue.<type>",
+          "paymentPlans.0.collections.regularCollections.0.dueDate: Value 'Some date' does not match format 'date'. (code: 1007)\n" +
+            "From: paymentPlans.0.<items>.<#/components/schemas/paymentPlans>.collections.regularCollections.0.<items>.<#/components/schemas/RegularCollections>.dueDate.<format>",
+          "paymentPlans.0.totalDebt: Type expected 'number', found 'boolean'. (code: 1027)\n" +
+            "From: paymentPlans.0.<items>.<#/components/schemas/paymentPlans>.totalDebt.<type>",
+          "paymentPlans.0.planInterest: Type expected 'number', found 'string'. (code: 1027)\n" +
+            "From: paymentPlans.0.<items>.<#/components/schemas/paymentPlans>.planInterest.<type>",
+          "paymentPlans.0.instalments.0.amountDue: Type expected 'number', found 'string'. (code: 1027)\n" +
+            "From: paymentPlans.0.<items>.<#/components/schemas/paymentPlans>.instalments.0.<items>.<#/components/schemas/instalments>.amountDue.<type>",
+          "paymentPlans.0.instalments.0.instalmentInterestAccrued: Type expected 'number', found 'string'. (code: 1027)\n" +
+            "From: paymentPlans.0.<items>.<#/components/schemas/paymentPlans>.instalments.0.<items>.<#/components/schemas/instalments>.instalmentInterestAccrued.<type>",
+          "paymentPlans.0.instalments.0.debtItemOriginalDueDate: Value 'not a date' does not match format 'date'. (code: 1007)\n" +
+            "From: paymentPlans.0.<items>.<#/components/schemas/paymentPlans>.instalments.0.<items>.<#/components/schemas/instalments>.debtItemOriginalDueDate.<format>",
+          "paymentPlans.0.instalments.0.instalmentNumber: Value '1.34' does not match format 'int32'. (code: 1007)\n" +
+            "From: paymentPlans.0.<items>.<#/components/schemas/paymentPlans>.instalments.0.<items>.<#/components/schemas/instalments>.instalmentNumber.<format>",
+          "paymentPlans.0.instalments.0.instalmentNumber: Type expected 'integer', found 'number'. (code: 1027)\n" +
+            "From: paymentPlans.0.<items>.<#/components/schemas/paymentPlans>.instalments.0.<items>.<#/components/schemas/instalments>.instalmentNumber.<type>",
+          "paymentPlans.0.instalments.0.instalmentBalance: Type expected 'number', found 'string'. (code: 1027)\n" +
+            "From: paymentPlans.0.<items>.<#/components/schemas/paymentPlans>.instalments.0.<items>.<#/components/schemas/instalments>.instalmentBalance.<type>",
+          "paymentPlans.0.instalments.0.dueDate: Value 'Another date' does not match format 'date'. (code: 1007)\n" +
+            "From: paymentPlans.0.<items>.<#/components/schemas/paymentPlans>.instalments.0.<items>.<#/components/schemas/instalments>.dueDate.<format>",
+          "paymentPlans.0.instalments.0.debtItemChargeId: Type expected 'string', found 'integer'. (code: 1027)\n" +
+            "From: paymentPlans.0.<items>.<#/components/schemas/paymentPlans>.instalments.0.<items>.<#/components/schemas/instalments>.debtItemChargeId.<type>",
+          "paymentPlans.0.totalDebtIncInt: Null value is not allowed. (code: 1021)\n" +
+            "From: paymentPlans.0.<items>.<#/components/schemas/paymentPlans>.totalDebtIncInt.<nullable>",
+          "paymentPlans.0.numberOfInstalments: Value 'foo' does not match format 'int32'. (code: 1007)\n" +
+            "From: paymentPlans.0.<items>.<#/components/schemas/paymentPlans>.numberOfInstalments.<format>",
+          "paymentPlans.0.numberOfInstalments: Type expected 'integer', found 'string'. (code: 1027)\n" +
+            "From: paymentPlans.0.<items>.<#/components/schemas/paymentPlans>.numberOfInstalments.<type>"
         )
       }
     }
