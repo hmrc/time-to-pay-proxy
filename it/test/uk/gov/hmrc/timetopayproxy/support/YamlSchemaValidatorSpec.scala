@@ -189,9 +189,16 @@ class YamlSchemaValidatorSpec extends AnyWordSpec with Matchers {
           jsonBodyContainingOnlyOptionalFields.toString()
         val errors: Map[String, List[String]] = validate(AffordableQuotesRequestSchema, requestExample)
 
-        errors.keys should contain("validationError")
-        errors("validationError") should contain(
-          "Field 'channelIdentifier' is required. (code: 1026)\nFrom: <required>"
+        errors.keys.toList shouldBe List("validationError")
+        errors("validationError") shouldBe List(
+          "Field 'channelIdentifier' is required. (code: 1026)\nFrom: <required>",
+          "Field 'paymentPlanAffordableAmount' is required. (code: 1026)\nFrom: <required>",
+          "Field 'paymentPlanFrequency' is required. (code: 1026)\nFrom: <required>",
+          "Field 'paymentPlanMaxLength' is required. (code: 1026)\nFrom: <required>",
+          "Field 'paymentPlanMinLength' is required. (code: 1026)\nFrom: <required>",
+          "Field 'accruedDebtInterest' is required. (code: 1026)\nFrom: <required>",
+          "Field 'paymentPlanStartDate' is required. (code: 1026)\nFrom: <required>",
+          "Field 'customerPostcodes' is required. (code: 1026)\nFrom: <required>"
         )
       }
 
@@ -200,8 +207,8 @@ class YamlSchemaValidatorSpec extends AnyWordSpec with Matchers {
           jsonBodyContainingOnlyMandatoryFields.strictDeepMerge(jsonBodyContainingABrokenField).toString()
         val errors: Map[String, List[String]] = validate(AffordableQuotesRequestSchema, requestExample)
 
-        errors.keys should contain("validationError")
-        errors("validationError") should contain(
+        errors.keys.toList shouldBe List("validationError")
+        errors("validationError") shouldBe List(
           "initialPaymentDate: Value 'Not A Date' does not match format 'date'. (code: 1007)\nFrom: initialPaymentDate.<format>"
         )
       }
@@ -392,10 +399,17 @@ class YamlSchemaValidatorSpec extends AnyWordSpec with Matchers {
           jsonBodyContainingOnlyOptionalFields.toString()
         val errors: Map[String, List[String]] = validate(AffordableQuotesResponseSchema, responseExample)
 
-        errors.keys should contain("validationError")
-        errors("validationError") should contain(
-          "paymentPlans.0: Field 'planDuration' is required. (code: 1026)\nFrom: paymentPlans.0.<items>.<#/components/schemas/paymentPlans>.<required>"
-        )
+        errors.keys.toList shouldBe List("validationError")
+        errors("validationError") shouldBe
+          List(
+            "paymentPlans.0: Field 'planDuration' is required. (code: 1026)\nFrom: paymentPlans.0.<items>.<#/components/schemas/paymentPlans>.<required>",
+            "paymentPlans.0: Field 'totalDebt' is required. (code: 1026)\nFrom: paymentPlans.0.<items>.<#/components/schemas/paymentPlans>.<required>",
+            "paymentPlans.0: Field 'totalDebtIncInt' is required. (code: 1026)\nFrom: paymentPlans.0.<items>.<#/components/schemas/paymentPlans>.<required>",
+            "paymentPlans.0: Field 'planInterest' is required. (code: 1026)\nFrom: paymentPlans.0.<items>.<#/components/schemas/paymentPlans>.<required>",
+            "paymentPlans.0: Field 'numberOfInstalments' is required. (code: 1026)\nFrom: paymentPlans.0.<items>.<#/components/schemas/paymentPlans>.<required>",
+            "paymentPlans.0: Field 'instalments' is required. (code: 1026)\nFrom: paymentPlans.0.<items>.<#/components/schemas/paymentPlans>.<required>",
+            "Field 'processingDateTime' is required. (code: 1026)\nFrom: <required>"
+          )
       }
 
       "a field is broken" in new TestBase {
@@ -403,9 +417,8 @@ class YamlSchemaValidatorSpec extends AnyWordSpec with Matchers {
           jsonBodyContainingOnlyMandatoryFields.strictDeepMerge(jsonBodyContainingABrokenField).toString()
         val errors: Map[String, List[String]] = validate(AffordableQuotesResponseSchema, responseExample)
 
-        println(Json.prettyPrint(Json.parse(responseExample)))
-        errors.keys should contain("validationError")
-        errors("validationError") should contain(
+        errors.keys.toList shouldBe List("validationError")
+        errors("validationError") shouldBe List(
           "paymentPlans.0.collections.initialCollection.dueDate: Value 'Not A Date' does not match format 'date'. (code: 1007)\n" +
             "From: paymentPlans.0.<items>.<#/components/schemas/paymentPlans>.collections.initialCollection.<#/components/schemas/InitialCollection>.dueDate.<format>"
         )
