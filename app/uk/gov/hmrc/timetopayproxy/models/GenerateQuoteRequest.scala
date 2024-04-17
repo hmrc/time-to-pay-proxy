@@ -52,7 +52,7 @@ final case class PlanToGenerateQuote(
   quoteDate: LocalDate,
   instalmentStartDate: LocalDate,
   instalmentAmount: Option[BigDecimal],
-  frequency: Option[Frequency],
+  frequency: Option[FrequencyLowercase],
   duration: Option[Duration],
   initialPaymentAmount: Option[BigDecimal],
   initialPaymentDate: Option[LocalDate],

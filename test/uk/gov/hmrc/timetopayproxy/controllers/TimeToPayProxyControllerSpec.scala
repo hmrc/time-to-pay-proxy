@@ -32,9 +32,10 @@ import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.timetopayproxy.actions.auth.{ AuthoriseAction, AuthoriseActionImpl }
 import uk.gov.hmrc.timetopayproxy.config.FeatureSwitch
 import uk.gov.hmrc.timetopayproxy.models._
+import uk.gov.hmrc.timetopayproxy.models.affordablequotes._
 import uk.gov.hmrc.timetopayproxy.services.TTPQuoteService
 
-import java.time.LocalDate
+import java.time.{ LocalDate, LocalDateTime }
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.{ ExecutionContext, Future }
 
@@ -59,7 +60,7 @@ class TimeToPayProxyControllerSpec extends AnyWordSpec with Matchers with MockFa
       LocalDate.of(2021, 1, 1),
       LocalDate.of(2021, 1, 1),
       Some(1),
-      Some(Frequency.Annually),
+      Some(FrequencyLowercase.Annually),
       Some(Duration(12)),
       Some(1),
       Some(LocalDate.now()),
@@ -102,7 +103,7 @@ class TimeToPayProxyControllerSpec extends AnyWordSpec with Matchers with MockFa
         PaymentPlanType.TimeToPay,
         false,
         2,
-        Some(Frequency.Single),
+        Some(FrequencyLowercase.Single),
         Some(Duration(2)),
         Some(PaymentMethod.Bacs),
         Some(PaymentReference("ref123")),
@@ -943,6 +944,134 @@ class TimeToPayProxyControllerSpec extends AnyWordSpec with Matchers with MockFa
         val response: Future[Result] = controller.createPlan()(fakeRequest)
 
         status(response) shouldBe Status.INTERNAL_SERVER_ERROR
+      }
+    }
+  }
+
+  "POST /individuals/time-to-pay/self-serve/affordable-quotes" should {
+    val affordableQuotesRequest = AffordableQuotesRequest(
+      channelIdentifier = "eSSTTP",
+      paymentPlanAffordableAmount = 500,
+      paymentPlanFrequency = FrequencyCapitalised.Monthly,
+      paymentPlanMaxLength = Duration(6),
+      paymentPlanMinLength = Duration(1),
+      accruedDebtInterest = 500,
+      paymentPlanStartDate = LocalDate.parse("2022-02-02"),
+      initialPaymentDate = Some(LocalDate.parse("2022-02-02")),
+      initialPaymentAmount = Some(500),
+      debtItemCharges = List(
+        DebtItemChargeSelfServe(
+          outstandingDebtAmount = 100000,
+          mainTrans = "1525",
+          subTrans = "1000",
+          DebtItemChargeId("ChargeRef 0903_2"),
+          interestStartDate = Some(LocalDate.parse("2021-09-03")),
+          debtItemOriginalDueDate = LocalDate.now(),
+          Some(IsInterestBearingCharge(true)),
+          Some(UseChargeReference(false))
+        )
+      ),
+      customerPostcodes = List(
+        CustomerPostCode(
+          PostCode("some postcode"),
+          LocalDate.parse("2022-03-09")
+        )
+      )
+    )
+    val affordableQuoteResponse = AffordableQuoteResponse(
+      LocalDateTime.parse("2025-01-13T10:15:30.975"),
+      paymentPlans = List(
+        AffordableQuotePaymentPlan(
+          numberOfInstalments = 1,
+          planDuration = Duration(1),
+          planInterest = 1,
+          totalDebt = 100,
+          totalDebtIncInt = 100,
+          collections = Collections(
+            initialCollection = None,
+            List(RegularCollection(dueDate = LocalDate.parse("2000-01-01"), amountDue = 1))
+          ),
+          instalments = List(
+            AffordableQuoteInstalment(
+              DebtItemChargeId("ChargeRef 0903_2"),
+              dueDate = LocalDate.parse("2000-01-01"),
+              amountDue = 1,
+              instalmentNumber = 1,
+              instalmentInterestAccrued = 100,
+              instalmentBalance = 100,
+              debtItemOriginalDueDate = LocalDate.parse("2000-01-01")
+            )
+          )
+        )
+      )
+    )
+
+    "return 200" when {
+      "service returns success" in {
+        (authConnector
+          .authorise[Unit](_: Predicate, _: Retrieval[Unit])(
+            _: HeaderCarrier,
+            _: ExecutionContext
+          ))
+          .expects(*, *, *, *)
+          .returning(Future.successful(()))
+
+        (ttpQuoteService
+          .getAffordableQuotes(_: AffordableQuotesRequest)(
+            _: ExecutionContext,
+            _: HeaderCarrier
+          ))
+          .expects(affordableQuotesRequest, *, *)
+          .returning(TtppEnvelope(affordableQuoteResponse))
+
+        val fakeRequest: FakeRequest[JsValue] =
+          FakeRequest("POST", "/individuals/time-to-pay-proxy/self-serve/affordable-quotes")
+            .withHeaders(CONTENT_TYPE -> MimeTypes.JSON)
+            .withBody(Json.toJson[AffordableQuotesRequest](affordableQuotesRequest))
+
+        val response: Future[Result] = controller.getAffordableQuotes()(fakeRequest)
+
+        status(response) shouldBe Status.OK
+        contentAsJson(response) shouldBe Json.toJson[AffordableQuoteResponse](
+          affordableQuoteResponse
+        )
+
+      }
+    }
+    "return 500" when {
+      "TTP returns a failure" in {
+        (authConnector
+          .authorise[Unit](_: Predicate, _: Retrieval[Unit])(
+            _: HeaderCarrier,
+            _: ExecutionContext
+          ))
+          .expects(*, *, *, *)
+          .returning(Future.successful(()))
+
+        val errorFromTtpConnector =
+          ConnectorError(500, "Internal Server Error")
+
+        (ttpQuoteService
+          .getAffordableQuotes(_: AffordableQuotesRequest)(
+            _: ExecutionContext,
+            _: HeaderCarrier
+          ))
+          .expects(affordableQuotesRequest, *, *)
+          .returning(
+            TtppEnvelope(errorFromTtpConnector.asLeft[AffordableQuoteResponse])
+          )
+
+        val fakeRequest: FakeRequest[JsValue] =
+          FakeRequest("POST", "/individuals/time-to-pay-proxy/self-serve/affordable-quotes")
+            .withHeaders(CONTENT_TYPE -> MimeTypes.JSON)
+            .withBody(Json.toJson[AffordableQuotesRequest](affordableQuotesRequest))
+
+        val response: Future[Result] = controller.getAffordableQuotes()(fakeRequest)
+
+        status(response) shouldBe Status.INTERNAL_SERVER_ERROR
+        contentAsJson(response) shouldBe Json.toJson[TtppErrorResponse](
+          TtppErrorResponse(statusCode = 500, errorMessage = "Internal Server Error")
+        )
       }
     }
   }

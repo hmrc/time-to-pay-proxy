@@ -18,8 +18,12 @@ package uk.gov.hmrc.timetopayproxy.support
 
 import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.client.WireMock
+import com.github.tomakehurst.wiremock.client.WireMock._
+import com.github.tomakehurst.wiremock.common.ConsoleNotifier
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration._
+import com.github.tomakehurst.wiremock.matching.StringValuePattern
+import com.github.tomakehurst.wiremock.stubbing.StubMapping
 import org.scalatest.concurrent.{ Eventually, IntegrationPatience }
 
 object WireMockHelper extends Eventually with IntegrationPatience {
@@ -31,15 +35,49 @@ object WireMockHelper extends Eventually with IntegrationPatience {
 trait WireMockHelper {
   import WireMockHelper._
 
-  lazy val wireMockConf: WireMockConfiguration = wireMockConfig.port(wireMockPort)
+  lazy val wireMockConf: WireMockConfiguration = wireMockConfig.port(wireMockPort).notifier(new ConsoleNotifier(true))
   lazy val wireMockServer: WireMockServer = new WireMockServer(wireMockConf)
 
   def startWireMock(): Unit = {
     wireMockServer.start()
-    WireMock.configureFor(host, wireMockPort)
+    WireMock
+      .configureFor(host, wireMockPort)
+
   }
 
   def stopWireMock(): Unit = wireMockServer.stop()
 
   def resetWireMock(): Unit = WireMock.reset()
+
+  def stubPostWithResponseBody(
+    url: String,
+    status: Int,
+    responseHeaderContaining: Option[Seq[(String, String)]] = None,
+    responseBody: String,
+    requestHeaderContaining: Option[Seq[(String, StringValuePattern)]] = None,
+    requestBodyContaining: Option[String] = None
+  ): StubMapping =
+    stubFor {
+      val mapping = post(urlEqualTo(url))
+
+      val response = aResponse()
+        .withStatus(status)
+        .withBody(responseBody)
+        .withHeader("Content-Type", "application/json; charset=utf-8")
+
+      requestHeaderContaining
+        .fold(mapping) { headers =>
+          headers.foldLeft(mapping) { case (mapping, (key, value)) =>
+            mapping.withHeader(key, value)
+          }
+        }
+        .withRequestBody(containing(requestBodyContaining.getOrElse("")))
+        .willReturn(
+          responseHeaderContaining.fold(response) { headers =>
+            headers.foldLeft(response) { case (response, (key, value)) =>
+              response.withHeader(key, value)
+            }
+          }
+        )
+    }
 }

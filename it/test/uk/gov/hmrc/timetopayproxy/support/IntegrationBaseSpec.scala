@@ -17,6 +17,7 @@
 package uk.gov.hmrc.timetopayproxy.support
 
 import org.scalamock.scalatest.MockFactory
+import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
 import org.scalatest.{ BeforeAndAfterAll, BeforeAndAfterEach, EitherValues }
@@ -30,20 +31,27 @@ import play.api.{ Application, Environment, Mode }
 import scala.concurrent.ExecutionContext
 
 trait IntegrationBaseSpec
-    extends AnyWordSpec with MockFactory with EitherValues with Matchers with FutureAwaits with DefaultAwaitTimeout
+    extends AnyFreeSpec with MockFactory with EitherValues with Matchers with FutureAwaits with DefaultAwaitTimeout
     with WireMockHelper with GuiceOneServerPerSuite with BeforeAndAfterEach with BeforeAndAfterAll {
 
   val mockHost: String = WireMockHelper.host
   val mockPort: String = WireMockHelper.wireMockPort.toString
-  implicit val ec: ExecutionContext = scala.concurrent.ExecutionContext.global
 
   lazy val client: WSClient = app.injector.instanceOf[WSClient]
 
-  def servicesConfig: Map[String, Any] = Map(
-    "microservice.services.auth.host" -> mockHost,
-    "microservice.services.auth.port" -> mockPort,
-    "auditing.consumer.baseUri.port"  -> mockPort
-  )
+  def servicesConfig: Map[String, Any] =
+    Map(
+      "microservice.services.auth.host" -> mockHost,
+      "microservice.services.auth.port" -> mockPort,
+      "microservice.services.ttp.host"  -> mockHost,
+      "microservice.services.ttp.port"  -> mockPort,
+      "microservice.services.ttp.token" -> "dummyToken",
+      "microservice.services.ttp.useIf" -> false,
+      "microservice.services.stub.host" -> mockHost,
+      "microservice.services.stub.port" -> mockPort,
+      "metrics.enabled"                 -> false,
+      "auditing.enabled"                -> false
+    )
 
   override implicit lazy val app: Application = new GuiceApplicationBuilder()
     .in(Environment.simple(mode = Mode.Dev))
@@ -60,7 +68,8 @@ trait IntegrationBaseSpec
     super.afterAll()
   }
 
-  def buildRequest(path: String): WSRequest = client.url(s"http://localhost:$port$path").withFollowRedirects(false)
+  def buildRequest(path: String): WSRequest =
+    client.url(s"http://localhost:$port$path").withFollowRedirects(false).withHttpHeaders("Authorization" -> "dummy")
 
   def document(response: WSResponse): JsValue = Json.parse(response.body)
 }

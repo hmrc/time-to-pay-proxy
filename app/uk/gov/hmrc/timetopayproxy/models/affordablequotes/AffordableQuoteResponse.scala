@@ -14,23 +14,17 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.timetopayproxy.models
+package uk.gov.hmrc.timetopayproxy.models.affordablequotes
 
 import play.api.libs.json.{ Json, OFormat }
 
-import java.time.LocalDate
+import java.time.LocalDateTime
 
-final case class Customer(
-  quoteType: QuoteType,
-  instalmentStartDate: LocalDate,
-  instalmentAmount: BigDecimal,
-  frequency: FrequencyLowercase,
-  duration: Duration,
-  initialPaymentAmount: Int,
-  initialPaymentDate: LocalDate,
-  paymentPlanType: PaymentPlanType
+final case class AffordableQuoteResponse(
+  processingDateTime: LocalDateTime,
+  paymentPlans: List[AffordableQuotePaymentPlan]
 )
 
-object Customer {
-  implicit val format: OFormat[Customer] = Json.format[Customer]
+object AffordableQuoteResponse {
+  implicit val format: OFormat[AffordableQuoteResponse] = Json.format[AffordableQuoteResponse]
 }

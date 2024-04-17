@@ -283,7 +283,7 @@ trait CreatePlanRequestFixture {
         PaymentPlanType.TimeToPay,
         true,
         1,
-        Some(Frequency.Annually),
+        Some(FrequencyLowercase.Annually),
         Some(Duration(12)),
         Some(PaymentMethod.Bacs),
         Some(PaymentReference("ref123")),

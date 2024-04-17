@@ -31,7 +31,7 @@ class GenerateQuoteRequestSpec extends AnyWordSpec with Matchers {
       LocalDate.of(2021, 5, 13),
       LocalDate.of(2021, 5, 13),
       Some(100),
-      Some(Frequency.Annually),
+      Some(FrequencyLowercase.Annually),
       Some(Duration(12)),
       Some(100),
       Some(LocalDate.of(2021, 5, 13)),

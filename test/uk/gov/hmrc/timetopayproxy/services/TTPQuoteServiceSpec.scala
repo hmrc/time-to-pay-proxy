@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.timetopayproxy.services
 
-import java.time.LocalDate
+import java.time.{ LocalDate, LocalDateTime }
 import java.util.concurrent.TimeUnit
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.timetopayproxy.connectors.TtpConnector
@@ -27,6 +27,7 @@ import scala.concurrent.{ ExecutionContext, Future }
 import scala.concurrent.ExecutionContext.Implicits.global
 import cats.syntax.either._
 import uk.gov.hmrc.timetopayproxy.models.TtppEnvelope.TtppEnvelope
+import uk.gov.hmrc.timetopayproxy.models.affordablequotes.{ AffordableQuoteResponse, AffordableQuotesRequest }
 
 class TTPQuoteServiceSpec extends UnitSpec {
   implicit val hc: HeaderCarrier = HeaderCarrier()
@@ -38,7 +39,7 @@ class TTPQuoteServiceSpec extends UnitSpec {
       LocalDate.of(2021, 1, 1),
       LocalDate.of(2021, 1, 1),
       Some(1),
-      Some(Frequency.TwoWeekly),
+      Some(FrequencyLowercase.TwoWeekly),
       Some(Duration(12)),
       Some(1),
       Some(LocalDate.now()),
@@ -175,7 +176,7 @@ class TTPQuoteServiceSpec extends UnitSpec {
         PaymentPlanType.TimeToPay,
         false,
         2,
-        Some(Frequency.Single),
+        Some(FrequencyLowercase.Single),
         Some(Duration(2)),
         Some(PaymentMethod.Bacs),
         Some(PaymentReference("ref123")),
@@ -218,6 +219,34 @@ class TTPQuoteServiceSpec extends UnitSpec {
     CaseId("caseId"),
     PlanStatus.Success
   )
+
+  private val affordableQuotesRequest: AffordableQuotesRequest = AffordableQuotesRequest(
+    channelIdentifier = "eSSTTP",
+    paymentPlanAffordableAmount = 10,
+    paymentPlanFrequency = FrequencyCapitalised.Monthly,
+    paymentPlanMinLength = Duration(3),
+    paymentPlanMaxLength = Duration(5),
+    accruedDebtInterest = 10,
+    paymentPlanStartDate = LocalDate.now(),
+    initialPaymentDate = None,
+    initialPaymentAmount = None,
+    debtItemCharges = List(
+      DebtItemChargeSelfServe(
+        outstandingDebtAmount = BigDecimal(200),
+        mainTrans = "1234",
+        subTrans = "1234",
+        debtItemChargeId = DebtItemChargeId("dici1"),
+        interestStartDate = Some(LocalDate.now()),
+        debtItemOriginalDueDate = LocalDate.now(),
+        isInterestBearingCharge = Some(IsInterestBearingCharge(true)),
+        useChargeReference = Some(UseChargeReference(false))
+      )
+    ),
+    customerPostcodes = List()
+  )
+
+  private val affordableQuoteResponse: AffordableQuoteResponse =
+    AffordableQuoteResponse(LocalDateTime.parse("2025-01-13T10:15:30.975"), Nil)
 
   "Generate Quote endpoint" should {
     "return a success response" when {
@@ -276,7 +305,8 @@ class TTPQuoteServiceSpec extends UnitSpec {
         Right(generateQuoteResponse),
         Right(retrievePlanResponse),
         Right(updatePlanResponse),
-        Right(createPlanResponse)
+        Right(createPlanResponse),
+        Right(affordableQuoteResponse)
       )
       val quoteService = new DefaultTTPQuoteService(connectorStub)
 
@@ -296,7 +326,8 @@ class TTPQuoteServiceSpec extends UnitSpec {
         Right(generateQuoteResponse),
         Left(ConnectorError(500, "Internal server error")),
         Right(updatePlanResponse),
-        Right(createPlanResponse)
+        Right(createPlanResponse),
+        Right(affordableQuoteResponse)
       )
       val quoteService = new DefaultTTPQuoteService(connectorStub)
 
@@ -372,7 +403,8 @@ class TTPQuoteServiceSpec extends UnitSpec {
         Right(generateQuoteResponse),
         Right(retrievePlanResponse),
         Right(updatePlanResponse),
-        Right(createPlanResponse)
+        Right(createPlanResponse),
+        Right(affordableQuoteResponse)
       )
       val quoteService = new DefaultTTPQuoteService(connectorStub)
 
@@ -385,7 +417,8 @@ class TTPQuoteServiceSpec extends UnitSpec {
         Right(generateQuoteResponse),
         Right(retrievePlanResponse),
         Right(updatePlanResponse),
-        Left(ConnectorError(500, "Internal server error"))
+        Left(ConnectorError(500, "Internal server error")),
+        Right(affordableQuoteResponse)
       )
       val quoteService = new DefaultTTPQuoteService(connectorStub)
 
@@ -396,13 +429,46 @@ class TTPQuoteServiceSpec extends UnitSpec {
 
     }
   }
+
+  ".getAffordableQuotes" should {
+    "return an AffordableQuoteResponse from the connector" in {
+      val connectorStub = new TtpConnectorStub(
+        Right(generateQuoteResponse),
+        Right(retrievePlanResponse),
+        Right(updatePlanResponse),
+        Right(createPlanResponse),
+        Right(affordableQuoteResponse)
+      )
+      val quoteService = new DefaultTTPQuoteService(connectorStub)
+
+      await(quoteService.getAffordableQuotes(affordableQuotesRequest).value) shouldBe affordableQuoteResponse
+        .asRight[TtppError]
+    }
+
+    "return an error from the connector" in {
+      val connectorStub = new TtpConnectorStub(
+        Right(generateQuoteResponse),
+        Right(retrievePlanResponse),
+        Right(updatePlanResponse),
+        Right(createPlanResponse),
+        Left(ConnectorError(500, "Internal server error"))
+      )
+      val quoteService = new DefaultTTPQuoteService(connectorStub)
+
+      await(quoteService.getAffordableQuotes(affordableQuotesRequest).value) shouldBe ConnectorError(
+        statusCode = 500,
+        message = "Internal server error"
+      ).asLeft[CreatePlanResponse]
+    }
+  }
 }
 
 class TtpConnectorStub(
   generateQuoteResponse: Either[TtppError, GenerateQuoteResponse],
   retrieveQuoteResponse: Either[TtppError, ViewPlanResponse],
   updatePlanResponse: Either[TtppError, UpdatePlanResponse],
-  createPlanResponse: Either[TtppError, CreatePlanResponse]
+  createPlanResponse: Either[TtppError, CreatePlanResponse],
+  affordableQuoteResponse: Either[TtppError, AffordableQuoteResponse]
 ) extends TtpConnector {
   override def generateQuote(
     ttppRequest: GenerateQuoteRequest,
@@ -426,4 +492,9 @@ class TtpConnectorStub(
     queryParams: Seq[(String, String)] = Seq.empty
   )(implicit ec: ExecutionContext, hc: HeaderCarrier): TtppEnvelope[CreatePlanResponse] =
     TtppEnvelope(Future successful createPlanResponse)
+
+  def getAffordableQuotes(
+    affordableQuotesRequest: AffordableQuotesRequest
+  )(implicit ec: ExecutionContext, hc: HeaderCarrier): TtppEnvelope[AffordableQuoteResponse] =
+    TtppEnvelope(Future.successful(affordableQuoteResponse))
 }
