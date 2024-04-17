@@ -857,6 +857,217 @@ paths:
                 statusCode: 500
                 errorMessage: Internal Service Error
       deprecated: false
+  /individuals/time-to-pay-proxy/test-only/requests:
+    get:
+      tags:
+      - individuals
+      summary: Test Only Requests
+      description: This is an endpoint for testing the ttp service in different env - not to be used apart from debt transformation
+      operationId: TestOnlyRequests
+      parameters: []
+      security:
+        - applicationRestricted:
+          - read:time-to-pay-proxy
+      responses:
+        '200':
+          description: ''
+          headers: {}
+          content:
+            text/plain:
+              schema:
+                $ref: '#/components/schemas/AJSONSchemaforTTPAPI.7'
+        '400':
+          description: ''
+          headers: {}
+          content:
+            text/plain:
+              schema:
+                allOf:
+                - $ref: '#/components/schemas/ErrorResponse'
+                - example:
+                    reason: Field at path '/field' missing or invalid
+                    message: Invalid Json
+              example:
+                reason: Field at path '/field' missing or invalid
+                message: Invalid Json
+      deprecated: false
+  /individuals/time-to-pay-proxy/test-only/request/{requestId}:
+    delete:
+      tags:
+      - individuals
+      summary: Test Only Requests
+      description: This is an endpoint for testing the ttp service in different env - not to be used apart from debt transformation
+      operationId: DeleteTestOnlyRequests
+      parameters:
+      - name: requestId
+        in: path
+        description: ''
+        required: true
+        style: simple
+        schema:
+          type: string
+      security:
+        - applicationRestricted:
+          - read:time-to-pay-proxy
+      responses:
+        '200':
+          description: ''
+          headers: {}
+          content:
+            text/plain:
+              schema:
+                $ref: '#/components/schemas/AJSONSchemaforTTPAPI.7'
+        '400':
+          description: ''
+          headers: {}
+          content:
+            text/plain:
+              schema:
+                allOf:
+                - $ref: '#/components/schemas/ErrorResponse'
+                - example:
+                    reason: Field at path '/field' missing or invalid
+                    message: Invalid Json
+              example:
+                reason: Field at path '/field' missing or invalid
+                message: Invalid Json
+      deprecated: false
+  /individuals/time-to-pay-proxy/test-only/response:
+    post:
+      tags:
+      - individuals
+      summary: Test Only Response
+      description: This is an endpoint for testing the ttp service in different env - not to be used apart from debt transformation
+      operationId: TestOnlyResponse
+      parameters: []
+      security:
+        - applicationRestricted:
+          - read:time-to-pay-proxy
+      requestBody:
+        description: ''
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AJSONSchemaforTTPAPI.7'
+        required: true
+      responses:
+        '200':
+          description: ''
+          headers: {}
+          content:
+            text/plain:
+              schema:
+                $ref: '#/components/schemas/AJSONSchemaforTTPAPI.7'
+        '400':
+          description: ''
+          headers: {}
+          content:
+            text/plain:
+              schema:
+                allOf:
+                - $ref: '#/components/schemas/ErrorResponse'
+                - example:
+                    reason: Field at path '/field' missing or invalid
+                    message: Invalid Json
+              example:
+                reason: Field at path '/field' missing or invalid
+                message: Invalid Json
+      deprecated: false
+  /individuals/time-to-pay-proxy/test-only/errors:
+    get:
+      tags:
+      - individuals
+      summary: Test Only Requests
+      description: This is an endpoint for testing the ttp service in different env - not to be used apart from debt transformation
+      operationId: TestOnlyRequests1
+      parameters: []
+      security:
+        - applicationRestricted:
+          - read:time-to-pay-proxy
+      responses:
+        '200':
+          description: ''
+          headers: {}
+          content:
+            text/plain:
+              schema:
+                $ref: '#/components/schemas/AJSONSchemaforTTPAPI.7'
+        '400':
+          description: ''
+          headers: {}
+          content:
+            text/plain:
+              schema:
+                allOf:
+                - $ref: '#/components/schemas/ErrorResponse'
+                - example:
+                    reason: Field at path '/field' missing or invalid
+                    message: Invalid Json
+              example:
+                reason: Field at path '/field' missing or invalid
+                message: Invalid Json
+      deprecated: false
+    post:
+      tags:
+      - individuals
+      summary: Test Only Response
+      description: This is an endpoint for testing the ttp service in different env - not to be used apart from debt transformation
+      operationId: TestOnlyResponse1
+      parameters: []
+      security:
+        - applicationRestricted:
+          - read:time-to-pay-proxy
+      requestBody:
+        description: ''
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AJSONSchemaforTTPAPI.7'
+        required: true
+      responses:
+        '200':
+          description: ''
+          headers: {}
+          content:
+            text/plain:
+              schema:
+                $ref: '#/components/schemas/AJSONSchemaforTTPAPI.7'
+        '400':
+          description: ''
+          headers: {}
+          content:
+            text/plain:
+              schema:
+                allOf:
+                - $ref: '#/components/schemas/ErrorResponse'
+                - example:
+                    reason: Field at path '/field' missing or invalid
+                    message: Invalid Json
+              example:
+                reason: Field at path '/field' missing or invalid
+                message: Invalid Json
+      deprecated: false
+  /individuals/time-to-pay-proxy/hello-world:
+    get:
+      tags:
+      - individuals
+      summary: Say hello world
+      description: >
+        An example for integrating with Time To Pay Proxy service.
+
+        Any request to this endpoint initiates a 'Hello world' response.
+      operationId: Sayhelloworld
+      parameters: []
+      security:
+      - {}
+      responses:
+        '200':
+          description: ''
+          headers: {}
+          content:
+            text/html:
+              schema: {}
+      deprecated: false
 components:
   securitySchemes:
     userRestricted:
@@ -1923,17 +2134,6 @@ components:
         amountDue:
           type: number
           description: Amount due
-    Timetopayproxyendpointerrorcodes:
-      title: Timetopayproxyendpointerrorcodes
-      type: object
-      properties:
-        reason:
-          type: string
-          description: Reason for error
-        message:
-          type: string
-          description: Summary of error response
-      description: Time to pay proxy endpoint error codes response
     UpdateType:
       title: UpdateType
       enum:
