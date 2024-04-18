@@ -11,9 +11,10 @@ info:
       | 1.0.0 | 11-03-2023 | Jorma Pajunen | Baselined Version |
       | 1.0.1 | 27-03-2024 | Jorma Pajunen | Added new affordable quotes endpoint |
       | 1.0.2 | 12-04-2024 | Jorma Pajunen | Added new affordable quotes endpoint |
-      | 1.0.3 | 16-04-2024 | Vinnie Brice  | Sets InitialCollection to an object and ... |
+      | 1.0.3 | 16-04-2024 | Vinnie Brice  | Sets InitialCollection to an object and removes duplicate |
+      | 1.0.4 | 18-04-2024 | Vinnie Brice  | Removes unused Schema AJSONSchemaforTTPAPI.7 |
   contact: {}
-  version: '1.0.3'
+  version: '1.0.4'
 servers:
   - url: https://api.service.hmrc.gov.uk/
     variables: {}
@@ -1348,25 +1349,6 @@ components:
           type: string
           description: This is the date for either the status change or the update
           format: date
-    AJSONSchemaforTTPAPI.7:
-      title: AJSONSchemaforTTPAPI.7
-      type: object
-      properties:
-        requestId:
-          type: string
-          description: request id
-        content:
-          type: string
-          description: content
-        uri:
-          type: string
-          description: uri
-        isResponse:
-          type: boolean
-          description: isResponse
-        status:
-          type: number
-          description: statusCode
     ChannelIdentifier:
       title: ChannelIdentifier
       enum:
