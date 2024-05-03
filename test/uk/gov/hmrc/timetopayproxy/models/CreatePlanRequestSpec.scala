@@ -29,12 +29,12 @@ class CreatePlanRequestSpec extends AnyWordSpec with Matchers with CreatePlanReq
   "CreatePlanRequest" should {
     "be correctly encoded and decoded" in {
       Json.toJson(createPlanRequest) shouldEqual (Json.parse(json))
-      (Json.parse(json)).as[CreatePlanRequest] shouldEqual createPlanRequest
+      Json.parse(json).as[CreatePlanRequest] shouldEqual createPlanRequest
 
     }
 
     "be correctly encoded and decoded with payment reference None for methods except direct debit" in {
-      (Json.parse(jsonWithEmptyReference)).as[CreatePlanRequest] shouldEqual createPlanRequestWithEmptyReference
+      Json.parse(jsonWithEmptyReference).as[CreatePlanRequest] shouldEqual createPlanRequestWithEmptyReference
       Json.toJson(createPlanRequestWithEmptyReference) shouldEqual (Json.parse(jsonWithEmptyReference))
     }
 
