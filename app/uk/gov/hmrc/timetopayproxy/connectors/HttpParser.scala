@@ -25,7 +25,7 @@ import scala.util.{ Failure, Success, Try }
 
 trait HttpParser {
 
-  implicit def httpReads[T](implicit rds: Reads[T]): HttpReads[Either[TtppError, T]] = (_, _, response) => {
+  implicit def httpReads[T](implicit rds: Reads[T]): HttpReads[Either[TtppError, T]] = (_, _, response) =>
     response.status match {
       case Status.OK | Status.CREATED =>
         response.json
@@ -52,5 +52,4 @@ trait HttpParser {
         }
 
     }
-  }
 }

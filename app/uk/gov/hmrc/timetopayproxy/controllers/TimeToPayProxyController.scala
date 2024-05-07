@@ -143,8 +143,8 @@ class TimeToPayProxyController @Inject() (
           TtppErrorResponse(
             BAD_REQUEST.intValue(),
             s"Invalid ${m.runtimeClass.getSimpleName} payload: Payload has a missing field or an invalid format. ${generateReadableMessageFromError(
-              errs.toSeq.map(err => (err._1, err._2.toSeq))
-            )}"
+                errs.toSeq.map(err => (err._1, err._2.toSeq))
+              )}"
           ).toResponse
         )
       case Failure(e) =>

@@ -30,7 +30,7 @@ class AppConfig @Inject() (
   val ttpBaseUrl: String = servicesConfig.baseUrl("ttp")
   val stubBaseUrl: String = servicesConfig.baseUrl("stub")
   val ttpToken: String = config.get[String]("microservice.services.ttp.token")
-  //TODO DTD-2356: microservice.services.ttp.useIf config value may not be needed for TTP as TTP will always be on MDTP. We don't need to go via IF
+  // TODO DTD-2356: microservice.services.ttp.useIf config value may not be needed for TTP as TTP will always be on MDTP. We don't need to go via IF
   val useIf: Boolean = config.get[Boolean]("microservice.services.ttp.useIf")
   val auditingEnabled: Boolean = config.get[Boolean]("auditing.enabled")
   val graphiteHost: String = config.get[String]("microservice.metrics.graphite.host")

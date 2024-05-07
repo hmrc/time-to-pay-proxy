@@ -30,20 +30,14 @@ object JsonAssertionOps {
 
   implicit final class RichJsValueWithAssertions(json: JsValue) {
 
-    /** Like ScalaTest's `shouldBe`, attempts a readable comparison of two `JsValue`,
-      *   with complete and deterministic error messages to help with large JSON diffs.
+    /** Like ScalaTest's `shouldBe`, attempts a readable comparison of two `JsValue`, with complete and deterministic
+      * error messages to help with large JSON diffs.
       *
-      * <li>Used like you would use `shouldBe`. Failures and passes are consistent with `shouldBe`.</li>
-      * <li>Always sorts object fields before diffing them, for clarity and copy-pastability.</li>
-      * <li>Prints the failure error in a ScalaTest-consistent format that allows a diff in IDEs that support it.</li>
-      * <li>
-      * Usage:
-      * <pre>
-      * import uk.gov.hmrc.timetopay.testutils.JsonAssertionOps._
-      * // ...
-      * myJsValue1 shouldBeEquivalentTo myJsValue2 // Same as you would use `shouldBe`.
-      * </pre>
-      * </li>
+      * <li>Used like you would use `shouldBe`. Failures and passes are consistent with `shouldBe`.</li> <li>Always
+      * sorts object fields before diffing them, for clarity and copy-pastability.</li> <li>Prints the failure error in
+      * a ScalaTest-consistent format that allows a diff in IDEs that support it.</li> <li> Usage: <pre> import
+      * uk.gov.hmrc.timetopay.testutils.JsonAssertionOps._ // ... myJsValue1 shouldBeEquivalentTo myJsValue2 // Same as
+      * you would use `shouldBe`. </pre> </li>
       */
     def shouldBeEquivalentTo(other: JsValue)(implicit pos: Position): Unit =
       if (json != other) {
@@ -74,14 +68,13 @@ object JsonAssertionOps {
 
   implicit final class RichJsValueWithPrinting(json: JsValue) {
 
-    /** All this does is print it in a way that's nice to diff.
-      * Sorts the fields of all JSON objects, but does not reorder the array elements.
-      * This string conversion preserves equality of JSON objects.
+    /** All this does is print it in a way that's nice to diff. Sorts the fields of all JSON objects, but does not
+      * reorder the array elements. This string conversion preserves equality of JSON objects.
       */
     def diffableString: String = json.sortedFields.indentedString
 
-    /** Pretty-prints the JSON by using indentation in both arrays and objects.
-      * Jackson's (and Play's) default pretty-printer does not indent arrays.
+    /** Pretty-prints the JSON by using indentation in both arrays and objects. Jackson's (and Play's) default
+      * pretty-printer does not indent arrays.
       */
     def indentedString: String =
       RichJsValueWithPrinting.mapper
@@ -112,15 +105,13 @@ object JsonAssertionOps {
 
   implicit final class RichJsValueWithMergingOperations(mainJson1: JsValue) {
 
-    /** Deeply merges one JSON object/array with another.
-      * This is a test utility that fails on any clashes.
-      * Does not reject identical values that appear on both sides.
+    /** Deeply merges one JSON object/array with another. This is a test utility that fails on any clashes. Does not
+      * reject identical values that appear on both sides.
       *
-      * "Strict" because it will not delete any data.
-      * "Deep" because it will go through both arrays and objects.
+      * "Strict" because it will not delete any data. "Deep" because it will go through both arrays and objects.
       *
-      * Note that this logic is not appropriate for production code.
-      * Here we need to throw in order to fail incorrect tests, but production code would use ValidatedNel.
+      * Note that this logic is not appropriate for production code. Here we need to throw in order to fail incorrect
+      * tests, but production code would use ValidatedNel.
       */
     def strictDeepMerge(mainJson2: JsValue)(implicit pos: Position): JsValue = {
 
