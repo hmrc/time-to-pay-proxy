@@ -14,7 +14,7 @@ object AppDependencies {
   val test = Seq(
     "uk.gov.hmrc"                      %% "bootstrap-test-play-30"      % BootstrapPlayVersion            % Test,
     "org.scalatest"                    %% "scalatest"                   % "3.2.18"                         % Test,
-    "org.scalamock"                    %% "scalamock"                   % "6.0.0"                         % Test,
+    "org.scalamock"                    %% "scalamock"                   % "5.1.0"                         % Test,
     "org.playframework"                %% "play-test"                   % PlayVersion.current             % Test,
     "com.fasterxml.jackson.module"     %% "jackson-module-scala"        % "2.17.0"                        % Test,
     "com.vladsch.flexmark"             %  "flexmark-all"                % "0.64.8"                        % Test,
