@@ -26,13 +26,6 @@ class DocumentationControllerSpec extends IntegrationBaseSpec {
   val apiDefinitionJson: JsValue = Json.parse(
     """
       |{
-      |  "scopes": [
-      |    {
-      |      "key": "read:time-to-pay-proxy",
-      |      "name": "Time to pay proxy",
-      |      "description": "Allow read access to time to pay proxy"
-      |    }
-      |  ],
       |  "api": {
       |    "name": "Time To Pay Proxy",
       |    "description": "A API for Time To Pay Proxy.",
