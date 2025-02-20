@@ -183,6 +183,7 @@ paths:
                   originalDebtAmount: 100
                   interestStartDate: 2021-05-13
                   dueDate: 2021-05-13
+                  chargeSource: CESA
                   paymentHistory:
                     - paymentDate: 2021-05-13
                       paymentAmount: 100
@@ -1224,6 +1225,9 @@ components:
           type: string
           description: Due date
           format: date
+        chargeSource:
+          type: string
+          description: Source of the charge
     DebtItemCharge1:
       title: DebtItemCharge
       required:
