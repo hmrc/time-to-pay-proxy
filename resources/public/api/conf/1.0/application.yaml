@@ -101,9 +101,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
-                example:
-                  statusCode: 400
-                  errorMessage: Invalid JSON error
               example:
                 statusCode: 400
                 errorMessage: Invalid JSON error
@@ -114,9 +111,9 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
-                example:
-                  statusCode: 401
-                  errorMessage: A user with no active session will return 401 response
+              example:
+                statusCode: 401
+                errorMessage: A user with no active session will return 401 response
         '500':
           description: ''
           headers: {}
@@ -124,9 +121,9 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
-                example:
-                  statusCode: 500
-                  errorMessage: Internal Service Error
+              example:
+                statusCode: 500
+                errorMessage: Internal Service Error
         '503':
           description: ''
           headers: {}
@@ -134,9 +131,9 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
-                example:
-                  statusCode: 503
-                  errorMessage: Couldn't parse body from upstream
+              example:
+                statusCode: 503
+                errorMessage: Couldn't parse body from upstream
       deprecated: false
   /individuals/time-to-pay-proxy/quote/arrangement:
     post:
@@ -155,53 +152,53 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/AJSONSchemaforTTPAPI.2'
-              example:
-                customerReference: uniqRef1234
-                quoteReference: quoteRef1234
-                channelIdentifier: advisor
-                plan:
-                  quoteId: quoteId1
-                  quoteType: instalmentAmount
-                  quoteDate: 2021-05-13
-                  instalmentStartDate: 2021-05-13
-                  instalmentAmount: 100
-                  paymentPlanType: timeToPay
-                  thirdPartyBank: true
-                  numberOfInstalments: 1
-                  frequency: annually
-                  duration: 12
-                  initialPaymentAmount: 100
-                  initialPaymentDate: 2021-05-13
-                  initialPaymentMethod: BACS
-                  initialPaymentReference: paymentRefInit
-                  totalDebtIncInt: 10
-                  totalInterest: 0.14
-                  interestAccrued: 10
-                  planInterest: 0.24
-                debtItemCharges:
-                  - debtItemChargeId: debtItemChrgId1
-                    mainTrans: '1546'
-                    subTrans: '1090'
-                    originalDebtAmount: 100
-                    interestStartDate: 2021-05-13
-                    paymentHistory:
-                      - paymentDate: 2021-05-13
-                        paymentAmount: 100
-                payments:
-                  - paymentMethod: BACS
-                    paymentReference: paymentRef123
-                customerPostCodes:
-                  - addressPostcode: NW9 5XW
-                    postcodeDate: 2021-05-13
-                instalments:
-                  - debtItemChargeId: debtItemChrgId1
-                    dueDate: 2021-05-13
-                    amountDue: 100
-                    expectedPayment: 10
-                    interestRate: 0.25
-                    instalmentNumber: 1
-                    instalmentInterestAccrued: 10
-                    instalmentBalance: 100
+            example:
+              customerReference: uniqRef1234
+              quoteReference: quoteRef1234
+              channelIdentifier: advisor
+              plan:
+                quoteId: quoteId1
+                quoteType: instalmentAmount
+                quoteDate: 2021-05-13
+                instalmentStartDate: 2021-05-13
+                instalmentAmount: 100
+                paymentPlanType: timeToPay
+                thirdPartyBank: true
+                numberOfInstalments: 1
+                frequency: annually
+                duration: 12
+                initialPaymentAmount: 100
+                initialPaymentDate: 2021-05-13
+                initialPaymentMethod: BACS
+                initialPaymentReference: paymentRefInit
+                totalDebtIncInt: 10
+                totalInterest: 0.14
+                interestAccrued: 10
+                planInterest: 0.24
+              debtItemCharges:
+                - debtItemChargeId: debtItemChrgId1
+                  mainTrans: '1546'
+                  subTrans: '1090'
+                  originalDebtAmount: 100
+                  interestStartDate: 2021-05-13
+                  paymentHistory:
+                    - paymentDate: 2021-05-13
+                      paymentAmount: 100
+              payments:
+                - paymentMethod: BACS
+                  paymentReference: paymentRef123
+              customerPostCodes:
+                - addressPostcode: NW9 5XW
+                  postcodeDate: 2021-05-13
+              instalments:
+                - debtItemChargeId: debtItemChrgId1
+                  dueDate: 2021-05-13
+                  amountDue: 100
+                  expectedPayment: 10
+                  interestRate: 0.25
+                  instalmentNumber: 1
+                  instalmentInterestAccrued: 10
+                  instalmentBalance: 100
         required: true
       responses:
         '200':
@@ -211,11 +208,11 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/AJSONSchemaforTTPAPI.3'
-                example:
-                  customerReference: customerRef1234
-                  planId: planId1234
-                  caseId: caseId1234
-                  planStatus: success
+              example:
+                customerReference: customerRef1234
+                planId: planId1234
+                caseId: caseId1234
+                planStatus: success
         '400':
           description: ''
           headers: {}
@@ -223,9 +220,9 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
-                example:
-                  statusCode: 400
-                  errorMessage: Invalid JSON error
+              example:
+                statusCode: 400
+                errorMessage: Invalid JSON error
         '401':
           description: ''
           headers: {}
@@ -233,9 +230,9 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
-                example:
-                  statusCode: 401
-                  errorMessage: A user with no active session will return 401 response
+              example:
+                statusCode: 401
+                errorMessage: A user with no active session will return 401 response
         '500':
           description: ''
           headers: {}
@@ -243,9 +240,9 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
-                example:
-                  statusCode: 500
-                  errorMessage: Internal Service Error
+              example:
+                statusCode: 500
+                errorMessage: Internal Service Error
         '503':
           description: ''
           headers: {}
@@ -253,9 +250,9 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
-                example:
-                  statusCode: 503
-                  errorMessage: Couldn't parse body from upstream
+              example:
+                statusCode: 503
+                errorMessage: Couldn't parse body from upstream
       deprecated: false
   /individuals/time-to-pay-proxy/quote/{customerReference}/{planId}:
     get:
@@ -290,58 +287,58 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/AJSONSchemaforTTPAPI.4'
-                example:
-                  customerReference: uniqRef1234
-                  channelIdentifier: advisor
-                  caseId: caseId1
-                  plan:
-                    planId: planId1
-                    quoteId: quoteId1
-                    quoteDate: 2021-05-13
-                    quoteType: instalmentAmount
-                    paymentPlanType: timeToPay
-                    thirdPartyBank: true
-                    numberOfInstalments: 0
-                    initialPaymentMethod: BACS
-                    initialPaymentReference: paymentRef123
-                    totalDebtIncInt: 0
-                    totalInterest: 0
-                    interestAccrued: 0
-                    planInterest: 0.24
-                    frequency: annually
-                  debtItemCharges:
-                    - debtItemChargeId: debtItemChrgId1
-                      mainTrans: '1546'
-                      subTrans: '1090'
-                      originalDebtAmount: 100
-                      interestStartDate: 2021-05-13
-                      paymentHistory:
-                        - paymentDate: 2021-05-13
-                          paymentAmount: 100
-                  payments:
-                    - paymentMethod: BACS
-                      paymentReference: paymentRef123
-                  customerPostCodes:
-                    - addressPostcode: NW9 5XW
-                      postcodeDate: 2021-05-13
-                  instalments:
-                    - debtItemChargeId: debtItemChrgId1
-                      dueDate: 2021-05-13
-                      amountDue: 100
-                      expectedPayment: 10
-                      interestRate: 0.25
-                      instalmentNumber: 1
-                      instalmentInterestAccrued: 10
-                      instalmentBalance: 100
-                  collections:
-                    initialCollection:
-                      dueDate: 2022-06-18
-                      amountDue: 1000
-                    regularCollections:
-                      - dueDate: 2022-07-08
-                        amountDue: 1628.21
-                      - dueDate: 2022-08-08
-                        amountDue: 1628.21
+              example:
+                customerReference: uniqRef1234
+                channelIdentifier: advisor
+                caseId: caseId1
+                plan:
+                  planId: planId1
+                  quoteId: quoteId1
+                  quoteDate: 2021-05-13
+                  quoteType: instalmentAmount
+                  paymentPlanType: timeToPay
+                  thirdPartyBank: true
+                  numberOfInstalments: 0
+                  initialPaymentMethod: BACS
+                  initialPaymentReference: paymentRef123
+                  totalDebtIncInt: 0
+                  totalInterest: 0
+                  interestAccrued: 0
+                  planInterest: 0.24
+                  frequency: annually
+                debtItemCharges:
+                  - debtItemChargeId: debtItemChrgId1
+                    mainTrans: '1546'
+                    subTrans: '1090'
+                    originalDebtAmount: 100
+                    interestStartDate: 2021-05-13
+                    paymentHistory:
+                      - paymentDate: 2021-05-13
+                        paymentAmount: 100
+                payments:
+                  - paymentMethod: BACS
+                    paymentReference: paymentRef123
+                customerPostCodes:
+                  - addressPostcode: NW9 5XW
+                    postcodeDate: 2021-05-13
+                instalments:
+                  - debtItemChargeId: debtItemChrgId1
+                    dueDate: 2021-05-13
+                    amountDue: 100
+                    expectedPayment: 10
+                    interestRate: 0.25
+                    instalmentNumber: 1
+                    instalmentInterestAccrued: 10
+                    instalmentBalance: 100
+                collections:
+                  initialCollection:
+                    dueDate: 2022-06-18
+                    amountDue: 1000
+                  regularCollections:
+                    - dueDate: 2022-07-08
+                      amountDue: 1628.21
+                    - dueDate: 2022-08-08
+                      amountDue: 1628.21
         '400':
           description: ''
           headers: {}
@@ -349,9 +346,9 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
-                example:
-                  statusCode: 400
-                  errorMessage: Invalid JSON error
+              example:
+                statusCode: 400
+                errorMessage: Invalid JSON error
         '401':
           description: ''
           headers: {}
@@ -359,9 +356,9 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
-                example:
-                  statusCode: 401
-                  errorMessage: A user with no active session will return 401 response
+              example:
+                statusCode: 401
+                errorMessage: A user with no active session will return 401 response
         '500':
           description: ''
           headers: {}
@@ -369,9 +366,9 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
-                example:
-                  statusCode: 500
-                  errorMessage: Internal Service Error
+              example:
+                statusCode: 500
+                errorMessage: Internal Service Error
         '503':
           description: ''
           headers: {}
@@ -379,9 +376,9 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
-                example:
-                  statusCode: 503
-                  errorMessage: Couldn't parse body from upstream
+              example:
+                statusCode: 503
+                errorMessage: Couldn't parse body from upstream
       deprecated: false
     put:
       tags:
@@ -413,17 +410,17 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/AJSONSchemaforTTPAPI.5'
-              example:
-                customerReference: custRef123
-                planId: planId1
-                updateType: paymentDetails
-                planStatus: Resolved - Completed
-                completeReason: Payment in Full
-                cancellationReason: debt-resolved
-                thirdPartyBank: true
-                payments:
-                  - paymentMethod: cheque
-                    paymentReference: paymentRef
+            example:
+              customerReference: custRef123
+              planId: planId1
+              updateType: paymentDetails
+              planStatus: Resolved - Completed
+              completeReason: Payment in Full
+              cancellationReason: debt-resolved
+              thirdPartyBank: true
+              payments:
+                - paymentMethod: cheque
+                  paymentReference: paymentRef
         required: true
       responses:
         '200':
@@ -433,11 +430,11 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/AJSONSchemaforTTPAPI.6'
-                example:
-                  customerReference: custRef1234
-                  planId: planId1234
-                  planStatus: Resolved - Completed
-                  planUpdatedDate: 2021-05-13
+              example:
+                customerReference: custRef1234
+                planId: planId1234
+                planStatus: Resolved - Completed
+                planUpdatedDate: 2021-05-13
         '400':
           description: ''
           headers: {}
@@ -445,9 +442,9 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
-                example:
-                  statusCode: 400
-                  errorMessage: Invalid JSON error
+              example:
+                statusCode: 400
+                errorMessage: Invalid JSON error
         '401':
           description: ''
           headers: {}
@@ -455,9 +452,9 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
-                example:
-                  statusCode: 401
-                  errorMessage: A user with no active session will return 401 response
+              example:
+                statusCode: 401
+                errorMessage: A user with no active session will return 401 response
         '500':
           description: ''
           headers: {}
@@ -465,9 +462,9 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
-                example:
-                  statusCode: 500
-                  errorMessage: Internal Service Error
+              example:
+                statusCode: 500
+                errorMessage: Internal Service Error
         '503':
           description: ''
           headers: {}
@@ -475,9 +472,9 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
-                example:
-                  statusCode: 503
-                  errorMessage: Couldn't parse body from upstream
+              example:
+                statusCode: 503
+                errorMessage: Couldn't parse body from upstream
       deprecated: false
   /individuals/time-to-pay-proxy/self-serve/affordable-quotes:
     post:
@@ -497,86 +494,86 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/AffordableQuotesRequest'
-              example:
-                channelIdentifier: eSSTTP
-                paymentPlanAffordableAmount: 1310
-                paymentPlanFrequency: Monthly
-                paymentPlanMaxLength: 6
-                paymentPlanMinLength: 1
-                accruedDebtInterest: 13.26
-                paymentPlanStartDate: 2022-07-08
-                initialPaymentDate: 2022-06-18
-                initialPaymentAmount: 1000
-                debtItemCharges:
-                  - outstandingDebtAmount: 1487.81
-                    mainTrans: 2000
-                    subTrans: 1000
-                    isInterestBearingCharge: false
-                    useChargeReference: false
-                    debtItemChargeId: XW006559808862
-                    interestStartDate: 2022-05-22
-                    debtItemOriginalDueDate: 2022-05-22
-                  - outstandingDebtAmount: 305.8
-                    mainTrans: 2000
-                    subTrans: 1100
-                    isInterestBearingCharge: false
-                    useChargeReference: false
-                    debtItemChargeId: XW006559808862
-                    interestStartDate: 2022-05-22
-                    debtItemOriginalDueDate: 2022-05-22
-                  - outstandingDebtAmount: 1246.58
-                    mainTrans: 2000
-                    subTrans: 1023
-                    isInterestBearingCharge: false
-                    useChargeReference: false
-                    debtItemChargeId: XW006559808862
-                    interestStartDate: 2022-05-22
-                    debtItemOriginalDueDate: 2022-05-22
-                  - outstandingDebtAmount: 1015.64
-                    mainTrans: 2000
-                    subTrans: 1026
-                    isInterestBearingCharge: false
-                    useChargeReference: false
-                    debtItemChargeId: XW006559808862
-                    interestStartDate: 2022-05-22
-                    debtItemOriginalDueDate: 2022-05-22
-                  - outstandingDebtAmount: 753.13
-                    mainTrans: 2000
-                    subTrans: 1030
-                    isInterestBearingCharge: false
-                    useChargeReference: false
-                    debtItemChargeId: XW005993570327
-                    interestStartDate: 2022-05-22
-                    debtItemOriginalDueDate: 2022-05-22
-                  - outstandingDebtAmount: 1627.06
-                    mainTrans: 2040
-                    subTrans: 1000
-                    isInterestBearingCharge: false
-                    useChargeReference: false
-                    debtItemChargeId: XW005993570327
-                    interestStartDate: 2022-05-22
-                    debtItemOriginalDueDate: 2022-05-22
-                  - outstandingDebtAmount: 139.81
-                    mainTrans: 2030
-                    subTrans: 1280
-                    isInterestBearingCharge: false
-                    useChargeReference: false
-                    debtItemChargeId: XJ006559984746
-                    interestStartDate: 2022-05-22
-                    debtItemOriginalDueDate: 2022-05-22
-                  - outstandingDebtAmount: 876
-                    mainTrans: 2006
-                    subTrans: 1106
-                    isInterestBearingCharge: false
-                    useChargeReference: false
-                    debtItemChargeId: XF006579976401
-                    interestStartDate: 2022-05-22
-                    debtItemOriginalDueDate: 2022-05-22
-                customerPostcodes:
-                  - postCode: BN127ER
-                    postCodeDate: 2022-05-22
-                  - postCode: BN129ER
-                    postCodeDate: 2022-04-30
+            example:
+              channelIdentifier: eSSTTP
+              paymentPlanAffordableAmount: 1310
+              paymentPlanFrequency: Monthly
+              paymentPlanMaxLength: 6
+              paymentPlanMinLength: 1
+              accruedDebtInterest: 13.26
+              paymentPlanStartDate: 2022-07-08
+              initialPaymentDate: 2022-06-18
+              initialPaymentAmount: 1000
+              debtItemCharges:
+                - outstandingDebtAmount: 1487.81
+                  mainTrans: 2000
+                  subTrans: 1000
+                  isInterestBearingCharge: false
+                  useChargeReference: false
+                  debtItemChargeId: XW006559808862
+                  interestStartDate: 2022-05-22
+                  debtItemOriginalDueDate: 2022-05-22
+                - outstandingDebtAmount: 305.8
+                  mainTrans: 2000
+                  subTrans: 1100
+                  isInterestBearingCharge: false
+                  useChargeReference: false
+                  debtItemChargeId: XW006559808862
+                  interestStartDate: 2022-05-22
+                  debtItemOriginalDueDate: 2022-05-22
+                - outstandingDebtAmount: 1246.58
+                  mainTrans: 2000
+                  subTrans: 1023
+                  isInterestBearingCharge: false
+                  useChargeReference: false
+                  debtItemChargeId: XW006559808862
+                  interestStartDate: 2022-05-22
+                  debtItemOriginalDueDate: 2022-05-22
+                - outstandingDebtAmount: 1015.64
+                  mainTrans: 2000
+                  subTrans: 1026
+                  isInterestBearingCharge: false
+                  useChargeReference: false
+                  debtItemChargeId: XW006559808862
+                  interestStartDate: 2022-05-22
+                  debtItemOriginalDueDate: 2022-05-22
+                - outstandingDebtAmount: 753.13
+                  mainTrans: 2000
+                  subTrans: 1030
+                  isInterestBearingCharge: false
+                  useChargeReference: false
+                  debtItemChargeId: XW005993570327
+                  interestStartDate: 2022-05-22
+                  debtItemOriginalDueDate: 2022-05-22
+                - outstandingDebtAmount: 1627.06
+                  mainTrans: 2040
+                  subTrans: 1000
+                  isInterestBearingCharge: false
+                  useChargeReference: false
+                  debtItemChargeId: XW005993570327
+                  interestStartDate: 2022-05-22
+                  debtItemOriginalDueDate: 2022-05-22
+                - outstandingDebtAmount: 139.81
+                  mainTrans: 2030
+                  subTrans: 1280
+                  isInterestBearingCharge: false
+                  useChargeReference: false
+                  debtItemChargeId: XJ006559984746
+                  interestStartDate: 2022-05-22
+                  debtItemOriginalDueDate: 2022-05-22
+                - outstandingDebtAmount: 876
+                  mainTrans: 2006
+                  subTrans: 1106
+                  isInterestBearingCharge: false
+                  useChargeReference: false
+                  debtItemChargeId: XF006579976401
+                  interestStartDate: 2022-05-22
+                  debtItemOriginalDueDate: 2022-05-22
+              customerPostcodes:
+                - postCode: BN127ER
+                  postCodeDate: 2022-05-22
+                - postCode: BN129ER
+                  postCodeDate: 2022-04-30
       responses:
         '200':
           description: ''
@@ -585,40 +582,40 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/AffordableQuotesResponse'
-                example:
-                  processingDateTime: 2022-03-23T13:49:51.141Z
-                  paymentPlans:
-                    - planDuration: 3
-                      totalDebt: 7451.83
-                      totalDebtIncInt: 7512.88
-                      planInterest: 48.05
-                      collections:
-                        initialCollection:
-                          dueDate: 2022-06-18
-                          amountDue: 1000
-                        regularCollections:
-                          - dueDate: 2022-07-08
-                            amountDue: 1628.21
-                          - dueDate: 2022-08-08
-                            amountDue: 1628.21
-                          - dueDate: 2022-09-08
-                            amountDue: 1628.21
-                      numberOfInstalments: 2
-                      instalments:
-                        - instalmentNumber: 1
-                          dueDate: 2022-06-18
-                          instalmentInterestAccrued: 4.59
-                          instalmentBalance: 4808.96
-                          debtItemChargeId: XW006559808862
-                          amountDue: 1000
-                          debtItemOriginalDueDate: 2022-05-22
-                        - instalmentNumber: 2
-                          dueDate: 2022-07-08
-                          instalmentInterestAccrued: 7.28
-                          instalmentBalance: 3808.96
-                          debtItemChargeId: XW006559808862
+              example:
+                processingDateTime: 2022-03-23T13:49:51.141Z
+                paymentPlans:
+                  - planDuration: 3
+                    totalDebt: 7451.83
+                    totalDebtIncInt: 7512.88
+                    planInterest: 48.05
+                    collections:
+                      initialCollection:
+                        dueDate: 2022-06-18
+                        amountDue: 1000
+                      regularCollections:
+                        - dueDate: 2022-07-08
                           amountDue: 1628.21
-                          debtItemOriginalDueDate: 2022-05-22
+                        - dueDate: 2022-08-08
+                          amountDue: 1628.21
+                        - dueDate: 2022-09-08
+                          amountDue: 1628.21
+                    numberOfInstalments: 2
+                    instalments:
+                      - instalmentNumber: 1
+                        dueDate: 2022-06-18
+                        instalmentInterestAccrued: 4.59
+                        instalmentBalance: 4808.96
+                        debtItemChargeId: XW006559808862
+                        amountDue: 1000
+                        debtItemOriginalDueDate: 2022-05-22
+                      - instalmentNumber: 2
+                        dueDate: 2022-07-08
+                        instalmentInterestAccrued: 7.28
+                        instalmentBalance: 3808.96
+                        debtItemChargeId: XW006559808862
+                        amountDue: 1628.21
+                        debtItemOriginalDueDate: 2022-05-22
         '400':
           description: ''
           headers: {}
@@ -626,9 +623,9 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
-                example:
-                  statusCode: 400
-                  errorMessage: Invalid JSON error
+              example:
+                statusCode: 400
+                errorMessage: Invalid JSON error
         '401':
           description: ''
           headers: {}
@@ -636,9 +633,9 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
-                example:
-                  statusCode: 401
-                  errorMessage: A user with no active session will return 401 response
+              example:
+                statusCode: 401
+                errorMessage: A user with no active session will return 401 response
         '500':
           description: ''
           headers: {}
@@ -646,9 +643,9 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
-                example:
-                  statusCode: 500
-                  errorMessage: Internal Service Error
+              example:
+                statusCode: 500
+                errorMessage: Internal Service Error
       deprecated: false
 components:
   securitySchemes:
