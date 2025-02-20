@@ -179,6 +179,7 @@ paths:
               debtItemCharges:
                 - debtItemChargeId: debtItemChrgId1
                   mainTrans: '1546'
+                  parentMainTrans: '4700'
                   subTrans: '1090'
                   originalDebtAmount: 100
                   interestStartDate: 2021-05-13
@@ -1204,6 +1205,9 @@ components:
           minLength: 4
           type: string
           description: Unique MTrans Debt Type ID e.g.1525 also known as M Trans
+        parentMainTrans:
+          type: string
+          description: Parent main transaction code
         subTrans:
           maxLength: 8
           minLength: 4
