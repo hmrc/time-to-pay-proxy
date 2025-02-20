@@ -38,8 +38,9 @@ info:
       | 1.0.4 | 18-04-2024 | Vinnie Brice  | Removes unused Schema AJSONSchemaforTTPAPI.7 |
       | 1.0.5 | 19-02-2025 | Alex Olkhovskiy | Update schema to match the current code state|
       | 1.0.6 | 20-02-2025 | Alex Olkhovskiy | Update createPlan API with regime and to accept SA debts|
+      | 1.0.7 | 20-02-2025 | Alex Olkhovskiy | Rename BACS to Bank payments|
   contact: {}
-  version: '1.0.6'
+  version: '1.0.7'
 servers:
   - url: https://api.service.hmrc.gov.uk/
     variables: {}
@@ -171,7 +172,7 @@ paths:
                 duration: 12
                 initialPaymentAmount: 100
                 initialPaymentDate: 2021-05-13
-                initialPaymentMethod: BACS
+                initialPaymentMethod: Bank payments
                 initialPaymentReference: paymentRefInit
                 totalDebtIncInt: 10
                 totalInterest: 0.14
@@ -191,7 +192,7 @@ paths:
                     - paymentDate: 2021-05-13
                       paymentAmount: 100
               payments:
-                - paymentMethod: BACS
+                - paymentMethod: Bank payments
                   paymentReference: paymentRef123
               customerPostCodes:
                 - addressPostcode: NW9 5XW
@@ -305,7 +306,7 @@ paths:
                   paymentPlanType: timeToPay
                   thirdPartyBank: true
                   numberOfInstalments: 0
-                  initialPaymentMethod: BACS
+                  initialPaymentMethod: Bank payments
                   initialPaymentReference: paymentRef123
                   totalDebtIncInt: 0
                   totalInterest: 0
@@ -322,7 +323,7 @@ paths:
                       - paymentDate: 2021-05-13
                         paymentAmount: 100
                 payments:
-                  - paymentMethod: BACS
+                  - paymentMethod: Bank payments
                     paymentReference: paymentRef123
                 customerPostCodes:
                   - addressPostcode: NW9 5XW
@@ -1327,12 +1328,12 @@ components:
       title: InitialPaymentMethod
       enum:
         - directDebit
-        - BACS
+        - Bank payments
         - cheque
         - cardPayment
         - Ongoing award
       type: string
-      description: Payment method (Direct debit, BACS, Cheque, Card)
+      description: Payment method (Direct debit, Bank payments, Cheque, Card)
     Instalment:
       title: Instalment
       properties:
@@ -1420,7 +1421,7 @@ components:
         paymentMethod:
           allOf:
             - $ref: '#/components/schemas/PaymentMethod'
-            - description: Payment method (Direct debit, BACS, Cheque, Card)
+            - description: Payment method (Direct debit, Bank payments, Cheque, Card)
         paymentReference:
           maxLength: 15
           minLength: 1
@@ -1432,7 +1433,7 @@ components:
         paymentMethod:
           allOf:
             - $ref: '#/components/schemas/PaymentMethod1'
-            - description: Payment method (Direct debit, BACS, Cheque, Card)
+            - description: Payment method (Direct debit, Bank payments, Cheque, Card)
         paymentReference:
           maxLength: 15
           minLength: 1
@@ -1446,7 +1447,7 @@ components:
         paymentMethod:
           allOf:
             - $ref: '#/components/schemas/PaymentMethod2'
-            - description: Payment method (Direct debit, BACS, Cheque, Card)
+            - description: Payment method (Direct debit, Bank payments, Cheque, Card)
         paymentReference:
           maxLength: 15
           minLength: 1
@@ -1481,31 +1482,31 @@ components:
       title: PaymentMethod
       enum:
         - directDebit
-        - BACS
+        - Bank payments
         - cheque
         - cardPayment
         - Ongoing award
       type: string
-      description: Payment method (Direct debit, BACS, Cheque, Card)
+      description: Payment method (Direct debit, Bank payments, Cheque, Card)
     PaymentMethod1:
       title: PaymentMethod1
       enum:
         - directDebit
-        - BACS
+        - Bank payments
         - cheque
         - cardPayment
         - On going award
       type: string
-      description: Payment method (Direct debit, BACS, Cheque, Card)
+      description: Payment method (Direct debit, Bank payments, Cheque, Card)
     PaymentMethod2:
       title: PaymentMethod2
       enum:
         - directDebit
-        - BACS
+        - Bank payments
         - cheque
         - cardPayment
       type: string
-      description: Payment method (Direct debit, BACS, Cheque, Card)
+      description: Payment method (Direct debit, Bank payments, Cheque, Card)
     PaymentPlanType:
       title: PaymentPlanType
       enum:
@@ -1646,7 +1647,7 @@ components:
         initialPaymentMethod:
           allOf:
             - $ref: '#/components/schemas/InitialPaymentMethod'
-            - description: Payment method (Direct debit, BACS, Cheque, Card)
+            - description: Payment method (Direct debit, Bank payments, Cheque, Card)
         initialPaymentReference:
           type: string
           description: Payment Method reference
@@ -1687,7 +1688,7 @@ components:
         initialPaymentMethod:
           allOf:
             - $ref: '#/components/schemas/InitialPaymentMethod'
-            - description: Payment method (Direct debit, BACS, Cheque, Card)
+            - description: Payment method (Direct debit, Bank payments, Cheque, Card)
         initialPaymentReference:
           type: string
           description: Payment Method reference
