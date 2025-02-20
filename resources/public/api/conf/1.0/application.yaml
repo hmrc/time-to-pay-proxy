@@ -153,6 +153,7 @@ paths:
             schema:
               $ref: '#/components/schemas/AJSONSchemaforTTPAPI.2'
             example:
+              regimeType: PAYE
               customerReference: uniqRef1234
               quoteReference: quoteRef1234
               channelIdentifier: advisor
@@ -964,6 +965,9 @@ components:
         - customerPostCodes
         - instalments
       properties:
+        regimeType:
+          type: string
+          description: Regime type
         customerReference:
           maxLength: 15
           minLength: 1
