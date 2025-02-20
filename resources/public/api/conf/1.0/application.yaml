@@ -182,6 +182,7 @@ paths:
                   subTrans: '1090'
                   originalDebtAmount: 100
                   interestStartDate: 2021-05-13
+                  dueDate: 2021-05-13
                   paymentHistory:
                     - paymentDate: 2021-05-13
                       paymentAmount: 100
@@ -1219,6 +1220,10 @@ components:
           items:
             $ref: '#/components/schemas/PaymentHistory'
           description: ''
+        dueDate:
+          type: string
+          description: Due date
+          format: date
     DebtItemCharge1:
       title: DebtItemCharge
       required:
