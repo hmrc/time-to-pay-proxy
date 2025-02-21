@@ -41,8 +41,9 @@ info:
       | 1.0.7 | 20-02-2025 | Alex Olkhovskiy | Rename BACS to Bank payments|
       | 1.0.8 | 20-02-2025 | Alex Olkhovskiy | Update update plan API with regime and to accept SA debts|
       | 1.0.9 | 21-02-2025 | Alex Olkhovskiy | update /quote endpoint to match the code|
+      | 1.0.10 | 21-02-2025 | Alex Olkhovskiy | Update Generate quote API with new fields and to accept SA debts|
   contact: {}
-  version: '1.0.9'
+  version: '1.0.10'
 servers:
   - url: https://api.service.hmrc.gov.uk/
     variables: {}
@@ -65,6 +66,7 @@ paths:
             schema:
               $ref: '#/components/schemas/AJSONSchemaforTTPAPI.0'
             example:
+              regimeType: PAYE
               customerReference: uniqRef1234
               channelIdentifier: selfService
               plan:
@@ -89,6 +91,7 @@ paths:
                   paymentHistory:
                     - paymentDate: 2021-05-13
                       paymentAmount: 100
+                  dueDate: "2021-05-13"
         required: true
       responses:
         '200':
@@ -921,6 +924,9 @@ components:
         - debtItemCharges
         - customerPostCodes
       properties:
+        regimeType:
+          type: string
+          description: Regime type
         customerReference:
           maxLength: 15
           minLength: 1
@@ -1337,6 +1343,10 @@ components:
           items:
             $ref: '#/components/schemas/PaymentHistory'
           description: ''
+        dueDate:
+          type: string
+          format: date
+          description: Due date
     DebtItemCharge2:
       title: DebtItemCharge2
       properties:
