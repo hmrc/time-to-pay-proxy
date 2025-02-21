@@ -51,7 +51,7 @@ paths:
       tags:
         - individuals
       summary: Generate TTP Quote Request
-      description: This is an endpoint that triggers request to create a plan for storage from ttp service
+      description: This is an endpoint that triggers a request to generate a quote from the TTP service
       operationId: GenerateTTPQuoteRequest
       parameters: []
       security:
@@ -97,16 +97,41 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/AJSONSchemaforTTPAPI.1'
-        '400':
-          description: ''
-          headers: {}
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
               example:
-                statusCode: 400
-                errorMessage: Invalid JSON error
+                quoteReference: "quoteRef1234"
+                customerReference: "uniqRef1234"
+                quoteType: "duration"
+                quoteDate: "2021-05-13"
+                numberOfInstalments: 0
+                totalDebtIncInt: 1100
+                interestAccrued: 50
+                planInterest: 0.20
+                totalInterest: 100
+                instalments:
+                  - dueDate: "2021-06-13"
+                    instalmentAmount: 100
+                    paymentHistory:
+                      - paymentDate: "2021-05-13"
+                        paymentAmount: 100
+                collections:
+                  initialCollection:
+                    dueDate: 2022-06-18
+                    amountDue: 1000
+                  regularCollections:
+                    - dueDate: 2022-07-08
+                      amountDue: 1628.21
+                    - dueDate: 2022-08-08
+                      amountDue: 1628.21
+        '400':
+         description: ''
+         headers: {}
+         content:
+           application/json:
+             schema:
+               $ref: '#/components/schemas/ErrorResponse'
+             example:
+               statusCode: 400
+               errorMessage: Invalid JSON error
         '401':
           description: ''
           headers: {}
@@ -143,7 +168,7 @@ paths:
       tags:
         - individuals
       summary: TTP Promote an Arrangement request
-      description: This is an endpoint that triggers a request to generate a draft quote from ttp service
+      description: This is an endpoint that triggers a request to create a plan/arrangement which in then stored in the TTP service
       operationId: TTPPromoteanArrangementrequest
       parameters: []
       security:
