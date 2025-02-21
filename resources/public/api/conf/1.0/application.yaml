@@ -40,8 +40,9 @@ info:
       | 1.0.6 | 20-02-2025 | Alex Olkhovskiy | Update createPlan API with regime and to accept SA debts|
       | 1.0.7 | 20-02-2025 | Alex Olkhovskiy | Rename BACS to Bank payments|
       | 1.0.8 | 20-02-2025 | Alex Olkhovskiy | Update update plan API with regime and to accept SA debts|
+      | 1.0.9 | 21-02-2025 | Alex Olkhovskiy | update /quote endpoint to match the code|
   contact: {}
-  version: '1.0.8'
+  version: '1.0.9'
 servers:
   - url: https://api.service.hmrc.gov.uk/
     variables: {}
@@ -912,12 +913,13 @@ components:
           type: string
           description: Reason for error request
     AJSONSchemaforTTPAPI.0:
-      title: AJSONSchemaforTTPAPI.
+      title: AJSONSchemaforTTPAPI.0
       required:
         - customerReference
         - channelIdentifier
         - plan
         - debtItemCharges
+        - customerPostCodes
       properties:
         customerReference:
           maxLength: 15
@@ -942,6 +944,18 @@ components:
           description: ''
     AJSONSchemaforTTPAPI.1:
       title: AJSONSchemaforTTPAPI.1
+      required:
+        - collections
+        - customerReference
+        - instalments
+        - interestAccrued
+        - numberOfInstalments
+        - planInterest
+        - quoteDate
+        - quoteReference
+        - quoteType
+        - totalDebtIncInt
+        - totalInterest
       properties:
         quoteReference:
           maxLength: 15
@@ -982,10 +996,10 @@ components:
         instalments:
           type: array
           items:
-            $ref: '#/components/schemas/Instalment'
+            $ref: '#/components/schemas/Instalment2'
           description: ''
         collections:
-          $ref: '#/components/schemas/Collections'
+          $ref: '#/components/schemas/Collections2'
     AJSONSchemaforTTPAPI.2:
       title: AJSONSchemaforTTPAPI.2
       required:
@@ -1187,6 +1201,18 @@ components:
           items:
             $ref: '#/components/schemas/RegularCollection'
           description: ''
+    Collections2:
+      title: Collections
+      required:
+        - regularCollections
+      properties:
+        initialCollection:
+          $ref: '#/components/schemas/InitialCollection'
+        regularCollections:
+          type: array
+          items:
+            $ref: '#/components/schemas/RegularCollection2'
+          description: ''
     CompleteReason:
       title: CompleteReason
       enum:
@@ -1281,6 +1307,7 @@ components:
         - mainTrans
         - subTrans
         - originalDebtAmount
+        - paymentHistory
       properties:
         debtItemChargeId:
           maxLength: 16
@@ -1443,6 +1470,50 @@ components:
           type: integer
           description: Instalment balance
           format: int32
+    Instalment2:
+      title: Instalment
+      required:
+        - amountDue
+        - debtItemChargeId
+        - dueDate
+        - expectedPayment
+        - instalmentBalance
+        - instalmentInterestAccrued
+        - instalmentNumber
+        - interestRate
+      properties:
+        debtItemChargeId:
+          maxLength: 16
+          minLength: 1
+          type: string
+          description: An ID which uniquely identifies a particular duty
+        dueDate:
+          type: string
+          description: Due date
+          format: date
+        amountDue:
+          type: integer
+          description: Amount due
+          format: int32
+        expectedPayment:
+          type: integer
+          description: Expected payment
+          format: int32
+        interestRate:
+          type: number
+          description: Interest rate
+        instalmentNumber:
+          type: integer
+          description: Instalment number
+          format: int32
+        instalmentInterestAccrued:
+          type: integer
+          description: Instalment interest
+          format: int32
+        instalmentBalance:
+          type: integer
+          description: Instalment balance
+          format: int32
     Payment:
       title: Payment
       required:
@@ -1563,7 +1634,6 @@ components:
         - quoteType
         - quoteDate
         - instalmentStartDate
-        - frequency
         - paymentPlanType
       properties:
         quoteType:
@@ -1765,6 +1835,19 @@ components:
       description: this will determine what IFS is required to calculate either duration or instalment amount
     RegularCollection:
       title: RegularCollection
+      properties:
+        dueDate:
+          type: string
+          description: Due date
+          format: date
+        amountDue:
+          type: number
+          description: Amount due
+    RegularCollection2:
+      title: RegularCollection
+      required:
+        - dueDate
+        - amountDue
       properties:
         dueDate:
           type: string
