@@ -177,7 +177,9 @@ class TimeToPayProxyControllerItSpec extends IntegrationBaseSpec {
                          |			"subTrans": "2000",
                          |			"outstandingDebtAmount": 9000,
                          |			"interestStartDate": "2022-08-02",
-                         |			"debtItemOriginalDueDate": "2021-05-22"
+                         |			"debtItemOriginalDueDate": "2021-05-22",
+                         |      "isInterestBearingCharge": true,
+                         |      "useChargeReference": false
                          |		}
                          |	],
                          |	"customerPostcodes": [
@@ -309,8 +311,8 @@ class TimeToPayProxyControllerItSpec extends IntegrationBaseSpec {
           debtItemChargeId = DebtItemChargeId("dici1"),
           interestStartDate = Some(LocalDate.now()),
           debtItemOriginalDueDate = LocalDate.now(),
-          isInterestBearingCharge = Some(IsInterestBearingCharge(true)),
-          useChargeReference = Some(UseChargeReference(false))
+          isInterestBearingCharge = IsInterestBearingCharge(true),
+          useChargeReference = UseChargeReference(false)
         )
       ),
       customerPostcodes = List()

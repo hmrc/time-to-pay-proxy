@@ -41,8 +41,8 @@ final case class DebtItemChargeSelfServe(
   debtItemChargeId: DebtItemChargeId,
   interestStartDate: Option[LocalDate],
   debtItemOriginalDueDate: LocalDate,
-  isInterestBearingCharge: Option[IsInterestBearingCharge],
-  useChargeReference: Option[UseChargeReference]
+  isInterestBearingCharge: IsInterestBearingCharge,
+  useChargeReference: UseChargeReference
 )
 
 object DebtItemChargeSelfServe {
