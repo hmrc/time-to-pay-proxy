@@ -22,7 +22,7 @@ modules
 /out
 precompiled
 /.project
-project/project
+project/project/*
 project/target
 /RUNNING_PID
 server.pid
@@ -33,3 +33,5 @@ test-result
 tmp
 .idea_modules
 bin
+
+!/project/project/*.sbt
