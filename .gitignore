@@ -34,4 +34,4 @@ tmp
 .idea_modules
 bin
 
-!/project/project/plugins-2.sbt
+!/project/project/*.sbt
