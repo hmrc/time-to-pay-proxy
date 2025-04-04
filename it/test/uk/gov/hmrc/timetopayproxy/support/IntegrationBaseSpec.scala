@@ -19,7 +19,6 @@ package uk.gov.hmrc.timetopayproxy.support
 import org.scalamock.scalatest.MockFactory
 import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.should.Matchers
-import org.scalatest.wordspec.AnyWordSpec
 import org.scalatest.{ BeforeAndAfterAll, BeforeAndAfterEach, EitherValues }
 import org.scalatestplus.play.guice.GuiceOneServerPerSuite
 import play.api.inject.guice.GuiceApplicationBuilder
@@ -27,8 +26,6 @@ import play.api.libs.json.{ JsValue, Json }
 import play.api.libs.ws.{ WSClient, WSRequest, WSResponse }
 import play.api.test.{ DefaultAwaitTimeout, FutureAwaits }
 import play.api.{ Application, Environment, Mode }
-
-import scala.concurrent.ExecutionContext
 
 trait IntegrationBaseSpec
     extends AnyFreeSpec with MockFactory with EitherValues with Matchers with FutureAwaits with DefaultAwaitTimeout

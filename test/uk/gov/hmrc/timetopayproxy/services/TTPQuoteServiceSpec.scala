@@ -238,8 +238,8 @@ class TTPQuoteServiceSpec extends UnitSpec {
         debtItemChargeId = DebtItemChargeId("dici1"),
         interestStartDate = Some(LocalDate.now()),
         debtItemOriginalDueDate = LocalDate.now(),
-        isInterestBearingCharge = Some(IsInterestBearingCharge(true)),
-        useChargeReference = Some(UseChargeReference(false))
+        isInterestBearingCharge = IsInterestBearingCharge(true),
+        useChargeReference = UseChargeReference(false)
       )
     ),
     customerPostcodes = List()

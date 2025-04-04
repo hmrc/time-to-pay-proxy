@@ -68,8 +68,8 @@ class YamlSchemaValidatorSpec extends AnyWordSpec with Matchers {
             debtItemChargeId = DebtItemChargeId("XW006559808862"),
             interestStartDate = None,
             debtItemOriginalDueDate = LocalDate.parse("2022-05-22"),
-            isInterestBearingCharge = None,
-            useChargeReference = None
+            isInterestBearingCharge = IsInterestBearingCharge(true),
+            useChargeReference = UseChargeReference(false)
           )
         ),
         customerPostcodes = List(CustomerPostCode(PostCode("BN127ER"), postcodeDate = LocalDate.parse("2022-05-22")))
@@ -82,8 +82,8 @@ class YamlSchemaValidatorSpec extends AnyWordSpec with Matchers {
         debtItemCharges = List(
           affordableQuotesRequestOnlyMandatoryFields.debtItemCharges.head.copy(
             interestStartDate = Some(LocalDate.parse("2022-05-22")),
-            isInterestBearingCharge = Some(IsInterestBearingCharge(true)),
-            useChargeReference = Some(UseChargeReference(false))
+            isInterestBearingCharge = IsInterestBearingCharge(true),
+            useChargeReference = UseChargeReference(false)
           )
         )
       )
@@ -103,7 +103,9 @@ class YamlSchemaValidatorSpec extends AnyWordSpec with Matchers {
                    |      "mainTrans": "5330",
                    |      "subTrans": "1090",
                    |      "debtItemChargeId": "XW006559808862",
-                   |      "debtItemOriginalDueDate": "2022-05-22"
+                   |      "debtItemOriginalDueDate": "2022-05-22",
+                   |      "isInterestBearingCharge": true,
+                   |      "useChargeReference": false
                    |    }
                    |   ],
                    |  "customerPostcodes": [

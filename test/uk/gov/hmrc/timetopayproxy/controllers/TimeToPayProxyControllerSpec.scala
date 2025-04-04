@@ -967,8 +967,8 @@ class TimeToPayProxyControllerSpec extends AnyWordSpec with Matchers with MockFa
           DebtItemChargeId("ChargeRef 0903_2"),
           interestStartDate = Some(LocalDate.parse("2021-09-03")),
           debtItemOriginalDueDate = LocalDate.now(),
-          Some(IsInterestBearingCharge(true)),
-          Some(UseChargeReference(false))
+          IsInterestBearingCharge(true),
+          UseChargeReference(false)
         )
       ),
       customerPostcodes = List(
