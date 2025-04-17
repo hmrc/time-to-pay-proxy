@@ -71,6 +71,7 @@ final case class UpdatePlanRequest(
   customerReference: CustomerReference,
   planId: PlanId,
   updateType: UpdateType,
+  channelIdentifier: Option[ChannelIdentifier],
   planStatus: Option[PlanStatus],
   completeReason: Option[CompleteReason],
   cancellationReason: Option[CancellationReason],

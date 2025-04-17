@@ -33,19 +33,7 @@ package uk.gov.hmrc.timetopayproxy.models
  */
 
 import java.time.LocalDate
-import enumeratum.{ Enum, EnumEntry, PlayJsonEnum }
 import play.api.libs.json.{ Json, OFormat }
-
-import scala.collection.immutable
-
-sealed abstract class ChannelIdentifier(override val entryName: String) extends EnumEntry
-
-object ChannelIdentifier extends Enum[ChannelIdentifier] with PlayJsonEnum[ChannelIdentifier] {
-  val values: immutable.IndexedSeq[ChannelIdentifier] = findValues
-
-  case object Advisor extends ChannelIdentifier("advisor")
-  case object SelfService extends ChannelIdentifier("selfService")
-}
 
 final case class PlanToGenerateQuote(
   quoteType: QuoteType,
