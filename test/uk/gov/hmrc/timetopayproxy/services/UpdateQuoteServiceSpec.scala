@@ -34,6 +34,7 @@ class UpdatePlanServiceSpec extends UnitSpec {
     CustomerReference("customerReference"),
     PlanId("planId"),
     UpdateType("updateType"),
+    None,
     Some(PlanStatus.ResolvedCancelled),
     None,
     Some(CancellationReason("reason")),

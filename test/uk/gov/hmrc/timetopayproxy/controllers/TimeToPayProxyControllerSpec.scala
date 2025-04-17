@@ -78,6 +78,7 @@ class TimeToPayProxyControllerSpec extends AnyWordSpec with Matchers with MockFa
       CustomerReference("customerReference"),
       PlanId("planId"),
       UpdateType("updateType"),
+      None,
       Some(PlanStatus.Success),
       None,
       Some(CancellationReason("reason")),
