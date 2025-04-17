@@ -28,7 +28,8 @@ final case class AffordableQuoteInstalment(
   instalmentNumber: Int,
   instalmentInterestAccrued: BigDecimal,
   instalmentBalance: BigDecimal,
-  debtItemOriginalDueDate: LocalDate
+  debtItemOriginalDueDate: LocalDate,
+  expectedPayment: Int
 )
 
 object AffordableQuoteInstalment {
