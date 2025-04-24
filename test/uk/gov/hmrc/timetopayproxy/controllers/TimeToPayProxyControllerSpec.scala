@@ -595,6 +595,56 @@ class TimeToPayProxyControllerSpec extends AnyWordSpec with Matchers with MockFa
           responseFromTtp
         )
       }
+
+      "channelIdentifier is valid" in {
+        (authConnector
+          .authorise[Unit](_: Predicate, _: Retrieval[Unit])(
+            _: HeaderCarrier,
+            _: ExecutionContext
+          ))
+          .expects(*, *, *, *)
+          .returning(Future.successful(()))
+
+        val updatePlanRequestValidChannelIdentifier: UpdatePlanRequest =
+          Json
+            .obj(
+              "customerReference" -> "customerReference",
+              "planId"            -> "planId",
+              "updateType"        -> "updateType",
+              "channelIdentifier" -> "advisor"
+            )
+            .as[UpdatePlanRequest]
+
+        val responseFromTtp = UpdatePlanResponse(
+          CustomerReference("customerReference"),
+          PlanId("planId"),
+          PlanStatus.Success,
+          LocalDate.now
+        )
+
+        (ttpQuoteService
+          .updatePlan(_: UpdatePlanRequest)(
+            _: ExecutionContext,
+            _: HeaderCarrier
+          ))
+          .expects(updatePlanRequestValidChannelIdentifier, *, *)
+          .returning(TtppEnvelope(responseFromTtp))
+
+        val fakeRequest: FakeRequest[JsValue] = FakeRequest(
+          "PUT",
+          s"/individuals/time-to-pay/quote/${updatePlanRequestValidChannelIdentifier.customerReference.value}/${updatePlanRequestValidChannelIdentifier.planId.value}"
+        ).withHeaders(CONTENT_TYPE -> MimeTypes.JSON)
+          .withBody(Json.toJson[UpdatePlanRequest](updatePlanRequestValidChannelIdentifier))
+
+        val response: Future[Result] = controller.updatePlan(
+          updatePlanRequestValidChannelIdentifier.customerReference.value,
+          updatePlanRequestValidChannelIdentifier.planId.value
+        )(fakeRequest)
+
+        status(response) shouldBe Status.OK
+
+        contentAsJson(response) shouldBe Json.toJson(responseFromTtp)
+      }
     }
 
     "return 500" when {
@@ -872,6 +922,48 @@ class TimeToPayProxyControllerSpec extends AnyWordSpec with Matchers with MockFa
           TtppErrorResponse(
             errorResponse.intValue(),
             "Could not parse body due to requirement failed: Invalid UpdatePlanRequest payload: Payload has a missing field or an invalid format. Field name: planStatus."
+          )
+        )
+      }
+
+      "channelIdentifier is invalid" in {
+        (authConnector
+          .authorise[Unit](_: Predicate, _: Retrieval[Unit])(
+            _: HeaderCarrier,
+            _: ExecutionContext
+          ))
+          .expects(*, *, *, *)
+          .returning(Future.successful(()))
+
+        val updatePlanRequestInvalidChannelIdentifierJson: JsValue =
+          Json.obj(
+            "customerReference" -> "customerReference",
+            "planId"            -> "planId",
+            "updateType"        -> "updateType",
+            "channelIdentifier" -> "invalidChannelIdentifier"
+          )
+
+        val fakeRequest: FakeRequest[JsValue] =
+          FakeRequest(
+            "PUT",
+            s"/individuals/time-to-pay/quote/customerReference/planId"
+          ).withHeaders(CONTENT_TYPE -> MimeTypes.JSON)
+            .withBody(updatePlanRequestInvalidChannelIdentifierJson)
+
+        val response: Future[Result] =
+          controller.updatePlan(
+            "customerReference",
+            "planId"
+          )(fakeRequest)
+
+        val errorResponse = Status.BAD_REQUEST
+
+        status(response) shouldBe errorResponse.intValue()
+
+        contentAsJson(response) shouldBe Json.toJson(
+          TtppErrorResponse(
+            errorResponse.intValue(),
+            "Invalid UpdatePlanRequest payload: Payload has a missing field or an invalid format. Field name: channelIdentifier. Valid enum value should be provided"
           )
         )
       }
