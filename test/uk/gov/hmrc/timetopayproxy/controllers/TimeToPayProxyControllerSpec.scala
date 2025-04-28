@@ -442,7 +442,7 @@ class TimeToPayProxyControllerSpec extends AnyWordSpec with Matchers with MockFa
       customerReferenceQueryParameter: String,
       planIdQueryParameter: String,
       ttpServiceResponse: Option[TtppEnvelope[UpdatePlanResponse]]
-    ): Unit = {
+    )(implicit position: org.scalactic.source.Position): Unit = {
       (authConnector
         .authorise[Unit](_: Predicate, _: Retrieval[Unit])(
           _: HeaderCarrier,
