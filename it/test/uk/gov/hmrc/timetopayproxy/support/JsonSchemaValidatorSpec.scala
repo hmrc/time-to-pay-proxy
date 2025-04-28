@@ -55,56 +55,51 @@ class JsonSchemaValidatorSpec extends AnyWordSpec with Matchers {
       errors shouldEqual Set.empty
     }
 
-    "should parse to the model" in {
-      val raw: String = scala.io.Source
-        .fromFile("resources/public/api/conf/1.0/examples/generate/postGenerateRequest.json")
-        .mkString
-      Json.parse(raw).as[GenerateQuoteRequest]
-    }
+    "should parse to the model" when {
+      "all optional fields are present " in {
+        val raw: String = scala.io.Source
+          .fromFile("resources/public/api/conf/1.0/examples/generate/postGenerateRequest.json")
+          .mkString
+        Json.parse(raw).as[GenerateQuoteRequest]
+      }
 
-    "should parse to the model with all optional fields" in {
-      val raw: String =
-        """
-          |{
-          |  "customerReference": "uniqRef1234",
-          |  "channelIdentifier": "selfService",
-          |  "plan": {
-          |    "quoteType": "duration",
-          |    "quoteDate": "2021-05-13",
-          |    "instalmentStartDate": "2021-05-13",
-          |    "instalmentAmount": 100,
-          |    "frequency": "annually",
-          |    "duration": 12,
-          |    "initialPaymentAmount": 100,
-          |    "initialPaymentDate": "2021-05-13",
-          |    "paymentPlanType": "timeToPay"
-          |  },
-          |  "customerPostCodes": [
-          |    {
-          |      "addressPostcode": "NW9 5XW",
-          |      "postcodeDate": "2021-05-13"
-          |    }
-          |  ],
-          |  "debtItemCharges": [
-          |    {
-          |      "debtItemChargeId": "debtItemChrgId1",
-          |      "mainTrans": "1546",
-          |      "subTrans": "1090",
-          |      "originalDebtAmount": 100,
-          |      "interestStartDate": "2021-05-13",
-          |      "paymentHistory": [
-          |        {
-          |          "paymentDate": "2021-05-13",
-          |          "paymentAmount": 100
-          |        }
-          |      ],
-          |      "dueDate": "2021-05-13"
-          |    }
-          |  ]
-          |}
-          |""".stripMargin
+      "all optional fields are not present" in {
+        val raw: String =
+          """
+            |{
+            |  "customerReference": "uniqRef1234",
+            |  "channelIdentifier": "selfService",
+            |  "plan": {
+            |    "quoteType": "duration",
+            |    "quoteDate": "2021-05-13",
+            |    "instalmentStartDate": "2021-05-13",
+            |    "paymentPlanType": "timeToPay"
+            |  },
+            |  "customerPostCodes": [
+            |    {
+            |      "addressPostcode": "NW9 5XW",
+            |      "postcodeDate": "2021-05-13"
+            |    }
+            |  ],
+            |  "debtItemCharges": [
+            |    {
+            |      "debtItemChargeId": "debtItemChrgId1",
+            |      "mainTrans": "1546",
+            |      "subTrans": "1090",
+            |      "originalDebtAmount": 100,
+            |      "paymentHistory": [
+            |        {
+            |          "paymentDate": "2021-05-13",
+            |          "paymentAmount": 100
+            |        }
+            |      ]
+            |    }
+            |  ]
+            |}
+            |""".stripMargin
 
-      Json.parse(raw).as[GenerateQuoteRequest]
+        Json.parse(raw).as[GenerateQuoteRequest]
+      }
     }
   }
 
