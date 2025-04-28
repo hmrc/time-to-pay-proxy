@@ -112,7 +112,8 @@ class TtpConnectorSpec extends PlaySpec with DefaultAwaitTimeout with FutureAwai
               PaymentPlanType.TimeToPay
             ),
             List.empty,
-            List.empty
+            List.empty,
+            regimeType = None
           )
         )
 
@@ -147,15 +148,17 @@ class TtpConnectorSpec extends PlaySpec with DefaultAwaitTimeout with FutureAwai
             ),
             customerPostCodes = List.empty,
             debtItemCharges = List(
-              DebtItemCharge(
+              DebtItemChargeGenerateQuote(
                 debtItemChargeId = DebtItemChargeId("id"),
                 mainTrans = "1111",
                 subTrans = "7010",
                 originalDebtAmount = 100,
                 interestStartDate = Some(LocalDate.now()),
-                paymentHistory = List()
+                paymentHistory = List(),
+                dueDate = None
               )
-            )
+            ),
+            regimeType = None
           )
         )
         await(result.value) mustBe Left(
@@ -184,7 +187,8 @@ class TtpConnectorSpec extends PlaySpec with DefaultAwaitTimeout with FutureAwai
               PaymentPlanType.TimeToPay
             ),
             List.empty,
-            List.empty
+            List.empty,
+            regimeType = None
           )
         )
 
