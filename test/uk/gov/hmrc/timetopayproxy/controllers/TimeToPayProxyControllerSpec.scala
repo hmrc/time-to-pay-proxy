@@ -999,8 +999,7 @@ class TimeToPayProxyControllerSpec extends AnyWordSpec with Matchers with MockFa
               instalmentNumber = 1,
               instalmentInterestAccrued = 100,
               instalmentBalance = 100,
-              debtItemOriginalDueDate = LocalDate.parse("2000-01-01"),
-              expectedPayment = 100
+              debtItemOriginalDueDate = LocalDate.parse("2000-01-01")
             )
           )
         )
