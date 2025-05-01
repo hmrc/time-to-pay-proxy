@@ -18,6 +18,7 @@ package uk.gov.hmrc.timetopayproxy.support
 
 import com.fasterxml.jackson.databind.{ JsonNode, ObjectMapper }
 import com.networknt.schema.{ JsonSchema, JsonSchemaFactory, SpecVersion }
+import org.scalatest.EitherValues
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
 import play.api.libs.json.Json
@@ -25,8 +26,9 @@ import uk.gov.hmrc.timetopayproxy.models._
 
 import java.nio.file.Paths
 import scala.jdk.CollectionConverters.CollectionHasAsScala
+import scala.util.Using
 
-class JsonSchemaValidatorSpec extends AnyWordSpec with Matchers {
+class JsonSchemaValidatorSpec extends AnyWordSpec with Matchers with EitherValues {
 
   lazy val schemaFactory = JsonSchemaFactory.getInstance(SpecVersion.VersionFlag.V4)
   lazy val objectMapper = new ObjectMapper
@@ -36,6 +38,11 @@ class JsonSchemaValidatorSpec extends AnyWordSpec with Matchers {
 
   def loadJson(path: String): JsonNode =
     objectMapper.readTree(Paths.get(path).toFile)
+
+  private def readFile(fileLocation: String): String =
+    Using(
+      scala.io.Source.fromFile(fileLocation)
+    )(_.mkString).toEither.value
 
   "The generateQuote request schema" should {
 
@@ -57,9 +64,7 @@ class JsonSchemaValidatorSpec extends AnyWordSpec with Matchers {
 
     "should parse to the model" when {
       "all optional fields are present " in {
-        val raw: String = scala.io.Source
-          .fromFile("resources/public/api/conf/1.0/examples/generate/postGenerateRequest.json")
-          .mkString
+        val raw: String = readFile("resources/public/api/conf/1.0/examples/generate/postGenerateRequest.json")
         Json.parse(raw).as[GenerateQuoteRequest]
       }
 
@@ -122,9 +127,7 @@ class JsonSchemaValidatorSpec extends AnyWordSpec with Matchers {
     }
 
     "should parse to the model" in {
-      val raw = scala.io.Source
-        .fromFile("resources/public/api/conf/1.0/examples/generate/postGenerateResponse.json")
-        .mkString
+      val raw = readFile("resources/public/api/conf/1.0/examples/generate/postGenerateResponse.json")
       Json.parse(raw).as[GenerateQuoteResponse]
     }
   }
@@ -148,9 +151,7 @@ class JsonSchemaValidatorSpec extends AnyWordSpec with Matchers {
     }
 
     "should parse to the model" in {
-      val raw = scala.io.Source
-        .fromFile("resources/public/api/conf/1.0/examples/create/postCreateRequest.json")
-        .mkString
+      val raw = readFile("resources/public/api/conf/1.0/examples/create/postCreateRequest.json")
       Json.parse(raw).as[CreatePlanRequest]
     }
   }
@@ -174,9 +175,7 @@ class JsonSchemaValidatorSpec extends AnyWordSpec with Matchers {
     }
 
     "should parse to the model" in {
-      val raw = scala.io.Source
-        .fromFile("resources/public/api/conf/1.0/examples/view/getViewResponse.json")
-        .mkString
+      val raw = readFile("resources/public/api/conf/1.0/examples/view/getViewResponse.json")
       Json.parse(raw).as[ViewPlanResponse]
     }
   }
