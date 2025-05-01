@@ -78,6 +78,11 @@ class JsonSchemaValidatorSpec extends AnyWordSpec with Matchers with EitherValue
             |    "quoteType": "duration",
             |    "quoteDate": "2021-05-13",
             |    "instalmentStartDate": "2021-05-13",
+            |    "instalmentAmount": null,
+            |    "frequency": null,
+            |    "duration": null,
+            |    "initialPaymentAmount": null,
+            |    "initialPaymentDate": null,
             |    "paymentPlanType": "timeToPay"
             |  },
             |  "customerPostCodes": [
@@ -92,14 +97,17 @@ class JsonSchemaValidatorSpec extends AnyWordSpec with Matchers with EitherValue
             |      "mainTrans": "1546",
             |      "subTrans": "1090",
             |      "originalDebtAmount": 100,
+            |      "interestStartDate": null,
             |      "paymentHistory": [
             |        {
             |          "paymentDate": "2021-05-13",
             |          "paymentAmount": 100
             |        }
-            |      ]
+            |      ],
+            |      "dueDate": null
             |    }
-            |  ]
+            |  ],
+            |  "regimeType": null
             |}
             |""".stripMargin
 
