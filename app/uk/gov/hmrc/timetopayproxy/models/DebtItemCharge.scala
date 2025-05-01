@@ -42,7 +42,7 @@ object DebtItemCharge {
   implicit val format: OFormat[DebtItemCharge] = Json.format[DebtItemCharge]
 }
 
-final case class DebtItemChargeGenerateQuote(
+final case class QuoteDebtItemCharge(
   debtItemChargeId: DebtItemChargeId,
   mainTrans: String,
   subTrans: String,
@@ -55,6 +55,6 @@ final case class DebtItemChargeGenerateQuote(
   require(originalDebtAmount > 0, "originalDebtAmount should be a positive amount.")
 }
 
-object DebtItemChargeGenerateQuote {
-  implicit val format: OFormat[DebtItemChargeGenerateQuote] = Json.format[DebtItemChargeGenerateQuote]
+object QuoteDebtItemCharge {
+  implicit val format: OFormat[QuoteDebtItemCharge] = Json.format[QuoteDebtItemCharge]
 }

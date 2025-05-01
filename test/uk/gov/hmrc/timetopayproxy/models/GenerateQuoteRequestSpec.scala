@@ -39,7 +39,7 @@ class GenerateQuoteRequestSpec extends AnyWordSpec with Matchers {
     ),
     List(CustomerPostCode(PostCode("NW9 5XW"), LocalDate.of(2021, 5, 13))),
     List(
-      DebtItemChargeGenerateQuote(
+      QuoteDebtItemCharge(
         DebtItemChargeId("debtItemChargeId1"),
         "5330",
         "1180",

@@ -148,7 +148,7 @@ class TtpConnectorSpec extends PlaySpec with DefaultAwaitTimeout with FutureAwai
             ),
             customerPostCodes = List.empty,
             debtItemCharges = List(
-              DebtItemChargeGenerateQuote(
+              QuoteDebtItemCharge(
                 debtItemChargeId = DebtItemChargeId("id"),
                 mainTrans = "1111",
                 subTrans = "7010",
