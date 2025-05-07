@@ -68,7 +68,8 @@ class TimeToPayProxyControllerSpec extends AnyWordSpec with Matchers with MockFa
       PaymentPlanType.TimeToPay
     ),
     List(),
-    List()
+    List(),
+    regimeType = None
   )
 
   val queryParameterNotMatchingPayload =

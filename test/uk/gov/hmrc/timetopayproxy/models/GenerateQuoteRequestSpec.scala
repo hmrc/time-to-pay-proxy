@@ -39,15 +39,17 @@ class GenerateQuoteRequestSpec extends AnyWordSpec with Matchers {
     ),
     List(CustomerPostCode(PostCode("NW9 5XW"), LocalDate.of(2021, 5, 13))),
     List(
-      DebtItemCharge(
+      QuoteDebtItemCharge(
         DebtItemChargeId("debtItemChargeId1"),
         "5330",
         "1180",
         100,
         Some(LocalDate.of(2021, 5, 13)),
-        List(Payment(LocalDate.of(2021, 5, 13), 100))
+        List(Payment(LocalDate.of(2021, 5, 13), 100)),
+        dueDate = Some(LocalDate.of(2021, 5, 13))
       )
-    )
+    ),
+    regimeType = Some(RegimeType.SA)
   )
 
   val json = """{
@@ -82,9 +84,11 @@ class GenerateQuoteRequestSpec extends AnyWordSpec with Matchers {
                |          "paymentDate": "2021-05-13",
                |          "paymentAmount": 100
                |        }
-               |      ]
+               |      ],
+               |      "dueDate": "2021-05-13"
                |    }
-               |  ]
+               |  ],
+               |  "regimeType": "SA"
                |}
                """.stripMargin
 
@@ -127,15 +131,17 @@ class GenerateQuoteRequestSpec extends AnyWordSpec with Matchers {
          |          "paymentDate": "2021-05-13",
          |          "paymentAmount": $paymentAmount
          |        }
-         |      ]
+         |      ],
+         |      "dueDate": "2021-05-13"
          |    }
-         |  ]
+         |  ],
+         |  "regimeType": "SA"
          |}
              """.stripMargin
 
   "GenerateQuoteRequest" should {
     "be correctly encoded and decoded" in {
-      Json.toJson(generateQuoteRequest) shouldEqual (Json.parse(json))
+      Json.toJson(generateQuoteRequest) shouldEqual Json.parse(json)
     }
 
     "fail decoding if customerReference is empty" in {
@@ -145,7 +151,7 @@ class GenerateQuoteRequestSpec extends AnyWordSpec with Matchers {
           .validate[GenerateQuoteRequest]
       ) match {
         case Failure(t) =>
-          t.toString() shouldBe "java.lang.IllegalArgumentException: requirement failed: customerReference should not be empty"
+          t.toString shouldBe "java.lang.IllegalArgumentException: requirement failed: customerReference should not be empty"
         case _ => fail()
       }
     }

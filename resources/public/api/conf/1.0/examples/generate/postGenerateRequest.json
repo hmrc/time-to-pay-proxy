@@ -30,7 +30,9 @@
           "paymentDate": "2021-05-13",
           "paymentAmount": 100
         }
-      ]
+      ],
+      "dueDate": "2021-05-13"
     }
-  ]
+  ],
+  "regimeType": "SA"
 }

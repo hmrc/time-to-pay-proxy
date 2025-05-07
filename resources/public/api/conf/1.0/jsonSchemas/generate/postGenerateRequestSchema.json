@@ -165,6 +165,11 @@
                 "paymentAmount"
               ]
             }
+          },
+          "dueDate": {
+            "type": "string",
+            "format": "date",
+            "description": "The due date"
           }
         },
         "additionalProperties": false,
@@ -175,6 +180,16 @@
           "originalDebtAmount"
         ]
       }
+    },
+    "regimeType": {
+      "type": "string",
+      "enum": [
+        "PAYE",
+        "VATC",
+        "SIMP",
+        "SA"
+      ],
+      "description": "Regime type"
     }
   },
   "additionalProperties": false,

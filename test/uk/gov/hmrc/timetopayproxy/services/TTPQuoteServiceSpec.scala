@@ -46,7 +46,8 @@ class TTPQuoteServiceSpec extends UnitSpec {
       PaymentPlanType.TimeToPay
     ),
     List(),
-    List()
+    List(),
+    regimeType = None
   )
 
   private val generateQuoteResponse = GenerateQuoteResponse(
