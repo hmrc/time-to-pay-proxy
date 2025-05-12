@@ -122,9 +122,7 @@ class YamlSchemaValidatorSpec extends AnyWordSpec with Matchers {
                    |  "initialPaymentAmount": 1000,
                    |  "debtItemCharges": [
                    |    {
-                   |      "interestStartDate": "2022-05-22",
-                   |      "isInterestBearingCharge": true,
-                   |      "useChargeReference": false
+                   |      "interestStartDate": "2022-05-22"
                    |    }
                    |  ]
                    |  }""".stripMargin)
@@ -149,7 +147,9 @@ class YamlSchemaValidatorSpec extends AnyWordSpec with Matchers {
                    |      "mainTrans": 5330,
                    |      "subTrans": 1090,
                    |      "debtItemChargeId": true,
-                   |      "debtItemOriginalDueDate": "2022-05-"
+                   |      "debtItemOriginalDueDate": "2022-05-",
+                   |      "isInterestBearingCharge": "true",
+                   |      "useChargeReference": "false"
                    |    }
                    |   ],
                    |  "customerPostcodes": [
@@ -219,6 +219,13 @@ class YamlSchemaValidatorSpec extends AnyWordSpec with Matchers {
 
         errors.keys.toList shouldBe List("validationError")
         errors("validationError") shouldBe List(
+          "debtItemCharges.0: Field 'debtItemChargeId' is required. (code: 1026)\nFrom: debtItemCharges.0.<items>.<#/components/schemas/DebtItem>.<required>",
+          "debtItemCharges.0: Field 'debtItemOriginalDueDate' is required. (code: 1026)\nFrom: debtItemCharges.0.<items>.<#/components/schemas/DebtItem>.<required>",
+          "debtItemCharges.0: Field 'mainTrans' is required. (code: 1026)\nFrom: debtItemCharges.0.<items>.<#/components/schemas/DebtItem>.<required>",
+          "debtItemCharges.0: Field 'outstandingDebtAmount' is required. (code: 1026)\nFrom: debtItemCharges.0.<items>.<#/components/schemas/DebtItem>.<required>",
+          "debtItemCharges.0: Field 'subTrans' is required. (code: 1026)\nFrom: debtItemCharges.0.<items>.<#/components/schemas/DebtItem>.<required>",
+          "debtItemCharges.0: Field 'isInterestBearingCharge' is required. (code: 1026)\nFrom: debtItemCharges.0.<items>.<#/components/schemas/DebtItem>.<required>",
+          "debtItemCharges.0: Field 'useChargeReference' is required. (code: 1026)\nFrom: debtItemCharges.0.<items>.<#/components/schemas/DebtItem>.<required>",
           "Field 'channelIdentifier' is required. (code: 1026)\nFrom: <required>",
           "Field 'paymentPlanAffordableAmount' is required. (code: 1026)\nFrom: <required>",
           "Field 'paymentPlanFrequency' is required. (code: 1026)\nFrom: <required>",
@@ -248,6 +255,10 @@ class YamlSchemaValidatorSpec extends AnyWordSpec with Matchers {
 
         errors.keys.toList shouldBe List("validationError")
         errors("validationError") shouldBe List(
+          "customerPostcodes.0.postcodeDate: '-05-22' does not respect pattern '^\\d{4}-[0-1][0-9]-[0-3][0-9]$'. (code: 1025)\n" +
+            "From: customerPostcodes.0.<items>.<#/components/schemas/postCode>.postcodeDate.<pattern>",
+          "customerPostcodes.0.addressPostcode: Type expected 'string', found 'integer'. (code: 1027)\n" +
+            "From: customerPostcodes.0.<items>.<#/components/schemas/postCode>.addressPostcode.<type>",
           "paymentPlanMaxLength: Value '6.5' does not match format 'int32'. (code: 1007)\n" +
             "From: paymentPlanMaxLength.<format>",
           "paymentPlanMaxLength: Type expected 'integer', found 'number'. (code: 1027)\n" +
@@ -264,10 +275,16 @@ class YamlSchemaValidatorSpec extends AnyWordSpec with Matchers {
             "From: debtItemCharges.0.<items>.<#/components/schemas/DebtItem>.subTrans.<type>",
           "debtItemCharges.0.outstandingDebtAmount: Type expected 'number', found 'string'. (code: 1027)\n" +
             "From: debtItemCharges.0.<items>.<#/components/schemas/DebtItem>.outstandingDebtAmount.<type>",
+          "debtItemCharges.0.useChargeReference: Type expected 'boolean', found 'string'. (code: 1027)\n" +
+            "From: debtItemCharges.0.<items>.<#/components/schemas/DebtItem>.useChargeReference.<type>",
           "debtItemCharges.0.debtItemChargeId: Type expected 'string', found 'boolean'. (code: 1027)\n" +
             "From: debtItemCharges.0.<items>.<#/components/schemas/DebtItem>.debtItemChargeId.<type>",
+          "debtItemCharges.0.isInterestBearingCharge: Type expected 'boolean', found 'string'. (code: 1027)\n" +
+            "From: debtItemCharges.0.<items>.<#/components/schemas/DebtItem>.isInterestBearingCharge.<type>",
           "accruedDebtInterest: Type expected 'number', found 'string'. (code: 1027)\n" +
             "From: accruedDebtInterest.<type>",
+          "paymentPlanFrequency: Value 'monthly' is not defined in the schema. (code: 1006)\n" +
+            "From: paymentPlanFrequency.<#/components/schemas/paymentPlanFrequency>.<enum>",
           "paymentPlanMinLength: Value '1.3' does not match format 'int32'. (code: 1007)\n" +
             "From: paymentPlanMinLength.<format>",
           "paymentPlanMinLength: Type expected 'integer', found 'number'. (code: 1027)\n" +
@@ -330,7 +347,8 @@ class YamlSchemaValidatorSpec extends AnyWordSpec with Matchers {
                 instalmentNumber = 1,
                 instalmentInterestAccrued = 4.59,
                 instalmentBalance = 4808.96,
-                debtItemOriginalDueDate = LocalDate.parse("2022-05-22")
+                debtItemOriginalDueDate = LocalDate.parse("2022-05-22"),
+                expectedPayment = 1000
               )
             )
           )
@@ -373,7 +391,8 @@ class YamlSchemaValidatorSpec extends AnyWordSpec with Matchers {
                    |          "instalmentBalance": 4808.96,
                    |          "debtItemChargeId": "XW006559808862",
                    |          "amountDue": 1000,
-                   |          "debtItemOriginalDueDate": "2022-05-22"
+                   |          "debtItemOriginalDueDate": "2022-05-22",
+                   |          "expectedPayment": 1000
                    |        }
                    |      ]
                    |    }
@@ -434,7 +453,8 @@ class YamlSchemaValidatorSpec extends AnyWordSpec with Matchers {
                    |          "instalmentBalance": "4808.96",
                    |          "debtItemChargeId": 654,
                    |          "amountDue": "1000",
-                   |          "debtItemOriginalDueDate": "not a date"
+                   |          "debtItemOriginalDueDate": "not a date",
+                   |          "expectedPayment": "1000"
                    |        }
                    |      ]
                    |    }
@@ -507,6 +527,7 @@ class YamlSchemaValidatorSpec extends AnyWordSpec with Matchers {
             "paymentPlans.0: Field 'planInterest' is required. (code: 1026)\nFrom: paymentPlans.0.<items>.<#/components/schemas/paymentPlans>.<required>",
             "paymentPlans.0: Field 'numberOfInstalments' is required. (code: 1026)\nFrom: paymentPlans.0.<items>.<#/components/schemas/paymentPlans>.<required>",
             "paymentPlans.0: Field 'instalments' is required. (code: 1026)\nFrom: paymentPlans.0.<items>.<#/components/schemas/paymentPlans>.<required>",
+            "paymentPlans.0.collections: Field 'regularCollections' is required. (code: 1026)\nFrom: paymentPlans.0.<items>.<#/components/schemas/paymentPlans>.collections.<required>",
             "Field 'processingDateTime' is required. (code: 1026)\nFrom: <required>"
           )
       }
@@ -535,9 +556,9 @@ class YamlSchemaValidatorSpec extends AnyWordSpec with Matchers {
           "paymentPlans.0.planDuration: Type expected 'integer', found 'boolean'. (code: 1027)\n" +
             "From: paymentPlans.0.<items>.<#/components/schemas/paymentPlans>.planDuration.<type>",
           "paymentPlans.0.collections.regularCollections.0.amountDue: Type expected 'number', found 'string'. (code: 1027)\n" +
-            "From: paymentPlans.0.<items>.<#/components/schemas/paymentPlans>.collections.regularCollections.0.<items>.<#/components/schemas/RegularCollections>.amountDue.<type>",
+            "From: paymentPlans.0.<items>.<#/components/schemas/paymentPlans>.collections.regularCollections.0.<items>.<#/components/schemas/RegularCollection>.amountDue.<type>",
           "paymentPlans.0.collections.regularCollections.0.dueDate: Value 'Some date' does not match format 'date'. (code: 1007)\n" +
-            "From: paymentPlans.0.<items>.<#/components/schemas/paymentPlans>.collections.regularCollections.0.<items>.<#/components/schemas/RegularCollections>.dueDate.<format>",
+            "From: paymentPlans.0.<items>.<#/components/schemas/paymentPlans>.collections.regularCollections.0.<items>.<#/components/schemas/RegularCollection>.dueDate.<format>",
           "paymentPlans.0.totalDebt: Type expected 'number', found 'boolean'. (code: 1027)\n" +
             "From: paymentPlans.0.<items>.<#/components/schemas/paymentPlans>.totalDebt.<type>",
           "paymentPlans.0.planInterest: Type expected 'number', found 'string'. (code: 1027)\n" +
@@ -556,6 +577,8 @@ class YamlSchemaValidatorSpec extends AnyWordSpec with Matchers {
             "From: paymentPlans.0.<items>.<#/components/schemas/paymentPlans>.instalments.0.<items>.<#/components/schemas/instalments>.instalmentBalance.<type>",
           "paymentPlans.0.instalments.0.dueDate: Value 'Another date' does not match format 'date'. (code: 1007)\n" +
             "From: paymentPlans.0.<items>.<#/components/schemas/paymentPlans>.instalments.0.<items>.<#/components/schemas/instalments>.dueDate.<format>",
+          "paymentPlans.0.instalments.0.expectedPayment: Type expected 'integer', found 'string'. (code: 1027)\n" +
+            "From: paymentPlans.0.<items>.<#/components/schemas/paymentPlans>.instalments.0.<items>.<#/components/schemas/instalments>.expectedPayment.<type>",
           "paymentPlans.0.instalments.0.debtItemChargeId: Type expected 'string', found 'integer'. (code: 1027)\n" +
             "From: paymentPlans.0.<items>.<#/components/schemas/paymentPlans>.instalments.0.<items>.<#/components/schemas/instalments>.debtItemChargeId.<type>",
           "paymentPlans.0.totalDebtIncInt: Null value is not allowed. (code: 1021)\n" +
