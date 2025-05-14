@@ -36,9 +36,12 @@ info:
       | 1.0.2 | 12-04-2024 | Jorma Pajunen | Added new affordable quotes endpoint |
       | 1.0.3 | 16-04-2024 | Vinnie Brice  | Sets InitialCollection to an object and removes duplicate |
       | 1.0.4 | 18-04-2024 | Vinnie Brice  | Removes unused Schema AJSONSchemaforTTPAPI.7 |
-      | 1.0.5 | 19-02-2025 | Alex Olkhovskiy | Update schema to match the current code state|
+      | 1.0.5 | 19-02-2025 | Alex Olkhovskiy | Update schema to match the current code state |
+      | 1.0.6 | 14-05-2025 | Alex Olkhovskiy | Added expectedPayment field to installments schema and response examples |
+      | 1.0.7 | 14-05-2025 | Alex Olkhovskiy | Added channelIdentifier field to schemas to support Self Assessment debts |
+      | 1.0.8 | 14-05-2025 | Alex Olkhovskiy | Added regimeType and dueDate fields to support Self Assessment debts |
   contact: {}
-  version: '1.0.5'
+  version: '1.0.8'
 servers:
   - url: https://api.service.hmrc.gov.uk/
     variables: {}
@@ -61,6 +64,7 @@ paths:
             schema:
               $ref: '#/components/schemas/TTPQuoteRequest'
             example:
+              regimeType: PAYE
               customerReference: uniqRef1234
               channelIdentifier: selfService
               plan:
@@ -412,6 +416,7 @@ paths:
               $ref: '#/components/schemas/UpdatePlanRequest'
             example:
               customerReference: custRef123
+              channelIdentifier: advisor
               planId: planId1
               updateType: paymentDetails
               planStatus: Resolved - Completed
@@ -904,6 +909,9 @@ components:
         - debtItemCharges
         - customerPostCodes
       properties:
+        regimeType:
+          type: string
+          description: Regime type
         customerReference:
           maxLength: 15
           minLength: 1
@@ -1123,6 +1131,12 @@ components:
           minLength: 1
           type: string
           description: Customer reference
+        channelIdentifier:
+          type: string
+          description: Channel Identification
+          enum:
+            - advisor
+            - selfService
         planId:
           maxLength: 15
           minLength: 1
@@ -1297,6 +1311,10 @@ components:
           minLength: 1
           type: string
           description: An ID which uniquely identifies a particular duty
+        dueDate:
+          type: string
+          format: date
+          description: Due date
         mainTrans:
           maxLength: 8
           minLength: 4
