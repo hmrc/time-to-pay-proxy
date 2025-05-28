@@ -306,9 +306,8 @@ class YamlSchemaValidatorSpec extends AnyWordSpec with Matchers {
         AffordableQuotesRequest.format.reads(jsonBodyContainingOnlyOptionalFields) match {
           case JsSuccess(_, _) => fail("Should not have parsed json with missing fields")
           case JsError(errors) =>
-            errors should contain((
-              (JsPath \ "debtItemCharges")(0) \ "mainTrans",
-              List(JsonValidationError("error.path.missing")))
+            errors should contain(
+              ((JsPath \ "debtItemCharges")(0) \ "mainTrans", List(JsonValidationError("error.path.missing")))
             )
         }
       }
@@ -600,9 +599,8 @@ class YamlSchemaValidatorSpec extends AnyWordSpec with Matchers {
         AffordableQuoteResponse.format.reads(jsonBodyContainingOnlyOptionalFields) match {
           case JsSuccess(_, _) => fail("Should not have parsed json with missing fields")
           case JsError(errors) =>
-            errors should contain((
-              (JsPath \ "paymentPlans")(0) \ "numberOfInstalments",
-              List(JsonValidationError("error.path.missing")))
+            errors should contain(
+              ((JsPath \ "paymentPlans")(0) \ "numberOfInstalments", List(JsonValidationError("error.path.missing")))
             )
         }
       }
