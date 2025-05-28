@@ -132,7 +132,7 @@ class TimeToPayProxyController @Inject() (
     s"$fieldInfo. $detailedMessage"
   }
 
-  override def withJsonBody[T](
+  def withJsonBody[T](
     f: T => Future[Result]
   )(implicit request: Request[JsValue], m: Manifest[T], reads: Reads[T]): Future[Result] =
     Try(request.body.validate[T]) match {

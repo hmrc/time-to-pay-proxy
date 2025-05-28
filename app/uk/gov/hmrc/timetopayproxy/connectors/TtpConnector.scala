@@ -19,7 +19,8 @@ package uk.gov.hmrc.timetopayproxy.connectors
 import cats.data.EitherT
 import com.google.inject.ImplementedBy
 import play.api.libs.json.{ Json, Reads }
-import uk.gov.hmrc.http.{ HeaderCarrier, HttpClient }
+import uk.gov.hmrc.http.client.HttpClientV2
+import uk.gov.hmrc.http.{ HeaderCarrier, StringContextOps }
 import uk.gov.hmrc.timetopayproxy.config.AppConfig
 import uk.gov.hmrc.timetopayproxy.logging.RequestAwareLogger
 import uk.gov.hmrc.timetopayproxy.models.TtppEnvelope.TtppEnvelope
@@ -58,12 +59,12 @@ trait TtpConnector {
 }
 
 @Singleton
-class DefaultTtpConnector @Inject() (appConfig: AppConfig, httpClient: HttpClient)
+class DefaultTtpConnector @Inject() (appConfig: AppConfig, httpClient: HttpClientV2)
     extends TtpConnector with HttpParser {
 
   private val logger: RequestAwareLogger = new RequestAwareLogger(classOf[DefaultTtpConnector])
 
-  val headers = (guid: String) =>
+  val headers: String => Seq[(String, String)] = (guid: String) =>
     if (appConfig.useIf) {
       Seq(
         "Authorization" -> s"Bearer ${appConfig.ttpToken}",
@@ -73,25 +74,28 @@ class DefaultTtpConnector @Inject() (appConfig: AppConfig, httpClient: HttpClien
       Seq()
     }
 
+  private def getOrGenerateCorrelationId(implicit hc: HeaderCarrier): String =
+    (hc.headers(Seq("CorrelationId")) ++ hc.extraHeaders)
+      .toMap[String, String]
+      .getOrElse("CorrelationId", UUID.randomUUID().toString)
+
   def generateQuote(
     ttppRequest: GenerateQuoteRequest,
     queryParams: Seq[(String, String)] = Seq.empty
   )(implicit ec: ExecutionContext, hc: HeaderCarrier): TtppEnvelope[GenerateQuoteResponse] = {
-    val path = if (appConfig.useIf) "individuals/debts/time-to-pay/quote" else "debts/time-to-pay/quote"
+    val path = if (appConfig.useIf) "/individuals/debts/time-to-pay/quote" else "/debts/time-to-pay/quote"
 
     val pathWithQueryParameters = path + makeQueryString(queryParams)
 
-    val url = s"${appConfig.ttpBaseUrl}/$pathWithQueryParameters"
+    val url = url"${appConfig.ttpBaseUrl + pathWithQueryParameters}"
 
     EitherT(
       httpClient
-        .POST[GenerateQuoteRequest, Either[TtppError, GenerateQuoteResponse]](
-          url,
-          ttppRequest,
-          headers(UUID.randomUUID().toString)
-        )
+        .post(url)
+        .withBody(Json.toJson(ttppRequest))
+        .setHeader(headers(getOrGenerateCorrelationId): _*)
+        .execute[Either[TtppError, GenerateQuoteResponse]]
     )
-
   }
 
   override def getExistingQuote(customerReference: CustomerReference, planId: PlanId)(implicit
@@ -107,28 +111,38 @@ class DefaultTtpConnector @Inject() (appConfig: AppConfig, httpClient: HttpClien
   ): TtppEnvelope[Response] = {
     val path =
       if (appConfig.useIf)
-        s"individuals/time-to-pay/quote/${customerReference.value}/${planId.value}"
+        s"/individuals/time-to-pay/quote/${customerReference.value}/${planId.value}"
       else
-        s"debts/time-to-pay/quote/${customerReference.value}/${planId.value}"
+        s"/debts/time-to-pay/quote/${customerReference.value}/${planId.value}"
 
-    val url = s"${appConfig.ttpBaseUrl}/$path"
+    val url = url"${appConfig.ttpBaseUrl + path}"
 
     EitherT(
-      httpClient.GET[Either[TtppError, Response]](url)
+      httpClient
+        .get(url)
+        .execute[Either[TtppError, Response]]
     )
-
   }
 
   def updatePlan(
     updatePlanRequest: UpdatePlanRequest
   )(implicit ec: ExecutionContext, hc: HeaderCarrier): TtppEnvelope[UpdatePlanResponse] = {
     val path = if (appConfig.useIf) "individuals/time-to-pay/quote" else "debts/time-to-pay/quote"
-    val url =
-      s"${appConfig.ttpBaseUrl}/$path/${updatePlanRequest.customerReference.value}/${updatePlanRequest.planId.value}"
+
+    val urlAsString = List(
+      appConfig.ttpBaseUrl,
+      path,
+      updatePlanRequest.customerReference.value,
+      updatePlanRequest.planId.value
+    ).mkString("/")
+
+    val url = url"$urlAsString"
 
     EitherT(
       httpClient
-        .PUT[UpdatePlanRequest, Either[TtppError, UpdatePlanResponse]](url, updatePlanRequest)
+        .put(url)
+        .withBody(Json.toJson(updatePlanRequest))
+        .execute[Either[TtppError, UpdatePlanResponse]]
     )
   }
 
@@ -139,33 +153,36 @@ class DefaultTtpConnector @Inject() (appConfig: AppConfig, httpClient: HttpClien
     logger.info(s"Create plan instalments: \n${Json.toJson(createPlanRequest.instalments)}")
 
     val path =
-      if (appConfig.useIf) "individuals/debts/time-to-pay/quote/arrangement" else "debts/time-to-pay/quote/arrangement"
+      if (appConfig.useIf) "/individuals/debts/time-to-pay/quote/arrangement"
+      else "/debts/time-to-pay/quote/arrangement"
 
     val pathWithQueryParameters = path + makeQueryString(queryParams)
 
-    val url = s"${appConfig.ttpBaseUrl}/$pathWithQueryParameters"
+    val url = url"${appConfig.ttpBaseUrl + pathWithQueryParameters}"
 
-    EitherT {
+    EitherT(
       httpClient
-        .POST[CreatePlanRequest, Either[TtppError, CreatePlanResponse]](
-          url,
-          createPlanRequest,
-          headers(UUID.randomUUID().toString)
-        )
-    }
+        .post(url)
+        .withBody(Json.toJson(createPlanRequest))
+        .setHeader(headers(getOrGenerateCorrelationId): _*)
+        .execute[Either[TtppError, CreatePlanResponse]]
+    )
   }
 
   def getAffordableQuotes(
     affordableQuotesRequest: AffordableQuotesRequest
   )(implicit ec: ExecutionContext, hc: HeaderCarrier): TtppEnvelope[AffordableQuoteResponse] = {
     val path =
-      if (appConfig.useIf) "individuals/time-to-pay/affordability/affordable-quotes"
-      else "debts/time-to-pay/affordability/affordable-quotes"
-    val url = s"${appConfig.ttpBaseUrl}/$path"
+      if (appConfig.useIf) "/individuals/time-to-pay/affordability/affordable-quotes"
+      else "/debts/time-to-pay/affordability/affordable-quotes"
+
+    val url = url"${appConfig.ttpBaseUrl + path}"
 
     EitherT(
       httpClient
-        .POST[AffordableQuotesRequest, Either[TtppError, AffordableQuoteResponse]](url, affordableQuotesRequest)
+        .post(url)
+        .withBody(Json.toJson(affordableQuotesRequest))
+        .execute[Either[TtppError, AffordableQuoteResponse]]
     )
   }
 
