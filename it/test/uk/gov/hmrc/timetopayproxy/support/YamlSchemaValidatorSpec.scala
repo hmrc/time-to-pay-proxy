@@ -307,8 +307,7 @@ class YamlSchemaValidatorSpec extends AnyWordSpec with Matchers {
           case JsSuccess(_, _) => fail("Should not have parsed json with missing fields")
           case JsError(errors) =>
             errors should contain(
-              (JsPath \ "debtItemCharges")(0) \ "mainTrans",
-              List(JsonValidationError("error.path.missing"))
+              ((JsPath \ "debtItemCharges")(0) \ "mainTrans", List(JsonValidationError("error.path.missing")))
             )
         }
       }
@@ -601,8 +600,7 @@ class YamlSchemaValidatorSpec extends AnyWordSpec with Matchers {
           case JsSuccess(_, _) => fail("Should not have parsed json with missing fields")
           case JsError(errors) =>
             errors should contain(
-              (JsPath \ "paymentPlans")(0) \ "numberOfInstalments",
-              List(JsonValidationError("error.path.missing"))
+              ((JsPath \ "paymentPlans")(0) \ "numberOfInstalments", List(JsonValidationError("error.path.missing")))
             )
         }
       }

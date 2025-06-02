@@ -21,7 +21,8 @@ import org.scalatestplus.play.PlaySpec
 import play.api.libs.json.Json
 import play.api.test.{ DefaultAwaitTimeout, FutureAwaits }
 import play.api.{ ConfigLoader, Configuration }
-import uk.gov.hmrc.http.{ HeaderCarrier, HttpClient }
+import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.http.client.HttpClientV2
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 import uk.gov.hmrc.timetopayproxy.config.AppConfig
 import uk.gov.hmrc.timetopayproxy.models._
@@ -36,7 +37,7 @@ class TtpConnectorSpec extends PlaySpec with DefaultAwaitTimeout with FutureAwai
   val config = mock[Configuration]
   val servicesConfig = mock[ServicesConfig]
 
-  val httpClient: HttpClient = app.injector.instanceOf[HttpClient]
+  val httpClient: HttpClientV2 = app.injector.instanceOf[HttpClientV2]
 
   class Setup(ifImpl: Boolean) {
     implicit val ec: ExecutionContext = ExecutionContext.global

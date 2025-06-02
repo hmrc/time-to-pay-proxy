@@ -19,11 +19,13 @@ package uk.gov.hmrc.timetopayproxy.connectors
 import cats.implicits.catsSyntaxEitherId
 import com.google.inject.ImplementedBy
 import play.api.http.Status.{ NO_CONTENT, OK }
-import uk.gov.hmrc.http.{ HeaderCarrier, HttpClient, HttpException, HttpResponse, UpstreamErrorResponse }
+import play.api.libs.json.Json
+import uk.gov.hmrc.http.{ HeaderCarrier, HttpException, HttpResponse, StringContextOps, UpstreamErrorResponse }
 import uk.gov.hmrc.timetopayproxy.config.AppConfig
 import uk.gov.hmrc.timetopayproxy.models.TtppEnvelope.TtppEnvelope
 import uk.gov.hmrc.timetopayproxy.models.{ ConnectorError, RequestDetails, TtppEnvelope }
 import uk.gov.hmrc.http.HttpReads.Implicits._
+import uk.gov.hmrc.http.client.HttpClientV2
 
 import javax.inject.{ Inject, Singleton }
 import scala.concurrent.ExecutionContext
@@ -44,33 +46,37 @@ trait TtpTestConnector {
 }
 
 @Singleton
-class DefaultTtpTestConnector @Inject() (appConfig: AppConfig, httpClient: HttpClient) extends TtpTestConnector {
+class DefaultTtpTestConnector @Inject() (appConfig: AppConfig, httpClient: HttpClientV2) extends TtpTestConnector {
   override def retrieveRequestDetails()(implicit
     ec: ExecutionContext,
     hc: HeaderCarrier
   ): TtppEnvelope[Seq[RequestDetails]] = {
     val path = "/test-only/requests"
-    val url = s"${appConfig.stubBaseUrl}$path"
+    val url = url"${appConfig.stubBaseUrl}$path"
 
-    TtppEnvelope {
+    TtppEnvelope(
       httpClient
-        .GET[Seq[RequestDetails]](url)
+        .get(url)
+        .execute[Seq[RequestDetails]]
         .map(r => r.asRight[ConnectorError])
         .recover {
           case e: HttpException         => ConnectorError(e.responseCode, e.message).asLeft[Seq[RequestDetails]]
-          case e: UpstreamErrorResponse => ConnectorError(e.statusCode, e.getMessage()).asLeft[Seq[RequestDetails]]
+          case e: UpstreamErrorResponse => ConnectorError(e.statusCode, e.getMessage).asLeft[Seq[RequestDetails]]
         }
-    }
+    )
   }
+
   override def saveResponseDetails(
     details: RequestDetails
   )(implicit ec: ExecutionContext, hc: HeaderCarrier): TtppEnvelope[Unit] = {
     val path = "/test-only/response"
-    val url = s"${appConfig.stubBaseUrl}$path"
+    val url = url"${appConfig.stubBaseUrl}$path"
 
-    TtppEnvelope {
+    TtppEnvelope(
       httpClient
-        .POST[RequestDetails, HttpResponse](url, details)
+        .post(url)
+        .withBody(Json.toJson(details))
+        .execute[HttpResponse]
         .map { response =>
           response.status match {
             case OK => ()
@@ -81,17 +87,19 @@ class DefaultTtpTestConnector @Inject() (appConfig: AppConfig, httpClient: HttpC
           case e: HttpException         => ConnectorError(e.responseCode, e.message).asLeft[Unit]
           case e: UpstreamErrorResponse => ConnectorError(e.statusCode, e.getMessage()).asLeft[Unit]
         }
-    }
+    )
   }
+
   override def deleteRequest(
     requestId: String
   )(implicit ec: ExecutionContext, hc: HeaderCarrier): TtppEnvelope[Unit] = {
     val path = s"/test-only/request/$requestId"
-    val url = s"${appConfig.stubBaseUrl}$path"
+    val url = url"${appConfig.stubBaseUrl}$path"
 
-    TtppEnvelope {
+    TtppEnvelope(
       httpClient
-        .DELETE[HttpResponse](url)
+        .delete(url)
+        .execute[HttpResponse]
         .map { response =>
           response.status match {
             case OK         => ()
@@ -101,20 +109,22 @@ class DefaultTtpTestConnector @Inject() (appConfig: AppConfig, httpClient: HttpC
         }
         .recover {
           case e: HttpException         => ConnectorError(e.responseCode, e.message).asLeft
-          case e: UpstreamErrorResponse => ConnectorError(e.statusCode, e.getMessage()).asLeft
+          case e: UpstreamErrorResponse => ConnectorError(e.statusCode, e.getMessage).asLeft
         }
-    }
-
+    )
   }
+
   override def saveError(
     details: RequestDetails
   )(implicit ec: ExecutionContext, hc: HeaderCarrier): TtppEnvelope[Unit] = {
     val path = "/test-only/errors"
-    val url = s"${appConfig.stubBaseUrl}$path"
+    val url = url"${appConfig.stubBaseUrl}$path"
 
-    TtppEnvelope {
+    TtppEnvelope(
       httpClient
-        .POST[RequestDetails, HttpResponse](url, details)
+        .post(url)
+        .withBody(Json.toJson(details))
+        .execute[HttpResponse]
         .map { response =>
           response.status match {
             case OK => ()
@@ -125,21 +135,23 @@ class DefaultTtpTestConnector @Inject() (appConfig: AppConfig, httpClient: HttpC
           case e: HttpException         => ConnectorError(e.responseCode, e.message).asLeft[Unit]
           case e: UpstreamErrorResponse => ConnectorError(e.statusCode, e.getMessage()).asLeft[Unit]
         }
-    }
+    )
   }
+
   override def getErrors()(implicit ec: ExecutionContext, hc: HeaderCarrier): TtppEnvelope[Seq[RequestDetails]] = {
     val path = "/test-only/errors"
-    val url = s"${appConfig.stubBaseUrl}$path"
+    val url = url"${appConfig.stubBaseUrl}$path"
 
-    TtppEnvelope {
+    TtppEnvelope(
       httpClient
-        .GET[Seq[RequestDetails]](url)
+        .get(url)
+        .execute[Seq[RequestDetails]]
         .map(r => r.asRight[ConnectorError])
         .recover {
           case e: HttpException         => ConnectorError(e.responseCode, e.message).asLeft[Seq[RequestDetails]]
-          case e: UpstreamErrorResponse => ConnectorError(e.statusCode, e.getMessage()).asLeft[Seq[RequestDetails]]
+          case e: UpstreamErrorResponse => ConnectorError(e.statusCode, e.getMessage).asLeft[Seq[RequestDetails]]
         }
-    }
+    )
   }
 }
 // $COVERAGE-ON$
