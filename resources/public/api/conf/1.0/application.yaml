@@ -40,9 +40,9 @@ info:
       | 1.0.6 | 14-05-2025 | Alex Olkhovskiy | Added expectedPayment field to installments schema and response examples |
       | 1.0.7 | 14-05-2025 | Alex Olkhovskiy | Added channelIdentifier field to schemas to support Self Assessment debts |
       | 1.0.8 | 14-05-2025 | Alex Olkhovskiy | Added regimeType and dueDate fields to support Self Assessment debts |
-      | 1.0.8-proposedE | 14-05-2025 | Alex Olkhovskiy | Add regimeType to /affordable-quotes endpoint |
+      | 1.0.9 | 14-05-2025 | Alex Olkhovskiy | Add regimeType to /affordable-quotes endpoint |
   contact: {}
-  version: '1.0.8-proposedE'
+  version: '1.0.9'
 servers:
   - url: https://api.service.hmrc.gov.uk/
     variables: {}
