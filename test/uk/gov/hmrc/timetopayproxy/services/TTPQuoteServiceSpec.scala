@@ -244,7 +244,8 @@ class TTPQuoteServiceSpec extends UnitSpec {
         useChargeReference = UseChargeReference(false)
       )
     ),
-    customerPostcodes = List()
+    customerPostcodes = List(),
+    regimeType = Some(RegimeType.SA)
   )
 
   private val affordableQuoteResponse: AffordableQuoteResponse =

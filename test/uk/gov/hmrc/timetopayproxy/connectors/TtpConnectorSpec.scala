@@ -416,7 +416,8 @@ class TtpConnectorSpec extends PlaySpec with DefaultAwaitTimeout with FutureAwai
           useChargeReference = UseChargeReference(false)
         )
       ),
-      customerPostcodes = List()
+      customerPostcodes = List(),
+      regimeType = Some(RegimeType.SA)
     )
 
     val affordableQuoteResponse: AffordableQuoteResponse =

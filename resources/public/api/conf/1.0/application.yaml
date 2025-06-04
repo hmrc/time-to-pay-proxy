@@ -40,8 +40,9 @@ info:
       | 1.0.6 | 14-05-2025 | Alex Olkhovskiy | Added expectedPayment field to installments schema and response examples |
       | 1.0.7 | 14-05-2025 | Alex Olkhovskiy | Added channelIdentifier field to schemas to support Self Assessment debts |
       | 1.0.8 | 14-05-2025 | Alex Olkhovskiy | Added regimeType and dueDate fields to support Self Assessment debts |
+      | 1.0.8-proposedE | 14-05-2025 | Alex Olkhovskiy | Add regimeType to /affordable-quotes endpoint |
   contact: {}
-  version: '1.0.8'
+  version: '1.0.8-proposedE'
 servers:
   - url: https://api.service.hmrc.gov.uk/
     variables: {}
@@ -500,6 +501,7 @@ paths:
             schema:
               $ref: '#/components/schemas/AffordableQuotesRequest'
             example:
+              regimeType: PAYE
               channelIdentifier: advisor
               paymentPlanAffordableAmount: 1310
               paymentPlanFrequency: Monthly
@@ -693,6 +695,9 @@ components:
         - debtItemCharges
         - customerPostcodes
       properties:
+        regimeType:
+          type: string
+          description: Regime type
         channelIdentifier:
           type: string
         paymentPlanAffordableAmount:

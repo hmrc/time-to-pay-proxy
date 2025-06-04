@@ -315,7 +315,8 @@ class TimeToPayProxyControllerItSpec extends IntegrationBaseSpec {
           useChargeReference = UseChargeReference(false)
         )
       ),
-      customerPostcodes = List()
+      customerPostcodes = List(),
+      regimeType = Some(RegimeType.SA)
     )
   }
 }

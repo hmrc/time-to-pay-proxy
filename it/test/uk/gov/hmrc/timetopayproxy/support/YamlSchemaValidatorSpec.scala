@@ -72,7 +72,8 @@ class YamlSchemaValidatorSpec extends AnyWordSpec with Matchers {
             useChargeReference = UseChargeReference(false)
           )
         ),
-        customerPostcodes = List(CustomerPostCode(PostCode("BN127ER"), postcodeDate = LocalDate.parse("2022-05-22")))
+        customerPostcodes = List(CustomerPostCode(PostCode("BN127ER"), postcodeDate = LocalDate.parse("2022-05-22"))),
+        regimeType = None
       )
 
     val affordableQuotesRequestWithAllFields: AffordableQuotesRequest =
@@ -85,7 +86,8 @@ class YamlSchemaValidatorSpec extends AnyWordSpec with Matchers {
             isInterestBearingCharge = IsInterestBearingCharge(true),
             useChargeReference = UseChargeReference(false)
           )
-        )
+        ),
+        regimeType = Some(RegimeType.SA)
       )
 
     def jsonBodyContainingOnlyMandatoryFields: JsValue =
@@ -124,7 +126,8 @@ class YamlSchemaValidatorSpec extends AnyWordSpec with Matchers {
                    |    {
                    |      "interestStartDate": "2022-05-22"
                    |    }
-                   |  ]
+                   |  ],
+                   |  "regimeType": "SA"
                    |  }""".stripMargin)
 
     def jsonBodyContainingABrokenField: JsValue =
