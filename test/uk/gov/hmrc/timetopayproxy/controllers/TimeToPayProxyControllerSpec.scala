@@ -914,7 +914,8 @@ class TimeToPayProxyControllerSpec extends AnyWordSpec with Matchers with MockFa
           PostCode("some postcode"),
           LocalDate.parse("2022-03-09")
         )
-      )
+      ),
+      regimeType = Some(RegimeType.SA)
     )
     val affordableQuoteResponse = AffordableQuoteResponse(
       LocalDateTime.parse("2025-01-13T10:15:30.975"),
