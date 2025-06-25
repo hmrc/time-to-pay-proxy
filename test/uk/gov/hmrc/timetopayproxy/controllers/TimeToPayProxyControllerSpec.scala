@@ -107,7 +107,11 @@ class TimeToPayProxyControllerSpec extends AnyWordSpec with Matchers with MockFa
           "1000",
           100,
           Some(LocalDate.now()),
-          List(Payment(LocalDate.parse("2020-01-01"), 100))
+          List(Payment(LocalDate.parse("2020-01-01"), 100)),
+          None,
+          None,
+          None,
+          None
         )
       ),
       List(PaymentInformation(PaymentMethod.Bacs, Some(PaymentReference("ref123")))),
@@ -123,7 +127,8 @@ class TimeToPayProxyControllerSpec extends AnyWordSpec with Matchers with MockFa
           10,
           90
         )
-      )
+      ),
+      None
     )
 
   val viewPlanResponse: ViewPlanResponse = ViewPlanResponse(
@@ -152,7 +157,11 @@ class TimeToPayProxyControllerSpec extends AnyWordSpec with Matchers with MockFa
         "1090",
         100,
         Some(LocalDate.parse("2021-05-13")),
-        List(Payment(LocalDate.parse("2021-05-13"), 100))
+        List(Payment(LocalDate.parse("2021-05-13"), 100)),
+        None,
+        None,
+        None,
+        None
       )
     ),
     Seq.empty[PaymentInformation],
@@ -915,7 +924,7 @@ class TimeToPayProxyControllerSpec extends AnyWordSpec with Matchers with MockFa
           LocalDate.parse("2022-03-09")
         )
       ),
-      regimeType = Some(RegimeType.SA)
+      regimeType = Some(SsttpRegimeType.SA)
     )
     val affordableQuoteResponse = AffordableQuoteResponse(
       LocalDateTime.parse("2025-01-13T10:15:30.975"),

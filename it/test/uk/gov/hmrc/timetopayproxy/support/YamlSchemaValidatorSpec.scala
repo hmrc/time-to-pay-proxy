@@ -87,7 +87,7 @@ class YamlSchemaValidatorSpec extends AnyWordSpec with Matchers {
             useChargeReference = UseChargeReference(false)
           )
         ),
-        regimeType = Some(RegimeType.SA)
+        regimeType = Some(SsttpRegimeType.SA)
       )
 
     def jsonBodyContainingOnlyMandatoryFields: JsValue =
