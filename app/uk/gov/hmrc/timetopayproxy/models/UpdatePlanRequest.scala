@@ -48,9 +48,13 @@ object PaymentMethod extends Enum[PaymentMethod] with PlayJsonEnum[PaymentMethod
 
   case object DirectDebit extends PaymentMethod("directDebit")
   case object Bacs extends PaymentMethod("BACS")
+  case object BankPayments extends PaymentMethod("Bank payments")
   case object Cheque extends PaymentMethod("cheque")
   case object CardPayment extends PaymentMethod("cardPayment")
   case object OnGoingAward extends PaymentMethod("Ongoing award")
+
+  def valueOf(value: String): Option[PaymentMethod] =
+    values.find(_.entryName == value)
 }
 
 final case class PaymentReference(value: String) extends AnyVal
