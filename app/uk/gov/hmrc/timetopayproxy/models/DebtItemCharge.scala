@@ -33,10 +33,11 @@ final case class DebtItemCharge(
   originalDebtAmount: BigDecimal,
   interestStartDate: Option[LocalDate],
   paymentHistory: Seq[Payment],
-  dueDate:               Option[LocalDate],
-  chargeSource:          Option[ChargeSource],
+  dueDate: Option[LocalDate],
+  chargeSource: Option[ChargeSource],
   parentChargeReference: Option[ParentChargeReference],
-  parentMainTrans:       Option[ParentMainTrans]) {
+  parentMainTrans: Option[ParentMainTrans]
+) {
   require(!debtItemChargeId.value.trim().isEmpty(), "debtItemChargeId should not be empty")
   require(originalDebtAmount > 0, "originalDebtAmount should be a positive amount.")
 }

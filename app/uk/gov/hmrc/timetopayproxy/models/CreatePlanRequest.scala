@@ -73,14 +73,14 @@ object PaymentInformation {
 
 final case class CreatePlanRequest(
   customerReference: CustomerReference,
-  quoteReference:    QuoteReference,
+  quoteReference: QuoteReference,
   channelIdentifier: ChannelIdentifier,
-  plan:              PlanToCreatePlan,
-  debtItemCharges:   Seq[DebtItemCharge],
-  payments:          Seq[PaymentInformation],
+  plan: PlanToCreatePlan,
+  debtItemCharges: Seq[DebtItemCharge],
+  payments: Seq[PaymentInformation],
   customerPostCodes: Seq[CustomerPostCode],
-  instalments:       Seq[Instalment],
-  regimeType:        Option[OpLedRegimeType]
+  instalments: Seq[Instalment],
+  regimeType: Option[OpLedRegimeType]
 ) {
   require(!customerReference.value.trim().isEmpty(), "customerReference should not be empty")
   require(!quoteReference.value.trim().isEmpty(), "quoteReference should not be empty")
