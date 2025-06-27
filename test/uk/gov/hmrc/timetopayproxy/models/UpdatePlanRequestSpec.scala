@@ -18,6 +18,7 @@ package uk.gov.hmrc.timetopayproxy.models
 
 import org.scalatest.freespec.AnyFreeSpecLike
 import org.scalatest.matchers.should.Matchers._
+import org.scalatest.prop.TableDrivenPropertyChecks._
 import play.api.libs.json.{ JsString, JsValue, Json }
 
 class UpdatePlanRequestSpec extends AnyFreeSpecLike {
@@ -143,83 +144,46 @@ class UpdatePlanRequestSpec extends AnyFreeSpecLike {
   }
 
   "PaymentMethod" - {
-    val paymentMethodValidEntryNames: Seq[String] =
-      Seq(
-        "directDebit",
-        "BACS",
-        "Bank payments",
-        "cheque",
-        "cardPayment",
-        "Ongoing award"
+    val paymentMethodMappings =
+      Table(
+        ("enum", "entryName"),
+        PaymentMethod.DirectDebit  -> "directDebit",
+        PaymentMethod.Bacs         -> "BACS",
+        PaymentMethod.BankPayments -> "Bank payments",
+        PaymentMethod.Cheque       -> "cheque",
+        PaymentMethod.CardPayment  -> "cardPayment",
+        PaymentMethod.OnGoingAward -> "Ongoing award"
       )
 
-    val paymentMethodEnums: Seq[PaymentMethod] =
-      Seq(
-        PaymentMethod.DirectDebit,
-        PaymentMethod.Bacs,
-        PaymentMethod.BankPayments,
-        PaymentMethod.Cheque,
-        PaymentMethod.CardPayment,
-        PaymentMethod.OnGoingAward
-      )
-
-    val paymentMethodMappings: Seq[(PaymentMethod, String)] = paymentMethodEnums.zip(paymentMethodValidEntryNames)
-
-    "should be deserialized correctly" - {
-      paymentMethodMappings.foreach { case (paymentMethod, entryName) =>
+    "should be deserialized correctly" in {
+      forAll(paymentMethodMappings) { case (paymentMethod, entryName) =>
         val paymentMethodJson: JsValue = JsString(entryName)
 
-        s"when payment method is $entryName" in {
-          paymentMethodJson.as[PaymentMethod] shouldBe paymentMethod
-        }
+        paymentMethodJson.as[PaymentMethod] shouldBe paymentMethod
       }
     }
 
-    "should be serialized correctly" - {
-      paymentMethodMappings.foreach { case (paymentMethod, entryName) =>
+    "should be serialized correctly" in {
+      forAll(paymentMethodMappings) { case (paymentMethod, entryName) =>
         val paymentMethodJson: JsValue = JsString(entryName)
 
-        s"when payment method is $paymentMethod" in {
-          Json.toJson(paymentMethod) shouldBe paymentMethodJson
-        }
+        Json.toJson(paymentMethod) shouldBe paymentMethodJson
       }
     }
 
     ".values" - {
+      val paymentMethodEnums: Seq[PaymentMethod] =
+        Seq(
+          PaymentMethod.DirectDebit,
+          PaymentMethod.Bacs,
+          PaymentMethod.BankPayments,
+          PaymentMethod.Cheque,
+          PaymentMethod.CardPayment,
+          PaymentMethod.OnGoingAward
+        )
+
       "should return the list of enums" in {
         PaymentMethod.values shouldBe paymentMethodEnums
-      }
-    }
-
-    ".valueOf" - {
-      "should return the correct PaymentMethod" - {
-        "when the strings are valid entry names" - {
-          paymentMethodMappings.foreach { case (paymentMethod, entryName) =>
-            s"when the entry name is $entryName" in {
-              PaymentMethod.valueOf(entryName) shouldBe Some(paymentMethod)
-            }
-          }
-        }
-      }
-
-      "should return None" - {
-        "when the strings are not valid entry names" - {
-          val invalidEntryNames: Seq[String] =
-            Seq(
-              "DirectDEBIT",
-              "Bacs",
-              "Bank Payments",
-              "Cheque",
-              "CardPayment",
-              "Ongoing Award"
-            )
-
-          invalidEntryNames.foreach(invalidEntryName =>
-            s"when the entry name is $invalidEntryName" in {
-              PaymentMethod.valueOf(invalidEntryName) shouldBe None
-            }
-          )
-        }
       }
     }
   }
