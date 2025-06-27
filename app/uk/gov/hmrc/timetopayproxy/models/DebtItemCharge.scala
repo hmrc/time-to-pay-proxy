@@ -58,4 +58,3 @@ final case class QuoteDebtItemCharge(
 object QuoteDebtItemCharge {
   implicit val format: OFormat[QuoteDebtItemCharge] = Json.format[QuoteDebtItemCharge]
 }
-

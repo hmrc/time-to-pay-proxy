@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.timetopayproxy.models
 
-import play.api.libs.json.{Format, Json, OFormat}
+import play.api.libs.json.{ Format, Json, OFormat }
 
 import java.time.LocalDate
 
@@ -88,16 +88,17 @@ object ParentMainTrans {
   implicit val format: Format[ParentMainTrans] = Json.valueFormat[ParentMainTrans]
 }
 final case class CreatePlanDebtItemCharge(
-                                     debtItemChargeId:      DebtItemChargeId,
-                                     mainTrans:             String,
-                                     subTrans:              String,
-                                     originalDebtAmount:    BigDecimal,
-                                     interestStartDate:     Option[LocalDate],
-                                     paymentHistory:        Seq[Payment],
-                                     dueDate:               Option[LocalDate],
-                                     chargeSource:          Option[ChargeSource],
-                                     parentChargeReference: Option[ParentChargeReference],
-                                     parentMainTrans:       Option[ParentMainTrans]) {
+  debtItemChargeId: DebtItemChargeId,
+  mainTrans: String,
+  subTrans: String,
+  originalDebtAmount: BigDecimal,
+  interestStartDate: Option[LocalDate],
+  paymentHistory: Seq[Payment],
+  dueDate: Option[LocalDate],
+  chargeSource: Option[ChargeSource],
+  parentChargeReference: Option[ParentChargeReference],
+  parentMainTrans: Option[ParentMainTrans]
+) {
   require(!debtItemChargeId.value.trim().isEmpty(), "debtItemChargeId should not be empty")
   require(originalDebtAmount > 0, "originalDebtAmount should be a positive amount.")
 }
