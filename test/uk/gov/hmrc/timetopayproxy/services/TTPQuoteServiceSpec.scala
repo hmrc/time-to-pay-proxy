@@ -104,11 +104,7 @@ class TTPQuoteServiceSpec extends UnitSpec {
         "1090",
         100,
         Some(LocalDate.parse("2021-05-13")),
-        List(Payment(LocalDate.parse("2021-05-13"), 100)),
-        None,
-        None,
-        None,
-        None
+        List(Payment(LocalDate.parse("2021-05-13"), 100))
       )
     ),
     Seq.empty[PaymentInformation],
@@ -194,7 +190,7 @@ class TTPQuoteServiceSpec extends UnitSpec {
         10
       ),
       List(
-        DebtItemCharge(
+        CreatePlanDebtItemCharge(
           DebtItemChargeId("debtItemChargeId"),
           "1525",
           "1000",

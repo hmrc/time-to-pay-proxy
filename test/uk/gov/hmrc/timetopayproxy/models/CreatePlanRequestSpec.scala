@@ -295,7 +295,7 @@ trait CreatePlanRequestFixture {
         10
       ),
       List(
-        DebtItemCharge(
+        CreatePlanDebtItemCharge(
           DebtItemChargeId("debtItemChargeId1"),
           "1525",
           "1000",

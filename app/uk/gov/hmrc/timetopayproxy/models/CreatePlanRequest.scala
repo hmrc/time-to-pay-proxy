@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.timetopayproxy.models
 
-import play.api.libs.json.{ Json, OFormat }
+import play.api.libs.json.{Format, Json, OFormat}
 
 import java.time.LocalDate
 
@@ -70,13 +70,49 @@ final case class PaymentInformation(paymentMethod: PaymentMethod, paymentReferen
 object PaymentInformation {
   implicit val format: OFormat[PaymentInformation] = Json.format[PaymentInformation]
 }
+case class ChargeSource(value: String)
+
+object ChargeSource {
+  implicit val format: Format[ChargeSource] = Json.valueFormat[ChargeSource]
+}
+
+final case class ParentChargeReference(value: String) extends AnyVal
+
+object ParentChargeReference {
+  implicit val format: Format[ParentChargeReference] = Json.valueFormat[ParentChargeReference]
+}
+
+final case class ParentMainTrans(value: String)
+
+object ParentMainTrans {
+  implicit val format: Format[ParentMainTrans] = Json.valueFormat[ParentMainTrans]
+}
+final case class CreatePlanDebtItemCharge(
+                                     debtItemChargeId:      DebtItemChargeId,
+                                     mainTrans:             String,
+                                     subTrans:              String,
+                                     originalDebtAmount:    BigDecimal,
+                                     interestStartDate:     Option[LocalDate],
+                                     paymentHistory:        Seq[Payment],
+                                     dueDate:               Option[LocalDate],
+                                     chargeSource:          Option[ChargeSource],
+                                     parentChargeReference: Option[ParentChargeReference],
+                                     parentMainTrans:       Option[ParentMainTrans]) {
+  require(!debtItemChargeId.value.trim().isEmpty(), "debtItemChargeId should not be empty")
+  require(originalDebtAmount > 0, "originalDebtAmount should be a positive amount.")
+}
+
+object CreatePlanDebtItemCharge {
+  implicit val format: OFormat[CreatePlanDebtItemCharge] = Json.format[CreatePlanDebtItemCharge]
+
+}
 
 final case class CreatePlanRequest(
   customerReference: CustomerReference,
   quoteReference: QuoteReference,
   channelIdentifier: ChannelIdentifier,
   plan: PlanToCreatePlan,
-  debtItemCharges: Seq[DebtItemCharge],
+  debtItemCharges: Seq[CreatePlanDebtItemCharge],
   payments: Seq[PaymentInformation],
   customerPostCodes: Seq[CustomerPostCode],
   instalments: Seq[Instalment],
