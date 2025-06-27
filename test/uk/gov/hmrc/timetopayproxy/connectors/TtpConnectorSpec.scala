@@ -234,7 +234,8 @@ class TtpConnectorSpec extends PlaySpec with DefaultAwaitTimeout with FutureAwai
             Seq.empty,
             Seq.empty,
             Seq.empty,
-            Seq.empty
+            Seq.empty,
+            None
           )
         )
 
@@ -277,7 +278,8 @@ class TtpConnectorSpec extends PlaySpec with DefaultAwaitTimeout with FutureAwai
             Seq.empty,
             Seq.empty,
             Seq.empty,
-            Seq.empty
+            Seq.empty,
+            None
           )
         )
 
@@ -417,7 +419,7 @@ class TtpConnectorSpec extends PlaySpec with DefaultAwaitTimeout with FutureAwai
         )
       ),
       customerPostcodes = List(),
-      regimeType = Some(RegimeType.SA)
+      regimeType = Some(SsttpRegimeType.SA)
     )
 
     val affordableQuoteResponse: AffordableQuoteResponse =

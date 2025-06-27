@@ -295,13 +295,17 @@ trait CreatePlanRequestFixture {
         10
       ),
       List(
-        DebtItemCharge(
+        CreatePlanDebtItemCharge(
           DebtItemChargeId("debtItemChargeId1"),
           "1525",
           "1000",
           100,
           Some(LocalDate.parse("2021-05-13")),
-          List(Payment(LocalDate.parse("2021-05-13"), 100))
+          List(Payment(LocalDate.parse("2021-05-13"), 100)),
+          None,
+          None,
+          None,
+          None
         )
       ),
       List(PaymentInformation(PaymentMethod.Bacs, Some(PaymentReference("ref123")))),
@@ -319,7 +323,8 @@ trait CreatePlanRequestFixture {
           10,
           90
         )
-      )
+      ),
+      None
     )
   protected val json = """{
                          |  "customerReference": "customerReference",

@@ -20,13 +20,13 @@ import enumeratum.{ Enum, EnumEntry, PlayJsonEnum }
 
 import scala.collection.immutable
 
-sealed abstract class RegimeType(override val entryName: String) extends EnumEntry
+sealed abstract class SsttpRegimeType(override val entryName: String) extends EnumEntry
 
-object RegimeType extends Enum[RegimeType] with PlayJsonEnum[RegimeType] {
-  val values: immutable.IndexedSeq[RegimeType] = findValues
+object SsttpRegimeType extends Enum[SsttpRegimeType] with PlayJsonEnum[SsttpRegimeType] {
+  val values: immutable.IndexedSeq[SsttpRegimeType] = findValues
 
-  case object PAYE extends RegimeType("PAYE")
-  case object VATC extends RegimeType("VATC")
-  case object SIMP extends RegimeType("SIMP")
-  case object SA extends RegimeType("SA")
+  case object PAYE extends SsttpRegimeType("PAYE")
+  case object VATC extends SsttpRegimeType("VATC")
+  case object SIMP extends SsttpRegimeType("SIMP")
+  case object SA extends SsttpRegimeType("SA")
 }

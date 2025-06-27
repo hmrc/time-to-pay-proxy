@@ -17,7 +17,7 @@
 package uk.gov.hmrc.timetopayproxy.models.affordablequotes
 
 import play.api.libs.json.{ Json, OFormat }
-import uk.gov.hmrc.timetopayproxy.models.{ CustomerPostCode, DebtItemChargeSelfServe, Duration, FrequencyCapitalised, RegimeType }
+import uk.gov.hmrc.timetopayproxy.models.{ CustomerPostCode, DebtItemChargeSelfServe, Duration, FrequencyCapitalised, SsttpRegimeType }
 
 import java.time.LocalDate
 
@@ -33,7 +33,7 @@ final case class AffordableQuotesRequest(
   initialPaymentAmount: Option[BigInt],
   debtItemCharges: List[DebtItemChargeSelfServe],
   customerPostcodes: List[CustomerPostCode],
-  regimeType: Option[RegimeType]
+  regimeType: Option[SsttpRegimeType]
 )
 
 object AffordableQuotesRequest {

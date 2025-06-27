@@ -316,7 +316,7 @@ class TimeToPayProxyControllerItSpec extends IntegrationBaseSpec {
         )
       ),
       customerPostcodes = List(),
-      regimeType = Some(RegimeType.SA)
+      regimeType = Some(SsttpRegimeType.SA)
     )
   }
 }

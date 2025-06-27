@@ -190,13 +190,17 @@ class TTPQuoteServiceSpec extends UnitSpec {
         10
       ),
       List(
-        DebtItemCharge(
+        CreatePlanDebtItemCharge(
           DebtItemChargeId("debtItemChargeId"),
           "1525",
           "1000",
           100,
           Some(LocalDate.now()),
-          List(Payment(LocalDate.parse("2020-01-01"), 100))
+          List(Payment(LocalDate.parse("2020-01-01"), 100)),
+          None,
+          None,
+          None,
+          None
         )
       ),
       List(PaymentInformation(PaymentMethod.Bacs, Some(PaymentReference("ref123")))),
@@ -212,7 +216,8 @@ class TTPQuoteServiceSpec extends UnitSpec {
           10,
           90
         )
-      )
+      ),
+      None
     )
 
   private val createPlanResponse = CreatePlanResponse(
@@ -245,7 +250,7 @@ class TTPQuoteServiceSpec extends UnitSpec {
       )
     ),
     customerPostcodes = List(),
-    regimeType = Some(RegimeType.SA)
+    regimeType = Some(SsttpRegimeType.SA)
   )
 
   private val affordableQuoteResponse: AffordableQuoteResponse =
