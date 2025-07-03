@@ -49,7 +49,7 @@ class GenerateQuoteRequestSpec extends AnyWordSpec with Matchers {
         dueDate = Some(LocalDate.of(2021, 5, 13))
       )
     ),
-    regimeType = Some(SsttpRegimeType.SA)
+    regimeType = Some(OpLedRegimeType.SA)
   )
 
   val json = """{
