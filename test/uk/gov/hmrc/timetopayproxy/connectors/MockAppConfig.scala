@@ -24,6 +24,7 @@ class MockAppConfig(config: Configuration, servicesConfig: ServicesConfig, ifImp
     extends AppConfig(config, servicesConfig) {
   override val authBaseUrl: String = "http://localhost:11111"
   override val ttpBaseUrl: String = "http://localhost:11111"
+  override val ttpeBaseUrl: String = "http://localhost:11111"
   override val ttpToken: String = "Token"
   override val useIf: Boolean = ifImpl
   override val auditingEnabled: Boolean = false
