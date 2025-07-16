@@ -159,7 +159,7 @@ paths:
             schema:
               $ref: '#/components/schemas/PromoteArrangementRequest'
             example:
-              regimeType: PAYE
+              regimeType: SA
               customerReference: uniqRef1234
               quoteReference: quoteRef1234
               channelIdentifier: advisor
@@ -1021,6 +1021,8 @@ components:
         regimeType:
           type: "string"
           description: "Regime type"
+          enum:
+            - SA
         customerReference:
           maxLength: 15
           minLength: 1
