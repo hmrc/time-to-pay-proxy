@@ -41,8 +41,9 @@ info:
       | 1.0.7 | 14-05-2025 | Alex Olkhovskiy | Added channelIdentifier field to schemas to support Self Assessment debts |
       | 1.0.8 | 14-05-2025 | Alex Olkhovskiy | Added regimeType and dueDate fields to support Self Assessment debts |
       | 1.0.9 | 14-05-2025 | Alex Olkhovskiy | Add regimeType to /affordable-quotes endpoint |
+      | 1.0.10 | 14-05-2025 | Alex Olkhovskiy | Added regimeType, chargeSource, parentMainTrans, parentChargeReference and dueDate fields to DebtItemChargeArrangementRequest schema |
   contact: {}
-  version: '1.0.9'
+  version: '1.0.10'
 servers:
   - url: https://api.service.hmrc.gov.uk/
     variables: {}
@@ -158,6 +159,7 @@ paths:
             schema:
               $ref: '#/components/schemas/PromoteArrangementRequest'
             example:
+              regimeType: SA
               customerReference: uniqRef1234
               quoteReference: quoteRef1234
               channelIdentifier: advisor
@@ -186,6 +188,10 @@ paths:
                   subTrans: '1090'
                   originalDebtAmount: 100
                   interestStartDate: 2021-05-13
+                  dueDate: 2021-06-30
+                  chargeSource: ETMP
+                  parentChargeReference: DEF987654321
+                  parentMainTrans: YnAS
                   paymentHistory:
                     - paymentDate: 2021-05-13
                       paymentAmount: 100
@@ -1012,6 +1018,11 @@ components:
         - customerPostCodes
         - instalments
       properties:
+        regimeType:
+          type: "string"
+          description: "Regime type"
+          enum:
+            - SA
         customerReference:
           maxLength: 15
           minLength: 1
@@ -1300,6 +1311,19 @@ components:
           items:
             $ref: '#/components/schemas/PaymentHistoryRequest'
           description: ''
+        dueDate:
+          type: string
+          description: Due date
+          format: date
+        chargeSource:
+          type: string
+          description: Source of the charge
+        parentMainTrans:
+          type: string
+        parentChargeReference:
+           type: string
+           description: Charge reference. Alphanumeric field
+           pattern: '^[A-Za-z0-9]{1,14}$'
 
     # Renamed from DebtItemCharge1
     DebtItemChargeQuoteRequest:
