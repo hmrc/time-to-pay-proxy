@@ -42,11 +42,11 @@ object AffordableQuotesResponseSchema
     )
 
 object ChargeInfoRequestSchema extends ApiSchema(
-      filename = "resources/public/api/conf/1.0/yamlSchemas/time-to-pay-v1.0.10-proposedA.yaml",
+      filename = "resources/public/api/conf/1.0/application.yaml",
       defaultSchemaName = "TTPChargeInfoRequest"
     )
 
 object ChargeInfoResponseSchema extends ApiSchema(
-      filename = "resources/public/api/conf/1.0/yamlSchemas/time-to-pay-v1.0.10-proposedA.yaml",
+      filename = "resources/public/api/conf/1.0/application.yaml",
       defaultSchemaName = "TTPChargeInfoResponse"
     )
