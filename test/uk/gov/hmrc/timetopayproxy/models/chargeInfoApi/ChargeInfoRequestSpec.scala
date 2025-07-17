@@ -28,39 +28,40 @@ import scala.jdk.CollectionConverters.CollectionHasAsScala
 import scala.util.{ Failure, Success, Try }
 
 class ChargeInfoRequestSpec extends AnyFreeSpec {
+
+  object TestData {
+    object WithNoDeclaredOptions {
+      def obj: ChargeInfoRequest = ChargeInfoRequest(
+        channelIdentifier = ChargeInfoChannelIdentifier("Channel Identifier"),
+        identifications = List(
+          Identification(idType = IDType("id type 1"), idValue = IDValue("id value 1")),
+          Identification(idType = IDType("id type 2"), idValue = IDValue("id value 2"))
+        ),
+        regimeType = RegimeType.SA
+      )
+
+      def json: JsValue = Json.parse(
+        """{
+          |  "channelIdentifier": "Channel Identifier",
+          |  "identifications": [
+          |    {
+          |      "idType": "id type 1",
+          |      "idValue": "id value 1"
+          |    },
+          |    {
+          |      "idType": "id type 2",
+          |      "idValue": "id value 2"
+          |    }
+          |  ],
+          |  "regimeType": "SA"
+          |}
+          |""".stripMargin
+      )
+    }
+  }
+
   "ChargeInfoRequest" - {
     "implicit json writer" - {
-      object TestData {
-        object WithNoDeclaredOptions {
-          def obj: ChargeInfoRequest = ChargeInfoRequest(
-            channelIdentifier = ChargeInfoChannelIdentifier("Channel Identifier"),
-            identifications = List(
-              Identification(idType = IDType("id type 1"), idValue = IDValue("id value 1")),
-              Identification(idType = IDType("id type 2"), idValue = IDValue("id value 2"))
-            ),
-            regimeType = RegimeType.SA
-          )
-
-          def json: JsValue = Json.parse(
-            """{
-              |  "channelIdentifier": "Channel Identifier",
-              |  "identifications": [
-              |    {
-              |      "idType": "id type 1",
-              |      "idValue": "id value 1"
-              |    },
-              |    {
-              |      "idType": "id type 2",
-              |      "idValue": "id value 2"
-              |    }
-              |  ],
-              |  "regimeType": "SA"
-              |}
-              |""".stripMargin
-          )
-        }
-      }
-
       def writer: Writes[ChargeInfoRequest] = implicitly[Writes[ChargeInfoRequest]]
 
       def obj = TestData.WithNoDeclaredOptions.obj
