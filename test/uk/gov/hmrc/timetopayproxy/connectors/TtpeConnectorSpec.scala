@@ -190,12 +190,8 @@ class TtpeConnectorSpec
         def errorResponse(code: String, reason: String): String =
           s"""
              |{
-             | "failures":[
-             |   {
-             |     "code":"$code",
-             |     "reason":"$reason"
-             |   }
-             | ]
+             |  "code":"$code",
+             |  "reason":"$reason"
              |}
              |""".stripMargin
 
