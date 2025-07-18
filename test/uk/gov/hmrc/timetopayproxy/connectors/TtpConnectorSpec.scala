@@ -55,6 +55,11 @@ class TtpConnectorSpec extends PlaySpec with DefaultAwaitTimeout with FutureAwai
       .returns("http://localhost:11111")
     (servicesConfig
       .baseUrl(_: String))
+      .expects("ttpe")
+      .once()
+      .returns("unused")
+    (servicesConfig
+      .baseUrl(_: String))
       .expects("stub")
       .once()
       .returns("http://localhost:11111")

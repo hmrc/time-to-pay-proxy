@@ -28,6 +28,7 @@ class AppConfig @Inject() (
 
   val authBaseUrl: String = servicesConfig.baseUrl("auth")
   val ttpBaseUrl: String = servicesConfig.baseUrl("ttp")
+  val ttpeBaseUrl: String = servicesConfig.baseUrl("ttpe")
   val stubBaseUrl: String = servicesConfig.baseUrl("stub")
   val ttpToken: String = config.get[String]("microservice.services.ttp.token")
   // TODO DTD-2356: microservice.services.ttp.useIf config value may not be needed for TTP as TTP will always be on MDTP. We don't need to go via IF
