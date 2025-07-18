@@ -80,7 +80,7 @@ class TimeToPayProxyControllerItSpec extends IntegrationBaseSpec {
 
             "with one item in the list of 'failures'" in new TimeToPayProxyControllerTestBase {
               val timeToPayError: TimeToPayError =
-                TimeToPayError(failures = Seq(Error(code = "BAD_REQUEST", reason = "only reason")))
+                TimeToPayError(failures = Seq(TimeToPayInnerError(code = "BAD_REQUEST", reason = "only reason")))
 
               stubPostWithResponseBody(url = "/auth/authorise", status = 200, responseBody = "null")
               stubPostWithResponseBody(
@@ -106,9 +106,9 @@ class TimeToPayProxyControllerItSpec extends IntegrationBaseSpec {
               val timeToPayError: TimeToPayError =
                 TimeToPayError(failures =
                   Seq(
-                    Error(code = "BAD_REQUEST", reason = "first reason"),
-                    Error(code = "SERVICE_UNAVAILABLE", reason = "second reason"),
-                    Error(code = "INTERNAL_SERVER_ERROR", reason = "third reason")
+                    TimeToPayInnerError(code = "BAD_REQUEST", reason = "first reason"),
+                    TimeToPayInnerError(code = "SERVICE_UNAVAILABLE", reason = "second reason"),
+                    TimeToPayInnerError(code = "INTERNAL_SERVER_ERROR", reason = "third reason")
                   )
                 )
 

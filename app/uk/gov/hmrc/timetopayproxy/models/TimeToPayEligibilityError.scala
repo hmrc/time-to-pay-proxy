@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 HM Revenue & Customs
+ * Copyright 2025 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,20 +18,11 @@ package uk.gov.hmrc.timetopayproxy.models
 
 import play.api.libs.json.{ Json, OFormat }
 
-final case class TimeToPayInnerError(code: String, reason: String)
-
-final case class TimeToPayError(failures: Seq[TimeToPayInnerError]) extends IncomingApiError {
+case class TimeToPayEligibilityError(code: String, reason: String) extends IncomingApiError {
   def toConnectorError(status: Int): ConnectorError =
-    ConnectorError(
-      status,
-      failures.headOption.map(_.reason).getOrElse("An unknown error has occurred")
-    )
+    ConnectorError(status, reason)
 }
 
-object TimeToPayInnerError {
-  implicit val format: OFormat[TimeToPayInnerError] = Json.format[TimeToPayInnerError]
-}
-
-object TimeToPayError {
-  implicit val format: OFormat[TimeToPayError] = Json.format[TimeToPayError]
+object TimeToPayEligibilityError {
+  implicit val format: OFormat[TimeToPayEligibilityError] = Json.format[TimeToPayEligibilityError]
 }

@@ -60,7 +60,7 @@ trait TtpConnector {
 
 @Singleton
 class DefaultTtpConnector @Inject() (appConfig: AppConfig, httpClient: HttpClientV2)
-    extends TtpConnector with HttpParser {
+    extends TtpConnector with HttpParser[TimeToPayError] {
 
   private val logger: RequestAwareLogger = new RequestAwareLogger(classOf[DefaultTtpConnector])
 
