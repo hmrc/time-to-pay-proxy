@@ -42,6 +42,8 @@ trait IntegrationBaseSpec
       "microservice.services.auth.port" -> mockPort,
       "microservice.services.ttp.host"  -> mockHost,
       "microservice.services.ttp.port"  -> mockPort,
+      "microservice.services.ttpe.host" -> mockHost,
+      "microservice.services.ttpe.port" -> mockPort,
       "microservice.services.ttp.token" -> "dummyToken",
       "microservice.services.ttp.useIf" -> false,
       "microservice.services.stub.host" -> mockHost,
