@@ -19,13 +19,16 @@ package uk.gov.hmrc.timetopayproxy.connectors
 import play.api.http.Status
 import play.api.libs.json.Reads
 import uk.gov.hmrc.http.HttpReads
-import uk.gov.hmrc.timetopayproxy.models.{ ConnectorError, TimeToPayError, TtppError }
+import uk.gov.hmrc.timetopayproxy.models.{ ConnectorError, IncomingApiError, TtppError }
 import cats.syntax.either._
+
 import scala.util.{ Failure, Success, Try }
 
-trait HttpParser {
-
-  implicit def httpReads[T](implicit rds: Reads[T]): HttpReads[Either[TtppError, T]] = (_, _, response) =>
+trait HttpParser[IncomingError <: IncomingApiError] {
+  implicit def httpReads[T](implicit
+    successReads: Reads[T],
+    errorReads: Reads[IncomingError]
+  ): HttpReads[Either[TtppError, T]] = (_, _, response) =>
     response.status match {
       case Status.OK | Status.CREATED =>
         response.json
@@ -38,14 +41,10 @@ trait HttpParser {
         Try(response.json) match {
           case Success(value) =>
             value
-              .validate[TimeToPayError]
+              .validate[IncomingError]
               .fold(
                 _ => ConnectorError(503, "Couldn't parse body from upstream"),
-                error =>
-                  ConnectorError(
-                    status,
-                    error.failures.headOption.map(_.reason).getOrElse("An unknown error has occurred")
-                  )
+                error => error.toConnectorError(status = status)
               )
               .asLeft[T]
           case Failure(_) => ConnectorError(status, "Couldn't parse body from upstream").asLeft[T]

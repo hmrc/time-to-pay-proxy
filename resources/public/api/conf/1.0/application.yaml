@@ -42,8 +42,9 @@ info:
       | 1.0.8 | 14-05-2025 | Alex Olkhovskiy | Added regimeType and dueDate fields to support Self Assessment debts |
       | 1.0.9 | 14-05-2025 | Alex Olkhovskiy | Add regimeType to /affordable-quotes endpoint |
       | 1.0.10 | 14-05-2025 | Alex Olkhovskiy | Added regimeType, chargeSource, parentMainTrans, parentChargeReference and dueDate fields to DebtItemChargeArrangementRequest schema |
+      | 1.0.11 | 10-07-2025 | Alex Olkhovskiy | Added new charge-info proxy endpoint to get customer charge information |
   contact: {}
-  version: '1.0.10'
+  version: '1.0.11'
 servers:
   - url: https://api.service.hmrc.gov.uk/
     variables: {}
@@ -661,6 +662,79 @@ paths:
               example:
                 statusCode: 500
                 errorMessage: Internal Service Error
+      deprecated: false
+  /individuals/time-to-pay-proxy/charge-info:
+    post:
+      tags:
+        - individuals
+      summary: Get Customer Charge Information
+      description: This is an endpoint that triggers a request to get customer charge information from ttp eligibility service
+      operationId: GetCustomerChargeInformation
+      parameters: []
+      security:
+        - applicationRestricted:
+            - read:time-to-pay-proxy
+      requestBody:
+        description: ''
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TTPChargeInfoRequest'
+            example:
+              regimeType: SA
+              channelIdentifier: advisor
+              identifications:
+                - idType: UTR
+                  idValue: '1234567890'
+        required: true
+      responses:
+        '200':
+          description: ''
+          headers: {}
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TTPChargeInfoResponse'
+        '400':
+          description: ''
+          headers: {}
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                statusCode: 400
+                errorMessage: Invalid JSON error
+        '401':
+          description: ''
+          headers: {}
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                statusCode: 401
+                errorMessage: A user with no active session will return 401 response
+        '500':
+          description: ''
+          headers: {}
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                statusCode: 500
+                errorMessage: Internal Service Error
+        '503':
+          description: ''
+          headers: {}
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                statusCode: 503
+                errorMessage: Couldn't parse body from upstream
       deprecated: false
 components:
   securitySchemes:
@@ -1321,9 +1395,9 @@ components:
         parentMainTrans:
           type: string
         parentChargeReference:
-           type: string
-           description: Charge reference. Alphanumeric field
-           pattern: '^[A-Za-z0-9]{1,14}$'
+          type: string
+          description: Charge reference. Alphanumeric field
+          pattern: '^[A-Za-z0-9]{1,14}$'
 
     # Renamed from DebtItemCharge1
     DebtItemChargeQuoteRequest:
@@ -1919,6 +1993,248 @@ components:
         - planStatus
       type: string
       description: This is where there is an update to the plan
+
+    TTPChargeInfoRequest:
+      title: TTPChargeInfoRequest
+      required:
+        - channelIdentifier
+        - identifications
+        - regimeType
+      properties:
+        regimeType:
+          type: string
+          description: Regime type
+        channelIdentifier:
+          type: string
+          description: Channel Identifier
+        identifications:
+          type: array
+          items:
+            type: object
+            properties:
+              idType:
+                type: string
+                description: ID type
+              idValue:
+                type: string
+                description: ID value
+            required:
+              - idType
+              - idValue
+          description: An array of customer identifications
+
+    TTPChargeInfoResponse:
+      title: TTPChargeInfoResponse
+      required:
+        - processingDateTime
+        - identification
+        - chargeTypeAssessment
+        - addresses
+      properties:
+        processingDateTime:
+          type: string
+          pattern: '^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d{1,3})?$'
+          example: '2022-03-23T13:49:51.123'
+        identification:
+          type: array
+          items:
+            type: object
+            properties:
+              idType:
+                type: string
+                description: ID type
+              idValue:
+                type: string
+                description: ID value
+            required:
+              - idType
+              - idValue
+          description: An array of customer identifications
+        individualDetails:
+          type: object
+          properties:
+            title:
+              type: string
+              description: Title
+            firstName:
+              type: string
+              description: Firstname
+            lastName:
+              type: string
+              description: Lastname
+            dateOfBirth:
+              type: string
+              format: date
+              description: Date of birth
+            districtNumber:
+              type: string
+              description: District Number
+            customerType:
+              type: string
+              description: Customer Type
+              enum:
+                - MTD(ITSA)
+                - Classic SA - Transitioned
+                - Classic SA - Non Transitioned
+            transitionToCDCS:
+              type: boolean
+              description: Signifies if the customer must be transitioned to CDCS
+          required:
+            - customerType
+            - transitionToCDCS
+        addresses:
+          type: array
+          items:
+            type: object
+            properties:
+              addressType:
+                type: string
+                description: Type of address
+              addressLine1:
+                type: string
+                description: Address line 1
+              addressLine2:
+                type: string
+                description: Address line 2
+              addressLine3:
+                type: string
+                description: Address line 3
+              addressLine4:
+                type: string
+                description: Address line 4
+              rls:
+                type: boolean
+                description: Returned Letter Service indicates tax payer is no longer resident
+              contactDetails:
+                type: object
+                properties:
+                  telephoneNumber:
+                    type: string
+                    description: Telephone number
+                  fax:
+                    type: string
+                    description: Fax number
+                  mobile:
+                    type: string
+                    description: Mobile number
+                  emailAddress:
+                    type: string
+                    description: Email address
+                  emailSource:
+                    type: string
+                    description: Email source
+                  altFormat:
+                    type: integer
+                    description: Specifies alternative format for letters
+              postCode:
+                type: string
+                description: Post code
+              country:
+                type: string
+                description: Country
+              postcodeHistory:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    addressPostcode:
+                      type: string
+                      description: Customer postcode
+                    postcodeDate:
+                      type: string
+                      format: date
+                      description: Date the customer used this postcode from
+                  required:
+                    - addressPostcode
+                    - postcodeDate
+            required:
+              - addressLine1
+              - addressType
+              - postcodeHistory
+        chargeTypeAssessment:
+          type: array
+          items:
+            type: object
+            required:
+              - debtTotalAmount
+              - chargeReference
+              - charges
+              - mainTrans
+            properties:
+              debtTotalAmount:
+                type: integer
+                description: Total debt amount
+              chargeReference:
+                type: string
+                description: Charge reference
+              parentChargeReference:
+                type: string
+              mainTrans:
+                type: string
+                description: |
+                  Represents main transaction types. Unrecognized values is treated
+                  as "UsedMainTrans" with the provided string value.
+              charges:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    taxPeriodFrom:
+                      type: string
+                      format: date
+                      description: Tax period start date
+                    taxPeriodTo:
+                      type: string
+                      format: date
+                      description: Tax period end date
+                    chargeType:
+                      type: string
+                    mainType:
+                      type: string
+                    subTrans:
+                      type: string
+                    outstandingAmount:
+                      type: integer
+                    dueDate:
+                      type: string
+                      format: date
+                    isInterestBearingCharge:
+                      type: boolean
+                      description: shows whether its an interest bearing charge
+                    interestStartDate:
+                      type: string
+                      format: date
+                    accruedInterest:
+                      type: integer
+                    chargeSource:
+                      type: string
+                    parentMainTrans:
+                      type: string
+                    originalCreationDate:
+                      type: string
+                      format: date
+                    tieBreaker:
+                      type: string
+                    originalTieBreaker:
+                      type: string
+                    saTaxYearEnd:
+                      type: string
+                      format: date
+                    creationDate:
+                      type: string
+                      format: date
+                    originalChargeType:
+                      type: string
+                  required:
+                    - taxPeriodFrom
+                    - taxPeriodTo
+                    - chargeSource
+                    - chargeType
+                    - mainType
+                    - subTrans
+                    - outstandingAmount
+                    - dueDate
+                    - accruedInterest
 tags:
   - name: individuals
     description: ''
