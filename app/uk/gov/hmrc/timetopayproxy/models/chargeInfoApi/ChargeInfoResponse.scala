@@ -262,11 +262,11 @@ final case class Charge(
   chargeType: ChargeType,
   mainType: MainType,
   subTrans: SubTrans,
-  outstandingAmount: BigInt,
+  outstandingAmount: OutstandingAmount,
   dueDate: DueDate,
   isInterestBearingCharge: Option[ChargeInfoIsInterestBearingCharge],
   interestStartDate: Option[InterestStartDate],
-  accruedInterest: BigInt,
+  accruedInterest: AccruedInterest,
   chargeSource: ChargeInfoChargeSource,
   parentMainTrans: Option[ChargeInfoParentMainTrans],
   originalCreationDate: Option[OriginalCreationDate],
@@ -311,6 +311,12 @@ object SubTrans {
   implicit val format: Format[SubTrans] = Json.valueFormat[SubTrans]
 }
 
+final case class OutstandingAmount(value: BigInt) extends AnyVal
+
+object OutstandingAmount {
+  implicit val format: Format[OutstandingAmount] = Json.valueFormat[OutstandingAmount]
+}
+
 final case class DueDate(dueDate: LocalDate) extends AnyVal
 
 object DueDate {
@@ -327,6 +333,12 @@ final case class InterestStartDate(value: LocalDate) extends AnyVal
 
 object InterestStartDate {
   implicit val format: Format[InterestStartDate] = Json.valueFormat[InterestStartDate]
+}
+
+final case class AccruedInterest(value: BigInt) extends AnyVal
+
+object AccruedInterest {
+  implicit val format: Format[AccruedInterest] = Json.valueFormat[AccruedInterest]
 }
 
 final case class ChargeInfoChargeSource(value: String) extends AnyVal
