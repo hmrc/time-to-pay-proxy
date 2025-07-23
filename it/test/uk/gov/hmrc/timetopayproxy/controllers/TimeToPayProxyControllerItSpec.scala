@@ -356,40 +356,105 @@ class TimeToPayProxyControllerItSpec extends IntegrationBaseSpec {
             response.status shouldBe 400
           }
 
-          "with mandatory fields missing" in new TimeToPayProxyControllerTestBase {
-            stubPostWithResponseBody(url = "/auth/authorise", status = 200, responseBody = "null")
+          "with mandatory fields missing" - {
+            "when 'channelIdentifier' is missing" in new TimeToPayProxyControllerTestBase {
+              stubPostWithResponseBody(url = "/auth/authorise", status = 200, responseBody = "null")
 
-            val requestForChargeInfo: WSRequest = buildRequest("/charge-info")
+              val requestForChargeInfo: WSRequest = buildRequest("/charge-info")
 
-            val invalidRequestBody: JsValue = Json.parse(
-              """{
-                |  "channelIdentifier": "Channel Identifier",
-                |  "identifications": [
-                |    {
-                |      "idType": "id type 1",
-                |      "idValue": "id value 1"
-                |    },
-                |    {
-                |      "idType": "id type 2",
-                |      "idValue": "id value 2"
-                |    }
-                |  ]
-                |}
-                |""".stripMargin
-            )
+              val invalidRequestBody: JsValue = Json.parse(
+                """{
+                  |  "identifications": [
+                  |    {
+                  |      "idType": "id type 1",
+                  |      "idValue": "id value 1"
+                  |    },
+                  |    {
+                  |      "idType": "id type 2",
+                  |      "idValue": "id value 2"
+                  |    }
+                  |  ],
+                  |  "regimeType": "SA"
+                  |}
+                  |""".stripMargin
+              )
 
-            val response: WSResponse = await(
-              requestForChargeInfo.post(invalidRequestBody)
-            )
+              val response: WSResponse = await(
+                requestForChargeInfo.post(invalidRequestBody)
+              )
 
-            val expectedTtppErrorResponse: TtppErrorResponse = TtppErrorResponse(
-              statusCode = 400,
-              errorMessage =
-                "Invalid ChargeInfoRequest payload: Payload has a missing field or an invalid format. Field name: regimeType. "
-            )
+              val expectedTtppErrorResponse: TtppErrorResponse = TtppErrorResponse(
+                statusCode = 400,
+                errorMessage =
+                  "Invalid ChargeInfoRequest payload: Payload has a missing field or an invalid format. Field name: channelIdentifier. "
+              )
 
-            response.json shouldBe Json.toJson(expectedTtppErrorResponse)
-            response.status shouldBe 400
+              response.json shouldBe Json.toJson(expectedTtppErrorResponse)
+              response.status shouldBe 400
+            }
+
+            "when 'identifications' is missing" in new TimeToPayProxyControllerTestBase {
+              stubPostWithResponseBody(url = "/auth/authorise", status = 200, responseBody = "null")
+
+              val requestForChargeInfo: WSRequest = buildRequest("/charge-info")
+
+              val invalidRequestBody: JsValue = Json.parse(
+                """{
+                  |  "channelIdentifier": "Channel Identifier",
+                  |  "regimeType": "SA"
+                  |}
+                  |""".stripMargin
+              )
+
+              val response: WSResponse = await(
+                requestForChargeInfo.post(invalidRequestBody)
+              )
+
+              val expectedTtppErrorResponse: TtppErrorResponse = TtppErrorResponse(
+                statusCode = 400,
+                errorMessage =
+                  "Invalid ChargeInfoRequest payload: Payload has a missing field or an invalid format. Field name: identifications. "
+              )
+
+              response.json shouldBe Json.toJson(expectedTtppErrorResponse)
+              response.status shouldBe 400
+            }
+
+            "when 'regimeType' is missing" in new TimeToPayProxyControllerTestBase {
+              stubPostWithResponseBody(url = "/auth/authorise", status = 200, responseBody = "null")
+
+              val requestForChargeInfo: WSRequest = buildRequest("/charge-info")
+
+              val invalidRequestBody: JsValue = Json.parse(
+                """{
+                  |  "channelIdentifier": "Channel Identifier",
+                  |  "identifications": [
+                  |    {
+                  |      "idType": "id type 1",
+                  |      "idValue": "id value 1"
+                  |    },
+                  |    {
+                  |      "idType": "id type 2",
+                  |      "idValue": "id value 2"
+                  |    }
+                  |  ]
+                  |}
+                  |""".stripMargin
+              )
+
+              val response: WSResponse = await(
+                requestForChargeInfo.post(invalidRequestBody)
+              )
+
+              val expectedTtppErrorResponse: TtppErrorResponse = TtppErrorResponse(
+                statusCode = 400,
+                errorMessage =
+                  "Invalid ChargeInfoRequest payload: Payload has a missing field or an invalid format. Field name: regimeType. "
+              )
+
+              response.json shouldBe Json.toJson(expectedTtppErrorResponse)
+              response.status shouldBe 400
+            }
           }
 
           "with invalid types" in new TimeToPayProxyControllerTestBase {
