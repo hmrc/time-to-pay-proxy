@@ -67,7 +67,7 @@ object LastName {
   implicit val format: Format[LastName] = Json.valueFormat[LastName]
 }
 
-final case class DateOfBirth(dateOfBirth: LocalDate) extends AnyVal
+final case class DateOfBirth(value: LocalDate) extends AnyVal
 
 object DateOfBirth {
   implicit val format: Format[DateOfBirth] = Json.valueFormat[DateOfBirth]
@@ -189,13 +189,13 @@ object Mobile {
   implicit val format: Format[Mobile] = Json.valueFormat[Mobile]
 }
 
-final case class Email(emailAddress: String) extends AnyVal
+final case class Email(value: String) extends AnyVal
 
 object Email {
   implicit val format: Format[Email] = Json.valueFormat[Email]
 }
 
-final case class EmailSource(emailSource: String) extends AnyVal
+final case class EmailSource(value: String) extends AnyVal
 
 object EmailSource {
   implicit val format: Format[EmailSource] = Json.valueFormat[EmailSource]
@@ -207,7 +207,7 @@ object AltFormat {
   implicit val format: Format[AltFormat] = Json.valueFormat[AltFormat]
 }
 
-final case class ChargeInfoPostCode(addressPostcode: String) extends AnyVal
+final case class ChargeInfoPostCode(value: String) extends AnyVal
 
 object ChargeInfoPostCode {
   implicit val format: Format[ChargeInfoPostCode] = Json.valueFormat[ChargeInfoPostCode]
@@ -262,11 +262,11 @@ final case class Charge(
   chargeType: ChargeType,
   mainType: MainType,
   subTrans: SubTrans,
-  outstandingAmount: BigInt,
+  outstandingAmount: OutstandingAmount,
   dueDate: DueDate,
   isInterestBearingCharge: Option[ChargeInfoIsInterestBearingCharge],
   interestStartDate: Option[InterestStartDate],
-  accruedInterest: BigInt,
+  accruedInterest: AccruedInterest,
   chargeSource: ChargeInfoChargeSource,
   parentMainTrans: Option[ChargeInfoParentMainTrans],
   originalCreationDate: Option[OriginalCreationDate],
@@ -281,13 +281,13 @@ object Charge {
   implicit val format: OFormat[Charge] = Json.format[Charge]
 }
 
-final case class TaxPeriodFrom(taxPeriodFrom: LocalDate) extends AnyVal
+final case class TaxPeriodFrom(value: LocalDate) extends AnyVal
 
 object TaxPeriodFrom {
   implicit val format: Format[TaxPeriodFrom] = Json.valueFormat[TaxPeriodFrom]
 }
 
-final case class TaxPeriodTo(taxPeriodTo: LocalDate) extends AnyVal
+final case class TaxPeriodTo(value: LocalDate) extends AnyVal
 
 object TaxPeriodTo {
   implicit val format: Format[TaxPeriodTo] = Json.valueFormat[TaxPeriodTo]
@@ -305,10 +305,16 @@ object MainType {
   implicit val format: Format[MainType] = Json.valueFormat[MainType]
 }
 
-final case class SubTrans(entryName: String) extends AnyVal
+final case class SubTrans(value: String) extends AnyVal
 
 object SubTrans {
   implicit val format: Format[SubTrans] = Json.valueFormat[SubTrans]
+}
+
+final case class OutstandingAmount(value: BigInt) extends AnyVal
+
+object OutstandingAmount {
+  implicit val format: Format[OutstandingAmount] = Json.valueFormat[OutstandingAmount]
 }
 
 final case class DueDate(dueDate: LocalDate) extends AnyVal
@@ -323,13 +329,19 @@ object ChargeInfoIsInterestBearingCharge {
   implicit val format: Format[ChargeInfoIsInterestBearingCharge] = Json.valueFormat[ChargeInfoIsInterestBearingCharge]
 }
 
-final case class InterestStartDate(interestStartDate: LocalDate) extends AnyVal
+final case class InterestStartDate(value: LocalDate) extends AnyVal
 
 object InterestStartDate {
   implicit val format: Format[InterestStartDate] = Json.valueFormat[InterestStartDate]
 }
 
-final case class ChargeInfoChargeSource(chargeSource: String) extends AnyVal
+final case class AccruedInterest(value: BigInt) extends AnyVal
+
+object AccruedInterest {
+  implicit val format: Format[AccruedInterest] = Json.valueFormat[AccruedInterest]
+}
+
+final case class ChargeInfoChargeSource(value: String) extends AnyVal
 
 object ChargeInfoChargeSource {
   implicit val format: Format[ChargeInfoChargeSource] = Json.valueFormat[ChargeInfoChargeSource]
@@ -341,37 +353,37 @@ object ChargeInfoParentMainTrans {
   implicit val format: Format[ChargeInfoParentMainTrans] = Json.valueFormat[ChargeInfoParentMainTrans]
 }
 
-final case class OriginalCreationDate(originalCreationDate: LocalDate) extends AnyVal
+final case class OriginalCreationDate(value: LocalDate) extends AnyVal
 
 object OriginalCreationDate {
   implicit val format: Format[OriginalCreationDate] = Json.valueFormat[OriginalCreationDate]
 }
 
-final case class TieBreaker(tieBreaker: String) extends AnyVal
+final case class TieBreaker(value: String) extends AnyVal
 
 object TieBreaker {
   implicit val format: Format[TieBreaker] = Json.valueFormat[TieBreaker]
 }
 
-final case class OriginalTieBreaker(originalTieBreaker: String) extends AnyVal
+final case class OriginalTieBreaker(value: String) extends AnyVal
 
 object OriginalTieBreaker {
   implicit val format: Format[OriginalTieBreaker] = Json.valueFormat[OriginalTieBreaker]
 }
 
-final case class SaTaxYearEnd(saTaxYearEnd: LocalDate) extends AnyVal
+final case class SaTaxYearEnd(value: LocalDate) extends AnyVal
 
 object SaTaxYearEnd {
   implicit val format: Format[SaTaxYearEnd] = Json.valueFormat[SaTaxYearEnd]
 }
 
-final case class CreationDate(creationDate: LocalDate) extends AnyVal
+final case class CreationDate(value: LocalDate) extends AnyVal
 
 object CreationDate {
   implicit val format: Format[CreationDate] = Json.valueFormat[CreationDate]
 }
 
-final case class OriginalChargeType(originalChargeType: String) extends AnyVal
+final case class OriginalChargeType(value: String) extends AnyVal
 
 object OriginalChargeType {
   implicit val format: Format[OriginalChargeType] = Json.valueFormat[OriginalChargeType]

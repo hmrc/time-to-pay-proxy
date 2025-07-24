@@ -21,6 +21,7 @@ import play.api.libs.ws.{ WSRequest, WSResponse }
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.timetopayproxy.models._
 import uk.gov.hmrc.timetopayproxy.models.affordablequotes.{ AffordableQuoteResponse, AffordableQuotesRequest }
+import uk.gov.hmrc.timetopayproxy.models.chargeInfoApi._
 import uk.gov.hmrc.timetopayproxy.support.IntegrationBaseSpec
 
 import java.time.{ LocalDate, LocalDateTime }
@@ -284,6 +285,311 @@ class TimeToPayProxyControllerItSpec extends IntegrationBaseSpec {
         }
       }
     }
+
+    ".checkChargeInfo" - {
+      "should return a 200 statusCode" - {
+        "when given a valid json payload" - {
+          "when TimeToPayEligibility returns a valid response" in new TimeToPayProxyControllerTestBase {
+            stubPostWithResponseBody(url = "/auth/authorise", status = 200, responseBody = "null")
+            stubPostWithResponseBody(
+              url = "/debts/time-to-pay/charge-info",
+              status = 200,
+              responseBody = Json.toJson(ttpeResponse).toString()
+            )
+
+            val requestForChargeInfo: WSRequest = buildRequest("/charge-info")
+
+            val response: WSResponse = await(
+              requestForChargeInfo.post(Json.toJson(chargeInfoRequest))
+            )
+
+            response.json shouldBe Json.toJson(ttpeResponse)
+            response.status shouldBe 200
+          }
+        }
+      }
+
+      "should return a 400 statusCode" - {
+        "when given a valid json payload" - {
+          "when TimeToPayEligibility returns an error response of 400" in new TimeToPayProxyControllerTestBase {
+            val timeToPayEligibilityError: TimeToPayEligibilityError =
+              TimeToPayEligibilityError(code = "BAD_REQUEST", reason = "only reason")
+
+            stubPostWithResponseBody(url = "/auth/authorise", status = 200, responseBody = "null")
+            stubPostWithResponseBody(
+              url = "/debts/time-to-pay/charge-info",
+              status = 400,
+              responseBody = Json.toJson(timeToPayEligibilityError).toString()
+            )
+
+            val requestForChargeInfo: WSRequest = buildRequest("/charge-info")
+
+            val response: WSResponse = await(
+              requestForChargeInfo.post(Json.toJson(chargeInfoRequest))
+            )
+
+            val expectedTtppErrorResponse: TtppErrorResponse =
+              TtppErrorResponse(statusCode = 400, errorMessage = "only reason")
+
+            response.json shouldBe Json.toJson(expectedTtppErrorResponse)
+            response.status shouldBe 400
+          }
+        }
+
+        "when given an invalid json payload" - {
+          "with an empty json object" in new TimeToPayProxyControllerTestBase {
+            stubPostWithResponseBody(url = "/auth/authorise", status = 200, responseBody = "null")
+
+            val requestForChargeInfo: WSRequest = buildRequest("/charge-info")
+
+            val response: WSResponse = await(
+              requestForChargeInfo.post(JsObject.empty)
+            )
+
+            val expectedTtppErrorResponse: TtppErrorResponse = TtppErrorResponse(
+              statusCode = 400,
+              errorMessage =
+                "Invalid ChargeInfoRequest payload: Payload has a missing field or an invalid format. Field name: regimeType. "
+            )
+
+            response.json shouldBe Json.toJson(expectedTtppErrorResponse)
+            response.status shouldBe 400
+          }
+
+          "with mandatory fields missing" - {
+            "when 'channelIdentifier' is missing" in new TimeToPayProxyControllerTestBase {
+              stubPostWithResponseBody(url = "/auth/authorise", status = 200, responseBody = "null")
+
+              val requestForChargeInfo: WSRequest = buildRequest("/charge-info")
+
+              val invalidRequestBody: JsValue = Json.parse(
+                """{
+                  |  "identifications": [
+                  |    {
+                  |      "idType": "id type 1",
+                  |      "idValue": "id value 1"
+                  |    },
+                  |    {
+                  |      "idType": "id type 2",
+                  |      "idValue": "id value 2"
+                  |    }
+                  |  ],
+                  |  "regimeType": "SA"
+                  |}
+                  |""".stripMargin
+              )
+
+              val response: WSResponse = await(
+                requestForChargeInfo.post(invalidRequestBody)
+              )
+
+              val expectedTtppErrorResponse: TtppErrorResponse = TtppErrorResponse(
+                statusCode = 400,
+                errorMessage =
+                  "Invalid ChargeInfoRequest payload: Payload has a missing field or an invalid format. Field name: channelIdentifier. "
+              )
+
+              response.json shouldBe Json.toJson(expectedTtppErrorResponse)
+              response.status shouldBe 400
+            }
+
+            "when 'identifications' is missing" in new TimeToPayProxyControllerTestBase {
+              stubPostWithResponseBody(url = "/auth/authorise", status = 200, responseBody = "null")
+
+              val requestForChargeInfo: WSRequest = buildRequest("/charge-info")
+
+              val invalidRequestBody: JsValue = Json.parse(
+                """{
+                  |  "channelIdentifier": "Channel Identifier",
+                  |  "regimeType": "SA"
+                  |}
+                  |""".stripMargin
+              )
+
+              val response: WSResponse = await(
+                requestForChargeInfo.post(invalidRequestBody)
+              )
+
+              val expectedTtppErrorResponse: TtppErrorResponse = TtppErrorResponse(
+                statusCode = 400,
+                errorMessage =
+                  "Invalid ChargeInfoRequest payload: Payload has a missing field or an invalid format. Field name: identifications. "
+              )
+
+              response.json shouldBe Json.toJson(expectedTtppErrorResponse)
+              response.status shouldBe 400
+            }
+
+            "when 'regimeType' is missing" in new TimeToPayProxyControllerTestBase {
+              stubPostWithResponseBody(url = "/auth/authorise", status = 200, responseBody = "null")
+
+              val requestForChargeInfo: WSRequest = buildRequest("/charge-info")
+
+              val invalidRequestBody: JsValue = Json.parse(
+                """{
+                  |  "channelIdentifier": "Channel Identifier",
+                  |  "identifications": [
+                  |    {
+                  |      "idType": "id type 1",
+                  |      "idValue": "id value 1"
+                  |    },
+                  |    {
+                  |      "idType": "id type 2",
+                  |      "idValue": "id value 2"
+                  |    }
+                  |  ]
+                  |}
+                  |""".stripMargin
+              )
+
+              val response: WSResponse = await(
+                requestForChargeInfo.post(invalidRequestBody)
+              )
+
+              val expectedTtppErrorResponse: TtppErrorResponse = TtppErrorResponse(
+                statusCode = 400,
+                errorMessage =
+                  "Invalid ChargeInfoRequest payload: Payload has a missing field or an invalid format. Field name: regimeType. "
+              )
+
+              response.json shouldBe Json.toJson(expectedTtppErrorResponse)
+              response.status shouldBe 400
+            }
+          }
+
+          "with invalid types" - {
+            "when 'channelIdentifier' is invalid" in new TimeToPayProxyControllerTestBase {
+              stubPostWithResponseBody(url = "/auth/authorise", status = 200, responseBody = "null")
+
+              val requestForChargeInfo: WSRequest = buildRequest("/charge-info")
+
+              val invalidRequestBody: JsValue = Json.parse(
+                """{
+                  |  "channelIdentifier": 10,
+                  |  "identifications": [
+                  |    {
+                  |      "idType": "id type 1",
+                  |      "idValue": "id value 1"
+                  |    },
+                  |    {
+                  |      "idType": "id type 2",
+                  |      "idValue": "id value 2"
+                  |    }
+                  |  ],
+                  |  "regimeType": "SA"
+                  |}
+                  |""".stripMargin
+              )
+
+              val response: WSResponse = await(
+                requestForChargeInfo.post(invalidRequestBody)
+              )
+
+              val expectedTtppErrorResponse: TtppErrorResponse = TtppErrorResponse(
+                statusCode = 400,
+                errorMessage =
+                  "Invalid ChargeInfoRequest payload: Payload has a missing field or an invalid format. Field name: channelIdentifier. "
+              )
+
+              response.json shouldBe Json.toJson(expectedTtppErrorResponse)
+              response.status shouldBe 400
+            }
+
+            "when 'identifications' is invalid" in new TimeToPayProxyControllerTestBase {
+              stubPostWithResponseBody(url = "/auth/authorise", status = 200, responseBody = "null")
+
+              val requestForChargeInfo: WSRequest = buildRequest("/charge-info")
+
+              val invalidRequestBody: JsValue = Json.parse(
+                """{
+                  |  "channelIdentifier": "Channel Identifier",
+                  |  "identifications": "identifications",
+                  |  "regimeType": "SA"
+                  |}
+                  |""".stripMargin
+              )
+
+              val response: WSResponse = await(
+                requestForChargeInfo.post(invalidRequestBody)
+              )
+
+              val expectedTtppErrorResponse: TtppErrorResponse = TtppErrorResponse(
+                statusCode = 400,
+                errorMessage =
+                  "Invalid ChargeInfoRequest payload: Payload has a missing field or an invalid format. Field name: identifications. "
+              )
+
+              response.json shouldBe Json.toJson(expectedTtppErrorResponse)
+              response.status shouldBe 400
+            }
+
+            "when 'regimeType' is invalid" in new TimeToPayProxyControllerTestBase {
+              stubPostWithResponseBody(url = "/auth/authorise", status = 200, responseBody = "null")
+
+              val requestForChargeInfo: WSRequest = buildRequest("/charge-info")
+
+              val invalidRequestBody: JsValue = Json.parse(
+                """{
+                  |  "channelIdentifier": 10,
+                  |  "identifications": [
+                  |    {
+                  |      "idType": "id type 1",
+                  |      "idValue": "id value 1"
+                  |    },
+                  |    {
+                  |      "idType": "id type 2",
+                  |      "idValue": "id value 2"
+                  |    }
+                  |  ],
+                  |  "regimeType": true
+                  |}
+                  |""".stripMargin
+              )
+
+              val response: WSResponse = await(
+                requestForChargeInfo.post(invalidRequestBody)
+              )
+
+              val expectedTtppErrorResponse: TtppErrorResponse = TtppErrorResponse(
+                statusCode = 400,
+                errorMessage =
+                  "Invalid ChargeInfoRequest payload: Payload has a missing field or an invalid format. Field name: regimeType. "
+              )
+
+              response.json shouldBe Json.toJson(expectedTtppErrorResponse)
+              response.status shouldBe 400
+            }
+          }
+        }
+      }
+
+      "should return a 503 statusCode" - {
+        "when given a valid json payload" - {
+          for (responseStatus <- List(200, 400)) s"when TimeToPayEligibility returns a $responseStatus response" - {
+            "with a null json response from TTPE" in new TimeToPayProxyControllerTestBase {
+              stubPostWithResponseBody(url = "/auth/authorise", status = 200, responseBody = "null")
+              stubPostWithResponseBody(
+                url = "/debts/time-to-pay/charge-info",
+                status = responseStatus,
+                responseBody = JsNull.toString()
+              )
+
+              val requestForChargeInfo: WSRequest = buildRequest("/charge-info")
+
+              val response: WSResponse = await(
+                requestForChargeInfo.post(Json.toJson(chargeInfoRequest))
+              )
+
+              val expectedTtppErrorResponse: TtppErrorResponse =
+                TtppErrorResponse(statusCode = 503, errorMessage = "Couldn't parse body from upstream")
+
+              response.json shouldBe Json.toJson(expectedTtppErrorResponse)
+              response.status shouldBe 503
+            }
+          }
+        }
+      }
+    }
   }
 
   trait TimeToPayProxyControllerTestBase {
@@ -318,5 +624,88 @@ class TimeToPayProxyControllerItSpec extends IntegrationBaseSpec {
       customerPostcodes = List(),
       regimeType = Some(SsttpRegimeType.SA)
     )
+
+    val ttpeResponse: ChargeInfoResponse = ChargeInfoResponse(
+      processingDateTime = LocalDateTime.parse("2025-07-02T15:00:41.689"),
+      identification = List(
+        Identification(idType = IDType("ID_TYPE"), idValue = IDValue("ID_VALUE"))
+      ),
+      individualDetails = Some(
+        IndividualDetails(
+          title = Some(Title("Mr")),
+          firstName = Some(FirstName("John")),
+          lastName = Some(LastName("Doe")),
+          dateOfBirth = Some(DateOfBirth(LocalDate.parse("1980-01-01"))),
+          districtNumber = Some(DistrictNumber("1234")),
+          customerType = CustomerType.ItsaMigtrated,
+          transitionToCDCS = TransitionToCdcs(value = true)
+        )
+      ),
+      addresses = List(
+        Address(
+          addressType = AddressType("Address Type"),
+          addressLine1 = AddressLine1("Address Line 1"),
+          addressLine2 = Some(AddressLine2("Address Line 2")),
+          addressLine3 = Some(AddressLine3("Address Line 3")),
+          addressLine4 = Some(AddressLine4("Address Line 4")),
+          rls = Some(Rls(true)),
+          contactDetails = Some(
+            ContactDetails(
+              telephoneNumber = Some(TelephoneNumber("telephone-number")),
+              fax = Some(Fax("fax-number")),
+              mobile = Some(Mobile("mobile-number")),
+              emailAddress = Some(Email("email address")),
+              emailSource = Some(EmailSource("email source")),
+              altFormat = Some(AltFormat(16))
+            )
+          ),
+          postCode = Some(ChargeInfoPostCode("AB12 3CD")),
+          country = Some(CountryCode("GB")),
+          postcodeHistory = List(
+            PostCodeInfo(addressPostcode = ChargeInfoPostCode("AB12 3CD"), postcodeDate = LocalDate.parse("2020-01-01"))
+          )
+        )
+      ),
+      chargeTypeAssessment = List(
+        ChargeTypeAssessment(
+          debtTotalAmount = BigInt(1000),
+          chargeReference = ChargeReference("CHARGE REFERENCE"),
+          parentChargeReference = Some(ChargeInfoParentChargeReference("PARENT CHARGE REF")),
+          mainTrans = MainTrans("2000"),
+          charges = List(
+            Charge(
+              taxPeriodFrom = TaxPeriodFrom(LocalDate.parse("2020-01-02")),
+              taxPeriodTo = TaxPeriodTo(LocalDate.parse("2020-12-31")),
+              chargeType = ChargeType("charge type"),
+              mainType = MainType("main type"),
+              subTrans = SubTrans("1000"),
+              outstandingAmount = OutstandingAmount(BigInt(500)),
+              dueDate = DueDate(LocalDate.parse("2021-01-31")),
+              isInterestBearingCharge = Some(ChargeInfoIsInterestBearingCharge(true)),
+              interestStartDate = Some(InterestStartDate(LocalDate.parse("2020-01-03"))),
+              accruedInterest = AccruedInterest(BigInt(50)),
+              chargeSource = ChargeInfoChargeSource("Source"),
+              parentMainTrans = Some(ChargeInfoParentMainTrans("Parent Main Transaction")),
+              originalCreationDate = Some(OriginalCreationDate(LocalDate.parse("2025-07-02"))),
+              tieBreaker = Some(TieBreaker("Tie Breaker")),
+              originalTieBreaker = Some(OriginalTieBreaker("Original Tie Breaker")),
+              saTaxYearEnd = Some(SaTaxYearEnd(LocalDate.parse("2020-04-05"))),
+              creationDate = Some(CreationDate(LocalDate.parse("2025-07-02"))),
+              originalChargeType = Some(OriginalChargeType("Original Charge Type"))
+            )
+          )
+        )
+      )
+    )
+
+    val chargeInfoRequest: ChargeInfoRequest = ChargeInfoRequest(
+      channelIdentifier = ChargeInfoChannelIdentifier("Channel Identifier"),
+      identifications = List(
+        Identification(idType = IDType("id type 1"), idValue = IDValue("id value 1")),
+        Identification(idType = IDType("id type 2"), idValue = IDValue("id value 2"))
+      ),
+      regimeType = RegimeType.SA
+    )
+
   }
 }

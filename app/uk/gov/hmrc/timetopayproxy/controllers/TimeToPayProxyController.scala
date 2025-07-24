@@ -26,7 +26,8 @@ import uk.gov.hmrc.timetopayproxy.models.TtppEnvelope.TtppEnvelope
 import uk.gov.hmrc.timetopayproxy.models.TtppErrorResponse._
 import uk.gov.hmrc.timetopayproxy.models._
 import uk.gov.hmrc.timetopayproxy.models.affordablequotes.AffordableQuotesRequest
-import uk.gov.hmrc.timetopayproxy.services.TTPQuoteService
+import uk.gov.hmrc.timetopayproxy.models.chargeInfoApi.ChargeInfoRequest
+import uk.gov.hmrc.timetopayproxy.services.{ TTPEService, TTPQuoteService }
 import uk.gov.hmrc.timetopayproxy.utils.TtppErrorHandler._
 import uk.gov.hmrc.timetopayproxy.utils.TtppResponseConverter._
 
@@ -39,7 +40,8 @@ import scala.util.{ Failure, Success, Try }
 class TimeToPayProxyController @Inject() (
   authoriseAction: AuthoriseAction,
   cc: ControllerComponents,
-  timeToPayProxyService: TTPQuoteService,
+  timeToPayQuoteService: TTPQuoteService,
+  timeToPayEligibilityService: TTPEService,
   @unused
   fs: FeatureSwitch
 ) extends BackendController(cc) with BaseController {
@@ -50,7 +52,7 @@ class TimeToPayProxyController @Inject() (
 
   def generateQuote: Action[JsValue] = authoriseAction.async(parse.json) { implicit request =>
     withJsonBody[GenerateQuoteRequest] { timeToPayRequest: GenerateQuoteRequest =>
-      timeToPayProxyService
+      timeToPayQuoteService
         .generateQuote(timeToPayRequest, request.queryString)
         .leftMap(ttppError => ttppError.toErrorResponse)
         .fold(e => e.toResponse, r => r.toResponse)
@@ -59,7 +61,7 @@ class TimeToPayProxyController @Inject() (
 
   def viewPlan(customerReference: String, planId: String) =
     authoriseAction.async { implicit request =>
-      timeToPayProxyService
+      timeToPayQuoteService
         .getExistingPlan(CustomerReference(customerReference), PlanId(planId))
         .leftMap(ttppError => ttppError.toErrorResponse)
         .fold(e => e.toResponse, r => r.toResponse)
@@ -71,7 +73,7 @@ class TimeToPayProxyController @Inject() (
         val result = for {
           validatedUpdatePlanRequest <-
             validateUpdateRequestMatchesQueryParams(customerReference, planId, updatePlanRequest)
-          response <- timeToPayProxyService.updatePlan(validatedUpdatePlanRequest)
+          response <- timeToPayQuoteService.updatePlan(validatedUpdatePlanRequest)
         } yield response
 
         result
@@ -82,7 +84,7 @@ class TimeToPayProxyController @Inject() (
 
   def createPlan = authoriseAction.async(parse.json) { implicit request =>
     withJsonBody[CreatePlanRequest] { createPlanRequest: CreatePlanRequest =>
-      timeToPayProxyService
+      timeToPayQuoteService
         .createPlan(createPlanRequest, request.queryString)
         .leftMap(ttppError => ttppError.toErrorResponse)
         .fold(e => e.toResponse, r => r.toResponse)
@@ -91,8 +93,17 @@ class TimeToPayProxyController @Inject() (
 
   def getAffordableQuotes = authoriseAction.async(parse.json) { implicit request =>
     withJsonBody[AffordableQuotesRequest] { affordableQuoteRequest: AffordableQuotesRequest =>
-      timeToPayProxyService
+      timeToPayQuoteService
         .getAffordableQuotes(affordableQuoteRequest)
+        .leftMap(ttppError => ttppError.toErrorResponse)
+        .fold(e => e.toResponse, r => r.toResponse)
+    }
+  }
+
+  def checkChargeInfo: Action[JsValue] = authoriseAction.async(parse.json) { implicit request =>
+    withJsonBody[ChargeInfoRequest] { chargeInfoRequest: ChargeInfoRequest =>
+      timeToPayEligibilityService
+        .checkChargeInfo(chargeInfoRequest)
         .leftMap(ttppError => ttppError.toErrorResponse)
         .fold(e => e.toResponse, r => r.toResponse)
     }

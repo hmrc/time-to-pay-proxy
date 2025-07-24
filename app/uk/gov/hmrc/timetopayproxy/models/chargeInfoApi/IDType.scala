@@ -18,7 +18,7 @@ package uk.gov.hmrc.timetopayproxy.models.chargeInfoApi
 
 import play.api.libs.json.{ Format, Json }
 
-final case class IDType(idType: String) extends AnyVal
+final case class IDType(value: String) extends AnyVal
 
 object IDType {
   implicit val format: Format[IDType] = Json.valueFormat[IDType]

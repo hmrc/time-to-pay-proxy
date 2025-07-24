@@ -31,7 +31,7 @@ object ChargeInfoRequest {
   implicit val format: OFormat[ChargeInfoRequest] = Json.format[ChargeInfoRequest]
 }
 
-final case class ChargeInfoChannelIdentifier(channelIdentifier: String) extends AnyVal
+final case class ChargeInfoChannelIdentifier(value: String) extends AnyVal
 
 object ChargeInfoChannelIdentifier {
   implicit val format: Format[ChargeInfoChannelIdentifier] = Json.valueFormat[ChargeInfoChannelIdentifier]

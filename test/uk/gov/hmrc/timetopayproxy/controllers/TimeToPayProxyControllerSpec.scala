@@ -18,7 +18,7 @@ package uk.gov.hmrc.timetopayproxy.controllers
 
 import cats.syntax.either._
 import org.scalamock.scalatest.MockFactory
-import org.scalatest.matchers.should.Matchers
+import org.scalatest.matchers.should.Matchers._
 import org.scalatest.wordspec.AnyWordSpec
 import play.api.http.{ MimeTypes, Status }
 import play.api.libs.json.{ JsArray, JsValue, Json }
@@ -34,13 +34,14 @@ import uk.gov.hmrc.timetopayproxy.config.FeatureSwitch
 import uk.gov.hmrc.timetopayproxy.models.TtppEnvelope.TtppEnvelope
 import uk.gov.hmrc.timetopayproxy.models._
 import uk.gov.hmrc.timetopayproxy.models.affordablequotes._
-import uk.gov.hmrc.timetopayproxy.services.TTPQuoteService
+import uk.gov.hmrc.timetopayproxy.models.chargeInfoApi._
+import uk.gov.hmrc.timetopayproxy.services.{ TTPEService, TTPQuoteService }
 
 import java.time.{ LocalDate, LocalDateTime }
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.{ ExecutionContext, Future }
 
-class TimeToPayProxyControllerSpec extends AnyWordSpec with Matchers with MockFactory {
+class TimeToPayProxyControllerSpec extends AnyWordSpec with MockFactory {
 
   private val authConnector: PlayAuthConnector = mock[PlayAuthConnector]
 
@@ -49,9 +50,10 @@ class TimeToPayProxyControllerSpec extends AnyWordSpec with Matchers with MockFa
     new AuthoriseActionImpl(authConnector, cc)
 
   private val ttpQuoteService = mock[TTPQuoteService]
+  private val ttpeService = mock[TTPEService]
   private val fs: FeatureSwitch = mock[FeatureSwitch]
   private val controller =
-    new TimeToPayProxyController(authoriseAction, cc, ttpQuoteService, fs)
+    new TimeToPayProxyController(authoriseAction, cc, ttpQuoteService, ttpeService, fs)
 
   private val generateQuoteRequest = GenerateQuoteRequest(
     CustomerReference("customerReference"),
@@ -1012,6 +1014,157 @@ class TimeToPayProxyControllerSpec extends AnyWordSpec with Matchers with MockFa
             .withBody(Json.toJson[AffordableQuotesRequest](affordableQuotesRequest))
 
         val response: Future[Result] = controller.getAffordableQuotes()(fakeRequest)
+
+        status(response) shouldBe Status.INTERNAL_SERVER_ERROR
+        contentAsJson(response) shouldBe Json.toJson[TtppErrorResponse](
+          TtppErrorResponse(statusCode = 500, errorMessage = "Internal Server Error")
+        )
+      }
+    }
+  }
+
+  "POST /individuals/time-to-pay-proxy/charge-info" should {
+    val chargeInfoRequest: ChargeInfoRequest = ChargeInfoRequest(
+      channelIdentifier = ChargeInfoChannelIdentifier("Channel Identifier"),
+      identifications = List(
+        Identification(idType = IDType("id type 1"), idValue = IDValue("id value 1")),
+        Identification(idType = IDType("id type 2"), idValue = IDValue("id value 2"))
+      ),
+      regimeType = RegimeType.SA
+    )
+    val chargeInfoResponse: ChargeInfoResponse = ChargeInfoResponse(
+      processingDateTime = LocalDateTime.parse("2025-07-02T15:00:41.689"),
+      identification = List(
+        Identification(idType = IDType("ID_TYPE"), idValue = IDValue("ID_VALUE"))
+      ),
+      individualDetails = Some(
+        IndividualDetails(
+          title = Some(Title("Mr")),
+          firstName = Some(FirstName("John")),
+          lastName = Some(LastName("Doe")),
+          dateOfBirth = Some(DateOfBirth(LocalDate.parse("1980-01-01"))),
+          districtNumber = Some(DistrictNumber("1234")),
+          customerType = CustomerType.ItsaMigtrated,
+          transitionToCDCS = TransitionToCdcs(value = true)
+        )
+      ),
+      addresses = List(
+        Address(
+          addressType = AddressType("Address Type"),
+          addressLine1 = AddressLine1("Address Line 1"),
+          addressLine2 = Some(AddressLine2("Address Line 2")),
+          addressLine3 = Some(AddressLine3("Address Line 3")),
+          addressLine4 = Some(AddressLine4("Address Line 4")),
+          rls = Some(Rls(true)),
+          contactDetails = Some(
+            ContactDetails(
+              telephoneNumber = Some(TelephoneNumber("telephone-number")),
+              fax = Some(Fax("fax-number")),
+              mobile = Some(Mobile("mobile-number")),
+              emailAddress = Some(Email("email address")),
+              emailSource = Some(EmailSource("email source")),
+              altFormat = Some(AltFormat(16))
+            )
+          ),
+          postCode = Some(ChargeInfoPostCode("AB12 3CD")),
+          country = Some(CountryCode("GB")),
+          postcodeHistory = List(
+            PostCodeInfo(addressPostcode = ChargeInfoPostCode("AB12 3CD"), postcodeDate = LocalDate.parse("2020-01-01"))
+          )
+        )
+      ),
+      chargeTypeAssessment = List(
+        ChargeTypeAssessment(
+          debtTotalAmount = BigInt(1000),
+          chargeReference = ChargeReference("CHARGE REFERENCE"),
+          parentChargeReference = Some(ChargeInfoParentChargeReference("PARENT CHARGE REF")),
+          mainTrans = MainTrans("2000"),
+          charges = List(
+            Charge(
+              taxPeriodFrom = TaxPeriodFrom(LocalDate.parse("2020-01-02")),
+              taxPeriodTo = TaxPeriodTo(LocalDate.parse("2020-12-31")),
+              chargeType = ChargeType("charge type"),
+              mainType = MainType("main type"),
+              subTrans = SubTrans("1000"),
+              outstandingAmount = OutstandingAmount(BigInt(500)),
+              dueDate = DueDate(LocalDate.parse("2021-01-31")),
+              isInterestBearingCharge = Some(ChargeInfoIsInterestBearingCharge(true)),
+              interestStartDate = Some(InterestStartDate(LocalDate.parse("2020-01-03"))),
+              accruedInterest = AccruedInterest(BigInt(50)),
+              chargeSource = ChargeInfoChargeSource("Source"),
+              parentMainTrans = Some(ChargeInfoParentMainTrans("Parent Main Transaction")),
+              originalCreationDate = Some(OriginalCreationDate(LocalDate.parse("2025-07-02"))),
+              tieBreaker = Some(TieBreaker("Tie Breaker")),
+              originalTieBreaker = Some(OriginalTieBreaker("Original Tie Breaker")),
+              saTaxYearEnd = Some(SaTaxYearEnd(LocalDate.parse("2020-04-05"))),
+              creationDate = Some(CreationDate(LocalDate.parse("2025-07-02"))),
+              originalChargeType = Some(OriginalChargeType("Original Charge Type"))
+            )
+          )
+        )
+      )
+    )
+
+    "return 200" when {
+      "service returns" in {
+        (authConnector
+          .authorise[Unit](_: Predicate, _: Retrieval[Unit])(
+            _: HeaderCarrier,
+            _: ExecutionContext
+          ))
+          .expects(*, *, *, *)
+          .returning(Future.successful(()))
+
+        (ttpeService
+          .checkChargeInfo(_: ChargeInfoRequest)(
+            _: ExecutionContext,
+            _: HeaderCarrier
+          ))
+          .expects(chargeInfoRequest, *, *)
+          .returning(TtppEnvelope(chargeInfoResponse))
+
+        val fakeRequest: FakeRequest[JsValue] =
+          FakeRequest("POST", "/individuals/time-to-pay-proxy/charge-info")
+            .withHeaders(CONTENT_TYPE -> MimeTypes.JSON)
+            .withBody(Json.toJson[ChargeInfoRequest](chargeInfoRequest))
+
+        val response: Future[Result] = controller.checkChargeInfo()(fakeRequest)
+
+        status(response) shouldBe Status.OK
+        contentAsJson(response) shouldBe Json.toJson[ChargeInfoResponse](
+          chargeInfoResponse
+        )
+      }
+    }
+    "return 500" when {
+      "TTPEligibility returns a failure" in {
+        (authConnector
+          .authorise[Unit](_: Predicate, _: Retrieval[Unit])(
+            _: HeaderCarrier,
+            _: ExecutionContext
+          ))
+          .expects(*, *, *, *)
+          .returning(Future.successful(()))
+
+        val errorFromTtpeConnector =
+          ConnectorError(500, "Internal Server Error")
+
+        (ttpeService
+          .checkChargeInfo(_: ChargeInfoRequest)(
+            _: ExecutionContext,
+            _: HeaderCarrier
+          ))
+          .expects(chargeInfoRequest, *, *)
+          .returning(
+            TtppEnvelope(errorFromTtpeConnector.asLeft[ChargeInfoResponse])
+          )
+
+        val fakeRequest: FakeRequest[JsValue] =
+          FakeRequest("POST", "/individuals/time-to-pay-proxy/charge-info")
+            .withHeaders(CONTENT_TYPE -> MimeTypes.JSON)
+            .withBody(Json.toJson[ChargeInfoRequest](chargeInfoRequest))
+
+        val response: Future[Result] = controller.checkChargeInfo()(fakeRequest)
 
         status(response) shouldBe Status.INTERNAL_SERVER_ERROR
         contentAsJson(response) shouldBe Json.toJson[TtppErrorResponse](
