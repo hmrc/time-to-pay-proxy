@@ -33,8 +33,7 @@ lazy val microservice = Project(appName, file("."))
       "-language:higherKinds",
       "-Wconf:src=routes/.*:s",
       "-Wconf:cat=unused-imports&src=html/.*:s"
-    ),
-    dependencyOverrides += "com.fasterxml.jackson.core" % "jackson-core" % "2.19.2"
+    )
   )
   .settings(
     Compile / unmanagedResourceDirectories += baseDirectory.value / "resources"
