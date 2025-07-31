@@ -43,8 +43,9 @@ info:
       | 1.0.9 | 14-05-2025 | Alex Olkhovskiy | Add regimeType to /affordable-quotes endpoint |
       | 1.0.10 | 14-05-2025 | Alex Olkhovskiy | Added regimeType, chargeSource, parentMainTrans, parentChargeReference and dueDate fields to DebtItemChargeArrangementRequest schema |
       | 1.0.11 | 10-07-2025 | Alex Olkhovskiy | Added new charge-info proxy endpoint to get customer charge information |
+      | 1.0.12 | 23-07-2025 | Alex Olkhovskiy | make regimeType enum |
   contact: {}
-  version: '1.0.11'
+  version: '1.0.12'
 servers:
   - url: https://api.service.hmrc.gov.uk/
     variables: {}
@@ -2004,6 +2005,8 @@ components:
         regimeType:
           type: string
           description: Regime type
+          enum:
+            - SA
         channelIdentifier:
           type: string
           description: Channel Identifier
