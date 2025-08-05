@@ -25,7 +25,7 @@ import scala.collection.immutable
 final case class ChargeInfoResponse(
   processingDateTime: LocalDateTime,
   identification: List[Identification],
-  individualDetails: Option[IndividualDetails],
+  individualDetails: IndividualDetails,
   addresses: List[Address],
   chargeTypeAssessment: List[ChargeTypeAssessment]
 )
@@ -114,7 +114,6 @@ final case class Address(
   rls: Option[Rls],
   contactDetails: Option[ContactDetails],
   postCode: Option[ChargeInfoPostCode],
-  country: Option[CountryCode],
   postcodeHistory: List[PostCodeInfo]
 )
 
@@ -163,8 +162,7 @@ final case class ContactDetails(
   fax: Option[Fax],
   mobile: Option[Mobile],
   emailAddress: Option[Email],
-  emailSource: Option[EmailSource],
-  altFormat: Option[AltFormat]
+  emailSource: Option[EmailSource]
 )
 
 object ContactDetails {

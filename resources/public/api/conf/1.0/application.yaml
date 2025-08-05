@@ -44,8 +44,9 @@ info:
       | 1.0.10 | 14-05-2025 | Alex Olkhovskiy | Added regimeType, chargeSource, parentMainTrans, parentChargeReference and dueDate fields to DebtItemChargeArrangementRequest schema |
       | 1.0.11 | 10-07-2025 | Alex Olkhovskiy | Added new charge-info proxy endpoint to get customer charge information |
       | 1.0.12 | 23-07-2025 | Alex Olkhovskiy | make regimeType enum |
+      | 1.0.12-proposedB | 31-07-2025 | Alex Olkhovskiy | make indentations in charge-info request non-empty|
   contact: {}
-  version: '1.0.12'
+  version: '1.0.12-proposedB'
 servers:
   - url: https://api.service.hmrc.gov.uk/
     variables: {}
@@ -2012,6 +2013,7 @@ components:
           description: Channel Identifier
         identifications:
           type: array
+          minItems: 1
           items:
             type: object
             properties:
@@ -2033,6 +2035,7 @@ components:
         - identification
         - chargeTypeAssessment
         - addresses
+        - individualDetails
       properties:
         processingDateTime:
           type: string
@@ -2126,15 +2129,9 @@ components:
                   emailSource:
                     type: string
                     description: Email source
-                  altFormat:
-                    type: integer
-                    description: Specifies alternative format for letters
               postCode:
                 type: string
                 description: Post code
-              country:
-                type: string
-                description: Country
               postcodeHistory:
                 type: array
                 items:

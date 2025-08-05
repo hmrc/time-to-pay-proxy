@@ -16,6 +16,7 @@
 
 package uk.gov.hmrc.timetopayproxy.models.chargeInfoApi
 
+import cats.data.NonEmptyList
 import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.should.Matchers._
 import play.api.libs.json.{ JsSuccess, JsValue, Json, Reads, Writes }
@@ -28,7 +29,7 @@ class ChargeInfoRequestSpec extends AnyFreeSpec {
     object WithNoDeclaredOptions {
       def obj: ChargeInfoRequest = ChargeInfoRequest(
         channelIdentifier = ChargeInfoChannelIdentifier("Channel Identifier"),
-        identifications = List(
+        identifications = NonEmptyList.of(
           Identification(idType = IDType("id type 1"), idValue = IDValue("id value 1")),
           Identification(idType = IDType("id type 2"), idValue = IDValue("id value 2"))
         ),

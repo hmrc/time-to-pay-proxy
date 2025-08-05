@@ -16,6 +16,7 @@
 
 package uk.gov.hmrc.timetopayproxy.services
 
+import cats.data.NonEmptyList
 import cats.implicits.catsSyntaxEitherId
 import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.should.Matchers._
@@ -27,6 +28,7 @@ import uk.gov.hmrc.timetopayproxy.connectors.TtpeConnector
 import uk.gov.hmrc.timetopayproxy.models.TtppEnvelope.TtppEnvelope
 import uk.gov.hmrc.timetopayproxy.models.{ ConnectorError, TtppEnvelope, TtppError }
 import uk.gov.hmrc.timetopayproxy.models.chargeInfoApi._
+
 import java.time.{ LocalDate, LocalDateTime }
 import scala.concurrent.{ ExecutionContext, Future }
 
@@ -35,7 +37,7 @@ class TTPEServiceSpec extends AnyFreeSpec {
 
   private val chargeInfoRequest: ChargeInfoRequest = ChargeInfoRequest(
     channelIdentifier = ChargeInfoChannelIdentifier("Channel Identifier"),
-    identifications = List(
+    identifications = NonEmptyList.of(
       Identification(idType = IDType("id type 1"), idValue = IDValue("id value 1")),
       Identification(idType = IDType("id type 2"), idValue = IDValue("id value 2"))
     ),
@@ -47,16 +49,14 @@ class TTPEServiceSpec extends AnyFreeSpec {
     identification = List(
       Identification(idType = IDType("ID_TYPE"), idValue = IDValue("ID_VALUE"))
     ),
-    individualDetails = Some(
-      IndividualDetails(
-        title = Some(Title("Mr")),
-        firstName = Some(FirstName("John")),
-        lastName = Some(LastName("Doe")),
-        dateOfBirth = Some(DateOfBirth(LocalDate.parse("1980-01-01"))),
-        districtNumber = Some(DistrictNumber("1234")),
-        customerType = CustomerType.ItsaMigtrated,
-        transitionToCDCS = TransitionToCdcs(value = true)
-      )
+    individualDetails = IndividualDetails(
+      title = Some(Title("Mr")),
+      firstName = Some(FirstName("John")),
+      lastName = Some(LastName("Doe")),
+      dateOfBirth = Some(DateOfBirth(LocalDate.parse("1980-01-01"))),
+      districtNumber = Some(DistrictNumber("1234")),
+      customerType = CustomerType.ItsaMigtrated,
+      transitionToCDCS = TransitionToCdcs(value = true)
     ),
     addresses = List(
       Address(
@@ -72,12 +72,10 @@ class TTPEServiceSpec extends AnyFreeSpec {
             fax = Some(Fax("fax-number")),
             mobile = Some(Mobile("mobile-number")),
             emailAddress = Some(Email("email address")),
-            emailSource = Some(EmailSource("email source")),
-            altFormat = Some(AltFormat(16))
+            emailSource = Some(EmailSource("email source"))
           )
         ),
         postCode = Some(ChargeInfoPostCode("AB12 3CD")),
-        country = Some(CountryCode("GB")),
         postcodeHistory = List(
           PostCodeInfo(addressPostcode = ChargeInfoPostCode("AB12 3CD"), postcodeDate = LocalDate.parse("2020-01-01"))
         )

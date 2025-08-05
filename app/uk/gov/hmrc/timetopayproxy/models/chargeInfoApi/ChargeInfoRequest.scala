@@ -16,19 +16,25 @@
 
 package uk.gov.hmrc.timetopayproxy.models.chargeInfoApi
 
+import cats.data.NonEmptyList
 import enumeratum.{ Enum, EnumEntry, PlayJsonEnum }
 import play.api.libs.json.{ Format, Json, OFormat }
+import uk.gov.hmrc.timetopayproxy.utils.json.CatsNonEmptyListJson
 
 import scala.collection.immutable
 
 final case class ChargeInfoRequest(
   channelIdentifier: ChargeInfoChannelIdentifier,
-  identifications: List[Identification],
+  identifications: NonEmptyList[Identification],
   regimeType: RegimeType
 )
 
 object ChargeInfoRequest {
-  implicit val format: OFormat[ChargeInfoRequest] = Json.format[ChargeInfoRequest]
+  implicit val format: OFormat[ChargeInfoRequest] = {
+    implicit val nelJsonFormat: Format[NonEmptyList[Identification]] = CatsNonEmptyListJson.nonEmptyListFormat
+
+    Json.format[ChargeInfoRequest]
+  }
 }
 
 final case class ChargeInfoChannelIdentifier(value: String) extends AnyVal
