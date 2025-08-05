@@ -77,15 +77,63 @@ object Validators {
   }
 
   object TimeToPayEligibility {
-    // These can be populated with TTPE's own schema file whenever it becomes useful, like with any other external API.
-    // The schema file would be downloaded into `test/resources/schemas/apis/time-to-pay-eligibility`.
-    // For now, we trust that our Proxy schema is identical to (and as up to date as) the TTPE schema.
+    // Downloaded from:
+    //   https://github.com/hmrc/time-to-pay-eligibility/blob/dfc3c970abfe7ee8bafbd32e2dc77d35b829a37b/test/resources/schemas/apis/time-to-pay-eligibility/ttp-eligibility0.3.6.yaml
+    // Official location:
+    //   https://confluence.tools.tax.service.gov.uk/display/DTDT/TTP+Eligibility+API
+    private val path = "test/resources/schemas/apis/time-to-pay-eligibility/ttp-eligibility0.3.6.yaml"
+
+    object ChargeInfo {
+      def openApiRequestSchema: OpenApi3DerivedSchema =
+        new OpenApi3DerivedSchema(
+          openApiYamlFilename = path,
+          defaultJsonSubschemaName = "TTPEligibilityRequestChargeInfo",
+          metaSchemaValidation = Some(Valid(())),
+          restrictAdditionalProperties = true
+        )
+
+      def openApiResponseSuccessfulSchema =
+        new OpenApi3DerivedSchema(
+          openApiYamlFilename = path,
+          defaultJsonSubschemaName = "TTPEligibilitySuccessResponseChargeInfo",
+          metaSchemaValidation = Some(Valid(())),
+          restrictAdditionalProperties = true
+        )
+
+      def openApiErrorSchema =
+        new OpenApi3DerivedSchema(
+          openApiYamlFilename = path,
+          defaultJsonSubschemaName = "ErrorResponse",
+          metaSchemaValidation = Some(Valid(())),
+          restrictAdditionalProperties = true
+        )
+    }
   }
 
   object TimeToPay {
-    // These can be populated with TTP's own schema file whenever it becomes useful, like with any other external API.
-    // The schema file would be downloaded into `test/resources/schemas/apis/time-to-pay`.
-    // For now, we trust that our Proxy schema is identical to (and as up to date as) the TTP schema.
+    object AffordableQuotes {
+      // Downloaded from:
+      //   https://github.com/hmrc/time-to-pay/blob/82c464a0fa7ba93ac869ee361f497fd92a206ed6/resources/public/api/conf/1.0/affordable-quotes-api-v1.3.0.yaml
+      // Official location:
+      //   ???
+      private val path = "test/resources/schemas/apis/time-to-pay/affordable-quotes-api-v1.3.0.yaml"
+
+      def openApiRequestSchema: OpenApi3DerivedSchema =
+        new OpenApi3DerivedSchema(
+          path,
+          defaultJsonSubschemaName = "TTPAffordableQuotesRequest",
+          metaSchemaValidation = Some(Valid(())),
+          restrictAdditionalProperties = true
+        )
+
+      def openApiResponseSuccessfulSchema: OpenApi3DerivedSchema =
+        new OpenApi3DerivedSchema(
+          path,
+          defaultJsonSubschemaName = "TTPAffordableQuotesResponse",
+          metaSchemaValidation = Some(Valid(())),
+          restrictAdditionalProperties = true
+        )
+    }
   }
 
 }

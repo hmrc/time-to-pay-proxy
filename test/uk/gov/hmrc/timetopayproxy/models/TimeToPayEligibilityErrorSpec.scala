@@ -19,6 +19,7 @@ package uk.gov.hmrc.timetopayproxy.models
 import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.should.Matchers._
 import play.api.libs.json.{ JsSuccess, JsValue, Json, Reads }
+import uk.gov.hmrc.timetopayproxy.testutils.schematestutils.Validators
 
 final class TimeToPayEligibilityErrorSpec extends AnyFreeSpec {
   "TimeToPayEligibilityError" - {
@@ -50,7 +51,13 @@ final class TimeToPayEligibilityErrorSpec extends AnyFreeSpec {
           readerFromTtp.reads(json) shouldBe JsSuccess(obj)
         }
 
-        // One could also check that the reader was given JSON compatible with the time-to-pay-eligibility schema, if it's ever added.
+        "was tested against JSON compatible with the time-to-pay-eligibility schema" - {
+          "for the charge info endpoint" in {
+            val schema = Validators.TimeToPayEligibility.ChargeInfo.openApiErrorSchema
+
+            schema.validateAndGetErrors(json) shouldBe Nil
+          }
+        }
       }
     }
   }

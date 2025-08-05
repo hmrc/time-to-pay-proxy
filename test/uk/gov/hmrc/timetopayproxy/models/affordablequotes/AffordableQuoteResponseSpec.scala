@@ -247,7 +247,15 @@ final class AffordableQuoteResponseSpec extends AnyFreeSpec {
           readerFromTtp.reads(json) shouldBe JsSuccess(obj)
         }
 
-        // One could also check that the reader was given JSON compatible with the time-to-pay schema, if it's ever added.
+        "was tested against JSON compatible with the time-to-pay schema" in {
+          val schema = Validators.TimeToPay.AffordableQuotes.openApiResponseSuccessfulSchema
+
+          schema.validateAndGetErrors(json) shouldBe List(
+            // This is an issue with the time-to-pay schema. As of 2025-08-05, this response is not tested in time-to-pay.
+            """processingDateTime: Value '2023-10-01T12:00:00' does not match format 'date-time'. (code: 1007)
+              |From: processingDateTime.<format>""".stripMargin
+          )
+        }
       }
 
       "when none of the optional fields are populated" - {
@@ -258,7 +266,15 @@ final class AffordableQuoteResponseSpec extends AnyFreeSpec {
           readerFromTtp.reads(json) shouldBe JsSuccess(obj)
         }
 
-        // One could also check that the reader was given JSON compatible with the time-to-pay schema, if it's ever added.
+        "was tested against JSON compatible with the time-to-pay schema" in {
+          val schema = Validators.TimeToPay.AffordableQuotes.openApiResponseSuccessfulSchema
+
+          schema.validateAndGetErrors(json) shouldBe List(
+            // This is an issue with the time-to-pay schema. As of 2025-08-05, this response is not tested in time-to-pay.
+            """processingDateTime: Value '2023-10-01T12:00:00' does not match format 'date-time'. (code: 1007)
+              |From: processingDateTime.<format>""".stripMargin
+          )
+        }
       }
     }
   }

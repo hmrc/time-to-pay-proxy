@@ -58,7 +58,11 @@ final class TimeToPayErrorSpec extends AnyFreeSpec {
           readerFromTtp.reads(json) shouldBe JsSuccess(obj)
         }
 
-        // One could also check that the reader was given JSON compatible with the time-to-pay schema, if it's ever added.
+        "was tested against JSON compatible with the time-to-pay schema" - {
+          "for the affordable quotes endpoint" ignore {
+            // The time-to-pay spec for affordable quotes does not (yet) define any error response schemas.
+          }
+        }
       }
     }
   }

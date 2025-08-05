@@ -168,7 +168,12 @@ final class AffordableQuotesRequestSpec extends AnyFreeSpec {
           writerToTtp.writes(obj) shouldBeEquivalentTo json
         }
 
-        // One could also check that the writer is compatible with the time-to-pay schema, if it's ever added.
+        "writes JSON compatible with the time-to-pay schema" in {
+          val schema = Validators.TimeToPay.AffordableQuotes.openApiRequestSchema
+          val writtenJson: JsValue = writerToTtp.writes(obj)
+
+          schema.validateAndGetErrors(writtenJson) shouldBe Nil
+        }
       }
 
       "when none of the optional fields are populated" - {
@@ -179,7 +184,12 @@ final class AffordableQuotesRequestSpec extends AnyFreeSpec {
           writerToTtp.writes(obj) shouldBeEquivalentTo json
         }
 
-        // One could also check that the writer is compatible with the time-to-pay schema, if it's ever added.
+        "writes JSON compatible with the time-to-pay schema" in {
+          val schema = Validators.TimeToPay.AffordableQuotes.openApiRequestSchema
+          val writtenJson: JsValue = writerToTtp.writes(obj)
+
+          schema.validateAndGetErrors(writtenJson) shouldBe Nil
+        }
       }
     }
 

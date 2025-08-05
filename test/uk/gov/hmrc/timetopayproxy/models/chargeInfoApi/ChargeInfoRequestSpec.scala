@@ -68,7 +68,12 @@ class ChargeInfoRequestSpec extends AnyFreeSpec {
           writerToTtp.writes(obj) shouldBeEquivalentTo json
         }
 
-        // One could also check that the writer is compatible with the time-to-pay schema, if it's ever added.
+        "writes JSON compatible with the time-to-pay-eligibility schema" in {
+          val schema = Validators.TimeToPayEligibility.ChargeInfo.openApiRequestSchema
+          val writtenJson: JsValue = writerToTtp.writes(obj)
+
+          schema.validateAndGetErrors(writtenJson) shouldBe Nil
+        }
       }
     }
 

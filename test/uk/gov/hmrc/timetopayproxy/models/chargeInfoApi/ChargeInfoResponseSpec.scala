@@ -497,7 +497,17 @@ class ChargeInfoResponseSpec extends AnyFreeSpec {
           readerFromTtp.reads(json) shouldBe JsSuccess(obj)
         }
 
-        // One could also check that the reader was given JSON compatible with the time-to-pay-eligibility schema, if it's ever added.
+        "was tested against JSON compatible with the time-to-pay-eligibility schema" in {
+          val schema = Validators.TimeToPayEligibility.ChargeInfo.openApiResponseSuccessfulSchema
+
+          schema.validateAndGetErrors(json) shouldBe List(
+            // TODO DTD-3682: Fix the JSON format to match the eligibility schema.
+            """addresses.0.contactDetails: Additional property 'altFormat' is not allowed. (code: 1000)
+              |From: addresses.0.<items>.contactDetails.<additionalProperties>""".stripMargin,
+            """addresses.0: Additional property 'country' is not allowed. (code: 1000)
+              |From: addresses.0.<items>.<additionalProperties>""".stripMargin
+          )
+        }
       }
 
       "when only one optional field on each path is populated" - {
@@ -508,7 +518,15 @@ class ChargeInfoResponseSpec extends AnyFreeSpec {
           readerFromTtp.reads(json) shouldBe JsSuccess(obj)
         }
 
-        // One could also check that the reader was given JSON compatible with the time-to-pay-eligibility schema, if it's ever added.
+        "was tested against JSON compatible with the time-to-pay-eligibility schema" in {
+          val schema = Validators.TimeToPayEligibility.ChargeInfo.openApiResponseSuccessfulSchema
+
+          schema.validateAndGetErrors(json) shouldBe List(
+            // TODO DTD-3682: Fix the JSON format to match the eligibility schema.
+            """addresses.0: Additional property 'country' is not allowed. (code: 1000)
+              |From: addresses.0.<items>.<additionalProperties>""".stripMargin
+          )
+        }
       }
 
       "when none of the optional fields are populated" - {
@@ -519,7 +537,15 @@ class ChargeInfoResponseSpec extends AnyFreeSpec {
           readerFromTtp.reads(json) shouldBe JsSuccess(obj)
         }
 
-        // One could also check that the reader was given JSON compatible with the time-to-pay-eligibility schema, if it's ever added.
+        "was tested against JSON compatible with the time-to-pay-eligibility schema" in {
+          val schema = Validators.TimeToPayEligibility.ChargeInfo.openApiResponseSuccessfulSchema
+
+          schema.validateAndGetErrors(json) shouldBe List(
+            // TODO DTD-3682: Fix the JSON format to match the eligibility schema.
+            """Field 'individualDetails' is required. (code: 1026)
+              |From: <required>""".stripMargin
+          )
+        }
       }
     }
   }
