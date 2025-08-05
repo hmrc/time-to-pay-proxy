@@ -16,16 +16,11 @@
 
 package uk.gov.hmrc.timetopayproxy.models.chargeInfoApi
 
-import com.fasterxml.jackson.databind.ObjectMapper
-import org.openapi4j.schema.validator.v3.SchemaValidator
-import org.openapi4j.schema.validator.{ ValidationContext, ValidationData }
 import org.scalatest.freespec.AnyFreeSpec
-import play.api.libs.json.{ JsValue, Json, Writes }
 import org.scalatest.matchers.should.Matchers._
-import uk.gov.hmrc.timetopayproxy.support.{ ApiSchema, ChargeInfoRequestSchema }
-
-import scala.jdk.CollectionConverters.CollectionHasAsScala
-import scala.util.{ Failure, Success, Try }
+import play.api.libs.json.{ JsSuccess, JsValue, Json, Reads, Writes }
+import uk.gov.hmrc.timetopayproxy.testutils.JsonAssertionOps._
+import uk.gov.hmrc.timetopayproxy.testutils.schematestutils.Validators
 
 class ChargeInfoRequestSpec extends AnyFreeSpec {
 
@@ -61,50 +56,40 @@ class ChargeInfoRequestSpec extends AnyFreeSpec {
   }
 
   "ChargeInfoRequest" - {
-    "implicit json writer" - {
-      def writer: Writes[ChargeInfoRequest] = implicitly[Writes[ChargeInfoRequest]]
 
-      def obj = TestData.WithNoDeclaredOptions.obj
+    "implicit JSON writer (data going to time-to-pay-eligibility)" - {
+      def writerToTtp: Writes[ChargeInfoRequest] = implicitly[Writes[ChargeInfoRequest]]
 
-      def json = TestData.WithNoDeclaredOptions.json
+      "when no optional fields are applicable" - {
+        def json: JsValue = TestData.WithNoDeclaredOptions.json
+        def obj: ChargeInfoRequest = TestData.WithNoDeclaredOptions.obj
 
-      "should write the expected JSON structure" in {
-        writer.writes(obj) shouldBe json
-      }
+        "writes the correct JSON" in {
+          writerToTtp.writes(obj) shouldBeEquivalentTo json
+        }
 
-      "should write JSON compatible with the API Schema" in new TestBase {
-        val errors: Map[String, List[String]] = validate(ChargeInfoRequestSchema, json.toString())
-
-        errors shouldEqual Map.empty
+        // One could also check that the writer is compatible with the time-to-pay schema, if it's ever added.
       }
     }
-  }
-}
 
-trait TestBase {
-  lazy val objectMapper = new ObjectMapper
+    "implicit JSON reader (data coming from our clients)" - {
+      def readerFromClients: Reads[ChargeInfoRequest] = implicitly[Reads[ChargeInfoRequest]]
 
-  def validate(api: ApiSchema, body: String): Map[String, List[String]] = {
-    val output = new ValidationData
-    val json = new ObjectMapper().readTree(body)
+      "when no optional fields are applicable" - {
+        def json: JsValue = TestData.WithNoDeclaredOptions.json
+        def obj: ChargeInfoRequest = TestData.WithNoDeclaredOptions.obj
 
-    Try {
-      new SchemaValidator(new ValidationContext(api.fullSchema.getContext), null, api.defaultSchema)
-        .validate(json, output)
-    } match {
-      case Failure(e) =>
-        Map("Exception found" -> List(e.getMessage))
-      case Success(_) =>
-        output
-          .results()
-          .items()
-          .asScala
-          .toList
-          .map(e => "validationError" -> e.toString)
-          .groupBy(_._1)
-          .view
-          .mapValues(_.map(_._2).toList)
-          .toMap
+        "reads the JSON correctly" in {
+          readerFromClients.reads(json) shouldBe JsSuccess(obj)
+        }
+
+        "was tested against JSON compatible with our schema" in {
+          val schema = Validators.TimeToPayProxy.ChargeInfo.openApiRequestSchema
+
+          schema.validateAndGetErrors(json) shouldBe Nil
+        }
+      }
     }
+
   }
 }
