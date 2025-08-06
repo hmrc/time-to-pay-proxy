@@ -17,9 +17,10 @@
 package uk.gov.hmrc.timetopayproxy.models.chargeInfoApi
 
 import org.scalatest.freespec.AnyFreeSpec
-import play.api.libs.json.{ JsSuccess, JsValue, Json, Reads, Writes }
 import org.scalatest.matchers.should.Matchers._
-import uk.gov.hmrc.timetopayproxy.support.ChargeInfoResponseSchema
+import play.api.libs.json.{ JsSuccess, JsValue, Json, Reads, Writes }
+import uk.gov.hmrc.timetopayproxy.testutils.JsonAssertionOps.RichJsValueWithAssertions
+import uk.gov.hmrc.timetopayproxy.testutils.schematestutils.Validators
 
 import java.time.{ LocalDate, LocalDateTime }
 
@@ -103,7 +104,7 @@ class ChargeInfoResponseSpec extends AnyFreeSpec {
         )
       )
 
-      def expectedJson: JsValue = Json.parse(
+      def json: JsValue = Json.parse(
         """{
           |  "addresses" : [
           |    {
@@ -259,7 +260,7 @@ class ChargeInfoResponseSpec extends AnyFreeSpec {
         )
       )
 
-      def expectedJson: JsValue = Json.parse(
+      def json: JsValue = Json.parse(
         """{
           |  "addresses" : [
           |    {
@@ -384,7 +385,7 @@ class ChargeInfoResponseSpec extends AnyFreeSpec {
         )
       )
 
-      def expectedJson: JsValue = Json.parse(
+      def json: JsValue = Json.parse(
         """{
           |  "addresses" : [
           |    {
@@ -432,80 +433,118 @@ class ChargeInfoResponseSpec extends AnyFreeSpec {
   }
 
   "ChargeInfoResponse" - {
-    "implicit JSON format" - {
-      def writer: Writes[ChargeInfoResponse] = implicitly[Writes[ChargeInfoResponse]]
 
-      def reader: Reads[ChargeInfoResponse] = implicitly[Reads[ChargeInfoResponse]]
+    "implicit JSON writer (data going to our clients)" - {
+      def writerToClients: Writes[ChargeInfoResponse] = implicitly[Writes[ChargeInfoResponse]]
 
-      "when all the optional fields are populated" - {
-        def obj = TestData.WithOnlySomes.obj
+      "when all the optional fields are fully populated" - {
+        def json: JsValue = TestData.WithOnlySomes.json
+        def obj: ChargeInfoResponse = TestData.WithOnlySomes.obj
 
-        def expectedJson = TestData.WithOnlySomes.expectedJson
-
-        "should write the expected JSON structure" in {
-          val actualJson = writer.writes(obj)
-
-          actualJson shouldBe expectedJson
+        "writes the correct JSON" in {
+          writerToClients.writes(obj) shouldBeEquivalentTo json
         }
 
-        "should write JSON compatible with the API Schema" in new TestBase {
-          val errors: Map[String, List[String]] = validate(ChargeInfoResponseSchema, expectedJson.toString())
+        "writes JSON compatible with our schema" in {
+          val schema = Validators.TimeToPayProxy.ChargeInfo.openApiResponseSuccessfulSchema
+          val writtenJson: JsValue = writerToClients.writes(obj)
 
-          errors shouldEqual Map.empty
-        }
-
-        "should read the expected JSON structure" in {
-          val actualObj = reader.reads(expectedJson)
-
-          actualObj shouldBe JsSuccess(obj)
+          schema.validateAndGetErrors(writtenJson) shouldBe Nil
         }
       }
 
-      "when when the optional fields have no more than 1 Some on any field path" - {
-        def obj = TestData.With1SomeOnEachPath.obj
+      "when only one optional field on each path is populated" - {
+        def json: JsValue = TestData.With1SomeOnEachPath.json
+        def obj: ChargeInfoResponse = TestData.With1SomeOnEachPath.obj
 
-        def expectedJson = TestData.With1SomeOnEachPath.expectedJson
-
-        "should write the expected JSON structure" in {
-          val actualJson = writer.writes(obj)
-
-          actualJson shouldBe expectedJson
+        "writes the correct JSON" in {
+          writerToClients.writes(obj) shouldBeEquivalentTo json
         }
 
-        "should write JSON compatible with the API Schema" in new TestBase {
-          val errors: Map[String, List[String]] = validate(ChargeInfoResponseSchema, expectedJson.toString())
+        "writes JSON compatible with our schema" in {
+          val schema = Validators.TimeToPayProxy.ChargeInfo.openApiResponseSuccessfulSchema
+          val writtenJson: JsValue = writerToClients.writes(obj)
 
-          errors shouldEqual Map.empty
-        }
-
-        "should read the expected JSON structure" in {
-          val actualObj = reader.reads(expectedJson)
-
-          actualObj shouldBe JsSuccess(obj)
+          schema.validateAndGetErrors(writtenJson) shouldBe Nil
         }
       }
 
-      "when when the optional fields have no Some on any field path" - {
-        def obj = TestData.With0SomeOnEachPath.obj
+      "when none of the optional fields are populated" - {
+        def json: JsValue = TestData.With0SomeOnEachPath.json
+        def obj: ChargeInfoResponse = TestData.With0SomeOnEachPath.obj
 
-        def expectedJson = TestData.With0SomeOnEachPath.expectedJson
-
-        "should write the expected JSON structure" in {
-          val actualJson = writer.writes(obj)
-
-          actualJson shouldBe expectedJson
+        "writes the correct JSON" in {
+          writerToClients.writes(obj) shouldBeEquivalentTo json
         }
 
-        "should write JSON compatible with the API Schema" in new TestBase {
-          val errors: Map[String, List[String]] = validate(ChargeInfoResponseSchema, expectedJson.toString())
+        "writes JSON compatible with our schema" in {
+          val schema = Validators.TimeToPayProxy.ChargeInfo.openApiResponseSuccessfulSchema
+          val writtenJson: JsValue = writerToClients.writes(obj)
 
-          errors shouldEqual Map.empty
+          schema.validateAndGetErrors(writtenJson) shouldBe Nil
+        }
+      }
+    }
+
+    "implicit JSON reader (data coming from time-to-pay-eligibility)" - {
+      def readerFromTtp: Reads[ChargeInfoResponse] = implicitly[Reads[ChargeInfoResponse]]
+
+      "when all the optional fields are fully populated" - {
+        def json: JsValue = TestData.WithOnlySomes.json
+        def obj: ChargeInfoResponse = TestData.WithOnlySomes.obj
+
+        "reads the JSON correctly" in {
+          readerFromTtp.reads(json) shouldBe JsSuccess(obj)
         }
 
-        "should read the expected JSON structure" in {
-          val actualObj = reader.reads(expectedJson)
+        "was tested against JSON compatible with the time-to-pay-eligibility schema" in {
+          val schema = Validators.TimeToPayEligibility.ChargeInfo.openApiResponseSuccessfulSchema
 
-          actualObj shouldBe JsSuccess(obj)
+          schema.validateAndGetErrors(json) shouldBe List(
+            // TODO DTD-3682: Fix the JSON format to match the eligibility schema.
+            """addresses.0.contactDetails: Additional property 'altFormat' is not allowed. (code: 1000)
+              |From: addresses.0.<items>.contactDetails.<additionalProperties>""".stripMargin,
+            """addresses.0: Additional property 'country' is not allowed. (code: 1000)
+              |From: addresses.0.<items>.<additionalProperties>""".stripMargin
+          )
+        }
+      }
+
+      "when only one optional field on each path is populated" - {
+        def json: JsValue = TestData.With1SomeOnEachPath.json
+        def obj: ChargeInfoResponse = TestData.With1SomeOnEachPath.obj
+
+        "reads the JSON correctly" in {
+          readerFromTtp.reads(json) shouldBe JsSuccess(obj)
+        }
+
+        "was tested against JSON compatible with the time-to-pay-eligibility schema" in {
+          val schema = Validators.TimeToPayEligibility.ChargeInfo.openApiResponseSuccessfulSchema
+
+          schema.validateAndGetErrors(json) shouldBe List(
+            // TODO DTD-3682: Fix the JSON format to match the eligibility schema.
+            """addresses.0: Additional property 'country' is not allowed. (code: 1000)
+              |From: addresses.0.<items>.<additionalProperties>""".stripMargin
+          )
+        }
+      }
+
+      "when none of the optional fields are populated" - {
+        def json: JsValue = TestData.With0SomeOnEachPath.json
+        def obj: ChargeInfoResponse = TestData.With0SomeOnEachPath.obj
+
+        "reads the JSON correctly" in {
+          readerFromTtp.reads(json) shouldBe JsSuccess(obj)
+        }
+
+        "was tested against JSON compatible with the time-to-pay-eligibility schema" in {
+          val schema = Validators.TimeToPayEligibility.ChargeInfo.openApiResponseSuccessfulSchema
+
+          schema.validateAndGetErrors(json) shouldBe List(
+            // TODO DTD-3682: Fix the JSON format to match the eligibility schema.
+            """Field 'individualDetails' is required. (code: 1026)
+              |From: <required>""".stripMargin
+          )
         }
       }
     }

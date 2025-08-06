@@ -1,0 +1,18 @@
+openapi: 3.0.0
+info:
+  title: ClassWithBigInteger
+  description: "A class with a field that has to be an integer. Used to prove that numbers like 1.1E+10 are rejected."
+  contact: {}
+  version: '1.0'
+paths: {}
+components:
+  schemas:
+    MainObject:
+      type: object
+      required:
+        - needsToBeInteger
+      properties:
+        needsToBeInteger:
+          $ref: '#/components/schemas/needsToBeInteger'
+    needsToBeInteger:
+      type: integer

@@ -1,0 +1,40 @@
+openapi: 3.0.3
+info:
+  title: ComplexAllOf
+  description: "Schema comprised of multiple complex schemas."
+  contact: {}
+  version: '1.0'
+paths: {}
+components:
+  schemas:
+    MainObject:
+      allOf:
+        - $ref: '#/components/schemas/MainObjectComponent1'
+        - $ref: '#/components/schemas/MainObjectComponent2'
+    MainObjectComponent1:
+      type: object
+      properties:
+        string:
+          type: string
+        number:
+          type: number
+      required:
+        - string
+    MainObjectComponent2:
+      type: object
+      properties:
+        stringArray:
+          type: array
+          items:
+            type: string
+        numberArray:
+          type: array
+          items:
+            type: number
+        string:
+          type: string
+      required:
+        - stringArray
+        - numberArray
+
+

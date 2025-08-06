@@ -1,0 +1,287 @@
+openapi: 3.0.3
+info:
+  title: Time To Pay Affordable Quotes API
+  description: |-
+    API to get Affordable Quotes
+    ```
+    Change Log
+    ```
+      | Version |       Date | Author          | Description          |
+      |---------|------------|-----------------|----------------------|
+      |   1.0.0 | 04-12-2024 | Alex Olkhovskiy | Baselined Version    |
+      |   1.1.0 | 28-01-2025 | Alex Olkhovskiy | add expectedPayment  |
+      |   1.2.0 | 28-01-2025 | Alex Olkhovskiy | update examples      |
+      |   1.3.0 | 28-01-2025 | Alex Olkhovskiy | add regimeType      |
+  version: 1.2.0
+
+paths:
+  /debts/time-to-pay/affordability/affordable-quotes:
+    post:
+      summary: Retrieve affordable quotes
+      operationId: retrieveAffordableQuotes
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TTPAffordableQuotesRequest'
+            example:
+              regimeType: PAYE
+              channelIdentifier: "eSSTTP"
+              paymentPlanAffordableAmount: 1310
+              paymentPlanFrequency: "Monthly"
+              paymentPlanMaxLength: 6
+              paymentPlanMinLength: 1
+              accruedDebtInterest: 1326.00
+              paymentPlanStartDate: "2022-07-08"
+              initialPaymentDate: "2022-06-18"
+              initialPaymentAmount: 1000
+              debtItemCharges:
+                - outstandingDebtAmount: 148781
+                  mainTrans: "5330"
+                  subTrans: "1090"
+                  debtItemChargeId: "XW006559808862"
+                  interestStartDate: "2022-05-22"
+                  debtItemOriginalDueDate: "2022-05-22"
+                  isInterestBearingCharge: true
+                  useChargeReference: false
+                - outstandingDebtAmount: 3058
+                  mainTrans: "5330"
+                  subTrans: "1090"
+                  debtItemChargeId: "XW006559808862"
+                  interestStartDate: "2022-05-22"
+                  debtItemOriginalDueDate: "2022-05-22"
+                  isInterestBearingCharge: true
+                  useChargeReference: false
+              customerPostcodes:
+                - addressPostcode: "BN127ER"
+                  postcodeDate: "2022-05-22"
+                - addressPostcode: "BN129ER"
+                  postcodeDate: "2022-04-30"
+      responses:
+        '200':
+          description: Successful affordable quote(s) response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TTPAffordableQuotesResponse'
+              example:
+                processingDateTime: "2022-03-23T13:49:51.141Z"
+                paymentPlans:
+                  - planDuration: 4
+                    totalDebt: 7451
+                    totalDebtIncInt: 751288
+                    planInterest: 4805
+                    collections:
+                      initialCollection:
+                        dueDate: "2022-06-18"
+                        amountDue: 1000
+                      regularCollections:
+                        - dueDate: "2022-07-08"
+                          amountDue: 162821
+                    numberOfInstalments: 8
+                    instalments:
+                      - instalmentNumber: 1
+                        dueDate: "2022-06-18"
+                        instalmentInterestAccrued: 459
+                        instalmentBalance: 480896
+                        debtItemChargeId: "XW006559808862"
+                        amountDue: 1000
+                        debtItemOriginalDueDate: "2022-05-22"
+                        expectedPayment: 1000
+
+components:
+  schemas:
+    TTPAffordableQuotesRequest:
+      type: object
+      properties:
+        regimeType:
+          type: string
+          description: Regime type
+        channelIdentifier:
+          type: string
+          description: "Channel identifier"
+        paymentPlanAffordableAmount:
+          type: integer
+          description: "Payment plan affordable amount"
+        paymentPlanFrequency:
+          type: string
+          description: "Payment plan frequency"
+        paymentPlanMinLength:
+          type: integer
+          description: "Payment plan minimum length"
+        paymentPlanMaxLength:
+          type: integer
+          description: "Payment plan maximum length"
+        accruedDebtInterest:
+          type: number
+          description: "All the accrued interests added together"
+        paymentPlanStartDate:
+          type: string
+          format: date
+          description: "Payment plan start date"
+        initialPaymentDate:
+          type: string
+          format: date
+          description: "Initial payment date"
+        initialPaymentAmount:
+          type: number
+          minimum: 0.01
+          description: "Initial payment amount in pounds"
+        debtItemCharges:
+          type: array
+          items:
+            type: object
+            properties:
+              outstandingDebtAmount:
+                type: number
+                description: "Outstanding debt amount"
+              mainTrans:
+                type: string
+                description: "Unique MTrans Debt Type ID e.g.1525 also known as M Trans"
+              subTrans:
+                type: string
+                description: "Duty Type description for the UI"
+              isInterestBearingCharge:
+                type: boolean
+                description: "Interest bearing charge flag"
+              useChargeReference:
+                type: boolean
+                description: "Use charge reference flag"
+              debtItemChargeId:
+                type: string
+                description: "An ID which uniquely identifies a particular duty"
+              interestStartDate:
+                type: string
+                format: date
+                description: "Interest start date"
+              debtItemOriginalDueDate:
+                type: string
+                format: date
+                description: "Original due date"
+            required:
+              - outstandingDebtAmount
+              - mainTrans
+              - subTrans
+              - debtItemChargeId
+              - debtItemOriginalDueDate
+        customerPostcodes:
+          type: array
+          items:
+            type: object
+            properties:
+              postcodeDate:
+                type: string
+                format: date
+                description: "Date the customer used this postcode from"
+              addressPostcode:
+                type: string
+                description: "Customer postcode"
+            required:
+              - postcodeDate
+              - addressPostcode
+      required:
+        - channelIdentifier
+        - paymentPlanAffordableAmount
+        - paymentPlanFrequency
+        - paymentPlanMaxLength
+        - paymentPlanMinLength
+        - accruedDebtInterest
+        - paymentPlanStartDate
+        - debtItemCharges
+        - customerPostcodes
+
+    TTPAffordableQuotesResponse:
+      type: object
+      properties:
+        processingDateTime:
+          type: string
+          format: date-time
+          description: "Processing datetime"
+        paymentPlans:
+          type: array
+          items:
+            type: object
+            properties:
+              planDuration:
+                type: integer
+                description: "Duration of the plan"
+              totalDebt:
+                type: number
+                description: "Total debt"
+              totalDebtIncInt:
+                type: number
+                description: "Total debt interest"
+              planInterest:
+                type: number
+                description: "Plan interest"
+              collections:
+                type: object
+                properties:
+                  initialCollection:
+                    type: object
+                    properties:
+                      dueDate:
+                        type: string
+                        format: date
+                        description: "Due date"
+                      amountDue:
+                        type: integer
+                        description: "Amount due"
+                    required:
+                      - dueDate
+                      - amountDue
+                  regularCollections:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        dueDate:
+                          type: string
+                          format: date
+                          description: "Due date"
+                        amountDue:
+                          type: number
+                          description: "Amount due"
+                      required:
+                        - dueDate
+                        - amountDue
+                required:
+                  - regularCollections
+              numberOfInstalments:
+                type: integer
+              instalments:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    instalmentNumber:
+                      type: integer
+                    dueDate:
+                      type: string
+                      format: date
+                    instalmentInterestAccrued:
+                      type: number
+                    instalmentBalance:
+                      type: number
+                    debtItemChargeId:
+                      type: string
+                    amountDue:
+                      type: integer
+                    debtItemOriginalDueDate:
+                      type: string
+                      format: date
+                    expectedPayment:
+                      type: integer
+                  required:
+                    - instalmentNumber
+                    - dueDate
+                    - instalmentInterestAccrued
+                    - instalmentBalance
+                    - debtItemChargeId
+                    - amountDue
+                    - debtItemOriginalDueDate
+                    - expectedPayment
+      required:
+        - processingDateTime
+        - paymentPlans
