@@ -16,14 +16,14 @@
 
 package uk.gov.hmrc.timetopayproxy.utils
 
-import play.api.libs.json.{ Format, Json }
+import play.api.libs.json.{ Json, Writes }
 import play.api.mvc.{ Result, Results }
 import uk.gov.hmrc.timetopayproxy.models.TtppErrorResponse
 
 object TtppResponseConverter {
 
   implicit class ToResponse[T](response: T) {
-    def toResponse(implicit format: Format[T]): Result =
+    def toResponse(implicit writer: Writes[T]): Result =
       response match {
         case TtppErrorResponse(statusCode, _) =>
           Results.Status(statusCode)(Json.toJson(response))

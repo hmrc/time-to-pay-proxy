@@ -16,9 +16,13 @@
 
 package uk.gov.hmrc.timetopayproxy.models
 
-import play.api.libs.json.{ Json, OFormat }
+import play.api.libs.json.{ Json, Reads }
 
 final case class TimeToPayInnerError(code: String, reason: String)
+
+object TimeToPayInnerError {
+  implicit val reader: Reads[TimeToPayInnerError] = Json.reads[TimeToPayInnerError]
+}
 
 final case class TimeToPayError(failures: Seq[TimeToPayInnerError]) extends IncomingApiError {
   def toConnectorError(status: Int): ConnectorError =
@@ -28,10 +32,6 @@ final case class TimeToPayError(failures: Seq[TimeToPayInnerError]) extends Inco
     )
 }
 
-object TimeToPayInnerError {
-  implicit val format: OFormat[TimeToPayInnerError] = Json.format[TimeToPayInnerError]
-}
-
 object TimeToPayError {
-  implicit val format: OFormat[TimeToPayError] = Json.format[TimeToPayError]
+  implicit val reader: Reads[TimeToPayError] = Json.reads[TimeToPayError]
 }
