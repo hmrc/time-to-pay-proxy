@@ -23,6 +23,7 @@ import uk.gov.hmrc.timetopayproxy.models._
 import uk.gov.hmrc.timetopayproxy.models.affordablequotes.{ AffordableQuoteResponse, AffordableQuotesRequest }
 import uk.gov.hmrc.timetopayproxy.models.chargeInfoApi._
 import uk.gov.hmrc.timetopayproxy.support.IntegrationBaseSpec
+import uk.gov.hmrc.timetopayproxy.testutils.TestOnlyJsonFormats._
 
 import java.time.{ LocalDate, LocalDateTime }
 import scala.concurrent.ExecutionContext

@@ -16,10 +16,10 @@
 
 package uk.gov.hmrc.timetopayproxy.models
 
-import play.api.libs.json.{ Json, OFormat }
+import play.api.libs.json.{ Json, Writes }
 
 final case class TtppErrorResponse(statusCode: Int, errorMessage: String)
 
 object TtppErrorResponse {
-  implicit val format: OFormat[TtppErrorResponse] = Json.format[TtppErrorResponse]
+  implicit val writer: Writes[TtppErrorResponse] = Json.writes[TtppErrorResponse]
 }
