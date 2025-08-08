@@ -33,16 +33,14 @@ class ChargeInfoResponseSpec extends AnyFreeSpec {
         identification = List(
           Identification(idType = IDType("ID_TYPE"), idValue = IDValue("ID_VALUE"))
         ),
-        individualDetails = Some(
-          IndividualDetails(
-            title = Some(Title("Mr")),
-            firstName = Some(FirstName("John")),
-            lastName = Some(LastName("Doe")),
-            dateOfBirth = Some(DateOfBirth(LocalDate.parse("1980-01-01"))),
-            districtNumber = Some(DistrictNumber("1234")),
-            customerType = CustomerType.ItsaMigtrated,
-            transitionToCDCS = TransitionToCdcs(value = true)
-          )
+        individualDetails = IndividualDetails(
+          title = Some(Title("Mr")),
+          firstName = Some(FirstName("John")),
+          lastName = Some(LastName("Doe")),
+          dateOfBirth = Some(DateOfBirth(LocalDate.parse("1980-01-01"))),
+          districtNumber = Some(DistrictNumber("1234")),
+          customerType = CustomerType.ItsaMigtrated,
+          transitionToCDCS = TransitionToCdcs(value = true)
         ),
         addresses = List(
           Address(
@@ -58,12 +56,10 @@ class ChargeInfoResponseSpec extends AnyFreeSpec {
                 fax = Some(Fax("fax-number")),
                 mobile = Some(Mobile("mobile-number")),
                 emailAddress = Some(Email("email address")),
-                emailSource = Some(EmailSource("email source")),
-                altFormat = Some(AltFormat(16))
+                emailSource = Some(EmailSource("email source"))
               )
             ),
             postCode = Some(ChargeInfoPostCode("AB12 3CD")),
-            country = Some(CountryCode("GB")),
             postcodeHistory = List(
               PostCodeInfo(
                 addressPostcode = ChargeInfoPostCode("AB12 3CD"),
@@ -114,14 +110,12 @@ class ChargeInfoResponseSpec extends AnyFreeSpec {
           |      "addressLine4" : "Address Line 4",
           |      "addressType" : "Address Type",
           |      "contactDetails" : {
-          |        "altFormat" : 16,
           |        "emailAddress" : "email address",
           |        "emailSource" : "email source",
           |        "fax" : "fax-number",
           |        "mobile" : "mobile-number",
           |        "telephoneNumber" : "telephone-number"
           |      },
-          |      "country" : "GB",
           |      "postCode" : "AB12 3CD",
           |      "postcodeHistory" : [
           |        {
@@ -189,16 +183,14 @@ class ChargeInfoResponseSpec extends AnyFreeSpec {
         identification = List(
           Identification(idType = IDType("ID_TYPE"), idValue = IDValue("ID_VALUE"))
         ),
-        individualDetails = Some(
-          IndividualDetails(
-            title = None,
-            firstName = None,
-            lastName = None,
-            dateOfBirth = None,
-            districtNumber = None,
-            customerType = CustomerType.ItsaMigtrated,
-            transitionToCDCS = TransitionToCdcs(value = true)
-          )
+        individualDetails = IndividualDetails(
+          title = None,
+          firstName = None,
+          lastName = None,
+          dateOfBirth = None,
+          districtNumber = None,
+          customerType = CustomerType.ItsaMigtrated,
+          transitionToCDCS = TransitionToCdcs(value = true)
         ),
         addresses = List(
           Address(
@@ -214,12 +206,10 @@ class ChargeInfoResponseSpec extends AnyFreeSpec {
                 fax = None,
                 mobile = None,
                 emailAddress = None,
-                emailSource = None,
-                altFormat = None
+                emailSource = None
               )
             ),
             postCode = Some(ChargeInfoPostCode("AB12 3CD")),
-            country = Some(CountryCode("GB")),
             postcodeHistory = List(
               PostCodeInfo(
                 addressPostcode = ChargeInfoPostCode("AB12 3CD"),
@@ -270,7 +260,6 @@ class ChargeInfoResponseSpec extends AnyFreeSpec {
           |      "addressLine4" : "Address Line 4",
           |      "addressType" : "Address Type",
           |      "contactDetails" : { },
-          |      "country" : "GB",
           |      "postCode" : "AB12 3CD",
           |      "postcodeHistory" : [
           |        {
@@ -333,7 +322,15 @@ class ChargeInfoResponseSpec extends AnyFreeSpec {
         identification = List(
           Identification(idType = IDType("ID_TYPE"), idValue = IDValue("ID_VALUE"))
         ),
-        individualDetails = None,
+        individualDetails = IndividualDetails(
+          title = None,
+          firstName = None,
+          lastName = None,
+          dateOfBirth = None,
+          districtNumber = None,
+          customerType = CustomerType.ItsaMigtrated,
+          transitionToCDCS = TransitionToCdcs(value = true)
+        ),
         addresses = List(
           Address(
             addressType = AddressType("Address Type"),
@@ -344,7 +341,6 @@ class ChargeInfoResponseSpec extends AnyFreeSpec {
             rls = None,
             contactDetails = None,
             postCode = None,
-            country = None,
             postcodeHistory = List(
               PostCodeInfo(
                 addressPostcode = ChargeInfoPostCode("AB12 3CD"),
@@ -425,6 +421,10 @@ class ChargeInfoResponseSpec extends AnyFreeSpec {
           |      "idValue" : "ID_VALUE"
           |    }
           |  ],
+          |  "individualDetails" : {
+          |    "customerType" : "MTD(ITSA)",
+          |    "transitionToCDCS" : true
+          |  },
           |  "processingDateTime" : "2025-07-02T15:00:41.689"
           |}
           |""".stripMargin
@@ -500,13 +500,7 @@ class ChargeInfoResponseSpec extends AnyFreeSpec {
         "was tested against JSON compatible with the time-to-pay-eligibility schema" in {
           val schema = Validators.TimeToPayEligibility.ChargeInfo.openApiResponseSuccessfulSchema
 
-          schema.validateAndGetErrors(json) shouldBe List(
-            // TODO DTD-3682: Fix the JSON format to match the eligibility schema.
-            """addresses.0.contactDetails: Additional property 'altFormat' is not allowed. (code: 1000)
-              |From: addresses.0.<items>.contactDetails.<additionalProperties>""".stripMargin,
-            """addresses.0: Additional property 'country' is not allowed. (code: 1000)
-              |From: addresses.0.<items>.<additionalProperties>""".stripMargin
-          )
+          schema.validateAndGetErrors(json) shouldBe Nil
         }
       }
 
@@ -521,11 +515,7 @@ class ChargeInfoResponseSpec extends AnyFreeSpec {
         "was tested against JSON compatible with the time-to-pay-eligibility schema" in {
           val schema = Validators.TimeToPayEligibility.ChargeInfo.openApiResponseSuccessfulSchema
 
-          schema.validateAndGetErrors(json) shouldBe List(
-            // TODO DTD-3682: Fix the JSON format to match the eligibility schema.
-            """addresses.0: Additional property 'country' is not allowed. (code: 1000)
-              |From: addresses.0.<items>.<additionalProperties>""".stripMargin
-          )
+          schema.validateAndGetErrors(json) shouldBe Nil
         }
       }
 
@@ -540,11 +530,7 @@ class ChargeInfoResponseSpec extends AnyFreeSpec {
         "was tested against JSON compatible with the time-to-pay-eligibility schema" in {
           val schema = Validators.TimeToPayEligibility.ChargeInfo.openApiResponseSuccessfulSchema
 
-          schema.validateAndGetErrors(json) shouldBe List(
-            // TODO DTD-3682: Fix the JSON format to match the eligibility schema.
-            """Field 'individualDetails' is required. (code: 1026)
-              |From: <required>""".stripMargin
-          )
+          schema.validateAndGetErrors(json) shouldBe Nil
         }
       }
     }
