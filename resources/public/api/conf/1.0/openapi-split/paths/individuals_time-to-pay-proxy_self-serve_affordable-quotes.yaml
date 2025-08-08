@@ -1,0 +1,173 @@
+post:
+  tags:
+    - individuals
+  summary: Affordable quotes
+  description: |
+    This API allows a request – to return affordable quotes.
+  operationId: AffordableQuotes
+  parameters: []
+  security:
+    - applicationRestricted:
+        - read:time-to-pay-proxy
+  requestBody:
+    description: ''
+    content:
+      application/json:
+        schema:
+          $ref: ../components/schemas/AffordableQuotesRequest.yaml
+        example:
+          regimeType: PAYE
+          channelIdentifier: advisor
+          paymentPlanAffordableAmount: 1310
+          paymentPlanFrequency: Monthly
+          paymentPlanMaxLength: 6
+          paymentPlanMinLength: 1
+          accruedDebtInterest: 13.26
+          paymentPlanStartDate: '2022-07-08'
+          initialPaymentDate: '2022-06-18'
+          initialPaymentAmount: 1000
+          debtItemCharges:
+            - outstandingDebtAmount: 1487.81
+              mainTrans: '2000'
+              subTrans: '1000'
+              isInterestBearingCharge: false
+              useChargeReference: false
+              debtItemChargeId: XW006559808862
+              interestStartDate: '2022-05-22'
+              debtItemOriginalDueDate: '2022-05-22'
+            - outstandingDebtAmount: 305.8
+              mainTrans: '2000'
+              subTrans: '1100'
+              isInterestBearingCharge: false
+              useChargeReference: false
+              debtItemChargeId: XW006559808862
+              interestStartDate: '2022-05-22'
+              debtItemOriginalDueDate: '2022-05-22'
+            - outstandingDebtAmount: 1246.58
+              mainTrans: '2000'
+              subTrans: '1023'
+              isInterestBearingCharge: false
+              useChargeReference: false
+              debtItemChargeId: XW006559808862
+              interestStartDate: '2022-05-22'
+              debtItemOriginalDueDate: '2022-05-22'
+            - outstandingDebtAmount: 1015.64
+              mainTrans: '2000'
+              subTrans: '1026'
+              isInterestBearingCharge: false
+              useChargeReference: false
+              debtItemChargeId: XW006559808862
+              interestStartDate: '2022-05-22'
+              debtItemOriginalDueDate: '2022-05-22'
+            - outstandingDebtAmount: 753.13
+              mainTrans: '2000'
+              subTrans: '1030'
+              isInterestBearingCharge: false
+              useChargeReference: false
+              debtItemChargeId: XW005993570327
+              interestStartDate: '2022-05-22'
+              debtItemOriginalDueDate: '2022-05-22'
+            - outstandingDebtAmount: 1627.06
+              mainTrans: '2040'
+              subTrans: '1000'
+              isInterestBearingCharge: false
+              useChargeReference: false
+              debtItemChargeId: XW005993570327
+              interestStartDate: '2022-05-22'
+              debtItemOriginalDueDate: '2022-05-22'
+            - outstandingDebtAmount: 139.81
+              mainTrans: '2030'
+              subTrans: '1280'
+              isInterestBearingCharge: false
+              useChargeReference: false
+              debtItemChargeId: XJ006559984746
+              interestStartDate: '2022-05-22'
+              debtItemOriginalDueDate: '2022-05-22'
+            - outstandingDebtAmount: 876
+              mainTrans: '2006'
+              subTrans: '1106'
+              isInterestBearingCharge: false
+              useChargeReference: false
+              debtItemChargeId: XF006579976401
+              interestStartDate: '2022-05-22'
+              debtItemOriginalDueDate: '2022-05-22'
+          customerPostcodes:
+            - addressPostcode: BN127ER
+              postcodeDate: '2022-05-22'
+            - addressPostcode: BN129ER
+              postcodeDate: '2022-04-30'
+  responses:
+    '200':
+      description: ''
+      headers: {}
+      content:
+        application/json:
+          schema:
+            $ref: ../components/schemas/AffordableQuotesResponse.yaml
+          example:
+            processingDateTime: '2022-03-23T13:49:51.123'
+            paymentPlans:
+              - planDuration: 3
+                totalDebt: 7451.83
+                totalDebtIncInt: 7512.88
+                planInterest: 48.05
+                collections:
+                  initialCollection:
+                    dueDate: '2022-06-18'
+                    amountDue: 1000
+                  regularCollections:
+                    - dueDate: '2022-07-08'
+                      amountDue: 1628.21
+                    - dueDate: '2022-08-08'
+                      amountDue: 1628.21
+                    - dueDate: '2022-09-08'
+                      amountDue: 1628.21
+                numberOfInstalments: 2
+                instalments:
+                  - instalmentNumber: 1
+                    dueDate: '2022-06-18'
+                    instalmentInterestAccrued: 4.59
+                    instalmentBalance: 4808.96
+                    debtItemChargeId: XW006559808862
+                    amountDue: 1000
+                    debtItemOriginalDueDate: '2022-05-22'
+                    expectedPayment: 1000
+                  - instalmentNumber: 2
+                    dueDate: '2022-07-08'
+                    instalmentInterestAccrued: 7.28
+                    instalmentBalance: 3808.96
+                    debtItemChargeId: XW006559808862
+                    amountDue: 1628.21
+                    debtItemOriginalDueDate: '2022-05-22'
+                    expectedPayment: 1000
+    '400':
+      description: ''
+      headers: {}
+      content:
+        application/json:
+          schema:
+            $ref: ../components/schemas/ErrorResponse.yaml
+          example:
+            statusCode: 400
+            errorMessage: Invalid JSON error
+    '401':
+      description: ''
+      headers: {}
+      content:
+        application/json:
+          schema:
+            $ref: ../components/schemas/ErrorResponse.yaml
+          example:
+            statusCode: 401
+            errorMessage: A user with no active session will return 401 response
+    '500':
+      description: ''
+      headers: {}
+      content:
+        application/json:
+          schema:
+            $ref: ../components/schemas/ErrorResponse.yaml
+          example:
+            statusCode: 500
+            errorMessage: Internal Service Error
+  deprecated: false

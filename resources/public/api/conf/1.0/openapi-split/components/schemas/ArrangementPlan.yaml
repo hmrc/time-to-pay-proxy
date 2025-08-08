@@ -1,0 +1,79 @@
+title: ArrangementPlan
+required:
+  - quoteId
+  - quoteType
+  - quoteDate
+  - instalmentStartDate
+  - paymentPlanType
+  - thirdPartyBank
+  - numberOfInstalments
+  - totalDebtIncInt
+  - totalInterest
+  - interestAccrued
+  - planInterest
+properties:
+  quoteId:
+    type: string
+    description: This is the ID for the quote associated with the plan
+  quoteType:
+    allOf:
+      - $ref: ./PlanQuoteType.yaml
+      - description: this will determine the calculation method
+  quoteDate:
+    type: string
+    description: Quote date
+    format: date
+  instalmentStartDate:
+    type: string
+    description: Instalment start date
+    format: date
+  instalmentAmount:
+    type: number
+    description: Instalment amount
+  paymentPlanType:
+    allOf:
+      - $ref: ./PaymentPlanTypeExtended.yaml
+      - description: Payment Plan Type
+  thirdPartyBank:
+    type: boolean
+    description: Third party bank
+  numberOfInstalments:
+    type: integer
+    description: Number of instalments
+    format: int32
+  frequency:
+    allOf:
+      - $ref: ./PaymentFrequency.yaml
+      - description: payment frequency
+  duration:
+    type: integer
+    description: Duration for the payment frequency
+    format: int32
+  initialPaymentAmount:
+    type: integer
+    description: Initial payment amount
+    format: int32
+  initialPaymentDate:
+    type: string
+    description: Initial payment date
+    format: date
+  totalDebtIncInt:
+    type: number
+    description: This is the total debt plus interest for the plan
+  totalInterest:
+    type: number
+    description: This is the total interest accrued for the duration of the plan
+  interestAccrued:
+    type: integer
+    description: This is the total interest accrued prior to plan start
+    format: int32
+  planInterest:
+    type: number
+    description: Interest accrued to the life of the plan
+  initialPaymentMethod:
+    allOf:
+      - $ref: ./InitialPaymentMethodType.yaml
+      - description: Payment method (Direct debit, BACS, Cheque, Card)
+  initialPaymentReference:
+    type: string
+    description: Payment Method reference

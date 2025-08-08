@@ -1,0 +1,74 @@
+post:
+  tags:
+    - individuals
+  summary: Get Customer Charge Information
+  description: >-
+    This is an endpoint that triggers a request to get customer charge
+    information from ttp eligibility service
+  operationId: GetCustomerChargeInformation
+  parameters: []
+  security:
+    - applicationRestricted:
+        - read:time-to-pay-proxy
+  requestBody:
+    description: ''
+    content:
+      application/json:
+        schema:
+          $ref: ../components/schemas/TTPChargeInfoRequest.yaml
+        example:
+          regimeType: SA
+          channelIdentifier: advisor
+          identifications:
+            - idType: UTR
+              idValue: '1234567890'
+    required: true
+  responses:
+    '200':
+      description: ''
+      headers: {}
+      content:
+        application/json:
+          schema:
+            $ref: ../components/schemas/TTPChargeInfoResponse.yaml
+    '400':
+      description: ''
+      headers: {}
+      content:
+        application/json:
+          schema:
+            $ref: ../components/schemas/ErrorResponse.yaml
+          example:
+            statusCode: 400
+            errorMessage: Invalid JSON error
+    '401':
+      description: ''
+      headers: {}
+      content:
+        application/json:
+          schema:
+            $ref: ../components/schemas/ErrorResponse.yaml
+          example:
+            statusCode: 401
+            errorMessage: A user with no active session will return 401 response
+    '500':
+      description: ''
+      headers: {}
+      content:
+        application/json:
+          schema:
+            $ref: ../components/schemas/ErrorResponse.yaml
+          example:
+            statusCode: 500
+            errorMessage: Internal Service Error
+    '503':
+      description: ''
+      headers: {}
+      content:
+        application/json:
+          schema:
+            $ref: ../components/schemas/ErrorResponse.yaml
+          example:
+            statusCode: 503
+            errorMessage: Couldn't parse body from upstream
+  deprecated: false

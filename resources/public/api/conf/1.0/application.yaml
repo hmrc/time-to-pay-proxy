@@ -44,12 +44,16 @@ info:
       | 1.0.10 | 14-05-2025 | Alex Olkhovskiy | Added regimeType, chargeSource, parentMainTrans, parentChargeReference and dueDate fields to DebtItemChargeArrangementRequest schema |
       | 1.0.11 | 10-07-2025 | Alex Olkhovskiy | Added new charge-info proxy endpoint to get customer charge information |
       | 1.0.12 | 23-07-2025 | Alex Olkhovskiy | make regimeType enum |
-      | 1.0.13 | 08-07-2025 | Alex Olkhovskiy | make indentations in charge-info request non-empty|
+      | 1.0.13 | 08-08-2025 | Alex Olkhovskiy | make indentations in charge-info request non-empty, remove altFormat and country|
+      | 1.0.14 | 08-08-2025 | Alex Olkhovskiy | refactor the spec with linter|
   contact: {}
-  version: '1.0.13'
+  version: 1.0.14
 servers:
-  - url: https://api.service.hmrc.gov.uk/
+  - url: https://api.service.hmrc.gov.uk
     variables: {}
+tags:
+  - name: individuals
+    description: ''
 paths:
   /individuals/time-to-pay-proxy/quote:
     post:
@@ -74,25 +78,25 @@ paths:
               channelIdentifier: selfService
               plan:
                 quoteType: duration
-                quoteDate: 2021-05-13
-                instalmentStartDate: 2021-05-13
+                quoteDate: '2021-05-13'
+                instalmentStartDate: '2021-05-13'
                 instalmentAmount: 100
                 frequency: annually
                 duration: 12
                 initialPaymentAmount: 100
-                initialPaymentDate: 2021-05-13
+                initialPaymentDate: '2021-05-13'
                 paymentPlanType: timeToPay
               customerPostCodes:
                 - addressPostcode: NW9 5XW
-                  postcodeDate: 2021-05-13
+                  postcodeDate: '2021-05-13'
               debtItemCharges:
                 - debtItemChargeId: debtItemChrgId1
                   mainTrans: '1546'
                   subTrans: '1090'
                   originalDebtAmount: 100
-                  interestStartDate: 2021-05-13
+                  interestStartDate: '2021-05-13'
                   paymentHistory:
-                    - paymentDate: 2021-05-13
+                    - paymentDate: '2021-05-13'
                       paymentAmount: 100
         required: true
       responses:
@@ -169,8 +173,8 @@ paths:
               plan:
                 quoteId: quoteId1
                 quoteType: instalmentAmount
-                quoteDate: 2021-05-13
-                instalmentStartDate: 2021-05-13
+                quoteDate: '2021-05-13'
+                instalmentStartDate: '2021-05-13'
                 instalmentAmount: 100
                 paymentPlanType: timeToPay
                 thirdPartyBank: true
@@ -178,7 +182,7 @@ paths:
                 frequency: annually
                 duration: 12
                 initialPaymentAmount: 100
-                initialPaymentDate: 2021-05-13
+                initialPaymentDate: '2021-05-13'
                 initialPaymentMethod: BACS
                 initialPaymentReference: paymentRefInit
                 totalDebtIncInt: 10
@@ -190,23 +194,23 @@ paths:
                   mainTrans: '1546'
                   subTrans: '1090'
                   originalDebtAmount: 100
-                  interestStartDate: 2021-05-13
-                  dueDate: 2021-06-30
+                  interestStartDate: '2021-05-13'
+                  dueDate: '2021-06-30'
                   chargeSource: ETMP
                   parentChargeReference: DEF987654321
                   parentMainTrans: YnAS
                   paymentHistory:
-                    - paymentDate: 2021-05-13
+                    - paymentDate: '2021-05-13'
                       paymentAmount: 100
               payments:
                 - paymentMethod: BACS
                   paymentReference: paymentRef123
               customerPostCodes:
                 - addressPostcode: NW9 5XW
-                  postcodeDate: 2021-05-13
+                  postcodeDate: '2021-05-13'
               instalments:
                 - debtItemChargeId: debtItemChrgId1
-                  dueDate: 2021-05-13
+                  dueDate: '2021-05-13'
                   amountDue: 100
                   expectedPayment: 10
                   interestRate: 0.25
@@ -308,7 +312,7 @@ paths:
                   caseId: caseId1
                   planId: planId1
                   quoteId: quoteId1
-                  quoteDate: 2021-05-13
+                  quoteDate: '2021-05-13'
                   quoteType: instalmentAmount
                   paymentPlanType: timeToPay
                   thirdPartyBank: true
@@ -325,19 +329,19 @@ paths:
                     mainTrans: '1546'
                     subTrans: '1090'
                     originalDebtAmount: 100
-                    interestStartDate: 2021-05-13
+                    interestStartDate: '2021-05-13'
                     paymentHistory:
-                      - paymentDate: 2021-05-13
+                      - paymentDate: '2021-05-13'
                         paymentAmount: 100
                 payments:
                   - paymentMethod: BACS
                     paymentReference: paymentRef123
                 customerPostCodes:
                   - addressPostcode: NW9 5XW
-                    postcodeDate: 2021-05-13
+                    postcodeDate: '2021-05-13'
                 instalments:
                   - debtItemChargeId: debtItemChrgId1
-                    dueDate: 2021-05-13
+                    dueDate: '2021-05-13'
                     amountDue: 100
                     expectedPayment: 10
                     interestRate: 0.25
@@ -346,12 +350,12 @@ paths:
                     instalmentBalance: 100
                 collections:
                   initialCollection:
-                    dueDate: 2022-06-18
+                    dueDate: '2022-06-18'
                     amountDue: 1000
                   regularCollections:
-                    - dueDate: 2022-07-08
+                    - dueDate: '2022-07-08'
                       amountDue: 1628.21
-                    - dueDate: 2022-08-08
+                    - dueDate: '2022-08-08'
                       amountDue: 1628.21
         '400':
           description: ''
@@ -449,7 +453,7 @@ paths:
                 customerReference: custRef1234
                 planId: planId1234
                 planStatus: Resolved - Completed
-                planUpdatedDate: 2021-05-13
+                planUpdatedDate: '2021-05-13'
         '400':
           description: ''
           headers: {}
@@ -502,7 +506,7 @@ paths:
       parameters: []
       security:
         - applicationRestricted:
-            - 'read:time-to-pay-proxy'
+            - read:time-to-pay-proxy
       requestBody:
         description: ''
         content:
@@ -517,8 +521,8 @@ paths:
               paymentPlanMaxLength: 6
               paymentPlanMinLength: 1
               accruedDebtInterest: 13.26
-              paymentPlanStartDate: 2022-07-08
-              initialPaymentDate: 2022-06-18
+              paymentPlanStartDate: '2022-07-08'
+              initialPaymentDate: '2022-06-18'
               initialPaymentAmount: 1000
               debtItemCharges:
                 - outstandingDebtAmount: 1487.81
@@ -527,69 +531,69 @@ paths:
                   isInterestBearingCharge: false
                   useChargeReference: false
                   debtItemChargeId: XW006559808862
-                  interestStartDate: 2022-05-22
-                  debtItemOriginalDueDate: 2022-05-22
+                  interestStartDate: '2022-05-22'
+                  debtItemOriginalDueDate: '2022-05-22'
                 - outstandingDebtAmount: 305.8
                   mainTrans: '2000'
                   subTrans: '1100'
                   isInterestBearingCharge: false
                   useChargeReference: false
                   debtItemChargeId: XW006559808862
-                  interestStartDate: 2022-05-22
-                  debtItemOriginalDueDate: 2022-05-22
+                  interestStartDate: '2022-05-22'
+                  debtItemOriginalDueDate: '2022-05-22'
                 - outstandingDebtAmount: 1246.58
                   mainTrans: '2000'
                   subTrans: '1023'
                   isInterestBearingCharge: false
                   useChargeReference: false
                   debtItemChargeId: XW006559808862
-                  interestStartDate: 2022-05-22
-                  debtItemOriginalDueDate: 2022-05-22
+                  interestStartDate: '2022-05-22'
+                  debtItemOriginalDueDate: '2022-05-22'
                 - outstandingDebtAmount: 1015.64
                   mainTrans: '2000'
-                  subTrans: 1026
+                  subTrans: '1026'
                   isInterestBearingCharge: false
                   useChargeReference: false
                   debtItemChargeId: XW006559808862
-                  interestStartDate: 2022-05-22
-                  debtItemOriginalDueDate: 2022-05-22
+                  interestStartDate: '2022-05-22'
+                  debtItemOriginalDueDate: '2022-05-22'
                 - outstandingDebtAmount: 753.13
                   mainTrans: '2000'
                   subTrans: '1030'
                   isInterestBearingCharge: false
                   useChargeReference: false
                   debtItemChargeId: XW005993570327
-                  interestStartDate: 2022-05-22
-                  debtItemOriginalDueDate: 2022-05-22
+                  interestStartDate: '2022-05-22'
+                  debtItemOriginalDueDate: '2022-05-22'
                 - outstandingDebtAmount: 1627.06
                   mainTrans: '2040'
                   subTrans: '1000'
                   isInterestBearingCharge: false
                   useChargeReference: false
                   debtItemChargeId: XW005993570327
-                  interestStartDate: 2022-05-22
-                  debtItemOriginalDueDate: 2022-05-22
+                  interestStartDate: '2022-05-22'
+                  debtItemOriginalDueDate: '2022-05-22'
                 - outstandingDebtAmount: 139.81
                   mainTrans: '2030'
                   subTrans: '1280'
                   isInterestBearingCharge: false
                   useChargeReference: false
                   debtItemChargeId: XJ006559984746
-                  interestStartDate: 2022-05-22
-                  debtItemOriginalDueDate: 2022-05-22
+                  interestStartDate: '2022-05-22'
+                  debtItemOriginalDueDate: '2022-05-22'
                 - outstandingDebtAmount: 876
                   mainTrans: '2006'
                   subTrans: '1106'
                   isInterestBearingCharge: false
                   useChargeReference: false
                   debtItemChargeId: XF006579976401
-                  interestStartDate: 2022-05-22
-                  debtItemOriginalDueDate: 2022-05-22
+                  interestStartDate: '2022-05-22'
+                  debtItemOriginalDueDate: '2022-05-22'
               customerPostcodes:
                 - addressPostcode: BN127ER
-                  postcodeDate: 2022-05-22
+                  postcodeDate: '2022-05-22'
                 - addressPostcode: BN129ER
-                  postcodeDate: 2022-04-30
+                  postcodeDate: '2022-04-30'
       responses:
         '200':
           description: ''
@@ -599,7 +603,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/AffordableQuotesResponse'
               example:
-                processingDateTime: 2022-03-23T13:49:51.141Z
+                processingDateTime: '2022-03-23T13:49:51.123'
                 paymentPlans:
                   - planDuration: 3
                     totalDebt: 7451.83
@@ -607,32 +611,32 @@ paths:
                     planInterest: 48.05
                     collections:
                       initialCollection:
-                        dueDate: 2022-06-18
+                        dueDate: '2022-06-18'
                         amountDue: 1000
                       regularCollections:
-                        - dueDate: 2022-07-08
+                        - dueDate: '2022-07-08'
                           amountDue: 1628.21
-                        - dueDate: 2022-08-08
+                        - dueDate: '2022-08-08'
                           amountDue: 1628.21
-                        - dueDate: 2022-09-08
+                        - dueDate: '2022-09-08'
                           amountDue: 1628.21
                     numberOfInstalments: 2
                     instalments:
                       - instalmentNumber: 1
-                        dueDate: 2022-06-18
+                        dueDate: '2022-06-18'
                         instalmentInterestAccrued: 4.59
                         instalmentBalance: 4808.96
                         debtItemChargeId: XW006559808862
                         amountDue: 1000
-                        debtItemOriginalDueDate: 2022-05-22
+                        debtItemOriginalDueDate: '2022-05-22'
                         expectedPayment: 1000
                       - instalmentNumber: 2
-                        dueDate: 2022-07-08
+                        dueDate: '2022-07-08'
                         instalmentInterestAccrued: 7.28
                         instalmentBalance: 3808.96
                         debtItemChargeId: XW006559808862
                         amountDue: 1628.21
-                        debtItemOriginalDueDate: 2022-05-22
+                        debtItemOriginalDueDate: '2022-05-22'
                         expectedPayment: 1000
         '400':
           description: ''
@@ -750,7 +754,7 @@ components:
           authorizationUrl: https://api.service.hmrc.gov.uk/oauth/authorize
           tokenUrl: https://api.service.hmrc.gov.uk/oauth/token
           refreshUrl: https://api.service.hmrc.gov.uk/oauth/refresh
-          scopes: { }
+          scopes: {}
     applicationRestricted:
       type: oauth2
       description: |
@@ -761,232 +765,155 @@ components:
           tokenUrl: https://api.service.hmrc.gov.uk/oauth/token
           scopes:
             read:time-to-pay-proxy: read ttp data
-
   schemas:
-
-    AffordableQuotesRequest:
-      title: AffordableQuotesRequest
+    ChannelIdentifier:
+      title: ChannelIdentifier
+      enum:
+        - advisor
+        - selfService
+      type: string
+      description: Attribute to identify where the request is coming
+    PlanQuoteType:
+      title: PlanQuoteType
+      enum:
+        - duration
+        - instalmentAmount
+      type: string
+      description: this will determine what IFS is required
+    PaymentFrequency:
+      title: PaymentFrequency
+      enum:
+        - single
+        - weekly
+        - 2Weekly
+        - 4Weekly
+        - Monthly
+        - quarterly
+        - 6Monthly
+        - annually
+      type: string
+      description: payment frequency
+    PaymentPlanTypeStandard:
+      title: PaymentPlanTypeStandard
+      enum:
+        - timeToPay
+        - instalmentOrder
+        - childBenefits
+        - fieldCollections
+        - LFC
+      type: string
+      description: Payment plan type
+    PlanInput:
+      title: PlanInput
       required:
-        - channelIdentifier
-        - paymentPlanAffordableAmount
-        - paymentPlanFrequency
-        - paymentPlanMaxLength
-        - paymentPlanMinLength
-        - accruedDebtInterest
-        - paymentPlanStartDate
-        - debtItemCharges
-        - customerPostcodes
+        - quoteType
+        - quoteDate
+        - instalmentStartDate
+        - paymentPlanType
       properties:
-        regimeType:
+        quoteType:
+          allOf:
+            - $ref: '#/components/schemas/PlanQuoteType'
+            - description: this will determine what IFS is required
+        quoteDate:
           type: string
-          description: Regime type
-        channelIdentifier:
+          description: Quote date
+          format: date
+        instalmentStartDate:
           type: string
-        paymentPlanAffordableAmount:
-          type: integer
-          format: int32
-        paymentPlanFrequency:
-          $ref: '#/components/schemas/paymentPlanFrequency'
-        paymentPlanMaxLength:
-          type: integer
-          format: int32
-        paymentPlanMinLength:
-          type: integer
-          format: int32
-        accruedDebtInterest:
+          description: Instalment start date
+          format: date
+        instalmentAmount:
           type: number
-        paymentPlanStartDate:
-          type: string
-          format: date
-        initialPaymentDate:
-          type: string
-          format: date
+          description: Instalment amount
+        frequency:
+          allOf:
+            - $ref: '#/components/schemas/PaymentFrequency'
+            - description: payment frequency
+        duration:
+          type: integer
+          description: Duration for the payment frequency
+          format: int32
         initialPaymentAmount:
           type: integer
+          description: Initial payment amount
           format: int32
-        debtItemCharges:
-          type: array
-          minItems: 1
-          items:
-            $ref: '#/components/schemas/DebtItem'
-          description: An array of DebtItems
-        customerPostcodes:
-          type: array
-          items:
-            $ref: '#/components/schemas/postCode'
-          description: An array of PostCode
-
-    AffordableQuotesResponse:
-      title: AffordableQuotesResponse
-      required:
-        - processingDateTime
-        - paymentPlans
-      properties:
-        processingDateTime:
+        initialPaymentDate:
           type: string
-          pattern: '^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d{1,3})?$'
-          example: '2022-03-23T13:49:51.123'
-        paymentPlans:
-          type: array
-          minItems: 1
-          items:
-            $ref: '#/components/schemas/paymentPlans'
-          description: An array of paymentPlans
-
-    paymentPlans:
-      title: PaymentPlans
-      required:
-        - planDuration
-        - totalDebt
-        - totalDebtIncInt
-        - planInterest
-        - collections
-        - numberOfInstalments
-        - instalments
-      properties:
-        planDuration:
-          type: integer
-          format: int32
-        totalDebt:
-          type: number
-        totalDebtIncInt:
-          type: number
-        planInterest:
-          type: number
-        numberOfInstalments:
-          type: integer
-          format: int32
-        collections:
-          required:
-            - regularCollections
-          properties:
-            initialCollection:
-              $ref: '#/components/schemas/InitialCollection'
-            regularCollections:
-              type: array
-              minItems: 1
-              items:
-                $ref: '#/components/schemas/RegularCollection'
-              description: An array of regularCollections
-        instalments:
-          type: array
-          minItems: 1
-          items:
-            $ref: '#/components/schemas/instalments'
-          description: An array of instalments
-
-    InitialCollection:
-      title: InitialCollection
-      required:
-        - dueDate
-        - amountDue
-      properties:
-        dueDate:
-          type: string
+          description: Initial payment date
           format: date
-        amountDue:
-          type: number
-
-    instalments:
-      title: Instalments
-      required:
-        - instalmentNumber
-        - dueDate
-        - instalmentInterestAccrued
-        - instalmentBalance
-        - debtItemChargeId
-        - amountDue
-        - debtItemOriginalDueDate
-        - expectedPayment
-      properties:
-        instalmentNumber:
-          type: integer
-          format: int32
-        dueDate:
-          type: string
-          format: date
-        instalmentInterestAccrued:
-          type: number
-        instalmentBalance:
-          type: number
-        debtItemChargeId:
-          type: string
-        amountDue:
-          type: number
-        debtItemOriginalDueDate:
-          type: string
-          format: date
-        expectedPayment:
-          type: integer
-    DebtItem:
-      title: DebtItem
-      required:
-        - debtItemChargeId
-        - debtItemOriginalDueDate
-        - mainTrans
-        - outstandingDebtAmount
-        - subTrans
-        - isInterestBearingCharge
-        - useChargeReference
-      properties:
-        outstandingDebtAmount:
-          type: number
-        mainTrans:
-          type: string
-        subTrans:
-          type: string
-        isInterestBearingCharge:
-          type: boolean
-        useChargeReference:
-          type: boolean
-        debtItemChargeId:
-          type: string
-        interestStartDate:
-          type: string
-          format: date
-        debtItemOriginalDueDate:
-          type: string
-          format: date
-
-    postCode:
-      title: postCode
+        paymentPlanType:
+          allOf:
+            - $ref: '#/components/schemas/PaymentPlanTypeStandard'
+            - description: Payment plan type
+    CustomerPostCodeRequest:
+      title: CustomerPostCodeRequest
       required:
         - addressPostcode
         - postcodeDate
       properties:
         addressPostcode:
-          pattern: '^([A-Za-z][A-Ha-hJ-Yj-y]?[0-9][A-Za-z0-9]? ?[0-9][A-Za-z]{2}|[Gg][Ii][Rr] ?0[Aa]{2})$'
           type: string
-          description: valid UK postcode
+          description: Customer postcode this will be a list of postcodes
         postcodeDate:
-          pattern: '^\d{4}-[0-1][0-9]-[0-3][0-9]$'
           type: string
-          description: Postcode date move in
-
-    paymentPlanFrequency:
-      title: paymentPlanFrequency
-      type: string
-      enum:
-        - Single
-        - Weekly
-        - 2Weekly
-        - 4Weekly
-        - Monthly
-        - Quarterly
-        - 6Monthly
-        - annually
-
-    ErrorResponse:
-      title: ErrorResponse
+          description: Date the customer used this postcode from
+          format: date
+    PaymentHistoryRequest:
+      title: PaymentHistoryRequest
+      required:
+        - paymentDate
+        - paymentAmount
       properties:
-        statusCode:
-          type: integer
-          description: http status code
-        errorMessage:
+        paymentDate:
           type: string
-          description: Reason for error request
-
-    # Renamed from AJSONSchemaforTTPAPI.0
+          description: Payment date
+          format: date
+        paymentAmount:
+          type: integer
+          description: Payment amount
+          format: int32
+    DebtItemChargeQuoteRequest:
+      title: DebtItemChargeQuoteRequest
+      required:
+        - debtItemChargeId
+        - mainTrans
+        - subTrans
+        - originalDebtAmount
+        - paymentHistory
+      properties:
+        debtItemChargeId:
+          maxLength: 16
+          minLength: 1
+          type: string
+          description: An ID which uniquely identifies a particular duty
+        dueDate:
+          type: string
+          format: date
+          description: Due date
+        mainTrans:
+          maxLength: 8
+          minLength: 4
+          type: string
+          description: Unique MTrans Debt Type ID e.g.1525 also known as M Trans
+        subTrans:
+          maxLength: 8
+          minLength: 4
+          type: string
+          description: Duty Type description for the UI
+        originalDebtAmount:
+          type: integer
+          description: Original debt amount
+          format: int32
+        interestStartDate:
+          type: string
+          description: The interest start date
+          format: date
+        paymentHistory:
+          type: array
+          items:
+            $ref: '#/components/schemas/PaymentHistoryRequest'
+          description: ''
     TTPQuoteRequest:
       title: TTPQuoteRequest
       required:
@@ -1020,8 +947,86 @@ components:
           items:
             $ref: '#/components/schemas/DebtItemChargeQuoteRequest'
           description: ''
-
-    # Renamed from AJSONSchemaforTTPAPI.1
+    InstalmentResponse:
+      title: InstalmentResponse
+      required:
+        - amountDue
+        - debtItemChargeId
+        - dueDate
+        - expectedPayment
+        - instalmentBalance
+        - instalmentInterestAccrued
+        - instalmentNumber
+        - interestRate
+      properties:
+        debtItemChargeId:
+          maxLength: 16
+          minLength: 1
+          type: string
+          description: An ID which uniquely identifies a particular duty
+        dueDate:
+          type: string
+          description: Due date
+          format: date
+        amountDue:
+          type: number
+          description: Amount due
+          format: int32
+        expectedPayment:
+          type: integer
+          description: Expected payment
+          format: int32
+        interestRate:
+          type: number
+          description: Interest rate
+        instalmentNumber:
+          type: integer
+          description: Instalment number
+          format: int32
+        instalmentInterestAccrued:
+          type: integer
+          description: Instalment interest
+          format: int32
+        instalmentBalance:
+          type: integer
+          description: Instalment balance
+          format: int32
+    InitialCollection:
+      title: InitialCollection
+      required:
+        - dueDate
+        - amountDue
+      properties:
+        dueDate:
+          type: string
+          format: date
+        amountDue:
+          type: number
+    RegularCollection:
+      title: RegularCollection
+      required:
+        - dueDate
+        - amountDue
+      properties:
+        dueDate:
+          type: string
+          description: Due date
+          format: date
+        amountDue:
+          type: number
+          description: Amount due
+    PlanCollections:
+      title: Collections
+      required:
+        - regularCollections
+      properties:
+        initialCollection:
+          $ref: '#/components/schemas/InitialCollection'
+        regularCollections:
+          type: array
+          items:
+            $ref: '#/components/schemas/RegularCollection'
+          description: ''
     TTPQuoteResponse:
       title: TTPQuoteResponse
       required:
@@ -1080,657 +1085,15 @@ components:
           description: ''
         collections:
           $ref: '#/components/schemas/PlanCollections'
-
-    # Renamed from AJSONSchemaforTTPAPI.2
-    PromoteArrangementRequest:
-      title: PromoteArrangementRequest
-      required:
-        - customerReference
-        - quoteReference
-        - channelIdentifier
-        - plan
-        - debtItemCharges
-        - payments
-        - customerPostCodes
-        - instalments
+    ErrorResponse:
+      title: ErrorResponse
       properties:
-        regimeType:
-          type: "string"
-          description: "Regime type"
-          enum:
-            - SA
-        customerReference:
-          maxLength: 15
-          minLength: 1
-          type: string
-          description: Unique Customer reference
-        quoteReference:
-          maxLength: 15
-          minLength: 1
-          type: string
-          description: This is the Quote reference
-        channelIdentifier:
-          allOf:
-            - $ref: '#/components/schemas/ChannelIdentifier'
-            - description: Attribute to identify where the request is coming
-        plan:
-          $ref: '#/components/schemas/ArrangementPlan'
-        debtItemCharges:
-          type: array
-          items:
-            $ref: '#/components/schemas/DebtItemChargeArrangementRequest'
-          description: ''
-        payments:
-          type: array
-          items:
-            $ref: '#/components/schemas/PaymentRequest'
-          description: ''
-        customerPostCodes:
-          type: array
-          items:
-            $ref: '#/components/schemas/CustomerPostCodeRequest'
-          description: ''
-        instalments:
-          type: array
-          items:
-            $ref: '#/components/schemas/InstalmentRequest'
-          description: ''
-
-    # Renamed from AJSONSchemaforTTPAPI.3
-    PromoteArrangementResponse:
-      title: PromoteArrangementResponse
-      required:
-        - caseId
-        - customerReference
-        - planId
-        - planStatus
-      properties:
-        customerReference:
-          maxLength: 15
-          minLength: 1
-          type: string
-          description: The Unique Customer reference
-        planId:
-          maxLength: 15
-          minLength: 1
-          type: string
-          description: Unique planId
-        caseId:
-          type: string
-          description: Unique caseId
-        planStatus:
-          allOf:
-            - $ref: '#/components/schemas/TTPPlanStatus'
-            - description: This is the plan status
-
-    # Renamed from AJSONSchemaforTTPAPI.4
-    GetPlanResponse:
-      title: GetPlanResponse
-      required:
-        - channelIdentifier
-        - collections
-        - customerPostCodes
-        - customerReference
-        - debtItemCharges
-        - instalments
-        - payments
-        - plan
-      properties:
-        customerReference:
-          maxLength: 15
-          minLength: 1
-          type: string
-          description: This is the customer reference
-        channelIdentifier:
-          allOf:
-            - $ref: '#/components/schemas/ChannelIdentifier'
-            - description: Attribute to identify where the request is coming
-        plan:
-          $ref: '#/components/schemas/PlanDetails'
-        debtItemCharges:
-          type: array
-          items:
-            $ref: '#/components/schemas/DebtItemChargeResponse'
-          description: ''
-        payments:
-          type: array
-          items:
-            $ref: '#/components/schemas/PaymentResponse'
-          description: ''
-        customerPostCodes:
-          type: array
-          items:
-            $ref: '#/components/schemas/CustomerPostCodeResponse'
-          description: ''
-        instalments:
-          type: array
-          items:
-            $ref: '#/components/schemas/InstalmentResponse'
-          description: ''
-        collections:
-          $ref: '#/components/schemas/PlanCollections'
-
-    # Renamed from AJSONSchemaforTTPAPI.5
-    UpdatePlanRequest:
-      title: UpdatePlanRequest
-      required:
-        - customerReference
-        - planId
-        - updateType
-      properties:
-        customerReference:
-          maxLength: 15
-          minLength: 1
-          type: string
-          description: Customer reference
-        channelIdentifier:
-          type: string
-          description: Channel Identification
-          enum:
-            - advisor
-            - selfService
-        planId:
-          maxLength: 15
-          minLength: 1
-          type: string
-          description: Unique planId
-        updateType:
-          allOf:
-            - $ref: '#/components/schemas/PlanUpdateType'
-            - description: This is where there is an update to the plan
-        planStatus:
-          allOf:
-            - $ref: '#/components/schemas/TTPPlanStatus'
-            - description: This is the plan status
-        completeReason:
-          allOf:
-            - $ref: '#/components/schemas/CompleteReason'
-            - description: This needs to be added as a validation where status update is complete
-        cancellationReason:
-          type: string
-          description: This needs to be added as a validation where status update is cancelled
-        thirdPartyBank:
-          type: boolean
-          description: Third party Bank
-        payments:
-          type: array
-          items:
-            $ref: '#/components/schemas/PaymentUpdate'
-          description: ''
-
-    # Renamed from AJSONSchemaforTTPAPI.6
-    UpdatePlanResponse:
-      title: UpdatePlanResponse
-      required:
-        - customerReference
-        - planId
-        - planStatus
-        - planUpdatedDate
-      properties:
-        customerReference:
-          maxLength: 15
-          minLength: 1
-          type: string
-          description: Customer reference
-        planId:
-          maxLength: 15
-          minLength: 1
-          type: string
-          description: Unique planId
-        planStatus:
-          allOf:
-            - $ref: '#/components/schemas/TTPPlanStatus'
-            - description: This is the plan status
-        planUpdatedDate:
-          type: string
-          description: This is the date for either the status change or the update
-          format: date
-
-    ChannelIdentifier:
-      title: ChannelIdentifier
-      enum:
-        - advisor
-        - selfService
-      type: string
-      description: Attribute to identify where the request is coming
-
-    PlanCollections:
-      title: Collections
-      required:
-        - regularCollections
-      properties:
-        initialCollection:
-          $ref: '#/components/schemas/InitialCollection'
-        regularCollections:
-          type: array
-          items:
-            $ref: '#/components/schemas/RegularCollection'
-          description: ''
-
-    CompleteReason:
-      title: CompleteReason
-      enum:
-        - Payment in Full
-        - Payment in full
-        - Amendment of Charges to Nil
-        - Amendment of charges to nil
-        - Remission
-        - Paid within Tolerance
-      type: string
-      description: This needs to be added as a validation where status update is complete
-
-    # Renamed from CustomerPostCode
-    CustomerPostCodeRequest:
-      title: CustomerPostCodeRequest
-      required:
-        - addressPostcode
-        - postcodeDate
-      properties:
-        addressPostcode:
-          type: string
-          description: Customer postcode this will be a list of postcodes
-        postcodeDate:
-          type: string
-          description: Date the customer used this postcode from
-          format: date
-
-    # Renamed from CustomerPostCode2
-    CustomerPostCodeResponse:
-      title: CustomerPostCodeResponse
-      required:
-        - addressPostcode
-        - postcodeDate
-      properties:
-        addressPostcode:
-          type: string
-          description: Customer postcode this will be a list of postcodes
-        postcodeDate:
-          type: string
-          description: Date the customer used this postcode from
-          format: date
-
-    # Renamed from DebtItemCharge
-    DebtItemChargeArrangementRequest:
-      title: DebtItemChargeArrangementRequest
-      required:
-        - debtItemChargeId
-        - mainTrans
-        - subTrans
-        - originalDebtAmount
-        - paymentHistory
-      properties:
-        debtItemChargeId:
-          maxLength: 16
-          minLength: 1
-          type: string
-          description: An ID which uniquely identifies a particular duty
-        mainTrans:
-          maxLength: 8
-          minLength: 4
-          type: string
-          description: Unique MTrans Debt Type ID e.g.1525 also known as M Trans
-        subTrans:
-          maxLength: 8
-          minLength: 4
-          type: string
-          description: Duty Type description for the UI
-        originalDebtAmount:
+        statusCode:
           type: integer
-          description: Original debt amount
-          format: int32
-        interestStartDate:
+          description: http status code
+        errorMessage:
           type: string
-          description: The interest start date
-          format: date
-        paymentHistory:
-          type: array
-          items:
-            $ref: '#/components/schemas/PaymentHistoryRequest'
-          description: ''
-        dueDate:
-          type: string
-          description: Due date
-          format: date
-        chargeSource:
-          type: string
-          description: Source of the charge
-        parentMainTrans:
-          type: string
-        parentChargeReference:
-          type: string
-          description: Charge reference. Alphanumeric field
-          pattern: '^[A-Za-z0-9]{1,14}$'
-
-    # Renamed from DebtItemCharge1
-    DebtItemChargeQuoteRequest:
-      title: DebtItemChargeQuoteRequest
-      required:
-        - debtItemChargeId
-        - mainTrans
-        - subTrans
-        - originalDebtAmount
-        - paymentHistory
-      properties:
-        debtItemChargeId:
-          maxLength: 16
-          minLength: 1
-          type: string
-          description: An ID which uniquely identifies a particular duty
-        dueDate:
-          type: string
-          format: date
-          description: Due date
-        mainTrans:
-          maxLength: 8
-          minLength: 4
-          type: string
-          description: Unique MTrans Debt Type ID e.g.1525 also known as M Trans
-        subTrans:
-          maxLength: 8
-          minLength: 4
-          type: string
-          description: Duty Type description for the UI
-        originalDebtAmount:
-          type: integer
-          description: Original debt amount
-          format: int32
-        interestStartDate:
-          type: string
-          description: The interest start date
-          format: date
-        paymentHistory:
-          type: array
-          items:
-            $ref: '#/components/schemas/PaymentHistoryRequest'
-          description: ''
-
-    # Renamed from DebtItemCharge2
-    DebtItemChargeResponse:
-      title: DebtItemChargeResponse
-      required:
-        - debtItemChargeId
-        - mainTrans
-        - originalDebtAmount
-        - paymentHistory
-        - subTrans
-      properties:
-        debtItemChargeId:
-          maxLength: 16
-          minLength: 1
-          type: string
-          description: An ID which uniquely identifies a particular duty
-        mainTrans:
-          maxLength: 8
-          minLength: 4
-          type: string
-          description: Unique MTrans Debt Type ID e.g.1525 also known as M Trans
-        subTrans:
-          maxLength: 8
-          minLength: 4
-          type: string
-          description: Duty Type description for the UI
-        originalDebtAmount:
-          type: integer
-          description: Original debt amount
-          format: int32
-        interestStartDate:
-          type: string
-          description: The interest start date
-          format: date
-        paymentHistory:
-          type: array
-          items:
-            $ref: '#/components/schemas/PaymentHistoryResponse'
-          description: ''
-
-    # Renamed from Frequency
-    PaymentFrequency:
-      title: PaymentFrequency
-      enum:
-        - single
-        - weekly
-        - 2Weekly
-        - 4Weekly
-        - Monthly
-        - quarterly
-        - 6Monthly
-        - annually
-      type: string
-      description: payment frequency
-
-    # Renamed from InitialPaymentMethod
-    InitialPaymentMethodType:
-      title: InitialPaymentMethodType
-      enum:
-        - directDebit
-        - BACS
-        - cheque
-        - cardPayment
-        - Ongoing award
-      type: string
-      description: Payment method (Direct debit, BACS, Cheque, Card)
-
-    # Renamed from Instalment
-    InstalmentResponse:
-      title: InstalmentResponse
-      required:
-        - amountDue
-        - debtItemChargeId
-        - dueDate
-        - expectedPayment
-        - instalmentBalance
-        - instalmentInterestAccrued
-        - instalmentNumber
-        - interestRate
-      properties:
-        debtItemChargeId:
-          maxLength: 16
-          minLength: 1
-          type: string
-          description: An ID which uniquely identifies a particular duty
-        dueDate:
-          type: string
-          description: Due date
-          format: date
-        amountDue:
-          type: number
-          description: Amount due
-          format: int32
-        expectedPayment:
-          type: integer
-          description: Expected payment
-          format: int32
-        interestRate:
-          type: number
-          description: Interest rate
-        instalmentNumber:
-          type: integer
-          description: Instalment number
-          format: int32
-        instalmentInterestAccrued:
-          type: integer
-          description: Instalment interest
-          format: int32
-        instalmentBalance:
-          type: integer
-          description: Instalment balance
-          format: int32
-
-    # Renamed from Instalment1
-    InstalmentRequest:
-      title: InstalmentRequest
-      required:
-        - debtItemChargeId
-        - dueDate
-        - amountDue
-        - expectedPayment
-        - interestRate
-        - instalmentNumber
-        - instalmentInterestAccrued
-        - instalmentBalance
-      properties:
-        debtItemChargeId:
-          maxLength: 32
-          minLength: 1
-          type: string
-          description: An ID which uniquely identifies a particular duty
-        dueDate:
-          type: string
-          description: Due date
-          format: date
-        amountDue:
-          type: number
-          description: Amount due
-          format: int32
-        expectedPayment:
-          type: integer
-          description: Expected payment
-          format: int32
-        interestRate:
-          type: number
-          description: Interest rate
-        instalmentNumber:
-          type: integer
-          description: Instalment number
-          format: int32
-        instalmentInterestAccrued:
-          type: integer
-          description: Instalment interest
-          format: int32
-        instalmentBalance:
-          type: integer
-          description: Instalment balance
-          format: int32
-
-    # Renamed from Payment
-    PaymentRequest:
-      title: PaymentRequest
-      required:
-        - paymentMethod
-      properties:
-        paymentMethod:
-          allOf:
-            - $ref: '#/components/schemas/PaymentMethodStandard'
-            - description: Payment method (Direct debit, BACS, Cheque, Card)
-        paymentReference:
-          maxLength: 15
-          minLength: 1
-          type: string
-          description: Payment Method reference
-
-    # Renamed from Payment1
-    PaymentResponse:
-      title: PaymentResponse
-      required:
-        - paymentMethod
-      properties:
-        paymentMethod:
-          allOf:
-            - $ref: '#/components/schemas/PaymentMethodExtended'
-            - description: Payment method (Direct debit, BACS, Cheque, Card)
-        paymentReference:
-          maxLength: 15
-          minLength: 1
-          type: string
-          description: Payment Method reference
-
-    # Renamed from Payment2
-    PaymentUpdate:
-      title: PaymentUpdate
-      required:
-        - paymentMethod
-      properties:
-        paymentMethod:
-          allOf:
-            - $ref: '#/components/schemas/PaymentMethodBasic'
-            - description: Payment method (Direct debit, BACS, Cheque, Card)
-        paymentReference:
-          maxLength: 15
-          minLength: 1
-          type: string
-          description: Payment Method reference
-
-    # Renamed from PaymentHistory
-    PaymentHistoryRequest:
-      title: PaymentHistoryRequest
-      required:
-        - paymentDate
-        - paymentAmount
-      properties:
-        paymentDate:
-          type: string
-          description: Payment date
-          format: date
-        paymentAmount:
-          type: integer
-          description: Payment amount
-          format: int32
-
-    # Renamed from PaymentHistory2
-    PaymentHistoryResponse:
-      title: PaymentHistoryResponse
-      required:
-        - paymentAmount
-        - paymentDate
-      properties:
-        paymentDate:
-          type: string
-          description: Payment date
-          format: date
-        paymentAmount:
-          type: integer
-          description: Payment amount
-          format: int32
-
-    # Renamed from PaymentMethod
-    PaymentMethodStandard:
-      title: PaymentMethodStandard
-      enum:
-        - directDebit
-        - BACS
-        - cheque
-        - cardPayment
-        - Ongoing award
-      type: string
-      description: Payment method (Direct debit, BACS, Cheque, Card)
-
-    # Renamed from PaymentMethod1
-    PaymentMethodExtended:
-      title: PaymentMethodExtended
-      enum:
-        - directDebit
-        - BACS
-        - cheque
-        - cardPayment
-        - Ongoing award
-      type: string
-      description: Payment method (Direct debit, BACS, Cheque, Card)
-
-    # Renamed from PaymentMethod2
-    PaymentMethodBasic:
-      title: PaymentMethodBasic
-      enum:
-        - directDebit
-        - BACS
-        - cheque
-        - cardPayment
-        - Ongoing award
-      type: string
-      description: Payment method (Direct debit, BACS, Cheque, Card)
-
-    # Renamed from PaymentPlanType
-    PaymentPlanTypeStandard:
-      title: PaymentPlanTypeStandard
-      enum:
-        - timeToPay
-        - instalmentOrder
-        - childBenefits
-        - fieldCollections
-        - LFC
-      type: string
-      description: Payment plan type
-
-    # Renamed from PaymentPlanType1
+          description: Reason for error request
     PaymentPlanTypeExtended:
       title: PaymentPlanTypeExtended
       enum:
@@ -1741,53 +1104,16 @@ components:
         - LFC
       type: string
       description: Payment Plan Type
-
-    # Renamed from Plan
-    PlanInput:
-      title: PlanInput
-      required:
-        - quoteType
-        - quoteDate
-        - instalmentStartDate
-        - paymentPlanType
-      properties:
-        quoteType:
-          allOf:
-            - $ref: '#/components/schemas/PlanQuoteType'
-            - description: this will determine what IFS is required
-        quoteDate:
-          type: string
-          description: Quote date
-          format: date
-        instalmentStartDate:
-          type: string
-          description: Instalment start date
-          format: date
-        instalmentAmount:
-          type: number
-          description: Instalment amount
-        frequency:
-          allOf:
-            - $ref: '#/components/schemas/PaymentFrequency'
-            - description: payment frequency
-        duration:
-          type: integer
-          description: Duration for the payment frequency
-          format: int32
-        initialPaymentAmount:
-          type: integer
-          description: Initial payment amount
-          format: int32
-        initialPaymentDate:
-          type: string
-          description: Initial payment date
-          format: date
-        paymentPlanType:
-          allOf:
-            - $ref: '#/components/schemas/PaymentPlanTypeStandard'
-            - description: Payment plan type
-
-    # Renamed from Plan1
+    InitialPaymentMethodType:
+      title: InitialPaymentMethodType
+      enum:
+        - directDebit
+        - BACS
+        - cheque
+        - cardPayment
+        - Ongoing award
+      type: string
+      description: Payment method (Direct debit, BACS, Cheque, Card)
     ArrangementPlan:
       title: ArrangementPlan
       required:
@@ -1868,8 +1194,222 @@ components:
         initialPaymentReference:
           type: string
           description: Payment Method reference
-
-    # Renamed from Plan2
+    DebtItemChargeArrangementRequest:
+      title: DebtItemChargeArrangementRequest
+      required:
+        - debtItemChargeId
+        - mainTrans
+        - subTrans
+        - originalDebtAmount
+        - paymentHistory
+      properties:
+        debtItemChargeId:
+          maxLength: 16
+          minLength: 1
+          type: string
+          description: An ID which uniquely identifies a particular duty
+        mainTrans:
+          maxLength: 8
+          minLength: 4
+          type: string
+          description: Unique MTrans Debt Type ID e.g.1525 also known as M Trans
+        subTrans:
+          maxLength: 8
+          minLength: 4
+          type: string
+          description: Duty Type description for the UI
+        originalDebtAmount:
+          type: integer
+          description: Original debt amount
+          format: int32
+        interestStartDate:
+          type: string
+          description: The interest start date
+          format: date
+        paymentHistory:
+          type: array
+          items:
+            $ref: '#/components/schemas/PaymentHistoryRequest'
+          description: ''
+        dueDate:
+          type: string
+          description: Due date
+          format: date
+        chargeSource:
+          type: string
+          description: Source of the charge
+        parentMainTrans:
+          type: string
+        parentChargeReference:
+          type: string
+          description: Charge reference. Alphanumeric field
+          pattern: ^[A-Za-z0-9]{1,14}$
+    PaymentMethodStandard:
+      title: PaymentMethodStandard
+      enum:
+        - directDebit
+        - BACS
+        - cheque
+        - cardPayment
+        - Ongoing award
+      type: string
+      description: Payment method (Direct debit, BACS, Cheque, Card)
+    PaymentRequest:
+      title: PaymentRequest
+      required:
+        - paymentMethod
+      properties:
+        paymentMethod:
+          allOf:
+            - $ref: '#/components/schemas/PaymentMethodStandard'
+            - description: Payment method (Direct debit, BACS, Cheque, Card)
+        paymentReference:
+          maxLength: 15
+          minLength: 1
+          type: string
+          description: Payment Method reference
+    InstalmentRequest:
+      title: InstalmentRequest
+      required:
+        - debtItemChargeId
+        - dueDate
+        - amountDue
+        - expectedPayment
+        - interestRate
+        - instalmentNumber
+        - instalmentInterestAccrued
+        - instalmentBalance
+      properties:
+        debtItemChargeId:
+          maxLength: 32
+          minLength: 1
+          type: string
+          description: An ID which uniquely identifies a particular duty
+        dueDate:
+          type: string
+          description: Due date
+          format: date
+        amountDue:
+          type: number
+          description: Amount due
+          format: int32
+        expectedPayment:
+          type: integer
+          description: Expected payment
+          format: int32
+        interestRate:
+          type: number
+          description: Interest rate
+        instalmentNumber:
+          type: integer
+          description: Instalment number
+          format: int32
+        instalmentInterestAccrued:
+          type: integer
+          description: Instalment interest
+          format: int32
+        instalmentBalance:
+          type: integer
+          description: Instalment balance
+          format: int32
+    PromoteArrangementRequest:
+      title: PromoteArrangementRequest
+      required:
+        - customerReference
+        - quoteReference
+        - channelIdentifier
+        - plan
+        - debtItemCharges
+        - payments
+        - customerPostCodes
+        - instalments
+      properties:
+        regimeType:
+          type: string
+          description: Regime type
+          enum:
+            - SA
+        customerReference:
+          maxLength: 15
+          minLength: 1
+          type: string
+          description: Unique Customer reference
+        quoteReference:
+          maxLength: 15
+          minLength: 1
+          type: string
+          description: This is the Quote reference
+        channelIdentifier:
+          allOf:
+            - $ref: '#/components/schemas/ChannelIdentifier'
+            - description: Attribute to identify where the request is coming
+        plan:
+          $ref: '#/components/schemas/ArrangementPlan'
+        debtItemCharges:
+          type: array
+          items:
+            $ref: '#/components/schemas/DebtItemChargeArrangementRequest'
+          description: ''
+        payments:
+          type: array
+          items:
+            $ref: '#/components/schemas/PaymentRequest'
+          description: ''
+        customerPostCodes:
+          type: array
+          items:
+            $ref: '#/components/schemas/CustomerPostCodeRequest'
+          description: ''
+        instalments:
+          type: array
+          items:
+            $ref: '#/components/schemas/InstalmentRequest'
+          description: ''
+    TTPPlanStatus:
+      title: TTPPlanStatus
+      enum:
+        - success
+        - failure
+        - Resolved - Cancelled
+        - Resolved - Completed
+        - TTP Arrangement - In Progress
+        - Resolved - TTP Amended
+        - In Default - Clerical Review
+        - Pending - First Reminder
+        - In Default - First Reminder
+        - Pending - Second Reminder
+        - In Default - Second Reminder
+        - Pending - Cancellation
+        - Pending - Completion
+        - TTP - Monitoring suspended
+        - Pending - Cancellation Letter
+      type: string
+      description: This is the plan status
+    PromoteArrangementResponse:
+      title: PromoteArrangementResponse
+      required:
+        - caseId
+        - customerReference
+        - planId
+        - planStatus
+      properties:
+        customerReference:
+          maxLength: 15
+          minLength: 1
+          type: string
+          description: The Unique Customer reference
+        planId:
+          maxLength: 15
+          minLength: 1
+          type: string
+          description: Unique planId
+        caseId:
+          type: string
+          description: Unique caseId
+        planStatus:
+          allOf:
+            - $ref: '#/components/schemas/TTPPlanStatus'
+            - description: This is the plan status
     PlanDetails:
       title: PlanDetails
       required:
@@ -1941,53 +1481,139 @@ components:
         planInterest:
           type: number
           description: Interest accrued to the life of the plan
-
-    # Renamed from PlanStatus
-    TTPPlanStatus:
-      title: TTPPlanStatus
-      enum:
-        - success
-        - failure
-        - Resolved - Cancelled
-        - Resolved - Completed
-        - TTP Arrangement - In Progress
-        - Resolved - TTP Amended
-        - In Default - Clerical Review
-        - Pending - First Reminder
-        - In Default - First Reminder
-        - Pending - Second Reminder
-        - In Default - Second Reminder
-        - Pending - Cancellation
-        - Pending - Completion
-        - TTP - Monitoring suspended
-        - Pending - Cancellation Letter
-      type: string
-      description: This is the plan status
-
-    # Renamed from QuoteType
-    PlanQuoteType:
-      title: PlanQuoteType
-      enum:
-        - duration
-        - instalmentAmount
-      type: string
-      description: this will determine what IFS is required
-
-    RegularCollection:
-      title: RegularCollection
+    PaymentHistoryResponse:
+      title: PaymentHistoryResponse
       required:
-        - dueDate
-        - amountDue
+        - paymentAmount
+        - paymentDate
       properties:
-        dueDate:
+        paymentDate:
           type: string
-          description: Due date
+          description: Payment date
           format: date
-        amountDue:
-          type: number
-          description: Amount due
-
-    # Renamed from UpdateType
+        paymentAmount:
+          type: integer
+          description: Payment amount
+          format: int32
+    DebtItemChargeResponse:
+      title: DebtItemChargeResponse
+      required:
+        - debtItemChargeId
+        - mainTrans
+        - originalDebtAmount
+        - paymentHistory
+        - subTrans
+      properties:
+        debtItemChargeId:
+          maxLength: 16
+          minLength: 1
+          type: string
+          description: An ID which uniquely identifies a particular duty
+        mainTrans:
+          maxLength: 8
+          minLength: 4
+          type: string
+          description: Unique MTrans Debt Type ID e.g.1525 also known as M Trans
+        subTrans:
+          maxLength: 8
+          minLength: 4
+          type: string
+          description: Duty Type description for the UI
+        originalDebtAmount:
+          type: integer
+          description: Original debt amount
+          format: int32
+        interestStartDate:
+          type: string
+          description: The interest start date
+          format: date
+        paymentHistory:
+          type: array
+          items:
+            $ref: '#/components/schemas/PaymentHistoryResponse'
+          description: ''
+    PaymentMethodExtended:
+      title: PaymentMethodExtended
+      enum:
+        - directDebit
+        - BACS
+        - cheque
+        - cardPayment
+        - Ongoing award
+      type: string
+      description: Payment method (Direct debit, BACS, Cheque, Card)
+    PaymentResponse:
+      title: PaymentResponse
+      required:
+        - paymentMethod
+      properties:
+        paymentMethod:
+          allOf:
+            - $ref: '#/components/schemas/PaymentMethodExtended'
+            - description: Payment method (Direct debit, BACS, Cheque, Card)
+        paymentReference:
+          maxLength: 15
+          minLength: 1
+          type: string
+          description: Payment Method reference
+    CustomerPostCodeResponse:
+      title: CustomerPostCodeResponse
+      required:
+        - addressPostcode
+        - postcodeDate
+      properties:
+        addressPostcode:
+          type: string
+          description: Customer postcode this will be a list of postcodes
+        postcodeDate:
+          type: string
+          description: Date the customer used this postcode from
+          format: date
+    GetPlanResponse:
+      title: GetPlanResponse
+      required:
+        - channelIdentifier
+        - collections
+        - customerPostCodes
+        - customerReference
+        - debtItemCharges
+        - instalments
+        - payments
+        - plan
+      properties:
+        customerReference:
+          maxLength: 15
+          minLength: 1
+          type: string
+          description: This is the customer reference
+        channelIdentifier:
+          allOf:
+            - $ref: '#/components/schemas/ChannelIdentifier'
+            - description: Attribute to identify where the request is coming
+        plan:
+          $ref: '#/components/schemas/PlanDetails'
+        debtItemCharges:
+          type: array
+          items:
+            $ref: '#/components/schemas/DebtItemChargeResponse'
+          description: ''
+        payments:
+          type: array
+          items:
+            $ref: '#/components/schemas/PaymentResponse'
+          description: ''
+        customerPostCodes:
+          type: array
+          items:
+            $ref: '#/components/schemas/CustomerPostCodeResponse'
+          description: ''
+        instalments:
+          type: array
+          items:
+            $ref: '#/components/schemas/InstalmentResponse'
+          description: ''
+        collections:
+          $ref: '#/components/schemas/PlanCollections'
     PlanUpdateType:
       title: PlanUpdateType
       enum:
@@ -1995,7 +1621,307 @@ components:
         - planStatus
       type: string
       description: This is where there is an update to the plan
-
+    CompleteReason:
+      title: CompleteReason
+      enum:
+        - Payment in Full
+        - Payment in full
+        - Amendment of Charges to Nil
+        - Amendment of charges to nil
+        - Remission
+        - Paid within Tolerance
+      type: string
+      description: This needs to be added as a validation where status update is complete
+    PaymentMethodBasic:
+      title: PaymentMethodBasic
+      enum:
+        - directDebit
+        - BACS
+        - cheque
+        - cardPayment
+        - Ongoing award
+      type: string
+      description: Payment method (Direct debit, BACS, Cheque, Card)
+    PaymentUpdate:
+      title: PaymentUpdate
+      required:
+        - paymentMethod
+      properties:
+        paymentMethod:
+          allOf:
+            - $ref: '#/components/schemas/PaymentMethodBasic'
+            - description: Payment method (Direct debit, BACS, Cheque, Card)
+        paymentReference:
+          maxLength: 15
+          minLength: 1
+          type: string
+          description: Payment Method reference
+    UpdatePlanRequest:
+      title: UpdatePlanRequest
+      required:
+        - customerReference
+        - planId
+        - updateType
+      properties:
+        customerReference:
+          maxLength: 15
+          minLength: 1
+          type: string
+          description: Customer reference
+        channelIdentifier:
+          type: string
+          description: Channel Identification
+          enum:
+            - advisor
+            - selfService
+        planId:
+          maxLength: 15
+          minLength: 1
+          type: string
+          description: Unique planId
+        updateType:
+          allOf:
+            - $ref: '#/components/schemas/PlanUpdateType'
+            - description: This is where there is an update to the plan
+        planStatus:
+          allOf:
+            - $ref: '#/components/schemas/TTPPlanStatus'
+            - description: This is the plan status
+        completeReason:
+          allOf:
+            - $ref: '#/components/schemas/CompleteReason'
+            - description: This needs to be added as a validation where status update is complete
+        cancellationReason:
+          type: string
+          description: This needs to be added as a validation where status update is cancelled
+        thirdPartyBank:
+          type: boolean
+          description: Third party Bank
+        payments:
+          type: array
+          items:
+            $ref: '#/components/schemas/PaymentUpdate'
+          description: ''
+    UpdatePlanResponse:
+      title: UpdatePlanResponse
+      required:
+        - customerReference
+        - planId
+        - planStatus
+        - planUpdatedDate
+      properties:
+        customerReference:
+          maxLength: 15
+          minLength: 1
+          type: string
+          description: Customer reference
+        planId:
+          maxLength: 15
+          minLength: 1
+          type: string
+          description: Unique planId
+        planStatus:
+          allOf:
+            - $ref: '#/components/schemas/TTPPlanStatus'
+            - description: This is the plan status
+        planUpdatedDate:
+          type: string
+          description: This is the date for either the status change or the update
+          format: date
+    paymentPlanFrequency:
+      title: paymentPlanFrequency
+      type: string
+      enum:
+        - Single
+        - Weekly
+        - 2Weekly
+        - 4Weekly
+        - Monthly
+        - Quarterly
+        - 6Monthly
+        - annually
+    DebtItem:
+      title: DebtItem
+      required:
+        - debtItemChargeId
+        - debtItemOriginalDueDate
+        - mainTrans
+        - outstandingDebtAmount
+        - subTrans
+        - isInterestBearingCharge
+        - useChargeReference
+      properties:
+        outstandingDebtAmount:
+          type: number
+        mainTrans:
+          type: string
+        subTrans:
+          type: string
+        isInterestBearingCharge:
+          type: boolean
+        useChargeReference:
+          type: boolean
+        debtItemChargeId:
+          type: string
+        interestStartDate:
+          type: string
+          format: date
+        debtItemOriginalDueDate:
+          type: string
+          format: date
+    postCode:
+      title: postCode
+      required:
+        - addressPostcode
+        - postcodeDate
+      properties:
+        addressPostcode:
+          pattern: ^([A-Za-z][A-Ha-hJ-Yj-y]?[0-9][A-Za-z0-9]? ?[0-9][A-Za-z]{2}|[Gg][Ii][Rr] ?0[Aa]{2})$
+          type: string
+          description: valid UK postcode
+        postcodeDate:
+          pattern: ^\d{4}-[0-1][0-9]-[0-3][0-9]$
+          type: string
+          description: Postcode date move in
+    AffordableQuotesRequest:
+      title: AffordableQuotesRequest
+      required:
+        - channelIdentifier
+        - paymentPlanAffordableAmount
+        - paymentPlanFrequency
+        - paymentPlanMaxLength
+        - paymentPlanMinLength
+        - accruedDebtInterest
+        - paymentPlanStartDate
+        - debtItemCharges
+        - customerPostcodes
+      properties:
+        regimeType:
+          type: string
+          description: Regime type
+        channelIdentifier:
+          type: string
+        paymentPlanAffordableAmount:
+          type: integer
+          format: int32
+        paymentPlanFrequency:
+          $ref: '#/components/schemas/paymentPlanFrequency'
+        paymentPlanMaxLength:
+          type: integer
+          format: int32
+        paymentPlanMinLength:
+          type: integer
+          format: int32
+        accruedDebtInterest:
+          type: number
+        paymentPlanStartDate:
+          type: string
+          format: date
+        initialPaymentDate:
+          type: string
+          format: date
+        initialPaymentAmount:
+          type: integer
+          format: int32
+        debtItemCharges:
+          type: array
+          minItems: 1
+          items:
+            $ref: '#/components/schemas/DebtItem'
+          description: An array of DebtItems
+        customerPostcodes:
+          type: array
+          items:
+            $ref: '#/components/schemas/postCode'
+          description: An array of PostCode
+    instalments:
+      title: Instalments
+      required:
+        - instalmentNumber
+        - dueDate
+        - instalmentInterestAccrued
+        - instalmentBalance
+        - debtItemChargeId
+        - amountDue
+        - debtItemOriginalDueDate
+        - expectedPayment
+      properties:
+        instalmentNumber:
+          type: integer
+          format: int32
+        dueDate:
+          type: string
+          format: date
+        instalmentInterestAccrued:
+          type: number
+        instalmentBalance:
+          type: number
+        debtItemChargeId:
+          type: string
+        amountDue:
+          type: number
+        debtItemOriginalDueDate:
+          type: string
+          format: date
+        expectedPayment:
+          type: integer
+    paymentPlans:
+      title: PaymentPlans
+      required:
+        - planDuration
+        - totalDebt
+        - totalDebtIncInt
+        - planInterest
+        - collections
+        - numberOfInstalments
+        - instalments
+      properties:
+        planDuration:
+          type: integer
+          format: int32
+        totalDebt:
+          type: number
+        totalDebtIncInt:
+          type: number
+        planInterest:
+          type: number
+        numberOfInstalments:
+          type: integer
+          format: int32
+        collections:
+          required:
+            - regularCollections
+          properties:
+            initialCollection:
+              $ref: '#/components/schemas/InitialCollection'
+            regularCollections:
+              type: array
+              minItems: 1
+              items:
+                $ref: '#/components/schemas/RegularCollection'
+              description: An array of regularCollections
+        instalments:
+          type: array
+          minItems: 1
+          items:
+            $ref: '#/components/schemas/instalments'
+          description: An array of instalments
+    AffordableQuotesResponse:
+      title: AffordableQuotesResponse
+      required:
+        - processingDateTime
+        - paymentPlans
+      properties:
+        processingDateTime:
+          type: string
+          pattern: ^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d{1,3})?$
+          example: '2022-03-23T13:49:51.123'
+        paymentPlans:
+          type: array
+          minItems: 1
+          items:
+            $ref: '#/components/schemas/paymentPlans'
+          description: An array of paymentPlans
     TTPChargeInfoRequest:
       title: TTPChargeInfoRequest
       required:
@@ -2027,7 +1953,6 @@ components:
               - idType
               - idValue
           description: An array of customer identifications
-
     TTPChargeInfoResponse:
       title: TTPChargeInfoResponse
       required:
@@ -2039,7 +1964,7 @@ components:
       properties:
         processingDateTime:
           type: string
-          pattern: '^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d{1,3})?$'
+          pattern: ^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d{1,3})?$
           example: '2022-03-23T13:49:51.123'
         identification:
           type: array
@@ -2235,6 +2160,3 @@ components:
                     - outstandingAmount
                     - dueDate
                     - accruedInterest
-tags:
-  - name: individuals
-    description: ''

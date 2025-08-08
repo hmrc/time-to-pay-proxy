@@ -1,0 +1,206 @@
+title: TTPChargeInfoResponse
+required:
+  - processingDateTime
+  - identification
+  - chargeTypeAssessment
+  - addresses
+  - individualDetails
+properties:
+  processingDateTime:
+    type: string
+    pattern: ^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d{1,3})?$
+    example: '2022-03-23T13:49:51.123'
+  identification:
+    type: array
+    items:
+      type: object
+      properties:
+        idType:
+          type: string
+          description: ID type
+        idValue:
+          type: string
+          description: ID value
+      required:
+        - idType
+        - idValue
+    description: An array of customer identifications
+  individualDetails:
+    type: object
+    properties:
+      title:
+        type: string
+        description: Title
+      firstName:
+        type: string
+        description: Firstname
+      lastName:
+        type: string
+        description: Lastname
+      dateOfBirth:
+        type: string
+        format: date
+        description: Date of birth
+      districtNumber:
+        type: string
+        description: District Number
+      customerType:
+        type: string
+        description: Customer Type
+        enum:
+          - MTD(ITSA)
+          - Classic SA - Transitioned
+          - Classic SA - Non Transitioned
+      transitionToCDCS:
+        type: boolean
+        description: Signifies if the customer must be transitioned to CDCS
+    required:
+      - customerType
+      - transitionToCDCS
+  addresses:
+    type: array
+    items:
+      type: object
+      properties:
+        addressType:
+          type: string
+          description: Type of address
+        addressLine1:
+          type: string
+          description: Address line 1
+        addressLine2:
+          type: string
+          description: Address line 2
+        addressLine3:
+          type: string
+          description: Address line 3
+        addressLine4:
+          type: string
+          description: Address line 4
+        rls:
+          type: boolean
+          description: Returned Letter Service indicates tax payer is no longer resident
+        contactDetails:
+          type: object
+          properties:
+            telephoneNumber:
+              type: string
+              description: Telephone number
+            fax:
+              type: string
+              description: Fax number
+            mobile:
+              type: string
+              description: Mobile number
+            emailAddress:
+              type: string
+              description: Email address
+            emailSource:
+              type: string
+              description: Email source
+        postCode:
+          type: string
+          description: Post code
+        postcodeHistory:
+          type: array
+          items:
+            type: object
+            properties:
+              addressPostcode:
+                type: string
+                description: Customer postcode
+              postcodeDate:
+                type: string
+                format: date
+                description: Date the customer used this postcode from
+            required:
+              - addressPostcode
+              - postcodeDate
+      required:
+        - addressLine1
+        - addressType
+        - postcodeHistory
+  chargeTypeAssessment:
+    type: array
+    items:
+      type: object
+      required:
+        - debtTotalAmount
+        - chargeReference
+        - charges
+        - mainTrans
+      properties:
+        debtTotalAmount:
+          type: integer
+          description: Total debt amount
+        chargeReference:
+          type: string
+          description: Charge reference
+        parentChargeReference:
+          type: string
+        mainTrans:
+          type: string
+          description: |
+            Represents main transaction types. Unrecognized values is treated
+            as "UsedMainTrans" with the provided string value.
+        charges:
+          type: array
+          items:
+            type: object
+            properties:
+              taxPeriodFrom:
+                type: string
+                format: date
+                description: Tax period start date
+              taxPeriodTo:
+                type: string
+                format: date
+                description: Tax period end date
+              chargeType:
+                type: string
+              mainType:
+                type: string
+              subTrans:
+                type: string
+              outstandingAmount:
+                type: integer
+              dueDate:
+                type: string
+                format: date
+              isInterestBearingCharge:
+                type: boolean
+                description: shows whether its an interest bearing charge
+              interestStartDate:
+                type: string
+                format: date
+              accruedInterest:
+                type: integer
+              chargeSource:
+                type: string
+              parentMainTrans:
+                type: string
+              originalCreationDate:
+                type: string
+                format: date
+              tieBreaker:
+                type: string
+              originalTieBreaker:
+                type: string
+              saTaxYearEnd:
+                type: string
+                format: date
+              creationDate:
+                type: string
+                format: date
+              originalChargeType:
+                type: string
+            required:
+              - taxPeriodFrom
+              - taxPeriodTo
+              - chargeSource
+              - chargeType
+              - mainType
+              - subTrans
+              - outstandingAmount
+              - dueDate
+              - accruedInterest

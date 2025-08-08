@@ -1,0 +1,45 @@
+title: UpdatePlanRequest
+required:
+  - customerReference
+  - planId
+  - updateType
+properties:
+  customerReference:
+    maxLength: 15
+    minLength: 1
+    type: string
+    description: Customer reference
+  channelIdentifier:
+    type: string
+    description: Channel Identification
+    enum:
+      - advisor
+      - selfService
+  planId:
+    maxLength: 15
+    minLength: 1
+    type: string
+    description: Unique planId
+  updateType:
+    allOf:
+      - $ref: ./PlanUpdateType.yaml
+      - description: This is where there is an update to the plan
+  planStatus:
+    allOf:
+      - $ref: ./TTPPlanStatus.yaml
+      - description: This is the plan status
+  completeReason:
+    allOf:
+      - $ref: ./CompleteReason.yaml
+      - description: This needs to be added as a validation where status update is complete
+  cancellationReason:
+    type: string
+    description: This needs to be added as a validation where status update is cancelled
+  thirdPartyBank:
+    type: boolean
+    description: Third party Bank
+  payments:
+    type: array
+    items:
+      $ref: ./PaymentUpdate.yaml
+    description: ''

@@ -1,0 +1,9 @@
+title: PaymentPlanTypeExtended
+enum:
+  - timeToPay
+  - instalmentOrder
+  - childBenefits
+  - fieldCollections
+  - LFC
+type: string
+description: Payment Plan Type

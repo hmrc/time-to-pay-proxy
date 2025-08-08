@@ -1,0 +1,8 @@
+title: ErrorResponse
+properties:
+  statusCode:
+    type: integer
+    description: http status code
+  errorMessage:
+    type: string
+    description: Reason for error request

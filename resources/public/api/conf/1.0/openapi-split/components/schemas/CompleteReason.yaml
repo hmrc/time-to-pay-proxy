@@ -1,0 +1,10 @@
+title: CompleteReason
+enum:
+  - Payment in Full
+  - Payment in full
+  - Amendment of Charges to Nil
+  - Amendment of charges to nil
+  - Remission
+  - Paid within Tolerance
+type: string
+description: This needs to be added as a validation where status update is complete

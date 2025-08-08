@@ -1,0 +1,85 @@
+# Redocly CLI Configuration
+# Documentation: https://redocly.com/docs/cli/configuration/
+# Rules reference: https://redocly.com/docs/cli/rules/built-in-rules/
+
+apis:
+  main:
+    root: resources/public/api/conf/1.0/openapi-split/openapi.yaml
+
+# Use recommended preset as base
+extends:
+  - recommended
+
+# All Built-in Rules with Default Values
+rules:
+  # === GLOBAL RULES ===
+  no-unresolved-refs: error
+  no-unused-components: warn
+
+  # === OPENAPI RULES ===
+
+  # Info Object Rules
+  info-contact: warn
+  info-license: off
+
+  # Paths and Operations Rules
+  operation-2xx-response: warn
+  operation-4xx-response: off
+  operation-description: warn
+  operation-operationId: warn
+  operation-operationId-unique: error
+  operation-operationId-url-safe: off
+  operation-parameters-unique: error
+  operation-singular-tag: off
+  operation-summary: error
+  operation-tag-defined: warn
+
+  # Parameters Rules
+  boolean-parameter-prefixes: off
+  no-invalid-parameter-examples: error
+  parameter-description: off
+  path-declaration-must-exist: error
+  path-not-include-query: error
+  path-parameters-defined: error
+  path-segment-plural: off
+  paths-kebab-case: off
+
+  # Request/Response Rules
+  request-mime-type: off
+  response-contains-header: off
+  response-contains-property: off
+
+  # Schema Rules
+  no-enum-type-mismatch: error
+  no-example-value-and-externalValue: error
+  no-identical-paths: error
+  no-invalid-media-type-examples: error
+  no-invalid-schema-examples: error
+  no-path-trailing-slash: error
+  no-required-schema-properties-undefined: error
+  no-server-example.com: warn
+  no-server-trailing-slash: error
+  no-undefined-server-variable: error
+
+  # Security Rules
+  component-name-unique: error
+  no-ambiguous-paths: warn
+  no-http-verbs-in-paths: warn
+  no-server-variables-empty-enum: error
+
+  # Tag Rules
+  tag-description: off
+  tags-alphabetical: off
+
+  # === CONFIGURABLE RULES EXAMPLES ===
+  # Uncomment and configure as needed:
+
+  # boolean-parameter-prefixes:
+  #   severity: error
+  #   prefixes: ['is', 'has', 'can', 'should', 'will']
+
+  # paths-kebab-case:
+  #   severity: warn
+
+  # tags-alphabetical:
+  #   severity: warn
