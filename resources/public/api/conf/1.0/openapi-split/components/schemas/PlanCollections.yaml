@@ -1,0 +1,11 @@
+title: Collections
+required:
+  - regularCollections
+properties:
+  initialCollection:
+    $ref: ./InitialCollection.yaml
+  regularCollections:
+    type: array
+    items:
+      $ref: ./RegularCollection.yaml
+    description: ''

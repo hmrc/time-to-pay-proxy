@@ -1,0 +1,43 @@
+title: InstalmentRequest
+required:
+  - debtItemChargeId
+  - dueDate
+  - amountDue
+  - expectedPayment
+  - interestRate
+  - instalmentNumber
+  - instalmentInterestAccrued
+  - instalmentBalance
+properties:
+  debtItemChargeId:
+    maxLength: 32
+    minLength: 1
+    type: string
+    description: An ID which uniquely identifies a particular duty
+  dueDate:
+    type: string
+    description: Due date
+    format: date
+  amountDue:
+    type: number
+    description: Amount due
+    format: int32
+  expectedPayment:
+    type: integer
+    description: Expected payment
+    format: int32
+  interestRate:
+    type: number
+    description: Interest rate
+  instalmentNumber:
+    type: integer
+    description: Instalment number
+    format: int32
+  instalmentInterestAccrued:
+    type: integer
+    description: Instalment interest
+    format: int32
+  instalmentBalance:
+    type: integer
+    description: Instalment balance
+    format: int32

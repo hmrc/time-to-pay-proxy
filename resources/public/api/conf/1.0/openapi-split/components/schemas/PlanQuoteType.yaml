@@ -1,0 +1,6 @@
+title: PlanQuoteType
+enum:
+  - duration
+  - instalmentAmount
+type: string
+description: this will determine what IFS is required

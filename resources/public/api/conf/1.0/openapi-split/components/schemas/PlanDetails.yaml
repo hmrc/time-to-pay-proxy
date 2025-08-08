@@ -1,0 +1,70 @@
+title: PlanDetails
+required:
+  - caseId
+  - interestAccrued
+  - numberOfInstalments
+  - paymentPlanType
+  - planId
+  - planInterest
+  - quoteDate
+  - quoteId
+  - quoteType
+  - thirdPartyBank
+  - totalDebtIncInt
+  - totalInterest
+properties:
+  caseId:
+    type: string
+    description: This is the unique case id
+  planId:
+    maxLength: 15
+    minLength: 1
+    type: string
+    description: This is the unique plan id
+  quoteId:
+    type: string
+    description: This is the ID for the quote associated with the plan
+  quoteDate:
+    type: string
+    description: Quote date
+    format: date
+  quoteType:
+    allOf:
+      - $ref: ./PlanQuoteType.yaml
+      - description: this will determine what IFS is required
+  paymentPlanType:
+    allOf:
+      - $ref: ./PaymentPlanTypeExtended.yaml
+      - description: Payment Plan Type
+  thirdPartyBank:
+    type: boolean
+    description: Third party bank
+  numberOfInstalments:
+    type: integer
+    description: Number of instalments
+    format: int32
+  frequency:
+    allOf:
+      - $ref: ./PaymentFrequency.yaml
+      - description: payment frequency
+  initialPaymentMethod:
+    allOf:
+      - $ref: ./InitialPaymentMethodType.yaml
+      - description: Payment method (Direct debit, BACS, Cheque, Card)
+  initialPaymentReference:
+    type: string
+    description: Payment Method reference
+  totalDebtIncInt:
+    type: integer
+    description: This is the total debt plus interest for the plan
+    format: int32
+  totalInterest:
+    type: number
+    description: This is the total interest accrued for the duration of the plan
+  interestAccrued:
+    type: integer
+    description: This is the total interest accrued prior to plan start
+    format: int32
+  planInterest:
+    type: number
+    description: Interest accrued to the life of the plan

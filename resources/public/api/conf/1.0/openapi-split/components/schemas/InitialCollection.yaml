@@ -1,0 +1,10 @@
+title: InitialCollection
+required:
+  - dueDate
+  - amountDue
+properties:
+  dueDate:
+    type: string
+    format: date
+  amountDue:
+    type: number

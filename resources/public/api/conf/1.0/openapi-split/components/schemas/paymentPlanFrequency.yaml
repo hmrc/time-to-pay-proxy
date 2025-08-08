@@ -1,0 +1,11 @@
+title: paymentPlanFrequency
+type: string
+enum:
+  - Single
+  - Weekly
+  - 2Weekly
+  - 4Weekly
+  - Monthly
+  - Quarterly
+  - 6Monthly
+  - annually

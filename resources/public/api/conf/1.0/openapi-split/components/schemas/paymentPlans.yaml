@@ -1,0 +1,40 @@
+title: PaymentPlans
+required:
+  - planDuration
+  - totalDebt
+  - totalDebtIncInt
+  - planInterest
+  - collections
+  - numberOfInstalments
+  - instalments
+properties:
+  planDuration:
+    type: integer
+    format: int32
+  totalDebt:
+    type: number
+  totalDebtIncInt:
+    type: number
+  planInterest:
+    type: number
+  numberOfInstalments:
+    type: integer
+    format: int32
+  collections:
+    required:
+      - regularCollections
+    properties:
+      initialCollection:
+        $ref: ./InitialCollection.yaml
+      regularCollections:
+        type: array
+        minItems: 1
+        items:
+          $ref: ./RegularCollection.yaml
+        description: An array of regularCollections
+  instalments:
+    type: array
+    minItems: 1
+    items:
+      $ref: ./instalments.yaml
+    description: An array of instalments

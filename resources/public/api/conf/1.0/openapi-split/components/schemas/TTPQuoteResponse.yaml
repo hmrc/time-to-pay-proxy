@@ -1,0 +1,59 @@
+title: TTPQuoteResponse
+required:
+  - collections
+  - customerReference
+  - instalments
+  - interestAccrued
+  - numberOfInstalments
+  - planInterest
+  - quoteDate
+  - quoteReference
+  - quoteType
+  - totalDebtIncInt
+  - totalInterest
+properties:
+  quoteReference:
+    maxLength: 15
+    minLength: 1
+    type: string
+    description: This is the Quote reference
+  customerReference:
+    maxLength: 15
+    minLength: 1
+    type: string
+    description: Unique Customer reference
+  quoteType:
+    allOf:
+      - $ref: ./PlanQuoteType.yaml
+      - description: >-
+          this will determine what IFS is required to calculate either duration
+          or instalment amount
+  quoteDate:
+    type: string
+    description: This is the Quote date
+    format: date
+  numberOfInstalments:
+    type: integer
+    description: Number of instalments
+    format: int32
+  totalDebtIncInt:
+    type: integer
+    description: This is the total debt plus interest for the plan
+    format: int32
+  interestAccrued:
+    type: integer
+    description: This is the total interest accrued prior up to the quote
+    format: int32
+  planInterest:
+    type: number
+    description: Interest accrued to the life of the plan
+  totalInterest:
+    type: number
+    description: This is the total interest accrued for the duration of the plan
+  instalments:
+    type: array
+    items:
+      $ref: ./InstalmentResponse.yaml
+    description: ''
+  collections:
+    $ref: ./PlanCollections.yaml

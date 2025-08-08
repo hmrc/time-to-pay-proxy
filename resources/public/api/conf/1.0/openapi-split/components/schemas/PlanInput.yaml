@@ -1,0 +1,42 @@
+title: PlanInput
+required:
+  - quoteType
+  - quoteDate
+  - instalmentStartDate
+  - paymentPlanType
+properties:
+  quoteType:
+    allOf:
+      - $ref: ./PlanQuoteType.yaml
+      - description: this will determine what IFS is required
+  quoteDate:
+    type: string
+    description: Quote date
+    format: date
+  instalmentStartDate:
+    type: string
+    description: Instalment start date
+    format: date
+  instalmentAmount:
+    type: number
+    description: Instalment amount
+  frequency:
+    allOf:
+      - $ref: ./PaymentFrequency.yaml
+      - description: payment frequency
+  duration:
+    type: integer
+    description: Duration for the payment frequency
+    format: int32
+  initialPaymentAmount:
+    type: integer
+    description: Initial payment amount
+    format: int32
+  initialPaymentDate:
+    type: string
+    description: Initial payment date
+    format: date
+  paymentPlanType:
+    allOf:
+      - $ref: ./PaymentPlanTypeStandard.yaml
+      - description: Payment plan type

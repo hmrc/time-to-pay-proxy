@@ -1,0 +1,12 @@
+title: CustomerPostCodeRequest
+required:
+  - addressPostcode
+  - postcodeDate
+properties:
+  addressPostcode:
+    type: string
+    description: Customer postcode this will be a list of postcodes
+  postcodeDate:
+    type: string
+    description: Date the customer used this postcode from
+    format: date

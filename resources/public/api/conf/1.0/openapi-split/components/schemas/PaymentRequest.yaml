@@ -1,0 +1,13 @@
+title: PaymentRequest
+required:
+  - paymentMethod
+properties:
+  paymentMethod:
+    allOf:
+      - $ref: ./PaymentMethodStandard.yaml
+      - description: Payment method (Direct debit, BACS, Cheque, Card)
+  paymentReference:
+    maxLength: 15
+    minLength: 1
+    type: string
+    description: Payment Method reference

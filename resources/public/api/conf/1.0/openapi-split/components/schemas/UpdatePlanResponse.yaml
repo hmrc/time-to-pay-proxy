@@ -1,0 +1,25 @@
+title: UpdatePlanResponse
+required:
+  - customerReference
+  - planId
+  - planStatus
+  - planUpdatedDate
+properties:
+  customerReference:
+    maxLength: 15
+    minLength: 1
+    type: string
+    description: Customer reference
+  planId:
+    maxLength: 15
+    minLength: 1
+    type: string
+    description: Unique planId
+  planStatus:
+    allOf:
+      - $ref: ./TTPPlanStatus.yaml
+      - description: This is the plan status
+  planUpdatedDate:
+    type: string
+    description: This is the date for either the status change or the update
+    format: date

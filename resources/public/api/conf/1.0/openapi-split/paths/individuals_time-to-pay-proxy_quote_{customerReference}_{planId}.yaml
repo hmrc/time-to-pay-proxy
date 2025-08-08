@@ -1,0 +1,222 @@
+get:
+  tags:
+    - individuals
+  summary: Get Existing TTP Plan
+  description: This is an endpoint that DAUI trigger a view a plan using ttp service
+  operationId: GetExistingTTPPlan
+  parameters:
+    - name: customerReference
+      in: path
+      description: ''
+      required: true
+      style: simple
+      schema:
+        type: string
+    - name: planId
+      in: path
+      description: ''
+      required: true
+      style: simple
+      schema:
+        type: string
+  security:
+    - applicationRestricted:
+        - read:time-to-pay-proxy
+  responses:
+    '200':
+      description: ''
+      headers: {}
+      content:
+        application/json:
+          schema:
+            $ref: ../components/schemas/GetPlanResponse.yaml
+          example:
+            customerReference: uniqRef1234
+            channelIdentifier: advisor
+            plan:
+              caseId: caseId1
+              planId: planId1
+              quoteId: quoteId1
+              quoteDate: '2021-05-13'
+              quoteType: instalmentAmount
+              paymentPlanType: timeToPay
+              thirdPartyBank: true
+              numberOfInstalments: 0
+              initialPaymentMethod: BACS
+              initialPaymentReference: paymentRef123
+              totalDebtIncInt: 0
+              totalInterest: 0
+              interestAccrued: 0
+              planInterest: 0.24
+              frequency: annually
+            debtItemCharges:
+              - debtItemChargeId: debtItemChrgId1
+                mainTrans: '1546'
+                subTrans: '1090'
+                originalDebtAmount: 100
+                interestStartDate: '2021-05-13'
+                paymentHistory:
+                  - paymentDate: '2021-05-13'
+                    paymentAmount: 100
+            payments:
+              - paymentMethod: BACS
+                paymentReference: paymentRef123
+            customerPostCodes:
+              - addressPostcode: NW9 5XW
+                postcodeDate: '2021-05-13'
+            instalments:
+              - debtItemChargeId: debtItemChrgId1
+                dueDate: '2021-05-13'
+                amountDue: 100
+                expectedPayment: 10
+                interestRate: 0.25
+                instalmentNumber: 1
+                instalmentInterestAccrued: 10
+                instalmentBalance: 100
+            collections:
+              initialCollection:
+                dueDate: '2022-06-18'
+                amountDue: 1000
+              regularCollections:
+                - dueDate: '2022-07-08'
+                  amountDue: 1628.21
+                - dueDate: '2022-08-08'
+                  amountDue: 1628.21
+    '400':
+      description: ''
+      headers: {}
+      content:
+        application/json:
+          schema:
+            $ref: ../components/schemas/ErrorResponse.yaml
+          example:
+            statusCode: 400
+            errorMessage: Invalid JSON error
+    '401':
+      description: ''
+      headers: {}
+      content:
+        application/json:
+          schema:
+            $ref: ../components/schemas/ErrorResponse.yaml
+          example:
+            statusCode: 401
+            errorMessage: A user with no active session will return 401 response
+    '500':
+      description: ''
+      headers: {}
+      content:
+        application/json:
+          schema:
+            $ref: ../components/schemas/ErrorResponse.yaml
+          example:
+            statusCode: 500
+            errorMessage: Internal Service Error
+    '503':
+      description: ''
+      headers: {}
+      content:
+        application/json:
+          schema:
+            $ref: ../components/schemas/ErrorResponse.yaml
+          example:
+            statusCode: 503
+            errorMessage: Couldn't parse body from upstream
+  deprecated: false
+put:
+  tags:
+    - individuals
+  summary: Update Existing TTP Plan
+  description: This is an endpoint that DAUI needs to update a TTP plan using ttp service
+  operationId: UpdateExistingTTPPlan
+  parameters:
+    - name: customerReference
+      in: path
+      description: ''
+      required: true
+      style: simple
+      schema:
+        type: string
+    - name: planId
+      in: path
+      description: ''
+      required: true
+      style: simple
+      schema:
+        type: string
+  security:
+    - applicationRestricted:
+        - read:time-to-pay-proxy
+  requestBody:
+    description: ''
+    content:
+      application/json:
+        schema:
+          $ref: ../components/schemas/UpdatePlanRequest.yaml
+        example:
+          customerReference: custRef123
+          channelIdentifier: advisor
+          planId: planId1
+          updateType: paymentDetails
+          planStatus: Resolved - Completed
+          completeReason: Payment in Full
+          cancellationReason: debt-resolved
+          thirdPartyBank: true
+          payments:
+            - paymentMethod: cheque
+              paymentReference: paymentRef
+    required: true
+  responses:
+    '200':
+      description: ''
+      headers: {}
+      content:
+        application/json:
+          schema:
+            $ref: ../components/schemas/UpdatePlanResponse.yaml
+          example:
+            customerReference: custRef1234
+            planId: planId1234
+            planStatus: Resolved - Completed
+            planUpdatedDate: '2021-05-13'
+    '400':
+      description: ''
+      headers: {}
+      content:
+        application/json:
+          schema:
+            $ref: ../components/schemas/ErrorResponse.yaml
+          example:
+            statusCode: 400
+            errorMessage: Invalid JSON error
+    '401':
+      description: ''
+      headers: {}
+      content:
+        application/json:
+          schema:
+            $ref: ../components/schemas/ErrorResponse.yaml
+          example:
+            statusCode: 401
+            errorMessage: A user with no active session will return 401 response
+    '500':
+      description: ''
+      headers: {}
+      content:
+        application/json:
+          schema:
+            $ref: ../components/schemas/ErrorResponse.yaml
+          example:
+            statusCode: 500
+            errorMessage: Internal Service Error
+    '503':
+      description: ''
+      headers: {}
+      content:
+        application/json:
+          schema:
+            $ref: ../components/schemas/ErrorResponse.yaml
+          example:
+            statusCode: 503
+            errorMessage: Couldn't parse body from upstream
+  deprecated: false
