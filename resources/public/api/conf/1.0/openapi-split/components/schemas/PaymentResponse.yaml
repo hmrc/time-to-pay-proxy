@@ -1,0 +1,13 @@
+title: PaymentResponse
+required:
+  - paymentMethod
+properties:
+  paymentMethod:
+    allOf:
+      - $ref: ./PaymentMethodExtended.yaml
+      - description: Payment method (Direct debit, BACS, Cheque, Card)
+  paymentReference:
+    maxLength: 15
+    minLength: 1
+    type: string
+    description: Payment Method reference

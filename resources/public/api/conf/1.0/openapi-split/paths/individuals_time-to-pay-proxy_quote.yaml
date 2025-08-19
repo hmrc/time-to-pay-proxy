@@ -1,0 +1,94 @@
+post:
+  tags:
+    - individuals
+  summary: Generate TTP Quote Request
+  description: >-
+    This is an endpoint that triggers request to create a plan for storage from
+    ttp service
+  operationId: GenerateTTPQuoteRequest
+  parameters: []
+  security:
+    - applicationRestricted:
+        - read:time-to-pay-proxy
+  requestBody:
+    description: ''
+    content:
+      application/json:
+        schema:
+          $ref: ../components/schemas/TTPQuoteRequest.yaml
+        example:
+          regimeType: PAYE
+          customerReference: uniqRef1234
+          channelIdentifier: selfService
+          plan:
+            quoteType: duration
+            quoteDate: '2021-05-13'
+            instalmentStartDate: '2021-05-13'
+            instalmentAmount: 100
+            frequency: annually
+            duration: 12
+            initialPaymentAmount: 100
+            initialPaymentDate: '2021-05-13'
+            paymentPlanType: timeToPay
+          customerPostCodes:
+            - addressPostcode: NW9 5XW
+              postcodeDate: '2021-05-13'
+          debtItemCharges:
+            - debtItemChargeId: debtItemChrgId1
+              mainTrans: '1546'
+              subTrans: '1090'
+              originalDebtAmount: 100
+              interestStartDate: '2021-05-13'
+              paymentHistory:
+                - paymentDate: '2021-05-13'
+                  paymentAmount: 100
+    required: true
+  responses:
+    '200':
+      description: ''
+      headers: {}
+      content:
+        application/json:
+          schema:
+            $ref: ../components/schemas/TTPQuoteResponse.yaml
+    '400':
+      description: ''
+      headers: {}
+      content:
+        application/json:
+          schema:
+            $ref: ../components/schemas/ErrorResponse.yaml
+          example:
+            statusCode: 400
+            errorMessage: Invalid JSON error
+    '401':
+      description: ''
+      headers: {}
+      content:
+        application/json:
+          schema:
+            $ref: ../components/schemas/ErrorResponse.yaml
+          example:
+            statusCode: 401
+            errorMessage: A user with no active session will return 401 response
+    '500':
+      description: ''
+      headers: {}
+      content:
+        application/json:
+          schema:
+            $ref: ../components/schemas/ErrorResponse.yaml
+          example:
+            statusCode: 500
+            errorMessage: Internal Service Error
+    '503':
+      description: ''
+      headers: {}
+      content:
+        application/json:
+          schema:
+            $ref: ../components/schemas/ErrorResponse.yaml
+          example:
+            statusCode: 503
+            errorMessage: Couldn't parse body from upstream
+  deprecated: false

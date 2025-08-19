@@ -1,0 +1,28 @@
+title: DebtItem
+required:
+  - debtItemChargeId
+  - debtItemOriginalDueDate
+  - mainTrans
+  - outstandingDebtAmount
+  - subTrans
+  - isInterestBearingCharge
+  - useChargeReference
+properties:
+  outstandingDebtAmount:
+    type: number
+  mainTrans:
+    type: string
+  subTrans:
+    type: string
+  isInterestBearingCharge:
+    type: boolean
+  useChargeReference:
+    type: boolean
+  debtItemChargeId:
+    type: string
+  interestStartDate:
+    type: string
+    format: date
+  debtItemOriginalDueDate:
+    type: string
+    format: date

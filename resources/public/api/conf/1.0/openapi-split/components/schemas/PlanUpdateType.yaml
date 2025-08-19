@@ -1,0 +1,6 @@
+title: PlanUpdateType
+enum:
+  - paymentDetails
+  - planStatus
+type: string
+description: This is where there is an update to the plan

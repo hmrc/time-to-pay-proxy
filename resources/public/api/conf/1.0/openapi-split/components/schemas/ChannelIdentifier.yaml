@@ -1,0 +1,6 @@
+title: ChannelIdentifier
+enum:
+  - advisor
+  - selfService
+type: string
+description: Attribute to identify where the request is coming

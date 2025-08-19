@@ -1,0 +1,24 @@
+title: PromoteArrangementResponse
+required:
+  - caseId
+  - customerReference
+  - planId
+  - planStatus
+properties:
+  customerReference:
+    maxLength: 15
+    minLength: 1
+    type: string
+    description: The Unique Customer reference
+  planId:
+    maxLength: 15
+    minLength: 1
+    type: string
+    description: Unique planId
+  caseId:
+    type: string
+    description: Unique caseId
+  planStatus:
+    allOf:
+      - $ref: ./TTPPlanStatus.yaml
+      - description: This is the plan status

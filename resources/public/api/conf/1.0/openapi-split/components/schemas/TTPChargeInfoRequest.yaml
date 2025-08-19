@@ -1,0 +1,30 @@
+title: TTPChargeInfoRequest
+required:
+  - channelIdentifier
+  - identifications
+  - regimeType
+properties:
+  regimeType:
+    type: string
+    description: Regime type
+    enum:
+      - SA
+  channelIdentifier:
+    type: string
+    description: Channel Identifier
+  identifications:
+    type: array
+    minItems: 1
+    items:
+      type: object
+      properties:
+        idType:
+          type: string
+          description: ID type
+        idValue:
+          type: string
+          description: ID value
+      required:
+        - idType
+        - idValue
+    description: An array of customer identifications

@@ -1,0 +1,30 @@
+title: Instalments
+required:
+  - instalmentNumber
+  - dueDate
+  - instalmentInterestAccrued
+  - instalmentBalance
+  - debtItemChargeId
+  - amountDue
+  - debtItemOriginalDueDate
+  - expectedPayment
+properties:
+  instalmentNumber:
+    type: integer
+    format: int32
+  dueDate:
+    type: string
+    format: date
+  instalmentInterestAccrued:
+    type: number
+  instalmentBalance:
+    type: number
+  debtItemChargeId:
+    type: string
+  amountDue:
+    type: number
+  debtItemOriginalDueDate:
+    type: string
+    format: date
+  expectedPayment:
+    type: integer
