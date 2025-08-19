@@ -26,7 +26,7 @@ import uk.gov.hmrc.http.HeaderCarrier
 import scala.concurrent.ExecutionContext.Implicits.global
 import uk.gov.hmrc.timetopayproxy.connectors.TtpeConnector
 import uk.gov.hmrc.timetopayproxy.models.TtppEnvelope.TtppEnvelope
-import uk.gov.hmrc.timetopayproxy.models.{ ConnectorError, TtppEnvelope, TtppError }
+import uk.gov.hmrc.timetopayproxy.models.{ ConnectorError, IdType, IdValue, Identification, TtppEnvelope, TtppError }
 import uk.gov.hmrc.timetopayproxy.models.chargeInfoApi._
 
 import java.time.{ LocalDate, LocalDateTime }
@@ -38,8 +38,8 @@ class TTPEServiceSpec extends AnyFreeSpec {
   private val chargeInfoRequest: ChargeInfoRequest = ChargeInfoRequest(
     channelIdentifier = ChargeInfoChannelIdentifier("Channel Identifier"),
     identifications = NonEmptyList.of(
-      Identification(idType = IDType("id type 1"), idValue = IDValue("id value 1")),
-      Identification(idType = IDType("id type 2"), idValue = IDValue("id value 2"))
+      Identification(idType = IdType("id type 1"), idValue = IdValue("id value 1")),
+      Identification(idType = IdType("id type 2"), idValue = IdValue("id value 2"))
     ),
     regimeType = RegimeType.SA
   )
@@ -47,7 +47,7 @@ class TTPEServiceSpec extends AnyFreeSpec {
   private val chargeInfoResponse: ChargeInfoResponse = ChargeInfoResponse(
     processingDateTime = LocalDateTime.parse("2025-07-02T15:00:41.689"),
     identification = List(
-      Identification(idType = IDType("ID_TYPE"), idValue = IDValue("ID_VALUE"))
+      Identification(idType = IdType("ID_TYPE"), idValue = IdValue("ID_VALUE"))
     ),
     individualDetails = IndividualDetails(
       title = Some(Title("Mr")),

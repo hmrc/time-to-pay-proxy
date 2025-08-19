@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.timetopayproxy.models.chargeInfoApi
+package uk.gov.hmrc.timetopayproxy.models
 
 import play.api.libs.json.{ Format, Json }
 
-final case class IDValue(value: String) extends AnyVal
+case class Identification(idType: IdType, idValue: IdValue)
 
-object IDValue {
-  implicit val format: Format[IDValue] = Json.valueFormat[IDValue]
+object Identification {
+  implicit val format: Format[Identification] = Json.format[Identification]
 }
