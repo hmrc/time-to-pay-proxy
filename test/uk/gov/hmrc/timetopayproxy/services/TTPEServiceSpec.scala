@@ -24,6 +24,7 @@ import play.api.test.Helpers.{ await, defaultAwaitTimeout }
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.timetopayproxy.connectors.TtpeConnector
 import uk.gov.hmrc.timetopayproxy.models.TtppEnvelope.TtppEnvelope
+import uk.gov.hmrc.timetopayproxy.models.saopled.OpLedRegimeType
 import uk.gov.hmrc.timetopayproxy.models.saopled.chargeInfoApi._
 import uk.gov.hmrc.timetopayproxy.models.{ ConnectorError, IdType, IdValue, Identification, TtppEnvelope, TtppError }
 
@@ -40,7 +41,7 @@ class TTPEServiceSpec extends AnyFreeSpec {
       Identification(idType = IdType("id type 1"), idValue = IdValue("id value 1")),
       Identification(idType = IdType("id type 2"), idValue = IdValue("id value 2"))
     ),
-    regimeType = RegimeType.SA
+    regimeType = OpLedRegimeType.SA
   )
 
   private val chargeInfoResponse: ChargeInfoResponse = ChargeInfoResponse(

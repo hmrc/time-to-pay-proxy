@@ -35,6 +35,7 @@ import uk.gov.hmrc.timetopayproxy.config.FeatureSwitch
 import uk.gov.hmrc.timetopayproxy.models.TtppEnvelope.TtppEnvelope
 import uk.gov.hmrc.timetopayproxy.models._
 import uk.gov.hmrc.timetopayproxy.models.affordablequotes._
+import uk.gov.hmrc.timetopayproxy.models.saopled.OpLedRegimeType
 import uk.gov.hmrc.timetopayproxy.models.saopled.chargeInfoApi._
 import uk.gov.hmrc.timetopayproxy.services.{ TTPEService, TTPQuoteService }
 
@@ -1031,7 +1032,7 @@ class TimeToPayProxyControllerSpec extends AnyWordSpec with MockFactory {
         Identification(idType = IdType("id type 1"), idValue = IdValue("id value 1")),
         Identification(idType = IdType("id type 2"), idValue = IdValue("id value 2"))
       ),
-      regimeType = RegimeType.SA
+      regimeType = OpLedRegimeType.SA
     )
     val chargeInfoResponse: ChargeInfoResponse = ChargeInfoResponse(
       processingDateTime = LocalDateTime.parse("2025-07-02T15:00:41.689"),

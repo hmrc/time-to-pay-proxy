@@ -18,6 +18,7 @@ package uk.gov.hmrc.timetopayproxy.models
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
 import play.api.libs.json._
+import uk.gov.hmrc.timetopayproxy.models.saopled.OpLedRegimeType
 
 import java.time.LocalDate
 import scala.util.{ Failure, Try }

@@ -22,6 +22,7 @@ import play.api.libs.ws.{ WSRequest, WSResponse }
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.timetopayproxy.models._
 import uk.gov.hmrc.timetopayproxy.models.affordablequotes.{ AffordableQuoteResponse, AffordableQuotesRequest }
+import uk.gov.hmrc.timetopayproxy.models.saopled.OpLedRegimeType
 import uk.gov.hmrc.timetopayproxy.models.saopled.chargeInfoApi._
 import uk.gov.hmrc.timetopayproxy.support.IntegrationBaseSpec
 import uk.gov.hmrc.timetopayproxy.testutils.TestOnlyJsonFormats._
@@ -702,7 +703,7 @@ class TimeToPayProxyControllerItSpec extends IntegrationBaseSpec {
         Identification(idType = IdType("id type 1"), idValue = IdValue("id value 1")),
         Identification(idType = IdType("id type 2"), idValue = IdValue("id value 2"))
       ),
-      regimeType = RegimeType.SA
+      regimeType = OpLedRegimeType.SA
     )
 
   }
