@@ -1,0 +1,92 @@
+post:
+  tags:
+    - individuals
+  summary: Inform HoDs of SA TTP Operator-led Plan (CESA + ETMP)
+  parameters:
+    - name: correlationId
+      in: header
+      description: Correlation Id used for end to end traceability
+      required: true
+      schema:
+        type: string
+        format: uuid
+        example: f0bd1f32-de51-45cc-9b18-0520d6e3ab1a
+  security:
+    - applicationRestricted:
+        - read:time-to-pay-proxy
+  requestBody:
+    description: Request body with fields to create a TTP in CESA and ETMP.
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: ../components/schemas/InformRequest.yaml
+        examples:
+          example:
+            summary: Sample request for Inform API
+            value:
+              identifications:
+                - idType: UTR
+                  idValue: '1234567890'
+              paymentPlan:
+                arrangementAgreedDate: '2025-05-01'
+                ttpEndDate: '2025-11-01'
+                initialPaymentDate: '2025-05-05'
+                initialPaymentAmount: 150
+                frequency: monthly
+                ddiReference: DD123456789
+              instalments:
+                - dueDate: '2025-06-01'
+                  amountDue: 300
+              channelIdentifier: advisor
+              transitioned: true
+  responses:
+    '200':
+      description: Inform API operation successful with results of calls to CESA and ETMP
+      content:
+        application/json:
+          schema:
+            $ref: ../components/schemas/InformResponse.yaml
+          examples:
+            successExample:
+              summary: Success example with both APIs called
+              value:
+                apisCalled:
+                  - name: CESA
+                    statusCode: '200'
+                    processingDateTime: '2025-05-01T14:30:00Z'
+                  - name: ETMP
+                    statusCode: '201'
+                    processingDateTime: '2025-05-01T14:31:00Z'
+                processingDateTime: '2025-05-01T14:32:00Z'
+    '400':
+      description: Bad request due to invalid or missing data
+      content:
+        application/json:
+          schema:
+            $ref: ../components/schemas/InformErrorResponse.yaml
+          examples:
+            badRequestExample:
+              summary: Invalid request example
+              value:
+                code: 400
+                details: 'Invalid request payload: missing identifications'
+    '500':
+      description: Internal error or partial failure in calls to HoDs
+      content:
+        application/json:
+          schema:
+            $ref: ../components/schemas/InformResponse.yaml
+          examples:
+            partialFailureExample:
+              summary: Partial failure example with error shown
+              value:
+                apisCalled:
+                  - name: CESA
+                    statusCode: '200'
+                    processingDateTime: '2025-05-01T14:30:00Z'
+                  - name: ETMP
+                    statusCode: '400'
+                    processingDateTime: '2025-05-01T14:31:00Z'
+                    errorResponse: Invalid lockReason
+                processingDateTime: '2025-05-01T14:32:00Z'

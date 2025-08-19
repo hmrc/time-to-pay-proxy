@@ -46,8 +46,9 @@ info:
       | 1.0.12 | 23-07-2025 | Alex Olkhovskiy | make regimeType enum |
       | 1.0.13 | 08-07-2025 | Alex Olkhovskiy | make indentations in charge-info request non-empty, remove altFormat and country|
       | 1.0.14 | 14-08-2025 | Alex Olkhovskiy | refactor the spec with linter|
+      | 1.0.14-proposedB | 19-08-2025 | Alex Olkhovskiy | Added new inform endpoint|
   contact: {}
-  version: 1.0.14
+  version: 1.0.14-proposedB
 servers:
   - url: https://api.service.hmrc.gov.uk
     variables: {}
@@ -742,6 +743,99 @@ paths:
                 statusCode: 503
                 errorMessage: Couldn't parse body from upstream
       deprecated: false
+  /individuals/time-to-pay-proxy/inform:
+    post:
+      tags:
+        - individuals
+      summary: Inform HoDs of SA TTP Operator-led Plan (CESA + ETMP)
+      parameters:
+        - name: correlationId
+          in: header
+          description: Correlation Id used for end to end traceability
+          required: true
+          schema:
+            type: string
+            format: uuid
+            example: f0bd1f32-de51-45cc-9b18-0520d6e3ab1a
+      security:
+        - applicationRestricted:
+            - read:time-to-pay-proxy
+      requestBody:
+        description: Request body with fields to create a TTP in CESA and ETMP.
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InformRequest'
+            examples:
+              example:
+                summary: Sample request for Inform API
+                value:
+                  identifications:
+                    - idType: UTR
+                      idValue: '1234567890'
+                  paymentPlan:
+                    arrangementAgreedDate: '2025-05-01'
+                    ttpEndDate: '2025-11-01'
+                    initialPaymentDate: '2025-05-05'
+                    initialPaymentAmount: 150
+                    frequency: monthly
+                    ddiReference: DD123456789
+                  instalments:
+                    - dueDate: '2025-06-01'
+                      amountDue: 300
+                  channelIdentifier: advisor
+                  transitioned: true
+      responses:
+        '200':
+          description: Inform API operation successful with results of calls to CESA and ETMP
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InformResponse'
+              examples:
+                successExample:
+                  summary: Success example with both APIs called
+                  value:
+                    apisCalled:
+                      - name: CESA
+                        statusCode: '200'
+                        processingDateTime: '2025-05-01T14:30:00Z'
+                      - name: ETMP
+                        statusCode: '201'
+                        processingDateTime: '2025-05-01T14:31:00Z'
+                    processingDateTime: '2025-05-01T14:32:00Z'
+        '400':
+          description: Bad request due to invalid or missing data
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InformErrorResponse'
+              examples:
+                badRequestExample:
+                  summary: Invalid request example
+                  value:
+                    code: 400
+                    details: 'Invalid request payload: missing identifications'
+        '500':
+          description: Internal error or partial failure in calls to HoDs
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InformResponse'
+              examples:
+                partialFailureExample:
+                  summary: Partial failure example with error shown
+                  value:
+                    apisCalled:
+                      - name: CESA
+                        statusCode: '200'
+                        processingDateTime: '2025-05-01T14:30:00Z'
+                      - name: ETMP
+                        statusCode: '400'
+                        processingDateTime: '2025-05-01T14:31:00Z'
+                        errorResponse: Invalid lockReason
+                    processingDateTime: '2025-05-01T14:32:00Z'
 components:
   securitySchemes:
     userRestricted:
@@ -2160,3 +2254,164 @@ components:
                     - outstandingAmount
                     - dueDate
                     - accruedInterest
+    InformIdentification:
+      type: object
+      required:
+        - idType
+        - idValue
+      properties:
+        idType:
+          type: string
+          description: Identifier type, e.g. UTR, EMPREF
+          pattern: ^[A-Za-z0-9]{1,6}$
+          example: UTR
+        idValue:
+          type: string
+          description: Identifier value
+          pattern: ^[A-Za-z0-9]{1,25}$
+          example: '1234567890'
+    InformPaymentPlan:
+      type: object
+      required:
+        - arrangementAgreedDate
+        - ttpEndDate
+        - frequency
+      properties:
+        arrangementAgreedDate:
+          type: string
+          format: date
+          description: The date when the plan was created
+          example: '2025-05-01'
+        ttpEndDate:
+          type: string
+          format: date
+          description: Date for the last payment/instalment
+          example: '2025-11-01'
+        frequency:
+          type: string
+          enum:
+            - single
+            - weekly
+            - 2Weekly
+            - 4Weekly
+            - monthly
+            - quarterly
+            - 6Monthly
+            - annually
+          description: Payment frequency (Note - quarterly will not be provided as it is prevented in CDCS)
+          example: monthly
+        initialPaymentDate:
+          type: string
+          format: date
+          description: Optional upfront payment date
+          example: '2025-05-05'
+        initialPaymentAmount:
+          type: number
+          multipleOf: 0.01
+          description: Optional upfront payment amount
+          example: 150
+        ddiReference:
+          type: string
+          description: Direct Debit Instruction reference number, if applicable
+          example: DD123456789
+    InformInstalment:
+      type: object
+      required:
+        - dueDate
+        - amountDue
+      properties:
+        dueDate:
+          type: string
+          format: date
+          description: Due date for each regular instalment
+          example: '2025-06-01'
+        amountDue:
+          type: number
+          multipleOf: 0.01
+          description: Amount due for the instalment
+          example: 300
+    InformRequest:
+      type: object
+      required:
+        - identifications
+        - paymentPlan
+        - instalments
+        - channelIdentifier
+      properties:
+        identifications:
+          type: array
+          minItems: 1
+          items:
+            $ref: '#/components/schemas/InformIdentification'
+          description: Array of identifiers for the customer
+        paymentPlan:
+          $ref: '#/components/schemas/InformPaymentPlan'
+        instalments:
+          type: array
+          minItems: 1
+          items:
+            $ref: '#/components/schemas/InformInstalment'
+          description: Array of payment instalments
+        channelIdentifier:
+          type: string
+          enum:
+            - advisor
+            - selfService
+          description: Channel through which arrangement was made (e.g. advisor, selfService)
+          example: advisor
+        transitioned:
+          type: boolean
+          description: Indicates whether the customer only has FDLs.
+          example: true
+    InformAPIStatus:
+      type: object
+      required:
+        - name
+        - statusCode
+        - processingDateTime
+      properties:
+        name:
+          type: string
+          description: The API name (CESA or ETMP)
+          example: CESA
+        statusCode:
+          type: string
+          description: HTTP status code from the downstream API
+          example: '200'
+        processingDateTime:
+          type: string
+          format: date-time
+          description: Timestamp of processing the request in downstream API
+          example: '2025-05-01T14:30:00Z'
+        errorResponse:
+          type: string
+          description: Error message if downstream API call failed
+          example: Invalid request
+    InformResponse:
+      type: object
+      required:
+        - apisCalled
+        - processingDateTime
+      properties:
+        apisCalled:
+          type: array
+          items:
+            $ref: '#/components/schemas/InformAPIStatus'
+          description: Status of calls to each HoD API
+        processingDateTime:
+          type: string
+          format: date-time
+          description: Timestamp for processing the inform request
+          example: '2025-05-01T14:35:00Z'
+    InformErrorResponse:
+      type: object
+      required:
+        - code
+        - details
+      properties:
+        code:
+          type: integer
+          example: 400
+        details:
+          type: string
+          example: 'Invalid request payload: missing identifications'
