@@ -18,6 +18,7 @@ package uk.gov.hmrc.timetopayproxy.models.chargeInfoApi
 
 import enumeratum.{ Enum, EnumEntry, PlayJsonEnum }
 import play.api.libs.json.{ Format, Json, OFormat }
+import uk.gov.hmrc.timetopayproxy.models.Identification
 
 import java.time.{ LocalDate, LocalDateTime }
 import scala.collection.immutable

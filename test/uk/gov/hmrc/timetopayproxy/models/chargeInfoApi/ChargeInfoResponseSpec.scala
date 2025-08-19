@@ -19,6 +19,7 @@ package uk.gov.hmrc.timetopayproxy.models.chargeInfoApi
 import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.should.Matchers._
 import play.api.libs.json.{ JsSuccess, JsValue, Json, Reads, Writes }
+import uk.gov.hmrc.timetopayproxy.models.{ IdType, IdValue, Identification }
 import uk.gov.hmrc.timetopayproxy.testutils.JsonAssertionOps.RichJsValueWithAssertions
 import uk.gov.hmrc.timetopayproxy.testutils.schematestutils.Validators
 
@@ -31,7 +32,7 @@ class ChargeInfoResponseSpec extends AnyFreeSpec {
       def obj: ChargeInfoResponse = ChargeInfoResponse(
         processingDateTime = LocalDateTime.parse("2025-07-02T15:00:41.689"),
         identification = List(
-          Identification(idType = IDType("ID_TYPE"), idValue = IDValue("ID_VALUE"))
+          Identification(idType = IdType("ID_TYPE"), idValue = IdValue("ID_VALUE"))
         ),
         individualDetails = IndividualDetails(
           title = Some(Title("Mr")),
@@ -181,7 +182,7 @@ class ChargeInfoResponseSpec extends AnyFreeSpec {
       def obj: ChargeInfoResponse = ChargeInfoResponse(
         processingDateTime = LocalDateTime.parse("2025-07-02T15:00:41.689"),
         identification = List(
-          Identification(idType = IDType("ID_TYPE"), idValue = IDValue("ID_VALUE"))
+          Identification(idType = IdType("ID_TYPE"), idValue = IdValue("ID_VALUE"))
         ),
         individualDetails = IndividualDetails(
           title = None,
@@ -320,7 +321,7 @@ class ChargeInfoResponseSpec extends AnyFreeSpec {
       def obj: ChargeInfoResponse = ChargeInfoResponse(
         processingDateTime = LocalDateTime.parse("2025-07-02T15:00:41.689"),
         identification = List(
-          Identification(idType = IDType("ID_TYPE"), idValue = IDValue("ID_VALUE"))
+          Identification(idType = IdType("ID_TYPE"), idValue = IdValue("ID_VALUE"))
         ),
         individualDetails = IndividualDetails(
           title = None,

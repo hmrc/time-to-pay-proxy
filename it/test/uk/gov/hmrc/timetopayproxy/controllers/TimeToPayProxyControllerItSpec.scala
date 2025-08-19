@@ -630,7 +630,7 @@ class TimeToPayProxyControllerItSpec extends IntegrationBaseSpec {
     val ttpeResponse: ChargeInfoResponse = ChargeInfoResponse(
       processingDateTime = LocalDateTime.parse("2025-07-02T15:00:41.689"),
       identification = List(
-        Identification(idType = IDType("ID_TYPE"), idValue = IDValue("ID_VALUE"))
+        Identification(idType = IdType("ID_TYPE"), idValue = IdValue("ID_VALUE"))
       ),
       individualDetails = IndividualDetails(
         title = Some(Title("Mr")),
@@ -699,8 +699,8 @@ class TimeToPayProxyControllerItSpec extends IntegrationBaseSpec {
     val chargeInfoRequest: ChargeInfoRequest = ChargeInfoRequest(
       channelIdentifier = ChargeInfoChannelIdentifier("Channel Identifier"),
       identifications = NonEmptyList.of(
-        Identification(idType = IDType("id type 1"), idValue = IDValue("id value 1")),
-        Identification(idType = IDType("id type 2"), idValue = IDValue("id value 2"))
+        Identification(idType = IdType("id type 1"), idValue = IdValue("id value 1")),
+        Identification(idType = IdType("id type 2"), idValue = IdValue("id value 2"))
       ),
       regimeType = RegimeType.SA
     )
