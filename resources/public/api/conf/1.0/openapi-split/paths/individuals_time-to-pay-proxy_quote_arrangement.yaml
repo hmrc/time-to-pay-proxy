@@ -1,0 +1,125 @@
+post:
+  tags:
+    - individuals
+  summary: TTP Promote an Arrangement request
+  description: >-
+    This is an endpoint that triggers a request to generate a draft quote from
+    ttp service
+  operationId: TTPPromoteanArrangementrequest
+  parameters: []
+  security:
+    - applicationRestricted:
+        - read:time-to-pay-proxy
+  requestBody:
+    description: ''
+    content:
+      application/json:
+        schema:
+          $ref: ../components/schemas/PromoteArrangementRequest.yaml
+        example:
+          regimeType: SA
+          customerReference: uniqRef1234
+          quoteReference: quoteRef1234
+          channelIdentifier: advisor
+          plan:
+            quoteId: quoteId1
+            quoteType: instalmentAmount
+            quoteDate: '2021-05-13'
+            instalmentStartDate: '2021-05-13'
+            instalmentAmount: 100
+            paymentPlanType: timeToPay
+            thirdPartyBank: true
+            numberOfInstalments: 1
+            frequency: annually
+            duration: 12
+            initialPaymentAmount: 100
+            initialPaymentDate: '2021-05-13'
+            initialPaymentMethod: BACS
+            initialPaymentReference: paymentRefInit
+            totalDebtIncInt: 10
+            totalInterest: 0.14
+            interestAccrued: 10
+            planInterest: 0.24
+          debtItemCharges:
+            - debtItemChargeId: debtItemChrgId1
+              mainTrans: '1546'
+              subTrans: '1090'
+              originalDebtAmount: 100
+              interestStartDate: '2021-05-13'
+              dueDate: '2021-06-30'
+              chargeSource: ETMP
+              parentChargeReference: DEF987654321
+              parentMainTrans: YnAS
+              paymentHistory:
+                - paymentDate: '2021-05-13'
+                  paymentAmount: 100
+          payments:
+            - paymentMethod: BACS
+              paymentReference: paymentRef123
+          customerPostCodes:
+            - addressPostcode: NW9 5XW
+              postcodeDate: '2021-05-13'
+          instalments:
+            - debtItemChargeId: debtItemChrgId1
+              dueDate: '2021-05-13'
+              amountDue: 100
+              expectedPayment: 10
+              interestRate: 0.25
+              instalmentNumber: 1
+              instalmentInterestAccrued: 10
+              instalmentBalance: 100
+    required: true
+  responses:
+    '200':
+      description: ''
+      headers: {}
+      content:
+        application/json:
+          schema:
+            $ref: ../components/schemas/PromoteArrangementResponse.yaml
+          example:
+            customerReference: customerRef1234
+            planId: planId1234
+            caseId: caseId1234
+            planStatus: success
+    '400':
+      description: ''
+      headers: {}
+      content:
+        application/json:
+          schema:
+            $ref: ../components/schemas/ErrorResponse.yaml
+          example:
+            statusCode: 400
+            errorMessage: Invalid JSON error
+    '401':
+      description: ''
+      headers: {}
+      content:
+        application/json:
+          schema:
+            $ref: ../components/schemas/ErrorResponse.yaml
+          example:
+            statusCode: 401
+            errorMessage: A user with no active session will return 401 response
+    '500':
+      description: ''
+      headers: {}
+      content:
+        application/json:
+          schema:
+            $ref: ../components/schemas/ErrorResponse.yaml
+          example:
+            statusCode: 500
+            errorMessage: Internal Service Error
+    '503':
+      description: ''
+      headers: {}
+      content:
+        application/json:
+          schema:
+            $ref: ../components/schemas/ErrorResponse.yaml
+          example:
+            statusCode: 503
+            errorMessage: Couldn't parse body from upstream
+  deprecated: false

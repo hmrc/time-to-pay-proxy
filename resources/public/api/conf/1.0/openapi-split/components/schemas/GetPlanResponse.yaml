@@ -1,0 +1,44 @@
+title: GetPlanResponse
+required:
+  - channelIdentifier
+  - collections
+  - customerPostCodes
+  - customerReference
+  - debtItemCharges
+  - instalments
+  - payments
+  - plan
+properties:
+  customerReference:
+    maxLength: 15
+    minLength: 1
+    type: string
+    description: This is the customer reference
+  channelIdentifier:
+    allOf:
+      - $ref: ./ChannelIdentifier.yaml
+      - description: Attribute to identify where the request is coming
+  plan:
+    $ref: ./PlanDetails.yaml
+  debtItemCharges:
+    type: array
+    items:
+      $ref: ./DebtItemChargeResponse.yaml
+    description: ''
+  payments:
+    type: array
+    items:
+      $ref: ./PaymentResponse.yaml
+    description: ''
+  customerPostCodes:
+    type: array
+    items:
+      $ref: ./CustomerPostCodeResponse.yaml
+    description: ''
+  instalments:
+    type: array
+    items:
+      $ref: ./InstalmentResponse.yaml
+    description: ''
+  collections:
+    $ref: ./PlanCollections.yaml

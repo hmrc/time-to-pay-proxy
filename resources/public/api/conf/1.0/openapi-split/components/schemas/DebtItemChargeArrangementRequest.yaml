@@ -1,0 +1,49 @@
+title: DebtItemChargeArrangementRequest
+required:
+  - debtItemChargeId
+  - mainTrans
+  - subTrans
+  - originalDebtAmount
+  - paymentHistory
+properties:
+  debtItemChargeId:
+    maxLength: 16
+    minLength: 1
+    type: string
+    description: An ID which uniquely identifies a particular duty
+  mainTrans:
+    maxLength: 8
+    minLength: 4
+    type: string
+    description: Unique MTrans Debt Type ID e.g.1525 also known as M Trans
+  subTrans:
+    maxLength: 8
+    minLength: 4
+    type: string
+    description: Duty Type description for the UI
+  originalDebtAmount:
+    type: integer
+    description: Original debt amount
+    format: int32
+  interestStartDate:
+    type: string
+    description: The interest start date
+    format: date
+  paymentHistory:
+    type: array
+    items:
+      $ref: ./PaymentHistoryRequest.yaml
+    description: ''
+  dueDate:
+    type: string
+    description: Due date
+    format: date
+  chargeSource:
+    type: string
+    description: Source of the charge
+  parentMainTrans:
+    type: string
+  parentChargeReference:
+    type: string
+    description: Charge reference. Alphanumeric field
+    pattern: ^[A-Za-z0-9]{1,14}$

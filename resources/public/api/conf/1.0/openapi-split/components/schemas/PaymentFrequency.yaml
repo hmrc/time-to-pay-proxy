@@ -1,0 +1,12 @@
+title: PaymentFrequency
+enum:
+  - single
+  - weekly
+  - 2Weekly
+  - 4Weekly
+  - Monthly
+  - quarterly
+  - 6Monthly
+  - annually
+type: string
+description: payment frequency
