@@ -1,0 +1,23 @@
+type: object
+required:
+  - processingDateTime
+  - name
+  - statusCode
+properties:
+  processingDateTime:
+    type: string
+    format: date-time
+    description: Timestamp of processing the request in downstream API
+    example: '2025-05-01T14:30:00Z'
+  name:
+    type: string
+    description: The API name (CESA or ETMP)
+    example: ETMP
+  statusCode:
+    type: string
+    description: HTTP status code from the downstream API
+    example: '400'
+  errorResponse:
+    type: string
+    description: Error message if downstream API call failed
+    example: Invalid request

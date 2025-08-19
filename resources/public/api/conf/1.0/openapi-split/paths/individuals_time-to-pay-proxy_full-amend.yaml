@@ -1,0 +1,116 @@
+post:
+  tags:
+    - individuals
+  summary: Full amend TTP plan and inform HoDs
+  parameters:
+    - name: correlationId
+      in: header
+      description: Correlation Id used for end to end traceability
+      required: true
+      schema:
+        type: string
+        format: uuid
+        example: f0bd1f32-de51-45cc-9b18-0520d6e3ab1a
+  security:
+    - applicationRestricted:
+        - write:time-to-pay-proxy
+  requestBody:
+    description: Request body with fields to amend a TTP in CESA and ETMP.
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: ../components/schemas/FullAmendRequest.yaml
+        examples:
+          opLedExample:
+            summary: Sample request for Op-led TTP amendment
+            value:
+              identifications:
+                - idType: UTR
+                  idValue: '1234567890'
+              paymentPlan:
+                arrangementAgreedDate: '2025-05-01'
+                ttpEndDate: '2025-11-01'
+                initialPaymentDate: '2025-05-05'
+                initialPaymentAmount: 150
+                frequency: monthly
+                ddiReference: DD123456789
+              instalments:
+                - dueDate: '2025-06-01'
+                  amountDue: 300
+                - dueDate: '2025-07-01'
+                  amountDue: 300
+              channelIdentifier: advisor
+              transitioned: true
+          ssttpExample:
+            summary: Sample request for SSTTP amendment
+            value:
+              identifications:
+                - idType: UTR
+                  idValue: '9876543210'
+              paymentPlan:
+                arrangementAgreedDate: '2025-05-01'
+                ttpEndDate: '2025-11-01'
+                initialPaymentDate: '2025-05-05'
+                initialPaymentAmount: 200
+                frequency: weekly
+                ddiReference: DD987654321
+              instalments:
+                - dueDate: '2025-06-01'
+                  amountDue: 100
+                - dueDate: '2025-06-08'
+                  amountDue: 100
+              channelIdentifier: selfService
+              transitioned: true
+  responses:
+    '200':
+      description: Full amend API calls HoD and gets successful responses
+      content:
+        application/json:
+          schema:
+            $ref: ../components/schemas/FullAmendResponse.yaml
+          examples:
+            successExample:
+              summary: Success example with both APIs called successfully
+              value:
+                apisCalled:
+                  - processingDateTime: '2025-05-01T14:30:00Z'
+                    name: CESA
+                    statusCode: '200'
+                  - processingDateTime: '2025-05-01T14:31:00Z'
+                    name: ETMP
+                    statusCode: '200'
+                processingDateTime: '2025-05-01T14:32:00Z'
+    '400':
+      description: Full amend API is sent incorrect data and the HoDs API are not called
+      content:
+        application/json:
+          schema:
+            $ref: ../components/schemas/FullAmendErrorResponse.yaml
+          examples:
+            badRequestExample:
+              summary: Invalid request example
+              value:
+                code: 400
+                details: 'Invalid request payload: missing identifications'
+    '500':
+      description: >-
+        Full amend API is called, data is correct, we call HoD, 1 or more of the
+        APIs is not successful
+      content:
+        application/json:
+          schema:
+            $ref: ../components/schemas/FullAmendResponse.yaml
+          examples:
+            partialFailureExample:
+              summary: Partial failure example with error shown
+              value:
+                apisCalled:
+                  - processingDateTime: '2025-05-01T14:30:00Z'
+                    name: ETMP
+                    statusCode: '400'
+                    errorResponse: Invalid request
+                  - processingDateTime: '2025-05-01T14:31:00Z'
+                    name: CESA
+                    statusCode: '200'
+                processingDateTime: '2025-05-01T14:32:00Z'

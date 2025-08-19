@@ -76,8 +76,9 @@ info:
       | 1.0.12 | 23-07-2025 | Alex Olkhovskiy | make regimeType enum |
       | 1.0.13 | 08-07-2025 | Alex Olkhovskiy | make indentations in charge-info request non-empty, remove altFormat and country|
       | 1.0.14 | 14-08-2025 | Alex Olkhovskiy | refactor the spec with linter|
+      | 1.0.14-proposedC | 19-08-2025 | Alex Olkhovskiy | Added new FullAmend endpoint|
   contact: {}
-  version: 1.0.14
+  version: 1.0.14-proposedC
 servers:
   - url: https://api.service.hmrc.gov.uk
     variables: {}
@@ -93,6 +94,8 @@ paths:
     $ref: paths/individuals_time-to-pay-proxy_self-serve_affordable-quotes.yaml
   /individuals/time-to-pay-proxy/charge-info:
     $ref: paths/individuals_time-to-pay-proxy_charge-info.yaml
+  /individuals/time-to-pay-proxy/full-amend:
+    $ref: paths/individuals_time-to-pay-proxy_full-amend.yaml
 components:
   securitySchemes:
     userRestricted:
