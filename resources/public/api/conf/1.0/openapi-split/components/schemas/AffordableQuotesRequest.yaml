@@ -1,0 +1,50 @@
+title: AffordableQuotesRequest
+required:
+  - channelIdentifier
+  - paymentPlanAffordableAmount
+  - paymentPlanFrequency
+  - paymentPlanMaxLength
+  - paymentPlanMinLength
+  - accruedDebtInterest
+  - paymentPlanStartDate
+  - debtItemCharges
+  - customerPostcodes
+properties:
+  regimeType:
+    type: string
+    description: Regime type
+  channelIdentifier:
+    type: string
+  paymentPlanAffordableAmount:
+    type: integer
+    format: int32
+  paymentPlanFrequency:
+    $ref: ./paymentPlanFrequency.yaml
+  paymentPlanMaxLength:
+    type: integer
+    format: int32
+  paymentPlanMinLength:
+    type: integer
+    format: int32
+  accruedDebtInterest:
+    type: number
+  paymentPlanStartDate:
+    type: string
+    format: date
+  initialPaymentDate:
+    type: string
+    format: date
+  initialPaymentAmount:
+    type: integer
+    format: int32
+  debtItemCharges:
+    type: array
+    minItems: 1
+    items:
+      $ref: ./DebtItem.yaml
+    description: An array of DebtItems
+  customerPostcodes:
+    type: array
+    items:
+      $ref: ./postCode.yaml
+    description: An array of PostCode

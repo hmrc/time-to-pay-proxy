@@ -1,0 +1,9 @@
+title: PaymentMethodStandard
+enum:
+  - directDebit
+  - BACS
+  - cheque
+  - cardPayment
+  - Ongoing award
+type: string
+description: Payment method (Direct debit, BACS, Cheque, Card)

@@ -34,3 +34,19 @@ curl -i -X POST -H 'Content-Type: application/json'  -d '{
 The resources of this service are secured, which means that a bearer token should be provided [via auth login stub service](https://confluence.tools.tax.service.gov.uk/display/DTRG/Testing+an+API+microservice+locally).
 
 This service can be run stand alone, although doesn't offer much value without time-to-pay service running.
+
+## OpenAPI Specification
+
+The OpenAPI spec is maintained as split files in `resources/public/api/conf/1.0/openapi-split/` for better version control.
+
+### Setup (macOS/Linux)
+```bash
+npm install -g @redocly/cli
+```
+
+### Combining the spec
+```bash
+./project/combine-openapi.sh
+```
+
+This generates `resources/public/api/conf/1.0/application.yaml` from the split files.

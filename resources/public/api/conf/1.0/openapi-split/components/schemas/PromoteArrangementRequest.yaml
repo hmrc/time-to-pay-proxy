@@ -1,0 +1,52 @@
+title: PromoteArrangementRequest
+required:
+  - customerReference
+  - quoteReference
+  - channelIdentifier
+  - plan
+  - debtItemCharges
+  - payments
+  - customerPostCodes
+  - instalments
+properties:
+  regimeType:
+    type: string
+    description: Regime type
+    enum:
+      - SA
+  customerReference:
+    maxLength: 15
+    minLength: 1
+    type: string
+    description: Unique Customer reference
+  quoteReference:
+    maxLength: 15
+    minLength: 1
+    type: string
+    description: This is the Quote reference
+  channelIdentifier:
+    allOf:
+      - $ref: ./ChannelIdentifier.yaml
+      - description: Attribute to identify where the request is coming
+  plan:
+    $ref: ./ArrangementPlan.yaml
+  debtItemCharges:
+    type: array
+    items:
+      $ref: ./DebtItemChargeArrangementRequest.yaml
+    description: ''
+  payments:
+    type: array
+    items:
+      $ref: ./PaymentRequest.yaml
+    description: ''
+  customerPostCodes:
+    type: array
+    items:
+      $ref: ./CustomerPostCodeRequest.yaml
+    description: ''
+  instalments:
+    type: array
+    items:
+      $ref: ./InstalmentRequest.yaml
+    description: ''
