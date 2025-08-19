@@ -1,0 +1,99 @@
+post:
+  tags:
+    - individuals
+  summary: Notify cancellation of TTP Plan to HoDs (CESA only in R1)
+  description: >
+    An API called by CDCS to trigger the TTP service to notify HoDs (via
+    different APIs) when a TTP set up either by an operator or the self serve
+    journey has been cancelled.
+  parameters:
+    - name: correlationId
+      in: header
+      description: Correlation Id used for end-to-end traceability
+      required: true
+      schema:
+        type: string
+        format: uuid
+        example: f0bd1f32-de51-45cc-9b18-0520d6e3ab1a
+  security:
+    - applicationRestricted:
+        - write:time-to-pay-proxy
+  requestBody:
+    description: Request body containing cancellation and identification details
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: ../components/schemas/CancelRequest.yaml
+        examples:
+          exampleR1:
+            summary: Release 1 Example Request (CESA only)
+            value:
+              identifications:
+                - idType: UTR
+                  idValue: '1234567890'
+              paymentPlan:
+                arrangementAgreedDate: '2025-05-01'
+                ttpEndDate: '2025-11-01'
+                initialPaymentDate: '2025-05-05'
+                initialPaymentAmount: 150
+                frequency: monthly
+                cancellationDate: '2025-10-15'
+              instalments:
+                - dueDate: '2025-06-01'
+                  amountDue: 300
+                - dueDate: '2025-07-01'
+                  amountDue: 300
+                - dueDate: '2025-08-01'
+                  amountDue: 300
+              channelIdentifier: advisor
+              transitioned: true
+  responses:
+    '200':
+      description: Cancellation notification processed successfully.
+      content:
+        application/json:
+          schema:
+            $ref: ../components/schemas/CancelResponse.yaml
+          examples:
+            successExample:
+              summary: Successful cancellation notification to CESA
+              value:
+                apisCalled:
+                  - name: CESA
+                    statusCode: '200'
+                    processingDateTime: '2025-05-01T14:30:00Z'
+                  - name: ETMP
+                    statusCode: '201'
+                    processingDateTime: '2025-05-01T14:31:00Z'
+                processingDateTime: '2025-10-15T10:31:00Z'
+    '400':
+      description: Bad request due to invalid or missing data.
+      content:
+        application/json:
+          schema:
+            $ref: ../components/schemas/CancelErrorResponse.yaml
+          examples:
+            badRequestExample:
+              summary: Invalid cancellation request example
+              value:
+                code: 400
+                details: >-
+                  Invalid request payload: missing identifications or
+                  cancellationDate
+    '500':
+      description: Internal error or partial failure in calls to HoDs.
+      content:
+        application/json:
+          schema:
+            $ref: ../components/schemas/CancelResponse.yaml
+          examples:
+            partialFailureExample:
+              summary: Partial failure example with error reported
+              value:
+                apisCalled:
+                  - name: CESA
+                    statusCode: '400'
+                    processingDateTime: '2025-10-15T10:30:00Z'
+                    errorResponse: Invalid cancellationDate
+                processingDateTime: '2025-10-15T10:31:00Z'

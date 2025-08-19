@@ -1,0 +1,13 @@
+type: object
+required:
+  - chargeReference
+  - chargeSource
+properties:
+  chargeReference:
+    type: string
+    description: Reference for the charge
+    example: 628BxY
+  chargeSource:
+    type: string
+    description: Source system of the charge
+    example: CESA
