@@ -1,0 +1,15 @@
+title: postCode
+required:
+  - addressPostcode
+  - postcodeDate
+properties:
+  addressPostcode:
+    pattern: >-
+      ^([A-Za-z][A-Ha-hJ-Yj-y]?[0-9][A-Za-z0-9]? ?[0-9][A-Za-z]{2}|[Gg][Ii][Rr]
+      ?0[Aa]{2})$
+    type: string
+    description: valid UK postcode
+  postcodeDate:
+    pattern: ^\d{4}-[0-1][0-9]-[0-3][0-9]$
+    type: string
+    description: Postcode date move in

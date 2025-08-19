@@ -1,0 +1,13 @@
+title: PaymentHistoryResponse
+required:
+  - paymentAmount
+  - paymentDate
+properties:
+  paymentDate:
+    type: string
+    description: Payment date
+    format: date
+  paymentAmount:
+    type: integer
+    description: Payment amount
+    format: int32

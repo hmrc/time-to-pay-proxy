@@ -1,0 +1,12 @@
+title: RegularCollection
+required:
+  - dueDate
+  - amountDue
+properties:
+  dueDate:
+    type: string
+    description: Due date
+    format: date
+  amountDue:
+    type: number
+    description: Amount due
