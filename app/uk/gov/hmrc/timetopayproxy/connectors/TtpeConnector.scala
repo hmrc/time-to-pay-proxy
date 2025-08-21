@@ -19,12 +19,12 @@ package uk.gov.hmrc.timetopayproxy.connectors
 import cats.data.EitherT
 import com.google.inject.ImplementedBy
 import play.api.libs.json.Json
-import uk.gov.hmrc.http.{ HeaderCarrier, StringContextOps }
 import uk.gov.hmrc.http.client.HttpClientV2
+import uk.gov.hmrc.http.{ HeaderCarrier, StringContextOps }
 import uk.gov.hmrc.timetopayproxy.config.AppConfig
 import uk.gov.hmrc.timetopayproxy.models.TtppEnvelope.TtppEnvelope
-import uk.gov.hmrc.timetopayproxy.models.{ TimeToPayEligibilityError, TtppError }
 import uk.gov.hmrc.timetopayproxy.models.chargeInfoApi.{ ChargeInfoRequest, ChargeInfoResponse }
+import uk.gov.hmrc.timetopayproxy.models.{ TimeToPayEligibilityError, TtppError }
 
 import java.util.UUID
 import javax.inject.{ Inject, Singleton }

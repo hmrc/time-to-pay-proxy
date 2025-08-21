@@ -15,8 +15,9 @@
  */
 
 package uk.gov.hmrc.timetopayproxy.models
-import java.time.LocalDate
 import play.api.libs.json.{ Json, OFormat }
+
+import java.time.LocalDate
 
 case class BreathingSpace(debtRespiteFrom: LocalDate, debtRespiteTo: LocalDate)
 

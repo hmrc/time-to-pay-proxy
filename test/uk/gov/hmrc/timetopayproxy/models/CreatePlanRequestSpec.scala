@@ -16,12 +16,11 @@
 
 package uk.gov.hmrc.timetopayproxy.models
 
-import java.time.LocalDate
-
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
 import play.api.libs.json._
 
+import java.time.LocalDate
 import scala.util.{ Failure, Try }
 
 class CreatePlanRequestSpec extends AnyWordSpec with Matchers with CreatePlanRequestFixture {

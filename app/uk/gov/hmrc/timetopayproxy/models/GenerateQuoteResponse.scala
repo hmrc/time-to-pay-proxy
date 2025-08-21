@@ -16,8 +16,9 @@
 
 package uk.gov.hmrc.timetopayproxy.models
 
-import java.time.LocalDate
 import play.api.libs.json.{ Json, OFormat }
+
+import java.time.LocalDate
 
 final case class GenerateQuoteResponse(
   quoteReference: QuoteReference,

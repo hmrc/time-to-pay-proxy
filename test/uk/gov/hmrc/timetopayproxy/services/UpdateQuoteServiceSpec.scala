@@ -16,15 +16,14 @@
 
 package uk.gov.hmrc.timetopayproxy.services
 
-import java.time.LocalDate
-import java.util.concurrent.TimeUnit
-
 import cats.syntax.either._
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.timetopayproxy.connectors.TtpConnector
 import uk.gov.hmrc.timetopayproxy.models._
 import uk.gov.hmrc.timetopayproxy.support.UnitSpec
 
+import java.time.LocalDate
+import java.util.concurrent.TimeUnit
 import scala.concurrent.ExecutionContext
 import scala.concurrent.ExecutionContext.Implicits.global
 

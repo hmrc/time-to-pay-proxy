@@ -16,11 +16,11 @@
 
 package uk.gov.hmrc.timetopayproxy.connectors
 
+import cats.syntax.either._
 import play.api.http.Status
 import play.api.libs.json.Reads
 import uk.gov.hmrc.http.HttpReads
 import uk.gov.hmrc.timetopayproxy.models.{ ConnectorError, IncomingApiError, TtppError }
-import cats.syntax.either._
 
 import scala.util.{ Failure, Success, Try }
 

@@ -17,14 +17,13 @@
 package uk.gov.hmrc.timetopayproxy.services
 
 import com.google.inject.ImplementedBy
-
-import javax.inject.{ Inject, Singleton }
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.timetopayproxy.connectors.TtpConnector
-import uk.gov.hmrc.timetopayproxy.models._
 import uk.gov.hmrc.timetopayproxy.models.TtppEnvelope.TtppEnvelope
+import uk.gov.hmrc.timetopayproxy.models._
 import uk.gov.hmrc.timetopayproxy.models.affordablequotes.{ AffordableQuoteResponse, AffordableQuotesRequest }
 
+import javax.inject.{ Inject, Singleton }
 import scala.concurrent.ExecutionContext
 
 @ImplementedBy(classOf[DefaultTTPQuoteService])
