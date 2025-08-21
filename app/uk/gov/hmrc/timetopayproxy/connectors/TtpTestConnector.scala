@@ -24,8 +24,9 @@ import uk.gov.hmrc.http.HttpReads.Implicits._
 import uk.gov.hmrc.http.client.HttpClientV2
 import uk.gov.hmrc.http.{ HeaderCarrier, HttpException, HttpResponse, StringContextOps, UpstreamErrorResponse }
 import uk.gov.hmrc.timetopayproxy.config.AppConfig
-import uk.gov.hmrc.timetopayproxy.models.TtppEnvelope.TtppEnvelope
-import uk.gov.hmrc.timetopayproxy.models.{ ConnectorError, RequestDetails, TtppEnvelope }
+import uk.gov.hmrc.timetopayproxy.models.RequestDetails
+import uk.gov.hmrc.timetopayproxy.models.error.TtppEnvelope.TtppEnvelope
+import uk.gov.hmrc.timetopayproxy.models.error.{ ConnectorError, TtppEnvelope }
 
 import javax.inject.{ Inject, Singleton }
 import scala.concurrent.ExecutionContext

@@ -23,10 +23,11 @@ import org.scalatest.matchers.should.Matchers._
 import play.api.test.Helpers.{ await, defaultAwaitTimeout }
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.timetopayproxy.connectors.TtpeConnector
-import uk.gov.hmrc.timetopayproxy.models.TtppEnvelope.TtppEnvelope
+import uk.gov.hmrc.timetopayproxy.models.error.TtppEnvelope.TtppEnvelope
+import uk.gov.hmrc.timetopayproxy.models.error.{ ConnectorError, TtppEnvelope, TtppError }
 import uk.gov.hmrc.timetopayproxy.models.saopled.OpLedRegimeType
 import uk.gov.hmrc.timetopayproxy.models.saopled.chargeInfoApi._
-import uk.gov.hmrc.timetopayproxy.models.{ ConnectorError, IdType, IdValue, Identification, TtppEnvelope, TtppError }
+import uk.gov.hmrc.timetopayproxy.models.{ IdType, IdValue, Identification }
 
 import java.time.{ LocalDate, LocalDateTime }
 import scala.concurrent.ExecutionContext.Implicits.global

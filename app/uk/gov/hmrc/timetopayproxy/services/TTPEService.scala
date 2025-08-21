@@ -19,7 +19,7 @@ package uk.gov.hmrc.timetopayproxy.services
 import com.google.inject.ImplementedBy
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.timetopayproxy.connectors.TtpeConnector
-import uk.gov.hmrc.timetopayproxy.models.TtppEnvelope.TtppEnvelope
+import uk.gov.hmrc.timetopayproxy.models.error.TtppEnvelope.TtppEnvelope
 import uk.gov.hmrc.timetopayproxy.models.saopled.chargeInfoApi.{ ChargeInfoRequest, ChargeInfoResponse }
 
 import javax.inject.{ Inject, Singleton }

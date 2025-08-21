@@ -23,9 +23,10 @@ import uk.gov.hmrc.http.client.HttpClientV2
 import uk.gov.hmrc.http.{ HeaderCarrier, StringContextOps }
 import uk.gov.hmrc.timetopayproxy.config.AppConfig
 import uk.gov.hmrc.timetopayproxy.logging.RequestAwareLogger
-import uk.gov.hmrc.timetopayproxy.models.TtppEnvelope.TtppEnvelope
 import uk.gov.hmrc.timetopayproxy.models._
 import uk.gov.hmrc.timetopayproxy.models.affordablequotes.{ AffordableQuoteResponse, AffordableQuotesRequest }
+import uk.gov.hmrc.timetopayproxy.models.error.TtppEnvelope.TtppEnvelope
+import uk.gov.hmrc.timetopayproxy.models.error.TtppError
 
 import java.net.URLEncoder
 import java.util.UUID

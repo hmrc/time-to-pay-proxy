@@ -20,7 +20,8 @@ import cats.syntax.either._
 import play.api.libs.json.Json
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.timetopayproxy.connectors.TtpTestConnector
-import uk.gov.hmrc.timetopayproxy.models.{ ConnectorError, RequestDetails, TtppEnvelope, TtppError }
+import uk.gov.hmrc.timetopayproxy.models.RequestDetails
+import uk.gov.hmrc.timetopayproxy.models.error.{ ConnectorError, TtppEnvelope, TtppError }
 import uk.gov.hmrc.timetopayproxy.support.UnitSpec
 
 import scala.concurrent.ExecutionContext

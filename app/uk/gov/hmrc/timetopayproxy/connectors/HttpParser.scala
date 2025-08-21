@@ -20,7 +20,8 @@ import cats.syntax.either._
 import play.api.http.Status
 import play.api.libs.json.Reads
 import uk.gov.hmrc.http.HttpReads
-import uk.gov.hmrc.timetopayproxy.models.{ ConnectorError, IncomingApiError, TtppError }
+import uk.gov.hmrc.timetopayproxy.models.IncomingApiError
+import uk.gov.hmrc.timetopayproxy.models.error.{ ConnectorError, TtppError }
 
 import scala.util.{ Failure, Success, Try }
 

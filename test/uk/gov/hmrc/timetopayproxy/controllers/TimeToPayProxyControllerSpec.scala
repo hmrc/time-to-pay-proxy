@@ -32,9 +32,10 @@ import uk.gov.hmrc.auth.core.retrieve.Retrieval
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.timetopayproxy.actions.auth.{ AuthoriseAction, AuthoriseActionImpl }
 import uk.gov.hmrc.timetopayproxy.config.FeatureSwitch
-import uk.gov.hmrc.timetopayproxy.models.TtppEnvelope.TtppEnvelope
 import uk.gov.hmrc.timetopayproxy.models._
 import uk.gov.hmrc.timetopayproxy.models.affordablequotes._
+import uk.gov.hmrc.timetopayproxy.models.error.TtppEnvelope.TtppEnvelope
+import uk.gov.hmrc.timetopayproxy.models.error.{ ConnectorError, TtppEnvelope, TtppErrorResponse }
 import uk.gov.hmrc.timetopayproxy.models.saopled.OpLedRegimeType
 import uk.gov.hmrc.timetopayproxy.models.saopled.chargeInfoApi._
 import uk.gov.hmrc.timetopayproxy.services.{ TTPEService, TTPQuoteService }

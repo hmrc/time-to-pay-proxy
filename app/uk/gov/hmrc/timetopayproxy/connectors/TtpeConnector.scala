@@ -22,9 +22,10 @@ import play.api.libs.json.Json
 import uk.gov.hmrc.http.client.HttpClientV2
 import uk.gov.hmrc.http.{ HeaderCarrier, StringContextOps }
 import uk.gov.hmrc.timetopayproxy.config.AppConfig
-import uk.gov.hmrc.timetopayproxy.models.TtppEnvelope.TtppEnvelope
+import uk.gov.hmrc.timetopayproxy.models.TimeToPayEligibilityError
+import uk.gov.hmrc.timetopayproxy.models.error.TtppEnvelope.TtppEnvelope
+import uk.gov.hmrc.timetopayproxy.models.error.TtppError
 import uk.gov.hmrc.timetopayproxy.models.saopled.chargeInfoApi.{ ChargeInfoRequest, ChargeInfoResponse }
-import uk.gov.hmrc.timetopayproxy.models.{ TimeToPayEligibilityError, TtppError }
 
 import java.util.UUID
 import javax.inject.{ Inject, Singleton }

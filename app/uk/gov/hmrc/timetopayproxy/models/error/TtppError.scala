@@ -14,6 +14,6 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.timetopayproxy.models
+package uk.gov.hmrc.timetopayproxy.models.error
 
 trait TtppError extends Product with Serializable

@@ -19,9 +19,10 @@ package uk.gov.hmrc.timetopayproxy.services
 import cats.syntax.either._
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.timetopayproxy.connectors.TtpConnector
-import uk.gov.hmrc.timetopayproxy.models.TtppEnvelope.TtppEnvelope
 import uk.gov.hmrc.timetopayproxy.models._
 import uk.gov.hmrc.timetopayproxy.models.affordablequotes.{ AffordableQuoteResponse, AffordableQuotesRequest }
+import uk.gov.hmrc.timetopayproxy.models.error.TtppEnvelope.TtppEnvelope
+import uk.gov.hmrc.timetopayproxy.models.error.{ ConnectorError, TtppEnvelope, TtppError }
 import uk.gov.hmrc.timetopayproxy.support.UnitSpec
 
 import java.time.{ LocalDate, LocalDateTime }

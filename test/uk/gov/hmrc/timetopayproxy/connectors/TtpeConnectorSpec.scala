@@ -26,10 +26,11 @@ import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.http.client.HttpClientV2
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 import uk.gov.hmrc.timetopayproxy.config.AppConfig
-import uk.gov.hmrc.timetopayproxy.models.TtppEnvelope.TtppEnvelope
+import uk.gov.hmrc.timetopayproxy.models.error.ConnectorError
+import uk.gov.hmrc.timetopayproxy.models.error.TtppEnvelope.TtppEnvelope
 import uk.gov.hmrc.timetopayproxy.models.saopled.OpLedRegimeType
 import uk.gov.hmrc.timetopayproxy.models.saopled.chargeInfoApi._
-import uk.gov.hmrc.timetopayproxy.models.{ ConnectorError, IdType, IdValue, Identification }
+import uk.gov.hmrc.timetopayproxy.models.{ IdType, IdValue, Identification }
 import uk.gov.hmrc.timetopayproxy.support.WireMockUtils
 
 import java.time.{ LocalDate, LocalDateTime }

@@ -22,10 +22,11 @@ import play.api.mvc._
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
 import uk.gov.hmrc.timetopayproxy.actions.auth.AuthoriseAction
 import uk.gov.hmrc.timetopayproxy.config.FeatureSwitch
-import uk.gov.hmrc.timetopayproxy.models.TtppEnvelope.TtppEnvelope
-import uk.gov.hmrc.timetopayproxy.models.TtppErrorResponse._
 import uk.gov.hmrc.timetopayproxy.models._
 import uk.gov.hmrc.timetopayproxy.models.affordablequotes.AffordableQuotesRequest
+import uk.gov.hmrc.timetopayproxy.models.error.TtppEnvelope.TtppEnvelope
+import uk.gov.hmrc.timetopayproxy.models.error.TtppErrorResponse._
+import uk.gov.hmrc.timetopayproxy.models.error.{ TtppEnvelope, TtppErrorResponse, ValidationError }
 import uk.gov.hmrc.timetopayproxy.models.saopled.chargeInfoApi.ChargeInfoRequest
 import uk.gov.hmrc.timetopayproxy.services.{ TTPEService, TTPQuoteService }
 import uk.gov.hmrc.timetopayproxy.utils.TtppErrorHandler._

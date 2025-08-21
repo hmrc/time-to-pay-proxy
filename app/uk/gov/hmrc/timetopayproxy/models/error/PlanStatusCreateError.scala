@@ -17,7 +17,6 @@
 package uk.gov.hmrc.timetopayproxy.models.error
 
 import play.api.libs.json.{ Json, OFormat }
-import uk.gov.hmrc.timetopayproxy.models.TtppError
 
 final case class PlanStatusCreateError(description: String) extends TtppError
 

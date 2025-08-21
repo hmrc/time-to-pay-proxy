@@ -18,7 +18,7 @@ package uk.gov.hmrc.timetopayproxy.utils
 
 import play.api.libs.json.{ Json, Writes }
 import play.api.mvc.{ Result, Results }
-import uk.gov.hmrc.timetopayproxy.models.TtppErrorResponse
+import uk.gov.hmrc.timetopayproxy.models.error.TtppErrorResponse
 
 object TtppResponseConverter {
 

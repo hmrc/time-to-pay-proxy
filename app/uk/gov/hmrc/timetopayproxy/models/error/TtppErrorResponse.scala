@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.timetopayproxy.models
+package uk.gov.hmrc.timetopayproxy.models.error
 
 import play.api.libs.json.{ Json, Writes }
 

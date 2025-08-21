@@ -14,11 +14,6 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.timetopayproxy.models
-import play.api.libs.json.{ Json, OFormat }
+package uk.gov.hmrc.timetopayproxy.models.error
 
-final case class ConnectorError(statusCode: Int, message: String) extends TtppError
-
-object ConnectorError {
-  implicit val format: OFormat[ConnectorError] = Json.format[ConnectorError]
-}
+final case class ValidationError(message: String) extends TtppError
