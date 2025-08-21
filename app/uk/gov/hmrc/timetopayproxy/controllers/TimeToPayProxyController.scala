@@ -29,7 +29,6 @@ import uk.gov.hmrc.timetopayproxy.models.error.TtppErrorResponse._
 import uk.gov.hmrc.timetopayproxy.models.error.{ TtppEnvelope, TtppErrorResponse, ValidationError }
 import uk.gov.hmrc.timetopayproxy.models.saopled.chargeInfoApi.ChargeInfoRequest
 import uk.gov.hmrc.timetopayproxy.services.{ TTPEService, TTPQuoteService }
-import uk.gov.hmrc.timetopayproxy.utils.TtppErrorHandler._
 import uk.gov.hmrc.timetopayproxy.utils.TtppResponseConverter._
 
 import javax.inject.{ Inject, Singleton }
@@ -55,7 +54,7 @@ class TimeToPayProxyController @Inject() (
     withJsonBody[GenerateQuoteRequest] { timeToPayRequest: GenerateQuoteRequest =>
       timeToPayQuoteService
         .generateQuote(timeToPayRequest, request.queryString)
-        .leftMap(ttppError => ttppError.toErrorResponse)
+        .leftMap(ttppError => ttppError.toWriteableProxyError)
         .fold(e => e.toResponse, r => r.toResponse)
     }
   }
@@ -64,7 +63,7 @@ class TimeToPayProxyController @Inject() (
     authoriseAction.async { implicit request =>
       timeToPayQuoteService
         .getExistingPlan(CustomerReference(customerReference), PlanId(planId))
-        .leftMap(ttppError => ttppError.toErrorResponse)
+        .leftMap(ttppError => ttppError.toWriteableProxyError)
         .fold(e => e.toResponse, r => r.toResponse)
     }
 
@@ -78,7 +77,7 @@ class TimeToPayProxyController @Inject() (
         } yield response
 
         result
-          .leftMap(ttppError => ttppError.toErrorResponse)
+          .leftMap(ttppError => ttppError.toWriteableProxyError)
           .fold(e => e.toResponse, r => r.toResponse)
       }
     }
@@ -87,7 +86,7 @@ class TimeToPayProxyController @Inject() (
     withJsonBody[CreatePlanRequest] { createPlanRequest: CreatePlanRequest =>
       timeToPayQuoteService
         .createPlan(createPlanRequest, request.queryString)
-        .leftMap(ttppError => ttppError.toErrorResponse)
+        .leftMap(ttppError => ttppError.toWriteableProxyError)
         .fold(e => e.toResponse, r => r.toResponse)
     }
   }
@@ -96,7 +95,7 @@ class TimeToPayProxyController @Inject() (
     withJsonBody[AffordableQuotesRequest] { affordableQuoteRequest: AffordableQuotesRequest =>
       timeToPayQuoteService
         .getAffordableQuotes(affordableQuoteRequest)
-        .leftMap(ttppError => ttppError.toErrorResponse)
+        .leftMap(ttppError => ttppError.toWriteableProxyError)
         .fold(e => e.toResponse, r => r.toResponse)
     }
   }
@@ -105,7 +104,7 @@ class TimeToPayProxyController @Inject() (
     withJsonBody[ChargeInfoRequest] { chargeInfoRequest: ChargeInfoRequest =>
       timeToPayEligibilityService
         .checkChargeInfo(chargeInfoRequest)
-        .leftMap(ttppError => ttppError.toErrorResponse)
+        .leftMap(ttppError => ttppError.toWriteableProxyError)
         .fold(e => e.toResponse, r => r.toResponse)
     }
   }

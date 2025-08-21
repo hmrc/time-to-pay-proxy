@@ -16,10 +16,12 @@
 
 package uk.gov.hmrc.timetopayproxy.models.error
 
-import play.api.libs.json.{ Json, OFormat }
+import play.api.libs.json.{ Json, Reads }
 
-final case class ConnectorError(statusCode: Int, message: String) extends TtppError
+final case class ConnectorError(statusCode: Int, message: String) extends TtppError {
+  def toWriteableProxyError: TtppErrorResponse = TtppErrorResponse(statusCode, message)
+}
 
 object ConnectorError {
-  implicit val format: OFormat[ConnectorError] = Json.format[ConnectorError]
+  implicit val reader: Reads[ConnectorError] = Json.reads[ConnectorError]
 }

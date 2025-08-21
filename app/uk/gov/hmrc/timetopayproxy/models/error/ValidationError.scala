@@ -16,4 +16,6 @@
 
 package uk.gov.hmrc.timetopayproxy.models.error
 
-final case class ValidationError(message: String) extends TtppError
+final case class ValidationError(message: String) extends TtppError {
+  def toWriteableProxyError: TtppErrorResponse = TtppErrorResponse(400, message)
+}

@@ -16,4 +16,6 @@
 
 package uk.gov.hmrc.timetopayproxy.models.error
 
-trait TtppError extends Product with Serializable
+trait TtppError { this: Product with Serializable =>
+  def toWriteableProxyError: TtppWriteableError
+}

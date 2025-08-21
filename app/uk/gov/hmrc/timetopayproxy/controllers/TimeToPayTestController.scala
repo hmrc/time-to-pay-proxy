@@ -21,7 +21,6 @@ import play.api.mvc.{ Action, AnyContent, BaseController, ControllerComponents, 
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
 import uk.gov.hmrc.timetopayproxy.models.RequestDetails
 import uk.gov.hmrc.timetopayproxy.services.TTPTestService
-import uk.gov.hmrc.timetopayproxy.utils.TtppErrorHandler.FromErrorToResponse
 import uk.gov.hmrc.timetopayproxy.utils.TtppResponseConverter.ToResponse
 
 import javax.inject.{ Inject, Singleton }
@@ -37,14 +36,14 @@ class TimeToPayTestController @Inject() (cc: ControllerComponents, ttpTestServic
   def requests: Action[AnyContent] = Action.async { implicit request =>
     ttpTestService
       .retrieveRequestDetails()
-      .leftMap(ttppError => ttppError.toErrorResponse)
+      .leftMap(ttppError => ttppError.toWriteableProxyError)
       .fold(e => e.toResponse, r => r.toResponse)
   }
 
   def deleteRequest(requestId: String): Action[AnyContent] = Action.async { implicit request =>
     ttpTestService
       .deleteRequestDetails(requestId)
-      .leftMap(ttppError => ttppError.toErrorResponse)
+      .leftMap(ttppError => ttppError.toWriteableProxyError)
       .fold(e => e.toResponse, _ => Results.Ok)
   }
 
@@ -52,7 +51,7 @@ class TimeToPayTestController @Inject() (cc: ControllerComponents, ttpTestServic
     withJsonBody[RequestDetails] { details: RequestDetails =>
       ttpTestService
         .saveResponseDetails(details)
-        .leftMap(ttppError => ttppError.toErrorResponse)
+        .leftMap(ttppError => ttppError.toWriteableProxyError)
         .fold(e => e.toResponse, _ => Results.Ok)
     }
   }
@@ -61,7 +60,7 @@ class TimeToPayTestController @Inject() (cc: ControllerComponents, ttpTestServic
     withJsonBody[RequestDetails] { details: RequestDetails =>
       ttpTestService
         .saveError(details)
-        .leftMap(ttppError => ttppError.toErrorResponse)
+        .leftMap(ttppError => ttppError.toWriteableProxyError)
         .fold(e => e.toResponse, _ => Results.Ok)
     }
   }
@@ -69,7 +68,7 @@ class TimeToPayTestController @Inject() (cc: ControllerComponents, ttpTestServic
   def getErrors(): Action[AnyContent] = Action.async { implicit request =>
     ttpTestService
       .getErrors()
-      .leftMap(ttppError => ttppError.toErrorResponse)
+      .leftMap(ttppError => ttppError.toWriteableProxyError)
       .fold(e => e.toResponse, r => r.toResponse)
   }
 }
