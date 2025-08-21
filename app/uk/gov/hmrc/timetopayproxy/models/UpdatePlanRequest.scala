@@ -16,8 +16,8 @@
 
 package uk.gov.hmrc.timetopayproxy.models
 
-import play.api.libs.json.{ Format, Json, OFormat }
 import enumeratum.{ Enum, EnumEntry, PlayJsonEnum }
+import play.api.libs.json.{ Format, Json, OFormat }
 
 import scala.collection.immutable
 

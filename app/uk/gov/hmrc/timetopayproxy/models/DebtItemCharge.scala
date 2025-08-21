@@ -16,8 +16,9 @@
 
 package uk.gov.hmrc.timetopayproxy.models
 
-import java.time.LocalDate
 import play.api.libs.json.{ Format, Json, OFormat }
+
+import java.time.LocalDate
 
 final case class DebtItemChargeId(value: String) extends AnyVal
 

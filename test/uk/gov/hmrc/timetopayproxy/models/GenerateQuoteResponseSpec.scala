@@ -16,11 +16,11 @@
 
 package uk.gov.hmrc.timetopayproxy.models
 
-import java.time.LocalDate
-
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
 import play.api.libs.json._
+
+import java.time.LocalDate
 
 class GenerateQuoteResponseSpec extends AnyWordSpec with Matchers {
   val generateQuoteResponse = GenerateQuoteResponse(

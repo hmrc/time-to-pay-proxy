@@ -32,8 +32,9 @@ package uk.gov.hmrc.timetopayproxy.models
  * limitations under the License.
  */
 
-import java.time.LocalDate
 import play.api.libs.json.{ Json, OFormat }
+
+import java.time.LocalDate
 
 final case class PlanToGenerateQuote(
   quoteType: QuoteType,

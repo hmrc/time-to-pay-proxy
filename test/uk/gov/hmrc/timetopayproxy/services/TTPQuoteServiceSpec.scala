@@ -16,18 +16,18 @@
 
 package uk.gov.hmrc.timetopayproxy.services
 
-import java.time.{ LocalDate, LocalDateTime }
-import java.util.concurrent.TimeUnit
+import cats.syntax.either._
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.timetopayproxy.connectors.TtpConnector
+import uk.gov.hmrc.timetopayproxy.models.TtppEnvelope.TtppEnvelope
 import uk.gov.hmrc.timetopayproxy.models._
+import uk.gov.hmrc.timetopayproxy.models.affordablequotes.{ AffordableQuoteResponse, AffordableQuotesRequest }
 import uk.gov.hmrc.timetopayproxy.support.UnitSpec
 
-import scala.concurrent.{ ExecutionContext, Future }
+import java.time.{ LocalDate, LocalDateTime }
+import java.util.concurrent.TimeUnit
 import scala.concurrent.ExecutionContext.Implicits.global
-import cats.syntax.either._
-import uk.gov.hmrc.timetopayproxy.models.TtppEnvelope.TtppEnvelope
-import uk.gov.hmrc.timetopayproxy.models.affordablequotes.{ AffordableQuoteResponse, AffordableQuotesRequest }
+import scala.concurrent.{ ExecutionContext, Future }
 
 class TTPQuoteServiceSpec extends UnitSpec {
   implicit val hc: HeaderCarrier = HeaderCarrier()

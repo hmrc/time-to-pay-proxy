@@ -17,14 +17,14 @@
 package uk.gov.hmrc.timetopayproxy.actions.auth
 
 import com.google.inject.ImplementedBy
-import javax.inject.Inject
 import play.api.Logger
+import play.api.mvc.Results.{ Forbidden, ServiceUnavailable }
 import play.api.mvc._
 import uk.gov.hmrc.auth.core._
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.http.HeaderCarrierConverter
-import play.api.mvc.Results.{ Forbidden, ServiceUnavailable }
 
+import javax.inject.Inject
 import scala.concurrent.{ ExecutionContext, Future }
 import scala.util.control.NonFatal
 

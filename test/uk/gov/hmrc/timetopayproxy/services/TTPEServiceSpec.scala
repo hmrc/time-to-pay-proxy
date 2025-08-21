@@ -22,14 +22,13 @@ import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.should.Matchers._
 import play.api.test.Helpers.{ await, defaultAwaitTimeout }
 import uk.gov.hmrc.http.HeaderCarrier
-
-import scala.concurrent.ExecutionContext.Implicits.global
 import uk.gov.hmrc.timetopayproxy.connectors.TtpeConnector
 import uk.gov.hmrc.timetopayproxy.models.TtppEnvelope.TtppEnvelope
-import uk.gov.hmrc.timetopayproxy.models.{ ConnectorError, IdType, IdValue, Identification, TtppEnvelope, TtppError }
 import uk.gov.hmrc.timetopayproxy.models.chargeInfoApi._
+import uk.gov.hmrc.timetopayproxy.models.{ ConnectorError, IdType, IdValue, Identification, TtppEnvelope, TtppError }
 
 import java.time.{ LocalDate, LocalDateTime }
+import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.{ ExecutionContext, Future }
 
 class TTPEServiceSpec extends AnyFreeSpec {
