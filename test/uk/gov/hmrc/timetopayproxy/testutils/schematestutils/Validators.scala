@@ -66,6 +66,37 @@ object Validators {
         )
     }
 
+    object TtpCancel {
+      // Downloaded from:
+      //   https://jira.tools.tax.service.gov.uk/browse/DTD-2858
+      // Official location:
+      //   ???
+      def openApiRequestSchema: OpenApi3DerivedSchema =
+        new OpenApi3DerivedSchema(
+          path,
+          defaultJsonSubschemaName = "CancelRequest",
+          metaSchemaValidation = Some(Valid(())),
+          restrictAdditionalProperties = true
+        )
+
+      /** This is used for both 200 and 500 statuses. */
+      def openApiInformativeResponseSchema: OpenApi3DerivedSchema =
+        new OpenApi3DerivedSchema(
+          path,
+          defaultJsonSubschemaName = "CancelResponse",
+          metaSchemaValidation = Some(Valid(())),
+          restrictAdditionalProperties = true
+        )
+
+      def openApiResponseGeneralFailureSchema: OpenApi3DerivedSchema =
+        new OpenApi3DerivedSchema(
+          path,
+          defaultJsonSubschemaName = "CancelErrorResponse",
+          metaSchemaValidation = Some(Valid(())),
+          restrictAdditionalProperties = true
+        )
+    }
+
     /** For now, this applies to all responses from the proxy */
     def openApiResponseErrorSchema: OpenApi3DerivedSchema =
       new OpenApi3DerivedSchema(
@@ -115,7 +146,7 @@ object Validators {
       // Downloaded from:
       //   https://github.com/hmrc/time-to-pay/blob/82c464a0fa7ba93ac869ee361f497fd92a206ed6/resources/public/api/conf/1.0/affordable-quotes-api-v1.3.0.yaml
       // Official location:
-      //   ???
+      //   https://github.com/hmrc/time-to-pay/tree/main/resources/public/api/conf/1.0
       private val path = "test/resources/schemas/apis/time-to-pay/affordable-quotes-api-v1.3.0.yaml"
 
       def openApiRequestSchema: OpenApi3DerivedSchema =
@@ -130,6 +161,38 @@ object Validators {
         new OpenApi3DerivedSchema(
           path,
           defaultJsonSubschemaName = "TTPAffordableQuotesResponse",
+          metaSchemaValidation = Some(Valid(())),
+          restrictAdditionalProperties = true
+        )
+    }
+
+    object TtpCancel {
+      // Downloaded from:
+      //   https://github.com/hmrc/time-to-pay/blob/7d0903506524411871930c3a3dc81899b58c7985/resources/public/api/conf/1.0/CancelAPI-v0.0.1.yaml
+      // Official location:
+      //   https://github.com/hmrc/time-to-pay/tree/main/resources/public/api/conf/1.0
+      private val path = "test/resources/schemas/apis/time-to-pay/CancelAPI-v0.0.1.yaml"
+
+      def openApiRequestSchema: OpenApi3DerivedSchema =
+        new OpenApi3DerivedSchema(
+          path,
+          defaultJsonSubschemaName = "CancelRequest",
+          metaSchemaValidation = Some(Valid(())),
+          restrictAdditionalProperties = true
+        )
+
+      def openApiInformativeResponseSchema: OpenApi3DerivedSchema =
+        new OpenApi3DerivedSchema(
+          path,
+          defaultJsonSubschemaName = "CancelResponse",
+          metaSchemaValidation = Some(Valid(())),
+          restrictAdditionalProperties = true
+        )
+
+      def openApiResponseGeneralFailureSchema: OpenApi3DerivedSchema =
+        new OpenApi3DerivedSchema(
+          path,
+          defaultJsonSubschemaName = "ErrorResponse",
           metaSchemaValidation = Some(Valid(())),
           restrictAdditionalProperties = true
         )
