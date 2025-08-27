@@ -29,6 +29,7 @@ import uk.gov.hmrc.timetopayproxy.support.IntegrationBaseSpec
 import uk.gov.hmrc.timetopayproxy.testutils.TestOnlyJsonFormats._
 
 import java.time.{ LocalDate, LocalDateTime }
+import scala.annotation.unused
 import scala.concurrent.ExecutionContext
 
 class TimeToPayProxyControllerItSpec extends IntegrationBaseSpec {
@@ -597,6 +598,13 @@ class TimeToPayProxyControllerItSpec extends IntegrationBaseSpec {
           }
         }
       }
+    }
+
+    ".cancelTtp" - {
+      @unused
+      val ttpCancelPath: String = "/cancel" // Extracted to prevent copy-paste errors.
+
+      // TODO DTD-2858: Add missing integration tests.
     }
   }
 

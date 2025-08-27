@@ -22,12 +22,14 @@ import play.api.mvc._
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
 import uk.gov.hmrc.timetopayproxy.actions.auth.AuthoriseAction
 import uk.gov.hmrc.timetopayproxy.config.FeatureSwitch
+import uk.gov.hmrc.timetopayproxy.connectors.TtpFromCdcsConnector
 import uk.gov.hmrc.timetopayproxy.models._
 import uk.gov.hmrc.timetopayproxy.models.affordablequotes.AffordableQuotesRequest
 import uk.gov.hmrc.timetopayproxy.models.error.TtppEnvelope.TtppEnvelope
 import uk.gov.hmrc.timetopayproxy.models.error.TtppErrorResponse._
 import uk.gov.hmrc.timetopayproxy.models.error.{ TtppEnvelope, TtppErrorResponse, ValidationError }
 import uk.gov.hmrc.timetopayproxy.models.saopled.chargeInfoApi.ChargeInfoRequest
+import uk.gov.hmrc.timetopayproxy.models.saopled.ttpcancel.TtpCancelRequest
 import uk.gov.hmrc.timetopayproxy.services.{ TTPEService, TTPQuoteService }
 import uk.gov.hmrc.timetopayproxy.utils.TtppResponseConverter._
 
@@ -41,6 +43,7 @@ class TimeToPayProxyController @Inject() (
   authoriseAction: AuthoriseAction,
   cc: ControllerComponents,
   timeToPayQuoteService: TTPQuoteService,
+  timeToPayFromCdcsConnector: TtpFromCdcsConnector,
   timeToPayEligibilityService: TTPEService,
   @unused
   fs: FeatureSwitch
@@ -104,6 +107,15 @@ class TimeToPayProxyController @Inject() (
     withJsonBody[ChargeInfoRequest] { chargeInfoRequest: ChargeInfoRequest =>
       timeToPayEligibilityService
         .checkChargeInfo(chargeInfoRequest)
+        .leftMap(ttppError => ttppError.toWriteableProxyError)
+        .fold(e => e.toResponse, r => r.toResponse)
+    }
+  }
+
+  def cancelTtp: Action[JsValue] = authoriseAction.async(parse.json) { implicit request =>
+    withJsonBody[TtpCancelRequest] { deserialisedRequest: TtpCancelRequest =>
+      timeToPayFromCdcsConnector
+        .cancelTtp(deserialisedRequest)
         .leftMap(ttppError => ttppError.toWriteableProxyError)
         .fold(e => e.toResponse, r => r.toResponse)
     }

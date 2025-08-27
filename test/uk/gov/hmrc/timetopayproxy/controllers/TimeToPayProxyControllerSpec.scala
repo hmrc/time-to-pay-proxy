@@ -32,6 +32,7 @@ import uk.gov.hmrc.auth.core.retrieve.Retrieval
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.timetopayproxy.actions.auth.{ AuthoriseAction, AuthoriseActionImpl }
 import uk.gov.hmrc.timetopayproxy.config.FeatureSwitch
+import uk.gov.hmrc.timetopayproxy.connectors.TtpFromCdcsConnector
 import uk.gov.hmrc.timetopayproxy.models._
 import uk.gov.hmrc.timetopayproxy.models.affordablequotes._
 import uk.gov.hmrc.timetopayproxy.models.error.TtppEnvelope.TtppEnvelope
@@ -54,9 +55,10 @@ class TimeToPayProxyControllerSpec extends AnyWordSpec with MockFactory {
 
   private val ttpQuoteService = mock[TTPQuoteService]
   private val ttpeService = mock[TTPEService]
+  private val ttpFromCdcsConnector = mock[TtpFromCdcsConnector]
   private val fs: FeatureSwitch = mock[FeatureSwitch]
   private val controller =
-    new TimeToPayProxyController(authoriseAction, cc, ttpQuoteService, ttpeService, fs)
+    new TimeToPayProxyController(authoriseAction, cc, ttpQuoteService, ttpFromCdcsConnector, ttpeService, fs)
 
   private val generateQuoteRequest = GenerateQuoteRequest(
     CustomerReference("customerReference"),
@@ -1171,5 +1173,9 @@ class TimeToPayProxyControllerSpec extends AnyWordSpec with MockFactory {
         )
       }
     }
+  }
+
+  "POST /individuals/time-to-pay-proxy/cancel" should {
+    // TODO DTD-2858: Implement missing tests for .cancelTtp.
   }
 }
