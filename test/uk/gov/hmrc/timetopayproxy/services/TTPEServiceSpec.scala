@@ -25,8 +25,8 @@ import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.timetopayproxy.connectors.TtpeConnector
 import uk.gov.hmrc.timetopayproxy.models.error.TtppEnvelope.TtppEnvelope
 import uk.gov.hmrc.timetopayproxy.models.error.{ ConnectorError, InternalTtppError, TtppEnvelope }
-import uk.gov.hmrc.timetopayproxy.models.saopled.OpLedRegimeType
 import uk.gov.hmrc.timetopayproxy.models.saopled.chargeInfoApi._
+import uk.gov.hmrc.timetopayproxy.models.saopled.common.OpLedRegimeType
 import uk.gov.hmrc.timetopayproxy.models.{ IdType, IdValue, Identification }
 
 import java.time.{ LocalDate, LocalDateTime }

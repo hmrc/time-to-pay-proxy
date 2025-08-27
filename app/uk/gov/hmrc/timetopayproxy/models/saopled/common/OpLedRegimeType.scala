@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.timetopayproxy.models.saopled
+package uk.gov.hmrc.timetopayproxy.models.saopled.common
 
 import enumeratum.{ Enum, EnumEntry, PlayJsonEnum }
 

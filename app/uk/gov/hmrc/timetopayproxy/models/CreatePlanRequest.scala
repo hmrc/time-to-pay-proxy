@@ -17,7 +17,7 @@
 package uk.gov.hmrc.timetopayproxy.models
 
 import play.api.libs.json.{ Format, Json, OFormat }
-import uk.gov.hmrc.timetopayproxy.models.saopled.OpLedRegimeType
+import uk.gov.hmrc.timetopayproxy.models.saopled.common.OpLedRegimeType
 
 import java.time.LocalDate
 

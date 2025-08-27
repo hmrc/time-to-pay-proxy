@@ -19,7 +19,7 @@ package uk.gov.hmrc.timetopayproxy.models.saopled.chargeInfoApi
 import cats.data.NonEmptyList
 import play.api.libs.json.{ Format, Json, OFormat }
 import uk.gov.hmrc.timetopayproxy.models.Identification
-import uk.gov.hmrc.timetopayproxy.models.saopled.OpLedRegimeType
+import uk.gov.hmrc.timetopayproxy.models.saopled.common.OpLedRegimeType
 import uk.gov.hmrc.timetopayproxy.utils.json.CatsNonEmptyListJson
 
 final case class ChargeInfoRequest(

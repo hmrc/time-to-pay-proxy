@@ -20,7 +20,7 @@ import cats.data.NonEmptyList
 import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.should.Matchers._
 import play.api.libs.json.{ JsSuccess, JsValue, Json, Reads, Writes }
-import uk.gov.hmrc.timetopayproxy.models.saopled.OpLedRegimeType
+import uk.gov.hmrc.timetopayproxy.models.saopled.common.OpLedRegimeType
 import uk.gov.hmrc.timetopayproxy.models.{ IdType, IdValue, Identification }
 import uk.gov.hmrc.timetopayproxy.testutils.JsonAssertionOps._
 import uk.gov.hmrc.timetopayproxy.testutils.schematestutils.Validators
