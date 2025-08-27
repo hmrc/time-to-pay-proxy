@@ -23,8 +23,8 @@ import uk.gov.hmrc.http.client.HttpClientV2
 import uk.gov.hmrc.http.{ HeaderCarrier, StringContextOps }
 import uk.gov.hmrc.timetopayproxy.config.AppConfig
 import uk.gov.hmrc.timetopayproxy.models.TimeToPayEligibilityError
+import uk.gov.hmrc.timetopayproxy.models.error.InternalTtppError
 import uk.gov.hmrc.timetopayproxy.models.error.TtppEnvelope.TtppEnvelope
-import uk.gov.hmrc.timetopayproxy.models.error.TtppError
 import uk.gov.hmrc.timetopayproxy.models.saopled.chargeInfoApi.{ ChargeInfoRequest, ChargeInfoResponse }
 
 import java.util.UUID
@@ -63,7 +63,7 @@ class DefaultTtpeConnector @Inject() (appConfig: AppConfig, httpClient: HttpClie
         .post(url)
         .withBody(Json.toJson(chargeInfoRequest))
         .setHeader(headers(getOrGenerateCorrelationId): _*)
-        .execute[Either[TtppError, ChargeInfoResponse]]
+        .execute[Either[InternalTtppError, ChargeInfoResponse]]
     )
   }
 }

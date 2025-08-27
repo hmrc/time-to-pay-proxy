@@ -24,7 +24,7 @@ import play.api.test.Helpers.{ await, defaultAwaitTimeout }
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.timetopayproxy.connectors.TtpeConnector
 import uk.gov.hmrc.timetopayproxy.models.error.TtppEnvelope.TtppEnvelope
-import uk.gov.hmrc.timetopayproxy.models.error.{ ConnectorError, TtppEnvelope, TtppError }
+import uk.gov.hmrc.timetopayproxy.models.error.{ ConnectorError, InternalTtppError, TtppEnvelope }
 import uk.gov.hmrc.timetopayproxy.models.saopled.OpLedRegimeType
 import uk.gov.hmrc.timetopayproxy.models.saopled.chargeInfoApi._
 import uk.gov.hmrc.timetopayproxy.models.{ IdType, IdValue, Identification }
@@ -123,7 +123,7 @@ class TTPEServiceSpec extends AnyFreeSpec {
       val ttpeService = new DefaultTTPEService(connectorStub)
 
       await(ttpeService.checkChargeInfo(chargeInfoRequest).value) shouldBe chargeInfoResponse
-        .asRight[TtppError]
+        .asRight[InternalTtppError]
     }
 
     "returns an error from the connector" in {
@@ -142,7 +142,7 @@ class TTPEServiceSpec extends AnyFreeSpec {
 }
 
 class TtpeConnectorStub(
-  chargeInfoResponse: Either[TtppError, ChargeInfoResponse]
+  chargeInfoResponse: Either[InternalTtppError, ChargeInfoResponse]
 ) extends TtpeConnector {
 
   override def checkChargeInfo(

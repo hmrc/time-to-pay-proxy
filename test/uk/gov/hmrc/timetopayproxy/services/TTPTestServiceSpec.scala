@@ -21,7 +21,7 @@ import play.api.libs.json.Json
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.timetopayproxy.connectors.TtpTestConnector
 import uk.gov.hmrc.timetopayproxy.models.RequestDetails
-import uk.gov.hmrc.timetopayproxy.models.error.{ ConnectorError, TtppEnvelope, TtppError }
+import uk.gov.hmrc.timetopayproxy.models.error.{ ConnectorError, InternalTtppError, TtppEnvelope }
 import uk.gov.hmrc.timetopayproxy.support.UnitSpec
 
 import scala.concurrent.ExecutionContext
@@ -50,7 +50,7 @@ class TTPTestServiceSpec extends UnitSpec {
           .returning(TtppEnvelope(requestDetails))
 
         val testService = new DefaultTTPTestService(connector)
-        await(testService.retrieveRequestDetails().value) shouldBe requestDetails.asRight[TtppError]
+        await(testService.retrieveRequestDetails().value) shouldBe requestDetails.asRight[InternalTtppError]
       }
     }
 
@@ -94,7 +94,7 @@ class TTPTestServiceSpec extends UnitSpec {
           .returning(TtppEnvelope(()))
 
         val testService = new DefaultTTPTestService(connector)
-        await(testService.saveResponseDetails(details).value) shouldBe ().asRight[TtppError]
+        await(testService.saveResponseDetails(details).value) shouldBe ().asRight[InternalTtppError]
       }
     }
 
@@ -139,7 +139,7 @@ class TTPTestServiceSpec extends UnitSpec {
           .returning(TtppEnvelope(requestDetails))
 
         val testService = new DefaultTTPTestService(connector)
-        await(testService.getErrors().value) shouldBe requestDetails.asRight[TtppError]
+        await(testService.getErrors().value) shouldBe requestDetails.asRight[InternalTtppError]
       }
     }
 
@@ -183,7 +183,7 @@ class TTPTestServiceSpec extends UnitSpec {
           .returning(TtppEnvelope(()))
 
         val testService = new DefaultTTPTestService(connector)
-        await(testService.saveError(details).value) shouldBe ().asRight[TtppError]
+        await(testService.saveError(details).value) shouldBe ().asRight[InternalTtppError]
       }
     }
 
@@ -229,7 +229,7 @@ class TTPTestServiceSpec extends UnitSpec {
           .returning(TtppEnvelope(()))
 
         val testService = new DefaultTTPTestService(connector)
-        await(testService.deleteRequestDetails(id).value) shouldBe ().asRight[TtppError]
+        await(testService.deleteRequestDetails(id).value) shouldBe ().asRight[InternalTtppError]
       }
     }
 
