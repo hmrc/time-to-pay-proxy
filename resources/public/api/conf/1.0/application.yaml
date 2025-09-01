@@ -47,7 +47,7 @@ info:
       | 1.0.13 | 08-07-2025 | Alex Olkhovskiy | make indentations in charge-info request non-empty, remove altFormat and country|
       | 1.0.14 | 14-08-2025 | Alex Olkhovskiy | refactor the spec with linter|
       | 1.0.14-proposedA| 19-08-2024 | Alex Olkhovskiy | Added new cancel endpoint    |
-      | 1.0.14-proposedA.1| 01-09-2025 | Claude Code | Enhanced cancel endpoint response behavior documentation and examples |
+      | 1.0.14-proposedA.1| 01-09-2025 | Alex Olkhovskiy | Enhanced cancel endpoint response behavior documentation and examples |
   contact: {}
   version: 1.0.14-proposedA.1
 servers:
@@ -749,6 +749,7 @@ paths:
       tags:
         - individuals
       summary: Notify cancellation of TTP Plan to downstream HoDs
+      operationId: NotifyCancellationOfTTPPlan
       description: |
         An API called by CDCS to trigger the TTP service to notify HoDs (via different APIs) when a TTP set up either by an operator or the self serve journey has been cancelled.
 
@@ -826,11 +827,11 @@ paths:
                       - name: CESA
                         statusCode: '500'
                         processingDateTime: '2025-05-01T14:30:00Z'
-                        errorResponse: "Internal server error in CESA"
+                        errorResponse: Internal server error in CESA
                       - name: ETMP
                         statusCode: '400'
                         processingDateTime: '2025-05-01T14:31:00Z'
-                        errorResponse: "Invalid request payload"
+                        errorResponse: Invalid request payload
                     processingDateTime: '2025-10-15T10:31:00Z'
                 mixedHoDsResponse:
                   summary: Mixed success/failure from HoDs but all responses parsed (HTTP 200)
@@ -842,7 +843,7 @@ paths:
                       - name: ETMP
                         statusCode: '500'
                         processingDateTime: '2025-05-01T14:31:00Z'
-                        errorResponse: "Error processing cancellation"
+                        errorResponse: Error processing cancellation
                     processingDateTime: '2025-10-15T10:31:00Z'
         '400':
           description: |
@@ -856,8 +857,8 @@ paths:
                 badRequestExample:
                   summary: Invalid cancellation request - client error
                   value:
-                    code: 400
-                    details: 'Invalid request payload: missing identifications or cancellationDate'
+                    statusCode: 400
+                    errorMessage: 'Invalid request payload: missing identifications or cancellationDate'
         '500':
           description: |
             Internal TTP error or failure to parse responses from downstream HoDs.
@@ -866,13 +867,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/CancelResponse'
+                $ref: '#/components/schemas/CancelErrorResponse'
               examples:
                 internalParsingError:
                   summary: Internal TTP error - cannot parse HoD responses (HTTP 500)
                   value:
                     internalErrors:
-                      - message: "Could not parse response from calling CESA"
+                      - message: Could not parse response from calling CESA
                     processingDateTime: '2025-10-15T10:31:00Z'
                 mixedSuccessWithInternalError:
                   summary: Some HoDs successful, others unparseable (HTTP 500)
@@ -882,7 +883,7 @@ paths:
                         statusCode: '200'
                         processingDateTime: '2025-10-15T10:30:00Z'
                     internalErrors:
-                      - message: "Could not parse response from calling ETMP"
+                      - message: Could not parse response from calling ETMP
                     processingDateTime: '2025-10-15T10:31:00Z'
 components:
   securitySchemes:
@@ -907,6 +908,7 @@ components:
           tokenUrl: https://api.service.hmrc.gov.uk/oauth/token
           scopes:
             read:time-to-pay-proxy: read ttp data
+            write:time-to-pay-proxy: write ttp data
   schemas:
     ChannelIdentifier:
       title: ChannelIdentifier
@@ -2438,8 +2440,24 @@ components:
           description: |
             Error message returned by the downstream API when the call failed.
             This field is present when the downstream API returns an error status code but TTP can parse the response.
-          example: "Invalid cancellationDate provided for cancellation"
+          example: Invalid cancellationDate provided for cancellation
     CancelResponse:
+      type: object
+      required:
+        - apisCalled
+        - processingDateTime
+      properties:
+        apisCalled:
+          type: array
+          items:
+            $ref: '#/components/schemas/CancelAPIStatus'
+          description: Status of calls to each HoD API
+        processingDateTime:
+          type: string
+          format: date-time
+          description: Timestamp for processing the cancel request
+          example: '2025-10-15T10:31:00Z'
+    CancelErrorResponse:
       type: object
       required:
         - processingDateTime
@@ -2459,7 +2477,7 @@ components:
               message:
                 type: string
                 description: Error message describing the internal failure
-                example: "Could not parse response from calling CESA"
+                example: Could not parse response from calling CESA
           description: Internal errors that occurred during processing (present when TTP cannot parse HoD responses)
         processingDateTime:
           type: string

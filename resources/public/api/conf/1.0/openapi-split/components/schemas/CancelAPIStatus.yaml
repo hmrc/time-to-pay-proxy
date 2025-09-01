@@ -19,5 +19,7 @@ properties:
     example: '2025-10-15T10:30:00Z'
   errorResponse:
     type: string
-    description: Error message if downstream API call failed
-    example: Invalid cancellationDate
+    description: |
+      Error message returned by the downstream API when the call failed.
+      This field is present when the downstream API returns an error status code but TTP can parse the response.
+    example: "Invalid cancellationDate provided for cancellation"
