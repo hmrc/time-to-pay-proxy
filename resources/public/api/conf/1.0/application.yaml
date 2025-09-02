@@ -48,8 +48,9 @@ info:
       | 1.0.14 | 14-08-2025 | Alex Olkhovskiy | refactor the spec with linter|
       | 1.0.14-proposedA| 19-08-2024 | Alex Olkhovskiy | Added new cancel endpoint    |
       | 1.0.14-proposedA.1| 01-09-2025 | Alex Olkhovskiy | Enhanced cancel endpoint response behavior documentation and examples |
+      | 1.0.14-proposedA.2| 02-09-2025 | Alex Olkhovskiy | Update version to 1.0.14-proposedA.2 |
   contact: {}
-  version: 1.0.14-proposedA.1
+  version: 1.0.14-proposedA.2
 servers:
   - url: https://api.service.hmrc.gov.uk
     variables: {}
