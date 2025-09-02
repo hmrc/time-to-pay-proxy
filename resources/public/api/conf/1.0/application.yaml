@@ -47,8 +47,10 @@ info:
       | 1.0.13 | 08-07-2025 | Alex Olkhovskiy | make indentations in charge-info request non-empty, remove altFormat and country|
       | 1.0.14 | 14-08-2025 | Alex Olkhovskiy | refactor the spec with linter|
       | 1.0.14-proposedC | 19-08-2025 | Alex Olkhovskiy | Added new FullAmend endpoint|
+      | 1.0.14-proposedC.1| 01-09-2025 | Alex Olkhovskiy | Enhanced full-amend endpoint response behavior documentation and examples |
+      | 1.0.14-proposedC.2| 02-09-2025 | Alex Olkhovskiy | Update version to 1.0.14-proposedC.2 |
   contact: {}
-  version: 1.0.14-proposedC
+  version: 1.0.14-proposedC.2
 servers:
   - url: https://api.service.hmrc.gov.uk
     variables: {}
@@ -748,6 +750,14 @@ paths:
       tags:
         - individuals
       summary: Full amend TTP plan and inform HoDs
+      operationId: FullAmendTTPPlanAndInformHoDs
+      description: |
+        An API called by CDCS to perform a full amendment of a TTP plan and inform HoDs (CESA + ETMP) of the changes.
+
+        Response Behavior:
+        - Returns HTTP 200 when all downstream HoDs are called and responses can be parsed successfully (regardless of individual HoD response status codes)
+        - Returns HTTP 500 only for internal TTP errors or when responses from downstream APIs cannot be parsed
+        - The response includes details of all HoDs called with their status codes to help operators determine any required manual steps
       parameters:
         - name: correlationId
           in: header
@@ -810,14 +820,16 @@ paths:
                   transitioned: true
       responses:
         '200':
-          description: Full amend API calls HoD and gets successful responses
+          description: |
+            Full amend API operation successful with results of calls to CESA and ETMP. All downstream HoDs were called and responses were parsed successfully.
+            Individual HoD APIs may have returned success or error status codes - this is reported in the apisCalled array.
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/FullAmendResponse'
               examples:
-                successExample:
-                  summary: Success example with both APIs called successfully
+                allHoDsSuccessful:
+                  summary: All downstream HoDs respond successfully (HTTP 200)
                   value:
                     apisCalled:
                       - processingDateTime: '2025-05-01T14:30:00Z'
@@ -827,37 +839,71 @@ paths:
                         name: ETMP
                         statusCode: '200'
                     processingDateTime: '2025-05-01T14:32:00Z'
+                allHoDsUnsuccessful:
+                  summary: All downstream HoDs respond unsuccessfully but responses parsed (HTTP 200)
+                  value:
+                    apisCalled:
+                      - processingDateTime: '2025-05-01T14:30:00Z'
+                        name: CESA
+                        statusCode: '500'
+                        errorResponse: Internal server error in CESA
+                      - processingDateTime: '2025-05-01T14:31:00Z'
+                        name: ETMP
+                        statusCode: '400'
+                        errorResponse: Invalid amendment payload
+                    processingDateTime: '2025-05-01T14:32:00Z'
+                mixedHoDsResponse:
+                  summary: Mixed success/failure from HoDs but all responses parsed (HTTP 200)
+                  value:
+                    apisCalled:
+                      - processingDateTime: '2025-05-01T14:30:00Z'
+                        name: CESA
+                        statusCode: '200'
+                      - processingDateTime: '2025-05-01T14:31:00Z'
+                        name: ETMP
+                        statusCode: '500'
+                        errorResponse: Error processing full amend
+                    processingDateTime: '2025-05-01T14:32:00Z'
         '400':
-          description: Full amend API is sent incorrect data and the HoDs API are not called
+          description: |
+            Bad request due to invalid or missing data in the request payload.
+            This indicates client-side errors that prevent TTP from processing the full amend request.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                badRequestExample:
+                  summary: Invalid request example
+                  value:
+                    statusCode: 400
+                    errorMessage: 'Invalid request payload: missing identifications'
+        '500':
+          description: |
+            Internal TTP error or failure to parse responses from downstream HoDs.
+            This status is returned only when TTP cannot complete its processing or cannot parse HoD responses.
+            When individual HoD APIs return errors but responses can be parsed, a 200 status is returned instead.
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/FullAmendErrorResponse'
               examples:
-                badRequestExample:
-                  summary: Invalid request example
+                internalParsingError:
+                  summary: Internal TTP error - cannot parse HoD responses (HTTP 500)
                   value:
-                    code: 400
-                    details: 'Invalid request payload: missing identifications'
-        '500':
-          description: Full amend API is called, data is correct, we call HoD, 1 or more of the APIs is not successful
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/FullAmendResponse'
-              examples:
-                partialFailureExample:
-                  summary: Partial failure example with error shown
+                    internalErrors:
+                      - message: Could not parse response from calling CESA
+                    processingDateTime: '2025-10-15T10:31:00Z'
+                mixedSuccessWithInternalError:
+                  summary: Some HoDs successful, others unparseable (HTTP 500)
                   value:
                     apisCalled:
-                      - processingDateTime: '2025-05-01T14:30:00Z'
-                        name: ETMP
-                        statusCode: '400'
-                        errorResponse: Invalid request
-                      - processingDateTime: '2025-05-01T14:31:00Z'
+                      - processingDateTime: '2025-10-15T10:30:00Z'
                         name: CESA
                         statusCode: '200'
-                    processingDateTime: '2025-05-01T14:32:00Z'
+                    internalErrors:
+                      - message: Could not parse response from calling ETMP
+                    processingDateTime: '2025-10-15T10:31:00Z'
 components:
   securitySchemes:
     userRestricted:
@@ -2408,8 +2454,10 @@ components:
           example: '400'
         errorResponse:
           type: string
-          description: Error message if downstream API call failed
-          example: Invalid request
+          description: |
+            Error message returned by the downstream API when the call failed.
+            This field is present when the downstream API returns an error status code but TTP can parse the response.
+          example: Invalid amendment request provided for full-amend
     FullAmendResponse:
       type: object
       required:
@@ -2429,12 +2477,27 @@ components:
     FullAmendErrorResponse:
       type: object
       required:
-        - code
-        - details
+        - processingDateTime
       properties:
-        code:
-          type: integer
-          example: 400
-        details:
+        apisCalled:
+          type: array
+          items:
+            $ref: '#/components/schemas/FullAmendAPIStatus'
+          description: Status of calls to each HoD API (present when HoD APIs were called successfully)
+        internalErrors:
+          type: array
+          items:
+            type: object
+            required:
+              - message
+            properties:
+              message:
+                type: string
+                description: Error message describing the internal failure
+                example: Could not parse response from calling CESA
+          description: Internal errors that occurred during processing (present when TTP cannot parse HoD responses)
+        processingDateTime:
           type: string
-          example: 'Invalid request payload: missing identifications'
+          format: date-time
+          description: Timestamp for processing the full-amend request
+          example: '2025-10-15T10:31:00Z'

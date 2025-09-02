@@ -77,8 +77,10 @@ info:
       | 1.0.13 | 08-07-2025 | Alex Olkhovskiy | make indentations in charge-info request non-empty, remove altFormat and country|
       | 1.0.14 | 14-08-2025 | Alex Olkhovskiy | refactor the spec with linter|
       | 1.0.14-proposedC | 19-08-2025 | Alex Olkhovskiy | Added new FullAmend endpoint|
+      | 1.0.14-proposedC.1| 01-09-2025 | Alex Olkhovskiy | Enhanced full-amend endpoint response behavior documentation and examples |
+      | 1.0.14-proposedC.2| 02-09-2025 | Alex Olkhovskiy | Update version to 1.0.14-proposedC.2 |
   contact: {}
-  version: 1.0.14-proposedC
+  version: 1.0.14-proposedC.2
 servers:
   - url: https://api.service.hmrc.gov.uk
     variables: {}
