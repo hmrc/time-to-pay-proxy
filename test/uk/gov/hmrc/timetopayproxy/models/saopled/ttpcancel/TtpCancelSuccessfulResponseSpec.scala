@@ -26,11 +26,11 @@ import uk.gov.hmrc.timetopayproxy.testutils.schematestutils.Validators
 
 import java.time.Instant
 
-final class TtpCancelInformativeResponseSpec extends AnyFreeSpec {
+final class TtpCancelSuccessfulResponseSpec extends AnyFreeSpec {
 
   object TestData {
     object WithOnlySomes {
-      def obj: TtpCancelInformativeResponse = TtpCancelInformativeResponse(
+      def obj: TtpCancelSuccessfulResponse = TtpCancelSuccessfulResponse(
         apisCalled = List(
           ApiStatus(
             name = ApiName("api name"),
@@ -59,7 +59,7 @@ final class TtpCancelInformativeResponseSpec extends AnyFreeSpec {
     }
 
     object With0SomeOnEachPath {
-      def obj: TtpCancelInformativeResponse = TtpCancelInformativeResponse(
+      def obj: TtpCancelSuccessfulResponse = TtpCancelSuccessfulResponse(
         apisCalled = List(
           ApiStatus(
             name = ApiName("api name"),
@@ -87,21 +87,21 @@ final class TtpCancelInformativeResponseSpec extends AnyFreeSpec {
     }
   }
 
-  "TtpCancelInformativeResponse" - {
+  "TtpCancelSuccessfulResponse" - {
 
     "implicit JSON writer (data going to our clients)" - {
-      def writerToClients: Writes[TtpCancelInformativeResponse] = implicitly[Writes[TtpCancelInformativeResponse]]
+      def writerToClients: Writes[TtpCancelSuccessfulResponse] = implicitly[Writes[TtpCancelSuccessfulResponse]]
 
       "when all the optional fields are fully populated" - {
         def json: JsValue = TestData.WithOnlySomes.json
-        def obj: TtpCancelInformativeResponse = TestData.WithOnlySomes.obj
+        def obj: TtpCancelSuccessfulResponse = TestData.WithOnlySomes.obj
 
         "writes the correct JSON" in {
           writerToClients.writes(obj) shouldBeEquivalentTo json
         }
 
         "writes JSON compatible with our schema" in {
-          val schema = Validators.TimeToPayProxy.TtpCancel.openApiInformativeResponseSchema
+          val schema = Validators.TimeToPayProxy.TtpCancel.openApiResponseSuccessfulSchema
           val writtenJson: JsValue = writerToClients.writes(obj)
 
           schema.validateAndGetErrors(writtenJson) shouldBe Nil
@@ -110,14 +110,14 @@ final class TtpCancelInformativeResponseSpec extends AnyFreeSpec {
 
       "when none of the optional fields are populated" - {
         def json: JsValue = TestData.With0SomeOnEachPath.json
-        def obj: TtpCancelInformativeResponse = TestData.With0SomeOnEachPath.obj
+        def obj: TtpCancelSuccessfulResponse = TestData.With0SomeOnEachPath.obj
 
         "writes the correct JSON" in {
           writerToClients.writes(obj) shouldBeEquivalentTo json
         }
 
         "writes JSON compatible with our schema" in {
-          val schema = Validators.TimeToPayProxy.TtpCancel.openApiInformativeResponseSchema
+          val schema = Validators.TimeToPayProxy.TtpCancel.openApiResponseSuccessfulSchema
           val writtenJson: JsValue = writerToClients.writes(obj)
 
           schema.validateAndGetErrors(writtenJson) shouldBe Nil
@@ -126,11 +126,11 @@ final class TtpCancelInformativeResponseSpec extends AnyFreeSpec {
     }
 
     "implicit JSON reader (data coming from time-to-pay)" - {
-      def readerFromTtp: Reads[TtpCancelInformativeResponse] = implicitly[Reads[TtpCancelInformativeResponse]]
+      def readerFromTtp: Reads[TtpCancelSuccessfulResponse] = implicitly[Reads[TtpCancelSuccessfulResponse]]
 
       "when all the optional fields are fully populated" - {
         def json: JsValue = TestData.WithOnlySomes.json
-        def obj: TtpCancelInformativeResponse = TestData.WithOnlySomes.obj
+        def obj: TtpCancelSuccessfulResponse = TestData.WithOnlySomes.obj
 
         "reads the JSON correctly" in {
           readerFromTtp.reads(json) shouldBe JsSuccess(obj)
@@ -145,7 +145,7 @@ final class TtpCancelInformativeResponseSpec extends AnyFreeSpec {
 
       "when none of the optional fields are populated" - {
         def json: JsValue = TestData.With0SomeOnEachPath.json
-        def obj: TtpCancelInformativeResponse = TestData.With0SomeOnEachPath.obj
+        def obj: TtpCancelSuccessfulResponse = TestData.With0SomeOnEachPath.obj
 
         "reads the JSON correctly" in {
           readerFromTtp.reads(json) shouldBe JsSuccess(obj)

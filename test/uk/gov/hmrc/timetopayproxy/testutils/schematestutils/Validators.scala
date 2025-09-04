@@ -80,7 +80,7 @@ object Validators {
         )
 
       /** This is used for both 200 and 500 statuses. */
-      def openApiInformativeResponseSchema: OpenApi3DerivedSchema =
+      def openApiResponseSuccessfulSchema: OpenApi3DerivedSchema =
         new OpenApi3DerivedSchema(
           path,
           defaultJsonSubschemaName = "CancelResponse",
@@ -88,7 +88,7 @@ object Validators {
           restrictAdditionalProperties = true
         )
 
-      def openApiResponseGeneralFailureSchema: OpenApi3DerivedSchema =
+      def openApiResponseInformativeErrorSchema: OpenApi3DerivedSchema =
         new OpenApi3DerivedSchema(
           path,
           defaultJsonSubschemaName = "CancelErrorResponse",
@@ -166,6 +166,7 @@ object Validators {
         )
     }
 
+    // TODO: Fix the behaviour of time-to-pay and update the schema.
     object TtpCancel {
       // Downloaded from:
       //   https://github.com/hmrc/time-to-pay/blob/7d0903506524411871930c3a3dc81899b58c7985/resources/public/api/conf/1.0/CancelAPI-v0.0.1.yaml

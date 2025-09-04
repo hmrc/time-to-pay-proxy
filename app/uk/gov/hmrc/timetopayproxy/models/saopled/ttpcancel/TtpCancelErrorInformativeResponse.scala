@@ -21,11 +21,9 @@ import uk.gov.hmrc.timetopayproxy.models.error.{ InternalTtppError, TtppWriteabl
 import uk.gov.hmrc.timetopayproxy.models.saopled.common.ProcessingDateTimeInstant
 import uk.gov.hmrc.timetopayproxy.models.saopled.common.apistatus.ApiStatus
 
-/** This is intended for both `200 OK` and `500 Internal Server Error`.
-  * This is also an incoming error from the `time-to-pay` service.
-  */
-final case class TtpCancelInformativeResponse(
-  apisCalled: List[ApiStatus],
+final case class TtpCancelErrorInformativeResponse(
+  apisCalled: Option[List[ApiStatus]],
+  internalErrors: Option[List[TtpCancelInternalError]],
   processingDateTime: ProcessingDateTimeInstant
 ) extends InternalTtppError with TtppWriteableError {
 
@@ -33,6 +31,6 @@ final case class TtpCancelInformativeResponse(
   def toJson: JsObject = Json.toJsObject(this)
 }
 
-object TtpCancelInformativeResponse {
-  implicit val format: OFormat[TtpCancelInformativeResponse] = Json.format[TtpCancelInformativeResponse]
+object TtpCancelErrorInformativeResponse {
+  implicit val format: OFormat[TtpCancelErrorInformativeResponse] = Json.format[TtpCancelErrorInformativeResponse]
 }

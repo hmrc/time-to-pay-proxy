@@ -27,7 +27,7 @@ import uk.gov.hmrc.timetopayproxy.logging.RequestAwareLogger
 import uk.gov.hmrc.timetopayproxy.models.TimeToPayError
 import uk.gov.hmrc.timetopayproxy.models.error.InternalTtppError
 import uk.gov.hmrc.timetopayproxy.models.error.TtppEnvelope.TtppEnvelope
-import uk.gov.hmrc.timetopayproxy.models.saopled.ttpcancel.{ TtpCancelInformativeResponse, TtpCancelRequest }
+import uk.gov.hmrc.timetopayproxy.models.saopled.ttpcancel.{ TtpCancelErrorInformativeResponse, TtpCancelRequest, TtpCancelSuccessfulResponse }
 
 import java.util.UUID
 import javax.inject.{ Inject, Singleton }
@@ -37,7 +37,7 @@ import scala.concurrent.ExecutionContext
 trait TtpFromCdcsConnector {
   def cancelTtp(
     ttppRequest: TtpCancelRequest
-  )(implicit ec: ExecutionContext, hc: HeaderCarrier): TtppEnvelope[TtpCancelInformativeResponse]
+  )(implicit ec: ExecutionContext, hc: HeaderCarrier): TtppEnvelope[TtpCancelSuccessfulResponse]
 }
 
 @Singleton
@@ -48,11 +48,11 @@ class DefaultTtpFromCdcsConnector @Inject() (appConfig: AppConfig, httpClient: H
 
   def cancelTtp(
     ttppRequest: TtpCancelRequest
-  )(implicit ec: ExecutionContext, hc: HeaderCarrier): TtppEnvelope[TtpCancelInformativeResponse] = {
-    implicit def httpReads: HttpReads[Either[InternalTtppError, TtpCancelInformativeResponse]] =
-      HttpReadsWithLoggingBuilder[InternalTtppError, TtpCancelInformativeResponse](logger)
-        .orSuccess[TtpCancelInformativeResponse](200)
-        .orError[TtpCancelInformativeResponse](500)
+  )(implicit ec: ExecutionContext, hc: HeaderCarrier): TtppEnvelope[TtpCancelSuccessfulResponse] = {
+    implicit def httpReads: HttpReads[Either[InternalTtppError, TtpCancelSuccessfulResponse]] =
+      HttpReadsWithLoggingBuilder[InternalTtppError, TtpCancelSuccessfulResponse](logger)
+        .orSuccess[TtpCancelSuccessfulResponse](200)
+        .orError[TtpCancelErrorInformativeResponse](500)
         .orErrorTransformed[TimeToPayError](400, _.toConnectorError(400))
         .httpReads
 
@@ -65,7 +65,7 @@ class DefaultTtpFromCdcsConnector @Inject() (appConfig: AppConfig, httpClient: H
         .post(url)
         .withBody(Json.toJson(ttppRequest))
         .setHeader(requestHeaders: _*)
-        .execute[Either[InternalTtppError, TtpCancelInformativeResponse]]
+        .execute[Either[InternalTtppError, TtpCancelSuccessfulResponse]]
     )
   }
 
