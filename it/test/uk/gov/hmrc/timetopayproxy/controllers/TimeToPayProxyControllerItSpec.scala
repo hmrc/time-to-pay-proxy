@@ -35,6 +35,8 @@ class TimeToPayProxyControllerItSpec extends IntegrationBaseSpec {
 
   "TimeToPayProxyController" - {
     ".getAffordableQuotes" - {
+      val getAffordableQuotesPath: String = "/self-serve/affordable-quotes" // Extracted to prevent copy-paste errors.
+
       "should return a 200 statusCode" - {
         "when given a valid json payload" - {
           "when TimeToPay returns a valid response" in new TimeToPayProxyControllerTestBase {
@@ -45,7 +47,7 @@ class TimeToPayProxyControllerItSpec extends IntegrationBaseSpec {
               responseBody = Json.toJson(ttpResponse).toString()
             )
 
-            val requestForAffordableQuotes: WSRequest = buildRequest("/self-serve/affordable-quotes")
+            val requestForAffordableQuotes: WSRequest = buildRequest(getAffordableQuotesPath)
 
             val response: WSResponse = await(
               requestForAffordableQuotes.post(Json.toJson(affordableQuoteRequest))
@@ -70,7 +72,7 @@ class TimeToPayProxyControllerItSpec extends IntegrationBaseSpec {
                 responseBody = Json.toJson(timeToPayError).toString()
               )
 
-              val requestForAffordableQuotes: WSRequest = buildRequest("/self-serve/affordable-quotes")
+              val requestForAffordableQuotes: WSRequest = buildRequest(getAffordableQuotesPath)
 
               val response: WSResponse = await(
                 requestForAffordableQuotes.post(Json.toJson(affordableQuoteRequest))
@@ -94,7 +96,7 @@ class TimeToPayProxyControllerItSpec extends IntegrationBaseSpec {
                 responseBody = Json.toJson(timeToPayError).toString()
               )
 
-              val requestForAffordableQuotes: WSRequest = buildRequest("/self-serve/affordable-quotes")
+              val requestForAffordableQuotes: WSRequest = buildRequest(getAffordableQuotesPath)
 
               val response: WSResponse = await(
                 requestForAffordableQuotes.post(Json.toJson(affordableQuoteRequest))
@@ -124,7 +126,7 @@ class TimeToPayProxyControllerItSpec extends IntegrationBaseSpec {
                 responseBody = Json.toJson(timeToPayError).toString()
               )
 
-              val requestForAffordableQuotes: WSRequest = buildRequest("/self-serve/affordable-quotes")
+              val requestForAffordableQuotes: WSRequest = buildRequest(getAffordableQuotesPath)
 
               val response: WSResponse = await(
                 requestForAffordableQuotes.post(Json.toJson(affordableQuoteRequest))
@@ -143,7 +145,7 @@ class TimeToPayProxyControllerItSpec extends IntegrationBaseSpec {
           "with an empty json object" in new TimeToPayProxyControllerTestBase {
             stubPostWithResponseBody(url = "/auth/authorise", status = 200, responseBody = "null")
 
-            val requestForAffordableQuotes: WSRequest = buildRequest("/self-serve/affordable-quotes")
+            val requestForAffordableQuotes: WSRequest = buildRequest(getAffordableQuotesPath)
 
             val response: WSResponse = await(
               requestForAffordableQuotes.post(JsObject.empty)
@@ -162,7 +164,7 @@ class TimeToPayProxyControllerItSpec extends IntegrationBaseSpec {
           "with mandatory fields missing" in new TimeToPayProxyControllerTestBase {
             stubPostWithResponseBody(url = "/auth/authorise", status = 200, responseBody = "null")
 
-            val requestForAffordableQuotes: WSRequest = buildRequest("/self-serve/affordable-quotes")
+            val requestForAffordableQuotes: WSRequest = buildRequest(getAffordableQuotesPath)
 
             val invalidRequestBody: JsValue =
               Json
@@ -213,7 +215,7 @@ class TimeToPayProxyControllerItSpec extends IntegrationBaseSpec {
           "with invalid types" in new TimeToPayProxyControllerTestBase {
             stubPostWithResponseBody(url = "/auth/authorise", status = 200, responseBody = "null")
 
-            val requestForAffordableQuotes: WSRequest = buildRequest("/self-serve/affordable-quotes")
+            val requestForAffordableQuotes: WSRequest = buildRequest(getAffordableQuotesPath)
 
             val invalidRequestBody: JsValue =
               Json
@@ -273,7 +275,7 @@ class TimeToPayProxyControllerItSpec extends IntegrationBaseSpec {
                 responseBody = JsNull.toString()
               )
 
-              val requestForAffordableQuotes: WSRequest = buildRequest("/self-serve/affordable-quotes")
+              val requestForAffordableQuotes: WSRequest = buildRequest(getAffordableQuotesPath)
 
               val response: WSResponse = await(
                 requestForAffordableQuotes.post(Json.toJson(affordableQuoteRequest))
@@ -291,6 +293,8 @@ class TimeToPayProxyControllerItSpec extends IntegrationBaseSpec {
     }
 
     ".checkChargeInfo" - {
+      val chargeInfoPath: String = "/charge-info" // Extracted to prevent copy-paste errors.
+
       "should return a 200 statusCode" - {
         "when given a valid json payload" - {
           "when TimeToPayEligibility returns a valid response" in new TimeToPayProxyControllerTestBase {
@@ -301,7 +305,7 @@ class TimeToPayProxyControllerItSpec extends IntegrationBaseSpec {
               responseBody = Json.toJson(ttpeResponse).toString()
             )
 
-            val requestForChargeInfo: WSRequest = buildRequest("/charge-info")
+            val requestForChargeInfo: WSRequest = buildRequest(chargeInfoPath)
 
             val response: WSResponse = await(
               requestForChargeInfo.post(Json.toJson(chargeInfoRequest))
@@ -326,7 +330,7 @@ class TimeToPayProxyControllerItSpec extends IntegrationBaseSpec {
               responseBody = Json.toJson(timeToPayEligibilityError).toString()
             )
 
-            val requestForChargeInfo: WSRequest = buildRequest("/charge-info")
+            val requestForChargeInfo: WSRequest = buildRequest(chargeInfoPath)
 
             val response: WSResponse = await(
               requestForChargeInfo.post(Json.toJson(chargeInfoRequest))
@@ -344,7 +348,7 @@ class TimeToPayProxyControllerItSpec extends IntegrationBaseSpec {
           "with an empty json object" in new TimeToPayProxyControllerTestBase {
             stubPostWithResponseBody(url = "/auth/authorise", status = 200, responseBody = "null")
 
-            val requestForChargeInfo: WSRequest = buildRequest("/charge-info")
+            val requestForChargeInfo: WSRequest = buildRequest(chargeInfoPath)
 
             val response: WSResponse = await(
               requestForChargeInfo.post(JsObject.empty)
@@ -364,7 +368,7 @@ class TimeToPayProxyControllerItSpec extends IntegrationBaseSpec {
             "when 'channelIdentifier' is missing" in new TimeToPayProxyControllerTestBase {
               stubPostWithResponseBody(url = "/auth/authorise", status = 200, responseBody = "null")
 
-              val requestForChargeInfo: WSRequest = buildRequest("/charge-info")
+              val requestForChargeInfo: WSRequest = buildRequest(chargeInfoPath)
 
               val invalidRequestBody: JsValue = Json.parse(
                 """{
@@ -400,7 +404,7 @@ class TimeToPayProxyControllerItSpec extends IntegrationBaseSpec {
             "when 'identifications' is missing" in new TimeToPayProxyControllerTestBase {
               stubPostWithResponseBody(url = "/auth/authorise", status = 200, responseBody = "null")
 
-              val requestForChargeInfo: WSRequest = buildRequest("/charge-info")
+              val requestForChargeInfo: WSRequest = buildRequest(chargeInfoPath)
 
               val invalidRequestBody: JsValue = Json.parse(
                 """{
@@ -427,7 +431,7 @@ class TimeToPayProxyControllerItSpec extends IntegrationBaseSpec {
             "when 'regimeType' is missing" in new TimeToPayProxyControllerTestBase {
               stubPostWithResponseBody(url = "/auth/authorise", status = 200, responseBody = "null")
 
-              val requestForChargeInfo: WSRequest = buildRequest("/charge-info")
+              val requestForChargeInfo: WSRequest = buildRequest(chargeInfoPath)
 
               val invalidRequestBody: JsValue = Json.parse(
                 """{
@@ -465,7 +469,7 @@ class TimeToPayProxyControllerItSpec extends IntegrationBaseSpec {
             "when 'channelIdentifier' is invalid" in new TimeToPayProxyControllerTestBase {
               stubPostWithResponseBody(url = "/auth/authorise", status = 200, responseBody = "null")
 
-              val requestForChargeInfo: WSRequest = buildRequest("/charge-info")
+              val requestForChargeInfo: WSRequest = buildRequest(chargeInfoPath)
 
               val invalidRequestBody: JsValue = Json.parse(
                 """{
@@ -502,7 +506,7 @@ class TimeToPayProxyControllerItSpec extends IntegrationBaseSpec {
             "when 'identifications' is invalid" in new TimeToPayProxyControllerTestBase {
               stubPostWithResponseBody(url = "/auth/authorise", status = 200, responseBody = "null")
 
-              val requestForChargeInfo: WSRequest = buildRequest("/charge-info")
+              val requestForChargeInfo: WSRequest = buildRequest(chargeInfoPath)
 
               val invalidRequestBody: JsValue = Json.parse(
                 """{
@@ -530,7 +534,7 @@ class TimeToPayProxyControllerItSpec extends IntegrationBaseSpec {
             "when 'regimeType' is invalid" in new TimeToPayProxyControllerTestBase {
               stubPostWithResponseBody(url = "/auth/authorise", status = 200, responseBody = "null")
 
-              val requestForChargeInfo: WSRequest = buildRequest("/charge-info")
+              val requestForChargeInfo: WSRequest = buildRequest(chargeInfoPath)
 
               val invalidRequestBody: JsValue = Json.parse(
                 """{
@@ -578,7 +582,7 @@ class TimeToPayProxyControllerItSpec extends IntegrationBaseSpec {
                 responseBody = JsNull.toString()
               )
 
-              val requestForChargeInfo: WSRequest = buildRequest("/charge-info")
+              val requestForChargeInfo: WSRequest = buildRequest(chargeInfoPath)
 
               val response: WSResponse = await(
                 requestForChargeInfo.post(Json.toJson(chargeInfoRequest))
