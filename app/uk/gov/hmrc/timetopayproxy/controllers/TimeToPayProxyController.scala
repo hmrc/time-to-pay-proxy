@@ -27,6 +27,7 @@ import uk.gov.hmrc.timetopayproxy.models.TtppErrorResponse._
 import uk.gov.hmrc.timetopayproxy.models._
 import uk.gov.hmrc.timetopayproxy.models.affordablequotes.AffordableQuotesRequest
 import uk.gov.hmrc.timetopayproxy.models.chargeInfoApi.ChargeInfoRequest
+import uk.gov.hmrc.timetopayproxy.models.saopledttp.CancelRequest
 import uk.gov.hmrc.timetopayproxy.services.{ TTPEService, TTPQuoteService }
 import uk.gov.hmrc.timetopayproxy.utils.TtppErrorHandler._
 import uk.gov.hmrc.timetopayproxy.utils.TtppResponseConverter._
@@ -104,6 +105,15 @@ class TimeToPayProxyController @Inject() (
     withJsonBody[ChargeInfoRequest] { chargeInfoRequest: ChargeInfoRequest =>
       timeToPayEligibilityService
         .checkChargeInfo(chargeInfoRequest)
+        .leftMap(ttppError => ttppError.toErrorResponse)
+        .fold(e => e.toResponse, r => r.toResponse)
+    }
+  }
+
+  def cancelPlan: Action[JsValue] = authoriseAction.async(parse.json) { implicit request =>
+    withJsonBody[CancelRequest] { cancelRequest: CancelRequest =>
+      timeToPayQuoteService
+        .cancelPlan(cancelRequest)
         .leftMap(ttppError => ttppError.toErrorResponse)
         .fold(e => e.toResponse, r => r.toResponse)
     }

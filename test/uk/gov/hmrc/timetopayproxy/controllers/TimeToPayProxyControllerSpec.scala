@@ -35,7 +35,9 @@ import uk.gov.hmrc.timetopayproxy.config.FeatureSwitch
 import uk.gov.hmrc.timetopayproxy.models.TtppEnvelope.TtppEnvelope
 import uk.gov.hmrc.timetopayproxy.models._
 import uk.gov.hmrc.timetopayproxy.models.affordablequotes._
+import uk.gov.hmrc.timetopayproxy.models.saopledttp.{ ApiErrorResponse, ApiName, ApiStatus, ApiStatusCode, CancelPaymentPlan, CancelRequest, CancelResponse, ProcessingDateTime, SaOpLedInstalment }
 import uk.gov.hmrc.timetopayproxy.models.chargeInfoApi._
+import uk.gov.hmrc.timetopayproxy.models.common.{ ArrangementAgreedDate, CancellationDate, ChannelIdentifier => CommonChannelIdentifier, FrequencyLowercase => CommonFrequencyLowercase, GbpPounds, IdType => CommonIdType, IdValue => CommonIdValue, Identification => CommonIdentification, InitialPaymentDate, InstalmentDueDate, TransitionedIndicator, TtpEndDate }
 import uk.gov.hmrc.timetopayproxy.services.{ TTPEService, TTPQuoteService }
 
 import java.time.{ LocalDate, LocalDateTime }
@@ -1168,6 +1170,190 @@ class TimeToPayProxyControllerSpec extends AnyWordSpec with MockFactory {
           TtppErrorResponse(statusCode = 500, errorMessage = "Internal Server Error")
         )
       }
+    }
+  }
+
+  ".cancelPlan" should {
+    val cancelRequest = CancelRequest(
+      identifications = NonEmptyList.of(
+        CommonIdentification(CommonIdType("UTR"), CommonIdValue("1234567890"))
+      ),
+      paymentPlan = CancelPaymentPlan(
+        arrangementAgreedDate = ArrangementAgreedDate(LocalDate.of(2025, 5, 1)),
+        ttpEndDate = TtpEndDate(LocalDate.of(2025, 12, 1)),
+        frequency = CommonFrequencyLowercase.Monthly,
+        cancellationDate = CancellationDate(LocalDate.of(2025, 6, 1)),
+        initialPaymentDate = Some(InitialPaymentDate(LocalDate.of(2025, 5, 15))),
+        initialPaymentAmount = Some(GbpPounds.createOrThrow(BigDecimal("150.00")))
+      ),
+      instalments = NonEmptyList.of(
+        SaOpLedInstalment(
+          dueDate = InstalmentDueDate(LocalDate.of(2025, 6, 1)),
+          amountDue = GbpPounds.createOrThrow(BigDecimal("300.00"))
+        ),
+        SaOpLedInstalment(
+          dueDate = InstalmentDueDate(LocalDate.of(2025, 7, 1)),
+          amountDue = GbpPounds.createOrThrow(BigDecimal("300.00"))
+        )
+      ),
+      channelIdentifier = CommonChannelIdentifier.SelfService,
+      transitioned = Some(TransitionedIndicator(true))
+    )
+
+    val cancelResponse = CancelResponse(
+      apisCalled = List(
+        ApiStatus(
+          ApiName("CESA"),
+          ApiStatusCode("200"),
+          ProcessingDateTime(java.time.Instant.parse("2025-05-01T14:30:00Z")),
+          None
+        ),
+        ApiStatus(
+          ApiName("ETMP"),
+          ApiStatusCode("201"),
+          ProcessingDateTime(java.time.Instant.parse("2025-05-01T14:31:00Z")),
+          None
+        )
+      ),
+      processingDateTime = ProcessingDateTime(java.time.Instant.parse("2025-10-15T10:31:00Z"))
+    )
+
+    "return 200" when {
+      "service returns success" in {
+        (authConnector
+          .authorise[Unit](_: Predicate, _: Retrieval[Unit])(
+            _: HeaderCarrier,
+            _: ExecutionContext
+          ))
+          .expects(*, *, *, *)
+          .returning(Future.successful(()))
+
+        (ttpQuoteService
+          .cancelPlan(_: CancelRequest)(
+            _: ExecutionContext,
+            _: HeaderCarrier
+          ))
+          .expects(cancelRequest, *, *)
+          .returning(TtppEnvelope(cancelResponse))
+
+        val fakeRequest: FakeRequest[JsValue] =
+          FakeRequest("POST", "/individuals/time-to-pay-proxy/cancel")
+            .withHeaders(CONTENT_TYPE -> MimeTypes.JSON)
+            .withBody(Json.toJson[CancelRequest](cancelRequest))
+
+        val response: Future[Result] = controller.cancelPlan()(fakeRequest)
+
+        status(response) shouldBe Status.OK
+        contentAsJson(response) shouldBe Json.toJson[CancelResponse](cancelResponse)
+      }
+    }
+
+    "return 400" when {
+      "request body is in wrong format" in {
+        (authConnector
+          .authorise[Unit](_: Predicate, _: Retrieval[Unit])(
+            _: HeaderCarrier,
+            _: ExecutionContext
+          ))
+          .expects(*, *, *, *)
+          .returning(Future.successful(()))
+
+        val invalidJson = Json.parse("""
+          {
+            "identifications": [],
+            "paymentPlan": {
+              "arrangementAgreedDate": "invalid-date"
+            }
+          }
+        """)
+
+        val fakeRequest: FakeRequest[JsValue] =
+          FakeRequest("POST", "/individuals/time-to-pay-proxy/cancel")
+            .withHeaders(CONTENT_TYPE -> MimeTypes.JSON)
+            .withBody(invalidJson)
+
+        val response: Future[Result] = controller.cancelPlan()(fakeRequest)
+
+        status(response) shouldBe Status.BAD_REQUEST
+        val errorResponse = contentAsJson(response).as[TtppErrorResponse]
+        errorResponse.statusCode shouldBe 400
+        errorResponse.errorMessage should include("Invalid CancelRequest payload")
+      }
+    }
+
+    "return 500" when {
+      "TTP service returns a failure" in {
+        (authConnector
+          .authorise[Unit](_: Predicate, _: Retrieval[Unit])(
+            _: HeaderCarrier,
+            _: ExecutionContext
+          ))
+          .expects(*, *, *, *)
+          .returning(Future.successful(()))
+
+        val errorFromTtpConnector = ConnectorError(500, "Internal Server Error")
+
+        (ttpQuoteService
+          .cancelPlan(_: CancelRequest)(
+            _: ExecutionContext,
+            _: HeaderCarrier
+          ))
+          .expects(cancelRequest, *, *)
+          .returning(TtppEnvelope(errorFromTtpConnector.asLeft[CancelResponse]))
+
+        val fakeRequest: FakeRequest[JsValue] =
+          FakeRequest("POST", "/individuals/time-to-pay-proxy/cancel")
+            .withHeaders(CONTENT_TYPE -> MimeTypes.JSON)
+            .withBody(Json.toJson[CancelRequest](cancelRequest))
+
+        val response: Future[Result] = controller.cancelPlan()(fakeRequest)
+
+        status(response) shouldBe Status.INTERNAL_SERVER_ERROR
+        contentAsJson(response) shouldBe Json.toJson[TtppErrorResponse](
+          TtppErrorResponse(statusCode = 500, errorMessage = "Internal Server Error")
+        )
+      }
+    }
+
+    "return error response from downstream when it returns CancelResponse with errors" in {
+      (authConnector
+        .authorise[Unit](_: Predicate, _: Retrieval[Unit])(
+          _: HeaderCarrier,
+          _: ExecutionContext
+        ))
+        .expects(*, *, *, *)
+        .returning(Future.successful(()))
+
+      val errorCancelResponse = CancelResponse(
+        apisCalled = List(
+          ApiStatus(
+            ApiName("CESA"),
+            ApiStatusCode("400"),
+            ProcessingDateTime(java.time.Instant.parse("2025-10-15T10:30:00Z")),
+            Some(ApiErrorResponse("Invalid cancellationDate"))
+          )
+        ),
+        processingDateTime = ProcessingDateTime(java.time.Instant.parse("2025-10-15T10:31:00Z"))
+      )
+
+      (ttpQuoteService
+        .cancelPlan(_: CancelRequest)(
+          _: ExecutionContext,
+          _: HeaderCarrier
+        ))
+        .expects(cancelRequest, *, *)
+        .returning(TtppEnvelope(errorCancelResponse))
+
+      val fakeRequest: FakeRequest[JsValue] =
+        FakeRequest("POST", "/individuals/time-to-pay-proxy/cancel")
+          .withHeaders(CONTENT_TYPE -> MimeTypes.JSON)
+          .withBody(Json.toJson[CancelRequest](cancelRequest))
+
+      val response: Future[Result] = controller.cancelPlan()(fakeRequest)
+
+      // This should return 200 with the error information in the response body
+      status(response) shouldBe Status.OK
+      contentAsJson(response) shouldBe Json.toJson[CancelResponse](errorCancelResponse)
     }
   }
 }

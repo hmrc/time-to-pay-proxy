@@ -505,4 +505,12 @@ class TtpConnectorStub(
     affordableQuotesRequest: AffordableQuotesRequest
   )(implicit ec: ExecutionContext, hc: HeaderCarrier): TtppEnvelope[AffordableQuoteResponse] =
     TtppEnvelope(Future.successful(affordableQuoteResponse))
+
+  override def cancelPlan(
+    cancelRequest: uk.gov.hmrc.timetopayproxy.models.saopledttp.CancelRequest
+  )(implicit
+    ec: ExecutionContext,
+    hc: HeaderCarrier
+  ): TtppEnvelope[uk.gov.hmrc.timetopayproxy.models.saopledttp.CancelResponse] =
+    TtppEnvelope(Future.successful(Left(ConnectorError(501, "Not implemented in stub"))))
 }

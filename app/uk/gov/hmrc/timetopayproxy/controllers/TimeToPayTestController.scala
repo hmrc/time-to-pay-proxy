@@ -21,7 +21,7 @@ import play.api.mvc.{ Action, AnyContent, BaseController, ControllerComponents, 
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
 import uk.gov.hmrc.timetopayproxy.models.RequestDetails
 import uk.gov.hmrc.timetopayproxy.services.TTPTestService
-import uk.gov.hmrc.timetopayproxy.utils.TtppErrorHandler.FromErrorToResponse
+import uk.gov.hmrc.timetopayproxy.utils.TtppErrorHandler.{ FromErrorToResponse, errorResponseWrites }
 import uk.gov.hmrc.timetopayproxy.utils.TtppResponseConverter.ToResponse
 
 import javax.inject.{ Inject, Singleton }

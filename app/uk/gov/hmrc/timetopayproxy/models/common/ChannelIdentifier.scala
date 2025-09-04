@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 HM Revenue & Customs
+ * Copyright 2025 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,12 +14,15 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.timetopayproxy.models
+package uk.gov.hmrc.timetopayproxy.models.common
 
-import play.api.libs.json.{ Json, OFormat }
+import enumeratum.{ Enum, EnumEntry, PlayJsonEnum }
 
-final case class TtppErrorResponse(statusCode: Int, errorMessage: String)
+sealed abstract class ChannelIdentifier(override val entryName: String) extends EnumEntry
 
-object TtppErrorResponse {
-  implicit val format: OFormat[TtppErrorResponse] = Json.format[TtppErrorResponse]
+object ChannelIdentifier extends Enum[ChannelIdentifier] with PlayJsonEnum[ChannelIdentifier] {
+  case object Advisor extends ChannelIdentifier("advisor")
+  case object SelfService extends ChannelIdentifier("selfService")
+
+  val values = findValues
 }

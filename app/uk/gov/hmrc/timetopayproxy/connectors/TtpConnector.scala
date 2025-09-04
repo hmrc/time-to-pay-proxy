@@ -26,6 +26,7 @@ import uk.gov.hmrc.timetopayproxy.logging.RequestAwareLogger
 import uk.gov.hmrc.timetopayproxy.models.TtppEnvelope.TtppEnvelope
 import uk.gov.hmrc.timetopayproxy.models._
 import uk.gov.hmrc.timetopayproxy.models.affordablequotes.{ AffordableQuoteResponse, AffordableQuotesRequest }
+import uk.gov.hmrc.timetopayproxy.models.saopledttp.{ CancelRequest, CancelResponse }
 
 import java.net.URLEncoder
 import java.util.UUID
@@ -56,6 +57,10 @@ trait TtpConnector {
   def getAffordableQuotes(
     affordableQuotesRequest: AffordableQuotesRequest
   )(implicit ec: ExecutionContext, hc: HeaderCarrier): TtppEnvelope[AffordableQuoteResponse]
+
+  def cancelPlan(
+    cancelRequest: CancelRequest
+  )(implicit ec: ExecutionContext, hc: HeaderCarrier): TtppEnvelope[CancelResponse]
 }
 
 @Singleton
@@ -183,6 +188,24 @@ class DefaultTtpConnector @Inject() (appConfig: AppConfig, httpClient: HttpClien
         .post(url)
         .withBody(Json.toJson(affordableQuotesRequest))
         .execute[Either[TtppError, AffordableQuoteResponse]]
+    )
+  }
+
+  def cancelPlan(
+    cancelRequest: CancelRequest
+  )(implicit ec: ExecutionContext, hc: HeaderCarrier): TtppEnvelope[CancelResponse] = {
+    val path =
+      if (appConfig.useIf) "/individuals/time-to-pay/cancel"
+      else "/debts/time-to-pay/cancel"
+
+    val url = url"${appConfig.ttpBaseUrl + path}"
+
+    EitherT(
+      httpClient
+        .post(url)
+        .withBody(Json.toJson(cancelRequest))
+        .setHeader(headers(getOrGenerateCorrelationId): _*)
+        .execute[Either[TtppError, CancelResponse]](CancelHttpParser.httpReads, ec)
     )
   }
 

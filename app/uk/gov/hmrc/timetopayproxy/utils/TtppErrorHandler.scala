@@ -16,17 +16,37 @@
 
 package uk.gov.hmrc.timetopayproxy.utils
 
+import play.api.libs.json.{ Json, Writes }
 import uk.gov.hmrc.timetopayproxy.models.{ ConnectorError, TtppError, TtppErrorResponse, ValidationError }
+import uk.gov.hmrc.timetopayproxy.models.saopledttp.{ CancelResponse, CancelResponseError }
+
+sealed trait ErrorResponse
+final case class StandardErrorResponse(ttppErrorResponse: TtppErrorResponse) extends ErrorResponse
+final case class CancelErrorResponseWrapper(statusCode: Int, cancelResponse: CancelResponse) extends ErrorResponse
 
 object TtppErrorHandler {
 
+  implicit val standardErrorResponseWrites: Writes[StandardErrorResponse] = (o: StandardErrorResponse) =>
+    Json.toJson(o.ttppErrorResponse)
+
+  implicit val cancelErrorResponseWrapperWrites: Writes[CancelErrorResponseWrapper] = (o: CancelErrorResponseWrapper) =>
+    Json.toJson(o.cancelResponse)
+
+  implicit val errorResponseWrites: Writes[ErrorResponse] = {
+    case std: StandardErrorResponse         => Json.toJson(std)
+    case cancel: CancelErrorResponseWrapper => Json.toJson(cancel)
+  }
+
   implicit class FromErrorToResponse(error: TtppError) {
-    def toErrorResponse: TtppErrorResponse = error match {
+    def toErrorResponse: ErrorResponse = error match {
       case ConnectorError(status, message) =>
-        TtppErrorResponse(status, s"$message")
+        StandardErrorResponse(TtppErrorResponse(status, s"$message"))
       case ValidationError(message) =>
-        TtppErrorResponse(400, s"$message")
-      case e => TtppErrorResponse(500, s"${e.toString}")
+        StandardErrorResponse(TtppErrorResponse(400, s"$message"))
+      case CancelResponseError(statusCode, cancelResponse) =>
+        // For CancelResponseError, we create a special response that will be handled differently
+        CancelErrorResponseWrapper(statusCode, cancelResponse)
+      case e => StandardErrorResponse(TtppErrorResponse(500, s"${e.toString}"))
     }
   }
 

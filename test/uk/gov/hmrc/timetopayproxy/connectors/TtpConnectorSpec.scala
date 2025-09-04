@@ -27,10 +27,13 @@ import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 import uk.gov.hmrc.timetopayproxy.config.AppConfig
 import uk.gov.hmrc.timetopayproxy.models._
 import uk.gov.hmrc.timetopayproxy.models.affordablequotes.{ AffordableQuoteResponse, AffordableQuotesRequest }
+import uk.gov.hmrc.timetopayproxy.models.saopledttp._
+import uk.gov.hmrc.timetopayproxy.models.common.{ ArrangementAgreedDate, CancellationDate, ChannelIdentifier => CommonChannelIdentifier, FrequencyLowercase => CommonFrequencyLowercase, GbpPounds, IdType, IdValue, Identification, InitialPaymentDate, TransitionedIndicator, TtpEndDate }
 import uk.gov.hmrc.timetopayproxy.support.WireMockUtils
 
 import java.time.{ LocalDate, LocalDateTime }
 import scala.concurrent.ExecutionContext
+import cats.data.NonEmptyList
 
 class TtpConnectorSpec extends PlaySpec with DefaultAwaitTimeout with FutureAwaits with MockFactory with WireMockUtils {
 
@@ -483,6 +486,145 @@ class TtpConnectorSpec extends PlaySpec with DefaultAwaitTimeout with FutureAwai
         )
 
         await(result.value) mustBe Left(ConnectorError(400, "Invalid request body"))
+      }
+    }
+  }
+
+  "Cancel plan" when {
+    val cancelRequest = CancelRequest(
+      identifications = NonEmptyList.of(Identification(IdType("UTR"), IdValue("1234567890"))),
+      paymentPlan = CancelPaymentPlan(
+        arrangementAgreedDate = ArrangementAgreedDate(LocalDate.of(2025, 5, 1)),
+        ttpEndDate = TtpEndDate(LocalDate.of(2025, 12, 1)),
+        frequency = CommonFrequencyLowercase.Monthly,
+        cancellationDate = CancellationDate(LocalDate.of(2025, 6, 1)),
+        initialPaymentDate = Some(InitialPaymentDate(LocalDate.of(2025, 5, 15))),
+        initialPaymentAmount = Some(GbpPounds.createOrThrow(BigDecimal("150.00")))
+      ),
+      instalments = NonEmptyList.of(
+        SaOpLedInstalment(
+          dueDate = uk.gov.hmrc.timetopayproxy.models.common.InstalmentDueDate(LocalDate.of(2025, 6, 1)),
+          amountDue = GbpPounds.createOrThrow(BigDecimal("300.00"))
+        )
+      ),
+      channelIdentifier = CommonChannelIdentifier.SelfService,
+      transitioned = Some(TransitionedIndicator(true))
+    )
+
+    val successfulCancelResponse = CancelResponse(
+      apisCalled = List(
+        ApiStatus(
+          ApiName("CESA"),
+          ApiStatusCode("200"),
+          ProcessingDateTime(java.time.Instant.parse("2025-05-01T14:30:00Z")),
+          None
+        )
+      ),
+      processingDateTime = ProcessingDateTime(java.time.Instant.parse("2025-10-15T10:31:00Z"))
+    )
+
+    val errorCancelResponse = CancelResponse(
+      apisCalled = List(
+        ApiStatus(
+          ApiName("CESA"),
+          ApiStatusCode("400"),
+          ProcessingDateTime(java.time.Instant.parse("2025-10-15T10:30:00Z")),
+          Some(ApiErrorResponse("Invalid cancellationDate"))
+        )
+      ),
+      processingDateTime = ProcessingDateTime(java.time.Instant.parse("2025-10-15T10:31:00Z"))
+    )
+
+    "using IF" must {
+      "return a CancelResponse for 200 OK" in new Setup(ifImpl = true) {
+        stubPostWithResponseBody(
+          "/individuals/time-to-pay/cancel",
+          200,
+          Json.toJson(successfulCancelResponse).toString()
+        )
+
+        val result = connector.cancelPlan(cancelRequest)
+        await(result.value) mustBe Right(successfulCancelResponse)
+      }
+
+      "return a CancelResponse for 500 Internal Server Error" in new Setup(ifImpl = true) {
+        stubPostWithResponseBody(
+          "/individuals/time-to-pay/cancel",
+          500,
+          Json.toJson(errorCancelResponse).toString()
+        )
+
+        val result = connector.cancelPlan(cancelRequest)
+        await(result.value) mustBe Left(CancelResponseError(500, errorCancelResponse))
+      }
+
+      "parse an error response for 400 Bad Request" in new Setup(ifImpl = true) {
+        val errorResponse = """
+          {
+            "code": 400,
+            "details": "Invalid request payload: missing identifications"
+          }
+        """
+        stubPostWithResponseBody(
+          "/individuals/time-to-pay/cancel",
+          400,
+          errorResponse
+        )
+
+        val result = connector.cancelPlan(cancelRequest)
+        await(result.value) mustBe Left(ConnectorError(400, "Invalid request payload: missing identifications"))
+      }
+
+      "handle unexpected status codes" in new Setup(ifImpl = true) {
+        stubPostWithResponseBody(
+          "/individuals/time-to-pay/cancel",
+          404,
+          ""
+        )
+
+        val result = connector.cancelPlan(cancelRequest)
+        await(result.value) mustBe Left(ConnectorError(404, "Unexpected response from upstream"))
+      }
+    }
+
+    "using TTP" must {
+      "return a CancelResponse for 200 OK" in new Setup(ifImpl = false) {
+        stubPostWithResponseBody(
+          "/debts/time-to-pay/cancel",
+          200,
+          Json.toJson(successfulCancelResponse).toString()
+        )
+
+        val result = connector.cancelPlan(cancelRequest)
+        await(result.value) mustBe Right(successfulCancelResponse)
+      }
+
+      "return a CancelResponse for 500 Internal Server Error" in new Setup(ifImpl = false) {
+        stubPostWithResponseBody(
+          "/debts/time-to-pay/cancel",
+          500,
+          Json.toJson(errorCancelResponse).toString()
+        )
+
+        val result = connector.cancelPlan(cancelRequest)
+        await(result.value) mustBe Left(CancelResponseError(500, errorCancelResponse))
+      }
+
+      "parse an error response for 400 Bad Request" in new Setup(ifImpl = false) {
+        val errorResponse = """
+          {
+            "code": 400,
+            "details": "Invalid request payload: missing cancellationDate"
+          }
+        """
+        stubPostWithResponseBody(
+          "/debts/time-to-pay/cancel",
+          400,
+          errorResponse
+        )
+
+        val result = connector.cancelPlan(cancelRequest)
+        await(result.value) mustBe Left(ConnectorError(400, "Invalid request payload: missing cancellationDate"))
       }
     }
   }

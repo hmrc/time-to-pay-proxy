@@ -6,3 +6,4 @@ PUT        /quote/:customerReference/:planId        uk.gov.hmrc.timetopayproxy.c
 POST       /quote/arrangement                       uk.gov.hmrc.timetopayproxy.controllers.TimeToPayProxyController.createPlan
 POST       /self-serve/affordable-quotes            uk.gov.hmrc.timetopayproxy.controllers.TimeToPayProxyController.getAffordableQuotes
 POST       /charge-info                             uk.gov.hmrc.timetopayproxy.controllers.TimeToPayProxyController.checkChargeInfo
+POST       /cancel                                  uk.gov.hmrc.timetopayproxy.controllers.TimeToPayProxyController.cancelPlan

@@ -22,7 +22,9 @@ import play.api.libs.ws.{ WSRequest, WSResponse }
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.timetopayproxy.models._
 import uk.gov.hmrc.timetopayproxy.models.affordablequotes.{ AffordableQuoteResponse, AffordableQuotesRequest }
+import uk.gov.hmrc.timetopayproxy.models.saopledttp.{ ApiErrorResponse, ApiName, ApiStatus, ApiStatusCode, CancelErrorResponse, CancelPaymentPlan, CancelRequest, CancelResponse, ProcessingDateTime, SaOpLedInstalment }
 import uk.gov.hmrc.timetopayproxy.models.chargeInfoApi._
+import uk.gov.hmrc.timetopayproxy.models.common.{ ArrangementAgreedDate, CancellationDate, ChannelIdentifier, FrequencyLowercase, GbpPounds, IdType => CommonIdType, IdValue => CommonIdValue, Identification => CommonIdentification, InitialPaymentDate, InstalmentDueDate, TransitionedIndicator, TtpEndDate }
 import uk.gov.hmrc.timetopayproxy.support.IntegrationBaseSpec
 import uk.gov.hmrc.timetopayproxy.testutils.TestOnlyJsonFormats._
 
@@ -592,6 +594,199 @@ class TimeToPayProxyControllerItSpec extends IntegrationBaseSpec {
         }
       }
     }
+
+    ".cancelPlan" - {
+      "should return a 200 statusCode" - {
+        "when given a valid json payload" - {
+          "when TimeToPay returns a successful response" in new TimeToPayProxyControllerTestBase {
+            stubPostWithResponseBody(url = "/auth/authorise", status = 200, responseBody = "null")
+            stubPostWithResponseBody(
+              url = "/debts/time-to-pay/cancel",
+              status = 200,
+              responseBody = Json.toJson(cancelResponse).toString()
+            )
+
+            val requestForCancelPlan: WSRequest = buildRequest("/cancel")
+
+            val response: WSResponse = await(
+              requestForCancelPlan.post(Json.toJson(cancelRequest))
+            )
+
+            response.json shouldBe Json.toJson(cancelResponse)
+            response.status shouldBe 200
+          }
+        }
+      }
+
+      "should return a 500 statusCode" - {
+        "when given a valid json payload" - {
+          "when TimeToPay returns an error response with 500" in new TimeToPayProxyControllerTestBase {
+            val errorResponse = CancelResponse(
+              apisCalled = List(
+                ApiStatus(
+                  name = ApiName("CESA"),
+                  statusCode = ApiStatusCode("400"),
+                  processingDateTime = ProcessingDateTime(java.time.Instant.parse("2025-10-15T10:30:00Z")),
+                  errorResponse = Some(ApiErrorResponse("Invalid cancellationDate"))
+                )
+              ),
+              processingDateTime = ProcessingDateTime(java.time.Instant.parse("2025-10-15T10:31:00Z"))
+            )
+
+            stubPostWithResponseBody(url = "/auth/authorise", status = 200, responseBody = "null")
+            stubPostWithResponseBody(
+              url = "/debts/time-to-pay/cancel",
+              status = 500,
+              responseBody = Json.toJson(errorResponse).toString()
+            )
+
+            val requestForCancelPlan: WSRequest = buildRequest("/cancel")
+
+            val response: WSResponse = await(
+              requestForCancelPlan.post(Json.toJson(cancelRequest))
+            )
+
+            response.json shouldBe Json.toJson(errorResponse)
+            response.status shouldBe 500
+          }
+        }
+      }
+
+      "should return a 400 statusCode" - {
+        "when given a valid json payload" - {
+          "when TimeToPay returns an error response of 400" in new TimeToPayProxyControllerTestBase {
+            val upstreamErrorResponse = CancelErrorResponse(
+              code = 400,
+              details = "Invalid request payload: missing identifications or cancellationDate"
+            )
+
+            val expectedTtppErrorResponse = TtppErrorResponse(
+              statusCode = 400,
+              errorMessage = "Invalid request payload: missing identifications or cancellationDate"
+            )
+
+            stubPostWithResponseBody(url = "/auth/authorise", status = 200, responseBody = "null")
+            stubPostWithResponseBody(
+              url = "/debts/time-to-pay/cancel",
+              status = 400,
+              responseBody = Json.toJson(upstreamErrorResponse).toString()
+            )
+
+            val requestForCancelPlan: WSRequest = buildRequest("/cancel")
+
+            val response: WSResponse = await(
+              requestForCancelPlan.post(Json.toJson(cancelRequest))
+            )
+
+            response.json shouldBe Json.toJson(expectedTtppErrorResponse)
+            response.status shouldBe 400
+          }
+        }
+
+        "when given an invalid json payload" - {
+          "with an empty json object" in new TimeToPayProxyControllerTestBase {
+            stubPostWithResponseBody(url = "/auth/authorise", status = 200, responseBody = "null")
+
+            val requestForCancelPlan: WSRequest = buildRequest("/cancel")
+
+            val response: WSResponse = await(
+              requestForCancelPlan.post(JsObject.empty)
+            )
+
+            val expectedTtppErrorResponse: TtppErrorResponse = TtppErrorResponse(
+              statusCode = 400,
+              errorMessage =
+                "Invalid CancelRequest payload: Payload has a missing field or an invalid format. Field name: identifications. "
+            )
+
+            response.json shouldBe Json.toJson(expectedTtppErrorResponse)
+            response.status shouldBe 400
+          }
+
+          "with mandatory fields missing" - {
+            "when 'identifications' is missing" in new TimeToPayProxyControllerTestBase {
+              stubPostWithResponseBody(url = "/auth/authorise", status = 200, responseBody = "null")
+
+              val requestForCancelPlan: WSRequest = buildRequest("/cancel")
+
+              val invalidRequestBody: JsValue = Json.parse(
+                """{
+                  |  "paymentPlan": {
+                  |    "planSelection": 1,
+                  |    "paymentDay": 28,
+                  |    "upfrontPaymentAmount": 123.45,
+                  |    "startDate": "2025-10-15"
+                  |  },
+                  |  "channelIdentifier": "eSSTTP"
+                  |}
+                  |""".stripMargin
+              )
+
+              val response: WSResponse = await(
+                requestForCancelPlan.post(invalidRequestBody)
+              )
+
+              val expectedTtppErrorResponse: TtppErrorResponse = TtppErrorResponse(
+                statusCode = 400,
+                errorMessage =
+                  "Invalid CancelRequest payload: Payload has a missing field or an invalid format. Field name: cancellationDate. "
+              )
+
+              response.json shouldBe Json.toJson(expectedTtppErrorResponse)
+              response.status shouldBe 400
+            }
+          }
+        }
+      }
+
+      "should return a 503 statusCode" - {
+        "when given a valid json payload" - {
+          for (responseStatus <- List(200, 400, 500)) s"when TimeToPay returns a $responseStatus response" - {
+            "with a null json response from TTP" in new TimeToPayProxyControllerTestBase {
+              stubPostWithResponseBody(url = "/auth/authorise", status = 200, responseBody = "null")
+              stubPostWithResponseBody(
+                url = "/debts/time-to-pay/cancel",
+                status = responseStatus,
+                responseBody = JsNull.toString()
+              )
+
+              val requestForCancelPlan: WSRequest = buildRequest("/cancel")
+
+              val response: WSResponse = await(
+                requestForCancelPlan.post(Json.toJson(cancelRequest))
+              )
+
+              val expectedTtppErrorResponse: TtppErrorResponse =
+                TtppErrorResponse(statusCode = 503, errorMessage = "Couldn't parse body from upstream")
+
+              response.json shouldBe Json.toJson(expectedTtppErrorResponse)
+              response.status shouldBe 503
+            }
+          }
+
+          "when TimeToPay returns unexpected status" in new TimeToPayProxyControllerTestBase {
+            stubPostWithResponseBody(url = "/auth/authorise", status = 200, responseBody = "null")
+            stubPostWithResponseBody(
+              url = "/debts/time-to-pay/cancel",
+              status = 404,
+              responseBody = Json.obj().toString()
+            )
+
+            val requestForCancelPlan: WSRequest = buildRequest("/cancel")
+
+            val response: WSResponse = await(
+              requestForCancelPlan.post(Json.toJson(cancelRequest))
+            )
+
+            val expectedTtppErrorResponse: TtppErrorResponse =
+              TtppErrorResponse(statusCode = 404, errorMessage = "Unexpected response from upstream")
+
+            response.json shouldBe Json.toJson(expectedTtppErrorResponse)
+            response.status shouldBe 404
+          }
+        }
+      }
+    }
   }
 
   trait TimeToPayProxyControllerTestBase {
@@ -703,6 +898,47 @@ class TimeToPayProxyControllerItSpec extends IntegrationBaseSpec {
         Identification(idType = IdType("id type 2"), idValue = IdValue("id value 2"))
       ),
       regimeType = RegimeType.SA
+    )
+
+    val cancelResponse: CancelResponse = CancelResponse(
+      apisCalled = List(
+        ApiStatus(
+          name = ApiName("CESA"),
+          statusCode = ApiStatusCode("200"),
+          processingDateTime = ProcessingDateTime(java.time.Instant.parse("2025-05-01T14:30:00Z")),
+          errorResponse = None
+        ),
+        ApiStatus(
+          name = ApiName("ETMP"),
+          statusCode = ApiStatusCode("201"),
+          processingDateTime = ProcessingDateTime(java.time.Instant.parse("2025-05-01T14:31:00Z")),
+          errorResponse = None
+        )
+      ),
+      processingDateTime = ProcessingDateTime(java.time.Instant.parse("2025-10-15T10:31:00Z"))
+    )
+
+    val cancelRequest: CancelRequest = CancelRequest(
+      identifications = NonEmptyList.of(
+        CommonIdentification(CommonIdType("NINO"), CommonIdValue("AA000000A")),
+        CommonIdentification(CommonIdType("MTDITID"), CommonIdValue("XAIT00000000054"))
+      ),
+      paymentPlan = CancelPaymentPlan(
+        arrangementAgreedDate = ArrangementAgreedDate(LocalDate.parse("2025-01-01")),
+        ttpEndDate = TtpEndDate(LocalDate.parse("2025-12-31")),
+        frequency = FrequencyLowercase.Monthly,
+        cancellationDate = CancellationDate(LocalDate.parse("2025-10-15")),
+        initialPaymentDate = Some(InitialPaymentDate(LocalDate.parse("2025-02-01"))),
+        initialPaymentAmount = Some(GbpPounds.createOrThrow(BigDecimal("123.45")))
+      ),
+      instalments = NonEmptyList.of(
+        SaOpLedInstalment(
+          dueDate = InstalmentDueDate(LocalDate.parse("2025-11-28")),
+          amountDue = GbpPounds.createOrThrow(BigDecimal("100.00"))
+        )
+      ),
+      channelIdentifier = ChannelIdentifier.SelfService,
+      transitioned = Some(TransitionedIndicator(true))
     )
 
   }
