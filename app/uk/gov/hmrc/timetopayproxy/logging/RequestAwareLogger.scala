@@ -21,9 +21,10 @@ import play.api.Logger
 import uk.gov.hmrc.http.{ HeaderCarrier, RequestId }
 import uk.gov.hmrc.timetopayproxy.models.HeaderNames.{ CorrelationIdKey, RequestIdKey }
 
-class RequestAwareLogger(clazz: Class[_]) {
+class RequestAwareLogger(underlying: Logger) {
 
-  private val underlying = Logger(clazz)
+  def this(clazz: Class[_]) =
+    this(Logger(clazz))
 
   def trace(msg: => String)(implicit hc: HeaderCarrier): Unit = withRequestIDsInMDC(underlying.trace(msg))
   def debug(msg: => String)(implicit hc: HeaderCarrier): Unit = withRequestIDsInMDC(underlying.debug(msg))
