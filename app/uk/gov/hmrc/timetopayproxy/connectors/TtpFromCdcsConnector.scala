@@ -24,10 +24,9 @@ import uk.gov.hmrc.http.{ HeaderCarrier, HttpReads, StringContextOps }
 import uk.gov.hmrc.timetopayproxy.config.AppConfig
 import uk.gov.hmrc.timetopayproxy.connectors.util.HttpReadsWithLoggingBuilder
 import uk.gov.hmrc.timetopayproxy.logging.RequestAwareLogger
-import uk.gov.hmrc.timetopayproxy.models.TimeToPayError
-import uk.gov.hmrc.timetopayproxy.models.error.InternalTtppError
+import uk.gov.hmrc.timetopayproxy.models.error.{ ConnectorError, InternalTtppError }
 import uk.gov.hmrc.timetopayproxy.models.error.TtppEnvelope.TtppEnvelope
-import uk.gov.hmrc.timetopayproxy.models.saopled.ttpcancel.{ TtpCancelInformativeResponse, TtpCancelRequest }
+import uk.gov.hmrc.timetopayproxy.models.saopled.ttpcancel.{ TtpCancelGeneralFailureResponse, TtpCancelInformativeError, TtpCancelInformativeResponse, TtpCancelRequest }
 
 import java.util.UUID
 import javax.inject.{ Inject, Singleton }
@@ -52,8 +51,12 @@ class DefaultTtpFromCdcsConnector @Inject() (appConfig: AppConfig, httpClient: H
     implicit def httpReads: HttpReads[Either[InternalTtppError, TtpCancelInformativeResponse]] =
       HttpReadsWithLoggingBuilder[InternalTtppError, TtpCancelInformativeResponse](logger)
         .orSuccess[TtpCancelInformativeResponse](200)
-        .orError[TtpCancelInformativeResponse](500)
-        .orErrorTransformed[TimeToPayError](400, _.toConnectorError(400))
+        .orErrorTransformed[TtpCancelInformativeResponse](500, TtpCancelInformativeError(_))
+        .orErrorTransformed[TtpCancelGeneralFailureResponse](400, _.toConnectorError(400))
+        .orErrorTransformed[play.api.libs.json.JsObject](
+          404,
+          _ => ConnectorError(404, "Unexpected response from upstream")
+        )
         .httpReads
 
     val path = if (appConfig.useIf) "/individuals/debts/time-to-pay/cancel" else "/debts/time-to-pay/cancel"

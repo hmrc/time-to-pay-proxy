@@ -41,13 +41,13 @@ final class HttpReadsWithLoggingBuilder[E >: ConnectorError, Result] private (
               createConnectorError(
                 responseContext,
                 newStatus = 503,
-                simpleMessage = "Couldn't deserialise HTTP JSON body from successful upstream."
+                simpleMessage = "Couldn't parse body from upstream"
               )
             case Failure(_) =>
               createConnectorError(
                 responseContext,
                 newStatus = 503,
-                simpleMessage = "Couldn't parse HTTP body as JSON from successful upstream."
+                simpleMessage = "Couldn't parse body from upstream"
               )
           }
       }
@@ -69,13 +69,13 @@ final class HttpReadsWithLoggingBuilder[E >: ConnectorError, Result] private (
               createConnectorError(
                 responseContext,
                 newStatus = 503,
-                simpleMessage = "Couldn't deserialise HTTP JSON body from failed upstream."
+                simpleMessage = "Couldn't parse body from upstream"
               )
             case Failure(_) =>
               createConnectorError(
                 responseContext,
                 newStatus = 503,
-                simpleMessage = "Couldn't parse HTTP body as JSON from failed upstream."
+                simpleMessage = "Couldn't parse body from upstream"
               )
           }
       }
@@ -87,8 +87,8 @@ final class HttpReadsWithLoggingBuilder[E >: ConnectorError, Result] private (
       case None =>
         createConnectorError(
           ResponseContext(method = method, url = url, response),
-          newStatus = 503,
-          simpleMessage = s"Upstream returned an unexpected and undocumented status."
+          newStatus = response.status,
+          simpleMessage = "Unexpected response from upstream"
         )
     }
   }
@@ -105,15 +105,18 @@ final class HttpReadsWithLoggingBuilder[E >: ConnectorError, Result] private (
         s"Incoming HTTP response body: ${responseContext.response.body}"
       }
 
+    val logMessage = if (simpleMessage.endsWith(".")) simpleMessage else s"$simpleMessage."
+    val errorMessage = if (simpleMessage.endsWith(".")) simpleMessage.dropRight(1) else simpleMessage
+
     logger.error(
-      s"""$simpleMessage
+      s"""$logMessage
          |Response status being returned: $newStatus
          |Request made: ${responseContext.method} ${responseContext.url}
          |Response status received: ${responseContext.response.status}
          |$incomingHttpBodyLine""".stripMargin
     )(hc)
 
-    Left(ConnectorError(newStatus, simpleMessage))
+    Left(ConnectorError(newStatus, errorMessage))
   }
 
   private def withMatcher(

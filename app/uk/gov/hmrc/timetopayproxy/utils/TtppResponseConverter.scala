@@ -19,6 +19,7 @@ package uk.gov.hmrc.timetopayproxy.utils
 import play.api.libs.json.{ Json, Writes }
 import play.api.mvc.{ Result, Results }
 import uk.gov.hmrc.timetopayproxy.models.error.TtppErrorResponse
+import uk.gov.hmrc.timetopayproxy.models.saopled.ttpcancel.{ TtpCancelInformativeError, TtpCancelInformativeResponse }
 
 object TtppResponseConverter {
 
@@ -27,6 +28,10 @@ object TtppResponseConverter {
       response match {
         case TtppErrorResponse(statusCode, _) =>
           Results.Status(statusCode)(Json.toJson(response))
+        case error: TtpCancelInformativeError =>
+          Results.InternalServerError(Json.toJson(error.response))
+        case _: TtpCancelInformativeResponse =>
+          Results.Ok(Json.toJson(response))
         case _ => Results.Ok(Json.toJson(response))
       }
   }
