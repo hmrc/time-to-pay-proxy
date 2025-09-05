@@ -16,12 +16,226 @@
 
 package uk.gov.hmrc.timetopayproxy.connectors
 
-import org.scalatest.freespec.AnyFreeSpec
+import cats.data.NonEmptyList
+import org.scalamock.scalatest.MockFactory
+import org.scalatestplus.play.PlaySpec
+import play.api.libs.json.Json
+import play.api.test.{ DefaultAwaitTimeout, FutureAwaits }
+import play.api.{ ConfigLoader, Configuration }
+import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.http.client.HttpClientV2
+import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
+import uk.gov.hmrc.timetopayproxy.config.AppConfig
+import uk.gov.hmrc.timetopayproxy.models.currency.GbpPoundsUnchecked
+import uk.gov.hmrc.timetopayproxy.models.error.ConnectorError
+import uk.gov.hmrc.timetopayproxy.models.saopled.common.apistatus.{ ApiName, ApiStatus, ApiStatusCode }
+import uk.gov.hmrc.timetopayproxy.models.saopled.common.{ ArrangementAgreedDate, InitialPaymentDate, ProcessingDateTimeInstant, SaOpLedInstalment, TransitionedIndicator, TtpEndDate }
+import uk.gov.hmrc.timetopayproxy.models.saopled.ttpcancel.{ CancellationDate, TtpCancelInformativeError, TtpCancelInformativeResponse, TtpCancelPaymentPlan, TtpCancelRequest }
+import uk.gov.hmrc.timetopayproxy.models.{ ChannelIdentifier, FrequencyLowercase, IdType, IdValue, Identification, InstalmentDueDate }
+import uk.gov.hmrc.timetopayproxy.support.WireMockUtils
 
-final class DefaultTtpFromCdcsConnectorSpec extends AnyFreeSpec {
-  "DefaultTtpFromCdcsConnector" - {
-    ".cancelTtp" - {
-      // TODO DTD-2858: Implement missing unit tests.
+import java.time.{ Instant, LocalDate }
+import scala.concurrent.ExecutionContext
+
+final class DefaultTtpFromCdcsConnectorSpec
+    extends PlaySpec with DefaultAwaitTimeout with FutureAwaits with MockFactory with WireMockUtils {
+
+  val config = mock[Configuration]
+  val servicesConfig = mock[ServicesConfig]
+
+  val httpClient: HttpClientV2 = app.injector.instanceOf[HttpClientV2]
+
+  class Setup(ifImpl: Boolean) {
+    implicit val ec: ExecutionContext = ExecutionContext.global
+    implicit val hc: HeaderCarrier = HeaderCarrier()
+
+    (servicesConfig
+      .baseUrl(_: String))
+      .expects("auth")
+      .once()
+      .returns("http://localhost:11111")
+    (servicesConfig
+      .baseUrl(_: String))
+      .expects("ttp")
+      .once()
+      .returns("http://localhost:11111")
+    (servicesConfig
+      .baseUrl(_: String))
+      .expects("ttpe")
+      .once()
+      .returns("unused")
+    (servicesConfig
+      .baseUrl(_: String))
+      .expects("stub")
+      .once()
+      .returns("http://localhost:11111")
+    (config
+      .get(_: String)(_: ConfigLoader[String]))
+      .expects("microservice.services.ttp.token", *)
+      .once()
+      .returns("TOKEN")
+    (config
+      .get(_: String)(_: ConfigLoader[Boolean]))
+      .expects("microservice.services.ttp.useIf", *)
+      .once()
+      .returns(ifImpl)
+    (config
+      .get(_: String)(_: ConfigLoader[Boolean]))
+      .expects("auditing.enabled", *)
+      .once()
+      .returns(false)
+    (config
+      .get(_: String)(_: ConfigLoader[String]))
+      .expects("microservice.metrics.graphite.host", *)
+      .once()
+      .returns("http://localhost:11111")
+    (config
+      .getOptional(_: String)(_: ConfigLoader[Option[Configuration]]))
+      .expects("feature-switch", *)
+      .once()
+      .returns(None)
+
+    val mockConfiguration: AppConfig = new MockAppConfig(config, servicesConfig, ifImpl)
+
+    val connector: TtpFromCdcsConnector = new DefaultTtpFromCdcsConnector(mockConfiguration, httpClient)
+  }
+
+  "DefaultTtpFromCdcsConnector" should {
+    ".cancelTtp" should {
+
+      val ttpCancelRequest: TtpCancelRequest = TtpCancelRequest(
+        identifications = NonEmptyList.of(
+          Identification(idType = IdType("NINO"), idValue = IdValue("AB123456C"))
+        ),
+        paymentPlan = TtpCancelPaymentPlan(
+          arrangementAgreedDate = ArrangementAgreedDate(LocalDate.parse("2025-01-01")),
+          ttpEndDate = TtpEndDate(LocalDate.parse("2025-02-01")),
+          frequency = FrequencyLowercase.Monthly,
+          cancellationDate = CancellationDate(LocalDate.parse("2025-01-15")),
+          initialPaymentDate = Some(InitialPaymentDate(LocalDate.parse("2025-01-05"))),
+          initialPaymentAmount = Some(GbpPoundsUnchecked(100.00))
+        ),
+        instalments = NonEmptyList.of(
+          SaOpLedInstalment(
+            dueDate = InstalmentDueDate(LocalDate.parse("2025-01-31")),
+            amountDue = GbpPoundsUnchecked(500.00)
+          )
+        ),
+        channelIdentifier = ChannelIdentifier.Advisor,
+        transitioned = Some(TransitionedIndicator(true))
+      )
+
+      val ttpCancelResponse: TtpCancelInformativeResponse = TtpCancelInformativeResponse(
+        apisCalled = List(
+          ApiStatus(
+            name = ApiName("API1"),
+            statusCode = ApiStatusCode("SUCCESS"),
+            processingDateTime = ProcessingDateTimeInstant(Instant.parse("2025-01-01T12:00:00Z")),
+            errorResponse = None
+          )
+        ),
+        processingDateTime = ProcessingDateTimeInstant(Instant.parse("2025-01-01T12:00:00Z"))
+      )
+
+      "using IF" should {
+        "return a successful response" in new Setup(ifImpl = true) {
+          stubPostWithResponseBody(
+            "/individuals/debts/time-to-pay/cancel",
+            200,
+            Json.toJson(ttpCancelResponse).toString()
+          )
+
+          val result = connector.cancelTtp(ttpCancelRequest)
+
+          await(result.value) must matchPattern { case Right(_: TtpCancelInformativeResponse) => }
+        }
+
+        "parse an error response from an upstream service" in new Setup(ifImpl = true) {
+          stubPostWithResponseBody(
+            "/individuals/debts/time-to-pay/cancel",
+            400,
+            """{"code": 400, "details": "Invalid request body"}"""
+          )
+
+          val result = connector.cancelTtp(ttpCancelRequest)
+
+          await(result.value) mustBe Left(ConnectorError(400, "Invalid request body"))
+        }
+
+        "handle 404 responses" in new Setup(ifImpl = true) {
+          stubPostWithResponseBody(
+            "/individuals/debts/time-to-pay/cancel",
+            404,
+            """{}"""
+          )
+
+          val result = connector.cancelTtp(ttpCancelRequest)
+
+          await(result.value) mustBe Left(ConnectorError(404, "Unexpected response from upstream"))
+        }
+
+        "handle 500 responses" in new Setup(ifImpl = true) {
+          stubPostWithResponseBody(
+            "/individuals/debts/time-to-pay/cancel",
+            500,
+            Json.toJson(ttpCancelResponse).toString()
+          )
+
+          val result = connector.cancelTtp(ttpCancelRequest)
+
+          await(result.value) must matchPattern { case Left(_: TtpCancelInformativeError) => }
+        }
+      }
+
+      "using TTP" should {
+        "return a successful response" in new Setup(ifImpl = false) {
+          stubPostWithResponseBody(
+            "/debts/time-to-pay/cancel",
+            200,
+            Json.toJson(ttpCancelResponse).toString()
+          )
+
+          val result = connector.cancelTtp(ttpCancelRequest)
+
+          await(result.value) must matchPattern { case Right(_: TtpCancelInformativeResponse) => }
+        }
+
+        "parse an error response from an upstream service" in new Setup(ifImpl = false) {
+          stubPostWithResponseBody(
+            "/debts/time-to-pay/cancel",
+            400,
+            """{"code": 400, "details": "Invalid request body"}"""
+          )
+
+          val result = connector.cancelTtp(ttpCancelRequest)
+
+          await(result.value) mustBe Left(ConnectorError(400, "Invalid request body"))
+        }
+
+        "handle 404 responses" in new Setup(ifImpl = false) {
+          stubPostWithResponseBody(
+            "/debts/time-to-pay/cancel",
+            404,
+            """{}"""
+          )
+
+          val result = connector.cancelTtp(ttpCancelRequest)
+
+          await(result.value) mustBe Left(ConnectorError(404, "Unexpected response from upstream"))
+        }
+
+        "handle 500 responses" in new Setup(ifImpl = false) {
+          stubPostWithResponseBody(
+            "/debts/time-to-pay/cancel",
+            500,
+            Json.toJson(ttpCancelResponse).toString()
+          )
+
+          val result = connector.cancelTtp(ttpCancelRequest)
+
+          await(result.value) must matchPattern { case Left(_: TtpCancelInformativeError) => }
+        }
+      }
     }
   }
 }
