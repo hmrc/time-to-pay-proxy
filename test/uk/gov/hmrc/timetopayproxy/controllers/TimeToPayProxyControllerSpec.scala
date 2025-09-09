@@ -32,7 +32,7 @@ import uk.gov.hmrc.auth.core.retrieve.Retrieval
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.timetopayproxy.actions.auth.{ AuthoriseAction, AuthoriseActionImpl }
 import uk.gov.hmrc.timetopayproxy.config.FeatureSwitch
-import uk.gov.hmrc.timetopayproxy.connectors.TtpFromCdcsConnector
+import uk.gov.hmrc.timetopayproxy.connectors.TtpFeedbackLoopConnector
 import uk.gov.hmrc.timetopayproxy.models._
 import uk.gov.hmrc.timetopayproxy.models.affordablequotes._
 import uk.gov.hmrc.timetopayproxy.models.error.TtppEnvelope.TtppEnvelope
@@ -61,10 +61,10 @@ class TimeToPayProxyControllerSpec extends AnyWordSpec with MockFactory {
 
   private val ttpQuoteService = mock[TTPQuoteService]
   private val ttpeService = mock[TTPEService]
-  private val ttpFromCdcsConnector = mock[TtpFromCdcsConnector]
+  private val ttpFeedbackLoopConnector = mock[TtpFeedbackLoopConnector]
   private val fs: FeatureSwitch = mock[FeatureSwitch]
   private val controller =
-    new TimeToPayProxyController(authoriseAction, cc, ttpQuoteService, ttpFromCdcsConnector, ttpeService, fs)
+    new TimeToPayProxyController(authoriseAction, cc, ttpQuoteService, ttpFeedbackLoopConnector, ttpeService, fs)
 
   private val generateQuoteRequest = GenerateQuoteRequest(
     CustomerReference("customerReference"),
@@ -1227,7 +1227,7 @@ class TimeToPayProxyControllerSpec extends AnyWordSpec with MockFactory {
           .expects(*, *, *, *)
           .returning(Future.successful(()))
 
-        (ttpFromCdcsConnector
+        (ttpFeedbackLoopConnector
           .cancelTtp(_: TtpCancelRequest)(
             _: ExecutionContext,
             _: HeaderCarrier
@@ -1290,7 +1290,7 @@ class TimeToPayProxyControllerSpec extends AnyWordSpec with MockFactory {
           .returning(Future.successful(()))
 
         val errorFromTtpConnector = ConnectorError(500, "Internal Service Error")
-        (ttpFromCdcsConnector
+        (ttpFeedbackLoopConnector
           .cancelTtp(_: TtpCancelRequest)(
             _: ExecutionContext,
             _: HeaderCarrier

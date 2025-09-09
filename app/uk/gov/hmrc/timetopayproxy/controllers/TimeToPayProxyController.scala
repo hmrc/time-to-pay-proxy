@@ -22,7 +22,7 @@ import play.api.mvc._
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
 import uk.gov.hmrc.timetopayproxy.actions.auth.AuthoriseAction
 import uk.gov.hmrc.timetopayproxy.config.FeatureSwitch
-import uk.gov.hmrc.timetopayproxy.connectors.TtpFromCdcsConnector
+import uk.gov.hmrc.timetopayproxy.connectors.TtpFeedbackLoopConnector
 import uk.gov.hmrc.timetopayproxy.models._
 import uk.gov.hmrc.timetopayproxy.models.affordablequotes.AffordableQuotesRequest
 import uk.gov.hmrc.timetopayproxy.models.error.TtppEnvelope.TtppEnvelope
@@ -43,7 +43,7 @@ class TimeToPayProxyController @Inject() (
   authoriseAction: AuthoriseAction,
   cc: ControllerComponents,
   timeToPayQuoteService: TTPQuoteService,
-  timeToPayFromCdcsConnector: TtpFromCdcsConnector,
+  ttpFeedbackLoopConnector: TtpFeedbackLoopConnector,
   timeToPayEligibilityService: TTPEService,
   @unused
   fs: FeatureSwitch
@@ -114,7 +114,7 @@ class TimeToPayProxyController @Inject() (
 
   def cancelTtp: Action[JsValue] = authoriseAction.async(parse.json) { implicit request =>
     withJsonBody[TtpCancelRequest] { deserialisedRequest: TtpCancelRequest =>
-      timeToPayFromCdcsConnector
+      ttpFeedbackLoopConnector
         .cancelTtp(deserialisedRequest)
         .leftMap(ttppError => ttppError.toWriteableProxyError)
         .fold(e => e.toResponse, r => r.toResponse)

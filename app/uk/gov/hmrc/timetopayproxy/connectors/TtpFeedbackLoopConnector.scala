@@ -32,18 +32,23 @@ import java.util.UUID
 import javax.inject.{ Inject, Singleton }
 import scala.concurrent.ExecutionContext
 
-@ImplementedBy(classOf[DefaultTtpFromCdcsConnector])
-trait TtpFromCdcsConnector {
+/** Feedback Loop Connector for CDCS -> TTP communication.
+  *
+  * The "feedback loop" refers to CDCS notifying TTP service about customer plan lifecycle events
+  * (cancel, amend, inform) so TTP can update downstream HoDs accordingly.
+  */
+@ImplementedBy(classOf[DefaultTtpFeedbackLoopConnector])
+trait TtpFeedbackLoopConnector {
   def cancelTtp(
     ttppRequest: TtpCancelRequest
   )(implicit ec: ExecutionContext, hc: HeaderCarrier): TtppEnvelope[TtpCancelInformativeResponse]
 }
 
 @Singleton
-class DefaultTtpFromCdcsConnector @Inject() (appConfig: AppConfig, httpClient: HttpClientV2)
-    extends TtpFromCdcsConnector {
+class DefaultTtpFeedbackLoopConnector @Inject() (appConfig: AppConfig, httpClient: HttpClientV2)
+    extends TtpFeedbackLoopConnector {
 
-  private val logger: RequestAwareLogger = new RequestAwareLogger(classOf[DefaultTtpFromCdcsConnector])
+  private val logger: RequestAwareLogger = new RequestAwareLogger(classOf[DefaultTtpFeedbackLoopConnector])
 
   def cancelTtp(
     ttppRequest: TtpCancelRequest

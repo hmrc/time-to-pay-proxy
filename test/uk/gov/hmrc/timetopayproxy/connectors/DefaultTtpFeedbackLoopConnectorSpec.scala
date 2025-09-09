@@ -37,7 +37,7 @@ import uk.gov.hmrc.timetopayproxy.support.WireMockUtils
 import java.time.{ Instant, LocalDate }
 import scala.concurrent.ExecutionContext
 
-final class DefaultTtpFromCdcsConnectorSpec
+final class DefaultTtpFeedbackLoopConnectorSpec
     extends PlaySpec with DefaultAwaitTimeout with FutureAwaits with MockFactory with WireMockUtils {
 
   val config = mock[Configuration]
@@ -97,10 +97,10 @@ final class DefaultTtpFromCdcsConnectorSpec
 
     val mockConfiguration: AppConfig = new MockAppConfig(config, servicesConfig, ifImpl)
 
-    val connector: TtpFromCdcsConnector = new DefaultTtpFromCdcsConnector(mockConfiguration, httpClient)
+    val connector: TtpFeedbackLoopConnector = new DefaultTtpFeedbackLoopConnector(mockConfiguration, httpClient)
   }
 
-  "DefaultTtpFromCdcsConnector" should {
+  "DefaultTtpFeedbackLoopConnector" should {
     ".cancelTtp" should {
 
       val ttpCancelRequest: TtpCancelRequest = TtpCancelRequest(
