@@ -57,7 +57,7 @@ class DefaultTtpFeedbackLoopConnector @Inject() (appConfig: AppConfig, httpClien
       HttpReadsWithLoggingBuilder[InternalTtppError, TtpCancelInformativeResponse](logger)
         .orSuccess[TtpCancelInformativeResponse](200)
         .orErrorTransformed[TtpCancelInformativeResponse](500, TtpCancelInformativeError(_))
-        .orErrorTransformed[TtpCancelGeneralFailureResponse](400, _.toConnectorError(400))
+        .orErrorTransformed[TtpCancelGeneralFailureResponse](400, error => ConnectorError(400, error.details))
         .orErrorTransformed[play.api.libs.json.JsObject](
           404,
           _ => ConnectorError(404, "Unexpected response from upstream")
