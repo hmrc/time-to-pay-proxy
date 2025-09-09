@@ -32,7 +32,6 @@ import uk.gov.hmrc.auth.core.retrieve.Retrieval
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.timetopayproxy.actions.auth.{ AuthoriseAction, AuthoriseActionImpl }
 import uk.gov.hmrc.timetopayproxy.config.FeatureSwitch
-import uk.gov.hmrc.timetopayproxy.connectors.TtpFeedbackLoopConnector
 import uk.gov.hmrc.timetopayproxy.models._
 import uk.gov.hmrc.timetopayproxy.models.affordablequotes._
 import uk.gov.hmrc.timetopayproxy.models.error.TtppEnvelope.TtppEnvelope
@@ -45,7 +44,7 @@ import uk.gov.hmrc.timetopayproxy.models.saopled.common.ProcessingDateTimeInstan
 import uk.gov.hmrc.timetopayproxy.models.saopled.ttpcancel.{ CancellationDate, TtpCancelInformativeResponse, TtpCancelPaymentPlan, TtpCancelRequest }
 import uk.gov.hmrc.timetopayproxy.models.{ IdType, IdValue, InstalmentDueDate }
 import uk.gov.hmrc.timetopayproxy.models.currency.GbpPoundsUnchecked
-import uk.gov.hmrc.timetopayproxy.services.{ TTPEService, TTPQuoteService }
+import uk.gov.hmrc.timetopayproxy.services.{ TTPEService, TTPQuoteService, TtpFeedbackLoopService }
 
 import java.time.{ Instant, LocalDate, LocalDateTime }
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -61,10 +60,10 @@ class TimeToPayProxyControllerSpec extends AnyWordSpec with MockFactory {
 
   private val ttpQuoteService = mock[TTPQuoteService]
   private val ttpeService = mock[TTPEService]
-  private val ttpFeedbackLoopConnector = mock[TtpFeedbackLoopConnector]
+  private val ttpFeedbackLoopService = mock[TtpFeedbackLoopService]
   private val fs: FeatureSwitch = mock[FeatureSwitch]
   private val controller =
-    new TimeToPayProxyController(authoriseAction, cc, ttpQuoteService, ttpFeedbackLoopConnector, ttpeService, fs)
+    new TimeToPayProxyController(authoriseAction, cc, ttpQuoteService, ttpFeedbackLoopService, ttpeService, fs)
 
   private val generateQuoteRequest = GenerateQuoteRequest(
     CustomerReference("customerReference"),
@@ -1227,7 +1226,7 @@ class TimeToPayProxyControllerSpec extends AnyWordSpec with MockFactory {
           .expects(*, *, *, *)
           .returning(Future.successful(()))
 
-        (ttpFeedbackLoopConnector
+        (ttpFeedbackLoopService
           .cancelTtp(_: TtpCancelRequest)(
             _: ExecutionContext,
             _: HeaderCarrier
@@ -1289,15 +1288,15 @@ class TimeToPayProxyControllerSpec extends AnyWordSpec with MockFactory {
           .expects(*, *, *, *)
           .returning(Future.successful(()))
 
-        val errorFromTtpConnector = ConnectorError(500, "Internal Service Error")
-        (ttpFeedbackLoopConnector
+        val errorFromTtpService = ConnectorError(500, "Internal Service Error")
+        (ttpFeedbackLoopService
           .cancelTtp(_: TtpCancelRequest)(
             _: ExecutionContext,
             _: HeaderCarrier
           ))
           .expects(ttpCancelRequest, *, *)
           .returning(
-            TtppEnvelope(errorFromTtpConnector.asLeft[TtpCancelInformativeResponse])
+            TtppEnvelope(errorFromTtpService.asLeft[TtpCancelInformativeResponse])
           )
 
         val fakeRequest: FakeRequest[JsValue] =
