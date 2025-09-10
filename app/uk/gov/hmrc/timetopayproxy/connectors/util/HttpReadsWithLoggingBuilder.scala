@@ -16,6 +16,7 @@
 
 package uk.gov.hmrc.timetopayproxy.connectors.util
 
+import cats.implicits.toBifunctorOps
 import play.api.http.Status
 import play.api.libs.json.{ JsError, JsSuccess, Reads }
 import uk.gov.hmrc.http.{ HeaderCarrier, HttpReads, HttpResponse }
@@ -26,10 +27,7 @@ import uk.gov.hmrc.timetopayproxy.models.error.ConnectorError
 import scala.util.{ Failure, Success, Try }
 
 final class HttpReadsWithLoggingBuilder[E >: ConnectorError, Result] private (
-  matcher: PartialFunction[Int, ResponseContext => Either[E, Result]],
-  //  The logger is injected so it can be fully tested, because the risk of logging sensitive information here is higher.
-  logger: RequestAwareLogger,
-  hc: HeaderCarrier
+  matcher: PartialFunction[Int, ResponseContext => Either[E, Result]]
 ) {
   def orSuccess[ReadableResult <: Result: Reads](incomingStatus: Int): HttpReadsWithLoggingBuilder[E, Result] =
     withMatcher(
@@ -39,13 +37,11 @@ final class HttpReadsWithLoggingBuilder[E >: ConnectorError, Result] private (
             case Success(JsSuccess(deserialisedBody, _)) => Right(deserialisedBody)
             case Success(JsError(_)) =>
               createConnectorError(
-                responseContext,
                 newStatus = 503,
                 simpleMessage = "Couldn't parse body from upstream"
               )
             case Failure(_) =>
               createConnectorError(
-                responseContext,
                 newStatus = 503,
                 simpleMessage = "Couldn't parse body from upstream"
               )
@@ -67,13 +63,11 @@ final class HttpReadsWithLoggingBuilder[E >: ConnectorError, Result] private (
             case Success(JsSuccess(deserialisedBody, _)) => Left(transform(deserialisedBody))
             case Success(JsError(_)) =>
               createConnectorError(
-                responseContext,
                 newStatus = 503,
                 simpleMessage = "Couldn't parse body from upstream"
               )
             case Failure(_) =>
               createConnectorError(
-                responseContext,
                 newStatus = 503,
                 simpleMessage = "Couldn't parse body from upstream"
               )
@@ -81,23 +75,36 @@ final class HttpReadsWithLoggingBuilder[E >: ConnectorError, Result] private (
       }
     )
 
-  def httpReads: HttpReads[Either[E, Result]] = { (method: String, url: String, response: HttpResponse) =>
-    matcher.lift(response.status) match {
-      case Some(handler) => handler(ResponseContext(method = method, url = url, response))
-      case None =>
-        createConnectorError(
-          ResponseContext(method = method, url = url, response),
-          newStatus = response.status,
-          simpleMessage = "Unexpected response from upstream"
-        )
-    }
+  def httpReads(logger: RequestAwareLogger)(implicit hc: HeaderCarrier): HttpReads[Either[E, Result]] = {
+    (method: String, url: String, response: HttpResponse) =>
+      matcher.lift(response.status) match {
+        case Some(handler) =>
+          handler(ResponseContext(method = method, url = url, response)).leftMap { error =>
+            log(logger, ResponseContext(method = method, url = url, response), newStatus = ???, simpleMessage = ???)
+            error
+          }
+        case None =>
+          val simpleMessage: String = "Unexpected response from upstream"
+          log(logger, ResponseContext(method = method, url = url, response), newStatus = response.status, simpleMessage)
+          createConnectorError(
+            newStatus = response.status,
+            simpleMessage
+          )
+      }
   }
 
   private def createConnectorError(
-    responseContext: ResponseContext,
     newStatus: Int,
     simpleMessage: String
   ): Left[ConnectorError, Nothing] = {
+    val errorMessage = if (simpleMessage.endsWith(".")) simpleMessage.dropRight(1) else simpleMessage
+
+    Left(ConnectorError(newStatus, errorMessage))
+  }
+
+  private def log(logger: RequestAwareLogger, responseContext: ResponseContext, newStatus: Int, simpleMessage: String)(
+    implicit hc: HeaderCarrier
+  ): Unit = {
     val incomingHttpBodyLine: String =
       if (Status.isSuccessful(responseContext.response.status)) {
         s"Incoming HTTP response body not logged for successful statuses."
@@ -106,7 +113,6 @@ final class HttpReadsWithLoggingBuilder[E >: ConnectorError, Result] private (
       }
 
     val logMessage = if (simpleMessage.endsWith(".")) simpleMessage else s"$simpleMessage."
-    val errorMessage = if (simpleMessage.endsWith(".")) simpleMessage.dropRight(1) else simpleMessage
 
     logger.error(
       s"""$logMessage
@@ -114,22 +120,18 @@ final class HttpReadsWithLoggingBuilder[E >: ConnectorError, Result] private (
          |Request made: ${responseContext.method} ${responseContext.url}
          |Response status received: ${responseContext.response.status}
          |$incomingHttpBodyLine""".stripMargin
-    )(hc)
-
-    Left(ConnectorError(newStatus, errorMessage))
+    )
   }
 
   private def withMatcher(
     newMatcher: PartialFunction[Int, ResponseContext => Either[E, Result]]
   ): HttpReadsWithLoggingBuilder[E, Result] =
-    new HttpReadsWithLoggingBuilder(newMatcher, logger, hc)
+    new HttpReadsWithLoggingBuilder(newMatcher)
 }
 
 object HttpReadsWithLoggingBuilder {
-  def apply[E >: ConnectorError, Result](logger: RequestAwareLogger)(implicit
-    hc: HeaderCarrier
-  ): HttpReadsWithLoggingBuilder[E, Result] =
-    new HttpReadsWithLoggingBuilder(PartialFunction.empty, logger, hc)
+  def apply[E >: ConnectorError, Result]: HttpReadsWithLoggingBuilder[E, Result] =
+    new HttpReadsWithLoggingBuilder(PartialFunction.empty)
 
   private final case class ResponseContext(method: String, url: String, response: HttpResponse)
 }

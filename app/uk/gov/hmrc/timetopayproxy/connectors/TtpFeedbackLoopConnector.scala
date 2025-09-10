@@ -50,19 +50,22 @@ class DefaultTtpFeedbackLoopConnector @Inject() (appConfig: AppConfig, httpClien
 
   private val logger: RequestAwareLogger = new RequestAwareLogger(classOf[DefaultTtpFeedbackLoopConnector])
 
+  private val httpReadsBuilder: HttpReadsWithLoggingBuilder[InternalTtppError, TtpCancelInformativeResponse] =
+    HttpReadsWithLoggingBuilder[InternalTtppError, TtpCancelInformativeResponse]
+      .orSuccess[TtpCancelInformativeResponse](200)
+      .orErrorTransformed[TtpCancelInformativeResponse](500, TtpCancelInformativeError(_))
+      .orErrorTransformed[TtpCancelGeneralFailureResponse](400, error => ConnectorError(400, error.details))
+      .orErrorTransformed[play.api.libs.json.JsObject](
+        404,
+        _ => ConnectorError(404, "Unexpected response from upstream")
+      )
+
   def cancelTtp(
     ttppRequest: TtpCancelRequest
   )(implicit ec: ExecutionContext, hc: HeaderCarrier): TtppEnvelope[TtpCancelInformativeResponse] = {
+
     implicit def httpReads: HttpReads[Either[InternalTtppError, TtpCancelInformativeResponse]] =
-      HttpReadsWithLoggingBuilder[InternalTtppError, TtpCancelInformativeResponse](logger)
-        .orSuccess[TtpCancelInformativeResponse](200)
-        .orErrorTransformed[TtpCancelInformativeResponse](500, TtpCancelInformativeError(_))
-        .orErrorTransformed[TtpCancelGeneralFailureResponse](400, error => ConnectorError(400, error.details))
-        .orErrorTransformed[play.api.libs.json.JsObject](
-          404,
-          _ => ConnectorError(404, "Unexpected response from upstream")
-        )
-        .httpReads
+      httpReadsBuilder.httpReads(logger)
 
     val path = if (appConfig.useIf) "/individuals/debts/time-to-pay/cancel" else "/debts/time-to-pay/cancel"
 
