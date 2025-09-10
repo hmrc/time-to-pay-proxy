@@ -30,6 +30,10 @@ trait TtpFeedbackLoopService {
   def cancelTtp(
     ttppRequest: TtpCancelRequest
   )(implicit ec: ExecutionContext, hc: HeaderCarrier): TtppEnvelope[TtpCancelSuccessfulResponse]
+
+  def informTtp(
+    ttppInformRequest: TtpInformRequest
+  )(implicit ec: ExecutionContext, hc: HeaderCarrier): TtppEnvelope[TtpInformInformativeSuccess]
 }
 
 @Singleton
@@ -38,4 +42,9 @@ class DefaultTtpFeedbackLoopService @Inject() (ttppConnector: TtpFeedbackLoopCon
     ttppRequest: TtpCancelRequest
   )(implicit ec: ExecutionContext, hc: HeaderCarrier): TtppEnvelope[TtpCancelSuccessfulResponse] =
     ttppConnector.cancelTtp(ttppRequest)
+
+  def informTtp(
+    ttppInformRequest: TtpInformRequest
+  )(implicit ec: ExecutionContext, hc: HeaderCarrier): TtppEnvelope[TtpInformInformativeSuccess] =
+    ttppConnector.informTtp(ttppInformRequest)
 }

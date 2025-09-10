@@ -118,6 +118,16 @@ class TimeToPayProxyController @Inject() (
     }
   }
 
+  def informTtp: Action[JsValue] = authoriseAction.async(parse.json) { implicit request =>
+    // TODO DTD-2856 remove usage of withJsonBody here as it does not conform to spec
+    withJsonBody[TtpInformRequest] { deserialisedRequest: TtpInformRequest =>
+      ttpFeedbackLoopService
+        .informTtp(deserialisedRequest)
+        .leftMap(ttppError => ttppError.toWriteableProxyError)
+        .fold(e => e.toErrorResult, r => r.toErrorResult)
+    }
+  }
+
   private def validateUpdateRequestMatchesQueryParams(
     customerReference: String,
     planId: String,
