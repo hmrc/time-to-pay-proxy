@@ -43,6 +43,10 @@ trait TtpFeedbackLoopConnector {
   def cancelTtp(
     ttppRequest: TtpCancelRequest
   )(implicit ec: ExecutionContext, hc: HeaderCarrier): TtppEnvelope[TtpCancelSuccessfulResponse]
+
+  def informTtp(
+    ttppInformRequest: TtpInformRequest
+  )(implicit ec: ExecutionContext, hc: HeaderCarrier): TtppEnvelope[TtpInformInformativeSuccess]
 }
 
 @Singleton
@@ -75,6 +79,33 @@ class DefaultTtpFeedbackLoopConnector @Inject() (appConfig: AppConfig, httpClien
         .withBody(Json.toJson(ttppRequest))
         .setHeader(requestHeaders: _*)
         .execute[Either[ProxyEnvelopeError, TtpCancelSuccessfulResponse]]
+    )
+  }
+
+  def informTtp(
+    ttppInformRequest: TtpInformRequest
+  )(implicit ec: ExecutionContext, hc: HeaderCarrier): TtppEnvelope[TtpInformInformativeSuccess] = {
+    implicit def httpReads: HttpReads[Either[InternalTtppError, TtpInformInformativeResponse]] =
+      HttpReadsWithLoggingBuilder[InternalTtppError, TtpInformInformativeResponse](logger)
+        .orSuccess[TtpInformInformativeSuccess](200)
+        .orError[TtpInformInformativeError](500)
+        .orErrorTransformed[TtpInformGeneralFailureResponse](400, error => ConnectorError(400, error.details))
+        .orErrorTransformed[play.api.libs.json.JsObject](
+          404,
+          _ => ConnectorError(404, "Unexpected response from upstream")
+        )
+        .httpReads
+
+    val path = if (appConfig.useIf) "/individuals/debts/time-to-pay/inform" else "/debts/time-to-pay/inform"
+
+    val url = url"${appConfig.ttpBaseUrl + path}"
+
+    EitherT(
+      httpClient
+        .post(url)
+        .withBody(Json.toJson(ttppInformRequest))
+        .setHeader(requestHeaders: _*)
+        .execute[Either[InternalTtppError, TtpInformInformativeResponse]]
     )
   }
 
