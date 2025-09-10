@@ -152,7 +152,7 @@ final class HttpReadsWithLoggingBuilderSpec extends AnyFreeSpec with MockFactory
       "when given a normal logger and header carrier" - {
         "when reading a 200 OK" - {
           "with an empty body" in new TestFixture[ConnectorError, Nothing] {
-            val httpReads: HttpReads[Either[ConnectorError, Nothing]] = obj.httpReads(logger)
+            val httpReads: HttpReads[Either[ConnectorError, Nothing]] = obj.httpReads(logger)(hc)
             val response: HttpResponse = HttpResponse(status = 200, body = TestData.emptyTextBody, headers = Map())
 
             expectOneErrorLogAndStoreInVar()
@@ -175,7 +175,7 @@ final class HttpReadsWithLoggingBuilderSpec extends AnyFreeSpec with MockFactory
           }
 
           "with an empty JSON body" in new TestFixture[ConnectorError, Nothing] {
-            val httpReads: HttpReads[Either[ConnectorError, Nothing]] = obj.httpReads(logger)
+            val httpReads: HttpReads[Either[ConnectorError, Nothing]] = obj.httpReads(logger)(hc)
             val response: HttpResponse = HttpResponse(status = 200, body = TestData.emptyJsonBody, headers = Map())
 
             expectOneErrorLogAndStoreInVar()
@@ -198,7 +198,7 @@ final class HttpReadsWithLoggingBuilderSpec extends AnyFreeSpec with MockFactory
           }
 
           "with a properly formatted TTP error JSON body" in new TestFixture[ConnectorError, Nothing] {
-            val httpReads: HttpReads[Either[ConnectorError, Nothing]] = obj.httpReads(logger)
+            val httpReads: HttpReads[Either[ConnectorError, Nothing]] = obj.httpReads(logger)(hc)
             val response: HttpResponse =
               HttpResponse(status = 200, body = TestData.ForApply.validTtpErrorBody, headers = Map())
 
@@ -222,7 +222,7 @@ final class HttpReadsWithLoggingBuilderSpec extends AnyFreeSpec with MockFactory
           }
 
           "with a properly formatted TTP-E error JSON body" in new TestFixture[ConnectorError, Nothing] {
-            val httpReads: HttpReads[Either[ConnectorError, Nothing]] = obj.httpReads(logger)
+            val httpReads: HttpReads[Either[ConnectorError, Nothing]] = obj.httpReads(logger)(hc)
             val response: HttpResponse =
               HttpResponse(status = 200, body = TestData.ForApply.validTtpEligibilityErrorBody, headers = Map())
 
@@ -248,7 +248,7 @@ final class HttpReadsWithLoggingBuilderSpec extends AnyFreeSpec with MockFactory
 
         "when reading a 400 BAD REQUEST" - {
           "with an empty body" in new TestFixture[ConnectorError, Nothing] {
-            val httpReads: HttpReads[Either[ConnectorError, Nothing]] = obj.httpReads(logger)
+            val httpReads: HttpReads[Either[ConnectorError, Nothing]] = obj.httpReads(logger)(hc)
             val response: HttpResponse = HttpResponse(status = 400, body = TestData.emptyTextBody, headers = Map())
 
             expectOneErrorLogAndStoreInVar()
@@ -271,7 +271,7 @@ final class HttpReadsWithLoggingBuilderSpec extends AnyFreeSpec with MockFactory
           }
 
           "with an empty JSON body" in new TestFixture[ConnectorError, Nothing] {
-            val httpReads: HttpReads[Either[ConnectorError, Nothing]] = obj.httpReads(logger)
+            val httpReads: HttpReads[Either[ConnectorError, Nothing]] = obj.httpReads(logger)(hc)
             val response: HttpResponse = HttpResponse(status = 400, body = TestData.emptyJsonBody, headers = Map())
 
             expectOneErrorLogAndStoreInVar()
@@ -294,7 +294,7 @@ final class HttpReadsWithLoggingBuilderSpec extends AnyFreeSpec with MockFactory
           }
 
           "with a properly formatted TTP error JSON body" in new TestFixture[ConnectorError, Nothing] {
-            val httpReads: HttpReads[Either[ConnectorError, Nothing]] = obj.httpReads(logger)
+            val httpReads: HttpReads[Either[ConnectorError, Nothing]] = obj.httpReads(logger)(hc)
             val response: HttpResponse =
               HttpResponse(status = 400, body = TestData.ForApply.validTtpErrorBody, headers = Map())
 
@@ -318,7 +318,7 @@ final class HttpReadsWithLoggingBuilderSpec extends AnyFreeSpec with MockFactory
           }
 
           "with a properly formatted TTP-E error JSON body" in new TestFixture[ConnectorError, Nothing] {
-            val httpReads: HttpReads[Either[ConnectorError, Nothing]] = obj.httpReads(logger)
+            val httpReads: HttpReads[Either[ConnectorError, Nothing]] = obj.httpReads(logger)(hc)
             val response: HttpResponse =
               HttpResponse(status = 400, body = TestData.ForApply.validTtpEligibilityErrorBody, headers = Map())
 
@@ -344,7 +344,7 @@ final class HttpReadsWithLoggingBuilderSpec extends AnyFreeSpec with MockFactory
 
         "when reading a 299 status with an empty JSON body, still doesn't log the body" in
           new TestFixture[ConnectorError, Nothing] {
-            val httpReads: HttpReads[Either[ConnectorError, Nothing]] = obj.httpReads(logger)
+            val httpReads: HttpReads[Either[ConnectorError, Nothing]] = obj.httpReads(logger)(hc)
             val response: HttpResponse =
               HttpResponse(status = 299, body = TestData.emptyJsonBody, headers = Map())
 
@@ -392,7 +392,7 @@ final class HttpReadsWithLoggingBuilderSpec extends AnyFreeSpec with MockFactory
               )
           }
             s"<$successfulStatus>" in new TestFixture[AnyRef, SuccessWrapper] {
-              val httpReads: HttpReads[Either[AnyRef, SuccessWrapper]] = makeHttpReadsBuilder(obj).httpReads(logger)
+              val httpReads: HttpReads[Either[AnyRef, SuccessWrapper]] = makeHttpReadsBuilder(obj).httpReads(logger)(hc)
 
               val response: HttpResponse = HttpResponse(status = successfulStatus, body = exampleBody, headers = Map())
 
@@ -663,7 +663,7 @@ final class HttpReadsWithLoggingBuilderSpec extends AnyFreeSpec with MockFactory
 
           for (unexpected2xxStatus <- unexpectedStatuses2xx)
             s"<$unexpected2xxStatus>" in new TestFixture[AnyRef, SuccessWrapper] {
-              val httpReads: HttpReads[Either[AnyRef, SuccessWrapper]] = makeHttpReadsBuilder(obj).httpReads(logger)
+              val httpReads: HttpReads[Either[AnyRef, SuccessWrapper]] = makeHttpReadsBuilder(obj).httpReads(logger)(hc)
 
               val response: HttpResponse =
                 HttpResponse(status = unexpected2xxStatus, body = SuccessWrapper236.exampleBody, headers = Map())
@@ -697,7 +697,7 @@ final class HttpReadsWithLoggingBuilderSpec extends AnyFreeSpec with MockFactory
 
           for (unexpected2xxStatus <- unexpectedStatuses2xx)
             s"<$unexpected2xxStatus>" in new TestFixture[AnyRef, SuccessWrapper] {
-              val httpReads: HttpReads[Either[AnyRef, SuccessWrapper]] = makeHttpReadsBuilder(obj).httpReads(logger)
+              val httpReads: HttpReads[Either[AnyRef, SuccessWrapper]] = makeHttpReadsBuilder(obj).httpReads(logger)(hc)
 
               val response: HttpResponse =
                 HttpResponse(status = unexpected2xxStatus, body = SuccessWrapper419.exampleBody, headers = Map())
@@ -731,7 +731,7 @@ final class HttpReadsWithLoggingBuilderSpec extends AnyFreeSpec with MockFactory
 
           for (unexpected2xxStatus <- unexpectedStatuses2xx)
             s"<$unexpected2xxStatus>" in new TestFixture[AnyRef, SuccessWrapper] {
-              val httpReads: HttpReads[Either[AnyRef, SuccessWrapper]] = makeHttpReadsBuilder(obj).httpReads(logger)
+              val httpReads: HttpReads[Either[AnyRef, SuccessWrapper]] = makeHttpReadsBuilder(obj).httpReads(logger)(hc)
 
               val response: HttpResponse =
                 HttpResponse(status = unexpected2xxStatus, body = ErrorFor109.exampleBody, headers = Map())
@@ -765,7 +765,7 @@ final class HttpReadsWithLoggingBuilderSpec extends AnyFreeSpec with MockFactory
 
           for (unexpected2xxStatus <- unexpectedStatuses2xx)
             s"<$unexpected2xxStatus>" in new TestFixture[AnyRef, SuccessWrapper] {
-              val httpReads: HttpReads[Either[AnyRef, SuccessWrapper]] = makeHttpReadsBuilder(obj).httpReads(logger)
+              val httpReads: HttpReads[Either[AnyRef, SuccessWrapper]] = makeHttpReadsBuilder(obj).httpReads(logger)(hc)
 
               val response: HttpResponse =
                 HttpResponse(status = unexpected2xxStatus, body = ErrorFor211ToTransform.exampleBody, headers = Map())
@@ -797,7 +797,7 @@ final class HttpReadsWithLoggingBuilderSpec extends AnyFreeSpec with MockFactory
         "when given an empty JSON body" - {
           for (unexpected2xxStatus <- unexpectedStatuses2xx)
             s"<$unexpected2xxStatus>" in new TestFixture[AnyRef, SuccessWrapper] {
-              val httpReads: HttpReads[Either[AnyRef, SuccessWrapper]] = makeHttpReadsBuilder(obj).httpReads(logger)
+              val httpReads: HttpReads[Either[AnyRef, SuccessWrapper]] = makeHttpReadsBuilder(obj).httpReads(logger)(hc)
 
               val response: HttpResponse =
                 HttpResponse(status = unexpected2xxStatus, body = """{}""", headers = Map())
@@ -829,7 +829,7 @@ final class HttpReadsWithLoggingBuilderSpec extends AnyFreeSpec with MockFactory
         "when given an unparsable text body" - {
           for (unexpected2xxStatus <- unexpectedStatuses2xx)
             s"<$unexpected2xxStatus>" in new TestFixture[AnyRef, SuccessWrapper] {
-              val httpReads: HttpReads[Either[AnyRef, SuccessWrapper]] = makeHttpReadsBuilder(obj).httpReads(logger)
+              val httpReads: HttpReads[Either[AnyRef, SuccessWrapper]] = makeHttpReadsBuilder(obj).httpReads(logger)(hc)
 
               val response: HttpResponse =
                 HttpResponse(status = unexpected2xxStatus, body = """SOMETEXT""", headers = Map())
@@ -868,7 +868,7 @@ final class HttpReadsWithLoggingBuilderSpec extends AnyFreeSpec with MockFactory
 
           for (unexpectedNon2xxStatus <- unexpectedStatusesNon2xx)
             s"<$unexpectedNon2xxStatus>" in new TestFixture[AnyRef, SuccessWrapper] {
-              val httpReads: HttpReads[Either[AnyRef, SuccessWrapper]] = makeHttpReadsBuilder(obj).httpReads(logger)
+              val httpReads: HttpReads[Either[AnyRef, SuccessWrapper]] = makeHttpReadsBuilder(obj).httpReads(logger)(hc)
 
               val response: HttpResponse =
                 HttpResponse(status = unexpectedNon2xxStatus, body = SuccessWrapper236.exampleBody, headers = Map())
@@ -900,7 +900,7 @@ final class HttpReadsWithLoggingBuilderSpec extends AnyFreeSpec with MockFactory
 
           for (unexpectedNon2xxStatus <- unexpectedStatusesNon2xx)
             s"<$unexpectedNon2xxStatus>" in new TestFixture[AnyRef, SuccessWrapper] {
-              val httpReads: HttpReads[Either[AnyRef, SuccessWrapper]] = makeHttpReadsBuilder(obj).httpReads(logger)
+              val httpReads: HttpReads[Either[AnyRef, SuccessWrapper]] = makeHttpReadsBuilder(obj).httpReads(logger)(hc)
 
               val response: HttpResponse =
                 HttpResponse(status = unexpectedNon2xxStatus, body = SuccessWrapper419.exampleBody, headers = Map())
@@ -932,7 +932,7 @@ final class HttpReadsWithLoggingBuilderSpec extends AnyFreeSpec with MockFactory
 
           for (unexpectedNon2xxStatus <- unexpectedStatusesNon2xx)
             s"<$unexpectedNon2xxStatus>" in new TestFixture[AnyRef, SuccessWrapper] {
-              val httpReads: HttpReads[Either[AnyRef, SuccessWrapper]] = makeHttpReadsBuilder(obj).httpReads(logger)
+              val httpReads: HttpReads[Either[AnyRef, SuccessWrapper]] = makeHttpReadsBuilder(obj).httpReads(logger)(hc)
 
               val response: HttpResponse =
                 HttpResponse(status = unexpectedNon2xxStatus, body = ErrorFor109.exampleBody, headers = Map())
@@ -964,7 +964,7 @@ final class HttpReadsWithLoggingBuilderSpec extends AnyFreeSpec with MockFactory
 
           for (unexpectedNon2xxStatus <- unexpectedStatusesNon2xx)
             s"<$unexpectedNon2xxStatus>" in new TestFixture[AnyRef, SuccessWrapper] {
-              val httpReads: HttpReads[Either[AnyRef, SuccessWrapper]] = makeHttpReadsBuilder(obj).httpReads(logger)
+              val httpReads: HttpReads[Either[AnyRef, SuccessWrapper]] = makeHttpReadsBuilder(obj).httpReads(logger)(hc)
 
               val response: HttpResponse =
                 HttpResponse(
@@ -998,7 +998,7 @@ final class HttpReadsWithLoggingBuilderSpec extends AnyFreeSpec with MockFactory
         "when given an empty JSON body" - {
           for (unexpectedNon2xxStatus <- unexpectedStatusesNon2xx)
             s"<$unexpectedNon2xxStatus>" in new TestFixture[AnyRef, SuccessWrapper] {
-              val httpReads: HttpReads[Either[AnyRef, SuccessWrapper]] = makeHttpReadsBuilder(obj).httpReads(logger)
+              val httpReads: HttpReads[Either[AnyRef, SuccessWrapper]] = makeHttpReadsBuilder(obj).httpReads(logger)(hc)
 
               val response: HttpResponse =
                 HttpResponse(status = unexpectedNon2xxStatus, body = """{}""", headers = Map())
@@ -1028,7 +1028,7 @@ final class HttpReadsWithLoggingBuilderSpec extends AnyFreeSpec with MockFactory
         "when given an unparsable text body" - {
           for (unexpectedNon2xxStatus <- unexpectedStatusesNon2xx)
             s"<$unexpectedNon2xxStatus>" in new TestFixture[AnyRef, SuccessWrapper] {
-              val httpReads: HttpReads[Either[AnyRef, SuccessWrapper]] = makeHttpReadsBuilder(obj).httpReads(logger)
+              val httpReads: HttpReads[Either[AnyRef, SuccessWrapper]] = makeHttpReadsBuilder(obj).httpReads(logger)(hc)
 
               val response: HttpResponse =
                 HttpResponse(status = unexpectedNon2xxStatus, body = """SOMETEXT""", headers = Map())
