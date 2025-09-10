@@ -49,8 +49,9 @@ info:
       | 1.0.14-proposedA| 19-08-2024 | Alex Olkhovskiy | Added new cancel endpoint    |
       | 1.0.14-proposedA.1| 01-09-2025 | Alex Olkhovskiy | Enhanced cancel endpoint response behavior documentation and examples |
       | 1.0.14-proposedA.2| 02-09-2025 | Alex Olkhovskiy | Update version to 1.0.14-proposedA.2 |
+      | 1.0.14-proposedA.3| 10-09-2025 | Alex Olkhovskiy | Change statusCode type to integer |
   contact: {}
-  version: 1.0.14-proposedA.2
+  version: 1.0.14-proposedA.3
 servers:
   - url: https://api.service.hmrc.gov.uk
     variables: {}
