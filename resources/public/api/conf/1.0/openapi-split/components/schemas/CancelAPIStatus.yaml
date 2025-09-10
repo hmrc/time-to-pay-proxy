@@ -9,9 +9,9 @@ properties:
     description: The API name (CESA, ETMP)
     example: CESA
   statusCode:
-    type: string
+    type: integer
     description: HTTP status code from the downstream API
-    example: '200'
+    example: 200
   processingDateTime:
     type: string
     format: date-time

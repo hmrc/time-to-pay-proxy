@@ -815,10 +815,10 @@ paths:
                   value:
                     apisCalled:
                       - name: CESA
-                        statusCode: '200'
+                        statusCode: 200
                         processingDateTime: '2025-05-01T14:30:00Z'
                       - name: ETMP
-                        statusCode: '201'
+                        statusCode: 201
                         processingDateTime: '2025-05-01T14:31:00Z'
                     processingDateTime: '2025-10-15T10:31:00Z'
                 allHoDsUnsuccessful:
@@ -826,11 +826,11 @@ paths:
                   value:
                     apisCalled:
                       - name: CESA
-                        statusCode: '500'
+                        statusCode: 500
                         processingDateTime: '2025-05-01T14:30:00Z'
                         errorResponse: Internal server error in CESA
                       - name: ETMP
-                        statusCode: '400'
+                        statusCode: 400
                         processingDateTime: '2025-05-01T14:31:00Z'
                         errorResponse: Invalid request payload
                     processingDateTime: '2025-10-15T10:31:00Z'
@@ -839,10 +839,10 @@ paths:
                   value:
                     apisCalled:
                       - name: CESA
-                        statusCode: '200'
+                        statusCode: 200
                         processingDateTime: '2025-05-01T14:30:00Z'
                       - name: ETMP
-                        statusCode: '500'
+                        statusCode: 500
                         processingDateTime: '2025-05-01T14:31:00Z'
                         errorResponse: Error processing cancellation
                     processingDateTime: '2025-10-15T10:31:00Z'
@@ -891,7 +891,7 @@ paths:
                   value:
                     apisCalled:
                       - name: CESA
-                        statusCode: '200'
+                        statusCode: 200
                         processingDateTime: '2025-10-15T10:30:00Z'
                     internalErrors:
                       - message: Could not parse response from calling ETMP
@@ -2438,9 +2438,9 @@ components:
           description: The API name (CESA, ETMP)
           example: CESA
         statusCode:
-          type: string
+          type: integer
           description: HTTP status code from the downstream API
-          example: '200'
+          example: 200
         processingDateTime:
           type: string
           format: date-time
