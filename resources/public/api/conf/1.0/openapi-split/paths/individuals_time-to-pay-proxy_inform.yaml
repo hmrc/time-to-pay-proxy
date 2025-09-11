@@ -63,10 +63,10 @@ post:
               value:
                 apisCalled:
                   - name: CESA
-                    statusCode: '200'
+                    statusCode: 200
                     processingDateTime: '2025-05-01T14:30:00Z'
                   - name: ETMP
-                    statusCode: '201'
+                    statusCode: 201
                     processingDateTime: '2025-05-01T14:31:00Z'
                 processingDateTime: '2025-05-01T14:32:00Z'
             allHoDsUnsuccessful:
@@ -74,11 +74,11 @@ post:
               value:
                 apisCalled:
                   - name: CESA
-                    statusCode: '500'
+                    statusCode: 500
                     processingDateTime: '2025-05-01T14:30:00Z'
                     errorResponse: "Internal server error in CESA"
                   - name: ETMP
-                    statusCode: '400'
+                    statusCode: 400
                     processingDateTime: '2025-05-01T14:31:00Z'
                     errorResponse: "Invalid request payload"
                 processingDateTime: '2025-05-01T14:32:00Z'
@@ -87,10 +87,10 @@ post:
               value:
                 apisCalled:
                   - name: CESA
-                    statusCode: '200'
+                    statusCode: 200
                     processingDateTime: '2025-05-01T14:30:00Z'
                   - name: ETMP
-                    statusCode: '500'
+                    statusCode: 500
                     processingDateTime: '2025-05-01T14:31:00Z'
                     errorResponse: "Error processing inform"
                 processingDateTime: '2025-05-01T14:32:00Z'
@@ -129,7 +129,7 @@ post:
               value:
                 apisCalled:
                   - name: CESA
-                    statusCode: '200'
+                    statusCode: 200
                     processingDateTime: '2025-10-15T10:30:00Z'
                 internalErrors:
                   - message: "Could not parse response from calling ETMP"
