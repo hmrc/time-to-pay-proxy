@@ -14,9 +14,9 @@ properties:
     description: The API name (CESA or ETMP)
     example: ETMP
   statusCode:
-    type: string
+    type: integer
     description: HTTP status code from the downstream API
-    example: '400'
+    example: 400
   errorResponse:
     type: string
     description: |

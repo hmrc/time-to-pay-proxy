@@ -49,8 +49,9 @@ info:
       | 1.0.14-proposedC | 19-08-2025 | Alex Olkhovskiy | Added new FullAmend endpoint|
       | 1.0.14-proposedC.1| 01-09-2025 | Alex Olkhovskiy | Enhanced full-amend endpoint response behavior documentation and examples |
       | 1.0.14-proposedC.2| 02-09-2025 | Alex Olkhovskiy | Update version to 1.0.14-proposedC.2 |
+      | 1.0.14-proposedC.3| 10-09-2025 | Alex Olkhovskiy | Change statusCode type to integer |
   contact: {}
-  version: 1.0.14-proposedC.2
+  version: 1.0.14-proposedC.3
 servers:
   - url: https://api.service.hmrc.gov.uk
     variables: {}
@@ -834,10 +835,10 @@ paths:
                     apisCalled:
                       - processingDateTime: '2025-05-01T14:30:00Z'
                         name: CESA
-                        statusCode: '200'
+                        statusCode: 200
                       - processingDateTime: '2025-05-01T14:31:00Z'
                         name: ETMP
-                        statusCode: '200'
+                        statusCode: 200
                     processingDateTime: '2025-05-01T14:32:00Z'
                 allHoDsUnsuccessful:
                   summary: All downstream HoDs respond unsuccessfully but responses parsed (HTTP 200)
@@ -845,11 +846,11 @@ paths:
                     apisCalled:
                       - processingDateTime: '2025-05-01T14:30:00Z'
                         name: CESA
-                        statusCode: '500'
+                        statusCode: 500
                         errorResponse: Internal server error in CESA
                       - processingDateTime: '2025-05-01T14:31:00Z'
                         name: ETMP
-                        statusCode: '400'
+                        statusCode: 400
                         errorResponse: Invalid amendment payload
                     processingDateTime: '2025-05-01T14:32:00Z'
                 mixedHoDsResponse:
@@ -858,10 +859,10 @@ paths:
                     apisCalled:
                       - processingDateTime: '2025-05-01T14:30:00Z'
                         name: CESA
-                        statusCode: '200'
+                        statusCode: 200
                       - processingDateTime: '2025-05-01T14:31:00Z'
                         name: ETMP
-                        statusCode: '500'
+                        statusCode: 500
                         errorResponse: Error processing full amend
                     processingDateTime: '2025-05-01T14:32:00Z'
         '400':
@@ -900,7 +901,7 @@ paths:
                     apisCalled:
                       - processingDateTime: '2025-10-15T10:30:00Z'
                         name: CESA
-                        statusCode: '200'
+                        statusCode: 200
                     internalErrors:
                       - message: Could not parse response from calling ETMP
                     processingDateTime: '2025-10-15T10:31:00Z'
@@ -927,6 +928,7 @@ components:
           tokenUrl: https://api.service.hmrc.gov.uk/oauth/token
           scopes:
             read:time-to-pay-proxy: read ttp data
+            write:time-to-pay-proxy: write ttp data
   schemas:
     ChannelIdentifier:
       title: ChannelIdentifier
@@ -2449,9 +2451,9 @@ components:
           description: The API name (CESA or ETMP)
           example: ETMP
         statusCode:
-          type: string
+          type: integer
           description: HTTP status code from the downstream API
-          example: '400'
+          example: 400
         errorResponse:
           type: string
           description: |

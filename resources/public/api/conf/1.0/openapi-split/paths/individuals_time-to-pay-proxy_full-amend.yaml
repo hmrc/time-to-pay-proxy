@@ -86,10 +86,10 @@ post:
                 apisCalled:
                   - processingDateTime: '2025-05-01T14:30:00Z'
                     name: CESA
-                    statusCode: '200'
+                    statusCode: 200
                   - processingDateTime: '2025-05-01T14:31:00Z'
                     name: ETMP
-                    statusCode: '200'
+                    statusCode: 200
                 processingDateTime: '2025-05-01T14:32:00Z'
             allHoDsUnsuccessful:
               summary: All downstream HoDs respond unsuccessfully but responses parsed (HTTP 200)
@@ -97,11 +97,11 @@ post:
                 apisCalled:
                   - processingDateTime: '2025-05-01T14:30:00Z'
                     name: CESA
-                    statusCode: '500'
+                    statusCode: 500
                     errorResponse: "Internal server error in CESA"
                   - processingDateTime: '2025-05-01T14:31:00Z'
                     name: ETMP
-                    statusCode: '400'
+                    statusCode: 400
                     errorResponse: "Invalid amendment payload"
                 processingDateTime: '2025-05-01T14:32:00Z'
             mixedHoDsResponse:
@@ -110,10 +110,10 @@ post:
                 apisCalled:
                   - processingDateTime: '2025-05-01T14:30:00Z'
                     name: CESA
-                    statusCode: '200'
+                    statusCode: 200
                   - processingDateTime: '2025-05-01T14:31:00Z'
                     name: ETMP
-                    statusCode: '500'
+                    statusCode: 500
                     errorResponse: "Error processing full amend"
                 processingDateTime: '2025-05-01T14:32:00Z'
     '400':
@@ -152,7 +152,7 @@ post:
                 apisCalled:
                   - processingDateTime: '2025-10-15T10:30:00Z'
                     name: CESA
-                    statusCode: '200'
+                    statusCode: 200
                 internalErrors:
                   - message: "Could not parse response from calling ETMP"
                 processingDateTime: '2025-10-15T10:31:00Z'

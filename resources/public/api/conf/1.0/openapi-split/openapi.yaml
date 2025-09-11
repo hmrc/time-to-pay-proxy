@@ -79,8 +79,9 @@ info:
       | 1.0.14-proposedC | 19-08-2025 | Alex Olkhovskiy | Added new FullAmend endpoint|
       | 1.0.14-proposedC.1| 01-09-2025 | Alex Olkhovskiy | Enhanced full-amend endpoint response behavior documentation and examples |
       | 1.0.14-proposedC.2| 02-09-2025 | Alex Olkhovskiy | Update version to 1.0.14-proposedC.2 |
+      | 1.0.14-proposedC.3| 10-09-2025 | Alex Olkhovskiy | Change statusCode type to integer |
   contact: {}
-  version: 1.0.14-proposedC.2
+  version: 1.0.14-proposedC.3
 servers:
   - url: https://api.service.hmrc.gov.uk
     variables: {}
@@ -129,6 +130,7 @@ components:
           tokenUrl: https://api.service.hmrc.gov.uk/oauth/token
           scopes:
             read:time-to-pay-proxy: read ttp data
+            write:time-to-pay-proxy: write ttp data
 tags:
   - name: individuals
     description: ''
