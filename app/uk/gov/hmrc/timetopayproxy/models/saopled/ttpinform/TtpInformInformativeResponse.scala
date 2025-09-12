@@ -16,14 +16,14 @@
 
 package uk.gov.hmrc.timetopayproxy.models.saopled.ttpinform
 
-import play.api.libs.json.{JsObject, Json, OFormat}
-import uk.gov.hmrc.timetopayproxy.models.error.{InternalTtppError, TtppWriteableError}
+import play.api.libs.json.{ JsObject, Json, OFormat }
+import uk.gov.hmrc.timetopayproxy.models.error.{ InternalTtppError, TtppWriteableError }
 import uk.gov.hmrc.timetopayproxy.models.saopled.common.ProcessingDateTimeInstant
 import uk.gov.hmrc.timetopayproxy.models.saopled.common.apistatus.ApiStatus
 
 /** This is intended for both `200 OK` and `500 Internal Server Error`.
- * This is also an incoming error from the `time-to-pay` service.
- */
+  * This is also an incoming error from the `time-to-pay` service.
+  */
 sealed abstract class TtpInformInformativeResponse(
   val apisCalled: List[ApiStatus],
   val processingDateTime: ProcessingDateTimeInstant
@@ -41,9 +41,10 @@ object TtpInformInformativeSuccess {
 final case class TtpInformInformativeError(
   override val apisCalled: List[ApiStatus],
   override val processingDateTime: ProcessingDateTimeInstant
-) extends TtpInformInformativeResponse(apisCalled = apisCalled, processingDateTime = processingDateTime) with InternalTtppError with TtppWriteableError {
-    def toWriteableProxyError: TtppWriteableError = this
-    def toJson: JsObject = Json.toJsObject(this)
+) extends TtpInformInformativeResponse(apisCalled = apisCalled, processingDateTime = processingDateTime)
+    with InternalTtppError with TtppWriteableError {
+  def toWriteableProxyError: TtppWriteableError = this
+  def toJson: JsObject = Json.toJsObject(this)
 }
 
 object TtpInformInformativeError {
