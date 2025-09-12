@@ -16,10 +16,10 @@
 
 package uk.gov.hmrc.timetopayproxy.models.saopled.ttpinform
 
-import play.api.libs.json.{Json, OFormat}
+import play.api.libs.json.{ Format, Json }
 
-final case class DdiReference(value: String)
+final case class DdiReference(value: String) extends AnyVal
 
 object DdiReference {
-  implicit val format: OFormat[DdiReference] = Json.format[DdiReference]
+  implicit val format: Format[DdiReference] = Json.valueFormat[DdiReference]
 }
