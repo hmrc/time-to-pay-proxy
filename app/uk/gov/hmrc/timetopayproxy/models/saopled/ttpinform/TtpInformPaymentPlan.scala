@@ -16,10 +16,10 @@
 
 package uk.gov.hmrc.timetopayproxy.models.saopled.ttpinform
 
-import play.api.libs.json.{Json, OFormat}
+import play.api.libs.json.{ Json, OFormat }
 import uk.gov.hmrc.timetopayproxy.models.FrequencyLowercase
 import uk.gov.hmrc.timetopayproxy.models.currency.GbpPoundsUnchecked
-import uk.gov.hmrc.timetopayproxy.models.saopled.common.{ArrangementAgreedDate, InitialPaymentDate, TtpEndDate}
+import uk.gov.hmrc.timetopayproxy.models.saopled.common.{ ArrangementAgreedDate, InitialPaymentDate, TtpEndDate }
 
 final case class TtpInformPaymentPlan(
   arrangementAgreedDate: ArrangementAgreedDate,
