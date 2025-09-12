@@ -25,7 +25,7 @@ import uk.gov.hmrc.timetopayproxy.config.AppConfig
 import uk.gov.hmrc.timetopayproxy.logging.RequestAwareLogger
 import uk.gov.hmrc.timetopayproxy.models._
 import uk.gov.hmrc.timetopayproxy.models.affordablequotes.{ AffordableQuoteResponse, AffordableQuotesRequest }
-import uk.gov.hmrc.timetopayproxy.models.error.InternalTtppError
+import uk.gov.hmrc.timetopayproxy.models.error.TtppSpecificError
 import uk.gov.hmrc.timetopayproxy.models.error.TtppEnvelope.TtppEnvelope
 
 import java.net.URLEncoder
@@ -95,7 +95,7 @@ class DefaultTtpConnector @Inject() (appConfig: AppConfig, httpClient: HttpClien
         .post(url)
         .withBody(Json.toJson(ttppRequest))
         .setHeader(headers(getOrGenerateCorrelationId): _*)
-        .execute[Either[InternalTtppError, GenerateQuoteResponse]]
+        .execute[Either[TtppSpecificError, GenerateQuoteResponse]]
     )
   }
 
@@ -121,7 +121,7 @@ class DefaultTtpConnector @Inject() (appConfig: AppConfig, httpClient: HttpClien
     EitherT(
       httpClient
         .get(url)
-        .execute[Either[InternalTtppError, Response]]
+        .execute[Either[TtppSpecificError, Response]]
     )
   }
 
@@ -143,7 +143,7 @@ class DefaultTtpConnector @Inject() (appConfig: AppConfig, httpClient: HttpClien
       httpClient
         .put(url)
         .withBody(Json.toJson(updatePlanRequest))
-        .execute[Either[InternalTtppError, UpdatePlanResponse]]
+        .execute[Either[TtppSpecificError, UpdatePlanResponse]]
     )
   }
 
@@ -166,7 +166,7 @@ class DefaultTtpConnector @Inject() (appConfig: AppConfig, httpClient: HttpClien
         .post(url)
         .withBody(Json.toJson(createPlanRequest))
         .setHeader(headers(getOrGenerateCorrelationId): _*)
-        .execute[Either[InternalTtppError, CreatePlanResponse]]
+        .execute[Either[TtppSpecificError, CreatePlanResponse]]
     )
   }
 
@@ -183,7 +183,7 @@ class DefaultTtpConnector @Inject() (appConfig: AppConfig, httpClient: HttpClien
       httpClient
         .post(url)
         .withBody(Json.toJson(affordableQuotesRequest))
-        .execute[Either[InternalTtppError, AffordableQuoteResponse]]
+        .execute[Either[TtppSpecificError, AffordableQuoteResponse]]
     )
   }
 

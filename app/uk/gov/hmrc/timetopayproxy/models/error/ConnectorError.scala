@@ -18,7 +18,7 @@ package uk.gov.hmrc.timetopayproxy.models.error
 
 import play.api.libs.json.{ Json, Reads }
 
-final case class ConnectorError(statusCode: Int, message: String) extends InternalTtppError {
+final case class ConnectorError(statusCode: Int, message: String) extends TtppSpecificError {
   def toWriteableProxyError: TtppErrorResponse = TtppErrorResponse(statusCode, message)
 }
 

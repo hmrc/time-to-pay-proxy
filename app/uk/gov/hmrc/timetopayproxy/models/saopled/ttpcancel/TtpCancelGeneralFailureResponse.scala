@@ -17,11 +17,11 @@
 package uk.gov.hmrc.timetopayproxy.models.saopled.ttpcancel
 
 import play.api.libs.json.{ JsObject, Json, OFormat }
-import uk.gov.hmrc.timetopayproxy.models.error.{ InternalTtppError, TtppWriteableError }
+import uk.gov.hmrc.timetopayproxy.models.error.{ TtppSpecificError, TtppWriteableError }
 
 /** This is both an incoming and an outgoing error response body. */
 final case class TtpCancelGeneralFailureResponse(code: Int, details: String)
-    extends InternalTtppError with TtppWriteableError /* TODO DTD-3785: This should no longer be writeable. */ {
+    extends TtppSpecificError with TtppWriteableError /* TODO DTD-3785: This should no longer be writeable. */ {
 
   def toWriteableProxyError: TtppWriteableError = this
   def toJson: JsObject = Json.toJsObject(this)

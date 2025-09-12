@@ -17,7 +17,7 @@
 package uk.gov.hmrc.timetopayproxy.models.saopled.ttpcancel
 
 import play.api.libs.json.{ JsObject, Json, OFormat }
-import uk.gov.hmrc.timetopayproxy.models.error.{ InternalTtppError, TtppWriteableError }
+import uk.gov.hmrc.timetopayproxy.models.error.{ TtppSpecificError, TtppWriteableError }
 import uk.gov.hmrc.timetopayproxy.models.saopled.common.ProcessingDateTimeInstant
 import uk.gov.hmrc.timetopayproxy.models.saopled.common.apistatus.ApiStatus
 
@@ -27,7 +27,7 @@ import uk.gov.hmrc.timetopayproxy.models.saopled.common.apistatus.ApiStatus
 final case class TtpCancelInformativeResponse(
   apisCalled: List[ApiStatus],
   processingDateTime: ProcessingDateTimeInstant
-) extends InternalTtppError with TtppWriteableError {
+) extends TtppSpecificError with TtppWriteableError {
 
   def toWriteableProxyError: TtppWriteableError = this
   def toJson: JsObject = Json.toJsObject(this)
