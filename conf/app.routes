@@ -9,3 +9,4 @@ POST       /self-serve/affordable-quotes            uk.gov.hmrc.timetopayproxy.c
 POST       /charge-info                             uk.gov.hmrc.timetopayproxy.controllers.TimeToPayProxyController.checkChargeInfo
 
 POST       /cancel                                  uk.gov.hmrc.timetopayproxy.controllers.TimeToPayProxyController.cancelTtp
+POST       /inform                                  uk.gov.hmrc.timetopayproxy.controllers.TimeToPayProxyController.informTtp

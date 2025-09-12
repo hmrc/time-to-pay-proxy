@@ -84,16 +84,8 @@ class DefaultTtpFeedbackLoopConnector @Inject() (appConfig: AppConfig, httpClien
   def informTtp(
     ttppInformRequest: TtpInformRequest
   )(implicit ec: ExecutionContext, hc: HeaderCarrier): TtppEnvelope[TtpInformInformativeSuccess] = {
-    implicit def httpReads: HttpReads[Either[InternalTtppError, TtpInformInformativeResponse]] =
-      HttpReadsWithLoggingBuilder[InternalTtppError, TtpInformInformativeResponse](logger)
-        .orSuccess[TtpInformInformativeSuccess](200)
-        .orError[TtpInformInformativeError](500)
-        .orErrorTransformed[TtpInformGeneralFailureResponse](400, error => ConnectorError(400, error.details))
-        .orErrorTransformed[play.api.libs.json.JsObject](
-          404,
-          _ => ConnectorError(404, "Unexpected response from upstream")
-        )
-        .httpReads
+    implicit def httpReads: HttpReads[Either[InternalTtppError, TtpInformInformativeSuccess]] =
+      httpReadsInformBuilder.httpReads(logger)
 
     val path = if (appConfig.useIf) "/individuals/debts/time-to-pay/inform" else "/debts/time-to-pay/inform"
 
@@ -104,7 +96,7 @@ class DefaultTtpFeedbackLoopConnector @Inject() (appConfig: AppConfig, httpClien
         .post(url)
         .withBody(Json.toJson(ttppInformRequest))
         .setHeader(requestHeaders: _*)
-        .execute[Either[InternalTtppError, TtpInformInformativeResponse]]
+        .execute[Either[InternalTtppError, TtpInformInformativeSuccess]]
     )
   }
 
