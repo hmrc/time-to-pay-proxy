@@ -46,8 +46,9 @@ info:
       | 1.0.12 | 23-07-2025 | Alex Olkhovskiy | make regimeType enum |
       | 1.0.13 | 08-07-2025 | Alex Olkhovskiy | make indentations in charge-info request non-empty, remove altFormat and country|
       | 1.0.14 | 14-08-2025 | Alex Olkhovskiy | refactor the spec with linter|
+      | 1.0.14-proposedD | 15-09-2025 | Alex Olkhovskiy | Added 422 error response to charge-info endpoint|
   contact: {}
-  version: 1.0.14
+  version: 1.0.14-proposedD
 servers:
   - url: https://api.service.hmrc.gov.uk
     variables: {}
@@ -721,6 +722,16 @@ paths:
               example:
                 statusCode: 401
                 errorMessage: A user with no active session will return 401 response
+        '422':
+          description: ''
+          headers: {}
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                statusCode: 422
+                errorMessage: Charges with the same charge reference do not share the same data
         '500':
           description: ''
           headers: {}

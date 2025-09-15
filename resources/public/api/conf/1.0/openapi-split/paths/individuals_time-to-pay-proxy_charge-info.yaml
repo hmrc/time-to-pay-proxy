@@ -51,6 +51,16 @@ post:
           example:
             statusCode: 401
             errorMessage: A user with no active session will return 401 response
+    '422':
+      description: ''
+      headers: {}
+      content:
+        application/json:
+          schema:
+            $ref: ../components/schemas/ErrorResponse.yaml
+          example:
+            statusCode: 422
+            errorMessage: Charges with the same charge reference do not share the same data
     '500':
       description: ''
       headers: {}
