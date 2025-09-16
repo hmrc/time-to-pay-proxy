@@ -805,6 +805,27 @@ class TimeToPayProxyControllerItSpec extends IntegrationBaseSpec {
               }
           }
 
+          "when TimeToPay returns unexpected success status" in new TimeToPayProxyControllerTestBase {
+            stubPostWithResponseBody(url = "/auth/authorise", status = 200, responseBody = "null")
+            stubPostWithResponseBody(
+              url = "/debts/time-to-pay/cancel",
+              status = 201,
+              responseBody = Json.obj().toString()
+            )
+
+            val requestForCancelPlan: WSRequest = buildRequest("/cancel")
+
+            val response: WSResponse = await(
+              requestForCancelPlan.post(Json.toJson(cancelRequest))
+            )
+
+            val expectedTtppErrorResponse: TtppErrorResponse =
+              TtppErrorResponse(statusCode = 503, errorMessage = "Upstream response status is unexpected.")
+
+            response.json shouldBe Json.toJson(expectedTtppErrorResponse)
+            response.status shouldBe 503
+          }
+
           "when TimeToPay returns unexpected error status" in new TimeToPayProxyControllerTestBase {
             stubPostWithResponseBody(url = "/auth/authorise", status = 200, responseBody = "null")
             stubPostWithResponseBody(
@@ -820,10 +841,10 @@ class TimeToPayProxyControllerItSpec extends IntegrationBaseSpec {
             )
 
             val expectedTtppErrorResponse: TtppErrorResponse =
-              TtppErrorResponse(statusCode = 403, errorMessage = "Upstream response status is unexpected.")
+              TtppErrorResponse(statusCode = 503, errorMessage = "Upstream response status is unexpected.")
 
             response.json shouldBe Json.toJson(expectedTtppErrorResponse)
-            response.status shouldBe 403
+            response.status shouldBe 503
           }
         }
       }

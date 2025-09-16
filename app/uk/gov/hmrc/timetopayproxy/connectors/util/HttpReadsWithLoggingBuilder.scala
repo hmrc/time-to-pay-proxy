@@ -91,7 +91,10 @@ final class HttpReadsWithLoggingBuilder[E >: ConnectorError, Result] private (
         case None =>
           createConnectorError(
             responseContext,
-            newStatus = response.status,
+            // Unrecognised upstream statuses cannot be forwarded because:
+            //   1. They will likely break our schema by returning undocumented status codes with mismatched JSON.
+            //   2. Some status codes don't make sense to be forwarded except in very special situations, e.g. 403, 404.
+            newStatus = 503,
             simpleMessage = "Upstream response status is unexpected.",
             logger
           )(hc)
