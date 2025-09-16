@@ -750,12 +750,12 @@ class TimeToPayProxyControllerItSpec extends IntegrationBaseSpec {
 
       "should return a 503 statusCode" - {
         "when given a valid json payload" - {
-          for (responseStatus <- List(200, 400, 500)) s"when TimeToPay returns a $responseStatus response" - {
+          "when TimeToPay returns an expected 200 response" - {
             "with a null json response from TTP" in new TimeToPayProxyControllerTestBase {
               stubPostWithResponseBody(url = "/auth/authorise", status = 200, responseBody = "null")
               stubPostWithResponseBody(
                 url = "/debts/time-to-pay/cancel",
-                status = responseStatus,
+                status = 200,
                 responseBody = JsNull.toString()
               )
 
@@ -766,18 +766,50 @@ class TimeToPayProxyControllerItSpec extends IntegrationBaseSpec {
               )
 
               val expectedTtppErrorResponse: TtppErrorResponse =
-                TtppErrorResponse(statusCode = 503, errorMessage = "Couldn't parse body from upstream")
+                TtppErrorResponse(
+                  statusCode = 503,
+                  errorMessage = "JSON structure is not valid in successful upstream response."
+                )
 
               response.json shouldBe Json.toJson(expectedTtppErrorResponse)
               response.status shouldBe 503
             }
           }
 
-          "when TimeToPay returns unexpected status" in new TimeToPayProxyControllerTestBase {
+          "when TimeToPay returns an expected error response" - {
+            for (responseStatus <- List(400, 500))
+              s"<$responseStatus>" - {
+                "with a null json response from TTP" in new TimeToPayProxyControllerTestBase {
+                  stubPostWithResponseBody(url = "/auth/authorise", status = 200, responseBody = "null")
+                  stubPostWithResponseBody(
+                    url = "/debts/time-to-pay/cancel",
+                    status = responseStatus,
+                    responseBody = JsNull.toString()
+                  )
+
+                  val requestForCancelPlan: WSRequest = buildRequest("/cancel")
+
+                  val response: WSResponse = await(
+                    requestForCancelPlan.post(Json.toJson(cancelRequest))
+                  )
+
+                  val expectedTtppErrorResponse: TtppErrorResponse =
+                    TtppErrorResponse(
+                      statusCode = 503,
+                      errorMessage = "JSON structure is not valid in error upstream response."
+                    )
+
+                  response.json shouldBe Json.toJson(expectedTtppErrorResponse)
+                  response.status shouldBe 503
+                }
+              }
+          }
+
+          "when TimeToPay returns unexpected error status" in new TimeToPayProxyControllerTestBase {
             stubPostWithResponseBody(url = "/auth/authorise", status = 200, responseBody = "null")
             stubPostWithResponseBody(
               url = "/debts/time-to-pay/cancel",
-              status = 404,
+              status = 403,
               responseBody = Json.obj().toString()
             )
 
@@ -788,10 +820,10 @@ class TimeToPayProxyControllerItSpec extends IntegrationBaseSpec {
             )
 
             val expectedTtppErrorResponse: TtppErrorResponse =
-              TtppErrorResponse(statusCode = 404, errorMessage = "Unexpected response from upstream")
+              TtppErrorResponse(statusCode = 403, errorMessage = "Upstream response status is unexpected.")
 
             response.json shouldBe Json.toJson(expectedTtppErrorResponse)
-            response.status shouldBe 404
+            response.status shouldBe 403
           }
         }
       }

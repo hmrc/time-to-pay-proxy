@@ -38,14 +38,14 @@ final class HttpReadsWithLoggingBuilder[E >: ConnectorError, Result] private (
               createConnectorError(
                 responseContext,
                 newStatus = 503,
-                simpleMessage = "Couldn't parse body from upstream",
+                simpleMessage = "JSON structure is not valid in successful upstream response.",
                 logger
               )(hc)
             case Failure(_) =>
               createConnectorError(
                 responseContext,
                 newStatus = 503,
-                simpleMessage = "Couldn't parse body from upstream",
+                simpleMessage = "Successful upstream response body is not JSON.",
                 logger
               )(hc)
           }
@@ -68,14 +68,14 @@ final class HttpReadsWithLoggingBuilder[E >: ConnectorError, Result] private (
               createConnectorError(
                 responseContext,
                 newStatus = 503,
-                simpleMessage = "Couldn't parse body from upstream",
+                simpleMessage = "JSON structure is not valid in error upstream response.",
                 logger
               )(hc)
             case Failure(_) =>
               createConnectorError(
                 responseContext,
                 newStatus = 503,
-                simpleMessage = "Couldn't parse body from upstream",
+                simpleMessage = "Error upstream response body is not JSON.",
                 logger
               )(hc)
           }
@@ -92,7 +92,7 @@ final class HttpReadsWithLoggingBuilder[E >: ConnectorError, Result] private (
           createConnectorError(
             responseContext,
             newStatus = response.status,
-            simpleMessage = "Unexpected response from upstream",
+            simpleMessage = "Upstream response status is unexpected.",
             logger
           )(hc)
       }
@@ -106,23 +106,20 @@ final class HttpReadsWithLoggingBuilder[E >: ConnectorError, Result] private (
   )(implicit hc: HeaderCarrier): Left[ConnectorError, Nothing] = {
     val incomingHttpBodyLine: String =
       if (Status.isSuccessful(responseContext.response.status)) {
-        s"Incoming HTTP response body not logged for successful statuses."
+        s"Incoming HTTP response body not logged for successful (2xx) statuses."
       } else {
         s"Incoming HTTP response body: ${responseContext.response.body}"
       }
 
-    val logMessage = if (simpleMessage.endsWith(".")) simpleMessage else s"$simpleMessage."
-
     logger.error(
-      s"""$logMessage
+      s"""$simpleMessage
          |Response status being returned: $newStatus
          |Request made: ${responseContext.method} ${responseContext.url}
          |Response status received: ${responseContext.response.status}
          |$incomingHttpBodyLine""".stripMargin
     )
 
-    val errorMessage = if (simpleMessage.endsWith(".")) simpleMessage.dropRight(1) else simpleMessage
-    Left(ConnectorError(newStatus, errorMessage))
+    Left(ConnectorError(statusCode = newStatus, message = simpleMessage))
   }
 
   private def withMatcher(
