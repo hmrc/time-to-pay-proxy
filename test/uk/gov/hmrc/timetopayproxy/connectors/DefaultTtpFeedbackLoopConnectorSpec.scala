@@ -162,18 +162,6 @@ final class DefaultTtpFeedbackLoopConnectorSpec
           await(result.value) mustBe Left(ConnectorError(400, "Invalid request body"))
         }
 
-        "handle 404 responses" in new Setup(ifImpl = true) {
-          stubPostWithResponseBody(
-            "/individuals/debts/time-to-pay/cancel",
-            404,
-            """{}"""
-          )
-
-          val result = connector.cancelTtp(ttpCancelRequest)
-
-          await(result.value) mustBe Left(ConnectorError(404, "Unexpected response from upstream"))
-        }
-
         "handle 500 responses" in new Setup(ifImpl = true) {
           stubPostWithResponseBody(
             "/individuals/debts/time-to-pay/cancel",
@@ -210,18 +198,6 @@ final class DefaultTtpFeedbackLoopConnectorSpec
           val result = connector.cancelTtp(ttpCancelRequest)
 
           await(result.value) mustBe Left(ConnectorError(400, "Invalid request body"))
-        }
-
-        "handle 404 responses" in new Setup(ifImpl = false) {
-          stubPostWithResponseBody(
-            "/debts/time-to-pay/cancel",
-            404,
-            """{}"""
-          )
-
-          val result = connector.cancelTtp(ttpCancelRequest)
-
-          await(result.value) mustBe Left(ConnectorError(404, "Unexpected response from upstream"))
         }
 
         "handle 500 responses" in new Setup(ifImpl = false) {

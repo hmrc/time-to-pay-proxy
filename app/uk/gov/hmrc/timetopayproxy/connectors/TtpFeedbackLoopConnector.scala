@@ -24,8 +24,8 @@ import uk.gov.hmrc.http.{ HeaderCarrier, HttpReads, StringContextOps }
 import uk.gov.hmrc.timetopayproxy.config.AppConfig
 import uk.gov.hmrc.timetopayproxy.connectors.util.HttpReadsWithLoggingBuilder
 import uk.gov.hmrc.timetopayproxy.logging.RequestAwareLogger
-import uk.gov.hmrc.timetopayproxy.models.error.{ ConnectorError, TtppSpecificError }
 import uk.gov.hmrc.timetopayproxy.models.error.TtppEnvelope.TtppEnvelope
+import uk.gov.hmrc.timetopayproxy.models.error.{ ConnectorError, TtppSpecificError }
 import uk.gov.hmrc.timetopayproxy.models.saopled.ttpcancel.{ TtpCancelGeneralFailureResponse, TtpCancelInformativeError, TtpCancelInformativeResponse, TtpCancelRequest }
 
 import java.util.UUID
@@ -56,10 +56,6 @@ class DefaultTtpFeedbackLoopConnector @Inject() (appConfig: AppConfig, httpClien
       // TODO DTD-3785: Read `TtpCancelInformativeError` directly and remove the transformation.
       .orErrorTransformed[TtpCancelInformativeResponse](500, TtpCancelInformativeError(_))
       .orErrorTransformed[TtpCancelGeneralFailureResponse](400, error => ConnectorError(400, error.details))
-      .orErrorTransformed[play.api.libs.json.JsObject](
-        404,
-        _ => ConnectorError(404, "Unexpected response from upstream")
-      )
 
   def cancelTtp(
     ttppRequest: TtpCancelRequest
