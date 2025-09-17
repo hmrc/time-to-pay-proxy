@@ -30,7 +30,7 @@ import uk.gov.hmrc.timetopayproxy.models.currency.GbpPoundsUnchecked
 import uk.gov.hmrc.timetopayproxy.models.error.ConnectorError
 import uk.gov.hmrc.timetopayproxy.models.saopled.common.apistatus.{ ApiName, ApiStatus, ApiStatusCode }
 import uk.gov.hmrc.timetopayproxy.models.saopled.common.{ ArrangementAgreedDate, InitialPaymentDate, ProcessingDateTimeInstant, SaOpLedInstalment, TransitionedIndicator, TtpEndDate }
-import uk.gov.hmrc.timetopayproxy.models.saopled.ttpcancel.{ CancellationDate, TtpCancelInformativeError, TtpCancelInformativeResponse, TtpCancelPaymentPlan, TtpCancelRequest }
+import uk.gov.hmrc.timetopayproxy.models.saopled.ttpcancel.{ CancellationDate, TtpCancelInformativeError, TtpCancelPaymentPlan, TtpCancelRequest, TtpCancelSuccessfulResponse }
 import uk.gov.hmrc.timetopayproxy.models.{ ChannelIdentifier, FrequencyLowercase, IdType, IdValue, Identification, InstalmentDueDate }
 import uk.gov.hmrc.timetopayproxy.support.WireMockUtils
 
@@ -125,7 +125,7 @@ final class DefaultTtpFeedbackLoopConnectorSpec
         transitioned = Some(TransitionedIndicator(true))
       )
 
-      val ttpCancelResponse: TtpCancelInformativeResponse = TtpCancelInformativeResponse(
+      val ttpCancelResponse: TtpCancelSuccessfulResponse = TtpCancelSuccessfulResponse(
         apisCalled = List(
           ApiStatus(
             name = ApiName("API1"),
@@ -147,7 +147,7 @@ final class DefaultTtpFeedbackLoopConnectorSpec
 
           val result = connector.cancelTtp(ttpCancelRequest)
 
-          await(result.value) must matchPattern { case Right(_: TtpCancelInformativeResponse) => }
+          await(result.value) must matchPattern { case Right(_: TtpCancelSuccessfulResponse) => }
         }
 
         "parse an error response from an upstream service" in new Setup(ifImpl = true) {
@@ -185,7 +185,7 @@ final class DefaultTtpFeedbackLoopConnectorSpec
 
           val result = connector.cancelTtp(ttpCancelRequest)
 
-          await(result.value) must matchPattern { case Right(_: TtpCancelInformativeResponse) => }
+          await(result.value) must matchPattern { case Right(_: TtpCancelSuccessfulResponse) => }
         }
 
         "parse an error response from an upstream service" in new Setup(ifImpl = false) {

@@ -25,7 +25,7 @@ import uk.gov.hmrc.timetopayproxy.models.affordablequotes.{ AffordableQuoteRespo
 import uk.gov.hmrc.timetopayproxy.models.error.TtppErrorResponse
 import uk.gov.hmrc.timetopayproxy.models.saopled.common.apistatus.{ ApiErrorResponse, ApiName, ApiStatus, ApiStatusCode }
 import uk.gov.hmrc.timetopayproxy.models.saopled.common.{ ArrangementAgreedDate, InitialPaymentDate, ProcessingDateTimeInstant, SaOpLedInstalment, TransitionedIndicator, TtpEndDate }
-import uk.gov.hmrc.timetopayproxy.models.saopled.ttpcancel.{ CancellationDate, TtpCancelGeneralFailureResponse, TtpCancelInformativeResponse, TtpCancelPaymentPlan, TtpCancelRequest }
+import uk.gov.hmrc.timetopayproxy.models.saopled.ttpcancel.{ CancellationDate, TtpCancelGeneralFailureResponse, TtpCancelPaymentPlan, TtpCancelRequest, TtpCancelSuccessfulResponse }
 import uk.gov.hmrc.timetopayproxy.models.saopled.chargeInfoApi._
 import uk.gov.hmrc.timetopayproxy.models.saopled.common.OpLedRegimeType
 import uk.gov.hmrc.timetopayproxy.models.currency.GbpPoundsUnchecked
@@ -630,7 +630,7 @@ class TimeToPayProxyControllerItSpec extends IntegrationBaseSpec {
       "should return a 500 statusCode" - {
         "when given a valid json payload" - {
           "when TimeToPay returns an error response with 500" in new TimeToPayProxyControllerTestBase {
-            val errorResponse = TtpCancelInformativeResponse(
+            val errorResponse = TtpCancelSuccessfulResponse(
               apisCalled = List(
                 ApiStatus(
                   name = ApiName("CESA"),
@@ -962,7 +962,7 @@ class TimeToPayProxyControllerItSpec extends IntegrationBaseSpec {
       regimeType = OpLedRegimeType.SA
     )
 
-    val cancelResponse: TtpCancelInformativeResponse = TtpCancelInformativeResponse(
+    val cancelResponse: TtpCancelSuccessfulResponse = TtpCancelSuccessfulResponse(
       apisCalled = List(
         ApiStatus(
           name = ApiName("CESA"),

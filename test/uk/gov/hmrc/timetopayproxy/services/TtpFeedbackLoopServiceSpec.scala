@@ -25,7 +25,7 @@ import org.scalatest.wordspec.AnyWordSpec
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.timetopayproxy.connectors.TtpFeedbackLoopConnector
 import uk.gov.hmrc.timetopayproxy.models.error.{ ConnectorError, TtppEnvelope }
-import uk.gov.hmrc.timetopayproxy.models.saopled.ttpcancel.{ CancellationDate, TtpCancelInformativeResponse, TtpCancelPaymentPlan, TtpCancelRequest }
+import uk.gov.hmrc.timetopayproxy.models.saopled.ttpcancel.{ CancellationDate, TtpCancelPaymentPlan, TtpCancelRequest, TtpCancelSuccessfulResponse }
 import uk.gov.hmrc.timetopayproxy.models.saopled.common.apistatus.{ ApiName, ApiStatus, ApiStatusCode }
 import uk.gov.hmrc.timetopayproxy.models.saopled.common.{ ArrangementAgreedDate, InitialPaymentDate, ProcessingDateTimeInstant, SaOpLedInstalment, TransitionedIndicator, TtpEndDate }
 import uk.gov.hmrc.timetopayproxy.models.{ ChannelIdentifier, FrequencyLowercase, IdType, IdValue, Identification, InstalmentDueDate }
@@ -64,7 +64,7 @@ class TtpFeedbackLoopServiceSpec extends AnyWordSpec with MockFactory with Scala
     transitioned = Some(TransitionedIndicator(true))
   )
 
-  private val ttpCancelResponse = TtpCancelInformativeResponse(
+  private val ttpCancelResponse = TtpCancelSuccessfulResponse(
     apisCalled = List(
       ApiStatus(
         name = ApiName("TTP_PROXY"),
@@ -101,7 +101,7 @@ class TtpFeedbackLoopServiceSpec extends AnyWordSpec with MockFactory with Scala
             _: HeaderCarrier
           ))
           .expects(ttpCancelRequest, *, *)
-          .returning(TtppEnvelope(error.asLeft[TtpCancelInformativeResponse]))
+          .returning(TtppEnvelope(error.asLeft[TtpCancelSuccessfulResponse]))
 
         val result = service.cancelTtp(ttpCancelRequest)
 

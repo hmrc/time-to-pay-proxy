@@ -26,7 +26,7 @@ import uk.gov.hmrc.timetopayproxy.connectors.util.HttpReadsWithLoggingBuilder
 import uk.gov.hmrc.timetopayproxy.logging.RequestAwareLogger
 import uk.gov.hmrc.timetopayproxy.models.error.TtppEnvelope.TtppEnvelope
 import uk.gov.hmrc.timetopayproxy.models.error.{ ConnectorError, TtppSpecificError }
-import uk.gov.hmrc.timetopayproxy.models.saopled.ttpcancel.{ TtpCancelGeneralFailureResponse, TtpCancelInformativeError, TtpCancelInformativeResponse, TtpCancelRequest }
+import uk.gov.hmrc.timetopayproxy.models.saopled.ttpcancel.{ TtpCancelGeneralFailureResponse, TtpCancelInformativeError, TtpCancelRequest, TtpCancelSuccessfulResponse }
 
 import java.util.UUID
 import javax.inject.{ Inject, Singleton }
@@ -41,7 +41,7 @@ import scala.concurrent.ExecutionContext
 trait TtpFeedbackLoopConnector {
   def cancelTtp(
     ttppRequest: TtpCancelRequest
-  )(implicit ec: ExecutionContext, hc: HeaderCarrier): TtppEnvelope[TtpCancelInformativeResponse]
+  )(implicit ec: ExecutionContext, hc: HeaderCarrier): TtppEnvelope[TtpCancelSuccessfulResponse]
 }
 
 @Singleton
@@ -50,18 +50,17 @@ class DefaultTtpFeedbackLoopConnector @Inject() (appConfig: AppConfig, httpClien
 
   private val logger: RequestAwareLogger = new RequestAwareLogger(classOf[DefaultTtpFeedbackLoopConnector])
 
-  private val httpReadsBuilder: HttpReadsWithLoggingBuilder[TtppSpecificError, TtpCancelInformativeResponse] =
-    HttpReadsWithLoggingBuilder[TtppSpecificError, TtpCancelInformativeResponse]
-      .orSuccess[TtpCancelInformativeResponse](200)
-      // TODO DTD-3785: Read `TtpCancelInformativeError` directly and remove the transformation.
-      .orErrorTransformed[TtpCancelInformativeResponse](500, TtpCancelInformativeError(_))
+  private val httpReadsBuilder: HttpReadsWithLoggingBuilder[TtppSpecificError, TtpCancelSuccessfulResponse] =
+    HttpReadsWithLoggingBuilder[TtppSpecificError, TtpCancelSuccessfulResponse]
+      .orSuccess[TtpCancelSuccessfulResponse](200)
+      .orError[TtpCancelInformativeError](500)
       .orErrorTransformed[TtpCancelGeneralFailureResponse](400, error => ConnectorError(400, error.details))
 
   def cancelTtp(
     ttppRequest: TtpCancelRequest
-  )(implicit ec: ExecutionContext, hc: HeaderCarrier): TtppEnvelope[TtpCancelInformativeResponse] = {
+  )(implicit ec: ExecutionContext, hc: HeaderCarrier): TtppEnvelope[TtpCancelSuccessfulResponse] = {
 
-    implicit def httpReads: HttpReads[Either[TtppSpecificError, TtpCancelInformativeResponse]] =
+    implicit def httpReads: HttpReads[Either[TtppSpecificError, TtpCancelSuccessfulResponse]] =
       httpReadsBuilder.httpReads(logger)
 
     val path = if (appConfig.useIf) "/individuals/debts/time-to-pay/cancel" else "/debts/time-to-pay/cancel"
@@ -73,7 +72,7 @@ class DefaultTtpFeedbackLoopConnector @Inject() (appConfig: AppConfig, httpClien
         .post(url)
         .withBody(Json.toJson(ttppRequest))
         .setHeader(requestHeaders: _*)
-        .execute[Either[TtppSpecificError, TtpCancelInformativeResponse]]
+        .execute[Either[TtppSpecificError, TtpCancelSuccessfulResponse]]
     )
   }
 

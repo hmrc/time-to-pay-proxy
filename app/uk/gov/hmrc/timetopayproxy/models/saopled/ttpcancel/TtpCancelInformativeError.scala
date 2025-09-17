@@ -16,26 +16,24 @@
 
 package uk.gov.hmrc.timetopayproxy.models.saopled.ttpcancel
 
-import play.api.libs.json.{ Json, Writes }
+import play.api.libs.json.{ Json, OFormat }
 import play.api.mvc.{ Result, Results }
 import uk.gov.hmrc.timetopayproxy.models.error.{ TtppSpecificError, TtppWriteableError }
+import uk.gov.hmrc.timetopayproxy.models.saopled.common.ProcessingDateTimeInstant
+import uk.gov.hmrc.timetopayproxy.models.saopled.common.apistatus.ApiStatus
 
-/** Outgoing error for `500 Internal Server Error`.
-  *
-  * TODO DTD-3785: Also mention that this is also an incoming error from the `time-to-pay` service.
-  */
+/** Outgoing error for `500 Internal Server Error`. Also the incoming error from the `time-to-pay` service. */
 final case class TtpCancelInformativeError(
-  // TODO DTD-3785: Make it standalone and implement the internalErrors field which won't exist in the 200 OK class.
-  response: TtpCancelInformativeResponse
+  // TODO DTD-3785: Implement the internalErrors field which won't exist in the 200 OK class.
+  apisCalled: List[ApiStatus],
+  processingDateTime: ProcessingDateTimeInstant
 ) extends TtppSpecificError with TtppWriteableError {
 
   def toWriteableProxyError: TtppWriteableError = this
 
-  def toErrorResult: Result = Results.InternalServerError(Json.toJson(this.response))
+  def toErrorResult: Result = Results.InternalServerError(Json.toJson(this))
 }
 
 object TtpCancelInformativeError {
-  // TODO DTD-3785: This will need a reader.
-  implicit val writes: Writes[TtpCancelInformativeError] =
-    (error: TtpCancelInformativeError) => Json.toJsObject(error.response)
+  implicit val format: OFormat[TtpCancelInformativeError] = Json.format[TtpCancelInformativeError]
 }

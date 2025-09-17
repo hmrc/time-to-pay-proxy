@@ -41,7 +41,7 @@ import uk.gov.hmrc.timetopayproxy.models.saopled.common.OpLedRegimeType
 import uk.gov.hmrc.timetopayproxy.models.saopled.common.{ ArrangementAgreedDate, InitialPaymentDate, SaOpLedInstalment, TransitionedIndicator, TtpEndDate }
 import uk.gov.hmrc.timetopayproxy.models.saopled.common.apistatus.{ ApiName, ApiStatus, ApiStatusCode }
 import uk.gov.hmrc.timetopayproxy.models.saopled.common.ProcessingDateTimeInstant
-import uk.gov.hmrc.timetopayproxy.models.saopled.ttpcancel.{ CancellationDate, TtpCancelInformativeResponse, TtpCancelPaymentPlan, TtpCancelRequest }
+import uk.gov.hmrc.timetopayproxy.models.saopled.ttpcancel.{ CancellationDate, TtpCancelPaymentPlan, TtpCancelRequest, TtpCancelSuccessfulResponse }
 import uk.gov.hmrc.timetopayproxy.models.{ IdType, IdValue, InstalmentDueDate }
 import uk.gov.hmrc.timetopayproxy.models.currency.GbpPoundsUnchecked
 import uk.gov.hmrc.timetopayproxy.services.{ TTPEService, TTPQuoteService, TtpFeedbackLoopService }
@@ -1204,7 +1204,7 @@ class TimeToPayProxyControllerSpec extends AnyWordSpec with MockFactory {
       transitioned = Some(TransitionedIndicator(true))
     )
 
-    val ttpCancelResponse = TtpCancelInformativeResponse(
+    val ttpCancelResponse = TtpCancelSuccessfulResponse(
       apisCalled = List(
         ApiStatus(
           name = ApiName("API1"),
@@ -1242,7 +1242,7 @@ class TimeToPayProxyControllerSpec extends AnyWordSpec with MockFactory {
         val response: Future[Result] = controller.cancelTtp()(fakeRequest)
 
         status(response) shouldBe Status.OK
-        contentAsJson(response) shouldBe Json.toJson[TtpCancelInformativeResponse](
+        contentAsJson(response) shouldBe Json.toJson[TtpCancelSuccessfulResponse](
           ttpCancelResponse
         )
       }
@@ -1296,7 +1296,7 @@ class TimeToPayProxyControllerSpec extends AnyWordSpec with MockFactory {
           ))
           .expects(ttpCancelRequest, *, *)
           .returning(
-            TtppEnvelope(errorFromTtpService.asLeft[TtpCancelInformativeResponse])
+            TtppEnvelope(errorFromTtpService.asLeft[TtpCancelSuccessfulResponse])
           )
 
         val fakeRequest: FakeRequest[JsValue] =

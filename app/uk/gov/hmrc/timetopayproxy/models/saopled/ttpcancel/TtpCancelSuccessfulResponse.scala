@@ -20,16 +20,12 @@ import play.api.libs.json.{ Json, OFormat }
 import uk.gov.hmrc.timetopayproxy.models.saopled.common.ProcessingDateTimeInstant
 import uk.gov.hmrc.timetopayproxy.models.saopled.common.apistatus.ApiStatus
 
-/** This is intended for `200 OK`.
-  *
-  * This is also an incoming error from the `time-to-pay` service. (TODO DTD-3785: Remove this line.)
-  */
-// TODO DTD-3785: Rename to make it clear that this is ONLY a successful response. (It isn't before the ticket)
-final case class TtpCancelInformativeResponse(
+/** This is intended only for `200 OK`. */
+final case class TtpCancelSuccessfulResponse(
   apisCalled: List[ApiStatus],
   processingDateTime: ProcessingDateTimeInstant
 )
 
-object TtpCancelInformativeResponse {
-  implicit val format: OFormat[TtpCancelInformativeResponse] = Json.format[TtpCancelInformativeResponse]
+object TtpCancelSuccessfulResponse {
+  implicit val format: OFormat[TtpCancelSuccessfulResponse] = Json.format[TtpCancelSuccessfulResponse]
 }

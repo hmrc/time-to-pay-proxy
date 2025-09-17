@@ -80,6 +80,7 @@ object Validators {
         )
 
       /** This is used for both 200 and 500 statuses. */
+      // TODO DTD-3785: Split into the separate schemas for 200 and 500 responses. 500 will have an extra field.
       def openApiInformativeResponseSchema: OpenApi3DerivedSchema =
         new OpenApi3DerivedSchema(
           path,
