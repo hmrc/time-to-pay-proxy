@@ -53,6 +53,7 @@ class DefaultTtpFeedbackLoopConnector @Inject() (appConfig: AppConfig, httpClien
   private val httpReadsBuilder: HttpReadsWithLoggingBuilder[TtppSpecificError, TtpCancelInformativeResponse] =
     HttpReadsWithLoggingBuilder[TtppSpecificError, TtpCancelInformativeResponse]
       .orSuccess[TtpCancelInformativeResponse](200)
+      // TODO DTD-3785: Read `TtpCancelInformativeError` directly and remove the transformation.
       .orErrorTransformed[TtpCancelInformativeResponse](500, TtpCancelInformativeError(_))
       .orErrorTransformed[TtpCancelGeneralFailureResponse](400, error => ConnectorError(400, error.details))
       .orErrorTransformed[play.api.libs.json.JsObject](

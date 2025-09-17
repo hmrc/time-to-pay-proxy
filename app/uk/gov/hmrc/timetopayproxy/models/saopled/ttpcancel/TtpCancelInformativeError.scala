@@ -20,8 +20,12 @@ import play.api.libs.json.{ Json, Writes }
 import play.api.mvc.{ Result, Results }
 import uk.gov.hmrc.timetopayproxy.models.error.{ TtppSpecificError, TtppWriteableError }
 
-/** Custom error response that returns TtpCancelInformativeResponse JSON with 500 status */
+/** Outgoing error for `500 Internal Server Error`.
+  *
+  * TODO DTD-3785: Also mention that this is also an incoming error from the `time-to-pay` service.
+  */
 final case class TtpCancelInformativeError(
+  // TODO DTD-3785: Make it standalone and implement the internalErrors field which won't exist in the 200 OK class.
   response: TtpCancelInformativeResponse
 ) extends TtppSpecificError with TtppWriteableError {
 
@@ -31,6 +35,7 @@ final case class TtpCancelInformativeError(
 }
 
 object TtpCancelInformativeError {
+  // TODO DTD-3785: This will need a reader.
   implicit val writes: Writes[TtpCancelInformativeError] =
     (error: TtpCancelInformativeError) => Json.toJsObject(error.response)
 }

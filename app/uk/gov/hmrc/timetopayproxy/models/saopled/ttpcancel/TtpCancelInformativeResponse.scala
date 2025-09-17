@@ -17,23 +17,18 @@
 package uk.gov.hmrc.timetopayproxy.models.saopled.ttpcancel
 
 import play.api.libs.json.{ Json, OFormat }
-import play.api.mvc.{ Result, Results }
-import uk.gov.hmrc.timetopayproxy.models.error.{ TtppSpecificError, TtppWriteableError }
 import uk.gov.hmrc.timetopayproxy.models.saopled.common.ProcessingDateTimeInstant
 import uk.gov.hmrc.timetopayproxy.models.saopled.common.apistatus.ApiStatus
 
-/** This is intended for both `200 OK` and `500 Internal Server Error`.
-  * This is also an incoming error from the `time-to-pay` service.
+/** This is intended for `200 OK`.
+  *
+  * This is also an incoming error from the `time-to-pay` service. (TODO DTD-3785: Remove this line.)
   */
+// TODO DTD-3785: Rename to make it clear that this is ONLY a successful response. (It isn't before the ticket)
 final case class TtpCancelInformativeResponse(
   apisCalled: List[ApiStatus],
   processingDateTime: ProcessingDateTimeInstant
-) extends TtppSpecificError with TtppWriteableError {
-
-  def toWriteableProxyError: TtppWriteableError = this
-
-  def toErrorResult: Result = Results.Ok(Json.toJson(this))
-}
+)
 
 object TtpCancelInformativeResponse {
   implicit val format: OFormat[TtpCancelInformativeResponse] = Json.format[TtpCancelInformativeResponse]
