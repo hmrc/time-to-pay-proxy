@@ -20,6 +20,7 @@ import cats.syntax.either._
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.timetopayproxy.connectors.TtpConnector
 import uk.gov.hmrc.timetopayproxy.models._
+import uk.gov.hmrc.timetopayproxy.models.error.{ ConnectorError, TtppEnvelope, TtppSpecificError }
 import uk.gov.hmrc.timetopayproxy.support.UnitSpec
 
 import java.time.LocalDate
@@ -73,7 +74,7 @@ class UpdatePlanServiceSpec extends UnitSpec {
           ttpQuoteService.updatePlan(updatePlanRequest).value,
           5,
           TimeUnit.SECONDS
-        ) shouldBe responseFromTtp.asRight[TtppError]
+        ) shouldBe responseFromTtp.asRight[TtppSpecificError]
       }
     }
     "return a failure response" when {

@@ -20,7 +20,7 @@ import com.google.inject.ImplementedBy
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.timetopayproxy.connectors.TtpTestConnector
 import uk.gov.hmrc.timetopayproxy.models.RequestDetails
-import uk.gov.hmrc.timetopayproxy.models.TtppEnvelope.TtppEnvelope
+import uk.gov.hmrc.timetopayproxy.models.error.TtppEnvelope.TtppEnvelope
 
 import javax.inject.{ Inject, Singleton }
 import scala.concurrent.ExecutionContext

@@ -26,9 +26,11 @@ import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.http.client.HttpClientV2
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 import uk.gov.hmrc.timetopayproxy.config.AppConfig
-import uk.gov.hmrc.timetopayproxy.models.TtppEnvelope.TtppEnvelope
-import uk.gov.hmrc.timetopayproxy.models.chargeInfoApi._
-import uk.gov.hmrc.timetopayproxy.models.{ ConnectorError, IdType, IdValue, Identification }
+import uk.gov.hmrc.timetopayproxy.models.error.ConnectorError
+import uk.gov.hmrc.timetopayproxy.models.error.TtppEnvelope.TtppEnvelope
+import uk.gov.hmrc.timetopayproxy.models.saopled.chargeInfoApi._
+import uk.gov.hmrc.timetopayproxy.models.saopled.common.OpLedRegimeType
+import uk.gov.hmrc.timetopayproxy.models.{ IdType, IdValue, Identification }
 import uk.gov.hmrc.timetopayproxy.support.WireMockUtils
 
 import java.time.{ LocalDate, LocalDateTime }
@@ -98,7 +100,7 @@ class TtpeConnectorSpec
         Identification(idType = IdType("id type 1"), idValue = IdValue("id value 1")),
         Identification(idType = IdType("id type 2"), idValue = IdValue("id value 2"))
       ),
-      regimeType = RegimeType.SA
+      regimeType = OpLedRegimeType.SA
     )
 
     def chargeInfoResponse: ChargeInfoResponse = ChargeInfoResponse(

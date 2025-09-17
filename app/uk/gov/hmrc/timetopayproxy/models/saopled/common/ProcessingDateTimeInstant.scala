@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 HM Revenue & Customs
+ * Copyright 2025 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,19 +14,14 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.timetopayproxy.models
+package uk.gov.hmrc.timetopayproxy.models.saopled.common
 
-import cats.data.EitherT
+import play.api.libs.json.{ Format, Json }
 
-import scala.concurrent.{ ExecutionContext, Future }
+import java.time.Instant
 
-object TtppEnvelope {
-  type TtppEnvelope[T] = EitherT[Future, TtppError, T]
+case class ProcessingDateTimeInstant(value: Instant) extends AnyVal
 
-  def apply[T](arg: T)(implicit ec: ExecutionContext): TtppEnvelope[T] = EitherT.pure[Future, TtppError](arg)
-
-  def apply[T](f: Future[Either[TtppError, T]]): TtppEnvelope[T] = EitherT(f)
-
-  def apply[T](eitherArg: Either[TtppError, T])(implicit ec: ExecutionContext): TtppEnvelope[T] =
-    EitherT.fromEither[Future](eitherArg)
+object ProcessingDateTimeInstant {
+  implicit val formats: Format[ProcessingDateTimeInstant] = Json.valueFormat[ProcessingDateTimeInstant]
 }

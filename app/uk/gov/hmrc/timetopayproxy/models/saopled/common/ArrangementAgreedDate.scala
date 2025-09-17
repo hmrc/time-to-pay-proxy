@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 HM Revenue & Customs
+ * Copyright 2025 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,21 +14,14 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.timetopayproxy.utils
+package uk.gov.hmrc.timetopayproxy.models.saopled.common
 
-import play.api.libs.json.{ Json, Writes }
-import play.api.mvc.{ Result, Results }
-import uk.gov.hmrc.timetopayproxy.models.TtppErrorResponse
+import play.api.libs.json.{ Format, Json }
 
-object TtppResponseConverter {
+import java.time.LocalDate
 
-  implicit class ToResponse[T](response: T) {
-    def toResponse(implicit writer: Writes[T]): Result =
-      response match {
-        case TtppErrorResponse(statusCode, _) =>
-          Results.Status(statusCode)(Json.toJson(response))
-        case _ => Results.Ok(Json.toJson(response))
-      }
-  }
+final case class ArrangementAgreedDate(value: LocalDate)
 
+object ArrangementAgreedDate {
+  implicit val format: Format[ArrangementAgreedDate] = Json.valueFormat[ArrangementAgreedDate]
 }

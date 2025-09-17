@@ -16,13 +16,11 @@
 
 package uk.gov.hmrc.timetopayproxy.controllers
 
-import play.api.libs.json.JsValue
+import play.api.libs.json.{ JsValue, Json }
 import play.api.mvc.{ Action, AnyContent, BaseController, ControllerComponents, Results }
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
 import uk.gov.hmrc.timetopayproxy.models.RequestDetails
 import uk.gov.hmrc.timetopayproxy.services.TTPTestService
-import uk.gov.hmrc.timetopayproxy.utils.TtppErrorHandler.FromErrorToResponse
-import uk.gov.hmrc.timetopayproxy.utils.TtppResponseConverter.ToResponse
 
 import javax.inject.{ Inject, Singleton }
 import scala.concurrent.ExecutionContext
@@ -37,23 +35,23 @@ class TimeToPayTestController @Inject() (cc: ControllerComponents, ttpTestServic
   def requests: Action[AnyContent] = Action.async { implicit request =>
     ttpTestService
       .retrieveRequestDetails()
-      .leftMap(ttppError => ttppError.toErrorResponse)
-      .fold(e => e.toResponse, r => r.toResponse)
+      .leftMap(ttppError => ttppError.toWriteableProxyError)
+      .fold(e => e.toErrorResult, r => Results.Ok(Json.toJson(r)))
   }
 
   def deleteRequest(requestId: String): Action[AnyContent] = Action.async { implicit request =>
     ttpTestService
       .deleteRequestDetails(requestId)
-      .leftMap(ttppError => ttppError.toErrorResponse)
-      .fold(e => e.toResponse, _ => Results.Ok)
+      .leftMap(ttppError => ttppError.toWriteableProxyError)
+      .fold(e => e.toErrorResult, _ => Results.Ok)
   }
 
   def response: Action[JsValue] = Action.async(parse.json) { implicit request =>
     withJsonBody[RequestDetails] { details: RequestDetails =>
       ttpTestService
         .saveResponseDetails(details)
-        .leftMap(ttppError => ttppError.toErrorResponse)
-        .fold(e => e.toResponse, _ => Results.Ok)
+        .leftMap(ttppError => ttppError.toWriteableProxyError)
+        .fold(e => e.toErrorResult, _ => Results.Ok)
     }
   }
 
@@ -61,16 +59,16 @@ class TimeToPayTestController @Inject() (cc: ControllerComponents, ttpTestServic
     withJsonBody[RequestDetails] { details: RequestDetails =>
       ttpTestService
         .saveError(details)
-        .leftMap(ttppError => ttppError.toErrorResponse)
-        .fold(e => e.toResponse, _ => Results.Ok)
+        .leftMap(ttppError => ttppError.toWriteableProxyError)
+        .fold(e => e.toErrorResult, _ => Results.Ok)
     }
   }
 
   def getErrors(): Action[AnyContent] = Action.async { implicit request =>
     ttpTestService
       .getErrors()
-      .leftMap(ttppError => ttppError.toErrorResponse)
-      .fold(e => e.toResponse, r => r.toResponse)
+      .leftMap(ttppError => ttppError.toWriteableProxyError)
+      .fold(e => e.toErrorResult, r => Results.Ok(Json.toJson(r)))
   }
 }
 // $COVERAGE-ON$

@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 HM Revenue & Customs
+ * Copyright 2024 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,20 +14,14 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.timetopayproxy.utils
+package uk.gov.hmrc.timetopayproxy.models
 
-import uk.gov.hmrc.timetopayproxy.models.{ ConnectorError, TtppError, TtppErrorResponse, ValidationError }
+import play.api.libs.json.{ Format, Json }
 
-object TtppErrorHandler {
+import java.time.LocalDate
 
-  implicit class FromErrorToResponse(error: TtppError) {
-    def toErrorResponse: TtppErrorResponse = error match {
-      case ConnectorError(status, message) =>
-        TtppErrorResponse(status, s"$message")
-      case ValidationError(message) =>
-        TtppErrorResponse(400, s"$message")
-      case e => TtppErrorResponse(500, s"${e.toString}")
-    }
-  }
+final case class InstalmentDueDate(value: LocalDate)
 
+object InstalmentDueDate {
+  implicit val format: Format[InstalmentDueDate] = Json.valueFormat[InstalmentDueDate]
 }

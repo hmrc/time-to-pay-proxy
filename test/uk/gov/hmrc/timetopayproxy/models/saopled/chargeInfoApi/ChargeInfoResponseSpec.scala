@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.timetopayproxy.models.chargeInfoApi
+package uk.gov.hmrc.timetopayproxy.models.saopled.chargeInfoApi
 
 import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.should.Matchers._

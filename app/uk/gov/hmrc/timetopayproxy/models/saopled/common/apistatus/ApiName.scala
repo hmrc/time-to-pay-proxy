@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 HM Revenue & Customs
+ * Copyright 2025 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,13 +14,12 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.timetopayproxy.models.error
+package uk.gov.hmrc.timetopayproxy.models.saopled.common.apistatus
 
-import play.api.libs.json.{ Json, OFormat }
-import uk.gov.hmrc.timetopayproxy.models.TtppError
+import play.api.libs.json.{ Format, Json }
 
-final case class PlanStatusCreateError(description: String) extends TtppError
+final case class ApiName(value: String)
 
-object PlanStatusCreateError {
-  implicit val format: OFormat[PlanStatusCreateError] = Json.format[PlanStatusCreateError]
+object ApiName {
+  implicit val format: Format[ApiName] = Json.valueFormat[ApiName]
 }

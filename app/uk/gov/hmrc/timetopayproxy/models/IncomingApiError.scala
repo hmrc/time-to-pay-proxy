@@ -16,6 +16,8 @@
 
 package uk.gov.hmrc.timetopayproxy.models
 
+import uk.gov.hmrc.timetopayproxy.models.error.ConnectorError
+
 trait IncomingApiError {
   def toConnectorError(status: Int): ConnectorError
 }

@@ -23,7 +23,8 @@ import play.api.mvc.{ ControllerComponents, Result }
 import play.api.test.Helpers.{ CONTENT_TYPE, status }
 import play.api.test.{ FakeRequest, Helpers }
 import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.timetopayproxy.models.{ ConnectorError, RequestDetails, TtppEnvelope }
+import uk.gov.hmrc.timetopayproxy.models.RequestDetails
+import uk.gov.hmrc.timetopayproxy.models.error.{ ConnectorError, TtppEnvelope }
 import uk.gov.hmrc.timetopayproxy.services.TTPTestService
 import uk.gov.hmrc.timetopayproxy.support.UnitSpec
 
