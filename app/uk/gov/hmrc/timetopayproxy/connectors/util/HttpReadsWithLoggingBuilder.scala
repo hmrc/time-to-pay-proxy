@@ -132,7 +132,9 @@ final class HttpReadsWithLoggingBuilder[E >: ConnectorError, Result] private (
 }
 
 object HttpReadsWithLoggingBuilder {
-  def apply[E >: ConnectorError, Result]: HttpReadsWithLoggingBuilder[E, Result] =
+
+  /** Includes a default handler for unrecognised/unimplemented/invalid status codes, which returns a 503. */
+  def empty[E >: ConnectorError, Result]: HttpReadsWithLoggingBuilder[E, Result] =
     new HttpReadsWithLoggingBuilder(PartialFunction.empty)
 
   private final case class ResponseContext(method: String, url: String, response: HttpResponse)

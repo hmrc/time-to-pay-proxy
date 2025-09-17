@@ -51,7 +51,8 @@ class DefaultTtpFeedbackLoopConnector @Inject() (appConfig: AppConfig, httpClien
   private val logger: RequestAwareLogger = new RequestAwareLogger(classOf[DefaultTtpFeedbackLoopConnector])
 
   private val httpReadsBuilderForCancel: HttpReadsWithLoggingBuilder[TtppSpecificError, TtpCancelSuccessfulResponse] =
-    HttpReadsWithLoggingBuilder[TtppSpecificError, TtpCancelSuccessfulResponse]
+    HttpReadsWithLoggingBuilder
+      .empty[TtppSpecificError, TtpCancelSuccessfulResponse]
       .orSuccess[TtpCancelSuccessfulResponse](200)
       .orError[TtpCancelInformativeError](500)
       .orErrorTransformed[TtpCancelGeneralFailureResponse](400, error => ConnectorError(400, error.details))
