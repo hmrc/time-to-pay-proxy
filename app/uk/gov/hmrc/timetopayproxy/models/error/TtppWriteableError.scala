@@ -16,12 +16,8 @@
 
 package uk.gov.hmrc.timetopayproxy.models.error
 
-import play.api.libs.json.{ JsObject, OWrites }
+import play.api.mvc.Result
 
 trait TtppWriteableError {
-  def toJson: JsObject
-}
-
-object TtppWriteableError {
-  implicit val writer: OWrites[TtppWriteableError] = (error: TtppWriteableError) => error.toJson
+  def toErrorResult: Result
 }

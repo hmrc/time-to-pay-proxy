@@ -25,12 +25,10 @@ import uk.gov.hmrc.timetopayproxy.config.FeatureSwitch
 import uk.gov.hmrc.timetopayproxy.models._
 import uk.gov.hmrc.timetopayproxy.models.affordablequotes.AffordableQuotesRequest
 import uk.gov.hmrc.timetopayproxy.models.error.TtppEnvelope.TtppEnvelope
-import uk.gov.hmrc.timetopayproxy.models.error.TtppErrorResponse._
 import uk.gov.hmrc.timetopayproxy.models.error.{ TtppEnvelope, TtppErrorResponse, ValidationError }
 import uk.gov.hmrc.timetopayproxy.models.saopled.chargeInfoApi.ChargeInfoRequest
 import uk.gov.hmrc.timetopayproxy.models.saopled.ttpcancel.TtpCancelRequest
 import uk.gov.hmrc.timetopayproxy.services.{ TTPEService, TTPQuoteService, TtpFeedbackLoopService }
-import uk.gov.hmrc.timetopayproxy.utils.TtppResponseConverter._
 
 import javax.inject.{ Inject, Singleton }
 import scala.annotation.unused
@@ -57,7 +55,7 @@ class TimeToPayProxyController @Inject() (
       timeToPayQuoteService
         .generateQuote(timeToPayRequest, request.queryString)
         .leftMap(ttppError => ttppError.toWriteableProxyError)
-        .fold(e => e.toResponse, r => r.toResponse)
+        .fold(e => e.toErrorResult, r => Results.Ok(Json.toJson(r)))
     }
   }
 
@@ -66,7 +64,7 @@ class TimeToPayProxyController @Inject() (
       timeToPayQuoteService
         .getExistingPlan(CustomerReference(customerReference), PlanId(planId))
         .leftMap(ttppError => ttppError.toWriteableProxyError)
-        .fold(e => e.toResponse, r => r.toResponse)
+        .fold(e => e.toErrorResult, r => Results.Ok(Json.toJson(r)))
     }
 
   def updatePlan(customerReference: String, planId: String): Action[JsValue] =
@@ -80,7 +78,7 @@ class TimeToPayProxyController @Inject() (
 
         result
           .leftMap(ttppError => ttppError.toWriteableProxyError)
-          .fold(e => e.toResponse, r => r.toResponse)
+          .fold(e => e.toErrorResult, r => Results.Ok(Json.toJson(r)))
       }
     }
 
@@ -89,7 +87,7 @@ class TimeToPayProxyController @Inject() (
       timeToPayQuoteService
         .createPlan(createPlanRequest, request.queryString)
         .leftMap(ttppError => ttppError.toWriteableProxyError)
-        .fold(e => e.toResponse, r => r.toResponse)
+        .fold(e => e.toErrorResult, r => Results.Ok(Json.toJson(r)))
     }
   }
 
@@ -98,7 +96,7 @@ class TimeToPayProxyController @Inject() (
       timeToPayQuoteService
         .getAffordableQuotes(affordableQuoteRequest)
         .leftMap(ttppError => ttppError.toWriteableProxyError)
-        .fold(e => e.toResponse, r => r.toResponse)
+        .fold(e => e.toErrorResult, r => Results.Ok(Json.toJson(r)))
     }
   }
 
@@ -107,7 +105,7 @@ class TimeToPayProxyController @Inject() (
       timeToPayEligibilityService
         .checkChargeInfo(chargeInfoRequest)
         .leftMap(ttppError => ttppError.toWriteableProxyError)
-        .fold(e => e.toResponse, r => r.toResponse)
+        .fold(e => e.toErrorResult, r => Results.Ok(Json.toJson(r)))
     }
   }
 
@@ -116,7 +114,7 @@ class TimeToPayProxyController @Inject() (
       ttpFeedbackLoopService
         .cancelTtp(deserialisedRequest)
         .leftMap(ttppError => ttppError.toWriteableProxyError)
-        .fold(e => e.toResponse, r => r.toResponse)
+        .fold(e => e.toErrorResult, r => Results.Ok(Json.toJson(r)))
     }
   }
 
@@ -167,14 +165,14 @@ class TimeToPayProxyController @Inject() (
             s"Invalid ${m.runtimeClass.getSimpleName} payload: Payload has a missing field or an invalid format. ${generateReadableMessageFromError(
                 errs.toSeq.map(err => (err._1, err._2.toSeq))
               )}"
-          ).toResponse
+          ).toErrorResult
         )
       case Failure(e) =>
         Future.successful(
           TtppErrorResponse(
             BAD_REQUEST.intValue(),
             s"Could not parse body due to ${e.getMessage}"
-          ).toResponse
+          ).toErrorResult
         )
     }
 

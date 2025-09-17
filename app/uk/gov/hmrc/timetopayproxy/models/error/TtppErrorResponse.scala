@@ -16,10 +16,11 @@
 
 package uk.gov.hmrc.timetopayproxy.models.error
 
-import play.api.libs.json.{ JsObject, Json, OWrites }
+import play.api.libs.json.{ Json, OWrites }
+import play.api.mvc.{ Result, Results }
 
 final case class TtppErrorResponse(statusCode: Int, errorMessage: String) extends TtppWriteableError {
-  def toJson: JsObject = Json.toJsObject(this)
+  def toErrorResult: Result = Results.Status(statusCode)(Json.toJson(this))
 }
 
 object TtppErrorResponse {
