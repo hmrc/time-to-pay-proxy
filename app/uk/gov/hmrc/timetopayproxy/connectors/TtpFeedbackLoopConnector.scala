@@ -50,7 +50,7 @@ class DefaultTtpFeedbackLoopConnector @Inject() (appConfig: AppConfig, httpClien
 
   private val logger: RequestAwareLogger = new RequestAwareLogger(classOf[DefaultTtpFeedbackLoopConnector])
 
-  private val httpReadsBuilder: HttpReadsWithLoggingBuilder[TtppSpecificError, TtpCancelSuccessfulResponse] =
+  private val httpReadsBuilderForCancel: HttpReadsWithLoggingBuilder[TtppSpecificError, TtpCancelSuccessfulResponse] =
     HttpReadsWithLoggingBuilder[TtppSpecificError, TtpCancelSuccessfulResponse]
       .orSuccess[TtpCancelSuccessfulResponse](200)
       .orError[TtpCancelInformativeError](500)
@@ -61,7 +61,7 @@ class DefaultTtpFeedbackLoopConnector @Inject() (appConfig: AppConfig, httpClien
   )(implicit ec: ExecutionContext, hc: HeaderCarrier): TtppEnvelope[TtpCancelSuccessfulResponse] = {
 
     implicit def httpReads: HttpReads[Either[TtppSpecificError, TtpCancelSuccessfulResponse]] =
-      httpReadsBuilder.httpReads(logger)
+      httpReadsBuilderForCancel.httpReads(logger)
 
     val path = if (appConfig.useIf) "/individuals/debts/time-to-pay/cancel" else "/debts/time-to-pay/cancel"
 
