@@ -46,8 +46,9 @@ info:
       | 1.0.12 | 23-07-2025 | Alex Olkhovskiy | make regimeType enum |
       | 1.0.13 | 08-07-2025 | Alex Olkhovskiy | make indentations in charge-info request non-empty, remove altFormat and country|
       | 1.0.14 | 14-08-2025 | Alex Olkhovskiy | refactor the spec with linter|
+      | 1.0.15 | 18-09-2025 | Alex Olkhovskiy | Restrict regimeType enum to only 'SA' value for /quote endpoint |
   contact: {}
-  version: 1.0.14
+  version: 1.0.15
 servers:
   - url: https://api.service.hmrc.gov.uk
     variables: {}
@@ -73,7 +74,7 @@ paths:
             schema:
               $ref: '#/components/schemas/TTPQuoteRequest'
             example:
-              regimeType: PAYE
+              regimeType: SA
               customerReference: uniqRef1234
               channelIdentifier: selfService
               plan:
@@ -926,6 +927,8 @@ components:
         regimeType:
           type: string
           description: Regime type
+          enum:
+            - SA
         customerReference:
           maxLength: 15
           minLength: 1
