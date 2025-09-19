@@ -1,0 +1,33 @@
+type: object
+required:
+  - identifications
+  - paymentPlan
+  - instalments
+  - channelIdentifier
+  - transitioned
+properties:
+  identifications:
+    type: array
+    minItems: 1
+    items:
+      $ref: ./FullAmendIdentification.yaml
+    description: Array of identifiers for the customer
+  paymentPlan:
+    $ref: ./FullAmendPaymentPlan.yaml
+  instalments:
+    type: array
+    minItems: 1
+    items:
+      $ref: ./FullAmendInstalment.yaml
+    description: Array of payment instalments
+  channelIdentifier:
+    type: string
+    enum:
+      - advisor
+      - selfService
+    description: Channel through which arrangement was made (e.g. advisor, selfService)
+    example: advisor
+  transitioned:
+    type: boolean
+    description: Indicates whether the customer only has FDLs.
+    example: true
