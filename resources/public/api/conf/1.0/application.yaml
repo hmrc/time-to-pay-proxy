@@ -51,8 +51,9 @@ info:
       | 1.0.15-proposedG| 19-08-2024 | Alex Olkhovskiy | Added new cancel endpoint    |
       | 1.0.15-proposedH | 19-08-2025 | Alex Olkhovskiy | Added new inform endpoint|
       | 1.0.14-proposedI | 19-08-2025 | Alex Olkhovskiy | Added new FullAmend endpoint|
+      | 1.0.14-proposedJ | 15-09-2025 | Alex Olkhovskiy | Added 422 error response to charge-info endpoint|
   contact: {}
-  version: 1.0.15-proposedI
+  version: 1.0.15-proposedJ
 servers:
   - url: https://api.service.hmrc.gov.uk
     variables: {}
@@ -736,6 +737,16 @@ paths:
               example:
                 statusCode: 401
                 errorMessage: A user with no active session will return 401 response
+        '422':
+          description: ''
+          headers: {}
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                statusCode: 422
+                errorMessage: Charges with the same charge reference do not share the same data
         '500':
           description: ''
           headers: {}
