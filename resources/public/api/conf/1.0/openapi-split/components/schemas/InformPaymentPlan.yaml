@@ -1,0 +1,45 @@
+type: object
+required:
+  - arrangementAgreedDate
+  - ttpEndDate
+  - frequency
+properties:
+  arrangementAgreedDate:
+    type: string
+    format: date
+    description: The date when the plan was created
+    example: '2025-05-01'
+  ttpEndDate:
+    type: string
+    format: date
+    description: Date for the last payment/instalment
+    example: '2025-11-01'
+  frequency:
+    type: string
+    enum:
+      - single
+      - weekly
+      - 2Weekly
+      - 4Weekly
+      - monthly
+      - quarterly
+      - 6Monthly
+      - annually
+    description: >-
+      Payment frequency (Note - quarterly will not be provided as it is
+      prevented in CDCS)
+    example: monthly
+  initialPaymentDate:
+    type: string
+    format: date
+    description: Optional upfront payment date
+    example: '2025-05-05'
+  initialPaymentAmount:
+    type: number
+    multipleOf: 0.01
+    description: Optional upfront payment amount
+    example: 150
+  ddiReference:
+    type: string
+    description: Direct Debit Instruction reference number, if applicable
+    example: DD123456789
