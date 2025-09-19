@@ -9,6 +9,8 @@ properties:
   regimeType:
     type: string
     description: Regime type
+    enum:
+      - SA
   customerReference:
     maxLength: 15
     minLength: 1
