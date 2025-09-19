@@ -1,0 +1,15 @@
+type: object
+required:
+  - idType
+  - idValue
+properties:
+  idType:
+    type: string
+    description: Identifier type, e.g. UTR, EMPREF
+    pattern: ^[A-Za-z0-9]{1,6}$
+    example: UTR
+  idValue:
+    type: string
+    description: Identifier value
+    pattern: ^[A-Za-z0-9]{1,25}$
+    example: '1234567890'

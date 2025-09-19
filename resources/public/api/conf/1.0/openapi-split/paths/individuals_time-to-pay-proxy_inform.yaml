@@ -1,0 +1,146 @@
+post:
+  tags:
+    - individuals
+  summary: Inform HoDs of SA TTP Operator-led Plan (CESA + ETMP)
+  operationId: InformHoDsOfSATTPOperatorLedPlan
+  description: |
+    An API called by CDCS to inform HoDs (CESA + ETMP) when a TTP set up by an operator has been created.
+
+    Response Behavior:
+    - Returns HTTP 200 when all downstream HoDs are called and responses can be parsed successfully (regardless of individual HoD response status codes)
+    - Returns HTTP 500 only for internal TTP errors or when responses from downstream APIs cannot be parsed
+    - The response includes details of all HoDs called with their status codes to help operators determine any required manual steps
+  parameters:
+    - name: correlationId
+      in: header
+      description: Correlation Id used for end to end traceability
+      required: true
+      schema:
+        type: string
+        format: uuid
+        example: f0bd1f32-de51-45cc-9b18-0520d6e3ab1a
+  security:
+    - applicationRestricted:
+        - read:time-to-pay-proxy
+  requestBody:
+    description: Request body with fields to create a TTP in CESA and ETMP.
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: ../components/schemas/InformRequest.yaml
+        examples:
+          example:
+            summary: Sample request for Inform API
+            value:
+              identifications:
+                - idType: UTR
+                  idValue: '1234567890'
+              paymentPlan:
+                arrangementAgreedDate: '2025-05-01'
+                ttpEndDate: '2025-11-01'
+                initialPaymentDate: '2025-05-05'
+                initialPaymentAmount: 150
+                frequency: monthly
+                ddiReference: DD123456789
+              instalments:
+                - dueDate: '2025-06-01'
+                  amountDue: 300
+              channelIdentifier: advisor
+              transitioned: true
+  responses:
+    '200':
+      description: |
+        Inform API operation successful with results of calls to CESA and ETMP. All downstream HoDs were called and responses were parsed successfully.
+        Individual HoD APIs may have returned success or error status codes - this is reported in the apisCalled array.
+      content:
+        application/json:
+          schema:
+            $ref: ../components/schemas/InformResponse.yaml
+          examples:
+            allHoDsSuccessful:
+              summary: All downstream HoDs respond successfully (HTTP 200)
+              value:
+                apisCalled:
+                  - name: CESA
+                    statusCode: 200
+                    processingDateTime: '2025-05-01T14:30:00Z'
+                  - name: ETMP
+                    statusCode: 201
+                    processingDateTime: '2025-05-01T14:31:00Z'
+                processingDateTime: '2025-05-01T14:32:00Z'
+            allHoDsUnsuccessful:
+              summary: All downstream HoDs respond unsuccessfully but responses parsed (HTTP 200)
+              value:
+                apisCalled:
+                  - name: CESA
+                    statusCode: 500
+                    processingDateTime: '2025-05-01T14:30:00Z'
+                    errorResponse: "Internal server error in CESA"
+                  - name: ETMP
+                    statusCode: 400
+                    processingDateTime: '2025-05-01T14:31:00Z'
+                    errorResponse: "Invalid request payload"
+                processingDateTime: '2025-05-01T14:32:00Z'
+            mixedHoDsResponse:
+              summary: Mixed success/failure from HoDs but all responses parsed (HTTP 200)
+              value:
+                apisCalled:
+                  - name: CESA
+                    statusCode: 200
+                    processingDateTime: '2025-05-01T14:30:00Z'
+                  - name: ETMP
+                    statusCode: 500
+                    processingDateTime: '2025-05-01T14:31:00Z'
+                    errorResponse: "Error processing inform"
+                processingDateTime: '2025-05-01T14:32:00Z'
+    '400':
+      description: |
+        Bad request due to invalid or missing data in the request payload.
+        This indicates client-side errors that prevent TTP from processing the inform request.
+      content:
+        application/json:
+          schema:
+            $ref: ../components/schemas/ErrorResponse.yaml
+          examples:
+            badRequestExample:
+              summary: Invalid request example
+              value:
+                statusCode: 400
+                errorMessage: 'Invalid request payload: missing identifications'
+    '500':
+      description: |
+        Internal TTP error or failure to parse responses from downstream HoDs.
+        This status is returned only when TTP cannot complete its processing or cannot parse HoD responses.
+        When individual HoD APIs return errors but responses can be parsed, a 200 status is returned instead.
+      content:
+        application/json:
+          schema:
+            $ref: ../components/schemas/InformErrorResponse.yaml
+          examples:
+            internalParsingError:
+              summary: Internal TTP error - cannot parse HoD responses (HTTP 500)
+              value:
+                internalErrors:
+                  - message: "Could not parse response from calling CESA"
+                processingDateTime: '2025-10-15T10:31:00Z'
+            mixedSuccessWithInternalError:
+              summary: Some HoDs successful, others unparseable (HTTP 500)
+              value:
+                apisCalled:
+                  - name: CESA
+                    statusCode: 200
+                    processingDateTime: '2025-10-15T10:30:00Z'
+                internalErrors:
+                  - message: "Could not parse response from calling ETMP"
+                processingDateTime: '2025-10-15T10:31:00Z'
+    '503':
+      description: The server is temporarily unavailable due to overload or maintenance.
+      headers: {}
+      content:
+        application/json:
+          schema:
+            $ref: ../components/schemas/ErrorResponse.yaml
+          example:
+            statusCode: 503
+            errorMessage: The server is temporarily unavailable.
