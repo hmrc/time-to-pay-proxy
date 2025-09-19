@@ -19,16 +19,21 @@ package uk.gov.hmrc.timetopayproxy.models.saopled.ttpinform
 import play.api.libs.json.{Json, OFormat}
 import play.api.mvc.{Result, Results}
 import uk.gov.hmrc.timetopayproxy.models.error.{TtppSpecificError, TtppWriteableError}
+import uk.gov.hmrc.timetopayproxy.models.saopled.common.ProcessingDateTimeInstant
+import uk.gov.hmrc.timetopayproxy.models.saopled.common.apistatus.ApiStatus
 
-/** This is both an incoming and an outgoing error response body. */
-final case class TtpInformGeneralFailureResponse(code: Int, details: String)
-    extends TtppSpecificError with TtppWriteableError { // TODO DTD-3779: This should no longer be writable
+/** Outgoing error for `500 Internal Server Error`. Also the incoming error from the `time-to-pay` service. */
+final case class TtpInformInformativeError(
+  // TODO DTD-3779: Implement the internalErrors field which won't exist in the 200 OK class.
+  apisCalled: List[ApiStatus],
+  processingDateTime: ProcessingDateTimeInstant
+) extends TtppSpecificError with TtppWriteableError {
+
   def toWriteableProxyError: TtppWriteableError = this
 
-  override def toErrorResult: Result = Results.Status(code)(Json.toJson(this))
+  def toErrorResult: Result = Results.InternalServerError(Json.toJson(this))
 }
 
-object TtpInformGeneralFailureResponse {
-  // TODO DTD-3779: Change this to a reader because the outgoing format will be TtppErrorResponse.
-  implicit val format: OFormat[TtpInformGeneralFailureResponse] = Json.format[TtpInformGeneralFailureResponse]
+object TtpInformInformativeError {
+  implicit val format: OFormat[TtpInformInformativeError] = Json.format[TtpInformInformativeError]
 }

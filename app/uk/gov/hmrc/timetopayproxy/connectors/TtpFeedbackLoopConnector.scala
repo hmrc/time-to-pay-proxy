@@ -46,7 +46,7 @@ trait TtpFeedbackLoopConnector {
 
   def informTtp(
     ttppInformRequest: TtpInformRequest
-  )(implicit ec: ExecutionContext, hc: HeaderCarrier): TtppEnvelope[TtpInformInformativeSuccess]
+  )(implicit ec: ExecutionContext, hc: HeaderCarrier): TtppEnvelope[TtpInformSuccessfulResponse]
 }
 
 @Singleton
@@ -61,6 +61,13 @@ class DefaultTtpFeedbackLoopConnector @Inject() (appConfig: AppConfig, httpClien
       .orSuccess[TtpCancelSuccessfulResponse](200)
       .orError[TtpCancelInformativeError](500)
       .orErrorTransformed[TimeToPayError](400, ttpError => ttpError.toConnectorError(status = 400))
+
+  private val httpReadsBuilderForInform: HttpReadsWithLoggingBuilder[ProxyEnvelopeError, TtpInformSuccessfulResponse] =
+    HttpReadsWithLoggingBuilder
+      .empty[ProxyEnvelopeError, TtpInformSuccessfulResponse]
+      .orSuccess[TtpInformSuccessfulResponse](200)
+      .orError[TtpInformInformativeError](500)
+      .orErrorTransformed[TtpInformGeneralFailureResponse](400, error => ConnectorError(400, error.details))
 
   def cancelTtp(
     ttppRequest: TtpCancelRequest
@@ -84,9 +91,10 @@ class DefaultTtpFeedbackLoopConnector @Inject() (appConfig: AppConfig, httpClien
 
   def informTtp(
     ttppInformRequest: TtpInformRequest
-  )(implicit ec: ExecutionContext, hc: HeaderCarrier): TtppEnvelope[TtpInformInformativeSuccess] = {
-    implicit def httpReads: HttpReads[Either[InternalTtppError, TtpInformInformativeSuccess]] =
-      httpReadsInformBuilder.httpReads(logger)
+  )(implicit ec: ExecutionContext, hc: HeaderCarrier): TtppEnvelope[TtpInformSuccessfulResponse] = {
+
+    implicit def httpReads: HttpReads[Either[ProxyEnvelopeError, TtpInformSuccessfulResponse]] =
+      httpReadsBuilderForInform.httpReads(logger)
 
     val path = if (appConfig.useIf) "/individuals/debts/time-to-pay/inform" else "/debts/time-to-pay/inform"
 
@@ -97,7 +105,7 @@ class DefaultTtpFeedbackLoopConnector @Inject() (appConfig: AppConfig, httpClien
         .post(url)
         .withBody(Json.toJson(ttppInformRequest))
         .setHeader(requestHeaders: _*)
-        .execute[Either[InternalTtppError, TtpInformInformativeSuccess]]
+        .execute[Either[ProxyEnvelopeError, TtpInformSuccessfulResponse]]
     )
   }
 
