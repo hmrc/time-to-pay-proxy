@@ -1,0 +1,15 @@
+type: object
+required:
+  - apisCalled
+  - processingDateTime
+properties:
+  apisCalled:
+    type: array
+    items:
+      $ref: ./FullAmendAPIStatus.yaml
+    description: Status of calls to each HoD API (done this way to future proof)
+  processingDateTime:
+    type: string
+    format: date-time
+    description: Timestamp for processing the full amend request (this is our one)
+    example: '2025-05-01T14:35:00Z'

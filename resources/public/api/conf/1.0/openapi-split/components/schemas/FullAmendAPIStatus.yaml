@@ -1,0 +1,25 @@
+type: object
+required:
+  - processingDateTime
+  - name
+  - statusCode
+properties:
+  processingDateTime:
+    type: string
+    format: date-time
+    description: Timestamp of processing the request in downstream API
+    example: '2025-05-01T14:30:00Z'
+  name:
+    type: string
+    description: The API name (CESA or ETMP)
+    example: ETMP
+  statusCode:
+    type: integer
+    description: HTTP status code from the downstream API
+    example: 400
+  errorResponse:
+    type: string
+    description: |
+      Error message returned by the downstream API when the call failed.
+      This field is present when the downstream API returns an error status code but TTP can parse the response.
+    example: "Invalid amendment request provided for full-amend"
