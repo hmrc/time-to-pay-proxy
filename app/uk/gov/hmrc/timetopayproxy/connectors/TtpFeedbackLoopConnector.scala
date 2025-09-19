@@ -20,16 +20,17 @@ import cats.data.EitherT
 import com.google.inject.ImplementedBy
 import play.api.libs.json.Json
 import uk.gov.hmrc.http.client.HttpClientV2
-import uk.gov.hmrc.http.{ HeaderCarrier, HttpReads, StringContextOps }
+import uk.gov.hmrc.http.{HeaderCarrier, HttpReads, StringContextOps}
 import uk.gov.hmrc.timetopayproxy.config.AppConfig
 import uk.gov.hmrc.timetopayproxy.connectors.util.HttpReadsWithLoggingBuilder
 import uk.gov.hmrc.timetopayproxy.logging.RequestAwareLogger
 import uk.gov.hmrc.timetopayproxy.models.error.TtppEnvelope.TtppEnvelope
-import uk.gov.hmrc.timetopayproxy.models.error.{ ConnectorError, TtppSpecificError }
-import uk.gov.hmrc.timetopayproxy.models.saopled.ttpcancel.{ TtpCancelGeneralFailureResponse, TtpCancelInformativeError, TtpCancelRequest, TtpCancelSuccessfulResponse }
+import uk.gov.hmrc.timetopayproxy.models.error.{ConnectorError, TtppSpecificError}
+import uk.gov.hmrc.timetopayproxy.models.saopled.ttpcancel.{TtpCancelGeneralFailureResponse, TtpCancelInformativeError, TtpCancelRequest, TtpCancelSuccessfulResponse}
+import uk.gov.hmrc.timetopayproxy.models.saopled.ttpinform.{TtpInformGeneralFailureResponse, TtpInformInformativeError, TtpInformRequest, TtpInformSuccessfulResponse}
 
 import java.util.UUID
-import javax.inject.{ Inject, Singleton }
+import javax.inject.{Inject, Singleton}
 import scala.concurrent.ExecutionContext
 
 /** Feedback Loop Connector for CDCS -> TTP communication.
@@ -45,7 +46,7 @@ trait TtpFeedbackLoopConnector {
 
   def informTtp(
     ttppInformRequest: TtpInformRequest
-  )(implicit ec: ExecutionContext, hc: HeaderCarrier): TtppEnvelope[TtpInformInformativeSuccess]
+  )(implicit ec: ExecutionContext, hc: HeaderCarrier): TtppEnvelope[TtpInformSuccessfulResponse]
 }
 
 @Singleton
@@ -60,6 +61,13 @@ class DefaultTtpFeedbackLoopConnector @Inject() (appConfig: AppConfig, httpClien
       .orSuccess[TtpCancelSuccessfulResponse](200)
       .orError[TtpCancelInformativeError](500)
       .orErrorTransformed[TtpCancelGeneralFailureResponse](400, error => ConnectorError(400, error.details))
+
+  private val httpReadsBuilderForInform: HttpReadsWithLoggingBuilder[TtppSpecificError, TtpInformSuccessfulResponse] =
+    HttpReadsWithLoggingBuilder
+      .empty[TtppSpecificError, TtpInformSuccessfulResponse]
+      .orSuccess[TtpInformSuccessfulResponse](200)
+      .orError[TtpInformInformativeError](500)
+      .orErrorTransformed[TtpInformGeneralFailureResponse](400, error => ConnectorError(400, error.details))
 
   def cancelTtp(
     ttppRequest: TtpCancelRequest
@@ -83,9 +91,10 @@ class DefaultTtpFeedbackLoopConnector @Inject() (appConfig: AppConfig, httpClien
 
   def informTtp(
     ttppInformRequest: TtpInformRequest
-  )(implicit ec: ExecutionContext, hc: HeaderCarrier): TtppEnvelope[TtpInformInformativeSuccess] = {
-    implicit def httpReads: HttpReads[Either[InternalTtppError, TtpInformInformativeSuccess]] =
-      httpReadsInformBuilder.httpReads(logger)
+  )(implicit ec: ExecutionContext, hc: HeaderCarrier): TtppEnvelope[TtpInformSuccessfulResponse] = {
+
+    implicit def httpReads: HttpReads[Either[TtppSpecificError, TtpInformSuccessfulResponse]] =
+      httpReadsBuilderForInform.httpReads(logger)
 
     val path = if (appConfig.useIf) "/individuals/debts/time-to-pay/inform" else "/debts/time-to-pay/inform"
 
@@ -96,7 +105,7 @@ class DefaultTtpFeedbackLoopConnector @Inject() (appConfig: AppConfig, httpClien
         .post(url)
         .withBody(Json.toJson(ttppInformRequest))
         .setHeader(requestHeaders: _*)
-        .execute[Either[InternalTtppError, TtpInformInformativeSuccess]]
+        .execute[Either[TtppSpecificError, TtpInformSuccessfulResponse]]
     )
   }
 

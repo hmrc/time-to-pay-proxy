@@ -20,9 +20,10 @@ import com.google.inject.ImplementedBy
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.timetopayproxy.connectors.TtpFeedbackLoopConnector
 import uk.gov.hmrc.timetopayproxy.models.error.TtppEnvelope.TtppEnvelope
-import uk.gov.hmrc.timetopayproxy.models.saopled.ttpcancel.{ TtpCancelRequest, TtpCancelSuccessfulResponse }
+import uk.gov.hmrc.timetopayproxy.models.saopled.ttpcancel.{TtpCancelRequest, TtpCancelSuccessfulResponse}
+import uk.gov.hmrc.timetopayproxy.models.saopled.ttpinform.{TtpInformRequest, TtpInformSuccessfulResponse}
 
-import javax.inject.{ Inject, Singleton }
+import javax.inject.{Inject, Singleton}
 import scala.concurrent.ExecutionContext
 
 @ImplementedBy(classOf[DefaultTtpFeedbackLoopService])
@@ -33,7 +34,7 @@ trait TtpFeedbackLoopService {
 
   def informTtp(
     ttppInformRequest: TtpInformRequest
-  )(implicit ec: ExecutionContext, hc: HeaderCarrier): TtppEnvelope[TtpInformInformativeSuccess]
+  )(implicit ec: ExecutionContext, hc: HeaderCarrier): TtppEnvelope[TtpInformSuccessfulResponse]
 }
 
 @Singleton
@@ -45,6 +46,6 @@ class DefaultTtpFeedbackLoopService @Inject() (ttppConnector: TtpFeedbackLoopCon
 
   def informTtp(
     ttppInformRequest: TtpInformRequest
-  )(implicit ec: ExecutionContext, hc: HeaderCarrier): TtppEnvelope[TtpInformInformativeSuccess] =
+  )(implicit ec: ExecutionContext, hc: HeaderCarrier): TtppEnvelope[TtpInformSuccessfulResponse] =
     ttppConnector.informTtp(ttppInformRequest)
 }
