@@ -17,7 +17,7 @@ post:
         schema:
           $ref: ../components/schemas/TTPQuoteRequest.yaml
         example:
-          regimeType: PAYE
+          regimeType: SA
           customerReference: uniqRef1234
           channelIdentifier: selfService
           plan:
