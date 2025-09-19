@@ -1,0 +1,15 @@
+type: object
+required:
+  - apisCalled
+  - processingDateTime
+properties:
+  apisCalled:
+    type: array
+    items:
+      $ref: ./CancelAPIStatus.yaml
+    description: Status of calls to each HoD API
+  processingDateTime:
+    type: string
+    format: date-time
+    description: Timestamp for processing the cancel request
+    example: '2025-10-15T10:31:00Z'
