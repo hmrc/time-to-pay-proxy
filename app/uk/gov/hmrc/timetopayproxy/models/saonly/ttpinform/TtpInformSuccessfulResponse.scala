@@ -14,12 +14,18 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.timetopayproxy.models.saopled.ttpinform
+package uk.gov.hmrc.timetopayproxy.models.saonly.ttpinform
 
-import play.api.libs.json.{ Format, Json }
+import play.api.libs.json.{Json, OFormat}
+import uk.gov.hmrc.timetopayproxy.models.saonly.common.ProcessingDateTimeInstant
+import uk.gov.hmrc.timetopayproxy.models.saonly.common.apistatus.ApiStatus
 
-final case class DdiReference(value: String) extends AnyVal
+/** This is intended only for `200 OK`. */
+final case class TtpInformSuccessfulResponse(
+  apisCalled: List[ApiStatus],
+  processingDateTime: ProcessingDateTimeInstant
+)
 
-object DdiReference {
-  implicit val format: Format[DdiReference] = Json.valueFormat[DdiReference]
+object TtpInformSuccessfulResponse {
+  implicit val format: OFormat[TtpInformSuccessfulResponse] = Json.format[TtpInformSuccessfulResponse]
 }

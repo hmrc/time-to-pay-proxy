@@ -14,20 +14,20 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.timetopayproxy.models.saopled.ttpinform
+package uk.gov.hmrc.timetopayproxy.models.saonly.ttpinform
 
 import play.api.libs.json.{Json, OFormat}
 import play.api.mvc.{Result, Results}
-import uk.gov.hmrc.timetopayproxy.models.error.{TtppSpecificError, TtppWriteableError}
-import uk.gov.hmrc.timetopayproxy.models.saopled.common.ProcessingDateTimeInstant
-import uk.gov.hmrc.timetopayproxy.models.saopled.common.apistatus.ApiStatus
+import uk.gov.hmrc.timetopayproxy.models.error.{ProxyEnvelopeError, TtppWriteableError}
+import uk.gov.hmrc.timetopayproxy.models.saonly.common.ProcessingDateTimeInstant
+import uk.gov.hmrc.timetopayproxy.models.saonly.common.apistatus.ApiStatus
 
 /** Outgoing error for `500 Internal Server Error`. Also the incoming error from the `time-to-pay` service. */
 final case class TtpInformInformativeError(
   // TODO DTD-3779: Implement the internalErrors field which won't exist in the 200 OK class.
   apisCalled: List[ApiStatus],
   processingDateTime: ProcessingDateTimeInstant
-) extends TtppSpecificError with TtppWriteableError {
+) extends ProxyEnvelopeError with TtppWriteableError {
 
   def toWriteableProxyError: TtppWriteableError = this
 

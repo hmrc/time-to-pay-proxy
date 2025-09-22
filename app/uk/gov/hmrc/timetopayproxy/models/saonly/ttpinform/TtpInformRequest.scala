@@ -14,18 +14,18 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.timetopayproxy.models.saopled.ttpinform
+package uk.gov.hmrc.timetopayproxy.models.saonly.ttpinform
 
 import cats.data.NonEmptyList
-import play.api.libs.json.{ Format, Json, OFormat }
-import uk.gov.hmrc.timetopayproxy.models.{ ChannelIdentifier, Identification }
-import uk.gov.hmrc.timetopayproxy.models.saopled.common.{ SaOpLedInstalment, TransitionedIndicator }
+import play.api.libs.json.{Format, Json, OFormat}
+import uk.gov.hmrc.timetopayproxy.models.saonly.common.{SaOnlyInstalment, TransitionedIndicator}
+import uk.gov.hmrc.timetopayproxy.models.{ChannelIdentifier, Identification}
 import uk.gov.hmrc.timetopayproxy.utils.json.CatsNonEmptyListJson
 
 final case class TtpInformRequest(
   identifications: NonEmptyList[Identification],
   paymentPlan: TtpInformPaymentPlan,
-  instalments: NonEmptyList[SaOpLedInstalment],
+  instalments: NonEmptyList[SaOnlyInstalment],
   channelIdentifier: ChannelIdentifier,
   transitioned: Option[TransitionedIndicator]
 )

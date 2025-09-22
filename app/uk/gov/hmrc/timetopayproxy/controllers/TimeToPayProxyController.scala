@@ -25,15 +25,16 @@ import uk.gov.hmrc.timetopayproxy.config.FeatureSwitch
 import uk.gov.hmrc.timetopayproxy.models._
 import uk.gov.hmrc.timetopayproxy.models.affordablequotes.AffordableQuotesRequest
 import uk.gov.hmrc.timetopayproxy.models.error.TtppEnvelope.TtppEnvelope
-import uk.gov.hmrc.timetopayproxy.models.error.{ TtppEnvelope, TtppErrorResponse, ValidationError }
+import uk.gov.hmrc.timetopayproxy.models.error.{TtppEnvelope, TtppErrorResponse, ValidationError}
 import uk.gov.hmrc.timetopayproxy.models.saonly.chargeInfoApi.ChargeInfoRequest
 import uk.gov.hmrc.timetopayproxy.models.saonly.ttpcancel.TtpCancelRequest
-import uk.gov.hmrc.timetopayproxy.services.{ TTPEService, TTPQuoteService, TtpFeedbackLoopService }
+import uk.gov.hmrc.timetopayproxy.models.saonly.ttpinform.TtpInformRequest
+import uk.gov.hmrc.timetopayproxy.services.{TTPEService, TTPQuoteService, TtpFeedbackLoopService}
 
-import javax.inject.{ Inject, Singleton }
+import javax.inject.{Inject, Singleton}
 import scala.annotation.unused
-import scala.concurrent.{ ExecutionContext, Future }
-import scala.util.{ Failure, Success, Try }
+import scala.concurrent.{ExecutionContext, Future}
+import scala.util.{Failure, Success, Try}
 
 @Singleton()
 class TimeToPayProxyController @Inject() (
@@ -138,7 +139,7 @@ class TimeToPayProxyController @Inject() (
       ttpFeedbackLoopService
         .informTtp(deserialisedRequest)
         .leftMap(ttppError => ttppError.toWriteableProxyError)
-        .fold(e => e.toErrorResult, r => r.toErrorResult)
+        .fold(e => e.toErrorResult, r => Results.Ok(Json.toJson(r)))
     }
   }
 

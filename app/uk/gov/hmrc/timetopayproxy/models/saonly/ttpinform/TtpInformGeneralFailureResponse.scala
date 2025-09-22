@@ -14,18 +14,19 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.timetopayproxy.models.saopled.ttpinform
+package uk.gov.hmrc.timetopayproxy.models.saonly.ttpinform
 
 import play.api.libs.json.{Json, OFormat}
 import play.api.mvc.{Result, Results}
-import uk.gov.hmrc.timetopayproxy.models.error.{TtppSpecificError, TtppWriteableError}
+import uk.gov.hmrc.timetopayproxy.models.error.{ProxyEnvelopeError, TtppWriteableError}
 
 /** This is both an incoming and an outgoing error response body. */
 final case class TtpInformGeneralFailureResponse(code: Int, details: String)
-    extends TtppSpecificError with TtppWriteableError { // TODO DTD-3779: This should no longer be writable
+    extends ProxyEnvelopeError with TtppWriteableError { // TODO DTD-3779: This should no longer be writable
+
   def toWriteableProxyError: TtppWriteableError = this
 
-  override def toErrorResult: Result = Results.Status(code)(Json.toJson(this))
+  def toErrorResult: Result = Results.Status(code)(Json.toJson(this))
 }
 
 object TtpInformGeneralFailureResponse {

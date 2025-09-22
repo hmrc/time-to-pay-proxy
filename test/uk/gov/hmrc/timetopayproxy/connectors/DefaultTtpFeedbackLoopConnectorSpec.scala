@@ -22,21 +22,23 @@ import org.scalatest.concurrent.ScalaFutures._
 import org.scalatest.matchers.should.Matchers._
 import org.scalatestplus.play.PlaySpec
 import play.api.libs.json.Json
-import play.api.test.{ DefaultAwaitTimeout, FutureAwaits }
-import play.api.{ ConfigLoader, Configuration }
+import play.api.test.{DefaultAwaitTimeout, FutureAwaits}
+import play.api.{ConfigLoader, Configuration}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.http.client.HttpClientV2
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 import uk.gov.hmrc.timetopayproxy.config.AppConfig
 import uk.gov.hmrc.timetopayproxy.models.currency.GbpPounds
 import uk.gov.hmrc.timetopayproxy.models.error.ConnectorError
-import uk.gov.hmrc.timetopayproxy.models.saonly.common.apistatus.{ ApiName, ApiStatus, ApiStatusCode }
-import uk.gov.hmrc.timetopayproxy.models.saonly.common.{ ArrangementAgreedDate, InitialPaymentDate, ProcessingDateTimeInstant, SaOnlyInstalment, TransitionedIndicator, TtpEndDate }
-import uk.gov.hmrc.timetopayproxy.models.saonly.ttpcancel.{ CancellationDate, TtpCancelInformativeError, TtpCancelPaymentPlan, TtpCancelRequest, TtpCancelSuccessfulResponse }
-import uk.gov.hmrc.timetopayproxy.models.{ ChannelIdentifier, FrequencyLowercase, IdType, IdValue, Identification, InstalmentDueDate }
+import uk.gov.hmrc.timetopayproxy.models.error.TtppEnvelope.TtppEnvelope
+import uk.gov.hmrc.timetopayproxy.models.saonly.common.apistatus.{ApiName, ApiStatus, ApiStatusCode}
+import uk.gov.hmrc.timetopayproxy.models.saonly.common.{ArrangementAgreedDate, InitialPaymentDate, ProcessingDateTimeInstant, SaOnlyInstalment, TransitionedIndicator, TtpEndDate}
+import uk.gov.hmrc.timetopayproxy.models.saonly.ttpcancel.{CancellationDate, TtpCancelInformativeError, TtpCancelPaymentPlan, TtpCancelRequest, TtpCancelSuccessfulResponse}
+import uk.gov.hmrc.timetopayproxy.models.saonly.ttpinform.{DdiReference, TtpInformInformativeError, TtpInformPaymentPlan, TtpInformRequest, TtpInformSuccessfulResponse}
+import uk.gov.hmrc.timetopayproxy.models.{ChannelIdentifier, FrequencyLowercase, IdType, IdValue, Identification, InstalmentDueDate}
 import uk.gov.hmrc.timetopayproxy.support.WireMockUtils
 
-import java.time.{ Instant, LocalDate }
+import java.time.{Instant, LocalDate}
 import scala.concurrent.ExecutionContext
 
 final class DefaultTtpFeedbackLoopConnectorSpec
@@ -258,7 +260,7 @@ final class DefaultTtpFeedbackLoopConnectorSpec
         ddiReference = Some(DdiReference("TestDDIReference"))
       ),
       instalments = NonEmptyList.of(
-        SaOpLedInstalment(
+        SaOnlyInstalment(
           dueDate = InstalmentDueDate(LocalDate.parse("2025-01-31")),
           amountDue = GbpPoundsUnchecked(500.00)
         )
