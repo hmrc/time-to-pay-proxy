@@ -16,6 +16,6 @@
 
 package uk.gov.hmrc.timetopayproxy.models.error
 
-trait TtppSpecificError { this: Product with Serializable =>
+trait ProxyEnvelopeError { this: Product with Serializable =>
   def toWriteableProxyError: TtppWriteableError
 }

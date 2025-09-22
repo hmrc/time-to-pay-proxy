@@ -21,12 +21,12 @@ import cats.data.EitherT
 import scala.concurrent.{ ExecutionContext, Future }
 
 object TtppEnvelope {
-  type TtppEnvelope[T] = EitherT[Future, TtppSpecificError, T]
+  type TtppEnvelope[T] = EitherT[Future, ProxyEnvelopeError, T]
 
-  def apply[T](arg: T)(implicit ec: ExecutionContext): TtppEnvelope[T] = EitherT.pure[Future, TtppSpecificError](arg)
+  def apply[T](arg: T)(implicit ec: ExecutionContext): TtppEnvelope[T] = EitherT.pure[Future, ProxyEnvelopeError](arg)
 
-  def apply[T](f: Future[Either[TtppSpecificError, T]]): TtppEnvelope[T] = EitherT(f)
+  def apply[T](f: Future[Either[ProxyEnvelopeError, T]]): TtppEnvelope[T] = EitherT(f)
 
-  def apply[T](eitherArg: Either[TtppSpecificError, T])(implicit ec: ExecutionContext): TtppEnvelope[T] =
+  def apply[T](eitherArg: Either[ProxyEnvelopeError, T])(implicit ec: ExecutionContext): TtppEnvelope[T] =
     EitherT.fromEither[Future](eitherArg)
 }

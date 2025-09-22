@@ -18,7 +18,7 @@ package uk.gov.hmrc.timetopayproxy.models.saopled.ttpcancel
 
 import play.api.libs.json.{ Json, OFormat }
 import play.api.mvc.{ Result, Results }
-import uk.gov.hmrc.timetopayproxy.models.error.{ TtppSpecificError, TtppWriteableError }
+import uk.gov.hmrc.timetopayproxy.models.error.{ ProxyEnvelopeError, TtppWriteableError }
 import uk.gov.hmrc.timetopayproxy.models.saopled.common.ProcessingDateTimeInstant
 import uk.gov.hmrc.timetopayproxy.models.saopled.common.apistatus.ApiStatus
 
@@ -27,7 +27,7 @@ final case class TtpCancelInformativeError(
   // TODO DTD-3785: Implement the internalErrors field which won't exist in the 200 OK class.
   apisCalled: List[ApiStatus],
   processingDateTime: ProcessingDateTimeInstant
-) extends TtppSpecificError with TtppWriteableError {
+) extends ProxyEnvelopeError with TtppWriteableError {
 
   def toWriteableProxyError: TtppWriteableError = this
 

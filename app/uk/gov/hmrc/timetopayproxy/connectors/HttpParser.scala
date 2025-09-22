@@ -21,7 +21,7 @@ import play.api.http.Status
 import play.api.libs.json.Reads
 import uk.gov.hmrc.http.HttpReads
 import uk.gov.hmrc.timetopayproxy.models.IncomingApiError
-import uk.gov.hmrc.timetopayproxy.models.error.{ ConnectorError, TtppSpecificError }
+import uk.gov.hmrc.timetopayproxy.models.error.{ ConnectorError, ProxyEnvelopeError }
 
 import scala.util.{ Failure, Success, Try }
 
@@ -29,7 +29,7 @@ trait HttpParser[IncomingError <: IncomingApiError] {
   implicit def httpReads[T](implicit
     successReads: Reads[T],
     errorReads: Reads[IncomingError]
-  ): HttpReads[Either[TtppSpecificError, T]] = (_, _, response) =>
+  ): HttpReads[Either[ProxyEnvelopeError, T]] = (_, _, response) =>
     response.status match {
       case Status.OK | Status.CREATED =>
         response.json

@@ -25,7 +25,7 @@ import uk.gov.hmrc.timetopayproxy.config.AppConfig
 import uk.gov.hmrc.timetopayproxy.connectors.util.HttpReadsWithLoggingBuilder
 import uk.gov.hmrc.timetopayproxy.logging.RequestAwareLogger
 import uk.gov.hmrc.timetopayproxy.models.error.TtppEnvelope.TtppEnvelope
-import uk.gov.hmrc.timetopayproxy.models.error.{ ConnectorError, TtppSpecificError }
+import uk.gov.hmrc.timetopayproxy.models.error.{ ConnectorError, ProxyEnvelopeError }
 import uk.gov.hmrc.timetopayproxy.models.saopled.ttpcancel.{ TtpCancelGeneralFailureResponse, TtpCancelInformativeError, TtpCancelRequest, TtpCancelSuccessfulResponse }
 
 import java.util.UUID
@@ -50,9 +50,9 @@ class DefaultTtpFeedbackLoopConnector @Inject() (appConfig: AppConfig, httpClien
 
   private val logger: RequestAwareLogger = new RequestAwareLogger(classOf[DefaultTtpFeedbackLoopConnector])
 
-  private val httpReadsBuilderForCancel: HttpReadsWithLoggingBuilder[TtppSpecificError, TtpCancelSuccessfulResponse] =
+  private val httpReadsBuilderForCancel: HttpReadsWithLoggingBuilder[ProxyEnvelopeError, TtpCancelSuccessfulResponse] =
     HttpReadsWithLoggingBuilder
-      .empty[TtppSpecificError, TtpCancelSuccessfulResponse]
+      .empty[ProxyEnvelopeError, TtpCancelSuccessfulResponse]
       .orSuccess[TtpCancelSuccessfulResponse](200)
       .orError[TtpCancelInformativeError](500)
       .orErrorTransformed[TtpCancelGeneralFailureResponse](400, error => ConnectorError(400, error.details))
@@ -61,7 +61,7 @@ class DefaultTtpFeedbackLoopConnector @Inject() (appConfig: AppConfig, httpClien
     ttppRequest: TtpCancelRequest
   )(implicit ec: ExecutionContext, hc: HeaderCarrier): TtppEnvelope[TtpCancelSuccessfulResponse] = {
 
-    implicit def httpReads: HttpReads[Either[TtppSpecificError, TtpCancelSuccessfulResponse]] =
+    implicit def httpReads: HttpReads[Either[ProxyEnvelopeError, TtpCancelSuccessfulResponse]] =
       httpReadsBuilderForCancel.httpReads(logger)
 
     val path = if (appConfig.useIf) "/individuals/debts/time-to-pay/cancel" else "/debts/time-to-pay/cancel"
@@ -73,7 +73,7 @@ class DefaultTtpFeedbackLoopConnector @Inject() (appConfig: AppConfig, httpClien
         .post(url)
         .withBody(Json.toJson(ttppRequest))
         .setHeader(requestHeaders: _*)
-        .execute[Either[TtppSpecificError, TtpCancelSuccessfulResponse]]
+        .execute[Either[ProxyEnvelopeError, TtpCancelSuccessfulResponse]]
     )
   }
 

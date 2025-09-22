@@ -25,7 +25,7 @@ import uk.gov.hmrc.timetopayproxy.config.AppConfig
 import uk.gov.hmrc.timetopayproxy.logging.RequestAwareLogger
 import uk.gov.hmrc.timetopayproxy.models._
 import uk.gov.hmrc.timetopayproxy.models.affordablequotes.{ AffordableQuoteResponse, AffordableQuotesRequest }
-import uk.gov.hmrc.timetopayproxy.models.error.TtppSpecificError
+import uk.gov.hmrc.timetopayproxy.models.error.ProxyEnvelopeError
 import uk.gov.hmrc.timetopayproxy.models.error.TtppEnvelope.TtppEnvelope
 
 import java.net.URLEncoder
@@ -95,7 +95,7 @@ class DefaultTtpConnector @Inject() (appConfig: AppConfig, httpClient: HttpClien
         .post(url)
         .withBody(Json.toJson(ttppRequest))
         .setHeader(headers(getOrGenerateCorrelationId): _*)
-        .execute[Either[TtppSpecificError, GenerateQuoteResponse]]
+        .execute[Either[ProxyEnvelopeError, GenerateQuoteResponse]]
     )
   }
 
@@ -121,7 +121,7 @@ class DefaultTtpConnector @Inject() (appConfig: AppConfig, httpClient: HttpClien
     EitherT(
       httpClient
         .get(url)
-        .execute[Either[TtppSpecificError, Response]]
+        .execute[Either[ProxyEnvelopeError, Response]]
     )
   }
 
@@ -143,7 +143,7 @@ class DefaultTtpConnector @Inject() (appConfig: AppConfig, httpClient: HttpClien
       httpClient
         .put(url)
         .withBody(Json.toJson(updatePlanRequest))
-        .execute[Either[TtppSpecificError, UpdatePlanResponse]]
+        .execute[Either[ProxyEnvelopeError, UpdatePlanResponse]]
     )
   }
 
@@ -166,7 +166,7 @@ class DefaultTtpConnector @Inject() (appConfig: AppConfig, httpClient: HttpClien
         .post(url)
         .withBody(Json.toJson(createPlanRequest))
         .setHeader(headers(getOrGenerateCorrelationId): _*)
-        .execute[Either[TtppSpecificError, CreatePlanResponse]]
+        .execute[Either[ProxyEnvelopeError, CreatePlanResponse]]
     )
   }
 
@@ -183,7 +183,7 @@ class DefaultTtpConnector @Inject() (appConfig: AppConfig, httpClient: HttpClien
       httpClient
         .post(url)
         .withBody(Json.toJson(affordableQuotesRequest))
-        .execute[Either[TtppSpecificError, AffordableQuoteResponse]]
+        .execute[Either[ProxyEnvelopeError, AffordableQuoteResponse]]
     )
   }
 

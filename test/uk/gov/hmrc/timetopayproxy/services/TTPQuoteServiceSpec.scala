@@ -22,7 +22,7 @@ import uk.gov.hmrc.timetopayproxy.connectors.TtpConnector
 import uk.gov.hmrc.timetopayproxy.models._
 import uk.gov.hmrc.timetopayproxy.models.affordablequotes.{ AffordableQuoteResponse, AffordableQuotesRequest }
 import uk.gov.hmrc.timetopayproxy.models.error.TtppEnvelope.TtppEnvelope
-import uk.gov.hmrc.timetopayproxy.models.error.{ ConnectorError, TtppEnvelope, TtppSpecificError }
+import uk.gov.hmrc.timetopayproxy.models.error.{ ConnectorError, ProxyEnvelopeError, TtppEnvelope }
 import uk.gov.hmrc.timetopayproxy.support.UnitSpec
 
 import java.time.{ LocalDate, LocalDateTime }
@@ -276,7 +276,7 @@ class TTPQuoteServiceSpec extends UnitSpec {
           quoteService.generateQuote(timeToPayRequest, Map.empty).value,
           5,
           TimeUnit.SECONDS
-        ) shouldBe generateQuoteResponse.asRight[TtppSpecificError]
+        ) shouldBe generateQuoteResponse.asRight[ProxyEnvelopeError]
       }
     }
     "return a failure response" when {
@@ -327,7 +327,7 @@ class TTPQuoteServiceSpec extends UnitSpec {
           )
           .value
       ) shouldBe retrievePlanResponse
-        .asRight[TtppSpecificError]
+        .asRight[ProxyEnvelopeError]
     }
 
     "return a error if the service does not return a successful response" in {
@@ -374,7 +374,7 @@ class TTPQuoteServiceSpec extends UnitSpec {
           ttpQuoteService.updatePlan(updatePlanRequest).value,
           5,
           TimeUnit.SECONDS
-        ) shouldBe updatePlanResponse.asRight[TtppSpecificError]
+        ) shouldBe updatePlanResponse.asRight[ProxyEnvelopeError]
       }
     }
     "return a failure response" when {
@@ -418,7 +418,7 @@ class TTPQuoteServiceSpec extends UnitSpec {
       val quoteService = new DefaultTTPQuoteService(connectorStub)
 
       await(quoteService.createPlan(createPlanRequest, Map.empty).value) shouldBe createPlanResponse
-        .asRight[TtppSpecificError]
+        .asRight[ProxyEnvelopeError]
     }
 
     "return a error if the service does not return a successful response" in {
@@ -451,7 +451,7 @@ class TTPQuoteServiceSpec extends UnitSpec {
       val quoteService = new DefaultTTPQuoteService(connectorStub)
 
       await(quoteService.getAffordableQuotes(affordableQuotesRequest).value) shouldBe affordableQuoteResponse
-        .asRight[TtppSpecificError]
+        .asRight[ProxyEnvelopeError]
     }
 
     "return an error from the connector" in {
@@ -473,11 +473,11 @@ class TTPQuoteServiceSpec extends UnitSpec {
 }
 
 class TtpConnectorStub(
-  generateQuoteResponse: Either[TtppSpecificError, GenerateQuoteResponse],
-  retrieveQuoteResponse: Either[TtppSpecificError, ViewPlanResponse],
-  updatePlanResponse: Either[TtppSpecificError, UpdatePlanResponse],
-  createPlanResponse: Either[TtppSpecificError, CreatePlanResponse],
-  affordableQuoteResponse: Either[TtppSpecificError, AffordableQuoteResponse]
+  generateQuoteResponse: Either[ProxyEnvelopeError, GenerateQuoteResponse],
+  retrieveQuoteResponse: Either[ProxyEnvelopeError, ViewPlanResponse],
+  updatePlanResponse: Either[ProxyEnvelopeError, UpdatePlanResponse],
+  createPlanResponse: Either[ProxyEnvelopeError, CreatePlanResponse],
+  affordableQuoteResponse: Either[ProxyEnvelopeError, AffordableQuoteResponse]
 ) extends TtpConnector {
   override def generateQuote(
     ttppRequest: GenerateQuoteRequest,
