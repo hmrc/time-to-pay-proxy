@@ -33,7 +33,7 @@ package uk.gov.hmrc.timetopayproxy.models
  */
 
 import play.api.libs.json.{ Json, OFormat }
-import uk.gov.hmrc.timetopayproxy.models.saopled.common.OpLedRegimeType
+import uk.gov.hmrc.timetopayproxy.models.saonly.common.SaOnlyRegimeType
 
 import java.time.LocalDate
 
@@ -62,7 +62,7 @@ final case class GenerateQuoteRequest(
   plan: PlanToGenerateQuote,
   customerPostCodes: List[CustomerPostCode],
   debtItemCharges: List[QuoteDebtItemCharge],
-  regimeType: Option[OpLedRegimeType]
+  regimeType: Option[SaOnlyRegimeType]
 ) {
   require(!customerReference.value.trim().isEmpty(), "customerReference should not be empty")
 }

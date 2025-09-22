@@ -23,11 +23,11 @@ import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.timetopayproxy.models._
 import uk.gov.hmrc.timetopayproxy.models.affordablequotes.{ AffordableQuoteResponse, AffordableQuotesRequest }
 import uk.gov.hmrc.timetopayproxy.models.error.TtppErrorResponse
-import uk.gov.hmrc.timetopayproxy.models.saopled.common.apistatus.{ ApiErrorResponse, ApiName, ApiStatus, ApiStatusCode }
-import uk.gov.hmrc.timetopayproxy.models.saopled.common.{ ArrangementAgreedDate, InitialPaymentDate, ProcessingDateTimeInstant, SaOpLedInstalment, TransitionedIndicator, TtpEndDate }
-import uk.gov.hmrc.timetopayproxy.models.saopled.ttpcancel.{ CancellationDate, TtpCancelGeneralFailureResponse, TtpCancelPaymentPlan, TtpCancelRequest, TtpCancelSuccessfulResponse }
-import uk.gov.hmrc.timetopayproxy.models.saopled.chargeInfoApi._
-import uk.gov.hmrc.timetopayproxy.models.saopled.common.OpLedRegimeType
+import uk.gov.hmrc.timetopayproxy.models.saonly.common.apistatus.{ ApiErrorResponse, ApiName, ApiStatus, ApiStatusCode }
+import uk.gov.hmrc.timetopayproxy.models.saonly.common.{ ArrangementAgreedDate, InitialPaymentDate, ProcessingDateTimeInstant, SaOnlyInstalment, TransitionedIndicator, TtpEndDate }
+import uk.gov.hmrc.timetopayproxy.models.saonly.ttpcancel.{ CancellationDate, TtpCancelGeneralFailureResponse, TtpCancelPaymentPlan, TtpCancelRequest, TtpCancelSuccessfulResponse }
+import uk.gov.hmrc.timetopayproxy.models.saonly.chargeInfoApi._
+import uk.gov.hmrc.timetopayproxy.models.saonly.common.SaOnlyRegimeType
 import uk.gov.hmrc.timetopayproxy.models.currency.GbpPoundsUnchecked
 import uk.gov.hmrc.timetopayproxy.models.{ ChannelIdentifier, FrequencyLowercase, Identification, InstalmentDueDate }
 import uk.gov.hmrc.timetopayproxy.support.IntegrationBaseSpec
@@ -959,7 +959,7 @@ class TimeToPayProxyControllerItSpec extends IntegrationBaseSpec {
         Identification(idType = IdType("id type 1"), idValue = IdValue("id value 1")),
         Identification(idType = IdType("id type 2"), idValue = IdValue("id value 2"))
       ),
-      regimeType = OpLedRegimeType.SA
+      regimeType = SaOnlyRegimeType.SA
     )
 
     val cancelResponse: TtpCancelSuccessfulResponse = TtpCancelSuccessfulResponse(
@@ -994,7 +994,7 @@ class TimeToPayProxyControllerItSpec extends IntegrationBaseSpec {
         initialPaymentAmount = Some(GbpPoundsUnchecked(BigDecimal("123.45")))
       ),
       instalments = NonEmptyList.of(
-        SaOpLedInstalment(
+        SaOnlyInstalment(
           dueDate = InstalmentDueDate(LocalDate.parse("2025-11-28")),
           amountDue = GbpPoundsUnchecked(BigDecimal("100.00"))
         )

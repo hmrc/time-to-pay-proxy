@@ -18,7 +18,7 @@ package uk.gov.hmrc.timetopayproxy.models
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
 import play.api.libs.json._
-import uk.gov.hmrc.timetopayproxy.models.saopled.common.OpLedRegimeType
+import uk.gov.hmrc.timetopayproxy.models.saonly.common.SaOnlyRegimeType
 
 import java.time.LocalDate
 import scala.util.{ Failure, Try }
@@ -50,7 +50,7 @@ class GenerateQuoteRequestSpec extends AnyWordSpec with Matchers {
         dueDate = Some(LocalDate.of(2021, 5, 13))
       )
     ),
-    regimeType = Some(OpLedRegimeType.SA)
+    regimeType = Some(SaOnlyRegimeType.SA)
   )
 
   val json = """{

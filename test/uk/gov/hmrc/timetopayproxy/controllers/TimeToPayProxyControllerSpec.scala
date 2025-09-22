@@ -36,12 +36,12 @@ import uk.gov.hmrc.timetopayproxy.models._
 import uk.gov.hmrc.timetopayproxy.models.affordablequotes._
 import uk.gov.hmrc.timetopayproxy.models.error.TtppEnvelope.TtppEnvelope
 import uk.gov.hmrc.timetopayproxy.models.error.{ ConnectorError, TtppEnvelope, TtppErrorResponse }
-import uk.gov.hmrc.timetopayproxy.models.saopled.chargeInfoApi._
-import uk.gov.hmrc.timetopayproxy.models.saopled.common.OpLedRegimeType
-import uk.gov.hmrc.timetopayproxy.models.saopled.common.{ ArrangementAgreedDate, InitialPaymentDate, SaOpLedInstalment, TransitionedIndicator, TtpEndDate }
-import uk.gov.hmrc.timetopayproxy.models.saopled.common.apistatus.{ ApiName, ApiStatus, ApiStatusCode }
-import uk.gov.hmrc.timetopayproxy.models.saopled.common.ProcessingDateTimeInstant
-import uk.gov.hmrc.timetopayproxy.models.saopled.ttpcancel.{ CancellationDate, TtpCancelPaymentPlan, TtpCancelRequest, TtpCancelSuccessfulResponse }
+import uk.gov.hmrc.timetopayproxy.models.saonly.chargeInfoApi._
+import uk.gov.hmrc.timetopayproxy.models.saonly.common.SaOnlyRegimeType
+import uk.gov.hmrc.timetopayproxy.models.saonly.common.{ ArrangementAgreedDate, InitialPaymentDate, SaOnlyInstalment, TransitionedIndicator, TtpEndDate }
+import uk.gov.hmrc.timetopayproxy.models.saonly.common.apistatus.{ ApiName, ApiStatus, ApiStatusCode }
+import uk.gov.hmrc.timetopayproxy.models.saonly.common.ProcessingDateTimeInstant
+import uk.gov.hmrc.timetopayproxy.models.saonly.ttpcancel.{ CancellationDate, TtpCancelPaymentPlan, TtpCancelRequest, TtpCancelSuccessfulResponse }
 import uk.gov.hmrc.timetopayproxy.models.{ IdType, IdValue, InstalmentDueDate }
 import uk.gov.hmrc.timetopayproxy.models.currency.GbpPoundsUnchecked
 import uk.gov.hmrc.timetopayproxy.services.{ TTPEService, TTPQuoteService, TtpFeedbackLoopService }
@@ -1040,7 +1040,7 @@ class TimeToPayProxyControllerSpec extends AnyWordSpec with MockFactory {
         Identification(idType = IdType("id type 1"), idValue = IdValue("id value 1")),
         Identification(idType = IdType("id type 2"), idValue = IdValue("id value 2"))
       ),
-      regimeType = OpLedRegimeType.SA
+      regimeType = SaOnlyRegimeType.SA
     )
     val chargeInfoResponse: ChargeInfoResponse = ChargeInfoResponse(
       processingDateTime = LocalDateTime.parse("2025-07-02T15:00:41.689"),
@@ -1195,7 +1195,7 @@ class TimeToPayProxyControllerSpec extends AnyWordSpec with MockFactory {
         initialPaymentAmount = Some(GbpPoundsUnchecked(100.00))
       ),
       instalments = NonEmptyList.of(
-        SaOpLedInstalment(
+        SaOnlyInstalment(
           dueDate = InstalmentDueDate(LocalDate.parse("2025-01-31")),
           amountDue = GbpPoundsUnchecked(500.00)
         )

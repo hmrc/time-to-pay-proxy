@@ -25,8 +25,8 @@ import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.timetopayproxy.connectors.TtpeConnector
 import uk.gov.hmrc.timetopayproxy.models.error.TtppEnvelope.TtppEnvelope
 import uk.gov.hmrc.timetopayproxy.models.error.{ ConnectorError, ProxyEnvelopeError, TtppEnvelope }
-import uk.gov.hmrc.timetopayproxy.models.saopled.chargeInfoApi._
-import uk.gov.hmrc.timetopayproxy.models.saopled.common.OpLedRegimeType
+import uk.gov.hmrc.timetopayproxy.models.saonly.chargeInfoApi._
+import uk.gov.hmrc.timetopayproxy.models.saonly.common.SaOnlyRegimeType
 import uk.gov.hmrc.timetopayproxy.models.{ IdType, IdValue, Identification }
 
 import java.time.{ LocalDate, LocalDateTime }
@@ -42,7 +42,7 @@ class TTPEServiceSpec extends AnyFreeSpec {
       Identification(idType = IdType("id type 1"), idValue = IdValue("id value 1")),
       Identification(idType = IdType("id type 2"), idValue = IdValue("id value 2"))
     ),
-    regimeType = OpLedRegimeType.SA
+    regimeType = SaOnlyRegimeType.SA
   )
 
   private val chargeInfoResponse: ChargeInfoResponse = ChargeInfoResponse(
