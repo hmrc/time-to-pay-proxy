@@ -18,6 +18,8 @@ package uk.gov.hmrc.timetopayproxy.connectors
 
 import cats.data.NonEmptyList
 import org.scalamock.scalatest.MockFactory
+import org.scalatest.concurrent.ScalaFutures._
+import org.scalatest.matchers.should.Matchers._
 import org.scalatestplus.play.PlaySpec
 import play.api.libs.json.Json
 import play.api.test.{ DefaultAwaitTimeout, FutureAwaits }
@@ -241,6 +243,129 @@ final class DefaultTtpFeedbackLoopConnectorSpec
               )
             )
         }
+      }
+    }
+  }
+
+  ".informTtp" should {
+
+    val ttpInformRequest: TtpInformRequest = TtpInformRequest(
+      identifications = NonEmptyList.of(
+        Identification(idType = IdType("NINO"), idValue = IdValue("AB123456C"))
+      ),
+      paymentPlan = TtpInformPaymentPlan(
+        arrangementAgreedDate = ArrangementAgreedDate(LocalDate.parse("2025-01-01")),
+        ttpEndDate = TtpEndDate(LocalDate.parse("2025-02-01")),
+        frequency = FrequencyLowercase.Monthly,
+        initialPaymentDate = Some(InitialPaymentDate(LocalDate.parse("2025-01-05"))),
+        initialPaymentAmount = Some(GbpPoundsUnchecked(100.00)),
+        ddiReference = Some(DdiReference("TestDDIReference"))
+      ),
+      instalments = NonEmptyList.of(
+        SaOpLedInstalment(
+          dueDate = InstalmentDueDate(LocalDate.parse("2025-01-31")),
+          amountDue = GbpPoundsUnchecked(500.00)
+        )
+      ),
+      channelIdentifier = ChannelIdentifier.Advisor,
+      transitioned = Some(TransitionedIndicator(true))
+    )
+
+    val ttpInformResponse: TtpInformSuccessfulResponse = TtpInformSuccessfulResponse(
+      apisCalled = List(
+        ApiStatus(
+          name = ApiName("API1"),
+          statusCode = ApiStatusCode("SUCCESS"),
+          processingDateTime = ProcessingDateTimeInstant(Instant.parse("2025-01-01T12:00:00Z")),
+          errorResponse = None
+        )
+      ),
+      processingDateTime = ProcessingDateTimeInstant(Instant.parse("2025-01-01T12:00:00Z"))
+    )
+
+    "using IF" should {
+      "return a successful response" in new Setup(ifImpl = true) {
+        stubPostWithResponseBody(
+          "/individuals/debts/time-to-pay/inform",
+          200,
+          Json.toJson(ttpInformResponse).toString()
+        )
+
+        val result: TtppEnvelope[TtpInformSuccessfulResponse] = connector.informTtp(ttpInformRequest)
+
+        result.value.futureValue shouldBe Right(ttpInformResponse)
+      }
+
+      "parse an error response from an upstream service" in new Setup(ifImpl = true) {
+        stubPostWithResponseBody(
+          "/individuals/debts/time-to-pay/inform",
+          400,
+          """{"code": 400, "details": "Invalid request body"}"""
+        )
+
+        val result: TtppEnvelope[TtpInformSuccessfulResponse] = connector.informTtp(ttpInformRequest)
+
+        result.value.futureValue shouldBe Left(ConnectorError(400, "Invalid request body"))
+      }
+
+      "handle 500 responses" in new Setup(ifImpl = true) {
+        stubPostWithResponseBody(
+          "/individuals/debts/time-to-pay/inform",
+          500,
+          Json.toJson(ttpInformResponse).toString()
+        )
+
+        val result: TtppEnvelope[TtpInformSuccessfulResponse] = connector.informTtp(ttpInformRequest)
+
+        val informativeError = TtpInformInformativeError(
+          apisCalled = ttpInformResponse.apisCalled,
+          processingDateTime = ttpInformResponse.processingDateTime
+        )
+
+        result.value.futureValue shouldBe Left(informativeError)
+      }
+    }
+
+    "using TTP" should {
+      "return a successful response" in new Setup(ifImpl = false) {
+        stubPostWithResponseBody(
+          "/debts/time-to-pay/inform",
+          200,
+          Json.toJson(ttpInformResponse).toString()
+        )
+
+        val result: TtppEnvelope[TtpInformSuccessfulResponse] = connector.informTtp(ttpInformRequest)
+
+        result.value.futureValue shouldBe Right(ttpInformResponse)
+      }
+
+      "parse an error response from an upstream service" in new Setup(ifImpl = false) {
+        stubPostWithResponseBody(
+          "/debts/time-to-pay/inform",
+          400,
+          """{"code": 400, "details": "Invalid request body"}"""
+        )
+
+        val result: TtppEnvelope[TtpInformSuccessfulResponse] = connector.informTtp(ttpInformRequest)
+
+        result.value.futureValue shouldBe Left(ConnectorError(400, "Invalid request body"))
+      }
+
+      "handle 500 responses" in new Setup(ifImpl = false) {
+        stubPostWithResponseBody(
+          "/debts/time-to-pay/inform",
+          500,
+          Json.toJson(ttpInformResponse).toString()
+        )
+
+        val result: TtppEnvelope[TtpInformSuccessfulResponse] = connector.informTtp(ttpInformRequest)
+
+        val informativeError = TtpInformInformativeError(
+          apisCalled = ttpInformResponse.apisCalled,
+          processingDateTime = ttpInformResponse.processingDateTime
+        )
+
+        result.value.futureValue shouldBe Left(informativeError)
       }
     }
   }
