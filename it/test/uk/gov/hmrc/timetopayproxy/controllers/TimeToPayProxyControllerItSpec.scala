@@ -28,7 +28,7 @@ import uk.gov.hmrc.timetopayproxy.models.saonly.common.{ ArrangementAgreedDate, 
 import uk.gov.hmrc.timetopayproxy.models.saonly.ttpcancel.{ CancellationDate, TtpCancelGeneralFailureResponse, TtpCancelPaymentPlan, TtpCancelRequest, TtpCancelSuccessfulResponse }
 import uk.gov.hmrc.timetopayproxy.models.saonly.chargeInfoApi._
 import uk.gov.hmrc.timetopayproxy.models.saonly.common.SaOnlyRegimeType
-import uk.gov.hmrc.timetopayproxy.models.currency.GbpPoundsUnchecked
+import uk.gov.hmrc.timetopayproxy.models.currency.GbpPounds
 import uk.gov.hmrc.timetopayproxy.models.{ ChannelIdentifier, FrequencyLowercase, Identification, InstalmentDueDate }
 import uk.gov.hmrc.timetopayproxy.support.IntegrationBaseSpec
 import uk.gov.hmrc.timetopayproxy.testutils.TestOnlyJsonFormats._
@@ -991,12 +991,12 @@ class TimeToPayProxyControllerItSpec extends IntegrationBaseSpec {
         frequency = FrequencyLowercase.Monthly,
         cancellationDate = CancellationDate(LocalDate.parse("2025-10-15")),
         initialPaymentDate = Some(InitialPaymentDate(LocalDate.parse("2025-02-01"))),
-        initialPaymentAmount = Some(GbpPoundsUnchecked(BigDecimal("123.45")))
+        initialPaymentAmount = Some(GbpPounds.createOrThrow(BigDecimal("123.45")))
       ),
       instalments = NonEmptyList.of(
         SaOnlyInstalment(
           dueDate = InstalmentDueDate(LocalDate.parse("2025-11-28")),
-          amountDue = GbpPoundsUnchecked(BigDecimal("100.00"))
+          amountDue = GbpPounds.createOrThrow(BigDecimal("100.00"))
         )
       ),
       channelIdentifier = ChannelIdentifier.SelfService,

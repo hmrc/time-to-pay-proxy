@@ -26,7 +26,7 @@ import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.http.client.HttpClientV2
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 import uk.gov.hmrc.timetopayproxy.config.AppConfig
-import uk.gov.hmrc.timetopayproxy.models.currency.GbpPoundsUnchecked
+import uk.gov.hmrc.timetopayproxy.models.currency.GbpPounds
 import uk.gov.hmrc.timetopayproxy.models.error.ConnectorError
 import uk.gov.hmrc.timetopayproxy.models.saonly.common.apistatus.{ ApiName, ApiStatus, ApiStatusCode }
 import uk.gov.hmrc.timetopayproxy.models.saonly.common.{ ArrangementAgreedDate, InitialPaymentDate, ProcessingDateTimeInstant, SaOnlyInstalment, TransitionedIndicator, TtpEndDate }
@@ -113,12 +113,12 @@ final class DefaultTtpFeedbackLoopConnectorSpec
           frequency = FrequencyLowercase.Monthly,
           cancellationDate = CancellationDate(LocalDate.parse("2025-01-15")),
           initialPaymentDate = Some(InitialPaymentDate(LocalDate.parse("2025-01-05"))),
-          initialPaymentAmount = Some(GbpPoundsUnchecked(100.00))
+          initialPaymentAmount = Some(GbpPounds.createOrThrow(100.00))
         ),
         instalments = NonEmptyList.of(
           SaOnlyInstalment(
             dueDate = InstalmentDueDate(LocalDate.parse("2025-01-31")),
-            amountDue = GbpPoundsUnchecked(500.00)
+            amountDue = GbpPounds.createOrThrow(500.00)
           )
         ),
         channelIdentifier = ChannelIdentifier.Advisor,

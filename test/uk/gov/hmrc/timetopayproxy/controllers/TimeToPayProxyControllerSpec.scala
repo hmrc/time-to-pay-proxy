@@ -43,7 +43,7 @@ import uk.gov.hmrc.timetopayproxy.models.saonly.common.apistatus.{ ApiName, ApiS
 import uk.gov.hmrc.timetopayproxy.models.saonly.common.ProcessingDateTimeInstant
 import uk.gov.hmrc.timetopayproxy.models.saonly.ttpcancel.{ CancellationDate, TtpCancelPaymentPlan, TtpCancelRequest, TtpCancelSuccessfulResponse }
 import uk.gov.hmrc.timetopayproxy.models.{ IdType, IdValue, InstalmentDueDate }
-import uk.gov.hmrc.timetopayproxy.models.currency.GbpPoundsUnchecked
+import uk.gov.hmrc.timetopayproxy.models.currency.GbpPounds
 import uk.gov.hmrc.timetopayproxy.services.{ TTPEService, TTPQuoteService, TtpFeedbackLoopService }
 
 import java.time.{ Instant, LocalDate, LocalDateTime }
@@ -1192,12 +1192,12 @@ class TimeToPayProxyControllerSpec extends AnyWordSpec with MockFactory {
         frequency = FrequencyLowercase.Monthly,
         cancellationDate = CancellationDate(LocalDate.parse("2025-01-15")),
         initialPaymentDate = Some(InitialPaymentDate(LocalDate.parse("2025-01-05"))),
-        initialPaymentAmount = Some(GbpPoundsUnchecked(100.00))
+        initialPaymentAmount = Some(GbpPounds.createOrThrow(100.00))
       ),
       instalments = NonEmptyList.of(
         SaOnlyInstalment(
           dueDate = InstalmentDueDate(LocalDate.parse("2025-01-31")),
-          amountDue = GbpPoundsUnchecked(500.00)
+          amountDue = GbpPounds.createOrThrow(500.00)
         )
       ),
       channelIdentifier = ChannelIdentifier.Advisor,

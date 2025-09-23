@@ -19,8 +19,8 @@ package uk.gov.hmrc.timetopayproxy.models.saonly.ttpcancel
 import cats.data.NonEmptyList
 import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.should.Matchers._
-import play.api.libs.json.{ JsSuccess, JsValue, Json, Reads, Writes }
-import uk.gov.hmrc.timetopayproxy.models.currency.GbpPoundsUnchecked
+import play.api.libs.json.{ JsError, JsPath, JsSuccess, JsValue, Json, JsonValidationError, Reads, Writes }
+import uk.gov.hmrc.timetopayproxy.models.currency.GbpPounds
 import uk.gov.hmrc.timetopayproxy.models.saonly.common.{ ArrangementAgreedDate, InitialPaymentDate, SaOnlyInstalment, TransitionedIndicator, TtpEndDate }
 import uk.gov.hmrc.timetopayproxy.models.{ ChannelIdentifier, FrequencyLowercase, IdType, IdValue, Identification, InstalmentDueDate }
 import uk.gov.hmrc.timetopayproxy.testutils.JsonAssertionOps._
@@ -46,12 +46,12 @@ final class TtpCancelRequestSpec extends AnyFreeSpec {
             frequency = FrequencyLowercase.Weekly,
             cancellationDate = CancellationDate(LocalDate.parse("2020-03-05")),
             initialPaymentDate = Some(InitialPaymentDate(LocalDate.parse("2020-04-06"))),
-            initialPaymentAmount = Some(GbpPoundsUnchecked(100.12))
+            initialPaymentAmount = Some(GbpPounds.createOrThrow(100.12))
           ),
           instalments = NonEmptyList.of(
             SaOnlyInstalment(
               dueDate = InstalmentDueDate(LocalDate.parse("2020-05-07")),
-              amountDue = GbpPoundsUnchecked(200.34)
+              amountDue = GbpPounds.createOrThrow(200.34)
             )
           ),
           channelIdentifier = ChannelIdentifier.SelfService,
@@ -106,7 +106,7 @@ final class TtpCancelRequestSpec extends AnyFreeSpec {
           instalments = NonEmptyList.of(
             SaOnlyInstalment(
               dueDate = InstalmentDueDate(LocalDate.parse("2020-05-07")),
-              amountDue = GbpPoundsUnchecked(200.34)
+              amountDue = GbpPounds.createOrThrow(200.34)
             )
           ),
           channelIdentifier = ChannelIdentifier.SelfService,
@@ -139,6 +139,35 @@ final class TtpCancelRequestSpec extends AnyFreeSpec {
         )
       }
 
+      object WithOnlySomesAndAllCurrencyAmountsInvalid {
+        def json: JsValue = Json.parse(
+          """{
+            |  "channelIdentifier" : "selfService",
+            |  "identifications" : [
+            |    {
+            |      "idType" : "idtype",
+            |      "idValue" : "idvalue"
+            |    }
+            |  ],
+            |  "instalments" : [
+            |    {
+            |      "amountDue" : 200.349,
+            |      "dueDate" : "2020-05-07"
+            |    }
+            |  ],
+            |  "paymentPlan" : {
+            |    "arrangementAgreedDate" : "2020-01-02",
+            |    "cancellationDate" : "2020-03-05",
+            |    "frequency" : "weekly",
+            |    "initialPaymentAmount" : 100.129,
+            |    "initialPaymentDate" : "2020-04-06",
+            |    "ttpEndDate" : "2020-02-04"
+            |  },
+            |  "transitioned" : true
+            |}
+            |""".stripMargin
+        )
+      }
     }
 
     "implicit JSON writer (data going to time-to-pay)" - {
@@ -209,6 +238,46 @@ final class TtpCancelRequestSpec extends AnyFreeSpec {
           schema.validateAndGetErrors(json) shouldBe Nil
         }
       }
+
+      "when all the optional fields are fully populated AND all the currency amounts are invalid" - {
+        def json: JsValue = TestData.WithOnlySomesAndAllCurrencyAmountsInvalid.json
+
+        "reads the JSON correctly" in {
+          readerFromClients.reads(json) shouldBe
+            JsError(
+              List(
+                (
+                  JsPath \ "instalments" \ 0 \ "amountDue",
+                  List(
+                    JsonValidationError(
+                      List("Number of digits after decimal point should not exceed 2: 200.349")
+                    )
+                  )
+                ),
+                (
+                  JsPath \ "paymentPlan" \ "initialPaymentAmount",
+                  List(
+                    JsonValidationError(
+                      List("Number of digits after decimal point should not exceed 2: 100.129")
+                    )
+                  )
+                )
+              )
+            )
+        }
+
+        "was tested against JSON incompatible with our schema" in {
+          val schema = Validators.TimeToPayProxy.TtpCancel.openApiRequestSchema
+
+          schema.validateAndGetErrors(json) shouldBe List(
+            """instalments.0.amountDue: Value '200.349' is not a multiple of '0.01'. (code: 1019)
+              |From: instalments.0.<items>.<#/components/schemas/CancelInstalment>.amountDue.<multipleOf>""".stripMargin,
+            """paymentPlan.initialPaymentAmount: Value '100.129' is not a multiple of '0.01'. (code: 1019)
+              |From: paymentPlan.<#/components/schemas/CancelPaymentPlan>.initialPaymentAmount.<multipleOf>""".stripMargin
+          )
+        }
+      }
+
     }
 
   }

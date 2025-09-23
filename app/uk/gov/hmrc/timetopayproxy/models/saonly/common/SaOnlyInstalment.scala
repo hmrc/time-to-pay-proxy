@@ -18,11 +18,11 @@ package uk.gov.hmrc.timetopayproxy.models.saonly.common
 
 import play.api.libs.json.{ Json, OFormat }
 import uk.gov.hmrc.timetopayproxy.models.InstalmentDueDate
-import uk.gov.hmrc.timetopayproxy.models.currency.GbpPoundsUnchecked
+import uk.gov.hmrc.timetopayproxy.models.currency.GbpPounds
 
 final case class SaOnlyInstalment(
   dueDate: InstalmentDueDate,
-  amountDue: GbpPoundsUnchecked
+  amountDue: GbpPounds
 )
 
 object SaOnlyInstalment {

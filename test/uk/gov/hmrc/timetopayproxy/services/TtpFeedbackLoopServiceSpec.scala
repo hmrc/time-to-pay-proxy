@@ -29,7 +29,7 @@ import uk.gov.hmrc.timetopayproxy.models.saonly.ttpcancel.{ CancellationDate, Tt
 import uk.gov.hmrc.timetopayproxy.models.saonly.common.apistatus.{ ApiName, ApiStatus, ApiStatusCode }
 import uk.gov.hmrc.timetopayproxy.models.saonly.common.{ ArrangementAgreedDate, InitialPaymentDate, ProcessingDateTimeInstant, SaOnlyInstalment, TransitionedIndicator, TtpEndDate }
 import uk.gov.hmrc.timetopayproxy.models.{ ChannelIdentifier, FrequencyLowercase, IdType, IdValue, Identification, InstalmentDueDate }
-import uk.gov.hmrc.timetopayproxy.models.currency.GbpPoundsUnchecked
+import uk.gov.hmrc.timetopayproxy.models.currency.GbpPounds
 
 import java.time.{ Instant, LocalDate }
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -52,12 +52,12 @@ class TtpFeedbackLoopServiceSpec extends AnyWordSpec with MockFactory with Scala
       frequency = FrequencyLowercase.Monthly,
       cancellationDate = CancellationDate(LocalDate.of(2025, 1, 15)),
       initialPaymentDate = Some(InitialPaymentDate(LocalDate.of(2025, 1, 5))),
-      initialPaymentAmount = Some(GbpPoundsUnchecked(100.00))
+      initialPaymentAmount = Some(GbpPounds.createOrThrow(100.00))
     ),
     instalments = NonEmptyList.of(
       SaOnlyInstalment(
         InstalmentDueDate(LocalDate.of(2024, 2, 1)),
-        GbpPoundsUnchecked(500.25)
+        GbpPounds.createOrThrow(500.25)
       )
     ),
     channelIdentifier = ChannelIdentifier.Advisor,

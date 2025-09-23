@@ -18,7 +18,7 @@ package uk.gov.hmrc.timetopayproxy.models.saonly.ttpcancel
 
 import play.api.libs.json.{ Json, OFormat }
 import uk.gov.hmrc.timetopayproxy.models.FrequencyLowercase
-import uk.gov.hmrc.timetopayproxy.models.currency.GbpPoundsUnchecked
+import uk.gov.hmrc.timetopayproxy.models.currency.GbpPounds
 import uk.gov.hmrc.timetopayproxy.models.saonly.common.{ ArrangementAgreedDate, InitialPaymentDate, TtpEndDate }
 
 final case class TtpCancelPaymentPlan(
@@ -27,7 +27,7 @@ final case class TtpCancelPaymentPlan(
   frequency: FrequencyLowercase,
   cancellationDate: CancellationDate,
   initialPaymentDate: Option[InitialPaymentDate],
-  initialPaymentAmount: Option[GbpPoundsUnchecked]
+  initialPaymentAmount: Option[GbpPounds]
 )
 
 object TtpCancelPaymentPlan {
