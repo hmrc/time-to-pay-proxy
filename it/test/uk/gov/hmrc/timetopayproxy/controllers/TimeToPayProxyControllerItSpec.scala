@@ -607,7 +607,7 @@ class TimeToPayProxyControllerItSpec extends IntegrationBaseSpec {
       }
     }
 
-    ".cancelPlan" - {
+    ".cancelTtp" - {
       "should return a 200 statusCode" - {
         "when given a valid json payload" - {
           "when TimeToPay returns a successful response" in new TimeToPayProxyControllerTestBase {
@@ -856,6 +856,252 @@ class TimeToPayProxyControllerItSpec extends IntegrationBaseSpec {
         }
       }
     }
+
+    ".informTtp" - {
+      "should return a 200 statusCode" - {
+        "when given a valid json payload" - {
+          "when TimeToPay returns a successful response" in new TimeToPayProxyControllerTestBase {
+            stubPostWithResponseBody(url = "/auth/authorise", status = 200, responseBody = "null")
+            stubPostWithResponseBody(
+              url = "/debts/time-to-pay/inform",
+              status = 200,
+              responseBody = Json.toJson(informResponse).toString()
+            )
+
+            val requestForInformTtp: WSRequest = buildRequest("/inform")
+
+            val response: WSResponse = await(
+              requestForInformTtp.post(Json.toJson(informRequest))
+            )
+
+            response.json shouldBe Json.toJson(informResponse)
+            response.status shouldBe 200
+          }
+        }
+      }
+
+      "should return a 500 statusCode" - {
+        "when given a valid json payload" - {
+          "when TimeToPay returns an error response with 500" in new TimeToPayProxyControllerTestBase {
+            val errorResponse = TtpInformInformativeError(
+              apisCalled = List(
+                ApiStatus(
+                  name = ApiName("CESA"),
+                  statusCode = ApiStatusCode("400"),
+                  processingDateTime = ProcessingDateTimeInstant(java.time.Instant.parse("2025-10-15T10:30:00Z")),
+                  errorResponse = Some(ApiErrorResponse("Invalid cancellationDate"))
+                )
+              ),
+              processingDateTime = ProcessingDateTimeInstant(java.time.Instant.parse("2025-10-15T10:31:00Z"))
+            )
+
+            stubPostWithResponseBody(url = "/auth/authorise", status = 200, responseBody = "null")
+            stubPostWithResponseBody(
+              url = "/debts/time-to-pay/inform",
+              status = 500,
+              responseBody = Json.toJson(errorResponse).toString()
+            )
+
+            val requestForInformTtp: WSRequest = buildRequest("/inform")
+
+            val response: WSResponse = await(
+              requestForInformTtp.post(Json.toJson(informRequest))
+            )
+
+            response.json shouldBe Json.toJson(errorResponse)
+            response.status shouldBe 500
+          }
+        }
+      }
+
+      "should return a 400 statusCode" - {
+        "when given a valid json payload" - {
+          "when TimeToPay returns an error response of 400" in new TimeToPayProxyControllerTestBase {
+            val upstreamErrorResponse = TtpInformGeneralFailureResponse(
+              code = 400,
+              details = "Invalid request payload: missing identifications or cancellationDate"
+            )
+
+            val expectedTtppErrorResponse = TtppErrorResponse(
+              statusCode = 400,
+              errorMessage = "Invalid request payload: missing identifications or cancellationDate"
+            )
+
+            stubPostWithResponseBody(url = "/auth/authorise", status = 200, responseBody = "null")
+            stubPostWithResponseBody(
+              url = "/debts/time-to-pay/inform",
+              status = 400,
+              responseBody = Json.toJson(upstreamErrorResponse).toString()
+            )
+
+            val requestForInformTtp: WSRequest = buildRequest("/inform")
+
+            val response: WSResponse = await(
+              requestForInformTtp.post(Json.toJson(informRequest))
+            )
+
+            response.json shouldBe Json.toJson(expectedTtppErrorResponse)
+            response.status shouldBe 400
+          }
+        }
+
+        "when given an invalid json payload" - {
+          "with an empty json object" in new TimeToPayProxyControllerTestBase {
+            stubPostWithResponseBody(url = "/auth/authorise", status = 200, responseBody = "null")
+
+            val requestForInformTtp: WSRequest = buildRequest("/inform")
+
+            val response: WSResponse = await(
+              requestForInformTtp.post(JsObject.empty)
+            )
+
+            val expectedTtppErrorResponse: TtppErrorResponse = TtppErrorResponse(
+              statusCode = 400,
+              errorMessage =
+                "Invalid TtpInformRequest payload: Payload has a missing field or an invalid format. Field name: identifications. "
+            )
+
+            response.json shouldBe Json.toJson(expectedTtppErrorResponse)
+            response.status shouldBe 400
+          }
+
+          "with mandatory fields missing" - {
+            "when 'identifications' is missing" in new TimeToPayProxyControllerTestBase {
+              stubPostWithResponseBody(url = "/auth/authorise", status = 200, responseBody = "null")
+
+              val requestForInformTtp: WSRequest = buildRequest("/inform")
+
+              val invalidRequestBody: JsValue = Json.parse(
+                """{
+                  |  "paymentPlan": {
+                  |    "planSelection": 1,
+                  |    "paymentDay": 28,
+                  |    "upfrontPaymentAmount": 123.45,
+                  |    "startDate": "2025-10-15"
+                  |  },
+                  |  "channelIdentifier": "eSSTTP"
+                  |}
+                  |""".stripMargin
+              )
+
+              val response: WSResponse = await(
+                requestForInformTtp.post(invalidRequestBody)
+              )
+
+              val expectedTtppErrorResponse: TtppErrorResponse = TtppErrorResponse(
+                statusCode = 400,
+                errorMessage =
+                  "Invalid TtpInformRequest payload: Payload has a missing field or an invalid format. Field name: identifications. "
+              )
+
+              response.json shouldBe Json.toJson(expectedTtppErrorResponse)
+              response.status shouldBe 400
+            }
+          }
+        }
+      }
+
+      "should return a 503 statusCode" - {
+        "when given a valid json payload" - {
+          "when TimeToPay returns an expected 200 response" - {
+            "with a null json response from TTP" in new TimeToPayProxyControllerTestBase {
+              stubPostWithResponseBody(url = "/auth/authorise", status = 200, responseBody = "null")
+              stubPostWithResponseBody(
+                url = "/debts/time-to-pay/inform",
+                status = 200,
+                responseBody = JsNull.toString()
+              )
+
+              val requestForInformTtp: WSRequest = buildRequest("/inform")
+
+              val response: WSResponse = await(
+                requestForInformTtp.post(Json.toJson(informRequest))
+              )
+
+              val expectedTtppErrorResponse: TtppErrorResponse =
+                TtppErrorResponse(
+                  statusCode = 503,
+                  errorMessage = "JSON structure is not valid in successful upstream response."
+                )
+
+              response.json shouldBe Json.toJson(expectedTtppErrorResponse)
+              response.status shouldBe 503
+            }
+          }
+
+          "when TimeToPay returns an expected error response" - {
+            for (responseStatus <- List(400, 500))
+              s"<$responseStatus>" - {
+                "with a null json response from TTP" in new TimeToPayProxyControllerTestBase {
+                  stubPostWithResponseBody(url = "/auth/authorise", status = 200, responseBody = "null")
+                  stubPostWithResponseBody(
+                    url = "/debts/time-to-pay/inform",
+                    status = responseStatus,
+                    responseBody = JsNull.toString()
+                  )
+
+                  val requestForInformTtp: WSRequest = buildRequest("/inform")
+
+                  val response: WSResponse = await(
+                    requestForInformTtp.post(Json.toJson(informRequest))
+                  )
+
+                  val expectedTtppErrorResponse: TtppErrorResponse =
+                    TtppErrorResponse(
+                      statusCode = 503,
+                      errorMessage = "JSON structure is not valid in error upstream response."
+                    )
+
+                  response.json shouldBe Json.toJson(expectedTtppErrorResponse)
+                  response.status shouldBe 503
+                }
+              }
+          }
+
+          "when TimeToPay returns unexpected success status" in new TimeToPayProxyControllerTestBase {
+            stubPostWithResponseBody(url = "/auth/authorise", status = 200, responseBody = "null")
+            stubPostWithResponseBody(
+              url = "/debts/time-to-pay/inform",
+              status = 201,
+              responseBody = Json.obj().toString()
+            )
+
+            val requestForInformTtp: WSRequest = buildRequest("/inform")
+
+            val response: WSResponse = await(
+              requestForInformTtp.post(Json.toJson(informRequest))
+            )
+
+            val expectedTtppErrorResponse: TtppErrorResponse =
+              TtppErrorResponse(statusCode = 503, errorMessage = "Upstream response status is unexpected.")
+
+            response.json shouldBe Json.toJson(expectedTtppErrorResponse)
+            response.status shouldBe 503
+          }
+
+          "when TimeToPay returns unexpected error status" in new TimeToPayProxyControllerTestBase {
+            stubPostWithResponseBody(url = "/auth/authorise", status = 200, responseBody = "null")
+            stubPostWithResponseBody(
+              url = "/debts/time-to-pay/inform",
+              status = 403,
+              responseBody = Json.obj().toString()
+            )
+
+            val requestForInformTtp: WSRequest = buildRequest("/inform")
+
+            val response: WSResponse = await(
+              requestForInformTtp.post(Json.toJson(informRequest))
+            )
+
+            val expectedTtppErrorResponse: TtppErrorResponse =
+              TtppErrorResponse(statusCode = 503, errorMessage = "Upstream response status is unexpected.")
+
+            response.json shouldBe Json.toJson(expectedTtppErrorResponse)
+            response.status shouldBe 503
+          }
+        }
+      }
+    }
   }
 
   trait TimeToPayProxyControllerTestBase {
@@ -1010,5 +1256,44 @@ class TimeToPayProxyControllerItSpec extends IntegrationBaseSpec {
       transitioned = Some(TransitionedIndicator(true))
     )
 
+    val informRequest: TtpInformRequest = TtpInformRequest(
+      identifications = NonEmptyList.of(
+        Identification(idType = IdType("NINO"), idValue = IdValue("AB123456C"))
+      ),
+      paymentPlan = TtpInformPaymentPlan(
+        arrangementAgreedDate = ArrangementAgreedDate(LocalDate.parse("2025-01-01")),
+        ttpEndDate = TtpEndDate(LocalDate.parse("2025-02-01")),
+        frequency = FrequencyLowercase.Monthly,
+        initialPaymentDate = Some(InitialPaymentDate(LocalDate.parse("2025-01-05"))),
+        initialPaymentAmount = Some(GbpPoundsUnchecked(100.00)),
+        ddiReference = Some(DdiReference("TestDDIReference"))
+      ),
+      instalments = NonEmptyList.of(
+        SaOnlyInstalment(
+          dueDate = InstalmentDueDate(LocalDate.parse("2025-01-31")),
+          amountDue = GbpPoundsUnchecked(500.00)
+        )
+      ),
+      channelIdentifier = ChannelIdentifier.Advisor,
+      transitioned = Some(TransitionedIndicator(true))
+    )
+
+    val informResponse: TtpInformSuccessfulResponse = TtpInformSuccessfulResponse(
+      apisCalled = List(
+        ApiStatus(
+          name = ApiName("CESA"),
+          statusCode = ApiStatusCode("200"),
+          processingDateTime = ProcessingDateTimeInstant(java.time.Instant.parse("2025-05-01T14:30:00Z")),
+          errorResponse = None
+        ),
+        ApiStatus(
+          name = ApiName("ETMP"),
+          statusCode = ApiStatusCode("201"),
+          processingDateTime = ProcessingDateTimeInstant(java.time.Instant.parse("2025-05-01T14:31:00Z")),
+          errorResponse = None
+        )
+      ),
+      processingDateTime = ProcessingDateTimeInstant(java.time.Instant.parse("2025-10-15T10:31:00Z"))
+    )
   }
 }
