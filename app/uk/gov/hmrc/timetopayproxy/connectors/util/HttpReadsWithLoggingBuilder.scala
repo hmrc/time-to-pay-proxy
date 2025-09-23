@@ -38,14 +38,14 @@ final class HttpReadsWithLoggingBuilder[E >: ConnectorError, Result] private (
               createConnectorError(
                 responseContext,
                 newStatus = 503,
-                simpleMessage = "JSON structure is not valid in successful upstream response.",
+                simpleMessage = "JSON structure is not valid in received successful HTTP response.",
                 logger
               )(hc)
             case Failure(_) =>
               createConnectorError(
                 responseContext,
                 newStatus = 503,
-                simpleMessage = "Successful upstream response body is not JSON.",
+                simpleMessage = "HTTP body is not JSON in received successful HTTP response.",
                 logger
               )(hc)
           }
@@ -68,14 +68,14 @@ final class HttpReadsWithLoggingBuilder[E >: ConnectorError, Result] private (
               createConnectorError(
                 responseContext,
                 newStatus = 503,
-                simpleMessage = "JSON structure is not valid in error upstream response.",
+                simpleMessage = "JSON structure is not valid in received error HTTP response.",
                 logger
               )(hc)
             case Failure(_) =>
               createConnectorError(
                 responseContext,
                 newStatus = 503,
-                simpleMessage = "Error upstream response body is not JSON.",
+                simpleMessage = "HTTP body is not JSON in received error HTTP response.",
                 logger
               )(hc)
           }
@@ -91,11 +91,11 @@ final class HttpReadsWithLoggingBuilder[E >: ConnectorError, Result] private (
         case None =>
           createConnectorError(
             responseContext,
-            // Unrecognised upstream statuses cannot be forwarded because:
+            // Unrecognised incoming HTTP statuses cannot be forwarded because:
             //   1. They will likely break our schema by returning undocumented status codes with mismatched JSON.
             //   2. Some status codes don't make sense to be forwarded except in very special situations, e.g. 403, 404.
             newStatus = 503,
-            simpleMessage = "Upstream response status is unexpected.",
+            simpleMessage = "HTTP status is unexpected in received HTTP response.",
             logger
           )(hc)
       }
@@ -109,16 +109,16 @@ final class HttpReadsWithLoggingBuilder[E >: ConnectorError, Result] private (
   )(implicit hc: HeaderCarrier): Left[ConnectorError, Nothing] = {
     val incomingHttpBodyLine: String =
       if (Status.isSuccessful(responseContext.response.status)) {
-        s"Incoming HTTP response body not logged for successful (2xx) statuses."
+        s"Received HTTP response body not logged for successful (2xx) statuses."
       } else {
-        s"Incoming HTTP response body: ${responseContext.response.body}"
+        s"Received HTTP response body: ${responseContext.response.body}"
       }
 
     logger.error(
       s"""$simpleMessage
-         |Response status being returned: $newStatus
-         |Request made: ${responseContext.method} ${responseContext.url}
-         |Response status received: ${responseContext.response.status}
+         |Response status to be returned: $newStatus
+         |Request made for received HTTP response: ${responseContext.method} ${responseContext.url}
+         |Received HTTP response status: ${responseContext.response.status}
          |$incomingHttpBodyLine""".stripMargin
     )
 

@@ -161,16 +161,16 @@ final class HttpReadsWithLoggingBuilderSpec extends AnyFreeSpec with MockFactory
             result shouldBe Left(
               ConnectorError(
                 statusCode = 503,
-                message = """Upstream response status is unexpected."""
+                message = """HTTP status is unexpected in received HTTP response."""
               )
             )
 
             savedErrorLogs shouldBe List(
-              """Upstream response status is unexpected.
-                |Response status being returned: 503
-                |Request made: MYMETHOD some/url
-                |Response status received: 200
-                |Incoming HTTP response body not logged for successful (2xx) statuses.""".stripMargin
+              """HTTP status is unexpected in received HTTP response.
+                |Response status to be returned: 503
+                |Request made for received HTTP response: MYMETHOD some/url
+                |Received HTTP response status: 200
+                |Received HTTP response body not logged for successful (2xx) statuses.""".stripMargin
             )
           }
 
@@ -184,16 +184,16 @@ final class HttpReadsWithLoggingBuilderSpec extends AnyFreeSpec with MockFactory
             result shouldBe Left(
               ConnectorError(
                 statusCode = 503,
-                message = """Upstream response status is unexpected."""
+                message = """HTTP status is unexpected in received HTTP response."""
               )
             )
 
             savedErrorLogs shouldBe List(
-              """Upstream response status is unexpected.
-                |Response status being returned: 503
-                |Request made: MYMETHOD some/url
-                |Response status received: 200
-                |Incoming HTTP response body not logged for successful (2xx) statuses.""".stripMargin
+              """HTTP status is unexpected in received HTTP response.
+                |Response status to be returned: 503
+                |Request made for received HTTP response: MYMETHOD some/url
+                |Received HTTP response status: 200
+                |Received HTTP response body not logged for successful (2xx) statuses.""".stripMargin
             )
           }
 
@@ -208,16 +208,16 @@ final class HttpReadsWithLoggingBuilderSpec extends AnyFreeSpec with MockFactory
             result shouldBe Left(
               ConnectorError(
                 statusCode = 503,
-                message = """Upstream response status is unexpected."""
+                message = """HTTP status is unexpected in received HTTP response."""
               )
             )
 
             savedErrorLogs shouldBe List(
-              """Upstream response status is unexpected.
-                |Response status being returned: 503
-                |Request made: MYMETHOD some/url
-                |Response status received: 200
-                |Incoming HTTP response body not logged for successful (2xx) statuses.""".stripMargin
+              """HTTP status is unexpected in received HTTP response.
+                |Response status to be returned: 503
+                |Request made for received HTTP response: MYMETHOD some/url
+                |Received HTTP response status: 200
+                |Received HTTP response body not logged for successful (2xx) statuses.""".stripMargin
             )
           }
 
@@ -232,16 +232,16 @@ final class HttpReadsWithLoggingBuilderSpec extends AnyFreeSpec with MockFactory
             result shouldBe Left(
               ConnectorError(
                 statusCode = 503,
-                message = """Upstream response status is unexpected."""
+                message = """HTTP status is unexpected in received HTTP response."""
               )
             )
 
             savedErrorLogs shouldBe List(
-              """Upstream response status is unexpected.
-                |Response status being returned: 503
-                |Request made: MYMETHOD some/url
-                |Response status received: 200
-                |Incoming HTTP response body not logged for successful (2xx) statuses.""".stripMargin
+              """HTTP status is unexpected in received HTTP response.
+                |Response status to be returned: 503
+                |Request made for received HTTP response: MYMETHOD some/url
+                |Received HTTP response status: 200
+                |Received HTTP response body not logged for successful (2xx) statuses.""".stripMargin
             )
           }
         }
@@ -257,16 +257,16 @@ final class HttpReadsWithLoggingBuilderSpec extends AnyFreeSpec with MockFactory
             result shouldBe Left(
               ConnectorError(
                 statusCode = 503,
-                message = """Upstream response status is unexpected."""
+                message = """HTTP status is unexpected in received HTTP response."""
               )
             )
 
             savedErrorLogs shouldBe List(
-              """Upstream response status is unexpected.
-                |Response status being returned: 503
-                |Request made: MYMETHOD some/url
-                |Response status received: 400
-                |Incoming HTTP response body: """.stripMargin
+              """HTTP status is unexpected in received HTTP response.
+                |Response status to be returned: 503
+                |Request made for received HTTP response: MYMETHOD some/url
+                |Received HTTP response status: 400
+                |Received HTTP response body: """.stripMargin
             )
           }
 
@@ -280,16 +280,16 @@ final class HttpReadsWithLoggingBuilderSpec extends AnyFreeSpec with MockFactory
             result shouldBe Left(
               ConnectorError(
                 statusCode = 503,
-                message = """Upstream response status is unexpected."""
+                message = """HTTP status is unexpected in received HTTP response."""
               )
             )
 
             savedErrorLogs shouldBe List(
-              """Upstream response status is unexpected.
-                |Response status being returned: 503
-                |Request made: MYMETHOD some/url
-                |Response status received: 400
-                |Incoming HTTP response body: {}""".stripMargin
+              """HTTP status is unexpected in received HTTP response.
+                |Response status to be returned: 503
+                |Request made for received HTTP response: MYMETHOD some/url
+                |Received HTTP response status: 400
+                |Received HTTP response body: {}""".stripMargin
             )
           }
 
@@ -304,16 +304,16 @@ final class HttpReadsWithLoggingBuilderSpec extends AnyFreeSpec with MockFactory
             result shouldBe Left(
               ConnectorError(
                 statusCode = 503,
-                message = """Upstream response status is unexpected."""
+                message = """HTTP status is unexpected in received HTTP response."""
               )
             )
 
             savedErrorLogs shouldBe List(
-              """Upstream response status is unexpected.
-                |Response status being returned: 503
-                |Request made: MYMETHOD some/url
-                |Response status received: 400
-                |Incoming HTTP response body: {"failures":[{"code":"400","reason":"my-reason"}]}""".stripMargin
+              """HTTP status is unexpected in received HTTP response.
+                |Response status to be returned: 503
+                |Request made for received HTTP response: MYMETHOD some/url
+                |Received HTTP response status: 400
+                |Received HTTP response body: {"failures":[{"code":"400","reason":"my-reason"}]}""".stripMargin
             )
           }
 
@@ -328,16 +328,16 @@ final class HttpReadsWithLoggingBuilderSpec extends AnyFreeSpec with MockFactory
             result shouldBe Left(
               ConnectorError(
                 statusCode = 503,
-                message = """Upstream response status is unexpected."""
+                message = """HTTP status is unexpected in received HTTP response."""
               )
             )
 
             savedErrorLogs shouldBe List(
-              """Upstream response status is unexpected.
-                |Response status being returned: 503
-                |Request made: MYMETHOD some/url
-                |Response status received: 400
-                |Incoming HTTP response body: {"code":"400","reason":"my-reason"}""".stripMargin
+              """HTTP status is unexpected in received HTTP response.
+                |Response status to be returned: 503
+                |Request made for received HTTP response: MYMETHOD some/url
+                |Received HTTP response status: 400
+                |Received HTTP response body: {"code":"400","reason":"my-reason"}""".stripMargin
             )
           }
         }
@@ -354,16 +354,16 @@ final class HttpReadsWithLoggingBuilderSpec extends AnyFreeSpec with MockFactory
             result shouldBe Left(
               ConnectorError(
                 statusCode = 503,
-                message = """Upstream response status is unexpected."""
+                message = """HTTP status is unexpected in received HTTP response."""
               )
             )
 
             savedErrorLogs shouldBe List(
-              """Upstream response status is unexpected.
-                |Response status being returned: 503
-                |Request made: MYMETHOD some/url
-                |Response status received: 299
-                |Incoming HTTP response body not logged for successful (2xx) statuses.""".stripMargin
+              """HTTP status is unexpected in received HTTP response.
+                |Response status to be returned: 503
+                |Request made for received HTTP response: MYMETHOD some/url
+                |Received HTTP response status: 299
+                |Received HTTP response body not logged for successful (2xx) statuses.""".stripMargin
             )
           }
       }
@@ -420,16 +420,16 @@ final class HttpReadsWithLoggingBuilderSpec extends AnyFreeSpec with MockFactory
             result shouldBe Left(
               ConnectorError(
                 statusCode = 503,
-                message = """JSON structure is not valid in successful upstream response."""
+                message = """JSON structure is not valid in received successful HTTP response."""
               )
             )
 
             savedErrorLogs shouldBe List(
-              s"""JSON structure is not valid in successful upstream response.
-                 |Response status being returned: 503
-                 |Request made: MYMETHOD some/url
-                 |Response status received: ${successStatus236: Int}
-                 |Incoming HTTP response body not logged for successful (2xx) statuses.""".stripMargin
+              s"""JSON structure is not valid in received successful HTTP response.
+                 |Response status to be returned: 503
+                 |Request made for received HTTP response: MYMETHOD some/url
+                 |Received HTTP response status: ${successStatus236: Int}
+                 |Received HTTP response body not logged for successful (2xx) statuses.""".stripMargin
             )
           }
 
@@ -447,16 +447,16 @@ final class HttpReadsWithLoggingBuilderSpec extends AnyFreeSpec with MockFactory
             result shouldBe Left(
               ConnectorError(
                 statusCode = 503,
-                message = """JSON structure is not valid in successful upstream response."""
+                message = """JSON structure is not valid in received successful HTTP response."""
               )
             )
 
             savedErrorLogs shouldBe List(
-              s"""JSON structure is not valid in successful upstream response.
-                 |Response status being returned: 503
-                 |Request made: MYMETHOD some/url
-                 |Response status received: ${successStatus419: Int}
-                 |Incoming HTTP response body: {}""".stripMargin
+              s"""JSON structure is not valid in received successful HTTP response.
+                 |Response status to be returned: 503
+                 |Request made for received HTTP response: MYMETHOD some/url
+                 |Received HTTP response status: ${successStatus419: Int}
+                 |Received HTTP response body: {}""".stripMargin
             )
           }
         }
@@ -476,16 +476,16 @@ final class HttpReadsWithLoggingBuilderSpec extends AnyFreeSpec with MockFactory
             result shouldBe Left(
               ConnectorError(
                 statusCode = 503,
-                message = """Successful upstream response body is not JSON."""
+                message = """HTTP body is not JSON in received successful HTTP response."""
               )
             )
 
             savedErrorLogs shouldBe List(
-              s"""Successful upstream response body is not JSON.
-                 |Response status being returned: 503
-                 |Request made: MYMETHOD some/url
-                 |Response status received: ${successStatus236: Int}
-                 |Incoming HTTP response body not logged for successful (2xx) statuses.""".stripMargin
+              s"""HTTP body is not JSON in received successful HTTP response.
+                 |Response status to be returned: 503
+                 |Request made for received HTTP response: MYMETHOD some/url
+                 |Received HTTP response status: ${successStatus236: Int}
+                 |Received HTTP response body not logged for successful (2xx) statuses.""".stripMargin
             )
 
             savedErrorLogs.toString should not include "TEXT"
@@ -505,16 +505,16 @@ final class HttpReadsWithLoggingBuilderSpec extends AnyFreeSpec with MockFactory
             result shouldBe Left(
               ConnectorError(
                 statusCode = 503,
-                message = """Successful upstream response body is not JSON."""
+                message = """HTTP body is not JSON in received successful HTTP response."""
               )
             )
 
             savedErrorLogs shouldBe List(
-              s"""Successful upstream response body is not JSON.
-                 |Response status being returned: 503
-                 |Request made: MYMETHOD some/url
-                 |Response status received: ${successStatus419: Int}
-                 |Incoming HTTP response body: TEXT""".stripMargin
+              s"""HTTP body is not JSON in received successful HTTP response.
+                 |Response status to be returned: 503
+                 |Request made for received HTTP response: MYMETHOD some/url
+                 |Received HTTP response status: ${successStatus419: Int}
+                 |Received HTTP response body: TEXT""".stripMargin
             )
           }
         }
@@ -552,16 +552,16 @@ final class HttpReadsWithLoggingBuilderSpec extends AnyFreeSpec with MockFactory
           result shouldBe Left(
             ConnectorError(
               statusCode = 503,
-              message = """JSON structure is not valid in error upstream response."""
+              message = """JSON structure is not valid in received error HTTP response."""
             )
           )
 
           savedErrorLogs shouldBe List(
-            s"""JSON structure is not valid in error upstream response.
-               |Response status being returned: 503
-               |Request made: MYMETHOD some/url
-               |Response status received: ${errorStatus109: Int}
-               |Incoming HTTP response body: {}""".stripMargin
+            s"""JSON structure is not valid in received error HTTP response.
+               |Response status to be returned: 503
+               |Request made for received HTTP response: MYMETHOD some/url
+               |Received HTTP response status: ${errorStatus109: Int}
+               |Received HTTP response body: {}""".stripMargin
           )
         }
 
@@ -579,16 +579,16 @@ final class HttpReadsWithLoggingBuilderSpec extends AnyFreeSpec with MockFactory
           result shouldBe Left(
             ConnectorError(
               statusCode = 503,
-              message = """Error upstream response body is not JSON."""
+              message = """HTTP body is not JSON in received error HTTP response."""
             )
           )
 
           savedErrorLogs shouldBe List(
-            s"""Error upstream response body is not JSON.
-               |Response status being returned: 503
-               |Request made: MYMETHOD some/url
-               |Response status received: ${errorStatus109: Int}
-               |Incoming HTTP response body: TEXT""".stripMargin
+            s"""HTTP body is not JSON in received error HTTP response.
+               |Response status to be returned: 503
+               |Request made for received HTTP response: MYMETHOD some/url
+               |Received HTTP response status: ${errorStatus109: Int}
+               |Received HTTP response body: TEXT""".stripMargin
           )
         }
       }
@@ -624,16 +624,16 @@ final class HttpReadsWithLoggingBuilderSpec extends AnyFreeSpec with MockFactory
           result shouldBe Left(
             ConnectorError(
               statusCode = 503,
-              message = """JSON structure is not valid in error upstream response."""
+              message = """JSON structure is not valid in received error HTTP response."""
             )
           )
 
           savedErrorLogs shouldBe List(
-            s"""JSON structure is not valid in error upstream response.
-               |Response status being returned: 503
-               |Request made: MYMETHOD some/url
-               |Response status received: ${errorStatus211Transf: Int}
-               |Incoming HTTP response body not logged for successful (2xx) statuses.""".stripMargin
+            s"""JSON structure is not valid in received error HTTP response.
+               |Response status to be returned: 503
+               |Request made for received HTTP response: MYMETHOD some/url
+               |Received HTTP response status: ${errorStatus211Transf: Int}
+               |Received HTTP response body not logged for successful (2xx) statuses.""".stripMargin
           )
         }
 
@@ -652,16 +652,16 @@ final class HttpReadsWithLoggingBuilderSpec extends AnyFreeSpec with MockFactory
           result shouldBe Left(
             ConnectorError(
               statusCode = 503,
-              message = """Error upstream response body is not JSON."""
+              message = """HTTP body is not JSON in received error HTTP response."""
             )
           )
 
           savedErrorLogs shouldBe List(
-            s"""Error upstream response body is not JSON.
-               |Response status being returned: 503
-               |Request made: MYMETHOD some/url
-               |Response status received: ${errorStatus211Transf: Int}
-               |Incoming HTTP response body not logged for successful (2xx) statuses.""".stripMargin
+            s"""HTTP body is not JSON in received error HTTP response.
+               |Response status to be returned: 503
+               |Request made for received HTTP response: MYMETHOD some/url
+               |Received HTTP response status: ${errorStatus211Transf: Int}
+               |Received HTTP response body not logged for successful (2xx) statuses.""".stripMargin
           )
         }
       }
@@ -688,16 +688,16 @@ final class HttpReadsWithLoggingBuilderSpec extends AnyFreeSpec with MockFactory
               result shouldBe Left(
                 ConnectorError(
                   statusCode = 503,
-                  message = """Upstream response status is unexpected."""
+                  message = """HTTP status is unexpected in received HTTP response."""
                 )
               )
 
               savedErrorLogs shouldBe List(
-                s"""Upstream response status is unexpected.
-                   |Response status being returned: 503
-                   |Request made: MYMETHOD some/url
-                   |Response status received: ${unexpected2xxStatus: Int}
-                   |Incoming HTTP response body not logged for successful (2xx) statuses.""".stripMargin
+                s"""HTTP status is unexpected in received HTTP response.
+                   |Response status to be returned: 503
+                   |Request made for received HTTP response: MYMETHOD some/url
+                   |Received HTTP response status: ${unexpected2xxStatus: Int}
+                   |Received HTTP response body not logged for successful (2xx) statuses.""".stripMargin
               )
 
               savedErrorLogs.toString should not include SuccessWrapper236.exampleBody // We don't forward invalid success bodies.
@@ -723,16 +723,16 @@ final class HttpReadsWithLoggingBuilderSpec extends AnyFreeSpec with MockFactory
               result shouldBe Left(
                 ConnectorError(
                   statusCode = 503,
-                  message = """Upstream response status is unexpected."""
+                  message = """HTTP status is unexpected in received HTTP response."""
                 )
               )
 
               savedErrorLogs shouldBe List(
-                s"""Upstream response status is unexpected.
-                   |Response status being returned: 503
-                   |Request made: MYMETHOD some/url
-                   |Response status received: ${unexpected2xxStatus: Int}
-                   |Incoming HTTP response body not logged for successful (2xx) statuses.""".stripMargin
+                s"""HTTP status is unexpected in received HTTP response.
+                   |Response status to be returned: 503
+                   |Request made for received HTTP response: MYMETHOD some/url
+                   |Received HTTP response status: ${unexpected2xxStatus: Int}
+                   |Received HTTP response body not logged for successful (2xx) statuses.""".stripMargin
               )
 
               savedErrorLogs.toString should not include SuccessWrapper419.exampleBody // We don't forward invalid success bodies.
@@ -758,16 +758,16 @@ final class HttpReadsWithLoggingBuilderSpec extends AnyFreeSpec with MockFactory
               result shouldBe Left(
                 ConnectorError(
                   statusCode = 503,
-                  message = """Upstream response status is unexpected."""
+                  message = """HTTP status is unexpected in received HTTP response."""
                 )
               )
 
               savedErrorLogs shouldBe List(
-                s"""Upstream response status is unexpected.
-                   |Response status being returned: 503
-                   |Request made: MYMETHOD some/url
-                   |Response status received: ${unexpected2xxStatus: Int}
-                   |Incoming HTTP response body not logged for successful (2xx) statuses.""".stripMargin
+                s"""HTTP status is unexpected in received HTTP response.
+                   |Response status to be returned: 503
+                   |Request made for received HTTP response: MYMETHOD some/url
+                   |Received HTTP response status: ${unexpected2xxStatus: Int}
+                   |Received HTTP response body not logged for successful (2xx) statuses.""".stripMargin
               )
 
               savedErrorLogs.toString should not include ErrorFor109.exampleBody // We don't forward invalid success bodies.
@@ -793,16 +793,16 @@ final class HttpReadsWithLoggingBuilderSpec extends AnyFreeSpec with MockFactory
               result shouldBe Left(
                 ConnectorError(
                   statusCode = 503,
-                  message = """Upstream response status is unexpected."""
+                  message = """HTTP status is unexpected in received HTTP response."""
                 )
               )
 
               savedErrorLogs shouldBe List(
-                s"""Upstream response status is unexpected.
-                   |Response status being returned: 503
-                   |Request made: MYMETHOD some/url
-                   |Response status received: ${unexpected2xxStatus: Int}
-                   |Incoming HTTP response body not logged for successful (2xx) statuses.""".stripMargin
+                s"""HTTP status is unexpected in received HTTP response.
+                   |Response status to be returned: 503
+                   |Request made for received HTTP response: MYMETHOD some/url
+                   |Received HTTP response status: ${unexpected2xxStatus: Int}
+                   |Received HTTP response body not logged for successful (2xx) statuses.""".stripMargin
               )
 
               savedErrorLogs.toString should not include ErrorFor211ToTransform.exampleBody // We don't forward invalid success bodies.
@@ -826,16 +826,16 @@ final class HttpReadsWithLoggingBuilderSpec extends AnyFreeSpec with MockFactory
               result shouldBe Left(
                 ConnectorError(
                   statusCode = 503,
-                  message = """Upstream response status is unexpected."""
+                  message = """HTTP status is unexpected in received HTTP response."""
                 )
               )
 
               savedErrorLogs shouldBe List(
-                s"""Upstream response status is unexpected.
-                   |Response status being returned: 503
-                   |Request made: MYMETHOD some/url
-                   |Response status received: ${unexpected2xxStatus: Int}
-                   |Incoming HTTP response body not logged for successful (2xx) statuses.""".stripMargin
+                s"""HTTP status is unexpected in received HTTP response.
+                   |Response status to be returned: 503
+                   |Request made for received HTTP response: MYMETHOD some/url
+                   |Received HTTP response status: ${unexpected2xxStatus: Int}
+                   |Received HTTP response body not logged for successful (2xx) statuses.""".stripMargin
               )
 
               savedErrorLogs.toString should not include "{}" // We don't forward invalid success bodies.
@@ -859,16 +859,16 @@ final class HttpReadsWithLoggingBuilderSpec extends AnyFreeSpec with MockFactory
               result shouldBe Left(
                 ConnectorError(
                   statusCode = 503,
-                  message = """Upstream response status is unexpected."""
+                  message = """HTTP status is unexpected in received HTTP response."""
                 )
               )
 
               savedErrorLogs shouldBe List(
-                s"""Upstream response status is unexpected.
-                   |Response status being returned: 503
-                   |Request made: MYMETHOD some/url
-                   |Response status received: ${unexpected2xxStatus: Int}
-                   |Incoming HTTP response body not logged for successful (2xx) statuses.""".stripMargin
+                s"""HTTP status is unexpected in received HTTP response.
+                   |Response status to be returned: 503
+                   |Request made for received HTTP response: MYMETHOD some/url
+                   |Received HTTP response status: ${unexpected2xxStatus: Int}
+                   |Received HTTP response body not logged for successful (2xx) statuses.""".stripMargin
               )
 
               savedErrorLogs.toString should not include "SOMETEXT" // We don't forward invalid success bodies.
@@ -899,16 +899,16 @@ final class HttpReadsWithLoggingBuilderSpec extends AnyFreeSpec with MockFactory
               result shouldBe Left(
                 ConnectorError(
                   statusCode = 503,
-                  message = """Upstream response status is unexpected."""
+                  message = """HTTP status is unexpected in received HTTP response."""
                 )
               )
 
               savedErrorLogs shouldBe List(
-                s"""Upstream response status is unexpected.
-                   |Response status being returned: 503
-                   |Request made: MYMETHOD some/url
-                   |Response status received: ${unexpectedNon2xxStatus: Int}
-                   |Incoming HTTP response body: ${SuccessWrapper236.exampleBody: String}""".stripMargin
+                s"""HTTP status is unexpected in received HTTP response.
+                   |Response status to be returned: 503
+                   |Request made for received HTTP response: MYMETHOD some/url
+                   |Received HTTP response status: ${unexpectedNon2xxStatus: Int}
+                   |Received HTTP response body: ${SuccessWrapper236.exampleBody: String}""".stripMargin
               )
             }
         }
@@ -932,16 +932,16 @@ final class HttpReadsWithLoggingBuilderSpec extends AnyFreeSpec with MockFactory
               result shouldBe Left(
                 ConnectorError(
                   statusCode = 503,
-                  message = """Upstream response status is unexpected."""
+                  message = """HTTP status is unexpected in received HTTP response."""
                 )
               )
 
               savedErrorLogs shouldBe List(
-                s"""Upstream response status is unexpected.
-                   |Response status being returned: 503
-                   |Request made: MYMETHOD some/url
-                   |Response status received: ${unexpectedNon2xxStatus: Int}
-                   |Incoming HTTP response body: ${SuccessWrapper419.exampleBody: String}""".stripMargin
+                s"""HTTP status is unexpected in received HTTP response.
+                   |Response status to be returned: 503
+                   |Request made for received HTTP response: MYMETHOD some/url
+                   |Received HTTP response status: ${unexpectedNon2xxStatus: Int}
+                   |Received HTTP response body: ${SuccessWrapper419.exampleBody: String}""".stripMargin
               )
             }
         }
@@ -965,16 +965,16 @@ final class HttpReadsWithLoggingBuilderSpec extends AnyFreeSpec with MockFactory
               result shouldBe Left(
                 ConnectorError(
                   statusCode = 503,
-                  message = """Upstream response status is unexpected."""
+                  message = """HTTP status is unexpected in received HTTP response."""
                 )
               )
 
               savedErrorLogs shouldBe List(
-                s"""Upstream response status is unexpected.
-                   |Response status being returned: 503
-                   |Request made: MYMETHOD some/url
-                   |Response status received: ${unexpectedNon2xxStatus: Int}
-                   |Incoming HTTP response body: ${ErrorFor109.exampleBody: String}""".stripMargin
+                s"""HTTP status is unexpected in received HTTP response.
+                   |Response status to be returned: 503
+                   |Request made for received HTTP response: MYMETHOD some/url
+                   |Received HTTP response status: ${unexpectedNon2xxStatus: Int}
+                   |Received HTTP response body: ${ErrorFor109.exampleBody: String}""".stripMargin
               )
             }
         }
@@ -1002,16 +1002,16 @@ final class HttpReadsWithLoggingBuilderSpec extends AnyFreeSpec with MockFactory
               result shouldBe Left(
                 ConnectorError(
                   statusCode = 503,
-                  message = """Upstream response status is unexpected."""
+                  message = """HTTP status is unexpected in received HTTP response."""
                 )
               )
 
               savedErrorLogs shouldBe List(
-                s"""Upstream response status is unexpected.
-                   |Response status being returned: 503
-                   |Request made: MYMETHOD some/url
-                   |Response status received: ${unexpectedNon2xxStatus: Int}
-                   |Incoming HTTP response body: ${ErrorFor211ToTransform.exampleBody: String}""".stripMargin
+                s"""HTTP status is unexpected in received HTTP response.
+                   |Response status to be returned: 503
+                   |Request made for received HTTP response: MYMETHOD some/url
+                   |Received HTTP response status: ${unexpectedNon2xxStatus: Int}
+                   |Received HTTP response body: ${ErrorFor211ToTransform.exampleBody: String}""".stripMargin
               )
             }
         }
@@ -1033,16 +1033,16 @@ final class HttpReadsWithLoggingBuilderSpec extends AnyFreeSpec with MockFactory
               result shouldBe Left(
                 ConnectorError(
                   statusCode = 503,
-                  message = """Upstream response status is unexpected."""
+                  message = """HTTP status is unexpected in received HTTP response."""
                 )
               )
 
               savedErrorLogs shouldBe List(
-                s"""Upstream response status is unexpected.
-                   |Response status being returned: 503
-                   |Request made: MYMETHOD some/url
-                   |Response status received: ${unexpectedNon2xxStatus: Int}
-                   |Incoming HTTP response body: {}""".stripMargin
+                s"""HTTP status is unexpected in received HTTP response.
+                   |Response status to be returned: 503
+                   |Request made for received HTTP response: MYMETHOD some/url
+                   |Received HTTP response status: ${unexpectedNon2xxStatus: Int}
+                   |Received HTTP response body: {}""".stripMargin
               )
             }
         }
@@ -1064,16 +1064,16 @@ final class HttpReadsWithLoggingBuilderSpec extends AnyFreeSpec with MockFactory
               result shouldBe Left(
                 ConnectorError(
                   statusCode = 503,
-                  message = """Upstream response status is unexpected."""
+                  message = """HTTP status is unexpected in received HTTP response."""
                 )
               )
 
               savedErrorLogs shouldBe List(
-                s"""Upstream response status is unexpected.
-                   |Response status being returned: 503
-                   |Request made: MYMETHOD some/url
-                   |Response status received: ${unexpectedNon2xxStatus: Int}
-                   |Incoming HTTP response body: SOMETEXT""".stripMargin
+                s"""HTTP status is unexpected in received HTTP response.
+                   |Response status to be returned: 503
+                   |Request made for received HTTP response: MYMETHOD some/url
+                   |Received HTTP response status: ${unexpectedNon2xxStatus: Int}
+                   |Received HTTP response body: SOMETEXT""".stripMargin
               )
             }
         }
