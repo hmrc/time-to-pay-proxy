@@ -78,13 +78,9 @@ info:
       | 1.0.14 | 14-08-2025 | Alex Olkhovskiy | refactor the spec with linter|
       | 1.0.15 | 18-09-2025 | Alex Olkhovskiy | Restrict regimeType enum to only 'SA' value for /quote endpoint |
       | 1.0.15-proposedF | 18-09-2025 | Alex Olkhovskiy | Add 409 conflict response to PUT /quote endpoint for duplicate plan ID|
-      | 1.0.15-proposedG| 19-08-2024 | Alex Olkhovskiy | Added new cancel endpoint    |
-      | 1.0.15-proposedH | 19-08-2025 | Alex Olkhovskiy | Added new inform endpoint|
-      | 1.0.15-proposedI | 19-08-2025 | Alex Olkhovskiy | Added new FullAmend endpoint|
-      | 1.0.15-proposedJ | 15-09-2025 | Alex Olkhovskiy | Added 422 error response to charge-info endpoint|
-      | 1.0.15-proposedH | 23-09-2025 | Alex Olkhovskiy | Add combineLastInstalments query parameter to quote and createPlan|
+      | 1.0.15-cancel-inform| 23-09-2024 | Alex Olkhovskiy | Added new cancel and inform endpoint    |
   contact: {}
-  version: 1.0.15-proposedH
+  version: 1.0.15-cancel-inform
 servers:
   - url: https://api.service.hmrc.gov.uk
     variables: {}
@@ -104,8 +100,6 @@ paths:
     $ref: paths/individuals_time-to-pay-proxy_cancel.yaml
   /individuals/time-to-pay-proxy/inform:
     $ref: paths/individuals_time-to-pay-proxy_inform.yaml
-  /individuals/time-to-pay-proxy/full-amend:
-    $ref: paths/individuals_time-to-pay-proxy_full-amend.yaml
 components:
   securitySchemes:
     userRestricted:
