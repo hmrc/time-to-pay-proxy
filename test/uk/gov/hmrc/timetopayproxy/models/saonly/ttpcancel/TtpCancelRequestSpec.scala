@@ -242,7 +242,7 @@ final class TtpCancelRequestSpec extends AnyFreeSpec {
       "when all the optional fields are fully populated AND all the currency amounts are invalid" - {
         def json: JsValue = TestData.WithOnlySomesAndAllCurrencyAmountsInvalid.json
 
-        "reads the JSON correctly" in {
+        "cannot read the JSON due to decimal precision issues" in {
           readerFromClients.reads(json) shouldBe
             JsError(
               List(
