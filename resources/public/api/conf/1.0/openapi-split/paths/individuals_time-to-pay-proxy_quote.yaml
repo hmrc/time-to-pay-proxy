@@ -6,7 +6,14 @@ post:
     This is an endpoint that triggers request to create a plan for storage from
     ttp service
   operationId: GenerateTTPQuoteRequest
-  parameters: []
+  parameters:
+    - name: combineLastInstalments
+      in: query
+      description: Optional flag to combine the last instalments. When set to true, last instalments will be combined.
+      required: false
+      schema:
+        type: boolean
+        default: false
   security:
     - applicationRestricted:
         - read:time-to-pay-proxy
