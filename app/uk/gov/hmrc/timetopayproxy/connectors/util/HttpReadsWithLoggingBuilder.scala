@@ -63,7 +63,9 @@ final class HttpReadsWithLoggingBuilder[E >: ConnectorError, Result] private (
       matcher.orElse { case `incomingStatus` =>
         (responseContext: ResponseContext, logger: RequestAwareLogger, hc: HeaderCarrier) =>
           Try(responseContext.response.json).map(_.validate[ReadableError]) match {
-            case Success(JsSuccess(deserialisedBody, _)) => Left(transform(deserialisedBody))
+            case Success(JsSuccess(deserialisedBody, _)) =>
+              logWarningAboutValidUnsuccessfulResponse(responseContext, logger)(hc)
+              Left(transform(deserialisedBody))
             case Success(JsError(_)) =>
               createConnectorError(
                 responseContext,
@@ -107,23 +109,34 @@ final class HttpReadsWithLoggingBuilder[E >: ConnectorError, Result] private (
     simpleMessage: String,
     logger: RequestAwareLogger
   )(implicit hc: HeaderCarrier): Left[ConnectorError, Nothing] = {
-    val incomingHttpBodyLine: String =
-      if (Status.isSuccessful(responseContext.response.status)) {
-        s"Received HTTP response body not logged for successful (2xx) statuses."
-      } else {
-        s"Received HTTP response body: ${responseContext.response.body}"
-      }
-
     logger.error(
       s"""$simpleMessage
          |Response status to be returned: $newStatus
          |Request made for received HTTP response: ${responseContext.method} ${responseContext.url}
          |Received HTTP response status: ${responseContext.response.status}
-         |$incomingHttpBodyLine""".stripMargin
+         |${safeToLogResponseBodyDescription(responseContext.response)}""".stripMargin
     )
 
     Left(ConnectorError(statusCode = newStatus, message = simpleMessage))
   }
+
+  private def logWarningAboutValidUnsuccessfulResponse(
+    responseContext: ResponseContext,
+    logger: RequestAwareLogger
+  )(implicit hc: HeaderCarrier): Unit =
+    logger.warn(
+      s"""Valid and expected error response was found in received successful HTTP response.
+         |Request made for received HTTP response: ${responseContext.method} ${responseContext.url}
+         |Received HTTP response status: ${responseContext.response.status}
+         |${safeToLogResponseBodyDescription(responseContext.response)}""".stripMargin
+    )
+
+  private def safeToLogResponseBodyDescription(response: HttpResponse): String =
+    if (Status.isSuccessful(response.status)) {
+      s"Received HTTP response body not logged for 2xx statuses."
+    } else {
+      s"Received HTTP response body: ${response.body}"
+    }
 
   private def withMatcher(
     newMatcher: PartialFunction[Int, (ResponseContext, RequestAwareLogger, HeaderCarrier) => Either[E, Result]]

@@ -137,11 +137,21 @@ final class HttpReadsWithLoggingBuilderSpec extends AnyFreeSpec with MockFactory
 
       protected val logger: RequestAwareLogger = new RequestAwareLogger(new Logger(underlyingLogger))
 
-      var savedErrorLogs: List[String] = Nil
-      def expectOneErrorLogAndStoreInVar(): Unit = {
-        (() => underlyingLogger.isErrorEnabled).expects().once().returning(true)
-        (underlyingLogger.error(_: String)).expects(*).once().onCall { (msg: String) =>
-          savedErrorLogs = savedErrorLogs :+ msg
+      /** List of `(LEVEL, MESSAGE)` tuples to assert on at the end of each test.
+        * e.g. {{{"ERROR" -> "My error log line"}}}, {{{"WARN" -> "My warning line"}}}
+        */
+      var allCapturedLogs: List[(String, String)] = Nil
+      locally {
+        // Make the mock automatically allow (and capture) all WARN and ERROR logs.
+        // As long as each test asserts on `allCapturedLogs`, there's no reason to be upfront about which logs are allowed.
+
+        (() => underlyingLogger.isErrorEnabled).expects().anyNumberOfTimes().returning(true)
+        (underlyingLogger.error(_: String)).expects(*).anyNumberOfTimes().onCall { (msg: String) =>
+          allCapturedLogs = allCapturedLogs :+ ("ERROR", msg)
+        }
+        (() => underlyingLogger.isWarnEnabled).expects().anyNumberOfTimes().returning(true)
+        (underlyingLogger.warn(_: String)).expects(*).anyNumberOfTimes().onCall { (msg: String) =>
+          allCapturedLogs = allCapturedLogs :+ ("WARN", msg)
         }
       }
 
@@ -155,8 +165,6 @@ final class HttpReadsWithLoggingBuilderSpec extends AnyFreeSpec with MockFactory
             val httpReads: HttpReads[Either[ConnectorError, Nothing]] = emptyBuilder.httpReads(logger)(hc)
             val response: HttpResponse = HttpResponse(status = 200, body = TestData.emptyTextBody, headers = Map())
 
-            expectOneErrorLogAndStoreInVar()
-
             val result: Either[ConnectorError, Nothing] = httpReads.read("MYMETHOD", "some/url", response)
             result shouldBe Left(
               ConnectorError(
@@ -165,12 +173,13 @@ final class HttpReadsWithLoggingBuilderSpec extends AnyFreeSpec with MockFactory
               )
             )
 
-            savedErrorLogs shouldBe List(
-              """HTTP status is unexpected in received HTTP response.
-                |Response status to be returned: 503
-                |Request made for received HTTP response: MYMETHOD some/url
-                |Received HTTP response status: 200
-                |Received HTTP response body not logged for successful (2xx) statuses.""".stripMargin
+            allCapturedLogs shouldBe List(
+              "ERROR" ->
+                """HTTP status is unexpected in received HTTP response.
+                  |Response status to be returned: 503
+                  |Request made for received HTTP response: MYMETHOD some/url
+                  |Received HTTP response status: 200
+                  |Received HTTP response body not logged for 2xx statuses.""".stripMargin
             )
           }
 
@@ -178,8 +187,6 @@ final class HttpReadsWithLoggingBuilderSpec extends AnyFreeSpec with MockFactory
             val httpReads: HttpReads[Either[ConnectorError, Nothing]] = emptyBuilder.httpReads(logger)(hc)
             val response: HttpResponse = HttpResponse(status = 200, body = TestData.emptyJsonBody, headers = Map())
 
-            expectOneErrorLogAndStoreInVar()
-
             val result: Either[ConnectorError, Nothing] = httpReads.read("MYMETHOD", "some/url", response)
             result shouldBe Left(
               ConnectorError(
@@ -188,12 +195,13 @@ final class HttpReadsWithLoggingBuilderSpec extends AnyFreeSpec with MockFactory
               )
             )
 
-            savedErrorLogs shouldBe List(
-              """HTTP status is unexpected in received HTTP response.
-                |Response status to be returned: 503
-                |Request made for received HTTP response: MYMETHOD some/url
-                |Received HTTP response status: 200
-                |Received HTTP response body not logged for successful (2xx) statuses.""".stripMargin
+            allCapturedLogs shouldBe List(
+              "ERROR" ->
+                """HTTP status is unexpected in received HTTP response.
+                  |Response status to be returned: 503
+                  |Request made for received HTTP response: MYMETHOD some/url
+                  |Received HTTP response status: 200
+                  |Received HTTP response body not logged for 2xx statuses.""".stripMargin
             )
           }
 
@@ -202,8 +210,6 @@ final class HttpReadsWithLoggingBuilderSpec extends AnyFreeSpec with MockFactory
             val response: HttpResponse =
               HttpResponse(status = 200, body = TestData.ForApply.validTtpErrorBody, headers = Map())
 
-            expectOneErrorLogAndStoreInVar()
-
             val result: Either[ConnectorError, Nothing] = httpReads.read("MYMETHOD", "some/url", response)
             result shouldBe Left(
               ConnectorError(
@@ -212,12 +218,13 @@ final class HttpReadsWithLoggingBuilderSpec extends AnyFreeSpec with MockFactory
               )
             )
 
-            savedErrorLogs shouldBe List(
-              """HTTP status is unexpected in received HTTP response.
-                |Response status to be returned: 503
-                |Request made for received HTTP response: MYMETHOD some/url
-                |Received HTTP response status: 200
-                |Received HTTP response body not logged for successful (2xx) statuses.""".stripMargin
+            allCapturedLogs shouldBe List(
+              "ERROR" ->
+                """HTTP status is unexpected in received HTTP response.
+                  |Response status to be returned: 503
+                  |Request made for received HTTP response: MYMETHOD some/url
+                  |Received HTTP response status: 200
+                  |Received HTTP response body not logged for 2xx statuses.""".stripMargin
             )
           }
 
@@ -226,8 +233,6 @@ final class HttpReadsWithLoggingBuilderSpec extends AnyFreeSpec with MockFactory
             val response: HttpResponse =
               HttpResponse(status = 200, body = TestData.ForApply.validTtpEligibilityErrorBody, headers = Map())
 
-            expectOneErrorLogAndStoreInVar()
-
             val result: Either[ConnectorError, Nothing] = httpReads.read("MYMETHOD", "some/url", response)
             result shouldBe Left(
               ConnectorError(
@@ -236,12 +241,13 @@ final class HttpReadsWithLoggingBuilderSpec extends AnyFreeSpec with MockFactory
               )
             )
 
-            savedErrorLogs shouldBe List(
-              """HTTP status is unexpected in received HTTP response.
-                |Response status to be returned: 503
-                |Request made for received HTTP response: MYMETHOD some/url
-                |Received HTTP response status: 200
-                |Received HTTP response body not logged for successful (2xx) statuses.""".stripMargin
+            allCapturedLogs shouldBe List(
+              "ERROR" ->
+                """HTTP status is unexpected in received HTTP response.
+                  |Response status to be returned: 503
+                  |Request made for received HTTP response: MYMETHOD some/url
+                  |Received HTTP response status: 200
+                  |Received HTTP response body not logged for 2xx statuses.""".stripMargin
             )
           }
         }
@@ -251,8 +257,6 @@ final class HttpReadsWithLoggingBuilderSpec extends AnyFreeSpec with MockFactory
             val httpReads: HttpReads[Either[ConnectorError, Nothing]] = emptyBuilder.httpReads(logger)(hc)
             val response: HttpResponse = HttpResponse(status = 400, body = TestData.emptyTextBody, headers = Map())
 
-            expectOneErrorLogAndStoreInVar()
-
             val result: Either[ConnectorError, Nothing] = httpReads.read("MYMETHOD", "some/url", response)
             result shouldBe Left(
               ConnectorError(
@@ -261,12 +265,13 @@ final class HttpReadsWithLoggingBuilderSpec extends AnyFreeSpec with MockFactory
               )
             )
 
-            savedErrorLogs shouldBe List(
-              """HTTP status is unexpected in received HTTP response.
-                |Response status to be returned: 503
-                |Request made for received HTTP response: MYMETHOD some/url
-                |Received HTTP response status: 400
-                |Received HTTP response body: """.stripMargin
+            allCapturedLogs shouldBe List(
+              "ERROR" ->
+                """HTTP status is unexpected in received HTTP response.
+                  |Response status to be returned: 503
+                  |Request made for received HTTP response: MYMETHOD some/url
+                  |Received HTTP response status: 400
+                  |Received HTTP response body: """.stripMargin
             )
           }
 
@@ -274,8 +279,6 @@ final class HttpReadsWithLoggingBuilderSpec extends AnyFreeSpec with MockFactory
             val httpReads: HttpReads[Either[ConnectorError, Nothing]] = emptyBuilder.httpReads(logger)(hc)
             val response: HttpResponse = HttpResponse(status = 400, body = TestData.emptyJsonBody, headers = Map())
 
-            expectOneErrorLogAndStoreInVar()
-
             val result: Either[ConnectorError, Nothing] = httpReads.read("MYMETHOD", "some/url", response)
             result shouldBe Left(
               ConnectorError(
@@ -284,12 +287,13 @@ final class HttpReadsWithLoggingBuilderSpec extends AnyFreeSpec with MockFactory
               )
             )
 
-            savedErrorLogs shouldBe List(
-              """HTTP status is unexpected in received HTTP response.
-                |Response status to be returned: 503
-                |Request made for received HTTP response: MYMETHOD some/url
-                |Received HTTP response status: 400
-                |Received HTTP response body: {}""".stripMargin
+            allCapturedLogs shouldBe List(
+              "ERROR" ->
+                """HTTP status is unexpected in received HTTP response.
+                  |Response status to be returned: 503
+                  |Request made for received HTTP response: MYMETHOD some/url
+                  |Received HTTP response status: 400
+                  |Received HTTP response body: {}""".stripMargin
             )
           }
 
@@ -298,8 +302,6 @@ final class HttpReadsWithLoggingBuilderSpec extends AnyFreeSpec with MockFactory
             val response: HttpResponse =
               HttpResponse(status = 400, body = TestData.ForApply.validTtpErrorBody, headers = Map())
 
-            expectOneErrorLogAndStoreInVar()
-
             val result: Either[ConnectorError, Nothing] = httpReads.read("MYMETHOD", "some/url", response)
             result shouldBe Left(
               ConnectorError(
@@ -308,12 +310,13 @@ final class HttpReadsWithLoggingBuilderSpec extends AnyFreeSpec with MockFactory
               )
             )
 
-            savedErrorLogs shouldBe List(
-              """HTTP status is unexpected in received HTTP response.
-                |Response status to be returned: 503
-                |Request made for received HTTP response: MYMETHOD some/url
-                |Received HTTP response status: 400
-                |Received HTTP response body: {"failures":[{"code":"400","reason":"my-reason"}]}""".stripMargin
+            allCapturedLogs shouldBe List(
+              "ERROR" ->
+                """HTTP status is unexpected in received HTTP response.
+                  |Response status to be returned: 503
+                  |Request made for received HTTP response: MYMETHOD some/url
+                  |Received HTTP response status: 400
+                  |Received HTTP response body: {"failures":[{"code":"400","reason":"my-reason"}]}""".stripMargin
             )
           }
 
@@ -322,8 +325,6 @@ final class HttpReadsWithLoggingBuilderSpec extends AnyFreeSpec with MockFactory
             val response: HttpResponse =
               HttpResponse(status = 400, body = TestData.ForApply.validTtpEligibilityErrorBody, headers = Map())
 
-            expectOneErrorLogAndStoreInVar()
-
             val result: Either[ConnectorError, Nothing] = httpReads.read("MYMETHOD", "some/url", response)
             result shouldBe Left(
               ConnectorError(
@@ -332,12 +333,13 @@ final class HttpReadsWithLoggingBuilderSpec extends AnyFreeSpec with MockFactory
               )
             )
 
-            savedErrorLogs shouldBe List(
-              """HTTP status is unexpected in received HTTP response.
-                |Response status to be returned: 503
-                |Request made for received HTTP response: MYMETHOD some/url
-                |Received HTTP response status: 400
-                |Received HTTP response body: {"code":"400","reason":"my-reason"}""".stripMargin
+            allCapturedLogs shouldBe List(
+              "ERROR" ->
+                """HTTP status is unexpected in received HTTP response.
+                  |Response status to be returned: 503
+                  |Request made for received HTTP response: MYMETHOD some/url
+                  |Received HTTP response status: 400
+                  |Received HTTP response body: {"code":"400","reason":"my-reason"}""".stripMargin
             )
           }
         }
@@ -348,8 +350,6 @@ final class HttpReadsWithLoggingBuilderSpec extends AnyFreeSpec with MockFactory
             val response: HttpResponse =
               HttpResponse(status = 299, body = TestData.emptyJsonBody, headers = Map())
 
-            expectOneErrorLogAndStoreInVar()
-
             val result: Either[ConnectorError, Nothing] = httpReads.read("MYMETHOD", "some/url", response)
             result shouldBe Left(
               ConnectorError(
@@ -358,12 +358,13 @@ final class HttpReadsWithLoggingBuilderSpec extends AnyFreeSpec with MockFactory
               )
             )
 
-            savedErrorLogs shouldBe List(
-              """HTTP status is unexpected in received HTTP response.
-                |Response status to be returned: 503
-                |Request made for received HTTP response: MYMETHOD some/url
-                |Received HTTP response status: 299
-                |Received HTTP response body not logged for successful (2xx) statuses.""".stripMargin
+            allCapturedLogs shouldBe List(
+              "ERROR" ->
+                """HTTP status is unexpected in received HTTP response.
+                  |Response status to be returned: 503
+                  |Request made for received HTTP response: MYMETHOD some/url
+                  |Received HTTP response status: 299
+                  |Received HTTP response body not logged for 2xx statuses.""".stripMargin
             )
           }
       }
@@ -401,7 +402,7 @@ final class HttpReadsWithLoggingBuilderSpec extends AnyFreeSpec with MockFactory
                 httpReads.read("MYMETHOD", "some/url", response)
 
               result shouldBe Right(exampleValue)
-              savedErrorLogs shouldBe Nil
+              allCapturedLogs shouldBe Nil
             }
         }
 
@@ -412,8 +413,6 @@ final class HttpReadsWithLoggingBuilderSpec extends AnyFreeSpec with MockFactory
 
             val response: HttpResponse = HttpResponse(status = successStatus236, body = """{}""", headers = Map())
 
-            expectOneErrorLogAndStoreInVar()
-
             val result: Either[AnyRef, SuccessWrapper] =
               httpReads.read("MYMETHOD", "some/url", response)
 
@@ -424,12 +423,13 @@ final class HttpReadsWithLoggingBuilderSpec extends AnyFreeSpec with MockFactory
               )
             )
 
-            savedErrorLogs shouldBe List(
-              s"""JSON structure is not valid in received successful HTTP response.
-                 |Response status to be returned: 503
-                 |Request made for received HTTP response: MYMETHOD some/url
-                 |Received HTTP response status: ${successStatus236: Int}
-                 |Received HTTP response body not logged for successful (2xx) statuses.""".stripMargin
+            allCapturedLogs shouldBe List(
+              "ERROR" ->
+                s"""JSON structure is not valid in received successful HTTP response.
+                   |Response status to be returned: 503
+                   |Request made for received HTTP response: MYMETHOD some/url
+                   |Received HTTP response status: ${successStatus236: Int}
+                   |Received HTTP response body not logged for 2xx statuses.""".stripMargin
             )
           }
 
@@ -439,8 +439,6 @@ final class HttpReadsWithLoggingBuilderSpec extends AnyFreeSpec with MockFactory
 
             val response: HttpResponse = HttpResponse(status = successStatus419, body = """{}""", headers = Map())
 
-            expectOneErrorLogAndStoreInVar()
-
             val result: Either[AnyRef, SuccessWrapper] =
               httpReads.read("MYMETHOD", "some/url", response)
 
@@ -451,12 +449,13 @@ final class HttpReadsWithLoggingBuilderSpec extends AnyFreeSpec with MockFactory
               )
             )
 
-            savedErrorLogs shouldBe List(
-              s"""JSON structure is not valid in received successful HTTP response.
-                 |Response status to be returned: 503
-                 |Request made for received HTTP response: MYMETHOD some/url
-                 |Received HTTP response status: ${successStatus419: Int}
-                 |Received HTTP response body: {}""".stripMargin
+            allCapturedLogs shouldBe List(
+              "ERROR" ->
+                s"""JSON structure is not valid in received successful HTTP response.
+                   |Response status to be returned: 503
+                   |Request made for received HTTP response: MYMETHOD some/url
+                   |Received HTTP response status: ${successStatus419: Int}
+                   |Received HTTP response body: {}""".stripMargin
             )
           }
         }
@@ -468,8 +467,6 @@ final class HttpReadsWithLoggingBuilderSpec extends AnyFreeSpec with MockFactory
 
             val response: HttpResponse = HttpResponse(status = successStatus236, body = """TEXT""", headers = Map())
 
-            expectOneErrorLogAndStoreInVar()
-
             val result: Either[AnyRef, SuccessWrapper] =
               httpReads.read("MYMETHOD", "some/url", response)
 
@@ -480,15 +477,16 @@ final class HttpReadsWithLoggingBuilderSpec extends AnyFreeSpec with MockFactory
               )
             )
 
-            savedErrorLogs shouldBe List(
-              s"""HTTP body is not JSON in received successful HTTP response.
-                 |Response status to be returned: 503
-                 |Request made for received HTTP response: MYMETHOD some/url
-                 |Received HTTP response status: ${successStatus236: Int}
-                 |Received HTTP response body not logged for successful (2xx) statuses.""".stripMargin
+            allCapturedLogs shouldBe List(
+              "ERROR" ->
+                s"""HTTP body is not JSON in received successful HTTP response.
+                   |Response status to be returned: 503
+                   |Request made for received HTTP response: MYMETHOD some/url
+                   |Received HTTP response status: ${successStatus236: Int}
+                   |Received HTTP response body not logged for 2xx statuses.""".stripMargin
             )
 
-            savedErrorLogs.toString should not include "TEXT"
+            allCapturedLogs.toString should not include "TEXT"
           }
 
           s"<$successStatus419>" in new TestFixture[AnyRef, SuccessWrapper] {
@@ -497,8 +495,6 @@ final class HttpReadsWithLoggingBuilderSpec extends AnyFreeSpec with MockFactory
 
             val response: HttpResponse = HttpResponse(status = successStatus419, body = """TEXT""", headers = Map())
 
-            expectOneErrorLogAndStoreInVar()
-
             val result: Either[AnyRef, SuccessWrapper] =
               httpReads.read("MYMETHOD", "some/url", response)
 
@@ -509,12 +505,13 @@ final class HttpReadsWithLoggingBuilderSpec extends AnyFreeSpec with MockFactory
               )
             )
 
-            savedErrorLogs shouldBe List(
-              s"""HTTP body is not JSON in received successful HTTP response.
-                 |Response status to be returned: 503
-                 |Request made for received HTTP response: MYMETHOD some/url
-                 |Received HTTP response status: ${successStatus419: Int}
-                 |Received HTTP response body: TEXT""".stripMargin
+            allCapturedLogs shouldBe List(
+              "ERROR" ->
+                s"""HTTP body is not JSON in received successful HTTP response.
+                   |Response status to be returned: 503
+                   |Request made for received HTTP response: MYMETHOD some/url
+                   |Received HTTP response status: ${successStatus419: Int}
+                   |Received HTTP response body: TEXT""".stripMargin
             )
           }
         }
@@ -536,7 +533,13 @@ final class HttpReadsWithLoggingBuilderSpec extends AnyFreeSpec with MockFactory
             httpReads.read("MYMETHOD", "some/url", response)
 
           result shouldBe Left(exampleValue)
-          savedErrorLogs shouldBe Nil
+          allCapturedLogs shouldBe List(
+            "WARN" ->
+              s"""Valid and expected error response was found in received successful HTTP response.
+                 |Request made for received HTTP response: MYMETHOD some/url
+                 |Received HTTP response status: ${errorStatus109: Int}
+                 |Received HTTP response body: ${exampleBody: String}""".stripMargin
+          )
         }
 
         "and an empty JSON body" in new TestFixture[AnyRef, SuccessWrapper] {
@@ -544,8 +547,6 @@ final class HttpReadsWithLoggingBuilderSpec extends AnyFreeSpec with MockFactory
             makeHttpReadsBuilder(emptyBuilder).httpReads(logger)
 
           val response: HttpResponse = HttpResponse(status = errorStatus109, body = """{}""", headers = Map())
-
-          expectOneErrorLogAndStoreInVar()
 
           val result: Either[AnyRef, SuccessWrapper] = httpReads.read("MYMETHOD", "some/url", response)
 
@@ -556,12 +557,13 @@ final class HttpReadsWithLoggingBuilderSpec extends AnyFreeSpec with MockFactory
             )
           )
 
-          savedErrorLogs shouldBe List(
-            s"""JSON structure is not valid in received error HTTP response.
-               |Response status to be returned: 503
-               |Request made for received HTTP response: MYMETHOD some/url
-               |Received HTTP response status: ${errorStatus109: Int}
-               |Received HTTP response body: {}""".stripMargin
+          allCapturedLogs shouldBe List(
+            "ERROR" ->
+              s"""JSON structure is not valid in received error HTTP response.
+                 |Response status to be returned: 503
+                 |Request made for received HTTP response: MYMETHOD some/url
+                 |Received HTTP response status: ${errorStatus109: Int}
+                 |Received HTTP response body: {}""".stripMargin
           )
         }
 
@@ -570,8 +572,6 @@ final class HttpReadsWithLoggingBuilderSpec extends AnyFreeSpec with MockFactory
             makeHttpReadsBuilder(emptyBuilder).httpReads(logger)
 
           val response: HttpResponse = HttpResponse(status = errorStatus109, body = """TEXT""", headers = Map())
-
-          expectOneErrorLogAndStoreInVar()
 
           val result: Either[AnyRef, SuccessWrapper] =
             httpReads.read("MYMETHOD", "some/url", response)
@@ -583,12 +583,13 @@ final class HttpReadsWithLoggingBuilderSpec extends AnyFreeSpec with MockFactory
             )
           )
 
-          savedErrorLogs shouldBe List(
-            s"""HTTP body is not JSON in received error HTTP response.
-               |Response status to be returned: 503
-               |Request made for received HTTP response: MYMETHOD some/url
-               |Received HTTP response status: ${errorStatus109: Int}
-               |Received HTTP response body: TEXT""".stripMargin
+          allCapturedLogs shouldBe List(
+            "ERROR" ->
+              s"""HTTP body is not JSON in received error HTTP response.
+                 |Response status to be returned: 503
+                 |Request made for received HTTP response: MYMETHOD some/url
+                 |Received HTTP response status: ${errorStatus109: Int}
+                 |Received HTTP response body: TEXT""".stripMargin
           )
         }
       }
@@ -607,7 +608,13 @@ final class HttpReadsWithLoggingBuilderSpec extends AnyFreeSpec with MockFactory
             httpReads.read("MYMETHOD", "some/url", response)
 
           result shouldBe Left(ErrorFor211ToTransform.exampleValue.myTransform)
-          savedErrorLogs shouldBe Nil
+          allCapturedLogs shouldBe List(
+            "WARN" ->
+              s"""Valid and expected error response was found in received successful HTTP response.
+                 |Request made for received HTTP response: MYMETHOD some/url
+                 |Received HTTP response status: ${errorStatus211Transf: Int}
+                 |Received HTTP response body not logged for 2xx statuses.""".stripMargin
+          )
         }
 
         "and an empty JSON body" in new TestFixture[AnyRef, SuccessWrapper] {
@@ -616,8 +623,6 @@ final class HttpReadsWithLoggingBuilderSpec extends AnyFreeSpec with MockFactory
 
           val response: HttpResponse =
             HttpResponse(status = errorStatus211Transf, body = """{}""", headers = Map())
-
-          expectOneErrorLogAndStoreInVar()
 
           val result: Either[AnyRef, SuccessWrapper] = httpReads.read("MYMETHOD", "some/url", response)
 
@@ -628,12 +633,13 @@ final class HttpReadsWithLoggingBuilderSpec extends AnyFreeSpec with MockFactory
             )
           )
 
-          savedErrorLogs shouldBe List(
-            s"""JSON structure is not valid in received error HTTP response.
-               |Response status to be returned: 503
-               |Request made for received HTTP response: MYMETHOD some/url
-               |Received HTTP response status: ${errorStatus211Transf: Int}
-               |Received HTTP response body not logged for successful (2xx) statuses.""".stripMargin
+          allCapturedLogs shouldBe List(
+            "ERROR" ->
+              s"""JSON structure is not valid in received error HTTP response.
+                 |Response status to be returned: 503
+                 |Request made for received HTTP response: MYMETHOD some/url
+                 |Received HTTP response status: ${errorStatus211Transf: Int}
+                 |Received HTTP response body not logged for 2xx statuses.""".stripMargin
           )
         }
 
@@ -643,8 +649,6 @@ final class HttpReadsWithLoggingBuilderSpec extends AnyFreeSpec with MockFactory
 
           val response: HttpResponse =
             HttpResponse(status = errorStatus211Transf, body = """TEXT""", headers = Map())
-
-          expectOneErrorLogAndStoreInVar()
 
           val result: Either[AnyRef, SuccessWrapper] =
             httpReads.read("MYMETHOD", "some/url", response)
@@ -656,12 +660,13 @@ final class HttpReadsWithLoggingBuilderSpec extends AnyFreeSpec with MockFactory
             )
           )
 
-          savedErrorLogs shouldBe List(
-            s"""HTTP body is not JSON in received error HTTP response.
-               |Response status to be returned: 503
-               |Request made for received HTTP response: MYMETHOD some/url
-               |Received HTTP response status: ${errorStatus211Transf: Int}
-               |Received HTTP response body not logged for successful (2xx) statuses.""".stripMargin
+          allCapturedLogs shouldBe List(
+            "ERROR" ->
+              s"""HTTP body is not JSON in received error HTTP response.
+                 |Response status to be returned: 503
+                 |Request made for received HTTP response: MYMETHOD some/url
+                 |Received HTTP response status: ${errorStatus211Transf: Int}
+                 |Received HTTP response body not logged for 2xx statuses.""".stripMargin
           )
         }
       }
@@ -680,8 +685,6 @@ final class HttpReadsWithLoggingBuilderSpec extends AnyFreeSpec with MockFactory
               val response: HttpResponse =
                 HttpResponse(status = unexpected2xxStatus, body = SuccessWrapper236.exampleBody, headers = Map())
 
-              expectOneErrorLogAndStoreInVar()
-
               val result: Either[AnyRef, SuccessWrapper] =
                 httpReads.read("MYMETHOD", "some/url", response)
 
@@ -692,15 +695,16 @@ final class HttpReadsWithLoggingBuilderSpec extends AnyFreeSpec with MockFactory
                 )
               )
 
-              savedErrorLogs shouldBe List(
-                s"""HTTP status is unexpected in received HTTP response.
-                   |Response status to be returned: 503
-                   |Request made for received HTTP response: MYMETHOD some/url
-                   |Received HTTP response status: ${unexpected2xxStatus: Int}
-                   |Received HTTP response body not logged for successful (2xx) statuses.""".stripMargin
+              allCapturedLogs shouldBe List(
+                "ERROR" ->
+                  s"""HTTP status is unexpected in received HTTP response.
+                     |Response status to be returned: 503
+                     |Request made for received HTTP response: MYMETHOD some/url
+                     |Received HTTP response status: ${unexpected2xxStatus: Int}
+                     |Received HTTP response body not logged for 2xx statuses.""".stripMargin
               )
 
-              savedErrorLogs.toString should not include SuccessWrapper236.exampleBody // We don't forward invalid success bodies.
+              allCapturedLogs.toString should not include SuccessWrapper236.exampleBody // We don't forward invalid success bodies.
             }
         }
 
@@ -715,8 +719,6 @@ final class HttpReadsWithLoggingBuilderSpec extends AnyFreeSpec with MockFactory
               val response: HttpResponse =
                 HttpResponse(status = unexpected2xxStatus, body = SuccessWrapper419.exampleBody, headers = Map())
 
-              expectOneErrorLogAndStoreInVar()
-
               val result: Either[AnyRef, SuccessWrapper] =
                 httpReads.read("MYMETHOD", "some/url", response)
 
@@ -727,15 +729,16 @@ final class HttpReadsWithLoggingBuilderSpec extends AnyFreeSpec with MockFactory
                 )
               )
 
-              savedErrorLogs shouldBe List(
-                s"""HTTP status is unexpected in received HTTP response.
-                   |Response status to be returned: 503
-                   |Request made for received HTTP response: MYMETHOD some/url
-                   |Received HTTP response status: ${unexpected2xxStatus: Int}
-                   |Received HTTP response body not logged for successful (2xx) statuses.""".stripMargin
+              allCapturedLogs shouldBe List(
+                "ERROR" ->
+                  s"""HTTP status is unexpected in received HTTP response.
+                     |Response status to be returned: 503
+                     |Request made for received HTTP response: MYMETHOD some/url
+                     |Received HTTP response status: ${unexpected2xxStatus: Int}
+                     |Received HTTP response body not logged for 2xx statuses.""".stripMargin
               )
 
-              savedErrorLogs.toString should not include SuccessWrapper419.exampleBody // We don't forward invalid success bodies.
+              allCapturedLogs.toString should not include SuccessWrapper419.exampleBody // We don't forward invalid success bodies.
             }
         }
 
@@ -750,8 +753,6 @@ final class HttpReadsWithLoggingBuilderSpec extends AnyFreeSpec with MockFactory
               val response: HttpResponse =
                 HttpResponse(status = unexpected2xxStatus, body = ErrorFor109.exampleBody, headers = Map())
 
-              expectOneErrorLogAndStoreInVar()
-
               val result: Either[AnyRef, SuccessWrapper] =
                 httpReads.read("MYMETHOD", "some/url", response)
 
@@ -762,15 +763,16 @@ final class HttpReadsWithLoggingBuilderSpec extends AnyFreeSpec with MockFactory
                 )
               )
 
-              savedErrorLogs shouldBe List(
-                s"""HTTP status is unexpected in received HTTP response.
-                   |Response status to be returned: 503
-                   |Request made for received HTTP response: MYMETHOD some/url
-                   |Received HTTP response status: ${unexpected2xxStatus: Int}
-                   |Received HTTP response body not logged for successful (2xx) statuses.""".stripMargin
+              allCapturedLogs shouldBe List(
+                "ERROR" ->
+                  s"""HTTP status is unexpected in received HTTP response.
+                     |Response status to be returned: 503
+                     |Request made for received HTTP response: MYMETHOD some/url
+                     |Received HTTP response status: ${unexpected2xxStatus: Int}
+                     |Received HTTP response body not logged for 2xx statuses.""".stripMargin
               )
 
-              savedErrorLogs.toString should not include ErrorFor109.exampleBody // We don't forward invalid success bodies.
+              allCapturedLogs.toString should not include ErrorFor109.exampleBody // We don't forward invalid success bodies.
             }
         }
 
@@ -785,8 +787,6 @@ final class HttpReadsWithLoggingBuilderSpec extends AnyFreeSpec with MockFactory
               val response: HttpResponse =
                 HttpResponse(status = unexpected2xxStatus, body = ErrorFor211ToTransform.exampleBody, headers = Map())
 
-              expectOneErrorLogAndStoreInVar()
-
               val result: Either[AnyRef, SuccessWrapper] =
                 httpReads.read("MYMETHOD", "some/url", response)
 
@@ -797,15 +797,16 @@ final class HttpReadsWithLoggingBuilderSpec extends AnyFreeSpec with MockFactory
                 )
               )
 
-              savedErrorLogs shouldBe List(
-                s"""HTTP status is unexpected in received HTTP response.
-                   |Response status to be returned: 503
-                   |Request made for received HTTP response: MYMETHOD some/url
-                   |Received HTTP response status: ${unexpected2xxStatus: Int}
-                   |Received HTTP response body not logged for successful (2xx) statuses.""".stripMargin
+              allCapturedLogs shouldBe List(
+                "ERROR" ->
+                  s"""HTTP status is unexpected in received HTTP response.
+                     |Response status to be returned: 503
+                     |Request made for received HTTP response: MYMETHOD some/url
+                     |Received HTTP response status: ${unexpected2xxStatus: Int}
+                     |Received HTTP response body not logged for 2xx statuses.""".stripMargin
               )
 
-              savedErrorLogs.toString should not include ErrorFor211ToTransform.exampleBody // We don't forward invalid success bodies.
+              allCapturedLogs.toString should not include ErrorFor211ToTransform.exampleBody // We don't forward invalid success bodies.
             }
         }
 
@@ -818,8 +819,6 @@ final class HttpReadsWithLoggingBuilderSpec extends AnyFreeSpec with MockFactory
               val response: HttpResponse =
                 HttpResponse(status = unexpected2xxStatus, body = """{}""", headers = Map())
 
-              expectOneErrorLogAndStoreInVar()
-
               val result: Either[AnyRef, SuccessWrapper] =
                 httpReads.read("MYMETHOD", "some/url", response)
 
@@ -830,15 +829,16 @@ final class HttpReadsWithLoggingBuilderSpec extends AnyFreeSpec with MockFactory
                 )
               )
 
-              savedErrorLogs shouldBe List(
-                s"""HTTP status is unexpected in received HTTP response.
-                   |Response status to be returned: 503
-                   |Request made for received HTTP response: MYMETHOD some/url
-                   |Received HTTP response status: ${unexpected2xxStatus: Int}
-                   |Received HTTP response body not logged for successful (2xx) statuses.""".stripMargin
+              allCapturedLogs shouldBe List(
+                "ERROR" ->
+                  s"""HTTP status is unexpected in received HTTP response.
+                     |Response status to be returned: 503
+                     |Request made for received HTTP response: MYMETHOD some/url
+                     |Received HTTP response status: ${unexpected2xxStatus: Int}
+                     |Received HTTP response body not logged for 2xx statuses.""".stripMargin
               )
 
-              savedErrorLogs.toString should not include "{}" // We don't forward invalid success bodies.
+              allCapturedLogs.toString should not include "{}" // We don't forward invalid success bodies.
             }
         }
 
@@ -851,8 +851,6 @@ final class HttpReadsWithLoggingBuilderSpec extends AnyFreeSpec with MockFactory
               val response: HttpResponse =
                 HttpResponse(status = unexpected2xxStatus, body = """SOMETEXT""", headers = Map())
 
-              expectOneErrorLogAndStoreInVar()
-
               val result: Either[AnyRef, SuccessWrapper] =
                 httpReads.read("MYMETHOD", "some/url", response)
 
@@ -863,15 +861,16 @@ final class HttpReadsWithLoggingBuilderSpec extends AnyFreeSpec with MockFactory
                 )
               )
 
-              savedErrorLogs shouldBe List(
-                s"""HTTP status is unexpected in received HTTP response.
-                   |Response status to be returned: 503
-                   |Request made for received HTTP response: MYMETHOD some/url
-                   |Received HTTP response status: ${unexpected2xxStatus: Int}
-                   |Received HTTP response body not logged for successful (2xx) statuses.""".stripMargin
+              allCapturedLogs shouldBe List(
+                "ERROR" ->
+                  s"""HTTP status is unexpected in received HTTP response.
+                     |Response status to be returned: 503
+                     |Request made for received HTTP response: MYMETHOD some/url
+                     |Received HTTP response status: ${unexpected2xxStatus: Int}
+                     |Received HTTP response body not logged for 2xx statuses.""".stripMargin
               )
 
-              savedErrorLogs.toString should not include "SOMETEXT" // We don't forward invalid success bodies.
+              allCapturedLogs.toString should not include "SOMETEXT" // We don't forward invalid success bodies.
             }
         }
 
@@ -891,8 +890,6 @@ final class HttpReadsWithLoggingBuilderSpec extends AnyFreeSpec with MockFactory
               val response: HttpResponse =
                 HttpResponse(status = unexpectedNon2xxStatus, body = SuccessWrapper236.exampleBody, headers = Map())
 
-              expectOneErrorLogAndStoreInVar()
-
               val result: Either[AnyRef, SuccessWrapper] =
                 httpReads.read("MYMETHOD", "some/url", response)
 
@@ -903,12 +900,13 @@ final class HttpReadsWithLoggingBuilderSpec extends AnyFreeSpec with MockFactory
                 )
               )
 
-              savedErrorLogs shouldBe List(
-                s"""HTTP status is unexpected in received HTTP response.
-                   |Response status to be returned: 503
-                   |Request made for received HTTP response: MYMETHOD some/url
-                   |Received HTTP response status: ${unexpectedNon2xxStatus: Int}
-                   |Received HTTP response body: ${SuccessWrapper236.exampleBody: String}""".stripMargin
+              allCapturedLogs shouldBe List(
+                "ERROR" ->
+                  s"""HTTP status is unexpected in received HTTP response.
+                     |Response status to be returned: 503
+                     |Request made for received HTTP response: MYMETHOD some/url
+                     |Received HTTP response status: ${unexpectedNon2xxStatus: Int}
+                     |Received HTTP response body: ${SuccessWrapper236.exampleBody: String}""".stripMargin
               )
             }
         }
@@ -924,8 +922,6 @@ final class HttpReadsWithLoggingBuilderSpec extends AnyFreeSpec with MockFactory
               val response: HttpResponse =
                 HttpResponse(status = unexpectedNon2xxStatus, body = SuccessWrapper419.exampleBody, headers = Map())
 
-              expectOneErrorLogAndStoreInVar()
-
               val result: Either[AnyRef, SuccessWrapper] =
                 httpReads.read("MYMETHOD", "some/url", response)
 
@@ -936,12 +932,13 @@ final class HttpReadsWithLoggingBuilderSpec extends AnyFreeSpec with MockFactory
                 )
               )
 
-              savedErrorLogs shouldBe List(
-                s"""HTTP status is unexpected in received HTTP response.
-                   |Response status to be returned: 503
-                   |Request made for received HTTP response: MYMETHOD some/url
-                   |Received HTTP response status: ${unexpectedNon2xxStatus: Int}
-                   |Received HTTP response body: ${SuccessWrapper419.exampleBody: String}""".stripMargin
+              allCapturedLogs shouldBe List(
+                "ERROR" ->
+                  s"""HTTP status is unexpected in received HTTP response.
+                     |Response status to be returned: 503
+                     |Request made for received HTTP response: MYMETHOD some/url
+                     |Received HTTP response status: ${unexpectedNon2xxStatus: Int}
+                     |Received HTTP response body: ${SuccessWrapper419.exampleBody: String}""".stripMargin
               )
             }
         }
@@ -957,8 +954,6 @@ final class HttpReadsWithLoggingBuilderSpec extends AnyFreeSpec with MockFactory
               val response: HttpResponse =
                 HttpResponse(status = unexpectedNon2xxStatus, body = ErrorFor109.exampleBody, headers = Map())
 
-              expectOneErrorLogAndStoreInVar()
-
               val result: Either[AnyRef, SuccessWrapper] =
                 httpReads.read("MYMETHOD", "some/url", response)
 
@@ -969,12 +964,13 @@ final class HttpReadsWithLoggingBuilderSpec extends AnyFreeSpec with MockFactory
                 )
               )
 
-              savedErrorLogs shouldBe List(
-                s"""HTTP status is unexpected in received HTTP response.
-                   |Response status to be returned: 503
-                   |Request made for received HTTP response: MYMETHOD some/url
-                   |Received HTTP response status: ${unexpectedNon2xxStatus: Int}
-                   |Received HTTP response body: ${ErrorFor109.exampleBody: String}""".stripMargin
+              allCapturedLogs shouldBe List(
+                "ERROR" ->
+                  s"""HTTP status is unexpected in received HTTP response.
+                     |Response status to be returned: 503
+                     |Request made for received HTTP response: MYMETHOD some/url
+                     |Received HTTP response status: ${unexpectedNon2xxStatus: Int}
+                     |Received HTTP response body: ${ErrorFor109.exampleBody: String}""".stripMargin
               )
             }
         }
@@ -994,8 +990,6 @@ final class HttpReadsWithLoggingBuilderSpec extends AnyFreeSpec with MockFactory
                   headers = Map()
                 )
 
-              expectOneErrorLogAndStoreInVar()
-
               val result: Either[AnyRef, SuccessWrapper] =
                 httpReads.read("MYMETHOD", "some/url", response)
 
@@ -1006,12 +1000,13 @@ final class HttpReadsWithLoggingBuilderSpec extends AnyFreeSpec with MockFactory
                 )
               )
 
-              savedErrorLogs shouldBe List(
-                s"""HTTP status is unexpected in received HTTP response.
-                   |Response status to be returned: 503
-                   |Request made for received HTTP response: MYMETHOD some/url
-                   |Received HTTP response status: ${unexpectedNon2xxStatus: Int}
-                   |Received HTTP response body: ${ErrorFor211ToTransform.exampleBody: String}""".stripMargin
+              allCapturedLogs shouldBe List(
+                "ERROR" ->
+                  s"""HTTP status is unexpected in received HTTP response.
+                     |Response status to be returned: 503
+                     |Request made for received HTTP response: MYMETHOD some/url
+                     |Received HTTP response status: ${unexpectedNon2xxStatus: Int}
+                     |Received HTTP response body: ${ErrorFor211ToTransform.exampleBody: String}""".stripMargin
               )
             }
         }
@@ -1025,8 +1020,6 @@ final class HttpReadsWithLoggingBuilderSpec extends AnyFreeSpec with MockFactory
               val response: HttpResponse =
                 HttpResponse(status = unexpectedNon2xxStatus, body = """{}""", headers = Map())
 
-              expectOneErrorLogAndStoreInVar()
-
               val result: Either[AnyRef, SuccessWrapper] =
                 httpReads.read("MYMETHOD", "some/url", response)
 
@@ -1037,12 +1030,13 @@ final class HttpReadsWithLoggingBuilderSpec extends AnyFreeSpec with MockFactory
                 )
               )
 
-              savedErrorLogs shouldBe List(
-                s"""HTTP status is unexpected in received HTTP response.
-                   |Response status to be returned: 503
-                   |Request made for received HTTP response: MYMETHOD some/url
-                   |Received HTTP response status: ${unexpectedNon2xxStatus: Int}
-                   |Received HTTP response body: {}""".stripMargin
+              allCapturedLogs shouldBe List(
+                "ERROR" ->
+                  s"""HTTP status is unexpected in received HTTP response.
+                     |Response status to be returned: 503
+                     |Request made for received HTTP response: MYMETHOD some/url
+                     |Received HTTP response status: ${unexpectedNon2xxStatus: Int}
+                     |Received HTTP response body: {}""".stripMargin
               )
             }
         }
@@ -1056,8 +1050,6 @@ final class HttpReadsWithLoggingBuilderSpec extends AnyFreeSpec with MockFactory
               val response: HttpResponse =
                 HttpResponse(status = unexpectedNon2xxStatus, body = """SOMETEXT""", headers = Map())
 
-              expectOneErrorLogAndStoreInVar()
-
               val result: Either[AnyRef, SuccessWrapper] =
                 httpReads.read("MYMETHOD", "some/url", response)
 
@@ -1068,12 +1060,13 @@ final class HttpReadsWithLoggingBuilderSpec extends AnyFreeSpec with MockFactory
                 )
               )
 
-              savedErrorLogs shouldBe List(
-                s"""HTTP status is unexpected in received HTTP response.
-                   |Response status to be returned: 503
-                   |Request made for received HTTP response: MYMETHOD some/url
-                   |Received HTTP response status: ${unexpectedNon2xxStatus: Int}
-                   |Received HTTP response body: SOMETEXT""".stripMargin
+              allCapturedLogs shouldBe List(
+                "ERROR" ->
+                  s"""HTTP status is unexpected in received HTTP response.
+                     |Response status to be returned: 503
+                     |Request made for received HTTP response: MYMETHOD some/url
+                     |Received HTTP response status: ${unexpectedNon2xxStatus: Int}
+                     |Received HTTP response body: SOMETEXT""".stripMargin
               )
             }
         }
