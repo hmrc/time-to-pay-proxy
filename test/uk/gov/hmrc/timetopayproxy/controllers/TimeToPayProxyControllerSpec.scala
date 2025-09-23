@@ -1391,4 +1391,137 @@ class TimeToPayProxyControllerSpec extends AnyWordSpec with MockFactory {
       }
     }
   }
+
+  "POST /individuals/time-to-pay-proxy/inform" should {
+
+    val ttpInformRequest: TtpInformRequest = TtpInformRequest(
+      identifications = NonEmptyList.of(
+        Identification(idType = IdType("NINO"), idValue = IdValue("AB123456C"))
+      ),
+      paymentPlan = TtpInformPaymentPlan(
+        arrangementAgreedDate = ArrangementAgreedDate(LocalDate.parse("2025-01-01")),
+        ttpEndDate = TtpEndDate(LocalDate.parse("2025-02-01")),
+        frequency = FrequencyLowercase.Monthly,
+        initialPaymentDate = Some(InitialPaymentDate(LocalDate.parse("2025-01-05"))),
+        initialPaymentAmount = Some(GbpPoundsUnchecked(100.00)),
+        ddiReference = Some(DdiReference("TestDDIReference"))
+      ),
+      instalments = NonEmptyList.of(
+        SaOnlyInstalment(
+          dueDate = InstalmentDueDate(LocalDate.parse("2025-01-31")),
+          amountDue = GbpPoundsUnchecked(500.00)
+        )
+      ),
+      channelIdentifier = ChannelIdentifier.Advisor,
+      transitioned = Some(TransitionedIndicator(true))
+    )
+
+    val ttpInformResponse: TtpInformSuccessfulResponse = TtpInformSuccessfulResponse(
+      apisCalled = List(
+        ApiStatus(
+          name = ApiName("API1"),
+          statusCode = ApiStatusCode("SUCCESS"),
+          processingDateTime = ProcessingDateTimeInstant(Instant.parse("2025-01-01T12:00:00Z")),
+          errorResponse = None
+        )
+      ),
+      processingDateTime = ProcessingDateTimeInstant(Instant.parse("2025-01-01T12:00:00Z"))
+    )
+
+    "return 200" when {
+      "service returns success" in {
+        (authConnector
+          .authorise[Unit](_: Predicate, _: Retrieval[Unit])(
+            _: HeaderCarrier,
+            _: ExecutionContext
+          ))
+          .expects(*, *, *, *)
+          .returning(Future.successful(()))
+
+        (ttpFeedbackLoopService
+          .informTtp(_: TtpInformRequest)(
+            _: ExecutionContext,
+            _: HeaderCarrier
+          ))
+          .expects(ttpInformRequest, *, *)
+          .returning(TtppEnvelope(ttpInformResponse))
+
+        val fakeRequest: FakeRequest[JsValue] =
+          FakeRequest("POST", "/individuals/time-to-pay-proxy/inform")
+            .withHeaders(CONTENT_TYPE -> MimeTypes.JSON)
+            .withBody(Json.toJson[TtpInformRequest](ttpInformRequest))
+
+        val response: Future[Result] = controller.informTtp()(fakeRequest)
+
+        status(response) shouldBe Status.OK
+        contentAsJson(response) shouldBe Json.toJson[TtpInformSuccessfulResponse](
+          ttpInformResponse
+        )
+      }
+    }
+
+    "return 400" when {
+      "request body is in wrong format" in {
+        (authConnector
+          .authorise[Unit](_: Predicate, _: Retrieval[Unit])(
+            _: HeaderCarrier,
+            _: ExecutionContext
+          ))
+          .expects(*, *, *, *)
+          .returning(Future.successful(()))
+
+        val wrongFormattedBody = """{
+          "identifications": [],
+          "paymentPlan": {
+            "arrangementAgreedDate": "invalid-date",
+            "ttpEndDate": "2025-02-01",
+            "frequency": "monthly"
+          }
+        }"""
+
+        val fakeRequest: FakeRequest[JsValue] =
+          FakeRequest("POST", "/individuals/time-to-pay-proxy/inform")
+            .withHeaders(CONTENT_TYPE -> MimeTypes.JSON)
+            .withBody(Json.parse(wrongFormattedBody))
+
+        val response: Future[Result] = controller.informTtp()(fakeRequest)
+
+        status(response) shouldBe Status.BAD_REQUEST
+      }
+    }
+
+    "return 500" when {
+      "service returns failure" in {
+        (authConnector
+          .authorise[Unit](_: Predicate, _: Retrieval[Unit])(
+            _: HeaderCarrier,
+            _: ExecutionContext
+          ))
+          .expects(*, *, *, *)
+          .returning(Future.successful(()))
+
+        val errorFromTtpService = ConnectorError(500, "Internal Service Error")
+        (ttpFeedbackLoopService
+          .informTtp(_: TtpInformRequest)(
+            _: ExecutionContext,
+            _: HeaderCarrier
+          ))
+          .expects(ttpInformRequest, *, *)
+          .returning(
+            TtppEnvelope(errorFromTtpService.asLeft[TtpInformSuccessfulResponse])
+          )
+
+        val fakeRequest: FakeRequest[JsValue] =
+          FakeRequest("POST", "/individuals/time-to-pay-proxy/inform")
+            .withHeaders(CONTENT_TYPE -> MimeTypes.JSON)
+            .withBody(Json.toJson[TtpInformRequest](ttpInformRequest))
+
+        val response: Future[Result] = controller.informTtp()(fakeRequest)
+
+        status(response) shouldBe Status.INTERNAL_SERVER_ERROR
+        (contentAsJson(response) \ "errorMessage")
+          .as[String] shouldBe "Internal Service Error"
+      }
+    }
+  }
 }
