@@ -147,7 +147,7 @@ final class DefaultTtpFeedbackLoopConnectorSpec
 
           val result = connector.cancelTtp(ttpCancelRequest)
 
-          await(result.value) must matchPattern { case Right(_: TtpCancelSuccessfulResponse) => }
+          await(result.value) mustBe Right(ttpCancelResponse: TtpCancelSuccessfulResponse)
         }
 
         "parse an error response from an upstream service" in new Setup(ifImpl = true) {
@@ -171,7 +171,20 @@ final class DefaultTtpFeedbackLoopConnectorSpec
 
           val result = connector.cancelTtp(ttpCancelRequest)
 
-          await(result.value) must matchPattern { case Left(_: TtpCancelInformativeError) => }
+          await(result.value) mustBe
+            Left(
+              TtpCancelInformativeError(
+                List(
+                  ApiStatus(
+                    ApiName("API1"),
+                    ApiStatusCode("SUCCESS"),
+                    ProcessingDateTimeInstant(Instant.parse("2025-01-01T12:00:00Z")),
+                    errorResponse = None
+                  )
+                ),
+                ProcessingDateTimeInstant(Instant.parse("2025-01-01T12:00:00Z"))
+              )
+            )
         }
       }
 
@@ -185,7 +198,7 @@ final class DefaultTtpFeedbackLoopConnectorSpec
 
           val result = connector.cancelTtp(ttpCancelRequest)
 
-          await(result.value) must matchPattern { case Right(_: TtpCancelSuccessfulResponse) => }
+          await(result.value) mustBe Right(ttpCancelResponse: TtpCancelSuccessfulResponse)
         }
 
         "parse an error response from an upstream service" in new Setup(ifImpl = false) {
@@ -209,7 +222,20 @@ final class DefaultTtpFeedbackLoopConnectorSpec
 
           val result = connector.cancelTtp(ttpCancelRequest)
 
-          await(result.value) must matchPattern { case Left(_: TtpCancelInformativeError) => }
+          await(result.value) mustBe
+            Left(
+              TtpCancelInformativeError(
+                List(
+                  ApiStatus(
+                    ApiName("API1"),
+                    ApiStatusCode("SUCCESS"),
+                    ProcessingDateTimeInstant(Instant.parse("2025-01-01T12:00:00Z")),
+                    errorResponse = None
+                  )
+                ),
+                ProcessingDateTimeInstant(Instant.parse("2025-01-01T12:00:00Z"))
+              )
+            )
         }
       }
     }
