@@ -47,9 +47,9 @@ info:
       | 1.0.13 | 08-07-2025 | Alex Olkhovskiy | make indentations in charge-info request non-empty, remove altFormat and country|
       | 1.0.14 | 14-08-2025 | Alex Olkhovskiy | refactor the spec with linter|
       | 1.0.15 | 18-09-2025 | Alex Olkhovskiy | Restrict regimeType enum to only 'SA' value for /quote endpoint |
-      | 1.0.16| 24-09-2024 | Alex Olkhovskiy | Added new cancel ednpont  |
+      | 1.0.15-cancel-inform| 23-09-2024 | Alex Olkhovskiy | Added new cancel and inform endpoint    |
   contact: {}
-  version: 1.0.16
+  version: 1.0.15-cancel-inform
 servers:
   - url: https://api.service.hmrc.gov.uk
     variables: {}
@@ -892,6 +892,155 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/CancelResponse'
+              examples:
+                mixedSuccessWithInternalError:
+                  summary: Some HoDs successful, others unparseable (HTTP 500)
+                  value:
+                    apisCalled:
+                      - name: CESA
+                        statusCode: 200
+                        processingDateTime: '2025-10-15T10:30:00Z'
+                    processingDateTime: '2025-10-15T10:31:00Z'
+        '503':
+          description: The server is temporarily unavailable due to overload or maintenance.
+          headers: {}
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                statusCode: 503
+                errorMessage: The server is temporarily unavailable.
+  /individuals/time-to-pay-proxy/inform:
+    post:
+      tags:
+        - individuals
+      summary: Inform HoDs of SA TTP Operator-led Plan (CESA + ETMP)
+      operationId: InformHoDsOfSATTPOperatorLedPlan
+      description: |
+        An API called by CDCS to inform HoDs (CESA + ETMP) when a TTP set up by an operator has been created.
+
+        Response Behavior:
+        - Returns HTTP 200 when all downstream HoDs are called and responses can be parsed successfully (regardless of individual HoD response status codes)
+        - Returns HTTP 500 only for internal TTP errors or when responses from downstream APIs cannot be parsed
+        - The response includes details of all HoDs called with their status codes to help operators determine any required manual steps
+      parameters:
+        - name: correlationId
+          in: header
+          description: Correlation Id used for end to end traceability
+          required: true
+          schema:
+            type: string
+            format: uuid
+            example: f0bd1f32-de51-45cc-9b18-0520d6e3ab1a
+      security:
+        - applicationRestricted:
+            - read:time-to-pay-proxy
+      requestBody:
+        description: Request body with fields to create a TTP in CESA and ETMP.
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InformRequest'
+            examples:
+              example:
+                summary: Sample request for Inform API
+                value:
+                  identifications:
+                    - idType: UTR
+                      idValue: '1234567890'
+                  paymentPlan:
+                    arrangementAgreedDate: '2025-05-01'
+                    ttpEndDate: '2025-11-01'
+                    initialPaymentDate: '2025-05-05'
+                    initialPaymentAmount: 150
+                    frequency: monthly
+                    ddiReference: DD123456789
+                  instalments:
+                    - dueDate: '2025-06-01'
+                      amountDue: 300
+                  channelIdentifier: advisor
+                  transitioned: true
+      responses:
+        '200':
+          description: |
+            Inform API operation successful with results of calls to CESA and ETMP. All downstream HoDs were called and responses were parsed successfully.
+            Individual HoD APIs may have returned success or error status codes - this is reported in the apisCalled array.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InformResponse'
+              examples:
+                allHoDsSuccessful:
+                  summary: All downstream HoDs respond successfully (HTTP 200)
+                  value:
+                    apisCalled:
+                      - name: CESA
+                        statusCode: 200
+                        processingDateTime: '2025-05-01T14:30:00Z'
+                      - name: ETMP
+                        statusCode: 201
+                        processingDateTime: '2025-05-01T14:31:00Z'
+                    processingDateTime: '2025-05-01T14:32:00Z'
+                allHoDsUnsuccessful:
+                  summary: All downstream HoDs respond unsuccessfully but responses parsed (HTTP 200)
+                  value:
+                    apisCalled:
+                      - name: CESA
+                        statusCode: 500
+                        processingDateTime: '2025-05-01T14:30:00Z'
+                        errorResponse: Internal server error in CESA
+                      - name: ETMP
+                        statusCode: 400
+                        processingDateTime: '2025-05-01T14:31:00Z'
+                        errorResponse: Invalid request payload
+                    processingDateTime: '2025-05-01T14:32:00Z'
+                mixedHoDsResponse:
+                  summary: Mixed success/failure from HoDs but all responses parsed (HTTP 200)
+                  value:
+                    apisCalled:
+                      - name: CESA
+                        statusCode: 200
+                        processingDateTime: '2025-05-01T14:30:00Z'
+                      - name: ETMP
+                        statusCode: 500
+                        processingDateTime: '2025-05-01T14:31:00Z'
+                        errorResponse: Error processing inform
+                    processingDateTime: '2025-05-01T14:32:00Z'
+        '400':
+          description: |
+            Bad request due to invalid or missing data in the request payload.
+            This indicates client-side errors that prevent TTP from processing the inform request.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                badRequestExample:
+                  summary: Invalid request example
+                  value:
+                    statusCode: 400
+                    errorMessage: 'Invalid request payload: missing identifications'
+        '401':
+          description: ''
+          headers: {}
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                statusCode: 401
+                errorMessage: A user with no active session will return 401 response
+        '500':
+          description: |
+            Internal TTP error or failure to parse responses from downstream HoDs.
+            This status is returned only when TTP cannot complete its processing or cannot parse HoD responses.
+            When individual HoD APIs return errors but responses can be parsed, a 200 status is returned instead.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InformResponse'
               examples:
                 mixedSuccessWithInternalError:
                   summary: Some HoDs successful, others unparseable (HTTP 500)
@@ -2484,3 +2633,154 @@ components:
           format: date-time
           description: Timestamp for processing the cancel request
           example: '2025-10-15T10:31:00Z'
+    InformIdentification:
+      type: object
+      required:
+        - idType
+        - idValue
+      properties:
+        idType:
+          type: string
+          description: Identifier type, e.g. UTR, EMPREF
+          pattern: ^[A-Za-z0-9]{1,6}$
+          example: UTR
+        idValue:
+          type: string
+          description: Identifier value
+          pattern: ^[A-Za-z0-9]{1,25}$
+          example: '1234567890'
+    InformPaymentPlan:
+      type: object
+      required:
+        - arrangementAgreedDate
+        - ttpEndDate
+        - frequency
+      properties:
+        arrangementAgreedDate:
+          type: string
+          format: date
+          description: The date when the plan was created
+          example: '2025-05-01'
+        ttpEndDate:
+          type: string
+          format: date
+          description: Date for the last payment/instalment
+          example: '2025-11-01'
+        frequency:
+          type: string
+          enum:
+            - single
+            - weekly
+            - 2Weekly
+            - 4Weekly
+            - monthly
+            - quarterly
+            - 6Monthly
+            - annually
+          description: Payment frequency (Note - quarterly will not be provided as it is prevented in CDCS)
+          example: monthly
+        initialPaymentDate:
+          type: string
+          format: date
+          description: Optional upfront payment date
+          example: '2025-05-05'
+        initialPaymentAmount:
+          type: number
+          multipleOf: 0.01
+          description: Optional upfront payment amount
+          example: 150
+        ddiReference:
+          type: string
+          description: Direct Debit Instruction reference number, if applicable
+          example: DD123456789
+    InformInstalment:
+      type: object
+      required:
+        - dueDate
+        - amountDue
+      properties:
+        dueDate:
+          type: string
+          format: date
+          description: Due date for each regular instalment
+          example: '2025-06-01'
+        amountDue:
+          type: number
+          multipleOf: 0.01
+          description: Amount due for the instalment
+          example: 300
+    InformRequest:
+      type: object
+      required:
+        - identifications
+        - paymentPlan
+        - instalments
+        - channelIdentifier
+      properties:
+        identifications:
+          type: array
+          minItems: 1
+          items:
+            $ref: '#/components/schemas/InformIdentification'
+          description: Array of identifiers for the customer
+        paymentPlan:
+          $ref: '#/components/schemas/InformPaymentPlan'
+        instalments:
+          type: array
+          minItems: 1
+          items:
+            $ref: '#/components/schemas/InformInstalment'
+          description: Array of payment instalments
+        channelIdentifier:
+          type: string
+          enum:
+            - advisor
+            - selfService
+          description: Channel through which arrangement was made (e.g. advisor, selfService)
+          example: advisor
+        transitioned:
+          type: boolean
+          description: Indicates whether the customer only has FDLs.
+          example: true
+    InformAPIStatus:
+      type: object
+      required:
+        - name
+        - statusCode
+        - processingDateTime
+      properties:
+        name:
+          type: string
+          description: The API name (CESA or ETMP)
+          example: CESA
+        statusCode:
+          type: integer
+          description: HTTP status code from the downstream API
+          example: 200
+        processingDateTime:
+          type: string
+          format: date-time
+          description: Timestamp of processing the request in downstream API
+          example: '2025-05-01T14:30:00Z'
+        errorResponse:
+          type: string
+          description: |
+            Error message returned by the downstream API when the call failed.
+            This field is present when the downstream API returns an error status code but TTP can parse the response.
+          example: Invalid lockReason provided for inform
+    InformResponse:
+      type: object
+      required:
+        - apisCalled
+        - processingDateTime
+      properties:
+        apisCalled:
+          type: array
+          items:
+            $ref: '#/components/schemas/InformAPIStatus'
+          description: Status of calls to each HoD API
+        processingDateTime:
+          type: string
+          format: date-time
+          description: Timestamp for processing the inform request
+          example: '2025-05-01T14:35:00Z'
