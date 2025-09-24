@@ -126,14 +126,8 @@ post:
       content:
         application/json:
           schema:
-            $ref: ../components/schemas/InformErrorResponse.yaml
+            $ref: ../components/schemas/InformResponse.yaml
           examples:
-            internalParsingError:
-              summary: Internal TTP error - cannot parse HoD responses (HTTP 500)
-              value:
-                internalErrors:
-                  - message: "Could not parse response from calling CESA"
-                processingDateTime: '2025-10-15T10:31:00Z'
             mixedSuccessWithInternalError:
               summary: Some HoDs successful, others unparseable (HTTP 500)
               value:
@@ -141,8 +135,6 @@ post:
                   - name: CESA
                     statusCode: 200
                     processingDateTime: '2025-10-15T10:30:00Z'
-                internalErrors:
-                  - message: "Could not parse response from calling ETMP"
                 processingDateTime: '2025-10-15T10:31:00Z'
     '503':
       description: The server is temporarily unavailable due to overload or maintenance.
