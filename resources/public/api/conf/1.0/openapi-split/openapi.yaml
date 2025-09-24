@@ -98,8 +98,6 @@ paths:
     $ref: paths/individuals_time-to-pay-proxy_charge-info.yaml
   /individuals/time-to-pay-proxy/cancel:
     $ref: paths/individuals_time-to-pay-proxy_cancel.yaml
-  /individuals/time-to-pay-proxy/inform:
-    $ref: paths/individuals_time-to-pay-proxy_inform.yaml
 components:
   securitySchemes:
     userRestricted:
