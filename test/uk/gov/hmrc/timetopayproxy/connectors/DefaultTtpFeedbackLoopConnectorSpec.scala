@@ -260,13 +260,13 @@ final class DefaultTtpFeedbackLoopConnectorSpec
         ttpEndDate = TtpEndDate(LocalDate.parse("2025-02-01")),
         frequency = FrequencyLowercase.Monthly,
         initialPaymentDate = Some(InitialPaymentDate(LocalDate.parse("2025-01-05"))),
-        initialPaymentAmount = Some(GbpPoundsUnchecked(100.00)),
+        initialPaymentAmount = Some(GbpPounds.createOrThrow(100.00)),
         ddiReference = Some(DdiReference("TestDDIReference"))
       ),
       instalments = NonEmptyList.of(
         SaOnlyInstalment(
           dueDate = InstalmentDueDate(LocalDate.parse("2025-01-31")),
-          amountDue = GbpPoundsUnchecked(500.00)
+          amountDue = GbpPounds.createOrThrow(500.00)
         )
       ),
       channelIdentifier = ChannelIdentifier.Advisor,
