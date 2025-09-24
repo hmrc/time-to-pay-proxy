@@ -88,14 +88,6 @@ object Validators {
           metaSchemaValidation = Some(Valid(())),
           restrictAdditionalProperties = true
         )
-
-      def openApiResponseGeneralFailureSchema: OpenApi3DerivedSchema =
-        new OpenApi3DerivedSchema(
-          path,
-          defaultJsonSubschemaName = "CancelErrorResponse",
-          metaSchemaValidation = Some(Valid(())),
-          restrictAdditionalProperties = true
-        )
     }
 
     /** For now, this applies to all responses from the proxy */

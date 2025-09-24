@@ -24,9 +24,10 @@ import uk.gov.hmrc.http.{ HeaderCarrier, HttpReads, StringContextOps }
 import uk.gov.hmrc.timetopayproxy.config.AppConfig
 import uk.gov.hmrc.timetopayproxy.connectors.util.HttpReadsWithLoggingBuilder
 import uk.gov.hmrc.timetopayproxy.logging.RequestAwareLogger
+import uk.gov.hmrc.timetopayproxy.models.TimeToPayError
+import uk.gov.hmrc.timetopayproxy.models.error.ProxyEnvelopeError
 import uk.gov.hmrc.timetopayproxy.models.error.TtppEnvelope.TtppEnvelope
-import uk.gov.hmrc.timetopayproxy.models.error.{ ConnectorError, ProxyEnvelopeError }
-import uk.gov.hmrc.timetopayproxy.models.saonly.ttpcancel.{ TtpCancelGeneralFailureResponse, TtpCancelInformativeError, TtpCancelRequest, TtpCancelSuccessfulResponse }
+import uk.gov.hmrc.timetopayproxy.models.saonly.ttpcancel.{ TtpCancelInformativeError, TtpCancelRequest, TtpCancelSuccessfulResponse }
 
 import java.util.UUID
 import javax.inject.{ Inject, Singleton }
@@ -55,7 +56,7 @@ class DefaultTtpFeedbackLoopConnector @Inject() (appConfig: AppConfig, httpClien
       .empty[ProxyEnvelopeError, TtpCancelSuccessfulResponse]
       .orSuccess[TtpCancelSuccessfulResponse](200)
       .orError[TtpCancelInformativeError](500)
-      .orErrorTransformed[TtpCancelGeneralFailureResponse](400, error => ConnectorError(400, error.details))
+      .orErrorTransformed[TimeToPayError](400, ttpError => ttpError.toConnectorError(status = 400))
 
   def cancelTtp(
     ttppRequest: TtpCancelRequest

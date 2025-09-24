@@ -154,7 +154,7 @@ final class DefaultTtpFeedbackLoopConnectorSpec
           stubPostWithResponseBody(
             "/individuals/debts/time-to-pay/cancel",
             400,
-            """{"code": 400, "details": "Invalid request body"}"""
+            """{"failures": [{"code": "400", "reason": "Invalid request body"}]}"""
           )
 
           val result = connector.cancelTtp(ttpCancelRequest)
@@ -205,7 +205,7 @@ final class DefaultTtpFeedbackLoopConnectorSpec
           stubPostWithResponseBody(
             "/debts/time-to-pay/cancel",
             400,
-            """{"code": 400, "details": "Invalid request body"}"""
+            """{"failures": [{"code": "400", "reason": "Invalid request body"}]}"""
           )
 
           val result = connector.cancelTtp(ttpCancelRequest)

@@ -46,9 +46,11 @@ info:
       | 1.0.12 | 23-07-2025 | Alex Olkhovskiy | make regimeType enum |
       | 1.0.13 | 08-07-2025 | Alex Olkhovskiy | make indentations in charge-info request non-empty, remove altFormat and country|
       | 1.0.14 | 14-08-2025 | Alex Olkhovskiy | refactor the spec with linter|
-      | 1.0.14-proposedA| 19-08-2024 | Alex Olkhovskiy | Added new cancel endpoint    |
+      | 1.0.15 | 18-09-2025 | Alex Olkhovskiy | Restrict regimeType enum to only 'SA' value for /quote endpoint |
+      | 1.0.15-proposedF | 18-09-2025 | Alex Olkhovskiy | Add 409 conflict response to PUT /quote endpoint for duplicate plan ID|
+      | 1.0.15-cancel| 24-09-2024 | Alex Olkhovskiy | Added new cancel ednpont  |
   contact: {}
-  version: 1.0.14-proposedA
+  version: 1.0.15-cancel
 servers:
   - url: https://api.service.hmrc.gov.uk
     variables: {}
@@ -63,7 +65,14 @@ paths:
       summary: Generate TTP Quote Request
       description: This is an endpoint that triggers request to create a plan for storage from ttp service
       operationId: GenerateTTPQuoteRequest
-      parameters: []
+      parameters:
+        - name: combineLastInstalments
+          in: query
+          description: Optional flag to combine the last instalments. When set to true, last instalments will be combined.
+          required: false
+          schema:
+            type: boolean
+            default: false
       security:
         - applicationRestricted:
             - read:time-to-pay-proxy
@@ -74,7 +83,7 @@ paths:
             schema:
               $ref: '#/components/schemas/TTPQuoteRequest'
             example:
-              regimeType: PAYE
+              regimeType: SA
               customerReference: uniqRef1234
               channelIdentifier: selfService
               plan:
@@ -156,7 +165,14 @@ paths:
       summary: TTP Promote an Arrangement request
       description: This is an endpoint that triggers a request to generate a draft quote from ttp service
       operationId: TTPPromoteanArrangementrequest
-      parameters: []
+      parameters:
+        - name: combineLastInstalments
+          in: query
+          description: Optional flag to combine the last instalments. When set to true, last instalments will be combined.
+          required: false
+          schema:
+            type: boolean
+            default: false
       security:
         - applicationRestricted:
             - read:time-to-pay-proxy
@@ -747,9 +763,15 @@ paths:
     post:
       tags:
         - individuals
-      summary: Notify cancellation of TTP Plan to HoDs (CESA only in R1)
+      summary: Notify cancellation of TTP Plan to downstream HoDs
+      operationId: NotifyCancellationOfTTPPlan
       description: |
         An API called by CDCS to trigger the TTP service to notify HoDs (via different APIs) when a TTP set up either by an operator or the self serve journey has been cancelled.
+
+        Response Behavior:
+        - Returns HTTP 200 when all downstream HoDs are called and responses can be parsed successfully (regardless of individual HoD response status codes)
+        - Returns HTTP 500 only for internal TTP errors or when responses from downstream APIs cannot be parsed
+        - The response includes details of all HoDs called with their status codes to help operators determine any required manual steps
       parameters:
         - name: correlationId
           in: header
@@ -794,51 +816,102 @@ paths:
                   transitioned: true
       responses:
         '200':
-          description: Cancellation notification processed successfully.
+          description: |
+            Cancellation notification processed successfully. All downstream HoDs were called and responses were parsed successfully.
+            Individual HoD APIs may have returned success or error status codes - this is reported in the apisCalled array.
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/CancelResponse'
               examples:
-                successExample:
-                  summary: Successful cancellation notification to CESA
+                allHoDsSuccessful:
+                  summary: All downstream HoDs respond successfully (HTTP 200)
                   value:
                     apisCalled:
                       - name: CESA
-                        statusCode: '200'
+                        statusCode: 200
                         processingDateTime: '2025-05-01T14:30:00Z'
                       - name: ETMP
-                        statusCode: '201'
+                        statusCode: 201
                         processingDateTime: '2025-05-01T14:31:00Z'
                     processingDateTime: '2025-10-15T10:31:00Z'
+                allHoDsUnsuccessful:
+                  summary: All downstream HoDs respond unsuccessfully but responses parsed (HTTP 200)
+                  value:
+                    apisCalled:
+                      - name: CESA
+                        statusCode: 500
+                        processingDateTime: '2025-05-01T14:30:00Z'
+                        errorResponse: Internal server error in CESA
+                      - name: ETMP
+                        statusCode: 400
+                        processingDateTime: '2025-05-01T14:31:00Z'
+                        errorResponse: Invalid request payload
+                    processingDateTime: '2025-10-15T10:31:00Z'
+                mixedHoDsResponse:
+                  summary: Mixed success/failure from HoDs but all responses parsed (HTTP 200)
+                  value:
+                    apisCalled:
+                      - name: CESA
+                        statusCode: 200
+                        processingDateTime: '2025-05-01T14:30:00Z'
+                      - name: ETMP
+                        statusCode: 500
+                        processingDateTime: '2025-05-01T14:31:00Z'
+                        errorResponse: Error processing cancellation
+                    processingDateTime: '2025-10-15T10:31:00Z'
         '400':
-          description: Bad request due to invalid or missing data.
+          description: |
+            Bad request due to invalid or missing data in the request payload.
+            This indicates client-side errors that prevent TTP from processing the cancellation request.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/CancelErrorResponse'
+                $ref: '#/components/schemas/ErrorResponse'
               examples:
                 badRequestExample:
-                  summary: Invalid cancellation request example
+                  summary: Invalid cancellation request - client error
                   value:
-                    code: 400
-                    details: 'Invalid request payload: missing identifications or cancellationDate'
+                    statusCode: 400
+                    errorMessage: 'Invalid request payload: missing identifications or cancellationDate'
+        '401':
+          description: ''
+          headers: {}
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                statusCode: 401
+                errorMessage: A user with no active session will return 401 response
         '500':
-          description: Internal error or partial failure in calls to HoDs.
+          description: |
+            Internal TTP error or failure to parse responses from downstream HoDs.
+            This status is returned only when TTP cannot complete its processing or cannot parse HoD responses.
+            When individual HoD APIs return errors but responses can be parsed, a 200 status is returned instead.
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/CancelResponse'
               examples:
-                partialFailureExample:
-                  summary: Partial failure example with error reported
+                mixedSuccessWithInternalError:
+                  summary: Some HoDs successful, others unparseable (HTTP 500)
                   value:
                     apisCalled:
                       - name: CESA
-                        statusCode: '400'
+                        statusCode: 200
                         processingDateTime: '2025-10-15T10:30:00Z'
-                        errorResponse: Invalid cancellationDate
                     processingDateTime: '2025-10-15T10:31:00Z'
+        '503':
+          description: The server is temporarily unavailable due to overload or maintenance.
+          headers: {}
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                statusCode: 503
+                errorMessage: The server is temporarily unavailable.
 components:
   securitySchemes:
     userRestricted:
@@ -1023,6 +1096,8 @@ components:
         regimeType:
           type: string
           description: Regime type
+          enum:
+            - SA
         customerReference:
           maxLength: 15
           minLength: 1
@@ -2380,9 +2455,9 @@ components:
           description: The API name (CESA, ETMP)
           example: CESA
         statusCode:
-          type: string
+          type: integer
           description: HTTP status code from the downstream API
-          example: '200'
+          example: 200
         processingDateTime:
           type: string
           format: date-time
@@ -2390,8 +2465,10 @@ components:
           example: '2025-10-15T10:30:00Z'
         errorResponse:
           type: string
-          description: Error message if downstream API call failed
-          example: Invalid cancellationDate
+          description: |
+            Error message returned by the downstream API when the call failed.
+            This field is present when the downstream API returns an error status code but TTP can parse the response.
+          example: Invalid cancellationDate provided for cancellation
     CancelResponse:
       type: object
       required:
@@ -2408,15 +2485,3 @@ components:
           format: date-time
           description: Timestamp for processing the cancel request
           example: '2025-10-15T10:31:00Z'
-    CancelErrorResponse:
-      type: object
-      required:
-        - code
-        - details
-      properties:
-        code:
-          type: integer
-          example: 400
-        details:
-          type: string
-          example: 'Invalid request payload: missing identifications or cancellationDate'

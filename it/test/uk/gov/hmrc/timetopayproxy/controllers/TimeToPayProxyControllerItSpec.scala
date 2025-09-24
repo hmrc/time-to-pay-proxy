@@ -25,7 +25,7 @@ import uk.gov.hmrc.timetopayproxy.models.affordablequotes.{ AffordableQuoteRespo
 import uk.gov.hmrc.timetopayproxy.models.error.TtppErrorResponse
 import uk.gov.hmrc.timetopayproxy.models.saonly.common.apistatus.{ ApiErrorResponse, ApiName, ApiStatus, ApiStatusCode }
 import uk.gov.hmrc.timetopayproxy.models.saonly.common.{ ArrangementAgreedDate, InitialPaymentDate, ProcessingDateTimeInstant, SaOnlyInstalment, TransitionedIndicator, TtpEndDate }
-import uk.gov.hmrc.timetopayproxy.models.saonly.ttpcancel.{ CancellationDate, TtpCancelGeneralFailureResponse, TtpCancelPaymentPlan, TtpCancelRequest, TtpCancelSuccessfulResponse }
+import uk.gov.hmrc.timetopayproxy.models.saonly.ttpcancel.{ CancellationDate, TtpCancelPaymentPlan, TtpCancelRequest, TtpCancelSuccessfulResponse }
 import uk.gov.hmrc.timetopayproxy.models.saonly.chargeInfoApi._
 import uk.gov.hmrc.timetopayproxy.models.saonly.common.SaOnlyRegimeType
 import uk.gov.hmrc.timetopayproxy.models.currency.GbpPounds
@@ -664,9 +664,13 @@ class TimeToPayProxyControllerItSpec extends IntegrationBaseSpec {
       "should return a 400 statusCode" - {
         "when given a valid json payload" - {
           "when TimeToPay returns an error response of 400" in new TimeToPayProxyControllerTestBase {
-            val upstreamErrorResponse = TtpCancelGeneralFailureResponse(
-              code = 400,
-              details = "Invalid request payload: missing identifications or cancellationDate"
+            val upstreamErrorResponse = TimeToPayError(
+              List(
+                TimeToPayInnerError(
+                  code = "400",
+                  reason = "Invalid request payload: missing identifications or cancellationDate"
+                )
+              )
             )
 
             val expectedTtppErrorResponse = TtppErrorResponse(
