@@ -21,34 +21,35 @@ import cats.syntax.either._
 import org.scalamock.scalatest.MockFactory
 import org.scalatest.matchers.should.Matchers._
 import org.scalatest.wordspec.AnyWordSpec
-import play.api.http.{ MimeTypes, Status }
-import play.api.libs.json.{ JsArray, JsValue, Json }
-import play.api.mvc.{ ControllerComponents, Result }
+import play.api.http.{MimeTypes, Status}
+import play.api.libs.json.{JsArray, JsValue, Json}
+import play.api.mvc.{ControllerComponents, Result}
 import play.api.test.Helpers._
-import play.api.test.{ FakeRequest, Helpers }
+import play.api.test.{FakeRequest, Helpers}
 import uk.gov.hmrc.auth.core.PlayAuthConnector
 import uk.gov.hmrc.auth.core.authorise.Predicate
 import uk.gov.hmrc.auth.core.retrieve.Retrieval
 import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.timetopayproxy.actions.auth.{ AuthoriseAction, AuthoriseActionImpl }
+import uk.gov.hmrc.timetopayproxy.actions.auth.{AuthoriseAction, AuthoriseActionImpl}
 import uk.gov.hmrc.timetopayproxy.config.FeatureSwitch
 import uk.gov.hmrc.timetopayproxy.models._
 import uk.gov.hmrc.timetopayproxy.models.affordablequotes._
 import uk.gov.hmrc.timetopayproxy.models.error.TtppEnvelope.TtppEnvelope
-import uk.gov.hmrc.timetopayproxy.models.error.{ ConnectorError, TtppEnvelope, TtppErrorResponse }
+import uk.gov.hmrc.timetopayproxy.models.error.{ConnectorError, TtppEnvelope, TtppErrorResponse}
 import uk.gov.hmrc.timetopayproxy.models.saonly.chargeInfoApi._
 import uk.gov.hmrc.timetopayproxy.models.saonly.common.SaOnlyRegimeType
-import uk.gov.hmrc.timetopayproxy.models.saonly.common.{ ArrangementAgreedDate, InitialPaymentDate, SaOnlyInstalment, TransitionedIndicator, TtpEndDate }
-import uk.gov.hmrc.timetopayproxy.models.saonly.common.apistatus.{ ApiName, ApiStatus, ApiStatusCode }
+import uk.gov.hmrc.timetopayproxy.models.saonly.common.{ArrangementAgreedDate, InitialPaymentDate, SaOnlyInstalment, TransitionedIndicator, TtpEndDate}
+import uk.gov.hmrc.timetopayproxy.models.saonly.common.apistatus.{ApiName, ApiStatus, ApiStatusCode}
 import uk.gov.hmrc.timetopayproxy.models.saonly.common.ProcessingDateTimeInstant
-import uk.gov.hmrc.timetopayproxy.models.saonly.ttpcancel.{ CancellationDate, TtpCancelPaymentPlan, TtpCancelRequest, TtpCancelSuccessfulResponse }
-import uk.gov.hmrc.timetopayproxy.models.{ IdType, IdValue, InstalmentDueDate }
+import uk.gov.hmrc.timetopayproxy.models.saonly.ttpcancel.{CancellationDate, TtpCancelPaymentPlan, TtpCancelRequest, TtpCancelSuccessfulResponse}
+import uk.gov.hmrc.timetopayproxy.models.{IdType, IdValue, InstalmentDueDate}
 import uk.gov.hmrc.timetopayproxy.models.currency.GbpPounds
-import uk.gov.hmrc.timetopayproxy.services.{ TTPEService, TTPQuoteService, TtpFeedbackLoopService }
+import uk.gov.hmrc.timetopayproxy.models.saonly.ttpinform.{DdiReference, TtpInformPaymentPlan, TtpInformRequest, TtpInformSuccessfulResponse}
+import uk.gov.hmrc.timetopayproxy.services.{TTPEService, TTPQuoteService, TtpFeedbackLoopService}
 
-import java.time.{ Instant, LocalDate, LocalDateTime }
+import java.time.{Instant, LocalDate, LocalDateTime}
 import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.{ ExecutionContext, Future }
+import scala.concurrent.{ExecutionContext, Future}
 
 class TimeToPayProxyControllerSpec extends AnyWordSpec with MockFactory {
 
@@ -1324,13 +1325,13 @@ class TimeToPayProxyControllerSpec extends AnyWordSpec with MockFactory {
         ttpEndDate = TtpEndDate(LocalDate.parse("2025-02-01")),
         frequency = FrequencyLowercase.Monthly,
         initialPaymentDate = Some(InitialPaymentDate(LocalDate.parse("2025-01-05"))),
-        initialPaymentAmount = Some(GbpPoundsUnchecked(100.00)),
+        initialPaymentAmount = Some(GbpPounds.createOrThrow(100.00)),
         ddiReference = Some(DdiReference("TestDDIReference"))
       ),
       instalments = NonEmptyList.of(
         SaOnlyInstalment(
           dueDate = InstalmentDueDate(LocalDate.parse("2025-01-31")),
-          amountDue = GbpPoundsUnchecked(500.00)
+          amountDue = GbpPounds.createOrThrow(500.00)
         )
       ),
       channelIdentifier = ChannelIdentifier.Advisor,
