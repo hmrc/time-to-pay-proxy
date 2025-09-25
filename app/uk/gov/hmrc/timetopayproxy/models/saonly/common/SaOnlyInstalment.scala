@@ -14,15 +14,17 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.timetopayproxy.models
+package uk.gov.hmrc.timetopayproxy.models.saonly.common
 
-import enumeratum.{ Enum, EnumEntry, PlayJsonEnum }
+import play.api.libs.json.{ Json, OFormat }
+import uk.gov.hmrc.timetopayproxy.models.InstalmentDueDate
+import uk.gov.hmrc.timetopayproxy.models.currency.GbpPounds
 
-import scala.collection.immutable
+final case class SaOnlyInstalment(
+  dueDate: InstalmentDueDate,
+  amountDue: GbpPounds
+)
 
-sealed abstract class OpLedRegimeType(override val entryName: String) extends EnumEntry
-
-object OpLedRegimeType extends Enum[OpLedRegimeType] with PlayJsonEnum[OpLedRegimeType] {
-  val values: immutable.IndexedSeq[OpLedRegimeType] = findValues
-  case object SA extends OpLedRegimeType("SA")
+object SaOnlyInstalment {
+  implicit val format: OFormat[SaOnlyInstalment] = Json.format[SaOnlyInstalment]
 }

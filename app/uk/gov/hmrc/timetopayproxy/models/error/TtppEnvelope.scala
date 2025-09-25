@@ -14,20 +14,19 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.timetopayproxy.utils
+package uk.gov.hmrc.timetopayproxy.models.error
 
-import uk.gov.hmrc.timetopayproxy.models.{ ConnectorError, TtppError, TtppErrorResponse, ValidationError }
+import cats.data.EitherT
 
-object TtppErrorHandler {
+import scala.concurrent.{ ExecutionContext, Future }
 
-  implicit class FromErrorToResponse(error: TtppError) {
-    def toErrorResponse: TtppErrorResponse = error match {
-      case ConnectorError(status, message) =>
-        TtppErrorResponse(status, s"$message")
-      case ValidationError(message) =>
-        TtppErrorResponse(400, s"$message")
-      case e => TtppErrorResponse(500, s"${e.toString}")
-    }
-  }
+object TtppEnvelope {
+  type TtppEnvelope[T] = EitherT[Future, ProxyEnvelopeError, T]
 
+  def apply[T](arg: T)(implicit ec: ExecutionContext): TtppEnvelope[T] = EitherT.pure[Future, ProxyEnvelopeError](arg)
+
+  def apply[T](f: Future[Either[ProxyEnvelopeError, T]]): TtppEnvelope[T] = EitherT(f)
+
+  def apply[T](eitherArg: Either[ProxyEnvelopeError, T])(implicit ec: ExecutionContext): TtppEnvelope[T] =
+    EitherT.fromEither[Future](eitherArg)
 }

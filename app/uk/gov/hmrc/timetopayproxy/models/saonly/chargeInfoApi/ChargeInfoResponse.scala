@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.timetopayproxy.models.chargeInfoApi
+package uk.gov.hmrc.timetopayproxy.models.saonly.chargeInfoApi
 
 import enumeratum.{ Enum, EnumEntry, PlayJsonEnum }
 import play.api.libs.json.{ Format, Json, OFormat }

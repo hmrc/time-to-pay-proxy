@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 HM Revenue & Customs
+ * Copyright 2025 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,11 +14,15 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.timetopayproxy.models
-import play.api.libs.json.{ Json, OFormat }
+package uk.gov.hmrc.timetopayproxy.models.saonly.common
 
-final case class ConnectorError(statusCode: Int, message: String) extends TtppError
+import enumeratum.{ Enum, EnumEntry, PlayJsonEnum }
 
-object ConnectorError {
-  implicit val format: OFormat[ConnectorError] = Json.format[ConnectorError]
+import scala.collection.immutable
+
+sealed abstract class SaOnlyRegimeType(override val entryName: String) extends EnumEntry
+
+object SaOnlyRegimeType extends Enum[SaOnlyRegimeType] with PlayJsonEnum[SaOnlyRegimeType] {
+  val values: immutable.IndexedSeq[SaOnlyRegimeType] = findValues
+  case object SA extends SaOnlyRegimeType("SA")
 }

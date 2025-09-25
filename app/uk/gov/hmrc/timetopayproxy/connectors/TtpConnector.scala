@@ -23,9 +23,10 @@ import uk.gov.hmrc.http.client.HttpClientV2
 import uk.gov.hmrc.http.{ HeaderCarrier, StringContextOps }
 import uk.gov.hmrc.timetopayproxy.config.AppConfig
 import uk.gov.hmrc.timetopayproxy.logging.RequestAwareLogger
-import uk.gov.hmrc.timetopayproxy.models.TtppEnvelope.TtppEnvelope
 import uk.gov.hmrc.timetopayproxy.models._
 import uk.gov.hmrc.timetopayproxy.models.affordablequotes.{ AffordableQuoteResponse, AffordableQuotesRequest }
+import uk.gov.hmrc.timetopayproxy.models.error.ProxyEnvelopeError
+import uk.gov.hmrc.timetopayproxy.models.error.TtppEnvelope.TtppEnvelope
 
 import java.net.URLEncoder
 import java.util.UUID
@@ -94,7 +95,7 @@ class DefaultTtpConnector @Inject() (appConfig: AppConfig, httpClient: HttpClien
         .post(url)
         .withBody(Json.toJson(ttppRequest))
         .setHeader(headers(getOrGenerateCorrelationId): _*)
-        .execute[Either[TtppError, GenerateQuoteResponse]]
+        .execute[Either[ProxyEnvelopeError, GenerateQuoteResponse]]
     )
   }
 
@@ -120,7 +121,7 @@ class DefaultTtpConnector @Inject() (appConfig: AppConfig, httpClient: HttpClien
     EitherT(
       httpClient
         .get(url)
-        .execute[Either[TtppError, Response]]
+        .execute[Either[ProxyEnvelopeError, Response]]
     )
   }
 
@@ -142,7 +143,7 @@ class DefaultTtpConnector @Inject() (appConfig: AppConfig, httpClient: HttpClien
       httpClient
         .put(url)
         .withBody(Json.toJson(updatePlanRequest))
-        .execute[Either[TtppError, UpdatePlanResponse]]
+        .execute[Either[ProxyEnvelopeError, UpdatePlanResponse]]
     )
   }
 
@@ -165,7 +166,7 @@ class DefaultTtpConnector @Inject() (appConfig: AppConfig, httpClient: HttpClien
         .post(url)
         .withBody(Json.toJson(createPlanRequest))
         .setHeader(headers(getOrGenerateCorrelationId): _*)
-        .execute[Either[TtppError, CreatePlanResponse]]
+        .execute[Either[ProxyEnvelopeError, CreatePlanResponse]]
     )
   }
 
@@ -182,7 +183,7 @@ class DefaultTtpConnector @Inject() (appConfig: AppConfig, httpClient: HttpClien
       httpClient
         .post(url)
         .withBody(Json.toJson(affordableQuotesRequest))
-        .execute[Either[TtppError, AffordableQuoteResponse]]
+        .execute[Either[ProxyEnvelopeError, AffordableQuoteResponse]]
     )
   }
 

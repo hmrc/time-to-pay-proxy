@@ -22,9 +22,10 @@ import play.api.libs.json.Json
 import uk.gov.hmrc.http.client.HttpClientV2
 import uk.gov.hmrc.http.{ HeaderCarrier, StringContextOps }
 import uk.gov.hmrc.timetopayproxy.config.AppConfig
-import uk.gov.hmrc.timetopayproxy.models.TtppEnvelope.TtppEnvelope
-import uk.gov.hmrc.timetopayproxy.models.chargeInfoApi.{ ChargeInfoRequest, ChargeInfoResponse }
-import uk.gov.hmrc.timetopayproxy.models.{ TimeToPayEligibilityError, TtppError }
+import uk.gov.hmrc.timetopayproxy.models.TimeToPayEligibilityError
+import uk.gov.hmrc.timetopayproxy.models.error.ProxyEnvelopeError
+import uk.gov.hmrc.timetopayproxy.models.error.TtppEnvelope.TtppEnvelope
+import uk.gov.hmrc.timetopayproxy.models.saonly.chargeInfoApi.{ ChargeInfoRequest, ChargeInfoResponse }
 
 import java.util.UUID
 import javax.inject.{ Inject, Singleton }
@@ -62,7 +63,7 @@ class DefaultTtpeConnector @Inject() (appConfig: AppConfig, httpClient: HttpClie
         .post(url)
         .withBody(Json.toJson(chargeInfoRequest))
         .setHeader(headers(getOrGenerateCorrelationId): _*)
-        .execute[Either[TtppError, ChargeInfoResponse]]
+        .execute[Either[ProxyEnvelopeError, ChargeInfoResponse]]
     )
   }
 }

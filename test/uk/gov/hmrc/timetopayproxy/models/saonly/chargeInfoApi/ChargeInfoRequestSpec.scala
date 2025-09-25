@@ -14,12 +14,13 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.timetopayproxy.models.chargeInfoApi
+package uk.gov.hmrc.timetopayproxy.models.saonly.chargeInfoApi
 
 import cats.data.NonEmptyList
 import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.should.Matchers._
 import play.api.libs.json.{ JsSuccess, JsValue, Json, Reads, Writes }
+import uk.gov.hmrc.timetopayproxy.models.saonly.common.SaOnlyRegimeType
 import uk.gov.hmrc.timetopayproxy.models.{ IdType, IdValue, Identification }
 import uk.gov.hmrc.timetopayproxy.testutils.JsonAssertionOps._
 import uk.gov.hmrc.timetopayproxy.testutils.schematestutils.Validators
@@ -34,7 +35,7 @@ class ChargeInfoRequestSpec extends AnyFreeSpec {
           Identification(idType = IdType("id type 1"), idValue = IdValue("id value 1")),
           Identification(idType = IdType("id type 2"), idValue = IdValue("id value 2"))
         ),
-        regimeType = RegimeType.SA
+        regimeType = SaOnlyRegimeType.SA
       )
 
       def json: JsValue = Json.parse(

@@ -16,11 +16,6 @@
 
 package uk.gov.hmrc.timetopayproxy.models.error
 
-import play.api.libs.json.{ Json, OFormat }
-import uk.gov.hmrc.timetopayproxy.models.TtppError
-
-final case class PlanStatusCreateError(description: String) extends TtppError
-
-object PlanStatusCreateError {
-  implicit val format: OFormat[PlanStatusCreateError] = Json.format[PlanStatusCreateError]
+trait ProxyEnvelopeError { this: Product with Serializable =>
+  def toWriteableProxyError: TtppWriteableError
 }

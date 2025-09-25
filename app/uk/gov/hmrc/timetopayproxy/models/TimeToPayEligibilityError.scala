@@ -17,6 +17,7 @@
 package uk.gov.hmrc.timetopayproxy.models
 
 import play.api.libs.json.{ Json, Reads }
+import uk.gov.hmrc.timetopayproxy.models.error.ConnectorError
 
 case class TimeToPayEligibilityError(code: String, reason: String) extends IncomingApiError {
   def toConnectorError(status: Int): ConnectorError =

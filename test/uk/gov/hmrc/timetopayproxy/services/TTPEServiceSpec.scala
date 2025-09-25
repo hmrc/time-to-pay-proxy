@@ -23,9 +23,11 @@ import org.scalatest.matchers.should.Matchers._
 import play.api.test.Helpers.{ await, defaultAwaitTimeout }
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.timetopayproxy.connectors.TtpeConnector
-import uk.gov.hmrc.timetopayproxy.models.TtppEnvelope.TtppEnvelope
-import uk.gov.hmrc.timetopayproxy.models.chargeInfoApi._
-import uk.gov.hmrc.timetopayproxy.models.{ ConnectorError, IdType, IdValue, Identification, TtppEnvelope, TtppError }
+import uk.gov.hmrc.timetopayproxy.models.error.TtppEnvelope.TtppEnvelope
+import uk.gov.hmrc.timetopayproxy.models.error.{ ConnectorError, ProxyEnvelopeError, TtppEnvelope }
+import uk.gov.hmrc.timetopayproxy.models.saonly.chargeInfoApi._
+import uk.gov.hmrc.timetopayproxy.models.saonly.common.SaOnlyRegimeType
+import uk.gov.hmrc.timetopayproxy.models.{ IdType, IdValue, Identification }
 
 import java.time.{ LocalDate, LocalDateTime }
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -40,7 +42,7 @@ class TTPEServiceSpec extends AnyFreeSpec {
       Identification(idType = IdType("id type 1"), idValue = IdValue("id value 1")),
       Identification(idType = IdType("id type 2"), idValue = IdValue("id value 2"))
     ),
-    regimeType = RegimeType.SA
+    regimeType = SaOnlyRegimeType.SA
   )
 
   private val chargeInfoResponse: ChargeInfoResponse = ChargeInfoResponse(
@@ -121,7 +123,7 @@ class TTPEServiceSpec extends AnyFreeSpec {
       val ttpeService = new DefaultTTPEService(connectorStub)
 
       await(ttpeService.checkChargeInfo(chargeInfoRequest).value) shouldBe chargeInfoResponse
-        .asRight[TtppError]
+        .asRight[ProxyEnvelopeError]
     }
 
     "returns an error from the connector" in {
@@ -140,7 +142,7 @@ class TTPEServiceSpec extends AnyFreeSpec {
 }
 
 class TtpeConnectorStub(
-  chargeInfoResponse: Either[TtppError, ChargeInfoResponse]
+  chargeInfoResponse: Either[ProxyEnvelopeError, ChargeInfoResponse]
 ) extends TtpeConnector {
 
   override def checkChargeInfo(

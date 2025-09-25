@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 HM Revenue & Customs
+ * Copyright 2024 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,4 +16,12 @@
 
 package uk.gov.hmrc.timetopayproxy.models
 
-trait TtppError extends Product with Serializable
+import play.api.libs.json.{ Format, Json }
+
+import java.time.LocalDate
+
+final case class InstalmentDueDate(value: LocalDate)
+
+object InstalmentDueDate {
+  implicit val format: Format[InstalmentDueDate] = Json.valueFormat[InstalmentDueDate]
+}

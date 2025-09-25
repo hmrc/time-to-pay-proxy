@@ -14,20 +14,18 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.timetopayproxy.models.chargeInfoApi
+package uk.gov.hmrc.timetopayproxy.models.saonly.chargeInfoApi
 
 import cats.data.NonEmptyList
-import enumeratum.{ Enum, EnumEntry, PlayJsonEnum }
 import play.api.libs.json.{ Format, Json, OFormat }
 import uk.gov.hmrc.timetopayproxy.models.Identification
+import uk.gov.hmrc.timetopayproxy.models.saonly.common.SaOnlyRegimeType
 import uk.gov.hmrc.timetopayproxy.utils.json.CatsNonEmptyListJson
-
-import scala.collection.immutable
 
 final case class ChargeInfoRequest(
   channelIdentifier: ChargeInfoChannelIdentifier,
   identifications: NonEmptyList[Identification],
-  regimeType: RegimeType
+  regimeType: SaOnlyRegimeType
 )
 
 object ChargeInfoRequest {
@@ -42,13 +40,4 @@ final case class ChargeInfoChannelIdentifier(value: String) extends AnyVal
 
 object ChargeInfoChannelIdentifier {
   implicit val format: Format[ChargeInfoChannelIdentifier] = Json.valueFormat[ChargeInfoChannelIdentifier]
-}
-
-sealed abstract class RegimeType(override val entryName: String) extends EnumEntry
-
-object RegimeType extends Enum[RegimeType] with PlayJsonEnum[RegimeType] {
-  val values: immutable.IndexedSeq[RegimeType] = findValues.distinct
-
-  type SA = SA.type
-  case object SA extends RegimeType("SA")
 }
