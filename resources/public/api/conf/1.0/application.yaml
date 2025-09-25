@@ -47,7 +47,7 @@ info:
       | 1.0.13 | 08-07-2025 | Alex Olkhovskiy | make indentations in charge-info request non-empty, remove altFormat and country|
       | 1.0.14 | 14-08-2025 | Alex Olkhovskiy | refactor the spec with linter|
       | 1.0.15 | 18-09-2025 | Alex Olkhovskiy | Restrict regimeType enum to only 'SA' value for /quote endpoint |
-      | 1.0.15-cancel-inform| 23-09-2024 | Alex Olkhovskiy | Added new cancel and inform endpoint    |
+      | 1.0.15-cancel-inform-proposed | 23-09-2024 | Alex Olkhovskiy | Added new cancel and inform endpoint    |
   contact: {}
   version: 1.0.15-cancel-inform
 servers:
