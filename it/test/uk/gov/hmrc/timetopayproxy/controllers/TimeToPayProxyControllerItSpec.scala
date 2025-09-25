@@ -29,6 +29,7 @@ import uk.gov.hmrc.timetopayproxy.models.saonly.chargeInfoApi._
 import uk.gov.hmrc.timetopayproxy.models.saonly.common.apistatus.{ ApiErrorResponse, ApiName, ApiStatus, ApiStatusCode }
 import uk.gov.hmrc.timetopayproxy.models.saonly.common._
 import uk.gov.hmrc.timetopayproxy.models.saonly.ttpcancel.{ CancellationDate, TtpCancelPaymentPlan, TtpCancelRequest, TtpCancelSuccessfulResponse }
+import uk.gov.hmrc.timetopayproxy.models.saonly.ttpinform.{DdiReference, TtpInformInformativeError, TtpInformPaymentPlan, TtpInformRequest, TtpInformSuccessfulResponse}
 import uk.gov.hmrc.timetopayproxy.models._
 import uk.gov.hmrc.timetopayproxy.support.IntegrationBaseSpec
 import uk.gov.hmrc.timetopayproxy.testutils.TestOnlyJsonFormats._
@@ -917,9 +918,13 @@ class TimeToPayProxyControllerItSpec extends IntegrationBaseSpec {
       "should return a 400 statusCode" - {
         "when given a valid json payload" - {
           "when TimeToPay returns an error response of 400" in new TimeToPayProxyControllerTestBase {
-            val upstreamErrorResponse = TtpInformGeneralFailureResponse(
-              code = 400,
-              details = "Invalid request payload: missing identifications or cancellationDate"
+            val upstreamErrorResponse = TimeToPayError(
+              List(
+                TimeToPayInnerError(
+                  code = "400",
+                  reason = "Invalid request payload: missing identifications or cancellationDate"
+                )
+              )
             )
 
             val expectedTtppErrorResponse = TtppErrorResponse(
@@ -1265,13 +1270,13 @@ class TimeToPayProxyControllerItSpec extends IntegrationBaseSpec {
         ttpEndDate = TtpEndDate(LocalDate.parse("2025-02-01")),
         frequency = FrequencyLowercase.Monthly,
         initialPaymentDate = Some(InitialPaymentDate(LocalDate.parse("2025-01-05"))),
-        initialPaymentAmount = Some(GbpPoundsUnchecked(100.00)),
+        initialPaymentAmount = Some(GbpPounds.createOrThrow(100.00)),
         ddiReference = Some(DdiReference("TestDDIReference"))
       ),
       instalments = NonEmptyList.of(
         SaOnlyInstalment(
           dueDate = InstalmentDueDate(LocalDate.parse("2025-01-31")),
-          amountDue = GbpPoundsUnchecked(500.00)
+          amountDue = GbpPounds.createOrThrow(500.00)
         )
       ),
       channelIdentifier = ChannelIdentifier.Advisor,

@@ -302,7 +302,7 @@ final class DefaultTtpFeedbackLoopConnectorSpec
         stubPostWithResponseBody(
           "/individuals/debts/time-to-pay/inform",
           400,
-          """{"code": 400, "details": "Invalid request body"}"""
+          """{"failures": [{"code": "400", "reason": "Invalid request body"}]}"""
         )
 
         val result: TtppEnvelope[TtpInformSuccessfulResponse] = connector.informTtp(ttpInformRequest)
@@ -345,7 +345,7 @@ final class DefaultTtpFeedbackLoopConnectorSpec
         stubPostWithResponseBody(
           "/debts/time-to-pay/inform",
           400,
-          """{"code": 400, "details": "Invalid request body"}"""
+          """{"failures": [{"code": "400", "reason": "Invalid request body"}]}"""
         )
 
         val result: TtppEnvelope[TtpInformSuccessfulResponse] = connector.informTtp(ttpInformRequest)
