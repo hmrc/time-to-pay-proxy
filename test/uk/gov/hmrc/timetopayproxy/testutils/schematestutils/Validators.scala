@@ -90,6 +90,38 @@ object Validators {
         )
     }
 
+    object TtpInform {
+      // Downloaded from:
+      //   ??? // TODO DTD-2856 THIS CURRENT TICKET - UPDATE LOCATION WHEN AVAILABLE. DON'T APPROVE PR IF THIS COMMENT IS STILL IN
+      // Official location:
+      //   ???
+      def openApiRequestSchema: OpenApi3DerivedSchema =
+        new OpenApi3DerivedSchema(
+          path,
+          defaultJsonSubschemaName = "InformRequest",
+          metaSchemaValidation = Some(Valid(())),
+          restrictAdditionalProperties = true
+        )
+
+      /** This is used for both 200 and 500 statuses. */
+      // TODO DTD-3779: Split into the separate schemas for 200 and 500 responses. 500 will have an extra field.
+      def openApiInformativeResponseSchema: OpenApi3DerivedSchema =
+        new OpenApi3DerivedSchema(
+          path,
+          defaultJsonSubschemaName = "InformResponse",
+          metaSchemaValidation = Some(Valid(())),
+          restrictAdditionalProperties = true
+        )
+
+      def openApiResponseGeneralFailureSchema: OpenApi3DerivedSchema =
+        new OpenApi3DerivedSchema(
+          path,
+          defaultJsonSubschemaName = "ErrorResponse",
+          metaSchemaValidation = Some(Valid(())),
+          restrictAdditionalProperties = true
+        )
+    }
+
     /** For now, this applies to all responses from the proxy */
     def openApiResponseErrorSchema: OpenApi3DerivedSchema =
       new OpenApi3DerivedSchema(
@@ -178,6 +210,38 @@ object Validators {
         new OpenApi3DerivedSchema(
           path,
           defaultJsonSubschemaName = "CancelResponse",
+          metaSchemaValidation = Some(Valid(())),
+          restrictAdditionalProperties = true
+        )
+
+      def openApiResponseGeneralFailureSchema: OpenApi3DerivedSchema =
+        new OpenApi3DerivedSchema(
+          path,
+          defaultJsonSubschemaName = "ErrorResponse",
+          metaSchemaValidation = Some(Valid(())),
+          restrictAdditionalProperties = true
+        )
+    }
+
+    object TtpInform {
+      // Downloaded from:
+      //   TODO
+      // Official location:
+      //   TODO
+      private val path = "test/resources/schemas/apis/time-to-pay/CancelAPI-v0.0.1.yaml"
+
+      def openApiRequestSchema: OpenApi3DerivedSchema =
+        new OpenApi3DerivedSchema(
+          path,
+          defaultJsonSubschemaName = "InformRequest",
+          metaSchemaValidation = Some(Valid(())),
+          restrictAdditionalProperties = true
+        )
+
+      def openApiInformativeResponseSchema: OpenApi3DerivedSchema =
+        new OpenApi3DerivedSchema(
+          path,
+          defaultJsonSubschemaName = "InformResponse",
           metaSchemaValidation = Some(Valid(())),
           restrictAdditionalProperties = true
         )
