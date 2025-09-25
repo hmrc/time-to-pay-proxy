@@ -38,18 +38,20 @@ trait IntegrationBaseSpec
 
   def servicesConfig: Map[String, Any] =
     Map(
-      "microservice.services.auth.host" -> mockHost,
-      "microservice.services.auth.port" -> mockPort,
-      "microservice.services.ttp.host"  -> mockHost,
-      "microservice.services.ttp.port"  -> mockPort,
-      "microservice.services.ttpe.host" -> mockHost,
-      "microservice.services.ttpe.port" -> mockPort,
-      "microservice.services.ttp.token" -> "dummyToken",
-      "microservice.services.ttp.useIf" -> false,
-      "microservice.services.stub.host" -> mockHost,
-      "microservice.services.stub.port" -> mockPort,
-      "metrics.enabled"                 -> false,
-      "auditing.enabled"                -> false
+      "microservice.services.auth.host"    -> mockHost,
+      "microservice.services.auth.port"    -> mockPort,
+      "microservice.services.ttp.host"     -> mockHost,
+      "microservice.services.ttp.port"     -> mockPort,
+      "microservice.services.ttpe.host"    -> mockHost,
+      "microservice.services.ttpe.port"    -> mockPort,
+      "microservice.services.ttp.token"    -> "dummyToken",
+      "microservice.services.ttp.useIf"    -> false,
+      "microservice.services.stub.host"    -> mockHost,
+      "microservice.services.stub.port"    -> mockPort,
+      "metrics.enabled"                    -> false,
+      "auditing.enabled"                   -> false,
+      "feature-switch.internalAuthEnabled" -> true,
+      "internalAuthToken"                  -> "valid-auth-token"
     )
 
   override implicit lazy val app: Application = new GuiceApplicationBuilder()

@@ -17,6 +17,8 @@
 package uk.gov.hmrc.timetopayproxy.controllers
 
 import cats.data.NonEmptyList
+import com.github.tomakehurst.wiremock.client.WireMock
+import com.github.tomakehurst.wiremock.client.WireMock.{ equalTo, postRequestedFor, urlPathEqualTo }
 import play.api.libs.json.{ JsNull, JsObject, JsValue, Json }
 import play.api.libs.ws.{ WSRequest, WSResponse }
 import uk.gov.hmrc.http.HeaderCarrier
@@ -307,7 +309,8 @@ class TimeToPayProxyControllerItSpec extends IntegrationBaseSpec {
             stubPostWithResponseBody(
               url = "/debts/time-to-pay/charge-info",
               status = 200,
-              responseBody = Json.toJson(ttpeResponse).toString()
+              responseBody = Json.toJson(ttpeResponse).toString(),
+              requestHeaderContaining = Some(Seq("Authorization" -> equalTo("valid-auth-token")))
             )
 
             val requestForChargeInfo: WSRequest = buildRequest(chargeInfoPath)
@@ -315,6 +318,8 @@ class TimeToPayProxyControllerItSpec extends IntegrationBaseSpec {
             val response: WSResponse = await(
               requestForChargeInfo.post(Json.toJson(chargeInfoRequest))
             )
+
+            WireMock.verify(1, postRequestedFor(urlPathEqualTo(chargeInfoPath)))
 
             response.json shouldBe Json.toJson(ttpeResponse)
             response.status shouldBe 200
@@ -573,6 +578,56 @@ class TimeToPayProxyControllerItSpec extends IntegrationBaseSpec {
               response.status shouldBe 400
             }
           }
+        }
+      }
+
+      "should return a 401" - {
+        "when an invalid authorisation token is used" in new TimeToPayProxyControllerTestBase {
+          val unauthorisedError: TimeToPayEligibilityError =
+            TimeToPayEligibilityError(code = "401", reason = "Unauthorized")
+
+          stubPostWithResponseBody(url = "/auth/authorise", status = 200, responseBody = "null")
+          stubPostWithResponseBody(
+            url = "/debts/time-to-pay/charge-info",
+            status = 401,
+            responseBody = Json.toJson(unauthorisedError).toString()
+          )
+
+          val requestForChargeInfo: WSRequest = buildRequest(chargeInfoPath)
+          val response: WSResponse = await(
+            requestForChargeInfo.post(Json.toJson(chargeInfoRequest))
+          )
+
+          val expectedTtppErrorResponse: TtppErrorResponse =
+            TtppErrorResponse(statusCode = 401, errorMessage = "Unauthorized")
+
+          response.json shouldBe Json.toJson(expectedTtppErrorResponse)
+          response.status shouldBe 401
+        }
+      }
+
+      "should return a 403" - {
+        "when the service sending the authorization token does not have required permissions" in new TimeToPayProxyControllerTestBase {
+          val forbiddenError: TimeToPayEligibilityError =
+            TimeToPayEligibilityError(code = "403", reason = "Forbidden")
+
+          stubPostWithResponseBody(url = "/auth/authorise", status = 200, responseBody = "null")
+          stubPostWithResponseBody(
+            url = "/debts/time-to-pay/charge-info",
+            status = 403,
+            responseBody = Json.toJson(forbiddenError).toString()
+          )
+
+          val requestForChargeInfo: WSRequest = buildRequest(chargeInfoPath)
+          val response: WSResponse = await(
+            requestForChargeInfo.post(Json.toJson(chargeInfoRequest))
+          )
+
+          val expectedTtppErrorResponse: TtppErrorResponse =
+            TtppErrorResponse(statusCode = 403, errorMessage = "Forbidden")
+
+          response.json shouldBe Json.toJson(expectedTtppErrorResponse)
+          response.status shouldBe 403
         }
       }
 
