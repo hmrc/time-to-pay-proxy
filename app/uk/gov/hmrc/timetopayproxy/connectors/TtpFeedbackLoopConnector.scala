@@ -20,17 +20,18 @@ import cats.data.EitherT
 import com.google.inject.ImplementedBy
 import play.api.libs.json.Json
 import uk.gov.hmrc.http.client.HttpClientV2
-import uk.gov.hmrc.http.{ HeaderCarrier, HttpReads, StringContextOps }
+import uk.gov.hmrc.http.{HeaderCarrier, HttpReads, StringContextOps}
 import uk.gov.hmrc.timetopayproxy.config.AppConfig
 import uk.gov.hmrc.timetopayproxy.connectors.util.HttpReadsWithLoggingBuilder
 import uk.gov.hmrc.timetopayproxy.logging.RequestAwareLogger
 import uk.gov.hmrc.timetopayproxy.models.TimeToPayError
 import uk.gov.hmrc.timetopayproxy.models.error.ProxyEnvelopeError
 import uk.gov.hmrc.timetopayproxy.models.error.TtppEnvelope.TtppEnvelope
-import uk.gov.hmrc.timetopayproxy.models.saonly.ttpcancel.{ TtpCancelInformativeError, TtpCancelRequest, TtpCancelSuccessfulResponse }
+import uk.gov.hmrc.timetopayproxy.models.saonly.ttpcancel.{TtpCancelInformativeError, TtpCancelRequest, TtpCancelSuccessfulResponse}
+import uk.gov.hmrc.timetopayproxy.models.saonly.ttpinform.{TtpInformInformativeError, TtpInformRequest, TtpInformSuccessfulResponse}
 
 import java.util.UUID
-import javax.inject.{ Inject, Singleton }
+import javax.inject.{Inject, Singleton}
 import scala.concurrent.ExecutionContext
 
 /** Feedback Loop Connector for CDCS -> TTP communication.
@@ -67,7 +68,7 @@ class DefaultTtpFeedbackLoopConnector @Inject() (appConfig: AppConfig, httpClien
       .empty[ProxyEnvelopeError, TtpInformSuccessfulResponse]
       .orSuccess[TtpInformSuccessfulResponse](200)
       .orError[TtpInformInformativeError](500)
-      .orErrorTransformed[TtpInformGeneralFailureResponse](400, error => ConnectorError(400, error.details))
+      .orErrorTransformed[TimeToPayError](400, ttpError => ttpError.toConnectorError(status = 400))
 
   def cancelTtp(
     ttppRequest: TtpCancelRequest
