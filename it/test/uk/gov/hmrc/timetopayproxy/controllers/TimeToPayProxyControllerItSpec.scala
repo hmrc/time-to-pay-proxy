@@ -17,23 +17,24 @@
 package uk.gov.hmrc.timetopayproxy.controllers
 
 import cats.data.NonEmptyList
-import play.api.libs.json.{ JsNull, JsObject, JsValue, Json }
-import play.api.libs.ws.{ WSRequest, WSResponse }
+import play.api.libs.json.{JsNull, JsObject, JsValue, Json}
+import play.api.libs.ws.{WSRequest, WSResponse}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.timetopayproxy.models._
-import uk.gov.hmrc.timetopayproxy.models.affordablequotes.{ AffordableQuoteResponse, AffordableQuotesRequest }
+import uk.gov.hmrc.timetopayproxy.models.affordablequotes.{AffordableQuoteResponse, AffordableQuotesRequest}
 import uk.gov.hmrc.timetopayproxy.models.error.TtppErrorResponse
-import uk.gov.hmrc.timetopayproxy.models.saonly.common.apistatus.{ ApiErrorResponse, ApiName, ApiStatus, ApiStatusCode }
-import uk.gov.hmrc.timetopayproxy.models.saonly.common.{ ArrangementAgreedDate, InitialPaymentDate, ProcessingDateTimeInstant, SaOnlyInstalment, TransitionedIndicator, TtpEndDate }
-import uk.gov.hmrc.timetopayproxy.models.saonly.ttpcancel.{ CancellationDate, TtpCancelPaymentPlan, TtpCancelRequest, TtpCancelSuccessfulResponse }
+import uk.gov.hmrc.timetopayproxy.models.saonly.common.apistatus.{ApiErrorResponse, ApiName, ApiStatus, ApiStatusCode}
+import uk.gov.hmrc.timetopayproxy.models.saonly.common.{ArrangementAgreedDate, InitialPaymentDate, ProcessingDateTimeInstant, SaOnlyInstalment, TransitionedIndicator, TtpEndDate}
+import uk.gov.hmrc.timetopayproxy.models.saonly.ttpcancel.{CancellationDate, TtpCancelPaymentPlan, TtpCancelRequest, TtpCancelSuccessfulResponse}
 import uk.gov.hmrc.timetopayproxy.models.saonly.chargeInfoApi._
 import uk.gov.hmrc.timetopayproxy.models.saonly.common.SaOnlyRegimeType
 import uk.gov.hmrc.timetopayproxy.models.currency.GbpPounds
-import uk.gov.hmrc.timetopayproxy.models.{ ChannelIdentifier, FrequencyLowercase, Identification, InstalmentDueDate }
+import uk.gov.hmrc.timetopayproxy.models.saonly.ttpinform.{DdiReference, TtpInformInformativeError, TtpInformPaymentPlan, TtpInformRequest, TtpInformSuccessfulResponse}
+import uk.gov.hmrc.timetopayproxy.models.{ChannelIdentifier, FrequencyLowercase, Identification, InstalmentDueDate}
 import uk.gov.hmrc.timetopayproxy.support.IntegrationBaseSpec
 import uk.gov.hmrc.timetopayproxy.testutils.TestOnlyJsonFormats._
 
-import java.time.{ LocalDate, LocalDateTime }
+import java.time.{LocalDate, LocalDateTime}
 import scala.concurrent.ExecutionContext
 
 class TimeToPayProxyControllerItSpec extends IntegrationBaseSpec {
@@ -914,9 +915,13 @@ class TimeToPayProxyControllerItSpec extends IntegrationBaseSpec {
       "should return a 400 statusCode" - {
         "when given a valid json payload" - {
           "when TimeToPay returns an error response of 400" in new TimeToPayProxyControllerTestBase {
-            val upstreamErrorResponse = TtpInformGeneralFailureResponse(
-              code = 400,
-              details = "Invalid request payload: missing identifications or cancellationDate"
+            val upstreamErrorResponse = TimeToPayError(
+              List(
+                TimeToPayInnerError(
+                  code = "400",
+                  reason = "Invalid request payload: missing identifications or cancellationDate"
+                )
+              )
             )
 
             val expectedTtppErrorResponse = TtppErrorResponse(
@@ -1262,13 +1267,13 @@ class TimeToPayProxyControllerItSpec extends IntegrationBaseSpec {
         ttpEndDate = TtpEndDate(LocalDate.parse("2025-02-01")),
         frequency = FrequencyLowercase.Monthly,
         initialPaymentDate = Some(InitialPaymentDate(LocalDate.parse("2025-01-05"))),
-        initialPaymentAmount = Some(GbpPoundsUnchecked(100.00)),
+        initialPaymentAmount = Some(GbpPounds.createOrThrow(100.00)),
         ddiReference = Some(DdiReference("TestDDIReference"))
       ),
       instalments = NonEmptyList.of(
         SaOnlyInstalment(
           dueDate = InstalmentDueDate(LocalDate.parse("2025-01-31")),
-          amountDue = GbpPoundsUnchecked(500.00)
+          amountDue = GbpPounds.createOrThrow(500.00)
         )
       ),
       channelIdentifier = ChannelIdentifier.Advisor,
