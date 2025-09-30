@@ -34,16 +34,13 @@ import uk.gov.hmrc.timetopayproxy.actions.auth.{ AuthoriseAction, AuthoriseActio
 import uk.gov.hmrc.timetopayproxy.config.FeatureSwitch
 import uk.gov.hmrc.timetopayproxy.models._
 import uk.gov.hmrc.timetopayproxy.models.affordablequotes._
+import uk.gov.hmrc.timetopayproxy.models.currency.GbpPounds
 import uk.gov.hmrc.timetopayproxy.models.error.TtppEnvelope.TtppEnvelope
 import uk.gov.hmrc.timetopayproxy.models.error.{ ConnectorError, TtppEnvelope, TtppErrorResponse }
 import uk.gov.hmrc.timetopayproxy.models.saonly.chargeInfoApi._
-import uk.gov.hmrc.timetopayproxy.models.saonly.common.SaOnlyRegimeType
-import uk.gov.hmrc.timetopayproxy.models.saonly.common.{ ArrangementAgreedDate, InitialPaymentDate, SaOnlyInstalment, TransitionedIndicator, TtpEndDate }
+import uk.gov.hmrc.timetopayproxy.models.saonly.common._
 import uk.gov.hmrc.timetopayproxy.models.saonly.common.apistatus.{ ApiName, ApiStatus, ApiStatusCode }
-import uk.gov.hmrc.timetopayproxy.models.saonly.common.ProcessingDateTimeInstant
 import uk.gov.hmrc.timetopayproxy.models.saonly.ttpcancel.{ CancellationDate, TtpCancelPaymentPlan, TtpCancelRequest, TtpCancelSuccessfulResponse }
-import uk.gov.hmrc.timetopayproxy.models.{ IdType, IdValue, InstalmentDueDate }
-import uk.gov.hmrc.timetopayproxy.models.currency.GbpPounds
 import uk.gov.hmrc.timetopayproxy.services.{ TTPEService, TTPQuoteService, TtpFeedbackLoopService }
 
 import java.time.{ Instant, LocalDate, LocalDateTime }
@@ -1113,6 +1110,11 @@ class TimeToPayProxyControllerSpec extends AnyWordSpec with MockFactory {
 
     "return 200" when {
       "service returns" in {
+
+        (() => fs.chargeInfoEndpointEnabled)
+          .expects()
+          .returning(true)
+
         (authConnector
           .authorise[Unit](_: Predicate, _: Retrieval[Unit])(
             _: HeaderCarrier,
@@ -1144,6 +1146,11 @@ class TimeToPayProxyControllerSpec extends AnyWordSpec with MockFactory {
     }
     "return 500" when {
       "TTPEligibility returns a failure" in {
+
+        (() => fs.chargeInfoEndpointEnabled)
+          .expects()
+          .returning(true)
+
         (authConnector
           .authorise[Unit](_: Predicate, _: Retrieval[Unit])(
             _: HeaderCarrier,
@@ -1175,6 +1182,35 @@ class TimeToPayProxyControllerSpec extends AnyWordSpec with MockFactory {
         status(response) shouldBe Status.INTERNAL_SERVER_ERROR
         contentAsJson(response) shouldBe Json.toJson[TtppErrorResponse](
           TtppErrorResponse(statusCode = 500, errorMessage = "Internal Server Error")
+        )
+      }
+    }
+
+    "return 503" when {
+      "if the charge-info endpoint is disabled" in {
+
+        (() => fs.chargeInfoEndpointEnabled)
+          .expects()
+          .returning(false)
+
+        (authConnector
+          .authorise[Unit](_: Predicate, _: Retrieval[Unit])(
+            _: HeaderCarrier,
+            _: ExecutionContext
+          ))
+          .expects(*, *, *, *)
+          .returning(Future.successful(()))
+
+        val fakeRequest: FakeRequest[JsValue] =
+          FakeRequest("POST", "/individuals/time-to-pay-proxy/charge-info")
+            .withHeaders(CONTENT_TYPE -> MimeTypes.JSON)
+            .withBody(Json.toJson[ChargeInfoRequest](chargeInfoRequest))
+
+        val response: Future[Result] = controller.checkChargeInfo()(fakeRequest)
+
+        status(response) shouldBe Status.SERVICE_UNAVAILABLE
+        contentAsJson(response) shouldBe Json.toJson[TtppErrorResponse](
+          TtppErrorResponse(statusCode = 503, errorMessage = "/charge-info endpoint is not currently enabled")
         )
       }
     }
@@ -1218,6 +1254,11 @@ class TimeToPayProxyControllerSpec extends AnyWordSpec with MockFactory {
 
     "return 200" when {
       "service returns success" in {
+
+        (() => fs.cancelEndpointEnabled)
+          .expects()
+          .returning(true)
+
         (authConnector
           .authorise[Unit](_: Predicate, _: Retrieval[Unit])(
             _: HeaderCarrier,
@@ -1250,6 +1291,11 @@ class TimeToPayProxyControllerSpec extends AnyWordSpec with MockFactory {
 
     "return 400" when {
       "request body is in wrong format" in {
+
+        (() => fs.cancelEndpointEnabled)
+          .expects()
+          .returning(true)
+
         (authConnector
           .authorise[Unit](_: Predicate, _: Retrieval[Unit])(
             _: HeaderCarrier,
@@ -1280,6 +1326,11 @@ class TimeToPayProxyControllerSpec extends AnyWordSpec with MockFactory {
 
     "return 500" when {
       "service returns failure" in {
+
+        (() => fs.cancelEndpointEnabled)
+          .expects()
+          .returning(true)
+
         (authConnector
           .authorise[Unit](_: Predicate, _: Retrieval[Unit])(
             _: HeaderCarrier,
@@ -1309,6 +1360,34 @@ class TimeToPayProxyControllerSpec extends AnyWordSpec with MockFactory {
         status(response) shouldBe Status.INTERNAL_SERVER_ERROR
         (contentAsJson(response) \ "errorMessage")
           .as[String] shouldBe "Internal Service Error"
+      }
+    }
+
+    "return 503" when {
+      "the cancel endpoint is disabled" in {
+
+        (() => fs.cancelEndpointEnabled)
+          .expects()
+          .returning(false)
+
+        (authConnector
+          .authorise[Unit](_: Predicate, _: Retrieval[Unit])(
+            _: HeaderCarrier,
+            _: ExecutionContext
+          ))
+          .expects(*, *, *, *)
+          .returning(Future.successful(()))
+
+        val fakeRequest: FakeRequest[JsValue] =
+          FakeRequest("POST", "/individuals/time-to-pay-proxy/cancel")
+            .withHeaders(CONTENT_TYPE -> MimeTypes.JSON)
+            .withBody(Json.toJson[TtpCancelRequest](ttpCancelRequest))
+
+        val response: Future[Result] = controller.cancelTtp()(fakeRequest)
+
+        status(response) shouldBe Status.SERVICE_UNAVAILABLE
+        (contentAsJson(response) \ "errorMessage")
+          .as[String] shouldBe "/cancel endpoint is not currently enabled"
       }
     }
   }

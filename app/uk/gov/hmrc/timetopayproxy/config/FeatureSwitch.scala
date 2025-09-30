@@ -20,4 +20,6 @@ import play.api.Configuration
 
 case class FeatureSwitch(value: Option[Configuration]) {
   // Implement feature switch getter methods here.
+  def cancelEndpointEnabled: Boolean = value.exists(_.get[Boolean]("endpoint.cancel.enabled"))
+  def chargeInfoEndpointEnabled: Boolean = value.exists(_.get[Boolean]("endpoint.charge-info.enabled"))
 }
