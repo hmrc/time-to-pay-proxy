@@ -110,10 +110,11 @@ final class HttpReadsWithLoggingBuilder[E >: ConnectorError, Result] private (
     logger: RequestAwareLogger
   )(implicit hc: HeaderCarrier): Left[ConnectorError, Nothing] = {
     logger.error(
+      // The full stops at the end of each line are necessary in the panels where Kibana strips the line breaks.
       s"""$simpleMessage
-         |Response status to be returned: $newStatus
-         |Request made for received HTTP response: ${responseContext.method} ${responseContext.url}
-         |Received HTTP response status: ${responseContext.response.status}
+         |Response status to be returned: $newStatus.
+         |Request made for received HTTP response: ${responseContext.method: String} ${responseContext.url: String} .
+         |Received HTTP response status: ${responseContext.response.status: Int}.
          |${safeToLogResponseBodyDescription(responseContext.response)}""".stripMargin
     )
 
@@ -125,9 +126,10 @@ final class HttpReadsWithLoggingBuilder[E >: ConnectorError, Result] private (
     logger: RequestAwareLogger
   )(implicit hc: HeaderCarrier): Unit =
     logger.warn(
+      // The full stops at the end of each line are necessary in the panels where Kibana strips the line breaks.
       s"""Valid and expected error response was found in received successful HTTP response.
-         |Request made for received HTTP response: ${responseContext.method} ${responseContext.url}
-         |Received HTTP response status: ${responseContext.response.status}
+         |Request made for received HTTP response: ${responseContext.method: String} ${responseContext.url: String} .
+         |Received HTTP response status: ${responseContext.response.status: Int}.
          |${safeToLogResponseBodyDescription(responseContext.response)}""".stripMargin
     )
 
