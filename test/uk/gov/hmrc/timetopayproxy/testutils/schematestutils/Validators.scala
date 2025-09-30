@@ -228,7 +228,7 @@ object Validators {
       //   TODO
       // Official location:
       //   TODO
-      private val path = "test/resources/schemas/apis/time-to-pay/CancelAPI-v0.0.1.yaml"
+      private val path = "test/resources/schemas/apis/time-to-pay/InformAPI-v0.0.1.yaml"
 
       def openApiRequestSchema: OpenApi3DerivedSchema =
         new OpenApi3DerivedSchema(
