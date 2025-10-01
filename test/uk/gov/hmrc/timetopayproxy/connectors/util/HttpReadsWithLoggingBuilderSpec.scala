@@ -176,9 +176,9 @@ final class HttpReadsWithLoggingBuilderSpec extends AnyFreeSpec with MockFactory
             allCapturedLogs shouldBe List(
               "ERROR" ->
                 """HTTP status is unexpected in received HTTP response.
-                  |Response status to be returned: 503
-                  |Request made for received HTTP response: MYMETHOD some/url
-                  |Received HTTP response status: 200
+                  |Response status to be returned: 503.
+                  |Request made for received HTTP response: MYMETHOD some/url .
+                  |Received HTTP response status: 200.
                   |Received HTTP response body not logged for 2xx statuses.""".stripMargin
             )
           }
@@ -198,9 +198,9 @@ final class HttpReadsWithLoggingBuilderSpec extends AnyFreeSpec with MockFactory
             allCapturedLogs shouldBe List(
               "ERROR" ->
                 """HTTP status is unexpected in received HTTP response.
-                  |Response status to be returned: 503
-                  |Request made for received HTTP response: MYMETHOD some/url
-                  |Received HTTP response status: 200
+                  |Response status to be returned: 503.
+                  |Request made for received HTTP response: MYMETHOD some/url .
+                  |Received HTTP response status: 200.
                   |Received HTTP response body not logged for 2xx statuses.""".stripMargin
             )
           }
@@ -221,9 +221,9 @@ final class HttpReadsWithLoggingBuilderSpec extends AnyFreeSpec with MockFactory
             allCapturedLogs shouldBe List(
               "ERROR" ->
                 """HTTP status is unexpected in received HTTP response.
-                  |Response status to be returned: 503
-                  |Request made for received HTTP response: MYMETHOD some/url
-                  |Received HTTP response status: 200
+                  |Response status to be returned: 503.
+                  |Request made for received HTTP response: MYMETHOD some/url .
+                  |Received HTTP response status: 200.
                   |Received HTTP response body not logged for 2xx statuses.""".stripMargin
             )
           }
@@ -244,9 +244,9 @@ final class HttpReadsWithLoggingBuilderSpec extends AnyFreeSpec with MockFactory
             allCapturedLogs shouldBe List(
               "ERROR" ->
                 """HTTP status is unexpected in received HTTP response.
-                  |Response status to be returned: 503
-                  |Request made for received HTTP response: MYMETHOD some/url
-                  |Received HTTP response status: 200
+                  |Response status to be returned: 503.
+                  |Request made for received HTTP response: MYMETHOD some/url .
+                  |Received HTTP response status: 200.
                   |Received HTTP response body not logged for 2xx statuses.""".stripMargin
             )
           }
@@ -268,9 +268,9 @@ final class HttpReadsWithLoggingBuilderSpec extends AnyFreeSpec with MockFactory
             allCapturedLogs shouldBe List(
               "ERROR" ->
                 """HTTP status is unexpected in received HTTP response.
-                  |Response status to be returned: 503
-                  |Request made for received HTTP response: MYMETHOD some/url
-                  |Received HTTP response status: 400
+                  |Response status to be returned: 503.
+                  |Request made for received HTTP response: MYMETHOD some/url .
+                  |Received HTTP response status: 400.
                   |Received HTTP response body: """.stripMargin
             )
           }
@@ -290,9 +290,9 @@ final class HttpReadsWithLoggingBuilderSpec extends AnyFreeSpec with MockFactory
             allCapturedLogs shouldBe List(
               "ERROR" ->
                 """HTTP status is unexpected in received HTTP response.
-                  |Response status to be returned: 503
-                  |Request made for received HTTP response: MYMETHOD some/url
-                  |Received HTTP response status: 400
+                  |Response status to be returned: 503.
+                  |Request made for received HTTP response: MYMETHOD some/url .
+                  |Received HTTP response status: 400.
                   |Received HTTP response body: {}""".stripMargin
             )
           }
@@ -313,9 +313,9 @@ final class HttpReadsWithLoggingBuilderSpec extends AnyFreeSpec with MockFactory
             allCapturedLogs shouldBe List(
               "ERROR" ->
                 """HTTP status is unexpected in received HTTP response.
-                  |Response status to be returned: 503
-                  |Request made for received HTTP response: MYMETHOD some/url
-                  |Received HTTP response status: 400
+                  |Response status to be returned: 503.
+                  |Request made for received HTTP response: MYMETHOD some/url .
+                  |Received HTTP response status: 400.
                   |Received HTTP response body: {"failures":[{"code":"400","reason":"my-reason"}]}""".stripMargin
             )
           }
@@ -336,9 +336,9 @@ final class HttpReadsWithLoggingBuilderSpec extends AnyFreeSpec with MockFactory
             allCapturedLogs shouldBe List(
               "ERROR" ->
                 """HTTP status is unexpected in received HTTP response.
-                  |Response status to be returned: 503
-                  |Request made for received HTTP response: MYMETHOD some/url
-                  |Received HTTP response status: 400
+                  |Response status to be returned: 503.
+                  |Request made for received HTTP response: MYMETHOD some/url .
+                  |Received HTTP response status: 400.
                   |Received HTTP response body: {"code":"400","reason":"my-reason"}""".stripMargin
             )
           }
@@ -361,9 +361,9 @@ final class HttpReadsWithLoggingBuilderSpec extends AnyFreeSpec with MockFactory
             allCapturedLogs shouldBe List(
               "ERROR" ->
                 """HTTP status is unexpected in received HTTP response.
-                  |Response status to be returned: 503
-                  |Request made for received HTTP response: MYMETHOD some/url
-                  |Received HTTP response status: 299
+                  |Response status to be returned: 503.
+                  |Request made for received HTTP response: MYMETHOD some/url .
+                  |Received HTTP response status: 299.
                   |Received HTTP response body not logged for 2xx statuses.""".stripMargin
             )
           }
@@ -374,6 +374,8 @@ final class HttpReadsWithLoggingBuilderSpec extends AnyFreeSpec with MockFactory
       // We're running the statuses in combinations because this would be many thousands more unit tests otherwise.
       // We'll still go with atypical values, to prove that no special handling for 200 and 201 exists.
 
+      import TestData.TestDataForCombinations.SuccessWrapper
+
       "(check the test data)" in {
         import TestData.TestDataForCombinations._
 
@@ -381,8 +383,110 @@ final class HttpReadsWithLoggingBuilderSpec extends AnyFreeSpec with MockFactory
         unexpectedStatusesNon2xx should have size 398
       }
 
+      "when given many requests and checking the logs with stripped line breaks" in new TestFixture[
+        AnyRef,
+        SuccessWrapper
+      ] {
+        import TestData.TestDataForCombinations.{ ErrorFor109, ErrorFor211ToTransform, errorStatus109, errorStatus211Transf, makeHttpReadsBuilder, successStatus236, successStatus419 }
+
+        val httpReads: HttpReads[Either[AnyRef, SuccessWrapper]] =
+          makeHttpReadsBuilder(emptyBuilder).httpReads(logger)(hc)
+
+        httpReads.read(
+          "POST",
+          "https://some.domain/for-success-236-wrong-structure",
+          HttpResponse(status = successStatus236, body = """{}""", headers = Map())
+        )
+
+        httpReads.read(
+          "POST",
+          "https://some.domain/for-success-236-not-json",
+          HttpResponse(status = successStatus236, body = """some body that's not JSON""", headers = Map())
+        )
+
+        httpReads.read(
+          "POST",
+          "https://some.domain/for-success-419-wrong-structure",
+          HttpResponse(status = successStatus419, body = """{}""", headers = Map())
+        )
+
+        httpReads.read(
+          "POST",
+          "https://some.domain/for-success-419-not-json",
+          HttpResponse(status = successStatus419, body = """some body that's not JSON""", headers = Map())
+        )
+
+        httpReads.read(
+          "POST",
+          "https://some.domain/for-failure-109-correct-structure-for-warning-log",
+          HttpResponse(status = errorStatus109, body = ErrorFor109.exampleBody, headers = Map())
+        )
+
+        httpReads.read(
+          "POST",
+          "https://some.domain/for-failure-109-wrong-structure",
+          HttpResponse(status = errorStatus109, body = """{}""", headers = Map())
+        )
+
+        httpReads.read(
+          "POST",
+          "https://some.domain/for-failure-109-not-json",
+          HttpResponse(status = errorStatus109, body = """some body that's not JSON""", headers = Map())
+        )
+
+        httpReads.read(
+          "POST",
+          "https://some.domain/for-failure-211-correct-structure-for-warning-log",
+          HttpResponse(status = errorStatus211Transf, body = ErrorFor211ToTransform.exampleBody, headers = Map())
+        )
+
+        httpReads.read(
+          "POST",
+          "https://some.domain/for-failure-211-wrong-structure",
+          HttpResponse(status = errorStatus211Transf, body = """{}""", headers = Map())
+        )
+
+        httpReads.read(
+          "POST",
+          "https://some.domain/for-failure-211-not-json",
+          HttpResponse(status = errorStatus211Transf, body = """some body that's not JSON""", headers = Map())
+        )
+
+        httpReads.read(
+          "POST",
+          "https://some.domain/for-299-unexpected-success",
+          HttpResponse(status = 299, body = """some irrelevant body because status is unexpected""", headers = Map())
+        )
+
+        httpReads.read(
+          "POST",
+          "https://some.domain/for-404-unexpected-failure",
+          HttpResponse(status = 404, body = """some irrelevant body because status is unexpected""", headers = Map())
+        )
+
+        val stripped: List[String] =
+          allCapturedLogs.map { case (level, msg) => s"$level | ${msg.replaceAll("\n", " ")}" }
+
+        // The plain log line must make sense and be readable when Kibana strips the line breaks.
+        // The URLs should not touch any punctuation.
+        stripped shouldBe List(
+          """ERROR | JSON structure is not valid in received successful HTTP response. Response status to be returned: 503. Request made for received HTTP response: POST https://some.domain/for-success-236-wrong-structure . Received HTTP response status: 236. Received HTTP response body not logged for 2xx statuses.""",
+          """ERROR | HTTP body is not JSON in received successful HTTP response. Response status to be returned: 503. Request made for received HTTP response: POST https://some.domain/for-success-236-not-json . Received HTTP response status: 236. Received HTTP response body not logged for 2xx statuses.""",
+          """ERROR | JSON structure is not valid in received successful HTTP response. Response status to be returned: 503. Request made for received HTTP response: POST https://some.domain/for-success-419-wrong-structure . Received HTTP response status: 419. Received HTTP response body: {}""",
+          """ERROR | HTTP body is not JSON in received successful HTTP response. Response status to be returned: 503. Request made for received HTTP response: POST https://some.domain/for-success-419-not-json . Received HTTP response status: 419. Received HTTP response body: some body that's not JSON""",
+          """WARN | Valid and expected error response was found in received successful HTTP response. Request made for received HTTP response: POST https://some.domain/for-failure-109-correct-structure-for-warning-log . Received HTTP response status: 109. Received HTTP response body: {"for109":"example"}""",
+          """ERROR | JSON structure is not valid in received error HTTP response. Response status to be returned: 503. Request made for received HTTP response: POST https://some.domain/for-failure-109-wrong-structure . Received HTTP response status: 109. Received HTTP response body: {}""",
+          """ERROR | HTTP body is not JSON in received error HTTP response. Response status to be returned: 503. Request made for received HTTP response: POST https://some.domain/for-failure-109-not-json . Received HTTP response status: 109. Received HTTP response body: some body that's not JSON""",
+          """WARN | Valid and expected error response was found in received successful HTTP response. Request made for received HTTP response: POST https://some.domain/for-failure-211-correct-structure-for-warning-log . Received HTTP response status: 211. Received HTTP response body not logged for 2xx statuses.""",
+          """ERROR | JSON structure is not valid in received error HTTP response. Response status to be returned: 503. Request made for received HTTP response: POST https://some.domain/for-failure-211-wrong-structure . Received HTTP response status: 211. Received HTTP response body not logged for 2xx statuses.""",
+          """ERROR | HTTP body is not JSON in received error HTTP response. Response status to be returned: 503. Request made for received HTTP response: POST https://some.domain/for-failure-211-not-json . Received HTTP response status: 211. Received HTTP response body not logged for 2xx statuses.""",
+          """ERROR | HTTP status is unexpected in received HTTP response. Response status to be returned: 503. Request made for received HTTP response: POST https://some.domain/for-299-unexpected-success . Received HTTP response status: 299. Received HTTP response body not logged for 2xx statuses.""",
+          """ERROR | HTTP status is unexpected in received HTTP response. Response status to be returned: 503. Request made for received HTTP response: POST https://some.domain/for-404-unexpected-failure . Received HTTP response status: 404. Received HTTP response body: some irrelevant body because status is unexpected"""
+        )
+      }
+
       "when given the successful statuses" - {
-        import TestData.TestDataForCombinations.{ SuccessWrapper, SuccessWrapper236, SuccessWrapper419, makeHttpReadsBuilder, successStatus236, successStatus419 }
+        import TestData.TestDataForCombinations.{ SuccessWrapper236, SuccessWrapper419, makeHttpReadsBuilder, successStatus236, successStatus419 }
 
         "and a valid body" - {
           for {
@@ -426,9 +530,9 @@ final class HttpReadsWithLoggingBuilderSpec extends AnyFreeSpec with MockFactory
             allCapturedLogs shouldBe List(
               "ERROR" ->
                 s"""JSON structure is not valid in received successful HTTP response.
-                   |Response status to be returned: 503
-                   |Request made for received HTTP response: MYMETHOD some/url
-                   |Received HTTP response status: ${successStatus236: Int}
+                   |Response status to be returned: 503.
+                   |Request made for received HTTP response: MYMETHOD some/url .
+                   |Received HTTP response status: ${successStatus236: Int}.
                    |Received HTTP response body not logged for 2xx statuses.""".stripMargin
             )
           }
@@ -452,9 +556,9 @@ final class HttpReadsWithLoggingBuilderSpec extends AnyFreeSpec with MockFactory
             allCapturedLogs shouldBe List(
               "ERROR" ->
                 s"""JSON structure is not valid in received successful HTTP response.
-                   |Response status to be returned: 503
-                   |Request made for received HTTP response: MYMETHOD some/url
-                   |Received HTTP response status: ${successStatus419: Int}
+                   |Response status to be returned: 503.
+                   |Request made for received HTTP response: MYMETHOD some/url .
+                   |Received HTTP response status: ${successStatus419: Int}.
                    |Received HTTP response body: {}""".stripMargin
             )
           }
@@ -480,9 +584,9 @@ final class HttpReadsWithLoggingBuilderSpec extends AnyFreeSpec with MockFactory
             allCapturedLogs shouldBe List(
               "ERROR" ->
                 s"""HTTP body is not JSON in received successful HTTP response.
-                   |Response status to be returned: 503
-                   |Request made for received HTTP response: MYMETHOD some/url
-                   |Received HTTP response status: ${successStatus236: Int}
+                   |Response status to be returned: 503.
+                   |Request made for received HTTP response: MYMETHOD some/url .
+                   |Received HTTP response status: ${successStatus236: Int}.
                    |Received HTTP response body not logged for 2xx statuses.""".stripMargin
             )
 
@@ -508,9 +612,9 @@ final class HttpReadsWithLoggingBuilderSpec extends AnyFreeSpec with MockFactory
             allCapturedLogs shouldBe List(
               "ERROR" ->
                 s"""HTTP body is not JSON in received successful HTTP response.
-                   |Response status to be returned: 503
-                   |Request made for received HTTP response: MYMETHOD some/url
-                   |Received HTTP response status: ${successStatus419: Int}
+                   |Response status to be returned: 503.
+                   |Request made for received HTTP response: MYMETHOD some/url .
+                   |Received HTTP response status: ${successStatus419: Int}.
                    |Received HTTP response body: TEXT""".stripMargin
             )
           }
@@ -536,8 +640,8 @@ final class HttpReadsWithLoggingBuilderSpec extends AnyFreeSpec with MockFactory
           allCapturedLogs shouldBe List(
             "WARN" ->
               s"""Valid and expected error response was found in received successful HTTP response.
-                 |Request made for received HTTP response: MYMETHOD some/url
-                 |Received HTTP response status: ${errorStatus109: Int}
+                 |Request made for received HTTP response: MYMETHOD some/url .
+                 |Received HTTP response status: ${errorStatus109: Int}.
                  |Received HTTP response body: ${exampleBody: String}""".stripMargin
           )
         }
@@ -560,9 +664,9 @@ final class HttpReadsWithLoggingBuilderSpec extends AnyFreeSpec with MockFactory
           allCapturedLogs shouldBe List(
             "ERROR" ->
               s"""JSON structure is not valid in received error HTTP response.
-                 |Response status to be returned: 503
-                 |Request made for received HTTP response: MYMETHOD some/url
-                 |Received HTTP response status: ${errorStatus109: Int}
+                 |Response status to be returned: 503.
+                 |Request made for received HTTP response: MYMETHOD some/url .
+                 |Received HTTP response status: ${errorStatus109: Int}.
                  |Received HTTP response body: {}""".stripMargin
           )
         }
@@ -586,9 +690,9 @@ final class HttpReadsWithLoggingBuilderSpec extends AnyFreeSpec with MockFactory
           allCapturedLogs shouldBe List(
             "ERROR" ->
               s"""HTTP body is not JSON in received error HTTP response.
-                 |Response status to be returned: 503
-                 |Request made for received HTTP response: MYMETHOD some/url
-                 |Received HTTP response status: ${errorStatus109: Int}
+                 |Response status to be returned: 503.
+                 |Request made for received HTTP response: MYMETHOD some/url .
+                 |Received HTTP response status: ${errorStatus109: Int}.
                  |Received HTTP response body: TEXT""".stripMargin
           )
         }
@@ -611,8 +715,8 @@ final class HttpReadsWithLoggingBuilderSpec extends AnyFreeSpec with MockFactory
           allCapturedLogs shouldBe List(
             "WARN" ->
               s"""Valid and expected error response was found in received successful HTTP response.
-                 |Request made for received HTTP response: MYMETHOD some/url
-                 |Received HTTP response status: ${errorStatus211Transf: Int}
+                 |Request made for received HTTP response: MYMETHOD some/url .
+                 |Received HTTP response status: ${errorStatus211Transf: Int}.
                  |Received HTTP response body not logged for 2xx statuses.""".stripMargin
           )
         }
@@ -636,9 +740,9 @@ final class HttpReadsWithLoggingBuilderSpec extends AnyFreeSpec with MockFactory
           allCapturedLogs shouldBe List(
             "ERROR" ->
               s"""JSON structure is not valid in received error HTTP response.
-                 |Response status to be returned: 503
-                 |Request made for received HTTP response: MYMETHOD some/url
-                 |Received HTTP response status: ${errorStatus211Transf: Int}
+                 |Response status to be returned: 503.
+                 |Request made for received HTTP response: MYMETHOD some/url .
+                 |Received HTTP response status: ${errorStatus211Transf: Int}.
                  |Received HTTP response body not logged for 2xx statuses.""".stripMargin
           )
         }
@@ -663,16 +767,16 @@ final class HttpReadsWithLoggingBuilderSpec extends AnyFreeSpec with MockFactory
           allCapturedLogs shouldBe List(
             "ERROR" ->
               s"""HTTP body is not JSON in received error HTTP response.
-                 |Response status to be returned: 503
-                 |Request made for received HTTP response: MYMETHOD some/url
-                 |Received HTTP response status: ${errorStatus211Transf: Int}
+                 |Response status to be returned: 503.
+                 |Request made for received HTTP response: MYMETHOD some/url .
+                 |Received HTTP response status: ${errorStatus211Transf: Int}.
                  |Received HTTP response body not logged for 2xx statuses.""".stripMargin
           )
         }
       }
 
       "when given an unexpected 2xx status, will not log or return the body" - {
-        import TestData.TestDataForCombinations.{ SuccessWrapper, makeHttpReadsBuilder, unexpectedStatuses2xx }
+        import TestData.TestDataForCombinations.{ makeHttpReadsBuilder, unexpectedStatuses2xx }
 
         "when given the first successful JSON body" - {
           import TestData.TestDataForCombinations.SuccessWrapper236
@@ -698,9 +802,9 @@ final class HttpReadsWithLoggingBuilderSpec extends AnyFreeSpec with MockFactory
               allCapturedLogs shouldBe List(
                 "ERROR" ->
                   s"""HTTP status is unexpected in received HTTP response.
-                     |Response status to be returned: 503
-                     |Request made for received HTTP response: MYMETHOD some/url
-                     |Received HTTP response status: ${unexpected2xxStatus: Int}
+                     |Response status to be returned: 503.
+                     |Request made for received HTTP response: MYMETHOD some/url .
+                     |Received HTTP response status: ${unexpected2xxStatus: Int}.
                      |Received HTTP response body not logged for 2xx statuses.""".stripMargin
               )
 
@@ -732,9 +836,9 @@ final class HttpReadsWithLoggingBuilderSpec extends AnyFreeSpec with MockFactory
               allCapturedLogs shouldBe List(
                 "ERROR" ->
                   s"""HTTP status is unexpected in received HTTP response.
-                     |Response status to be returned: 503
-                     |Request made for received HTTP response: MYMETHOD some/url
-                     |Received HTTP response status: ${unexpected2xxStatus: Int}
+                     |Response status to be returned: 503.
+                     |Request made for received HTTP response: MYMETHOD some/url .
+                     |Received HTTP response status: ${unexpected2xxStatus: Int}.
                      |Received HTTP response body not logged for 2xx statuses.""".stripMargin
               )
 
@@ -766,9 +870,9 @@ final class HttpReadsWithLoggingBuilderSpec extends AnyFreeSpec with MockFactory
               allCapturedLogs shouldBe List(
                 "ERROR" ->
                   s"""HTTP status is unexpected in received HTTP response.
-                     |Response status to be returned: 503
-                     |Request made for received HTTP response: MYMETHOD some/url
-                     |Received HTTP response status: ${unexpected2xxStatus: Int}
+                     |Response status to be returned: 503.
+                     |Request made for received HTTP response: MYMETHOD some/url .
+                     |Received HTTP response status: ${unexpected2xxStatus: Int}.
                      |Received HTTP response body not logged for 2xx statuses.""".stripMargin
               )
 
@@ -800,9 +904,9 @@ final class HttpReadsWithLoggingBuilderSpec extends AnyFreeSpec with MockFactory
               allCapturedLogs shouldBe List(
                 "ERROR" ->
                   s"""HTTP status is unexpected in received HTTP response.
-                     |Response status to be returned: 503
-                     |Request made for received HTTP response: MYMETHOD some/url
-                     |Received HTTP response status: ${unexpected2xxStatus: Int}
+                     |Response status to be returned: 503.
+                     |Request made for received HTTP response: MYMETHOD some/url .
+                     |Received HTTP response status: ${unexpected2xxStatus: Int}.
                      |Received HTTP response body not logged for 2xx statuses.""".stripMargin
               )
 
@@ -832,9 +936,9 @@ final class HttpReadsWithLoggingBuilderSpec extends AnyFreeSpec with MockFactory
               allCapturedLogs shouldBe List(
                 "ERROR" ->
                   s"""HTTP status is unexpected in received HTTP response.
-                     |Response status to be returned: 503
-                     |Request made for received HTTP response: MYMETHOD some/url
-                     |Received HTTP response status: ${unexpected2xxStatus: Int}
+                     |Response status to be returned: 503.
+                     |Request made for received HTTP response: MYMETHOD some/url .
+                     |Received HTTP response status: ${unexpected2xxStatus: Int}.
                      |Received HTTP response body not logged for 2xx statuses.""".stripMargin
               )
 
@@ -864,9 +968,9 @@ final class HttpReadsWithLoggingBuilderSpec extends AnyFreeSpec with MockFactory
               allCapturedLogs shouldBe List(
                 "ERROR" ->
                   s"""HTTP status is unexpected in received HTTP response.
-                     |Response status to be returned: 503
-                     |Request made for received HTTP response: MYMETHOD some/url
-                     |Received HTTP response status: ${unexpected2xxStatus: Int}
+                     |Response status to be returned: 503.
+                     |Request made for received HTTP response: MYMETHOD some/url .
+                     |Received HTTP response status: ${unexpected2xxStatus: Int}.
                      |Received HTTP response body not logged for 2xx statuses.""".stripMargin
               )
 
@@ -877,7 +981,7 @@ final class HttpReadsWithLoggingBuilderSpec extends AnyFreeSpec with MockFactory
       }
 
       "when given an unexpected non-2xx status, WILL LOG the body, but not return it" - {
-        import TestData.TestDataForCombinations.{ SuccessWrapper, makeHttpReadsBuilder, unexpectedStatusesNon2xx }
+        import TestData.TestDataForCombinations.{ makeHttpReadsBuilder, unexpectedStatusesNon2xx }
 
         "when given the first successful JSON body" - {
           import TestData.TestDataForCombinations.SuccessWrapper236
@@ -903,9 +1007,9 @@ final class HttpReadsWithLoggingBuilderSpec extends AnyFreeSpec with MockFactory
               allCapturedLogs shouldBe List(
                 "ERROR" ->
                   s"""HTTP status is unexpected in received HTTP response.
-                     |Response status to be returned: 503
-                     |Request made for received HTTP response: MYMETHOD some/url
-                     |Received HTTP response status: ${unexpectedNon2xxStatus: Int}
+                     |Response status to be returned: 503.
+                     |Request made for received HTTP response: MYMETHOD some/url .
+                     |Received HTTP response status: ${unexpectedNon2xxStatus: Int}.
                      |Received HTTP response body: ${SuccessWrapper236.exampleBody: String}""".stripMargin
               )
             }
@@ -935,9 +1039,9 @@ final class HttpReadsWithLoggingBuilderSpec extends AnyFreeSpec with MockFactory
               allCapturedLogs shouldBe List(
                 "ERROR" ->
                   s"""HTTP status is unexpected in received HTTP response.
-                     |Response status to be returned: 503
-                     |Request made for received HTTP response: MYMETHOD some/url
-                     |Received HTTP response status: ${unexpectedNon2xxStatus: Int}
+                     |Response status to be returned: 503.
+                     |Request made for received HTTP response: MYMETHOD some/url .
+                     |Received HTTP response status: ${unexpectedNon2xxStatus: Int}.
                      |Received HTTP response body: ${SuccessWrapper419.exampleBody: String}""".stripMargin
               )
             }
@@ -967,9 +1071,9 @@ final class HttpReadsWithLoggingBuilderSpec extends AnyFreeSpec with MockFactory
               allCapturedLogs shouldBe List(
                 "ERROR" ->
                   s"""HTTP status is unexpected in received HTTP response.
-                     |Response status to be returned: 503
-                     |Request made for received HTTP response: MYMETHOD some/url
-                     |Received HTTP response status: ${unexpectedNon2xxStatus: Int}
+                     |Response status to be returned: 503.
+                     |Request made for received HTTP response: MYMETHOD some/url .
+                     |Received HTTP response status: ${unexpectedNon2xxStatus: Int}.
                      |Received HTTP response body: ${ErrorFor109.exampleBody: String}""".stripMargin
               )
             }
@@ -1003,9 +1107,9 @@ final class HttpReadsWithLoggingBuilderSpec extends AnyFreeSpec with MockFactory
               allCapturedLogs shouldBe List(
                 "ERROR" ->
                   s"""HTTP status is unexpected in received HTTP response.
-                     |Response status to be returned: 503
-                     |Request made for received HTTP response: MYMETHOD some/url
-                     |Received HTTP response status: ${unexpectedNon2xxStatus: Int}
+                     |Response status to be returned: 503.
+                     |Request made for received HTTP response: MYMETHOD some/url .
+                     |Received HTTP response status: ${unexpectedNon2xxStatus: Int}.
                      |Received HTTP response body: ${ErrorFor211ToTransform.exampleBody: String}""".stripMargin
               )
             }
@@ -1033,9 +1137,9 @@ final class HttpReadsWithLoggingBuilderSpec extends AnyFreeSpec with MockFactory
               allCapturedLogs shouldBe List(
                 "ERROR" ->
                   s"""HTTP status is unexpected in received HTTP response.
-                     |Response status to be returned: 503
-                     |Request made for received HTTP response: MYMETHOD some/url
-                     |Received HTTP response status: ${unexpectedNon2xxStatus: Int}
+                     |Response status to be returned: 503.
+                     |Request made for received HTTP response: MYMETHOD some/url .
+                     |Received HTTP response status: ${unexpectedNon2xxStatus: Int}.
                      |Received HTTP response body: {}""".stripMargin
               )
             }
@@ -1063,9 +1167,9 @@ final class HttpReadsWithLoggingBuilderSpec extends AnyFreeSpec with MockFactory
               allCapturedLogs shouldBe List(
                 "ERROR" ->
                   s"""HTTP status is unexpected in received HTTP response.
-                     |Response status to be returned: 503
-                     |Request made for received HTTP response: MYMETHOD some/url
-                     |Received HTTP response status: ${unexpectedNon2xxStatus: Int}
+                     |Response status to be returned: 503.
+                     |Request made for received HTTP response: MYMETHOD some/url .
+                     |Received HTTP response status: ${unexpectedNon2xxStatus: Int}.
                      |Received HTTP response body: SOMETEXT""".stripMargin
               )
             }
