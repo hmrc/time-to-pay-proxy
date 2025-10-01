@@ -319,7 +319,7 @@ class TimeToPayProxyControllerItSpec extends IntegrationBaseSpec {
               requestForChargeInfo.post(Json.toJson(chargeInfoRequest))
             )
 
-            WireMock.verify(1, postRequestedFor(urlPathEqualTo(chargeInfoPath)))
+            WireMock.verify(1, postRequestedFor(urlPathEqualTo("/debts/time-to-pay/charge-info")))
 
             response.json shouldBe Json.toJson(ttpeResponse)
             response.status shouldBe 200

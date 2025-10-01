@@ -94,6 +94,10 @@ final class DefaultTtpFeedbackLoopConnectorSpec
       .expects("feature-switch", *)
       .once()
       .returns(None)
+    (config
+      .get(_: String)(_: ConfigLoader[String]))
+      .expects("internal-auth.token", *)
+      .returns("valid-auth-token")
 
     val mockConfiguration: AppConfig = new MockAppConfig(config, servicesConfig, ifImpl)
 
