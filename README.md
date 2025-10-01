@@ -14,7 +14,10 @@ Or locally with the testOnlyDoNotUseInAppConf.Routes specified: (port in service
 sbt "run <PORT>"
 ```
 
-To run locally with Internal Auth enabled, a valid authentication token is needed when sending a request:
+To run locally with Internal Auth enabled, a valid authentication token is needed when sending a request.
+To generate a test-only token, ensure INTERNAL_AUTH is running and send a POST request to `http://localhost:8470/test-only/token`
+
+The curl request below will generate an Authorization token, `valid-auth-token`, giving full permissions to access `time-to-pay-eligibility`:
 ```
 curl -i -X POST -H 'Content-Type: application/json'  -d '{
   "token": "valid-auth-token",         
