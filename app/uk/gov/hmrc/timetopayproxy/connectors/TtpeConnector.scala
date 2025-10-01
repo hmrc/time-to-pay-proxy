@@ -42,7 +42,13 @@ trait TtpeConnector {
 class DefaultTtpeConnector @Inject() (appConfig: AppConfig, httpClient: HttpClientV2)
     extends TtpeConnector with HttpParser[TimeToPayEligibilityError] {
 
-  val headers: String => Seq[(String, String)] = (guid: String) => Seq("CorrelationId" -> s"$guid")
+  private val authorizationHeader: Seq[(String, String)] =
+    if (appConfig.internalAuthEnabled.enabled)
+      Seq("Authorization" -> appConfig.internalAuthToken)
+    else Seq.empty
+
+  val headers: String => Seq[(String, String)] = (guid: String) =>
+    Seq("CorrelationId" -> s"$guid") ++ authorizationHeader
 
   private def getOrGenerateCorrelationId(implicit hc: HeaderCarrier): String =
     (hc.headers(Seq("CorrelationId")) ++ hc.extraHeaders)
