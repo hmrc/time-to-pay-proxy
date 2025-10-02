@@ -43,7 +43,7 @@ class TimeToPayProxyController @Inject() (
   ttpFeedbackLoopService: TtpFeedbackLoopService,
   timeToPayEligibilityService: TTPEService,
   @unused
-  fs: FeatureSwitch
+  featureSwitch: FeatureSwitch
 ) extends BackendController(cc) with BaseController {
   implicit val ec: ExecutionContext = cc.executionContext
 
@@ -101,7 +101,7 @@ class TimeToPayProxyController @Inject() (
   }
 
   def checkChargeInfo: Action[JsValue] = authoriseAction.async(parse.json) { implicit request =>
-    if (fs.chargeInfoEndpointEnabled) {
+    if (featureSwitch.chargeInfoEndpointEnabled) {
       withJsonBody[ChargeInfoRequest] { chargeInfoRequest: ChargeInfoRequest =>
         timeToPayEligibilityService
           .checkChargeInfo(chargeInfoRequest)
@@ -119,7 +119,7 @@ class TimeToPayProxyController @Inject() (
   }
 
   def cancelTtp: Action[JsValue] = authoriseAction.async(parse.json) { implicit request =>
-    if (fs.cancelEndpointEnabled) {
+    if (featureSwitch.cancelEndpointEnabled) {
       withJsonBody[TtpCancelRequest] { deserialisedRequest: TtpCancelRequest =>
         ttpFeedbackLoopService
           .cancelTtp(deserialisedRequest)
