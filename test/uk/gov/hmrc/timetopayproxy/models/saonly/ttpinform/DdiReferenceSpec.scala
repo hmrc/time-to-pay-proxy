@@ -16,6 +16,27 @@
 
 package uk.gov.hmrc.timetopayproxy.models.saonly.ttpinform
 
-class DdiReferenceSpec {
+import org.scalatest.freespec.AnyFreeSpec
+import org.scalatest.matchers.should.Matchers._
+import play.api.libs.json.{JsNumber, JsResultException, JsString, Json}
 
+class DdiReferenceSpec extends AnyFreeSpec {
+
+  "DDIReference" - {
+    "should encode and decode correctly" in {
+      val ddiReferenceObject = DdiReference("TestDDI")
+      val ddiReferenceJson = JsString("TestDDI")
+
+      Json.toJson(ddiReferenceObject) shouldBe ddiReferenceJson
+      ddiReferenceJson.as[DdiReference] shouldBe ddiReferenceObject
+    }
+
+    "should correctly fail to decode from invalid JSON" in {
+      val badDdiReferenceJson = JsNumber(2)
+
+      assertThrows[JsResultException](
+        badDdiReferenceJson.as[DdiReference]
+      )
+    }
+  }
 }
