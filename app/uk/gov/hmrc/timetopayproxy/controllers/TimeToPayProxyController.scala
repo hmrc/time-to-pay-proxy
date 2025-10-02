@@ -43,7 +43,7 @@ class TimeToPayProxyController @Inject() (
   ttpFeedbackLoopService: TtpFeedbackLoopService,
   timeToPayEligibilityService: TTPEService,
   @unused
-  fs: FeatureSwitch
+  featureSwitch: FeatureSwitch
 ) extends BackendController(cc) with BaseController {
   implicit val ec: ExecutionContext = cc.executionContext
 
@@ -101,20 +101,35 @@ class TimeToPayProxyController @Inject() (
   }
 
   def checkChargeInfo: Action[JsValue] = authoriseAction.async(parse.json) { implicit request =>
-    withJsonBody[ChargeInfoRequest] { chargeInfoRequest: ChargeInfoRequest =>
-      timeToPayEligibilityService
-        .checkChargeInfo(chargeInfoRequest)
-        .leftMap(ttppError => ttppError.toWriteableProxyError)
-        .fold(e => e.toErrorResult, r => Results.Ok(Json.toJson(r)))
+    if (featureSwitch.chargeInfoEndpointEnabled) {
+      withJsonBody[ChargeInfoRequest] { chargeInfoRequest: ChargeInfoRequest =>
+        timeToPayEligibilityService
+          .checkChargeInfo(chargeInfoRequest)
+          .leftMap(ttppError => ttppError.toWriteableProxyError)
+          .fold(e => e.toErrorResult, r => Results.Ok(Json.toJson(r)))
+      }
+    } else {
+      Future.successful(
+        TtppErrorResponse(
+          statusCode = 503,
+          errorMessage = "/charge-info endpoint is not currently enabled"
+        ).toErrorResult
+      )
     }
   }
 
   def cancelTtp: Action[JsValue] = authoriseAction.async(parse.json) { implicit request =>
-    withJsonBody[TtpCancelRequest] { deserialisedRequest: TtpCancelRequest =>
-      ttpFeedbackLoopService
-        .cancelTtp(deserialisedRequest)
-        .leftMap(ttppError => ttppError.toWriteableProxyError)
-        .fold(e => e.toErrorResult, r => Results.Ok(Json.toJson(r)))
+    if (featureSwitch.cancelEndpointEnabled) {
+      withJsonBody[TtpCancelRequest] { deserialisedRequest: TtpCancelRequest =>
+        ttpFeedbackLoopService
+          .cancelTtp(deserialisedRequest)
+          .leftMap(ttppError => ttppError.toWriteableProxyError)
+          .fold(e => e.toErrorResult, r => Results.Ok(Json.toJson(r)))
+      }
+    } else {
+      Future.successful(
+        TtppErrorResponse(statusCode = 503, errorMessage = "/cancel endpoint is not currently enabled").toErrorResult
+      )
     }
   }
 
