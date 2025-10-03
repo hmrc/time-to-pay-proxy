@@ -7,7 +7,7 @@ object AppDependencies {
 
   val compile = Seq(
     // This is necessary until the HMRC/Play dependencies bring in the version of Jackson that is not insecure.
-    "com.fasterxml.jackson.core"       % "jackson-core"               % "2.19.2",
+    "com.fasterxml.jackson.core"       % "jackson-core"               % "2.20.0",
     "uk.gov.hmrc"                      %% "bootstrap-backend-play-30" % BootstrapPlayVersion,
     "org.typelevel"                    %% "cats-core"                 % "2.13.0",
     "com.beachape"                     %% "enumeratum-play-json"      % "1.9.0"
