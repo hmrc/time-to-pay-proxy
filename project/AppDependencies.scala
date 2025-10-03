@@ -3,7 +3,7 @@ import sbt.*
 
 object AppDependencies {
 
-  private val BootstrapPlayVersion = "9.12.0"
+  private val BootstrapPlayVersion = "9.19.0"
 
   val compile = Seq(
     // This is necessary until the HMRC/Play dependencies bring in the version of Jackson that is not insecure.
