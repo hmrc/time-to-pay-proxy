@@ -135,11 +135,17 @@ class TimeToPayProxyController @Inject() (
   }
 
   def informTtp: Action[JsValue] = authoriseAction.async(parse.json) { implicit request =>
-    withJsonBody[TtpInformRequest] { deserialisedRequest: TtpInformRequest =>
-      ttpFeedbackLoopService
-        .informTtp(deserialisedRequest)
-        .leftMap(ttppError => ttppError.toWriteableProxyError)
-        .fold(e => e.toErrorResult, r => Results.Ok(Json.toJson(r)))
+    if (featureSwitch.informEndpointEnabled) {
+      withJsonBody[TtpInformRequest] { deserialisedRequest: TtpInformRequest =>
+        ttpFeedbackLoopService
+          .informTtp(deserialisedRequest)
+          .leftMap(ttppError => ttppError.toWriteableProxyError)
+          .fold(e => e.toErrorResult, r => Results.Ok(Json.toJson(r)))
+      }
+    } else {
+      Future.successful(
+        TtppErrorResponse(statusCode = 503, errorMessage = "/inform endpoint is not currently enabled").toErrorResult
+      )
     }
   }
 

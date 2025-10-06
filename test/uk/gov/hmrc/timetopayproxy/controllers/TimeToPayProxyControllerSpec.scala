@@ -1524,5 +1524,32 @@ class TimeToPayProxyControllerSpec extends AnyWordSpec with MockFactory {
           .as[String] shouldBe "Internal Service Error"
       }
     }
+
+    "return 503" when {
+      "the inform endpoint is disabled" in {
+        (() => fs.informEndpointEnabled)
+          .expects()
+          .returning(false)
+
+        (authConnector
+          .authorise[Unit](_: Predicate, _: Retrieval[Unit])(
+            _: HeaderCarrier,
+            _: ExecutionContext
+          ))
+          .expects(*, *, *, *)
+          .returning(Future.successful(()))
+
+        val fakeRequest: FakeRequest[JsValue] =
+          FakeRequest("POST", "/individuals/time-to-pay-proxy/inform")
+            .withHeaders(CONTENT_TYPE -> MimeTypes.JSON)
+            .withBody(Json.toJson[TtpInformRequest](ttpInformRequest))
+
+        val response: Future[Result] = controller.informTtp()(fakeRequest)
+
+        status(response) shouldBe Status.SERVICE_UNAVAILABLE
+        (contentAsJson(response) \ "errorMessage")
+          .as[String] shouldBe "/inform endpoint is not currently enabled"
+      }
+    }
   }
 }
