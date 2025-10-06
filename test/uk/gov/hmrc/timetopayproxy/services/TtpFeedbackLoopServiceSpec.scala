@@ -20,64 +20,66 @@ import cats.data.NonEmptyList
 import cats.syntax.either._
 import org.scalamock.scalatest.MockFactory
 import org.scalatest.concurrent.ScalaFutures
+import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.should.Matchers._
-import org.scalatest.wordspec.AnyWordSpec
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.timetopayproxy.connectors.TtpFeedbackLoopConnector
-import uk.gov.hmrc.timetopayproxy.models.error.{ ConnectorError, TtppEnvelope }
-import uk.gov.hmrc.timetopayproxy.models.saonly.ttpcancel.{ CancellationDate, TtpCancelPaymentPlan, TtpCancelRequest, TtpCancelSuccessfulResponse }
-import uk.gov.hmrc.timetopayproxy.models.saonly.common.apistatus.{ ApiName, ApiStatus, ApiStatusCode }
-import uk.gov.hmrc.timetopayproxy.models.saonly.common.{ ArrangementAgreedDate, InitialPaymentDate, ProcessingDateTimeInstant, SaOnlyInstalment, TransitionedIndicator, TtpEndDate }
-import uk.gov.hmrc.timetopayproxy.models.{ ChannelIdentifier, FrequencyLowercase, IdType, IdValue, Identification, InstalmentDueDate }
 import uk.gov.hmrc.timetopayproxy.models.currency.GbpPounds
+import uk.gov.hmrc.timetopayproxy.models.error.{ConnectorError, TtppEnvelope}
+import uk.gov.hmrc.timetopayproxy.models.saonly.common.apistatus.{ApiName, ApiStatus, ApiStatusCode}
+import uk.gov.hmrc.timetopayproxy.models.saonly.common._
+import uk.gov.hmrc.timetopayproxy.models.saonly.ttpcancel.{CancellationDate, TtpCancelPaymentPlan, TtpCancelRequest, TtpCancelSuccessfulResponse}
+import uk.gov.hmrc.timetopayproxy.models.saonly.ttpinform.{DdiReference, TtpInformPaymentPlan, TtpInformRequest, TtpInformSuccessfulResponse}
+import uk.gov.hmrc.timetopayproxy.models._
 
-import java.time.{ Instant, LocalDate }
-import scala.concurrent.ExecutionContext.Implicits.global
+import java.time.{Instant, LocalDate}
 import scala.concurrent.ExecutionContext
+import scala.concurrent.ExecutionContext.Implicits.global
 
-class TtpFeedbackLoopServiceSpec extends AnyWordSpec with MockFactory with ScalaFutures {
+class TtpFeedbackLoopServiceSpec extends AnyFreeSpec with MockFactory with ScalaFutures {
 
   private val mockConnector = mock[TtpFeedbackLoopConnector]
   private val service = new DefaultTtpFeedbackLoopService(mockConnector)
 
   implicit val hc: HeaderCarrier = HeaderCarrier()
 
-  private val ttpCancelRequest = TtpCancelRequest(
-    identifications = NonEmptyList.of(
-      Identification(idType = IdType("NINO"), idValue = IdValue("AB123456C"))
-    ),
-    paymentPlan = TtpCancelPaymentPlan(
-      arrangementAgreedDate = ArrangementAgreedDate(LocalDate.of(2025, 1, 1)),
-      ttpEndDate = TtpEndDate(LocalDate.of(2025, 2, 1)),
-      frequency = FrequencyLowercase.Monthly,
-      cancellationDate = CancellationDate(LocalDate.of(2025, 1, 15)),
-      initialPaymentDate = Some(InitialPaymentDate(LocalDate.of(2025, 1, 5))),
-      initialPaymentAmount = Some(GbpPounds.createOrThrow(100.00))
-    ),
-    instalments = NonEmptyList.of(
-      SaOnlyInstalment(
-        InstalmentDueDate(LocalDate.of(2024, 2, 1)),
-        GbpPounds.createOrThrow(500.25)
-      )
-    ),
-    channelIdentifier = ChannelIdentifier.Advisor,
-    transitioned = Some(TransitionedIndicator(true))
-  )
+  "TtpFeedbackLoopService" - {
+    "cancelTtp" - {
 
-  private val ttpCancelResponse = TtpCancelSuccessfulResponse(
-    apisCalled = List(
-      ApiStatus(
-        name = ApiName("TTP_PROXY"),
-        statusCode = ApiStatusCode("SUCCESS"),
-        processingDateTime = ProcessingDateTimeInstant(Instant.parse("2024-01-15T10:30:00Z")),
-        errorResponse = None
+      val ttpCancelRequest = TtpCancelRequest(
+        identifications = NonEmptyList.of(
+          Identification(idType = IdType("NINO"), idValue = IdValue("AB123456C"))
+        ),
+        paymentPlan = TtpCancelPaymentPlan(
+          arrangementAgreedDate = ArrangementAgreedDate(LocalDate.of(2025, 1, 1)),
+          ttpEndDate = TtpEndDate(LocalDate.of(2025, 2, 1)),
+          frequency = FrequencyLowercase.Monthly,
+          cancellationDate = CancellationDate(LocalDate.of(2025, 1, 15)),
+          initialPaymentDate = Some(InitialPaymentDate(LocalDate.of(2025, 1, 5))),
+          initialPaymentAmount = Some(GbpPounds.createOrThrow(100.00))
+        ),
+        instalments = NonEmptyList.of(
+          SaOnlyInstalment(
+            InstalmentDueDate(LocalDate.of(2024, 2, 1)),
+            GbpPounds.createOrThrow(500.25)
+          )
+        ),
+        channelIdentifier = ChannelIdentifier.Advisor,
+        transitioned = Some(TransitionedIndicator(true))
       )
-    ),
-    processingDateTime = ProcessingDateTimeInstant(Instant.parse("2024-01-15T10:30:00Z"))
-  )
 
-  "TtpFeedbackLoopService" should {
-    "cancelTtp" should {
+      val ttpCancelResponse = TtpCancelSuccessfulResponse(
+        apisCalled = List(
+          ApiStatus(
+            name = ApiName("TTP_PROXY"),
+            statusCode = ApiStatusCode("SUCCESS"),
+            processingDateTime = ProcessingDateTimeInstant(Instant.parse("2024-01-15T10:30:00Z")),
+            errorResponse = None
+          )
+        ),
+        processingDateTime = ProcessingDateTimeInstant(Instant.parse("2024-01-15T10:30:00Z"))
+      )
+
       "return success response when connector returns success" in {
         (mockConnector
           .cancelTtp(_: TtpCancelRequest)(
@@ -104,6 +106,73 @@ class TtpFeedbackLoopServiceSpec extends AnyWordSpec with MockFactory with Scala
           .returning(TtppEnvelope(error.asLeft[TtpCancelSuccessfulResponse]))
 
         val result = service.cancelTtp(ttpCancelRequest)
+
+        result.value.futureValue shouldBe error.asLeft
+      }
+    }
+
+    "informTtp" - {
+
+      val ttpInformRequest = TtpInformRequest(
+        identifications = NonEmptyList.of(
+          Identification(idType = IdType("NINO"), idValue = IdValue("AB123456C"))
+        ),
+        paymentPlan = TtpInformPaymentPlan(
+          arrangementAgreedDate = ArrangementAgreedDate(LocalDate.of(2025, 1, 1)),
+          ttpEndDate = TtpEndDate(LocalDate.of(2025, 2, 1)),
+          frequency = FrequencyLowercase.Monthly,
+          initialPaymentDate = Some(InitialPaymentDate(LocalDate.of(2025, 1, 5))),
+          initialPaymentAmount = Some(GbpPounds.createOrThrow(100.00)),
+          ddiReference = Some(DdiReference("Test DDI Reference"))
+        ),
+        instalments = NonEmptyList.of(
+          SaOnlyInstalment(
+            InstalmentDueDate(LocalDate.of(2024, 2, 1)),
+            GbpPounds.createOrThrow(500.25)
+          )
+        ),
+        channelIdentifier = ChannelIdentifier.Advisor,
+        transitioned = Some(TransitionedIndicator(true))
+      )
+
+      val ttpInformResponse = TtpInformSuccessfulResponse(
+        apisCalled = List(
+          ApiStatus(
+            name = ApiName("TTP_PROXY"),
+            statusCode = ApiStatusCode("SUCCESS"),
+            processingDateTime = ProcessingDateTimeInstant(Instant.parse("2024-01-15T10:30:00Z")),
+            errorResponse = None
+          )
+        ),
+        processingDateTime = ProcessingDateTimeInstant(Instant.parse("2024-01-15T10:30:00Z"))
+      )
+
+      "return success response when connector returns success" in {
+        (mockConnector
+          .informTtp(_: TtpInformRequest)(
+            _: ExecutionContext,
+            _: HeaderCarrier
+          ))
+          .expects(ttpInformRequest, *, *)
+          .returning(TtppEnvelope(ttpInformResponse))
+
+        val result = service.informTtp(ttpInformRequest)
+
+        result.value.futureValue shouldBe ttpInformResponse.asRight
+      }
+
+      "return error when connector returns error" in {
+        val error = ConnectorError(500, "Internal Server Error")
+
+        (mockConnector
+          .informTtp(_: TtpInformRequest)(
+            _: ExecutionContext,
+            _: HeaderCarrier
+          ))
+          .expects(ttpInformRequest, *, *)
+          .returning(TtppEnvelope(error.asLeft[TtpInformSuccessfulResponse]))
+
+        val result = service.informTtp(ttpInformRequest)
 
         result.value.futureValue shouldBe error.asLeft
       }
