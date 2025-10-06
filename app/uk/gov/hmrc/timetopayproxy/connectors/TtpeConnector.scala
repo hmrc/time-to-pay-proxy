@@ -21,7 +21,7 @@ import com.google.inject.ImplementedBy
 import play.api.libs.json.Json
 import uk.gov.hmrc.http.client.HttpClientV2
 import uk.gov.hmrc.http.{ HeaderCarrier, StringContextOps }
-import uk.gov.hmrc.timetopayproxy.config.AppConfig
+import uk.gov.hmrc.timetopayproxy.config.{ AppConfig, FeatureSwitch }
 import uk.gov.hmrc.timetopayproxy.models.TimeToPayEligibilityError
 import uk.gov.hmrc.timetopayproxy.models.error.ProxyEnvelopeError
 import uk.gov.hmrc.timetopayproxy.models.error.TtppEnvelope.TtppEnvelope
@@ -39,11 +39,11 @@ trait TtpeConnector {
 }
 
 @Singleton
-class DefaultTtpeConnector @Inject() (appConfig: AppConfig, httpClient: HttpClientV2)
+class DefaultTtpeConnector @Inject() (appConfig: AppConfig, httpClient: HttpClientV2, featureSwitch: FeatureSwitch)
     extends TtpeConnector with HttpParser[TimeToPayEligibilityError] {
 
   private val authorizationHeader: Seq[(String, String)] =
-    if (appConfig.internalAuthEnabled.enabled)
+    if (featureSwitch.internalAuthEnabled.enabled)
       Seq("Authorization" -> appConfig.internalAuthToken)
     else Seq.empty
 
