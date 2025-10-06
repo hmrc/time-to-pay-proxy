@@ -1026,7 +1026,7 @@ class TimeToPayProxyControllerItSpec extends IntegrationBaseSpec {
               val expectedTtppErrorResponse: TtppErrorResponse =
                 TtppErrorResponse(
                   statusCode = 503,
-                  errorMessage = "JSON structure is not valid in successful upstream response."
+                  errorMessage = "JSON structure is not valid in received successful HTTP response."
                 )
 
               response.json shouldBe Json.toJson(expectedTtppErrorResponse)
@@ -1054,7 +1054,7 @@ class TimeToPayProxyControllerItSpec extends IntegrationBaseSpec {
                   val expectedTtppErrorResponse: TtppErrorResponse =
                     TtppErrorResponse(
                       statusCode = 503,
-                      errorMessage = "JSON structure is not valid in error upstream response."
+                      errorMessage = "JSON structure is not valid in received error HTTP response."
                     )
 
                   response.json shouldBe Json.toJson(expectedTtppErrorResponse)
@@ -1078,7 +1078,7 @@ class TimeToPayProxyControllerItSpec extends IntegrationBaseSpec {
             )
 
             val expectedTtppErrorResponse: TtppErrorResponse =
-              TtppErrorResponse(statusCode = 503, errorMessage = "Upstream response status is unexpected.")
+              TtppErrorResponse(statusCode = 503, errorMessage = "HTTP status is unexpected in received HTTP response.")
 
             response.json shouldBe Json.toJson(expectedTtppErrorResponse)
             response.status shouldBe 503
@@ -1099,7 +1099,7 @@ class TimeToPayProxyControllerItSpec extends IntegrationBaseSpec {
             )
 
             val expectedTtppErrorResponse: TtppErrorResponse =
-              TtppErrorResponse(statusCode = 503, errorMessage = "Upstream response status is unexpected.")
+              TtppErrorResponse(statusCode = 503, errorMessage = "HTTP status is unexpected in received HTTP response.")
 
             response.json shouldBe Json.toJson(expectedTtppErrorResponse)
             response.status shouldBe 503

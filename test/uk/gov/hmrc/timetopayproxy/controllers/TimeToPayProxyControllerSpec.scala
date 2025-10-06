@@ -1431,6 +1431,10 @@ class TimeToPayProxyControllerSpec extends AnyWordSpec with MockFactory {
 
     "return 200" when {
       "service returns success" in {
+        (() => fs.informEndpointEnabled)
+          .expects()
+          .returning(true)
+
         (authConnector
           .authorise[Unit](_: Predicate, _: Retrieval[Unit])(
             _: HeaderCarrier,
@@ -1463,6 +1467,10 @@ class TimeToPayProxyControllerSpec extends AnyWordSpec with MockFactory {
 
     "return 400" when {
       "request body is in wrong format" in {
+        (() => fs.informEndpointEnabled)
+          .expects()
+          .returning(true)
+
         (authConnector
           .authorise[Unit](_: Predicate, _: Retrieval[Unit])(
             _: HeaderCarrier,
@@ -1493,6 +1501,10 @@ class TimeToPayProxyControllerSpec extends AnyWordSpec with MockFactory {
 
     "return 500" when {
       "service returns failure" in {
+        (() => fs.informEndpointEnabled)
+          .expects()
+          .returning(true)
+
         (authConnector
           .authorise[Unit](_: Predicate, _: Retrieval[Unit])(
             _: HeaderCarrier,
