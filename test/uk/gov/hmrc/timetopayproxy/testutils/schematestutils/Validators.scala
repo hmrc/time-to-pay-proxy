@@ -92,7 +92,7 @@ object Validators {
 
     object TtpInform {
       // Downloaded from:
-      //   ??? // TODO DTD-2856 THIS CURRENT TICKET - UPDATE LOCATION WHEN AVAILABLE. DON'T APPROVE PR IF THIS COMMENT IS STILL IN
+      //   https://jira.tools.tax.service.gov.uk/browse/DTD-2856
       // Official location:
       //   ???
       def openApiRequestSchema: OpenApi3DerivedSchema =
@@ -225,9 +225,9 @@ object Validators {
 
     object TtpInform {
       // Downloaded from:
-      //   TODO
+      //   https://github.com/hmrc/time-to-pay/blob/main/resources/public/api/conf/1.0/InformAPI-v0.0.1.yaml
       // Official location:
-      //   TODO
+      //   https://github.com/hmrc/time-to-pay/blob/main/resources/public/api/conf/1.0/InformAPI-v0.0.1.yaml
       private val path = "test/resources/schemas/apis/time-to-pay/InformAPI-v0.0.1.yaml"
 
       def openApiRequestSchema: OpenApi3DerivedSchema =
