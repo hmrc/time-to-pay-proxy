@@ -16,6 +16,78 @@
 
 package uk.gov.hmrc.timetopayproxy.models.saonly.ttpinform
 
-class TtpInformPaymentPlanSpec {
+import org.scalatest.freespec.AnyFreeSpec
+import org.scalatest.matchers.should.Matchers._
+import play.api.libs.json.{JsNumber, JsResultException, Json}
+import uk.gov.hmrc.timetopayproxy.models.FrequencyLowercase
+import uk.gov.hmrc.timetopayproxy.models.currency.GbpPounds
+import uk.gov.hmrc.timetopayproxy.models.saonly.common.{ArrangementAgreedDate, InitialPaymentDate, TtpEndDate}
+
+import java.time.LocalDate
+
+class TtpInformPaymentPlanSpec extends AnyFreeSpec {
+
+  "DDIReference" - {
+    "should encode and decode correctly" - {
+      "with no optional values present" in {
+        val planWithNoOptionalFields = TtpInformPaymentPlan(
+          arrangementAgreedDate = ArrangementAgreedDate(LocalDate.parse("2025-05-05")),
+          ttpEndDate = TtpEndDate(LocalDate.parse("2026-05-05")),
+          frequency = FrequencyLowercase.Monthly,
+          initialPaymentDate = None,
+          initialPaymentAmount = None,
+          ddiReference = None
+        )
+
+        val jsonPlanWithNoOptionalFields = Json.parse(
+          """
+            |{
+            |  "arrangementAgreedDate": "2025-05-05",
+            |  "ttpEndDate": "2026-05-05",
+            |  "frequency": "monthly"
+            |}
+            |""".stripMargin
+        )
+
+        Json.toJson(planWithNoOptionalFields) shouldBe jsonPlanWithNoOptionalFields
+        jsonPlanWithNoOptionalFields.as[TtpInformPaymentPlan] shouldBe planWithNoOptionalFields
+      }
+
+      "with all optional values present" in {
+        val planWithAllOptionalFields = TtpInformPaymentPlan(
+          arrangementAgreedDate = ArrangementAgreedDate(LocalDate.parse("2025-05-05")),
+          ttpEndDate = TtpEndDate(LocalDate.parse("2026-05-05")),
+          frequency = FrequencyLowercase.Monthly,
+          initialPaymentDate = Some(InitialPaymentDate(LocalDate.parse("2025-05-05"))),
+          initialPaymentAmount = Some(GbpPounds.createOrThrow(BigDecimal(123.45))),
+          ddiReference = Some(DdiReference("Test DDI Reference"))
+        )
+
+        val jsonPlanWithAllOptionalFields = Json.parse(
+          """
+            |{
+            |  "arrangementAgreedDate": "2025-05-05",
+            |  "ttpEndDate": "2026-05-05",
+            |  "frequency": "monthly",
+            |  "initialPaymentDate": "2025-05-05",
+            |  "initialPaymentAmount": 123.45,
+            |  "ddiReference": "Test DDI Reference"
+            |}
+            |""".stripMargin
+        )
+
+        Json.toJson(planWithAllOptionalFields) shouldBe jsonPlanWithAllOptionalFields
+        jsonPlanWithAllOptionalFields.as[TtpInformPaymentPlan] shouldBe planWithAllOptionalFields
+      }
+    }
+
+    "should correctly fail to decode from invalid JSON" in {
+      val badJson = JsNumber(2)
+
+      assertThrows[JsResultException](
+        badJson.as[TtpInformPaymentPlan]
+      )
+    }
+  }
 
 }
