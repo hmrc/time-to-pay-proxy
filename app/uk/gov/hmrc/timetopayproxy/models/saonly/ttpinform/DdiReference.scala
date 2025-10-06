@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.timetopayproxy.models.saonly.ttpinform
 
-import play.api.libs.json.{Format, Json}
+import play.api.libs.json.{ Format, Json }
 
 final case class DdiReference(value: String) extends AnyVal
 

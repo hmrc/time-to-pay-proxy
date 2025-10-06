@@ -16,9 +16,9 @@
 
 package uk.gov.hmrc.timetopayproxy.models.saonly.ttpinform
 
-import play.api.libs.json.{Json, OFormat}
-import play.api.mvc.{Result, Results}
-import uk.gov.hmrc.timetopayproxy.models.error.{ProxyEnvelopeError, TtppWriteableError}
+import play.api.libs.json.{ Json, OFormat }
+import play.api.mvc.{ Result, Results }
+import uk.gov.hmrc.timetopayproxy.models.error.{ ProxyEnvelopeError, TtppWriteableError }
 import uk.gov.hmrc.timetopayproxy.models.saonly.common.ProcessingDateTimeInstant
 import uk.gov.hmrc.timetopayproxy.models.saonly.common.apistatus.ApiStatus
 

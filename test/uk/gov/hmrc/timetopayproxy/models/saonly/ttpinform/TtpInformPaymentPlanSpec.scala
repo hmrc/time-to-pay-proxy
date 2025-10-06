@@ -18,10 +18,10 @@ package uk.gov.hmrc.timetopayproxy.models.saonly.ttpinform
 
 import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.should.Matchers._
-import play.api.libs.json.{JsNumber, JsResultException, Json}
+import play.api.libs.json.{ JsNumber, JsResultException, Json }
 import uk.gov.hmrc.timetopayproxy.models.FrequencyLowercase
 import uk.gov.hmrc.timetopayproxy.models.currency.GbpPounds
-import uk.gov.hmrc.timetopayproxy.models.saonly.common.{ArrangementAgreedDate, InitialPaymentDate, TtpEndDate}
+import uk.gov.hmrc.timetopayproxy.models.saonly.common.{ ArrangementAgreedDate, InitialPaymentDate, TtpEndDate }
 
 import java.time.LocalDate
 

@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.timetopayproxy.models.saonly.ttpinform
 
-import play.api.libs.json.{Json, OFormat}
+import play.api.libs.json.{ Json, OFormat }
 import uk.gov.hmrc.timetopayproxy.models.saonly.common.ProcessingDateTimeInstant
 import uk.gov.hmrc.timetopayproxy.models.saonly.common.apistatus.ApiStatus
 

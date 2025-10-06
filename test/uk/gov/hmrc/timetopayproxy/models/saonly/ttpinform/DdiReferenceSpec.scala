@@ -18,7 +18,7 @@ package uk.gov.hmrc.timetopayproxy.models.saonly.ttpinform
 
 import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.should.Matchers._
-import play.api.libs.json.{JsNumber, JsResultException, JsString, Json}
+import play.api.libs.json.{ JsNumber, JsResultException, JsString, Json }
 
 class DdiReferenceSpec extends AnyFreeSpec {
 
