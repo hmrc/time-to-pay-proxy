@@ -38,7 +38,7 @@ import uk.gov.hmrc.timetopayproxy.testutils.TestOnlyJsonFormats._
 import java.time.{ LocalDate, LocalDateTime }
 import scala.concurrent.ExecutionContext
 
-class TimeToPayProxyControllerItSpec extends IntegrationBaseSpec {
+class TimeToPayProxyControllerNonAuthItSpec extends IntegrationBaseSpec {
 
   "TimeToPayProxyController" - {
     ".getAffordableQuotes" - {
@@ -578,56 +578,6 @@ class TimeToPayProxyControllerItSpec extends IntegrationBaseSpec {
               response.status shouldBe 400
             }
           }
-        }
-      }
-
-      "should return a 401" - {
-        "when an invalid authorisation token is used" in new TimeToPayProxyControllerTestBase {
-          val unauthorisedError: TimeToPayEligibilityError =
-            TimeToPayEligibilityError(code = "401", reason = "Unauthorized")
-
-          stubPostWithResponseBody(url = "/auth/authorise", status = 200, responseBody = "null")
-          stubPostWithResponseBody(
-            url = "/debts/time-to-pay/charge-info",
-            status = 401,
-            responseBody = Json.toJson(unauthorisedError).toString()
-          )
-
-          val requestForChargeInfo: WSRequest = buildRequest(chargeInfoPath)
-          val response: WSResponse = await(
-            requestForChargeInfo.post(Json.toJson(chargeInfoRequest))
-          )
-
-          val expectedTtppErrorResponse: TtppErrorResponse =
-            TtppErrorResponse(statusCode = 401, errorMessage = "Unauthorized")
-
-          response.json shouldBe Json.toJson(expectedTtppErrorResponse)
-          response.status shouldBe 401
-        }
-      }
-
-      "should return a 403" - {
-        "when the service sending the authorization token does not have required permissions" in new TimeToPayProxyControllerTestBase {
-          val forbiddenError: TimeToPayEligibilityError =
-            TimeToPayEligibilityError(code = "403", reason = "Forbidden")
-
-          stubPostWithResponseBody(url = "/auth/authorise", status = 200, responseBody = "null")
-          stubPostWithResponseBody(
-            url = "/debts/time-to-pay/charge-info",
-            status = 403,
-            responseBody = Json.toJson(forbiddenError).toString()
-          )
-
-          val requestForChargeInfo: WSRequest = buildRequest(chargeInfoPath)
-          val response: WSResponse = await(
-            requestForChargeInfo.post(Json.toJson(chargeInfoRequest))
-          )
-
-          val expectedTtppErrorResponse: TtppErrorResponse =
-            TtppErrorResponse(statusCode = 403, errorMessage = "Forbidden")
-
-          response.json shouldBe Json.toJson(expectedTtppErrorResponse)
-          response.status shouldBe 403
         }
       }
 

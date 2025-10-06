@@ -50,8 +50,7 @@ trait IntegrationBaseSpec
       "microservice.services.stub.port"    -> mockPort,
       "metrics.enabled"                    -> false,
       "auditing.enabled"                   -> false,
-      "feature-switch.internalAuthEnabled" -> true,
-      "internalAuthToken"                  -> "valid-auth-token"
+      "feature-switch.internalAuthEnabled" -> true
     )
 
   override implicit lazy val app: Application = new GuiceApplicationBuilder()
