@@ -47,9 +47,10 @@ info:
       | 1.0.13 | 08-07-2025 | Alex Olkhovskiy | make indentations in charge-info request non-empty, remove altFormat and country|
       | 1.0.14 | 14-08-2025 | Alex Olkhovskiy | refactor the spec with linter|
       | 1.0.15 | 18-09-2025 | Alex Olkhovskiy | Restrict regimeType enum to only 'SA' value for /quote endpoint |
-      | 1.0.16| 24-09-2024 | Alex Olkhovskiy | Added new cancel ednpont  |
+      | 1.0.16 | 24-09-2025 | Alex Olkhovskiy | Added new cancel endpoint  |
+      | 1.0.17 | 07-10-2025 | Vinnie Brice | Change cancel scope to writes  |
   contact: {}
-  version: 1.0.16
+  version: 1.0.17
 servers:
   - url: https://api.service.hmrc.gov.uk
     variables: {}
@@ -782,7 +783,7 @@ paths:
             example: f0bd1f32-de51-45cc-9b18-0520d6e3ab1a
       security:
         - applicationRestricted:
-            - write:time-to-pay-proxy
+            - read:time-to-pay-proxy
       requestBody:
         description: Request body containing cancellation and identification details
         required: true
