@@ -50,7 +50,8 @@ trait IntegrationBaseSpec
       "microservice.services.stub.port"    -> mockPort,
       "metrics.enabled"                    -> false,
       "auditing.enabled"                   -> false,
-      "feature-switch.internalAuthEnabled" -> true
+      "feature-switch.internalAuthEnabled" -> internalAuthEnabled,
+      "internal-auth.token"                -> "configured-auth-token"
     )
 
   override implicit lazy val app: Application = new GuiceApplicationBuilder()
@@ -72,4 +73,6 @@ trait IntegrationBaseSpec
     client.url(s"http://localhost:$port$path").withFollowRedirects(false).withHttpHeaders("Authorization" -> "dummy")
 
   def document(response: WSResponse): JsValue = Json.parse(response.body)
+
+  def internalAuthEnabled: Boolean
 }
