@@ -147,8 +147,9 @@ final class DefaultTtpFeedbackLoopConnectorSpec
 
       "using IF" should {
         "return a successful response" in new Setup(ifImpl = true) {
-          stubPostWithResponseBody(
+          stubPostWithResponseBodyEnsuringRequest(
             "/individuals/debts/time-to-pay/cancel",
+            Json.toJson(ttpCancelRequest).toString(),
             200,
             Json.toJson(ttpCancelResponse).toString()
           )
@@ -159,8 +160,9 @@ final class DefaultTtpFeedbackLoopConnectorSpec
         }
 
         "parse an error response from an upstream service" in new Setup(ifImpl = true) {
-          stubPostWithResponseBody(
+          stubPostWithResponseBodyEnsuringRequest(
             "/individuals/debts/time-to-pay/cancel",
+            Json.toJson(ttpCancelRequest).toString(),
             400,
             """{"failures": [{"code": "400", "reason": "Invalid request body"}]}"""
           )
@@ -171,8 +173,9 @@ final class DefaultTtpFeedbackLoopConnectorSpec
         }
 
         "handle 500 responses" in new Setup(ifImpl = true) {
-          stubPostWithResponseBody(
+          stubPostWithResponseBodyEnsuringRequest(
             "/individuals/debts/time-to-pay/cancel",
+            Json.toJson(ttpCancelRequest).toString(),
             500,
             Json.toJson(ttpCancelResponse).toString()
           )
@@ -198,8 +201,9 @@ final class DefaultTtpFeedbackLoopConnectorSpec
 
       "using TTP" should {
         "return a successful response" in new Setup(ifImpl = false) {
-          stubPostWithResponseBody(
+          stubPostWithResponseBodyEnsuringRequest(
             "/debts/time-to-pay/cancel",
+            Json.toJson(ttpCancelRequest).toString(),
             200,
             Json.toJson(ttpCancelResponse).toString()
           )
@@ -210,8 +214,9 @@ final class DefaultTtpFeedbackLoopConnectorSpec
         }
 
         "parse an error response from an upstream service" in new Setup(ifImpl = false) {
-          stubPostWithResponseBody(
+          stubPostWithResponseBodyEnsuringRequest(
             "/debts/time-to-pay/cancel",
+            Json.toJson(ttpCancelRequest).toString(),
             400,
             """{"failures": [{"code": "400", "reason": "Invalid request body"}]}"""
           )
@@ -222,8 +227,9 @@ final class DefaultTtpFeedbackLoopConnectorSpec
         }
 
         "handle 500 responses" in new Setup(ifImpl = false) {
-          stubPostWithResponseBody(
+          stubPostWithResponseBodyEnsuringRequest(
             "/debts/time-to-pay/cancel",
+            Json.toJson(ttpCancelRequest).toString(),
             500,
             Json.toJson(ttpCancelResponse).toString()
           )
@@ -287,8 +293,9 @@ final class DefaultTtpFeedbackLoopConnectorSpec
 
     "using IF" should {
       "return a successful response" in new Setup(ifImpl = true) {
-        stubPostWithResponseBody(
+        stubPostWithResponseBodyEnsuringRequest(
           "/individuals/debts/time-to-pay/inform",
+          Json.toJson(ttpInformRequest).toString(),
           200,
           Json.toJson(ttpInformResponse).toString()
         )
@@ -299,8 +306,9 @@ final class DefaultTtpFeedbackLoopConnectorSpec
       }
 
       "parse an error response from an upstream service" in new Setup(ifImpl = true) {
-        stubPostWithResponseBody(
+        stubPostWithResponseBodyEnsuringRequest(
           "/individuals/debts/time-to-pay/inform",
+          Json.toJson(ttpInformRequest).toString(),
           400,
           """{"failures": [{"code": "400", "reason": "Invalid request body"}]}"""
         )
@@ -311,8 +319,9 @@ final class DefaultTtpFeedbackLoopConnectorSpec
       }
 
       "handle 500 responses" in new Setup(ifImpl = true) {
-        stubPostWithResponseBody(
+        stubPostWithResponseBodyEnsuringRequest(
           "/individuals/debts/time-to-pay/inform",
+          Json.toJson(ttpInformRequest).toString(),
           500,
           Json.toJson(ttpInformResponse).toString()
         )
@@ -330,8 +339,9 @@ final class DefaultTtpFeedbackLoopConnectorSpec
 
     "using TTP" should {
       "return a successful response" in new Setup(ifImpl = false) {
-        stubPostWithResponseBody(
+        stubPostWithResponseBodyEnsuringRequest(
           "/debts/time-to-pay/inform",
+          Json.toJson(ttpInformRequest).toString(),
           200,
           Json.toJson(ttpInformResponse).toString()
         )
@@ -342,8 +352,9 @@ final class DefaultTtpFeedbackLoopConnectorSpec
       }
 
       "parse an error response from an upstream service" in new Setup(ifImpl = false) {
-        stubPostWithResponseBody(
+        stubPostWithResponseBodyEnsuringRequest(
           "/debts/time-to-pay/inform",
+          Json.toJson(ttpInformRequest).toString(),
           400,
           """{"failures": [{"code": "400", "reason": "Invalid request body"}]}"""
         )
@@ -354,8 +365,9 @@ final class DefaultTtpFeedbackLoopConnectorSpec
       }
 
       "handle 500 responses" in new Setup(ifImpl = false) {
-        stubPostWithResponseBody(
+        stubPostWithResponseBodyEnsuringRequest(
           "/debts/time-to-pay/inform",
+          Json.toJson(ttpInformRequest).toString(),
           500,
           Json.toJson(ttpInformResponse).toString()
         )
