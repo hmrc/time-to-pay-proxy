@@ -29,7 +29,7 @@ import uk.gov.hmrc.timetopayproxy.models.saonly.chargeInfoApi._
 import uk.gov.hmrc.timetopayproxy.models.saonly.common.apistatus.{ ApiErrorResponse, ApiName, ApiStatus, ApiStatusCode }
 import uk.gov.hmrc.timetopayproxy.models.saonly.common._
 import uk.gov.hmrc.timetopayproxy.models.saonly.ttpcancel.{ CancellationDate, TtpCancelPaymentPlan, TtpCancelRequest, TtpCancelSuccessfulResponse }
-import uk.gov.hmrc.timetopayproxy.models.saonly.ttpinform.{DdiReference, TtpInformInformativeError, TtpInformPaymentPlan, TtpInformRequest, TtpInformSuccessfulResponse}
+import uk.gov.hmrc.timetopayproxy.models.saonly.ttpinform.{ DdiReference, TtpInformInformativeError, TtpInformPaymentPlan, TtpInformRequest, TtpInformSuccessfulResponse }
 import uk.gov.hmrc.timetopayproxy.models._
 import uk.gov.hmrc.timetopayproxy.support.IntegrationBaseSpec
 import uk.gov.hmrc.timetopayproxy.testutils.TestOnlyJsonFormats._
