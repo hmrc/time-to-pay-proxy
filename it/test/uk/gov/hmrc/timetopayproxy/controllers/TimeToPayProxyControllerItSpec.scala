@@ -17,23 +17,24 @@
 package uk.gov.hmrc.timetopayproxy.controllers
 
 import cats.data.NonEmptyList
-import play.api.libs.json.{ JsNull, JsObject, JsValue, Json }
-import play.api.libs.ws.{ WSRequest, WSResponse }
+import play.api.libs.json.{JsNull, JsObject, JsValue, Json}
+import play.api.libs.ws.{WSRequest, WSResponse}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.timetopayproxy.models._
-import uk.gov.hmrc.timetopayproxy.models.affordablequotes.{ AffordableQuoteResponse, AffordableQuotesRequest }
+import uk.gov.hmrc.timetopayproxy.models.affordablequotes.{AffordableQuoteResponse, AffordableQuotesRequest}
 import uk.gov.hmrc.timetopayproxy.models.error.TtppErrorResponse
-import uk.gov.hmrc.timetopayproxy.models.saonly.common.apistatus.{ ApiErrorResponse, ApiName, ApiStatus, ApiStatusCode }
-import uk.gov.hmrc.timetopayproxy.models.saonly.common.{ ArrangementAgreedDate, InitialPaymentDate, ProcessingDateTimeInstant, SaOnlyInstalment, TransitionedIndicator, TtpEndDate }
-import uk.gov.hmrc.timetopayproxy.models.saonly.ttpcancel.{ CancellationDate, TtpCancelPaymentPlan, TtpCancelRequest, TtpCancelSuccessfulResponse }
+import uk.gov.hmrc.timetopayproxy.models.saonly.common.apistatus.{ApiErrorResponse, ApiName, ApiStatus, ApiStatusCode}
+import uk.gov.hmrc.timetopayproxy.models.saonly.common.{ArrangementAgreedDate, InitialPaymentDate, ProcessingDateTimeInstant, SaOnlyInstalment, TransitionedIndicator, TtpEndDate}
+import uk.gov.hmrc.timetopayproxy.models.saonly.ttpcancel.{CancellationDate, TtpCancelPaymentPlan, TtpCancelRequest, TtpCancelSuccessfulResponse}
 import uk.gov.hmrc.timetopayproxy.models.saonly.chargeInfoApi._
 import uk.gov.hmrc.timetopayproxy.models.saonly.common.SaOnlyRegimeType
 import uk.gov.hmrc.timetopayproxy.models.currency.GbpPounds
-import uk.gov.hmrc.timetopayproxy.models.{ ChannelIdentifier, FrequencyLowercase, Identification, InstalmentDueDate }
+import uk.gov.hmrc.timetopayproxy.models.saonly.fullAmend.{FullAmendInstalment, FullAmendPaymentPlan, FullAmendRequest, FullAmendSuccessResponse}
+import uk.gov.hmrc.timetopayproxy.models.{ChannelIdentifier, FrequencyLowercase, Identification, InstalmentDueDate}
 import uk.gov.hmrc.timetopayproxy.support.IntegrationBaseSpec
 import uk.gov.hmrc.timetopayproxy.testutils.TestOnlyJsonFormats._
 
-import java.time.{ LocalDate, LocalDateTime }
+import java.time.{LocalDate, LocalDateTime}
 import scala.concurrent.ExecutionContext
 
 class TimeToPayProxyControllerItSpec extends IntegrationBaseSpec {
@@ -1005,6 +1006,48 @@ class TimeToPayProxyControllerItSpec extends IntegrationBaseSpec {
       ),
       channelIdentifier = ChannelIdentifier.SelfService,
       transitioned = Some(TransitionedIndicator(true))
+    )
+
+    val fullAmendRequest: FullAmendRequest = FullAmendRequest(
+      identifications = NonEmptyList.of(
+        Identification(idType = IdType("NINO"), idValue = IdValue("AA000000A")),
+        Identification(idType = IdType("MTDITID"), idValue = IdValue("XAIT00000000054"))
+      ),
+      paymentPlan = FullAmendPaymentPlan(
+        arrangementAgreedDate = ArrangementAgreedDate(LocalDate.parse("2025-01-01")),
+        ttpEndDate = TtpEndDate(LocalDate.parse("2025-12-31")),
+        frequency = FrequencyLowercase.Monthly,
+
+        initialPaymentDate = Some(InitialPaymentDate(LocalDate.parse("2025-02-01"))),
+        initialPaymentAmount = Some(GbpPounds.createOrThrow(BigDecimal("123.45"))),
+        ddiReference = Some("DDI Reference")
+      ),
+      instalments = NonEmptyList.of(
+        SaOnlyInstalment(
+          dueDate = InstalmentDueDate(LocalDate.parse("2025-11-28")),
+          amountDue = GbpPounds.createOrThrow(BigDecimal("100.00"))
+        )
+      ),
+      channelIdentifier = ChannelIdentifier.SelfService,
+      transitioned = Some(TransitionedIndicator(true))
+    )
+
+    val fullAmendResponse: FullAmendSuccessResponse = FullAmendSuccessResponse(
+      apisCalled = List(
+        ApiStatus(
+          name = ApiName("CESA"),
+          statusCode = ApiStatusCode("200"),
+          processingDateTime = ProcessingDateTimeInstant(java.time.Instant.parse("2025-05-01T14:30:00Z")),
+          errorResponse = None
+        ),
+        ApiStatus(
+          name = ApiName("ETMP"),
+          statusCode = ApiStatusCode("201"),
+          processingDateTime = ProcessingDateTimeInstant(java.time.Instant.parse("2025-05-01T14:31:00Z")),
+          errorResponse = None
+        )
+      ),
+      processingDateTime = ProcessingDateTimeInstant(java.time.Instant.parse("2025-10-15T10:31:00Z"))
     )
 
   }
