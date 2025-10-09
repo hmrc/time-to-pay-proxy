@@ -16,13 +16,16 @@
 
 package uk.gov.hmrc.timetopayproxy.config
 
+import com.typesafe.config.ConfigFactory
 import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.should.Matchers
-import org.scalatestplus.play.guice.GuiceOneAppPerSuite
+import play.api.Configuration
 import uk.gov.hmrc.timetopayproxy.models.featureSwitches.InternalAuthEnabled
 
-class FeatureSwitchSpec extends AnyFreeSpec with Matchers with GuiceOneAppPerSuite {
-  val featureSwitch: FeatureSwitch = app.injector.instanceOf[FeatureSwitch]
+class FeatureSwitchSpec extends AnyFreeSpec with Matchers {
+  val config: Configuration = Configuration(ConfigFactory.load())
+  val maybeFeatureSwitchConfig: Option[Configuration] = config.getOptional[Configuration](s"feature-switch")
+  val featureSwitch: FeatureSwitch = FeatureSwitch(maybeFeatureSwitchConfig)
 
   "FeatureSwitch" - {
     "internalAuthEnabled" - {
