@@ -38,18 +38,20 @@ trait IntegrationBaseSpec
 
   def servicesConfig: Map[String, Any] =
     Map(
-      "microservice.services.auth.host" -> mockHost,
-      "microservice.services.auth.port" -> mockPort,
-      "microservice.services.ttp.host"  -> mockHost,
-      "microservice.services.ttp.port"  -> mockPort,
-      "microservice.services.ttpe.host" -> mockHost,
-      "microservice.services.ttpe.port" -> mockPort,
-      "microservice.services.ttp.token" -> "dummyToken",
-      "microservice.services.ttp.useIf" -> false,
-      "microservice.services.stub.host" -> mockHost,
-      "microservice.services.stub.port" -> mockPort,
-      "metrics.enabled"                 -> false,
-      "auditing.enabled"                -> false
+      "microservice.services.auth.host"    -> mockHost,
+      "microservice.services.auth.port"    -> mockPort,
+      "microservice.services.ttp.host"     -> mockHost,
+      "microservice.services.ttp.port"     -> mockPort,
+      "microservice.services.ttpe.host"    -> mockHost,
+      "microservice.services.ttpe.port"    -> mockPort,
+      "microservice.services.ttp.token"    -> "dummyToken",
+      "microservice.services.ttp.useIf"    -> false,
+      "microservice.services.stub.host"    -> mockHost,
+      "microservice.services.stub.port"    -> mockPort,
+      "metrics.enabled"                    -> false,
+      "auditing.enabled"                   -> false,
+      "feature-switch.internalAuthEnabled" -> internalAuthEnabled,
+      "internal-auth.token"                -> "configured-auth-token"
     )
 
   override implicit lazy val app: Application = new GuiceApplicationBuilder()
@@ -71,4 +73,6 @@ trait IntegrationBaseSpec
     client.url(s"http://localhost:$port$path").withFollowRedirects(false).withHttpHeaders("Authorization" -> "dummy")
 
   def document(response: WSResponse): JsValue = Json.parse(response.body)
+
+  def internalAuthEnabled: Boolean
 }

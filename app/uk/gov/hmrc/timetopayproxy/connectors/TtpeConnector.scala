@@ -21,7 +21,7 @@ import com.google.inject.ImplementedBy
 import play.api.libs.json.Json
 import uk.gov.hmrc.http.client.HttpClientV2
 import uk.gov.hmrc.http.{ HeaderCarrier, StringContextOps }
-import uk.gov.hmrc.timetopayproxy.config.AppConfig
+import uk.gov.hmrc.timetopayproxy.config.{ AppConfig, FeatureSwitch }
 import uk.gov.hmrc.timetopayproxy.models.TimeToPayEligibilityError
 import uk.gov.hmrc.timetopayproxy.models.error.ProxyEnvelopeError
 import uk.gov.hmrc.timetopayproxy.models.error.TtppEnvelope.TtppEnvelope
@@ -39,10 +39,16 @@ trait TtpeConnector {
 }
 
 @Singleton
-class DefaultTtpeConnector @Inject() (appConfig: AppConfig, httpClient: HttpClientV2)
+class DefaultTtpeConnector @Inject() (appConfig: AppConfig, httpClient: HttpClientV2, featureSwitch: FeatureSwitch)
     extends TtpeConnector with HttpParser[TimeToPayEligibilityError] {
 
-  val headers: String => Seq[(String, String)] = (guid: String) => Seq("CorrelationId" -> s"$guid")
+  private val authorizationHeader: Seq[(String, String)] =
+    if (featureSwitch.internalAuthEnabled.enabled)
+      Seq("Authorization" -> appConfig.internalAuthToken)
+    else Seq.empty
+
+  val headers: String => Seq[(String, String)] = (guid: String) =>
+    Seq("CorrelationId" -> s"$guid") ++ authorizationHeader
 
   private def getOrGenerateCorrelationId(implicit hc: HeaderCarrier): String =
     (hc.headers(Seq("CorrelationId")) ++ hc.extraHeaders)

@@ -17,19 +17,19 @@
 package uk.gov.hmrc.timetopayproxy.controllers
 
 import cats.data.NonEmptyList
+import com.github.tomakehurst.wiremock.client.WireMock
+import com.github.tomakehurst.wiremock.client.WireMock.{ postRequestedFor, urlPathEqualTo }
 import play.api.libs.json.{ JsNull, JsObject, JsValue, Json }
 import play.api.libs.ws.{ WSRequest, WSResponse }
 import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.timetopayproxy.models._
 import uk.gov.hmrc.timetopayproxy.models.affordablequotes.{ AffordableQuoteResponse, AffordableQuotesRequest }
-import uk.gov.hmrc.timetopayproxy.models.error.TtppErrorResponse
-import uk.gov.hmrc.timetopayproxy.models.saonly.common.apistatus.{ ApiErrorResponse, ApiName, ApiStatus, ApiStatusCode }
-import uk.gov.hmrc.timetopayproxy.models.saonly.common.{ ArrangementAgreedDate, InitialPaymentDate, ProcessingDateTimeInstant, SaOnlyInstalment, TransitionedIndicator, TtpEndDate }
-import uk.gov.hmrc.timetopayproxy.models.saonly.ttpcancel.{ CancellationDate, TtpCancelPaymentPlan, TtpCancelRequest, TtpCancelSuccessfulResponse }
-import uk.gov.hmrc.timetopayproxy.models.saonly.chargeInfoApi._
-import uk.gov.hmrc.timetopayproxy.models.saonly.common.SaOnlyRegimeType
 import uk.gov.hmrc.timetopayproxy.models.currency.GbpPounds
-import uk.gov.hmrc.timetopayproxy.models.{ ChannelIdentifier, FrequencyLowercase, Identification, InstalmentDueDate }
+import uk.gov.hmrc.timetopayproxy.models.error.TtppErrorResponse
+import uk.gov.hmrc.timetopayproxy.models.saonly.chargeInfoApi._
+import uk.gov.hmrc.timetopayproxy.models.saonly.common.apistatus.{ ApiErrorResponse, ApiName, ApiStatus, ApiStatusCode }
+import uk.gov.hmrc.timetopayproxy.models.saonly.common._
+import uk.gov.hmrc.timetopayproxy.models.saonly.ttpcancel.{ CancellationDate, TtpCancelPaymentPlan, TtpCancelRequest, TtpCancelSuccessfulResponse }
+import uk.gov.hmrc.timetopayproxy.models._
 import uk.gov.hmrc.timetopayproxy.support.IntegrationBaseSpec
 import uk.gov.hmrc.timetopayproxy.testutils.TestOnlyJsonFormats._
 
@@ -37,6 +37,7 @@ import java.time.{ LocalDate, LocalDateTime }
 import scala.concurrent.ExecutionContext
 
 class TimeToPayProxyControllerItSpec extends IntegrationBaseSpec {
+  def internalAuthEnabled: Boolean = false
 
   "TimeToPayProxyController" - {
     ".getAffordableQuotes" - {
@@ -315,6 +316,8 @@ class TimeToPayProxyControllerItSpec extends IntegrationBaseSpec {
             val response: WSResponse = await(
               requestForChargeInfo.post(Json.toJson(chargeInfoRequest))
             )
+
+            WireMock.verify(1, postRequestedFor(urlPathEqualTo("/debts/time-to-pay/charge-info")))
 
             response.json shouldBe Json.toJson(ttpeResponse)
             response.status shouldBe 200

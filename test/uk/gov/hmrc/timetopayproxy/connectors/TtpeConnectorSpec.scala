@@ -25,9 +25,10 @@ import play.api.{ ConfigLoader, Configuration }
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.http.client.HttpClientV2
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
-import uk.gov.hmrc.timetopayproxy.config.AppConfig
+import uk.gov.hmrc.timetopayproxy.config.{ AppConfig, FeatureSwitch }
 import uk.gov.hmrc.timetopayproxy.models.error.ConnectorError
 import uk.gov.hmrc.timetopayproxy.models.error.TtppEnvelope.TtppEnvelope
+import uk.gov.hmrc.timetopayproxy.models.featureSwitches.InternalAuthEnabled
 import uk.gov.hmrc.timetopayproxy.models.saonly.chargeInfoApi._
 import uk.gov.hmrc.timetopayproxy.models.saonly.common.SaOnlyRegimeType
 import uk.gov.hmrc.timetopayproxy.models.{ IdType, IdValue, Identification }
@@ -41,6 +42,7 @@ class TtpeConnectorSpec
 
   val config: Configuration = mock[Configuration]
   val servicesConfig: ServicesConfig = mock[ServicesConfig]
+  val featureSwitch: FeatureSwitch = mock[FeatureSwitch]
 
   val httpClient: HttpClientV2 = app.injector.instanceOf[HttpClientV2]
 
@@ -85,10 +87,17 @@ class TtpeConnectorSpec
       .getOptional(_: String)(_: ConfigLoader[Option[Configuration]]))
       .expects("feature-switch", *)
       .returns(None)
+    (config
+      .get(_: String)(_: ConfigLoader[String]))
+      .expects("internal-auth.token", *)
+      .returns("valid-auth-token")
+    (() => featureSwitch.internalAuthEnabled)
+      .expects()
+      .returning(InternalAuthEnabled(true))
 
     val mockConfiguration: AppConfig = new MockAppConfig(config, servicesConfig, ifImpl = false)
 
-    val connector: TtpeConnector = new DefaultTtpeConnector(mockConfiguration, httpClient)
+    val connector: TtpeConnector = new DefaultTtpeConnector(mockConfiguration, httpClient, featureSwitch)
 
   }
 

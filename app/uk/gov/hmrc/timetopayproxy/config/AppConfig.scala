@@ -37,4 +37,5 @@ class AppConfig @Inject() (
   val auditingEnabled: Boolean = config.get[Boolean]("auditing.enabled")
   val graphiteHost: String = config.get[String]("microservice.metrics.graphite.host")
   val featureSwitch: Option[Configuration] = config.getOptional[Configuration](s"feature-switch")
+  val internalAuthToken: String = config.get[String]("internal-auth.token")
 }
