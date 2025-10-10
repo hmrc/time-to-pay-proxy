@@ -28,6 +28,7 @@ import uk.gov.hmrc.timetopayproxy.models.error.TtppEnvelope.TtppEnvelope
 import uk.gov.hmrc.timetopayproxy.models.error.{ TtppEnvelope, TtppErrorResponse, ValidationError }
 import uk.gov.hmrc.timetopayproxy.models.saonly.chargeInfoApi.ChargeInfoRequest
 import uk.gov.hmrc.timetopayproxy.models.saonly.ttpcancel.TtpCancelRequest
+import uk.gov.hmrc.timetopayproxy.models.saonly.ttpinform.TtpInformRequest
 import uk.gov.hmrc.timetopayproxy.services.{ TTPEService, TTPQuoteService, TtpFeedbackLoopService }
 
 import javax.inject.{ Inject, Singleton }
@@ -129,6 +130,21 @@ class TimeToPayProxyController @Inject() (
     } else {
       Future.successful(
         TtppErrorResponse(statusCode = 503, errorMessage = "/cancel endpoint is not currently enabled").toErrorResult
+      )
+    }
+  }
+
+  def informTtp: Action[JsValue] = authoriseAction.async(parse.json) { implicit request =>
+    if (featureSwitch.informEndpointEnabled) {
+      withJsonBody[TtpInformRequest] { deserialisedRequest: TtpInformRequest =>
+        ttpFeedbackLoopService
+          .informTtp(deserialisedRequest)
+          .leftMap(ttppError => ttppError.toWriteableProxyError)
+          .fold(e => e.toErrorResult, r => Results.Ok(Json.toJson(r)))
+      }
+    } else {
+      Future.successful(
+        TtppErrorResponse(statusCode = 503, errorMessage = "/inform endpoint is not currently enabled").toErrorResult
       )
     }
   }
