@@ -105,7 +105,7 @@ final class DefaultTtpFeedbackLoopConnectorSpec
 
     val mockConfiguration: AppConfig = new MockAppConfig(config, servicesConfig, ifImpl)
 
-    val connector: TtpFeedbackLoopConnector = new DefaultTtpFeedbackLoopConnector(mockConfiguration, httpClient)
+    val connector: TtpFeedbackLoopConnector = new TtpFeedbackLoopConnector(mockConfiguration, httpClient)
   }
 
   "DefaultTtpFeedbackLoopConnector" should {

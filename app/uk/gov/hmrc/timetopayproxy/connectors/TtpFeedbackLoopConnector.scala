@@ -17,21 +17,20 @@
 package uk.gov.hmrc.timetopayproxy.connectors
 
 import cats.data.EitherT
-import com.google.inject.ImplementedBy
 import play.api.libs.json.Json
 import uk.gov.hmrc.http.client.HttpClientV2
-import uk.gov.hmrc.http.{ HeaderCarrier, HttpReads, StringContextOps }
+import uk.gov.hmrc.http.{HeaderCarrier, HttpReads, StringContextOps}
 import uk.gov.hmrc.timetopayproxy.config.AppConfig
 import uk.gov.hmrc.timetopayproxy.connectors.util.HttpReadsWithLoggingBuilder
 import uk.gov.hmrc.timetopayproxy.logging.RequestAwareLogger
 import uk.gov.hmrc.timetopayproxy.models.TimeToPayError
 import uk.gov.hmrc.timetopayproxy.models.error.ProxyEnvelopeError
 import uk.gov.hmrc.timetopayproxy.models.error.TtppEnvelope.TtppEnvelope
-import uk.gov.hmrc.timetopayproxy.models.saonly.ttpcancel.{ TtpCancelInformativeError, TtpCancelRequest, TtpCancelSuccessfulResponse }
-import uk.gov.hmrc.timetopayproxy.models.saonly.ttpinform.{ TtpInformInformativeError, TtpInformRequest, TtpInformSuccessfulResponse }
+import uk.gov.hmrc.timetopayproxy.models.saonly.ttpcancel.{TtpCancelInformativeError, TtpCancelRequest, TtpCancelSuccessfulResponse}
+import uk.gov.hmrc.timetopayproxy.models.saonly.ttpinform.{TtpInformInformativeError, TtpInformRequest, TtpInformSuccessfulResponse}
 
 import java.util.UUID
-import javax.inject.{ Inject, Singleton }
+import javax.inject.{Inject, Singleton}
 import scala.concurrent.ExecutionContext
 
 /** Feedback Loop Connector for CDCS -> TTP communication.
@@ -39,22 +38,10 @@ import scala.concurrent.ExecutionContext
   * The "feedback loop" refers to CDCS notifying TTP service about customer plan lifecycle events
   * (cancel, amend, inform) so TTP can update downstream HoDs accordingly.
   */
-@ImplementedBy(classOf[DefaultTtpFeedbackLoopConnector])
-trait TtpFeedbackLoopConnector {
-  def cancelTtp(
-    ttppRequest: TtpCancelRequest
-  )(implicit ec: ExecutionContext, hc: HeaderCarrier): TtppEnvelope[TtpCancelSuccessfulResponse]
-
-  def informTtp(
-    ttppInformRequest: TtpInformRequest
-  )(implicit ec: ExecutionContext, hc: HeaderCarrier): TtppEnvelope[TtpInformSuccessfulResponse]
-}
-
 @Singleton
-class DefaultTtpFeedbackLoopConnector @Inject() (appConfig: AppConfig, httpClient: HttpClientV2)
-    extends TtpFeedbackLoopConnector {
+class TtpFeedbackLoopConnector @Inject() (appConfig: AppConfig, httpClient: HttpClientV2) {
 
-  private val logger: RequestAwareLogger = new RequestAwareLogger(classOf[DefaultTtpFeedbackLoopConnector])
+  private val logger: RequestAwareLogger = new RequestAwareLogger(classOf[TtpFeedbackLoopConnector])
 
   private val httpReadsBuilderForCancel: HttpReadsWithLoggingBuilder[ProxyEnvelopeError, TtpCancelSuccessfulResponse] =
     HttpReadsWithLoggingBuilder

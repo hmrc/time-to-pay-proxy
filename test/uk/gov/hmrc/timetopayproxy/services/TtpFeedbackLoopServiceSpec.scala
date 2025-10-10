@@ -39,7 +39,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 class TtpFeedbackLoopServiceSpec extends AnyFreeSpec with MockFactory with ScalaFutures {
 
   private val mockConnector = mock[TtpFeedbackLoopConnector]
-  private val service = new DefaultTtpFeedbackLoopService(mockConnector)
+  private val service = new TtpFeedbackLoopService(mockConnector)
 
   implicit val hc: HeaderCarrier = HeaderCarrier()
 
