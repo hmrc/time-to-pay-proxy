@@ -17,9 +17,9 @@
 package uk.gov.hmrc.timetopayproxy.models.saonly.fullAmend
 
 import cats.data.NonEmptyList
-import play.api.libs.json.{Format, Json, OFormat}
-import uk.gov.hmrc.timetopayproxy.models.saonly.common.{SaOnlyInstalment, TransitionedIndicator}
-import uk.gov.hmrc.timetopayproxy.models.{ChannelIdentifier, Identification}
+import play.api.libs.json.{ Format, Json, OFormat }
+import uk.gov.hmrc.timetopayproxy.models.saonly.common.{ SaOnlyInstalment, TransitionedIndicator }
+import uk.gov.hmrc.timetopayproxy.models.{ ChannelIdentifier, Identification }
 import uk.gov.hmrc.timetopayproxy.utils.json.CatsNonEmptyListJson
 
 case class FullAmendRequest(
@@ -29,11 +29,10 @@ case class FullAmendRequest(
   channelIdentifier: ChannelIdentifier,
   transitioned: Option[TransitionedIndicator]
 )
-object FullAmendRequest{
+object FullAmendRequest {
   implicit val format: OFormat[FullAmendRequest] = {
     implicit def nelFormat[T: Format]: Format[NonEmptyList[T]] = CatsNonEmptyListJson.nonEmptyListFormat[T]
 
     Json.format[FullAmendRequest]
   }
 }
-

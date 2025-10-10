@@ -16,19 +16,19 @@
 
 package uk.gov.hmrc.timetopayproxy.models.saonly.fullAmend
 
-import play.api.libs.json.{Json, OFormat}
+import play.api.libs.json.{ Json, OFormat }
 import uk.gov.hmrc.timetopayproxy.models.FrequencyLowercase
 import uk.gov.hmrc.timetopayproxy.models.currency.GbpPounds
-import uk.gov.hmrc.timetopayproxy.models.saonly.common.{ArrangementAgreedDate, InitialPaymentDate, TtpEndDate}
+import uk.gov.hmrc.timetopayproxy.models.saonly.common.{ ArrangementAgreedDate, InitialPaymentDate, TtpEndDate }
 
 case class FullAmendPaymentPlan(
-                                 arrangementAgreedDate: ArrangementAgreedDate,
-                                 ttpEndDate: TtpEndDate,
-                                 initialPaymentDate: Option[InitialPaymentDate],
-                                 initialPaymentAmount: Option[GbpPounds],
-                                 frequency: FrequencyLowercase,
-                                 ddiReference: Option[String]
-                               )
-object FullAmendPaymentPlan{
+  arrangementAgreedDate: ArrangementAgreedDate,
+  ttpEndDate: TtpEndDate,
+  initialPaymentDate: Option[InitialPaymentDate],
+  initialPaymentAmount: Option[GbpPounds],
+  frequency: FrequencyLowercase,
+  ddiReference: Option[String]
+)
+object FullAmendPaymentPlan {
   implicit val format: OFormat[FullAmendPaymentPlan] = Json.format[FullAmendPaymentPlan]
 }

@@ -20,10 +20,10 @@ import com.google.inject.ImplementedBy
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.timetopayproxy.connectors.TtpFeedbackLoopConnector
 import uk.gov.hmrc.timetopayproxy.models.error.TtppEnvelope.TtppEnvelope
-import uk.gov.hmrc.timetopayproxy.models.saonly.fullAmend.{FullAmendRequest, FullAmendSuccessResponse}
-import uk.gov.hmrc.timetopayproxy.models.saonly.ttpcancel.{TtpCancelRequest, TtpCancelSuccessfulResponse}
+import uk.gov.hmrc.timetopayproxy.models.saonly.fullAmend.{ FullAmendRequest, FullAmendSuccessResponse }
+import uk.gov.hmrc.timetopayproxy.models.saonly.ttpcancel.{ TtpCancelRequest, TtpCancelSuccessfulResponse }
 
-import javax.inject.{Inject, Singleton}
+import javax.inject.{ Inject, Singleton }
 import scala.concurrent.ExecutionContext
 
 @ImplementedBy(classOf[DefaultTtpFeedbackLoopService])
@@ -33,8 +33,8 @@ trait TtpFeedbackLoopService {
   )(implicit ec: ExecutionContext, hc: HeaderCarrier): TtppEnvelope[TtpCancelSuccessfulResponse]
 
   def fullAmendTtp(
-                 request: FullAmendRequest
-               )(implicit ec: ExecutionContext, hc: HeaderCarrier): TtppEnvelope[FullAmendSuccessResponse]
+    request: FullAmendRequest
+  )(implicit ec: ExecutionContext, hc: HeaderCarrier): TtppEnvelope[FullAmendSuccessResponse]
 }
 
 @Singleton
@@ -45,7 +45,7 @@ class DefaultTtpFeedbackLoopService @Inject() (ttppConnector: TtpFeedbackLoopCon
     ttppConnector.cancelTtp(ttppRequest)
 
   def fullAmendTtp(
-                 request: FullAmendRequest
-               )(implicit ec: ExecutionContext, hc: HeaderCarrier): TtppEnvelope[FullAmendSuccessResponse] =
+    request: FullAmendRequest
+  )(implicit ec: ExecutionContext, hc: HeaderCarrier): TtppEnvelope[FullAmendSuccessResponse] =
     ttppConnector.fullAmendTtp(request)
 }

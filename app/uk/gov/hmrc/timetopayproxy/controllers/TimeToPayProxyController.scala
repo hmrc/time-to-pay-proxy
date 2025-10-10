@@ -25,15 +25,15 @@ import uk.gov.hmrc.timetopayproxy.config.FeatureSwitch
 import uk.gov.hmrc.timetopayproxy.models._
 import uk.gov.hmrc.timetopayproxy.models.affordablequotes.AffordableQuotesRequest
 import uk.gov.hmrc.timetopayproxy.models.error.TtppEnvelope.TtppEnvelope
-import uk.gov.hmrc.timetopayproxy.models.error.{TtppEnvelope, TtppErrorResponse, ValidationError}
+import uk.gov.hmrc.timetopayproxy.models.error.{ TtppEnvelope, TtppErrorResponse, ValidationError }
 import uk.gov.hmrc.timetopayproxy.models.saonly.chargeInfoApi.ChargeInfoRequest
 import uk.gov.hmrc.timetopayproxy.models.saonly.fullAmend.FullAmendRequest
 import uk.gov.hmrc.timetopayproxy.models.saonly.ttpcancel.TtpCancelRequest
-import uk.gov.hmrc.timetopayproxy.services.{TTPEService, TTPQuoteService, TtpFeedbackLoopService}
+import uk.gov.hmrc.timetopayproxy.services.{ TTPEService, TTPQuoteService, TtpFeedbackLoopService }
 
-import javax.inject.{Inject, Singleton}
-import scala.concurrent.{ExecutionContext, Future}
-import scala.util.{Failure, Success, Try}
+import javax.inject.{ Inject, Singleton }
+import scala.concurrent.{ ExecutionContext, Future }
+import scala.util.{ Failure, Success, Try }
 
 @Singleton()
 class TimeToPayProxyController @Inject() (
@@ -132,7 +132,7 @@ class TimeToPayProxyController @Inject() (
     }
   }
 
-  def fullAmend: Action[JsValue] =  authoriseAction.async(parse.json) { implicit request =>
+  def fullAmend: Action[JsValue] = authoriseAction.async(parse.json) { implicit request =>
     if (featureSwitch.fullAmendEndpointEnabled) {
       withJsonBody[FullAmendRequest] { deserialisedRequest: FullAmendRequest =>
         ttpFeedbackLoopService
@@ -142,7 +142,10 @@ class TimeToPayProxyController @Inject() (
       }
     } else {
       Future.successful(
-        TtppErrorResponse(statusCode = 503, errorMessage = "/full-amend endpoint is not currently enabled").toErrorResult
+        TtppErrorResponse(
+          statusCode = 503,
+          errorMessage = "/full-amend endpoint is not currently enabled"
+        ).toErrorResult
       )
     }
   }

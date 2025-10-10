@@ -20,18 +20,18 @@ import cats.data.EitherT
 import com.google.inject.ImplementedBy
 import play.api.libs.json.Json
 import uk.gov.hmrc.http.client.HttpClientV2
-import uk.gov.hmrc.http.{HeaderCarrier, HttpReads, StringContextOps}
+import uk.gov.hmrc.http.{ HeaderCarrier, HttpReads, StringContextOps }
 import uk.gov.hmrc.timetopayproxy.config.AppConfig
 import uk.gov.hmrc.timetopayproxy.connectors.util.HttpReadsWithLoggingBuilder
 import uk.gov.hmrc.timetopayproxy.logging.RequestAwareLogger
 import uk.gov.hmrc.timetopayproxy.models.TimeToPayError
 import uk.gov.hmrc.timetopayproxy.models.error.ProxyEnvelopeError
 import uk.gov.hmrc.timetopayproxy.models.error.TtppEnvelope.TtppEnvelope
-import uk.gov.hmrc.timetopayproxy.models.saonly.fullAmend.{FullAmendErrorResponse, FullAmendRequest, FullAmendSuccessResponse}
-import uk.gov.hmrc.timetopayproxy.models.saonly.ttpcancel.{TtpCancelInformativeError, TtpCancelRequest, TtpCancelSuccessfulResponse}
+import uk.gov.hmrc.timetopayproxy.models.saonly.fullAmend.{ FullAmendErrorResponse, FullAmendRequest, FullAmendSuccessResponse }
+import uk.gov.hmrc.timetopayproxy.models.saonly.ttpcancel.{ TtpCancelInformativeError, TtpCancelRequest, TtpCancelSuccessfulResponse }
 
 import java.util.UUID
-import javax.inject.{Inject, Singleton}
+import javax.inject.{ Inject, Singleton }
 import scala.concurrent.ExecutionContext
 
 /** Feedback Loop Connector for CDCS -> TTP communication.
@@ -46,8 +46,8 @@ trait TtpFeedbackLoopConnector {
   )(implicit ec: ExecutionContext, hc: HeaderCarrier): TtppEnvelope[TtpCancelSuccessfulResponse]
 
   def fullAmendTtp(
-                 request: FullAmendRequest
-               )(implicit ec: ExecutionContext, hc: HeaderCarrier): TtppEnvelope[FullAmendSuccessResponse]
+    request: FullAmendRequest
+  )(implicit ec: ExecutionContext, hc: HeaderCarrier): TtppEnvelope[FullAmendSuccessResponse]
 }
 
 @Singleton
@@ -91,8 +91,8 @@ class DefaultTtpFeedbackLoopConnector @Inject() (appConfig: AppConfig, httpClien
       .orErrorTransformed[TimeToPayError](400, ttpError => ttpError.toConnectorError(status = 400))
 
   def fullAmendTtp(
-               request: FullAmendRequest
-               )(implicit ec: ExecutionContext, hc: HeaderCarrier): TtppEnvelope[FullAmendSuccessResponse] = {
+    request: FullAmendRequest
+  )(implicit ec: ExecutionContext, hc: HeaderCarrier): TtppEnvelope[FullAmendSuccessResponse] = {
 
     implicit def httpReads: HttpReads[Either[ProxyEnvelopeError, FullAmendSuccessResponse]] =
       httpReadsBuilderForFullAmend.httpReads(logger)
