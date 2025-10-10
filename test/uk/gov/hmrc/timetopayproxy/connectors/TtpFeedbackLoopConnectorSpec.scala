@@ -41,7 +41,7 @@ import uk.gov.hmrc.timetopayproxy.support.WireMockUtils
 import java.time.{ Instant, LocalDate }
 import scala.concurrent.ExecutionContext
 
-final class DefaultTtpFeedbackLoopConnectorSpec
+final class TtpFeedbackLoopConnectorSpec
     extends PlaySpec with DefaultAwaitTimeout with FutureAwaits with MockFactory with WireMockUtils {
 
   val config = mock[Configuration]
