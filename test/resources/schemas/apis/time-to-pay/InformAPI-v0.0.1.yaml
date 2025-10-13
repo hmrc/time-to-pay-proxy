@@ -1,3 +1,4 @@
+---
 openapi: 3.0.3
 info:
   title: Inform API for TTP Plans to CESA and ETMP
@@ -5,7 +6,9 @@ info:
     An API called by CDCS when a customer sets up a TTP via an operator to trigger the TTP service to inform HoDs (via different APIs) so the TTP can be monitored.
 
     ```
+
     Change Log
+
     ```
       | Version | Date | Author | Description |
       |---|-----|------|-----|
@@ -40,7 +43,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/InformRequest'
+              $ref: "#/components/schemas/InformRequest"
             examples:
               example:
                 summary: Sample request for Inform API
@@ -62,11 +65,11 @@ paths:
                   transitioned: true
       responses:
         '200':
-          description: Inform API operation successful with results of calls to CESA and ETMP
+          description: Inform API operation was successful or Hod Failure (partial or complete)
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/InformResponse'
+                $ref: "#/components/schemas/InformSuccessResponse"
               examples:
                 successExample:
                   summary: Success example with both APIs called
@@ -92,11 +95,11 @@ paths:
                     code: 400
                     details: "Invalid request payload: missing identifications"
         '500':
-          description: Internal error or partial failure in calls to HoDs
+          description: Internal error
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/InformResponse'
+                $ref: "#/components/schemas/InformErrorResponse"
               examples:
                 partialFailureExample:
                   summary: Partial failure example with error shown
@@ -109,6 +112,7 @@ paths:
                         statusCode: "400"
                         processingDateTime: "2025-05-01T14:31:00Z"
                         errorResponse: "Invalid lockReason"
+                    internalErrors: [{"message":"internal error 1"}, {"message":"internal error 2"}]
                     processingDateTime: "2025-05-01T14:32:00Z"
 components:
   securitySchemes:
@@ -237,15 +241,15 @@ components:
         channelIdentifier:
           type: string
           enum:
-          - advisor
-          - selfService
+            - advisor
+            - selfService
           description: Channel through which arrangement was made (e.g. advisor, selfService)
           example: "advisor"
         transitioned:
           type: boolean
           description: Indicates whether the customer only has FDLs.
           example: true
-    APIStatus:
+    InformAPIStatus:
       type: object
       required:
         - name
@@ -269,7 +273,7 @@ components:
           type: string
           description: Error message if downstream API call failed
           example: "Invalid request"
-    InformResponse:
+    InformSuccessResponse:
       type: object
       required:
         - apisCalled
@@ -278,13 +282,44 @@ components:
         apisCalled:
           type: array
           items:
-            $ref: '#/components/schemas/APIStatus'
+            $ref: "#/components/schemas/InformAPIStatus"
           description: Status of calls to each HoD API
         processingDateTime:
           type: string
           format: date-time
           description: Timestamp for processing the inform request
-          example: "2025-05-01T14:35:00Z"
+          example: 2025-05-01T14:35:00Z
+    InformErrorResponse:
+      type: object
+      required:
+        - apisCalled
+        - internalErrors
+        - processingDateTime
+      properties:
+        apisCalled:
+          type: array
+          items:
+            $ref: "#/components/schemas/InformAPIStatus"
+          description: Status of calls to each HoD API (present when HoD APIs were called
+            successfully)
+        internalErrors:
+          type: array
+          items:
+            type: object
+            required:
+              - message
+            properties:
+              message:
+                type: string
+                description: Error message describing the internal failure
+                example: Could not parse response from calling CESA
+          description: Internal errors that occurred during processing (present when TTP
+            cannot parse HoD responses)
+        processingDateTime:
+          type: string
+          format: date-time
+          description: Timestamp for processing the cancel request
+          example: 2025-10-15T10:31:00Z
     ErrorResponse:
       type: object
       required:

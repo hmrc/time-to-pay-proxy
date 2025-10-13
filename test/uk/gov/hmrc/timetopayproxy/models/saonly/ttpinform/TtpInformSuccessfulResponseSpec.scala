@@ -101,7 +101,7 @@ final class TtpInformSuccessfulResponseSpec extends AnyFreeSpec {
         }
 
         "writes JSON compatible with our schema" in {
-          val schema = Validators.TimeToPayProxy.TtpInform.openApiInformativeResponseSchema
+          val schema = Validators.TimeToPayProxy.TtpInform.openApiInformSuccessResponseSchema
           val writtenJson: JsValue = writerToClients.writes(obj)
 
           // TODO DTD-3779: These errors should be resolved.
@@ -121,7 +121,7 @@ final class TtpInformSuccessfulResponseSpec extends AnyFreeSpec {
         }
 
         "writes JSON compatible with our schema" in {
-          val schema = Validators.TimeToPayProxy.TtpInform.openApiInformativeResponseSchema
+          val schema = Validators.TimeToPayProxy.TtpInform.openApiInformSuccessResponseSchema
           val writtenJson: JsValue = writerToClients.writes(obj)
 
           // TODO DTD-3779: These errors should be resolved.
@@ -145,7 +145,7 @@ final class TtpInformSuccessfulResponseSpec extends AnyFreeSpec {
         }
 
         "was tested against JSON compatible with the time-to-pay schema" in {
-          val schema = Validators.TimeToPay.TtpInform.openApiInformativeResponseSchema
+          val schema = Validators.TimeToPay.TtpInform.openApiInformSuccessResponseSchema
 
           schema.validateAndGetErrors(json) shouldBe Nil
         }
@@ -160,7 +160,7 @@ final class TtpInformSuccessfulResponseSpec extends AnyFreeSpec {
         }
 
         "was tested against JSON compatible with the time-to-pay schema" in {
-          val schema = Validators.TimeToPay.TtpInform.openApiInformativeResponseSchema
+          val schema = Validators.TimeToPay.TtpInform.openApiInformSuccessResponseSchema
 
           schema.validateAndGetErrors(json) shouldBe Nil
         }

@@ -22,15 +22,15 @@ import com.github.tomakehurst.wiremock.client.WireMock.{ postRequestedFor, urlPa
 import play.api.libs.json.{ JsNull, JsObject, JsValue, Json }
 import play.api.libs.ws.{ WSRequest, WSResponse }
 import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.timetopayproxy.models._
 import uk.gov.hmrc.timetopayproxy.models.affordablequotes.{ AffordableQuoteResponse, AffordableQuotesRequest }
 import uk.gov.hmrc.timetopayproxy.models.currency.GbpPounds
 import uk.gov.hmrc.timetopayproxy.models.error.TtppErrorResponse
 import uk.gov.hmrc.timetopayproxy.models.saonly.chargeInfoApi._
-import uk.gov.hmrc.timetopayproxy.models.saonly.common.apistatus.{ ApiErrorResponse, ApiName, ApiStatus, ApiStatusCode }
 import uk.gov.hmrc.timetopayproxy.models.saonly.common._
-import uk.gov.hmrc.timetopayproxy.models.saonly.ttpcancel.{ CancellationDate, TtpCancelPaymentPlan, TtpCancelRequest, TtpCancelSuccessfulResponse }
-import uk.gov.hmrc.timetopayproxy.models.saonly.ttpinform.{ DdiReference, TtpInformInformativeError, TtpInformPaymentPlan, TtpInformRequest, TtpInformSuccessfulResponse }
-import uk.gov.hmrc.timetopayproxy.models._
+import uk.gov.hmrc.timetopayproxy.models.saonly.common.apistatus.{ ApiErrorResponse, ApiName, ApiStatus, ApiStatusCode }
+import uk.gov.hmrc.timetopayproxy.models.saonly.ttpcancel._
+import uk.gov.hmrc.timetopayproxy.models.saonly.ttpinform._
 import uk.gov.hmrc.timetopayproxy.support.IntegrationBaseSpec
 import uk.gov.hmrc.timetopayproxy.testutils.TestOnlyJsonFormats._
 
@@ -691,7 +691,7 @@ class TimeToPayProxyControllerItSpec extends IntegrationBaseSpec {
       "should return a 500 statusCode" - {
         "when given a valid json payload" - {
           "when TimeToPay returns an error response with 500" in new TimeToPayProxyControllerTestBase {
-            val errorResponse = TtpCancelSuccessfulResponse(
+            val errorResponse: TtpCancelInformativeError = TtpCancelInformativeError(
               apisCalled = List(
                 ApiStatus(
                   name = ApiName("CESA"),
@@ -699,6 +699,10 @@ class TimeToPayProxyControllerItSpec extends IntegrationBaseSpec {
                   processingDateTime = ProcessingDateTimeInstant(java.time.Instant.parse("2025-10-15T10:30:00Z")),
                   errorResponse = Some(ApiErrorResponse("Invalid cancellationDate"))
                 )
+              ),
+              internalErrors = List(
+                TtpCancelInternalError("some error that ttp is responsible for"),
+                TtpCancelInternalError("another error that ttp is responsible for")
               ),
               processingDateTime = ProcessingDateTimeInstant(java.time.Instant.parse("2025-10-15T10:31:00Z"))
             )
@@ -941,7 +945,7 @@ class TimeToPayProxyControllerItSpec extends IntegrationBaseSpec {
       "should return a 500 statusCode" - {
         "when given a valid json payload" - {
           "when TimeToPay returns an error response with 500" in new TimeToPayProxyControllerTestBase {
-            val errorResponse = TtpInformInformativeError(
+            val errorResponse: TtpInformInformativeError = TtpInformInformativeError(
               apisCalled = List(
                 ApiStatus(
                   name = ApiName("CESA"),
@@ -949,6 +953,10 @@ class TimeToPayProxyControllerItSpec extends IntegrationBaseSpec {
                   processingDateTime = ProcessingDateTimeInstant(java.time.Instant.parse("2025-10-15T10:30:00Z")),
                   errorResponse = Some(ApiErrorResponse("Invalid cancellationDate"))
                 )
+              ),
+              internalErrors = List(
+                TtpInformInternalError("some error that ttp is responsible for"),
+                TtpInformInternalError("another error that ttp is responsible for")
               ),
               processingDateTime = ProcessingDateTimeInstant(java.time.Instant.parse("2025-10-15T10:31:00Z"))
             )

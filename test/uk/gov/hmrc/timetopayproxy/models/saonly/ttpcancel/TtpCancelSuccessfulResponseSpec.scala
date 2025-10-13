@@ -18,7 +18,7 @@ package uk.gov.hmrc.timetopayproxy.models.saonly.ttpcancel
 
 import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.should.Matchers._
-import play.api.libs.json.{ JsSuccess, JsValue, Json, Reads, Writes }
+import play.api.libs.json._
 import uk.gov.hmrc.timetopayproxy.models.saonly.common.ProcessingDateTimeInstant
 import uk.gov.hmrc.timetopayproxy.models.saonly.common.apistatus.{ ApiErrorResponse, ApiName, ApiStatus, ApiStatusCode }
 import uk.gov.hmrc.timetopayproxy.testutils.JsonAssertionOps._
@@ -101,7 +101,7 @@ final class TtpCancelSuccessfulResponseSpec extends AnyFreeSpec {
         }
 
         "writes JSON compatible with our schema" in {
-          val schema = Validators.TimeToPayProxy.TtpCancel.openApiInformativeResponseSchema
+          val schema = Validators.TimeToPayProxy.TtpCancel.openApiCancelSuccessResponseSchema
           val writtenJson: JsValue = writerToClients.writes(obj)
 
           // TODO DTD-3785: These errors should be resolved.
@@ -121,7 +121,7 @@ final class TtpCancelSuccessfulResponseSpec extends AnyFreeSpec {
         }
 
         "writes JSON compatible with our schema" in {
-          val schema = Validators.TimeToPayProxy.TtpCancel.openApiInformativeResponseSchema
+          val schema = Validators.TimeToPayProxy.TtpCancel.openApiCancelSuccessResponseSchema
           val writtenJson: JsValue = writerToClients.writes(obj)
 
           // TODO DTD-3785: These errors should be resolved.
@@ -145,7 +145,7 @@ final class TtpCancelSuccessfulResponseSpec extends AnyFreeSpec {
         }
 
         "was tested against JSON compatible with the time-to-pay schema" in {
-          val schema = Validators.TimeToPay.TtpCancel.openApiInformativeResponseSchema
+          val schema = Validators.TimeToPay.TtpCancel.openApiCancelSuccessResponseSchema
 
           schema.validateAndGetErrors(json) shouldBe Nil
         }
@@ -160,7 +160,7 @@ final class TtpCancelSuccessfulResponseSpec extends AnyFreeSpec {
         }
 
         "was tested against JSON compatible with the time-to-pay schema" in {
-          val schema = Validators.TimeToPay.TtpCancel.openApiInformativeResponseSchema
+          val schema = Validators.TimeToPay.TtpCancel.openApiCancelSuccessResponseSchema
 
           schema.validateAndGetErrors(json) shouldBe Nil
         }
