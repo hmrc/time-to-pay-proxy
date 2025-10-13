@@ -18,6 +18,8 @@ package uk.gov.hmrc.timetopayproxy.connectors
 
 import cats.data.NonEmptyList
 import org.scalamock.scalatest.MockFactory
+import org.scalatest.concurrent.ScalaFutures._
+import org.scalatest.matchers.should.Matchers._
 import org.scalatestplus.play.PlaySpec
 import play.api.libs.json.Json
 import play.api.test.{ DefaultAwaitTimeout, FutureAwaits }
@@ -28,16 +30,18 @@ import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 import uk.gov.hmrc.timetopayproxy.config.AppConfig
 import uk.gov.hmrc.timetopayproxy.models.currency.GbpPounds
 import uk.gov.hmrc.timetopayproxy.models.error.ConnectorError
+import uk.gov.hmrc.timetopayproxy.models.error.TtppEnvelope.TtppEnvelope
 import uk.gov.hmrc.timetopayproxy.models.saonly.common.apistatus.{ ApiName, ApiStatus, ApiStatusCode }
 import uk.gov.hmrc.timetopayproxy.models.saonly.common.{ ArrangementAgreedDate, InitialPaymentDate, ProcessingDateTimeInstant, SaOnlyInstalment, TransitionedIndicator, TtpEndDate }
 import uk.gov.hmrc.timetopayproxy.models.saonly.ttpcancel.{ CancellationDate, TtpCancelInformativeError, TtpCancelPaymentPlan, TtpCancelRequest, TtpCancelSuccessfulResponse }
+import uk.gov.hmrc.timetopayproxy.models.saonly.ttpinform.{ DdiReference, TtpInformInformativeError, TtpInformPaymentPlan, TtpInformRequest, TtpInformSuccessfulResponse }
 import uk.gov.hmrc.timetopayproxy.models.{ ChannelIdentifier, FrequencyLowercase, IdType, IdValue, Identification, InstalmentDueDate }
 import uk.gov.hmrc.timetopayproxy.support.WireMockUtils
 
 import java.time.{ Instant, LocalDate }
 import scala.concurrent.ExecutionContext
 
-final class DefaultTtpFeedbackLoopConnectorSpec
+final class TtpFeedbackLoopConnectorSpec
     extends PlaySpec with DefaultAwaitTimeout with FutureAwaits with MockFactory with WireMockUtils {
 
   val config = mock[Configuration]
@@ -101,7 +105,7 @@ final class DefaultTtpFeedbackLoopConnectorSpec
 
     val mockConfiguration: AppConfig = new MockAppConfig(config, servicesConfig, ifImpl)
 
-    val connector: TtpFeedbackLoopConnector = new DefaultTtpFeedbackLoopConnector(mockConfiguration, httpClient)
+    val connector: TtpFeedbackLoopConnector = new TtpFeedbackLoopConnector(mockConfiguration, httpClient)
   }
 
   "DefaultTtpFeedbackLoopConnector" should {
@@ -143,8 +147,9 @@ final class DefaultTtpFeedbackLoopConnectorSpec
 
       "using IF" should {
         "return a successful response" in new Setup(ifImpl = true) {
-          stubPostWithResponseBody(
+          stubPostWithResponseBodyEnsuringRequest(
             "/individuals/debts/time-to-pay/cancel",
+            Json.toJson(ttpCancelRequest).toString(),
             200,
             Json.toJson(ttpCancelResponse).toString()
           )
@@ -155,8 +160,9 @@ final class DefaultTtpFeedbackLoopConnectorSpec
         }
 
         "parse an error response from an upstream service" in new Setup(ifImpl = true) {
-          stubPostWithResponseBody(
+          stubPostWithResponseBodyEnsuringRequest(
             "/individuals/debts/time-to-pay/cancel",
+            Json.toJson(ttpCancelRequest).toString(),
             400,
             """{"failures": [{"code": "400", "reason": "Invalid request body"}]}"""
           )
@@ -167,8 +173,9 @@ final class DefaultTtpFeedbackLoopConnectorSpec
         }
 
         "handle 500 responses" in new Setup(ifImpl = true) {
-          stubPostWithResponseBody(
+          stubPostWithResponseBodyEnsuringRequest(
             "/individuals/debts/time-to-pay/cancel",
+            Json.toJson(ttpCancelRequest).toString(),
             500,
             Json.toJson(ttpCancelResponse).toString()
           )
@@ -194,8 +201,9 @@ final class DefaultTtpFeedbackLoopConnectorSpec
 
       "using TTP" should {
         "return a successful response" in new Setup(ifImpl = false) {
-          stubPostWithResponseBody(
+          stubPostWithResponseBodyEnsuringRequest(
             "/debts/time-to-pay/cancel",
+            Json.toJson(ttpCancelRequest).toString(),
             200,
             Json.toJson(ttpCancelResponse).toString()
           )
@@ -206,8 +214,9 @@ final class DefaultTtpFeedbackLoopConnectorSpec
         }
 
         "parse an error response from an upstream service" in new Setup(ifImpl = false) {
-          stubPostWithResponseBody(
+          stubPostWithResponseBodyEnsuringRequest(
             "/debts/time-to-pay/cancel",
+            Json.toJson(ttpCancelRequest).toString(),
             400,
             """{"failures": [{"code": "400", "reason": "Invalid request body"}]}"""
           )
@@ -218,8 +227,9 @@ final class DefaultTtpFeedbackLoopConnectorSpec
         }
 
         "handle 500 responses" in new Setup(ifImpl = false) {
-          stubPostWithResponseBody(
+          stubPostWithResponseBodyEnsuringRequest(
             "/debts/time-to-pay/cancel",
+            Json.toJson(ttpCancelRequest).toString(),
             500,
             Json.toJson(ttpCancelResponse).toString()
           )
@@ -241,6 +251,135 @@ final class DefaultTtpFeedbackLoopConnectorSpec
               )
             )
         }
+      }
+    }
+  }
+
+  ".informTtp" should {
+
+    val ttpInformRequest: TtpInformRequest = TtpInformRequest(
+      identifications = NonEmptyList.of(
+        Identification(idType = IdType("NINO"), idValue = IdValue("AB123456C"))
+      ),
+      paymentPlan = TtpInformPaymentPlan(
+        arrangementAgreedDate = ArrangementAgreedDate(LocalDate.parse("2025-01-01")),
+        ttpEndDate = TtpEndDate(LocalDate.parse("2025-02-01")),
+        frequency = FrequencyLowercase.Monthly,
+        initialPaymentDate = Some(InitialPaymentDate(LocalDate.parse("2025-01-05"))),
+        initialPaymentAmount = Some(GbpPounds.createOrThrow(100.00)),
+        ddiReference = Some(DdiReference("TestDDIReference"))
+      ),
+      instalments = NonEmptyList.of(
+        SaOnlyInstalment(
+          dueDate = InstalmentDueDate(LocalDate.parse("2025-01-31")),
+          amountDue = GbpPounds.createOrThrow(500.00)
+        )
+      ),
+      channelIdentifier = ChannelIdentifier.Advisor,
+      transitioned = Some(TransitionedIndicator(true))
+    )
+
+    val ttpInformResponse: TtpInformSuccessfulResponse = TtpInformSuccessfulResponse(
+      apisCalled = List(
+        ApiStatus(
+          name = ApiName("API1"),
+          statusCode = ApiStatusCode("SUCCESS"),
+          processingDateTime = ProcessingDateTimeInstant(Instant.parse("2025-01-01T12:00:00Z")),
+          errorResponse = None
+        )
+      ),
+      processingDateTime = ProcessingDateTimeInstant(Instant.parse("2025-01-01T12:00:00Z"))
+    )
+
+    "using IF" should {
+      "return a successful response" in new Setup(ifImpl = true) {
+        stubPostWithResponseBodyEnsuringRequest(
+          "/individuals/debts/time-to-pay/inform",
+          Json.toJson(ttpInformRequest).toString(),
+          200,
+          Json.toJson(ttpInformResponse).toString()
+        )
+
+        val result: TtppEnvelope[TtpInformSuccessfulResponse] = connector.informTtp(ttpInformRequest)
+
+        result.value.futureValue shouldBe Right(ttpInformResponse)
+      }
+
+      "parse an error response from an upstream service" in new Setup(ifImpl = true) {
+        stubPostWithResponseBodyEnsuringRequest(
+          "/individuals/debts/time-to-pay/inform",
+          Json.toJson(ttpInformRequest).toString(),
+          400,
+          """{"failures": [{"code": "400", "reason": "Invalid request body"}]}"""
+        )
+
+        val result: TtppEnvelope[TtpInformSuccessfulResponse] = connector.informTtp(ttpInformRequest)
+
+        result.value.futureValue shouldBe Left(ConnectorError(400, "Invalid request body"))
+      }
+
+      "handle 500 responses" in new Setup(ifImpl = true) {
+        stubPostWithResponseBodyEnsuringRequest(
+          "/individuals/debts/time-to-pay/inform",
+          Json.toJson(ttpInformRequest).toString(),
+          500,
+          Json.toJson(ttpInformResponse).toString()
+        )
+
+        val result: TtppEnvelope[TtpInformSuccessfulResponse] = connector.informTtp(ttpInformRequest)
+
+        val informativeError = TtpInformInformativeError(
+          apisCalled = ttpInformResponse.apisCalled,
+          processingDateTime = ttpInformResponse.processingDateTime
+        )
+
+        result.value.futureValue shouldBe Left(informativeError)
+      }
+    }
+
+    "using TTP" should {
+      "return a successful response" in new Setup(ifImpl = false) {
+        stubPostWithResponseBodyEnsuringRequest(
+          "/debts/time-to-pay/inform",
+          Json.toJson(ttpInformRequest).toString(),
+          200,
+          Json.toJson(ttpInformResponse).toString()
+        )
+
+        val result: TtppEnvelope[TtpInformSuccessfulResponse] = connector.informTtp(ttpInformRequest)
+
+        result.value.futureValue shouldBe Right(ttpInformResponse)
+      }
+
+      "parse an error response from an upstream service" in new Setup(ifImpl = false) {
+        stubPostWithResponseBodyEnsuringRequest(
+          "/debts/time-to-pay/inform",
+          Json.toJson(ttpInformRequest).toString(),
+          400,
+          """{"failures": [{"code": "400", "reason": "Invalid request body"}]}"""
+        )
+
+        val result: TtppEnvelope[TtpInformSuccessfulResponse] = connector.informTtp(ttpInformRequest)
+
+        result.value.futureValue shouldBe Left(ConnectorError(400, "Invalid request body"))
+      }
+
+      "handle 500 responses" in new Setup(ifImpl = false) {
+        stubPostWithResponseBodyEnsuringRequest(
+          "/debts/time-to-pay/inform",
+          Json.toJson(ttpInformRequest).toString(),
+          500,
+          Json.toJson(ttpInformResponse).toString()
+        )
+
+        val result: TtppEnvelope[TtpInformSuccessfulResponse] = connector.informTtp(ttpInformRequest)
+
+        val informativeError = TtpInformInformativeError(
+          apisCalled = ttpInformResponse.apisCalled,
+          processingDateTime = ttpInformResponse.processingDateTime
+        )
+
+        result.value.futureValue shouldBe Left(informativeError)
       }
     }
   }

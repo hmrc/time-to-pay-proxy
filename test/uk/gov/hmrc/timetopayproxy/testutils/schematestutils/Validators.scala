@@ -90,6 +90,38 @@ object Validators {
         )
     }
 
+    object TtpInform {
+      // Downloaded from:
+      //   https://jira.tools.tax.service.gov.uk/browse/DTD-2856
+      // Official location:
+      //   ???
+      def openApiRequestSchema: OpenApi3DerivedSchema =
+        new OpenApi3DerivedSchema(
+          path,
+          defaultJsonSubschemaName = "InformRequest",
+          metaSchemaValidation = Some(Valid(())),
+          restrictAdditionalProperties = true
+        )
+
+      /** This is used for both 200 and 500 statuses. */
+      // TODO DTD-3779: Split into the separate schemas for 200 and 500 responses. 500 will have an extra field.
+      def openApiInformativeResponseSchema: OpenApi3DerivedSchema =
+        new OpenApi3DerivedSchema(
+          path,
+          defaultJsonSubschemaName = "InformResponse",
+          metaSchemaValidation = Some(Valid(())),
+          restrictAdditionalProperties = true
+        )
+
+      def openApiResponseGeneralFailureSchema: OpenApi3DerivedSchema =
+        new OpenApi3DerivedSchema(
+          path,
+          defaultJsonSubschemaName = "ErrorResponse",
+          metaSchemaValidation = Some(Valid(())),
+          restrictAdditionalProperties = true
+        )
+    }
+
     /** For now, this applies to all responses from the proxy */
     def openApiResponseErrorSchema: OpenApi3DerivedSchema =
       new OpenApi3DerivedSchema(
@@ -178,6 +210,38 @@ object Validators {
         new OpenApi3DerivedSchema(
           path,
           defaultJsonSubschemaName = "CancelResponse",
+          metaSchemaValidation = Some(Valid(())),
+          restrictAdditionalProperties = true
+        )
+
+      def openApiResponseGeneralFailureSchema: OpenApi3DerivedSchema =
+        new OpenApi3DerivedSchema(
+          path,
+          defaultJsonSubschemaName = "ErrorResponse",
+          metaSchemaValidation = Some(Valid(())),
+          restrictAdditionalProperties = true
+        )
+    }
+
+    object TtpInform {
+      // Downloaded from:
+      //   https://github.com/hmrc/time-to-pay/blob/main/resources/public/api/conf/1.0/InformAPI-v0.0.1.yaml
+      // Official location:
+      //   https://github.com/hmrc/time-to-pay/blob/main/resources/public/api/conf/1.0/InformAPI-v0.0.1.yaml
+      private val path = "test/resources/schemas/apis/time-to-pay/InformAPI-v0.0.1.yaml"
+
+      def openApiRequestSchema: OpenApi3DerivedSchema =
+        new OpenApi3DerivedSchema(
+          path,
+          defaultJsonSubschemaName = "InformRequest",
+          metaSchemaValidation = Some(Valid(())),
+          restrictAdditionalProperties = true
+        )
+
+      def openApiInformativeResponseSchema: OpenApi3DerivedSchema =
+        new OpenApi3DerivedSchema(
+          path,
+          defaultJsonSubschemaName = "InformResponse",
           metaSchemaValidation = Some(Valid(())),
           restrictAdditionalProperties = true
         )

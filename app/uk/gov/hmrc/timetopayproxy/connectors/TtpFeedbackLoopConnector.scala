@@ -17,7 +17,6 @@
 package uk.gov.hmrc.timetopayproxy.connectors
 
 import cats.data.EitherT
-import com.google.inject.ImplementedBy
 import play.api.libs.json.Json
 import uk.gov.hmrc.http.client.HttpClientV2
 import uk.gov.hmrc.http.{ HeaderCarrier, HttpReads, StringContextOps }
@@ -28,6 +27,7 @@ import uk.gov.hmrc.timetopayproxy.models.TimeToPayError
 import uk.gov.hmrc.timetopayproxy.models.error.ProxyEnvelopeError
 import uk.gov.hmrc.timetopayproxy.models.error.TtppEnvelope.TtppEnvelope
 import uk.gov.hmrc.timetopayproxy.models.saonly.ttpcancel.{ TtpCancelInformativeError, TtpCancelRequest, TtpCancelSuccessfulResponse }
+import uk.gov.hmrc.timetopayproxy.models.saonly.ttpinform.{ TtpInformInformativeError, TtpInformRequest, TtpInformSuccessfulResponse }
 
 import java.util.UUID
 import javax.inject.{ Inject, Singleton }
@@ -38,24 +38,23 @@ import scala.concurrent.ExecutionContext
   * The "feedback loop" refers to CDCS notifying TTP service about customer plan lifecycle events
   * (cancel, amend, inform) so TTP can update downstream HoDs accordingly.
   */
-@ImplementedBy(classOf[DefaultTtpFeedbackLoopConnector])
-trait TtpFeedbackLoopConnector {
-  def cancelTtp(
-    ttppRequest: TtpCancelRequest
-  )(implicit ec: ExecutionContext, hc: HeaderCarrier): TtppEnvelope[TtpCancelSuccessfulResponse]
-}
-
 @Singleton
-class DefaultTtpFeedbackLoopConnector @Inject() (appConfig: AppConfig, httpClient: HttpClientV2)
-    extends TtpFeedbackLoopConnector {
+class TtpFeedbackLoopConnector @Inject() (appConfig: AppConfig, httpClient: HttpClientV2) {
 
-  private val logger: RequestAwareLogger = new RequestAwareLogger(classOf[DefaultTtpFeedbackLoopConnector])
+  private val logger: RequestAwareLogger = new RequestAwareLogger(classOf[TtpFeedbackLoopConnector])
 
   private val httpReadsBuilderForCancel: HttpReadsWithLoggingBuilder[ProxyEnvelopeError, TtpCancelSuccessfulResponse] =
     HttpReadsWithLoggingBuilder
       .empty[ProxyEnvelopeError, TtpCancelSuccessfulResponse]
       .orSuccess[TtpCancelSuccessfulResponse](200)
       .orError[TtpCancelInformativeError](500)
+      .orErrorTransformed[TimeToPayError](400, ttpError => ttpError.toConnectorError(status = 400))
+
+  private val httpReadsBuilderForInform: HttpReadsWithLoggingBuilder[ProxyEnvelopeError, TtpInformSuccessfulResponse] =
+    HttpReadsWithLoggingBuilder
+      .empty[ProxyEnvelopeError, TtpInformSuccessfulResponse]
+      .orSuccess[TtpInformSuccessfulResponse](200)
+      .orError[TtpInformInformativeError](500)
       .orErrorTransformed[TimeToPayError](400, ttpError => ttpError.toConnectorError(status = 400))
 
   def cancelTtp(
@@ -75,6 +74,26 @@ class DefaultTtpFeedbackLoopConnector @Inject() (appConfig: AppConfig, httpClien
         .withBody(Json.toJson(ttppRequest))
         .setHeader(requestHeaders: _*)
         .execute[Either[ProxyEnvelopeError, TtpCancelSuccessfulResponse]]
+    )
+  }
+
+  def informTtp(
+    ttppInformRequest: TtpInformRequest
+  )(implicit ec: ExecutionContext, hc: HeaderCarrier): TtppEnvelope[TtpInformSuccessfulResponse] = {
+
+    implicit def httpReads: HttpReads[Either[ProxyEnvelopeError, TtpInformSuccessfulResponse]] =
+      httpReadsBuilderForInform.httpReads(logger)
+
+    val path = if (appConfig.useIf) "/individuals/debts/time-to-pay/inform" else "/debts/time-to-pay/inform"
+
+    val url = url"${appConfig.ttpBaseUrl + path}"
+
+    EitherT(
+      httpClient
+        .post(url)
+        .withBody(Json.toJson(ttppInformRequest))
+        .setHeader(requestHeaders: _*)
+        .execute[Either[ProxyEnvelopeError, TtpInformSuccessfulResponse]]
     )
   }
 

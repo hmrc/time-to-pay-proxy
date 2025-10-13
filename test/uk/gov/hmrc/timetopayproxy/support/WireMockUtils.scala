@@ -83,6 +83,23 @@ trait WireMockUtils extends BeforeAndAfterEach with BeforeAndAfterAll with Guice
         )
     )
 
+  def stubPostWithResponseBodyEnsuringRequest(
+    url: String,
+    expectedRequestAsJson: String,
+    responseStatus: Int,
+    responseBody: String
+  ): StubMapping =
+    stubFor(
+      post(urlEqualTo(url))
+        .withRequestBody(equalToJson(expectedRequestAsJson))
+        .willReturn(
+          aResponse()
+            .withStatus(responseStatus)
+            .withBody(responseBody)
+            .withHeader("Content-Type", "application/json; charset=utf-8")
+        )
+    )
+
   def stubPostWithoutResponseBody(url: String, status: Int): StubMapping =
     stubFor(
       post(urlEqualTo(url))
