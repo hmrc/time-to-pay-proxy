@@ -32,10 +32,10 @@ import uk.gov.hmrc.timetopayproxy.models.currency.GbpPounds
 import uk.gov.hmrc.timetopayproxy.models.error.ConnectorError
 import uk.gov.hmrc.timetopayproxy.models.error.TtppEnvelope.TtppEnvelope
 import uk.gov.hmrc.timetopayproxy.models.saonly.common.apistatus.{ ApiName, ApiStatus, ApiStatusCode }
-import uk.gov.hmrc.timetopayproxy.models.saonly.common.{ ArrangementAgreedDate, InitialPaymentDate, ProcessingDateTimeInstant, SaOnlyInstalment, TransitionedIndicator, TtpEndDate }
-import uk.gov.hmrc.timetopayproxy.models.saonly.ttpcancel.{ CancellationDate, TtpCancelInformativeError, TtpCancelPaymentPlan, TtpCancelRequest, TtpCancelSuccessfulResponse }
-import uk.gov.hmrc.timetopayproxy.models.saonly.ttpinform.{ DdiReference, TtpInformInformativeError, TtpInformPaymentPlan, TtpInformRequest, TtpInformSuccessfulResponse }
-import uk.gov.hmrc.timetopayproxy.models.{ ChannelIdentifier, FrequencyLowercase, IdType, IdValue, Identification, InstalmentDueDate }
+import uk.gov.hmrc.timetopayproxy.models.saonly.common._
+import uk.gov.hmrc.timetopayproxy.models.saonly.ttpcancel._
+import uk.gov.hmrc.timetopayproxy.models.saonly.ttpinform._
+import uk.gov.hmrc.timetopayproxy.models._
 import uk.gov.hmrc.timetopayproxy.support.WireMockUtils
 
 import java.time.{ Instant, LocalDate }
@@ -145,6 +145,19 @@ final class TtpFeedbackLoopConnectorSpec
         processingDateTime = ProcessingDateTimeInstant(Instant.parse("2025-01-01T12:00:00Z"))
       )
 
+      val ttpCancelInformativeErrorResponse: TtpCancelInformativeError = TtpCancelInformativeError(
+        apisCalled = List(
+          ApiStatus(
+            name = ApiName("API1"),
+            statusCode = ApiStatusCode("SUCCESS"),
+            processingDateTime = ProcessingDateTimeInstant(Instant.parse("2025-01-01T12:00:00Z")),
+            errorResponse = None
+          )
+        ),
+        internalErrors = List(TtpCancelInternalError("some error that ttp is responsible for")),
+        processingDateTime = ProcessingDateTimeInstant(Instant.parse("2025-01-01T12:00:00Z"))
+      )
+
       "using IF" should {
         "return a successful response" in new Setup(ifImpl = true) {
           stubPostWithResponseBodyEnsuringRequest(
@@ -177,7 +190,7 @@ final class TtpFeedbackLoopConnectorSpec
             "/individuals/debts/time-to-pay/cancel",
             Json.toJson(ttpCancelRequest).toString(),
             500,
-            Json.toJson(ttpCancelResponse).toString()
+            Json.toJson(ttpCancelInformativeErrorResponse).toString()
           )
 
           val result = connector.cancelTtp(ttpCancelRequest)
@@ -185,7 +198,7 @@ final class TtpFeedbackLoopConnectorSpec
           await(result.value) mustBe
             Left(
               TtpCancelInformativeError(
-                List(
+                apisCalled = List(
                   ApiStatus(
                     ApiName("API1"),
                     ApiStatusCode("SUCCESS"),
@@ -193,7 +206,8 @@ final class TtpFeedbackLoopConnectorSpec
                     errorResponse = None
                   )
                 ),
-                ProcessingDateTimeInstant(Instant.parse("2025-01-01T12:00:00Z"))
+                internalErrors = List(TtpCancelInternalError("some error that ttp is responsible for")),
+                processingDateTime = ProcessingDateTimeInstant(Instant.parse("2025-01-01T12:00:00Z"))
               )
             )
         }
@@ -231,7 +245,7 @@ final class TtpFeedbackLoopConnectorSpec
             "/debts/time-to-pay/cancel",
             Json.toJson(ttpCancelRequest).toString(),
             500,
-            Json.toJson(ttpCancelResponse).toString()
+            Json.toJson(ttpCancelInformativeErrorResponse).toString()
           )
 
           val result = connector.cancelTtp(ttpCancelRequest)
@@ -239,7 +253,7 @@ final class TtpFeedbackLoopConnectorSpec
           await(result.value) mustBe
             Left(
               TtpCancelInformativeError(
-                List(
+                apisCalled = List(
                   ApiStatus(
                     ApiName("API1"),
                     ApiStatusCode("SUCCESS"),
@@ -247,7 +261,8 @@ final class TtpFeedbackLoopConnectorSpec
                     errorResponse = None
                   )
                 ),
-                ProcessingDateTimeInstant(Instant.parse("2025-01-01T12:00:00Z"))
+                internalErrors = List(TtpCancelInternalError("some error that ttp is responsible for")),
+                processingDateTime = ProcessingDateTimeInstant(Instant.parse("2025-01-01T12:00:00Z"))
               )
             )
         }
@@ -291,13 +306,29 @@ final class TtpFeedbackLoopConnectorSpec
       processingDateTime = ProcessingDateTimeInstant(Instant.parse("2025-01-01T12:00:00Z"))
     )
 
+    val ttpInformErrorResponse: TtpInformInformativeError = TtpInformInformativeError(
+      apisCalled = List(
+        ApiStatus(
+          name = ApiName("API1"),
+          statusCode = ApiStatusCode("SUCCESS"),
+          processingDateTime = ProcessingDateTimeInstant(Instant.parse("2025-01-01T12:00:00Z")),
+          errorResponse = None
+        )
+      ),
+      internalErrors = List(
+        TtpInformInternalError("some error that ttp is responsible for"),
+        TtpInformInternalError("another error that ttp is responsible for")
+      ),
+      processingDateTime = ProcessingDateTimeInstant(Instant.parse("2025-01-01T12:00:00Z"))
+    )
+
     "using IF" should {
       "return a successful response" in new Setup(ifImpl = true) {
         stubPostWithResponseBodyEnsuringRequest(
           "/individuals/debts/time-to-pay/inform",
           Json.toJson(ttpInformRequest).toString(),
           200,
-          Json.toJson(ttpInformResponse).toString()
+          Json.toJson(ttpInformErrorResponse).toString()
         )
 
         val result: TtppEnvelope[TtpInformSuccessfulResponse] = connector.informTtp(ttpInformRequest)
@@ -323,13 +354,17 @@ final class TtpFeedbackLoopConnectorSpec
           "/individuals/debts/time-to-pay/inform",
           Json.toJson(ttpInformRequest).toString(),
           500,
-          Json.toJson(ttpInformResponse).toString()
+          Json.toJson(ttpInformErrorResponse).toString()
         )
 
         val result: TtppEnvelope[TtpInformSuccessfulResponse] = connector.informTtp(ttpInformRequest)
 
         val informativeError = TtpInformInformativeError(
           apisCalled = ttpInformResponse.apisCalled,
+          internalErrors = List(
+            TtpInformInternalError("some error that ttp is responsible for"),
+            TtpInformInternalError("another error that ttp is responsible for")
+          ),
           processingDateTime = ttpInformResponse.processingDateTime
         )
 
@@ -369,13 +404,17 @@ final class TtpFeedbackLoopConnectorSpec
           "/debts/time-to-pay/inform",
           Json.toJson(ttpInformRequest).toString(),
           500,
-          Json.toJson(ttpInformResponse).toString()
+          Json.toJson(ttpInformErrorResponse).toString()
         )
 
         val result: TtppEnvelope[TtpInformSuccessfulResponse] = connector.informTtp(ttpInformRequest)
 
         val informativeError = TtpInformInformativeError(
           apisCalled = ttpInformResponse.apisCalled,
+          internalErrors = List(
+            TtpInformInternalError("some error that ttp is responsible for"),
+            TtpInformInternalError("another error that ttp is responsible for")
+          ),
           processingDateTime = ttpInformResponse.processingDateTime
         )
 
