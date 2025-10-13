@@ -721,6 +721,57 @@ class TimeToPayProxyControllerItSpec extends IntegrationBaseSpec {
             response.status shouldBe 400
           }
 
+          "when 'cancellationDate' is invalid" in new TimeToPayProxyControllerTestBase {
+            stubPostWithResponseBody(url = "/auth/authorise", status = 200, responseBody = "null")
+
+            val requestForCancelPlan: WSRequest = buildRequest("/cancel")
+
+            val invalidRequestBody: JsValue = Json.parse(
+              """{
+                |"identifications":[
+                | {
+                |   "idType":"NINO",
+                |   "idValue":"AA000000A"
+                |   },
+                |   {
+                |   "idType":"MTDITID",
+                |   "idValue":"XAIT00000000054"
+                |   }
+                |   ],
+                |   "paymentPlan":{
+                |   "arrangementAgreedDate":"2025-01-01",
+                |   "ttpEndDate":"2025-12-31",
+                |   "frequency":"monthly",
+                |   "cancellationDate":"invalid",
+                |   "initialPaymentDate":"2025-02-01",
+                |   "initialPaymentAmount":123.45
+                |   },
+                |   "instalments":[
+                |   {
+                |   "dueDate":"2025-11-28",
+                |   "amountDue":100
+                |   }
+                |   ],
+                |   "channelIdentifier":"selfService",
+                |   "transitioned":true
+                |}
+                |""".stripMargin
+            )
+
+            val response: WSResponse = await(
+              requestForCancelPlan.post(invalidRequestBody)
+            )
+
+            val expectedTtppErrorResponse: TtppErrorResponse = TtppErrorResponse(
+              statusCode = 400,
+              errorMessage =
+                "Invalid TtpCancelRequest payload: Payload has a missing field or an invalid format. Field name: cancellationDate. Date format should be correctly provided"
+            )
+
+            response.json shouldBe Json.toJson(expectedTtppErrorResponse)
+            response.status shouldBe 400
+          }
+
           "with mandatory fields missing" - {
             "when 'identifications' is missing" in new TimeToPayProxyControllerTestBase {
               stubPostWithResponseBody(url = "/auth/authorise", status = 200, responseBody = "null")
@@ -1222,6 +1273,57 @@ class TimeToPayProxyControllerItSpec extends IntegrationBaseSpec {
             response.status shouldBe 400
           }
 
+          "when 'arrangementAgreedDate' is invalid" in new TimeToPayProxyControllerTestBase {
+            stubPostWithResponseBody(url = "/auth/authorise", status = 200, responseBody = "null")
+
+            val requestForFullAmend: WSRequest = buildRequest("/full-amend")
+
+            val invalidRequestBody: JsValue = Json.parse(
+              """{
+                |   "identifications": [
+                |      {
+                |      "idType": "id type 1",
+                |      "idValue": "id value 1"
+                |    },
+                |    {
+                |      "idType": "id type 2",
+                |      "idValue": "id value 2"
+                |    }
+                |   ],
+                |   "instalments": [
+                |   {
+                |    "dueDate": "2025-05-01",
+                |     "amountDue": 840.72
+                |   }
+                |   ],
+                |  "paymentPlan": {
+                |    "arrangementAgreedDate": "date invalid",
+                |    "ttpEndDate": "2025-03-22",
+                |    "initialPaymentDate": "2025-05-22",
+                |    "initialPaymentAmount": 40.7,
+                |    "frequency": "monthly",
+                |    "ddiReference": "ddi ref"
+                |  },
+                |  "channelIdentifier": "selfService",
+                |  "transitioned": false
+                |}
+                |""".stripMargin
+            )
+
+            val response: WSResponse = await(
+              requestForFullAmend.post(invalidRequestBody)
+            )
+
+            val expectedTtppErrorResponse: TtppErrorResponse = TtppErrorResponse(
+              statusCode = 400,
+              errorMessage =
+                "Invalid FullAmendRequest payload: Payload has a missing field or an invalid format. Field name: arrangementAgreedDate. Date format should be correctly provided"
+            )
+
+            response.json shouldBe Json.toJson(expectedTtppErrorResponse)
+            response.status shouldBe 400
+          }
+
           "with mandatory fields missing" - {
             "when 'identifications' is missing" in new TimeToPayProxyControllerTestBase {
               stubPostWithResponseBody(url = "/auth/authorise", status = 200, responseBody = "null")
@@ -1235,7 +1337,7 @@ class TimeToPayProxyControllerItSpec extends IntegrationBaseSpec {
                   |    "ttpEndDate": "2025-03-22",
                   |    "initialPaymentDate": "2025-05-22",
                   |    "initialPaymentAmount": 40.7,
-                  |    "frequency": "Monthly",
+                  |    "frequency": "monthly",
                   |    "ddiReference": "ddi ref"
                   |  },
                   |  "channelIdentifier": "selfService",
@@ -1280,7 +1382,7 @@ class TimeToPayProxyControllerItSpec extends IntegrationBaseSpec {
                   |    "ttpEndDate": "2025-03-22",
                   |    "initialPaymentDate": "2025-05-22",
                   |    "initialPaymentAmount": 40.7,
-                  |    "frequency": "Monthly",
+                  |    "frequency": "monthly",
                   |    "ddiReference": "ddi ref"
                   |  },
                   |  "channelIdentifier": "selfService",
