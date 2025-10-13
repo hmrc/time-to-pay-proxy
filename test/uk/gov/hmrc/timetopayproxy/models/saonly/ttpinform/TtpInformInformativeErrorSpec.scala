@@ -39,6 +39,10 @@ final class TtpInformInformativeErrorSpec extends AnyFreeSpec {
             errorResponse = Some(ApiErrorResponse("api error response"))
           )
         ),
+        internalErrors = List(
+          TtpInformInternalError("some error that ttp is responsible for"),
+          TtpInformInternalError("another error that ttp is responsible for")
+        ),
         processingDateTime = ProcessingDateTimeInstant(Instant.parse("2222-02-24T14:35:00.788998Z"))
       )
 
@@ -51,6 +55,10 @@ final class TtpInformInformativeErrorSpec extends AnyFreeSpec {
           |      "processingDateTime" : "2000-01-02T14:35:00.788998Z",
           |      "statusCode" : "400"
           |    }
+          |  ],
+          |  "internalErrors": [
+          |     {"message": "some error that ttp is responsible for"},
+          |     {"message": "another error that ttp is responsible for"}
           |  ],
           |  "processingDateTime" : "2222-02-24T14:35:00.788998Z"
           |}
@@ -68,6 +76,10 @@ final class TtpInformInformativeErrorSpec extends AnyFreeSpec {
             errorResponse = None
           )
         ),
+        internalErrors = List(
+          TtpInformInternalError("some error that ttp is responsible for"),
+          TtpInformInternalError("another error that ttp is responsible for")
+        ),
         processingDateTime = ProcessingDateTimeInstant(Instant.parse("2222-02-24T14:35:00.788998Z"))
       )
 
@@ -79,6 +91,10 @@ final class TtpInformInformativeErrorSpec extends AnyFreeSpec {
           |      "processingDateTime" : "2000-01-02T14:35:00.788998Z",
           |      "statusCode" : "400"
           |    }
+          |  ],
+          |  "internalErrors": [
+          |     {"message": "some error that ttp is responsible for"},
+          |     {"message": "another error that ttp is responsible for"}
           |  ],
           |  "processingDateTime" : "2222-02-24T14:35:00.788998Z"
           |}
@@ -101,7 +117,7 @@ final class TtpInformInformativeErrorSpec extends AnyFreeSpec {
         }
 
         "writes JSON compatible with our schema" in {
-          val schema = Validators.TimeToPayProxy.TtpInform.openApiInformativeResponseSchema
+          val schema = Validators.TimeToPayProxy.TtpInform.openApiInformErrorResponseSchema
           val writtenJson: JsValue = writerToClients.writes(obj)
 
           // TODO DTD-3779: These errors should be resolved.
@@ -121,7 +137,7 @@ final class TtpInformInformativeErrorSpec extends AnyFreeSpec {
         }
 
         "writes JSON compatible with our schema" in {
-          val schema = Validators.TimeToPayProxy.TtpInform.openApiInformativeResponseSchema
+          val schema = Validators.TimeToPayProxy.TtpInform.openApiInformErrorResponseSchema
           val writtenJson: JsValue = writerToClients.writes(obj)
 
           // TODO DTD-3779: These errors should be resolved.
@@ -145,7 +161,7 @@ final class TtpInformInformativeErrorSpec extends AnyFreeSpec {
         }
 
         "was tested against JSON compatible with the time-to-pay schema" in {
-          val schema = Validators.TimeToPay.TtpInform.openApiInformativeResponseSchema
+          val schema = Validators.TimeToPay.TtpInform.openApiInformErrorResponseSchema
 
           schema.validateAndGetErrors(json) shouldBe Nil
         }
@@ -160,7 +176,7 @@ final class TtpInformInformativeErrorSpec extends AnyFreeSpec {
         }
 
         "was tested against JSON compatible with the time-to-pay schema" in {
-          val schema = Validators.TimeToPay.TtpInform.openApiInformativeResponseSchema
+          val schema = Validators.TimeToPay.TtpInform.openApiInformErrorResponseSchema
 
           schema.validateAndGetErrors(json) shouldBe Nil
         }
