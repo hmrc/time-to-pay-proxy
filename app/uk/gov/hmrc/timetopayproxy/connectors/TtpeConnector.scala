@@ -20,8 +20,10 @@ import cats.data.EitherT
 import com.google.inject.ImplementedBy
 import play.api.libs.json.Json
 import uk.gov.hmrc.http.client.HttpClientV2
-import uk.gov.hmrc.http.{ HeaderCarrier, StringContextOps }
+import uk.gov.hmrc.http.{ HeaderCarrier, HttpReads, StringContextOps }
 import uk.gov.hmrc.timetopayproxy.config.{ AppConfig, FeatureSwitch }
+import uk.gov.hmrc.timetopayproxy.connectors.util.HttpReadsWithLoggingBuilder
+import uk.gov.hmrc.timetopayproxy.logging.RequestAwareLogger
 import uk.gov.hmrc.timetopayproxy.models.TimeToPayEligibilityError
 import uk.gov.hmrc.timetopayproxy.models.error.ProxyEnvelopeError
 import uk.gov.hmrc.timetopayproxy.models.error.TtppEnvelope.TtppEnvelope
@@ -40,7 +42,15 @@ trait TtpeConnector {
 
 @Singleton
 class DefaultTtpeConnector @Inject() (appConfig: AppConfig, httpClient: HttpClientV2, featureSwitch: FeatureSwitch)
-    extends TtpeConnector with HttpParser[TimeToPayEligibilityError] {
+    extends TtpeConnector {
+
+  private val logger: RequestAwareLogger = new RequestAwareLogger(classOf[DefaultTtpConnector])
+
+  private val httpReadsBuilderForChargeInfo: HttpReadsWithLoggingBuilder[ProxyEnvelopeError, ChargeInfoResponse] =
+    HttpReadsWithLoggingBuilder
+      .empty[ProxyEnvelopeError, ChargeInfoResponse]
+      .orSuccess[ChargeInfoResponse](200)
+      .orErrorTransformed[TimeToPayEligibilityError](400, ttpError => ttpError.toConnectorError(status = 400))
 
   private val authorizationHeader: Seq[(String, String)] =
     if (featureSwitch.internalAuthEnabled.enabled)
@@ -59,6 +69,9 @@ class DefaultTtpeConnector @Inject() (appConfig: AppConfig, httpClient: HttpClie
     ec: ExecutionContext,
     hc: HeaderCarrier
   ): TtppEnvelope[ChargeInfoResponse] = {
+
+    implicit def httpReads: HttpReads[Either[ProxyEnvelopeError, ChargeInfoResponse]] =
+      httpReadsBuilderForChargeInfo.httpReads(logger)
 
     val path = "/debts/time-to-pay/charge-info"
 

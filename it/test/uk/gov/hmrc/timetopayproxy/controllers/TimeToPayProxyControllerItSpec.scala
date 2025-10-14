@@ -610,29 +610,57 @@ class TimeToPayProxyControllerItSpec extends IntegrationBaseSpec {
       }
 
       "should return a 503 statusCode" - {
-        "when given a valid json payload" - {
-          for (responseStatus <- List(200, 400)) s"when TimeToPayEligibility returns a $responseStatus response" - {
-            "with a null json response from TTPE" in new TimeToPayProxyControllerTestBase {
-              stubPostWithResponseBody(url = "/auth/authorise", status = 200, responseBody = "null")
-              stubPostWithResponseBody(
-                url = "/debts/time-to-pay/charge-info",
-                status = responseStatus,
-                responseBody = JsNull.toString()
+        "when given a valid json payload with response code 200" - {
+          "with a null json response from TTPE" in new TimeToPayProxyControllerTestBase {
+            stubPostWithResponseBody(url = "/auth/authorise", status = 200, responseBody = "null")
+            stubPostWithResponseBody(
+              url = "/debts/time-to-pay/charge-info",
+              status = 200,
+              responseBody = JsNull.toString()
+            )
+
+            val requestForChargeInfo: WSRequest = buildRequest(chargeInfoPath)
+
+            val response: WSResponse = await(
+              requestForChargeInfo.post(Json.toJson(chargeInfoRequest))
+            )
+
+            val expectedTtppErrorResponse: TtppErrorResponse =
+              TtppErrorResponse(
+                statusCode = 503,
+                errorMessage = "JSON structure is not valid in received successful HTTP response."
               )
 
-              val requestForChargeInfo: WSRequest = buildRequest(chargeInfoPath)
-
-              val response: WSResponse = await(
-                requestForChargeInfo.post(Json.toJson(chargeInfoRequest))
-              )
-
-              val expectedTtppErrorResponse: TtppErrorResponse =
-                TtppErrorResponse(statusCode = 503, errorMessage = "Couldn't parse body from upstream")
-
-              response.json shouldBe Json.toJson(expectedTtppErrorResponse)
-              response.status shouldBe 503
-            }
+            response.json shouldBe Json.toJson(expectedTtppErrorResponse)
+            response.status shouldBe 503
           }
+
+        }
+        "when given a valid json payload with response code 400" - {
+          "with a null json response from TTPE" in new TimeToPayProxyControllerTestBase {
+            stubPostWithResponseBody(url = "/auth/authorise", status = 200, responseBody = "null")
+            stubPostWithResponseBody(
+              url = "/debts/time-to-pay/charge-info",
+              status = 400,
+              responseBody = JsNull.toString()
+            )
+
+            val requestForChargeInfo: WSRequest = buildRequest(chargeInfoPath)
+
+            val response: WSResponse = await(
+              requestForChargeInfo.post(Json.toJson(chargeInfoRequest))
+            )
+
+            val expectedTtppErrorResponse: TtppErrorResponse =
+              TtppErrorResponse(
+                statusCode = 503,
+                errorMessage = "JSON structure is not valid in received error HTTP response."
+              )
+
+            response.json shouldBe Json.toJson(expectedTtppErrorResponse)
+            response.status shouldBe 503
+          }
+
         }
       }
     }
