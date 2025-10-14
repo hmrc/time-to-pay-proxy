@@ -308,7 +308,9 @@ class TtpConnectorSpec extends PlaySpec with DefaultAwaitTimeout with FutureAwai
         )
         val result = connector.getExistingQuote(CustomerReference("CustRef1234"), PlanId("Plan1234"))
 
-        await(result.value) mustBe Left(ConnectorError(503, "Couldn't parse body from upstream"))
+        await(result.value) mustBe Left(
+          ConnectorError(503, "JSON structure is not valid in received successful HTTP response.")
+        )
       }
     }
     "The status code is 503" must {
@@ -320,7 +322,7 @@ class TtpConnectorSpec extends PlaySpec with DefaultAwaitTimeout with FutureAwai
         )
         val result = connector.getExistingQuote(CustomerReference("CustRef1234"), PlanId("Plan1234"))
 
-        await(result.value) mustBe Left(ConnectorError(503, "Couldn't parse body from upstream"))
+        await(result.value) mustBe Left(ConnectorError(503, "HTTP status is unexpected in received HTTP response."))
       }
     }
   }
