@@ -18,9 +18,10 @@ package uk.gov.hmrc.timetopayproxy.connectors
 
 import cats.data.EitherT
 import com.google.inject.ImplementedBy
-import play.api.libs.json.{ Json, Reads }
+import play.api.libs.json.Json
 import uk.gov.hmrc.http.client.HttpClientV2
-import uk.gov.hmrc.http.{ HeaderCarrier, StringContextOps }
+import uk.gov.hmrc.timetopayproxy.connectors.util.HttpReadsWithLoggingBuilder
+import uk.gov.hmrc.http.{ HeaderCarrier, HttpReads, StringContextOps }
 import uk.gov.hmrc.timetopayproxy.config.AppConfig
 import uk.gov.hmrc.timetopayproxy.logging.RequestAwareLogger
 import uk.gov.hmrc.timetopayproxy.models._
@@ -60,10 +61,40 @@ trait TtpConnector {
 }
 
 @Singleton
-class DefaultTtpConnector @Inject() (appConfig: AppConfig, httpClient: HttpClientV2)
-    extends TtpConnector with HttpParser[TimeToPayError] {
+class DefaultTtpConnector @Inject() (appConfig: AppConfig, httpClient: HttpClientV2) extends TtpConnector {
 
   private val logger: RequestAwareLogger = new RequestAwareLogger(classOf[DefaultTtpConnector])
+
+  private val httpReadsBuilderForGenerateQuote: HttpReadsWithLoggingBuilder[ProxyEnvelopeError, GenerateQuoteResponse] =
+    HttpReadsWithLoggingBuilder
+      .empty[ProxyEnvelopeError, GenerateQuoteResponse]
+      .orSuccess[GenerateQuoteResponse](201)
+      .orErrorTransformed[TimeToPayError](400, ttpError => ttpError.toConnectorError(status = 400))
+
+  private val httpReadsBuilderForViewPlan: HttpReadsWithLoggingBuilder[ProxyEnvelopeError, ViewPlanResponse] =
+    HttpReadsWithLoggingBuilder
+      .empty[ProxyEnvelopeError, ViewPlanResponse]
+      .orSuccess[ViewPlanResponse](200)
+      .orErrorTransformed[TimeToPayError](400, ttpError => ttpError.toConnectorError(status = 400))
+
+  private val httpReadsBuilderForUpdatePlan: HttpReadsWithLoggingBuilder[ProxyEnvelopeError, UpdatePlanResponse] =
+    HttpReadsWithLoggingBuilder
+      .empty[ProxyEnvelopeError, UpdatePlanResponse]
+      .orSuccess[UpdatePlanResponse](200)
+      .orErrorTransformed[TimeToPayError](400, ttpError => ttpError.toConnectorError(status = 400))
+
+  private val httpReadsBuilderForCreatePlan: HttpReadsWithLoggingBuilder[ProxyEnvelopeError, CreatePlanResponse] =
+    HttpReadsWithLoggingBuilder
+      .empty[ProxyEnvelopeError, CreatePlanResponse]
+      .orSuccess[CreatePlanResponse](201)
+      .orErrorTransformed[TimeToPayError](400, ttpError => ttpError.toConnectorError(status = 400))
+
+  private val httpReadsBuilderForAffordableQuotes
+    : HttpReadsWithLoggingBuilder[ProxyEnvelopeError, AffordableQuoteResponse] =
+    HttpReadsWithLoggingBuilder
+      .empty[ProxyEnvelopeError, AffordableQuoteResponse]
+      .orSuccess[AffordableQuoteResponse](200)
+      .orErrorTransformed[TimeToPayError](400, ttpError => ttpError.toConnectorError(status = 400))
 
   val headers: String => Seq[(String, String)] = (guid: String) =>
     if (appConfig.useIf) {
@@ -84,6 +115,10 @@ class DefaultTtpConnector @Inject() (appConfig: AppConfig, httpClient: HttpClien
     ttppRequest: GenerateQuoteRequest,
     queryParams: Seq[(String, String)] = Seq.empty
   )(implicit ec: ExecutionContext, hc: HeaderCarrier): TtppEnvelope[GenerateQuoteResponse] = {
+
+    implicit def httpReads: HttpReads[Either[ProxyEnvelopeError, GenerateQuoteResponse]] =
+      httpReadsBuilderForGenerateQuote.httpReads(logger)
+
     val path = if (appConfig.useIf) "/individuals/debts/time-to-pay/quote" else "/debts/time-to-pay/quote"
 
     val pathWithQueryParameters = path + makeQueryString(queryParams)
@@ -102,14 +137,11 @@ class DefaultTtpConnector @Inject() (appConfig: AppConfig, httpClient: HttpClien
   override def getExistingQuote(customerReference: CustomerReference, planId: PlanId)(implicit
     ec: ExecutionContext,
     hc: HeaderCarrier
-  ): TtppEnvelope[ViewPlanResponse] =
-    getExistingQuoteG[ViewPlanResponse](customerReference, planId)
+  ): TtppEnvelope[ViewPlanResponse] = {
 
-  private def getExistingQuoteG[Response](customerReference: CustomerReference, planId: PlanId)(implicit
-    ec: ExecutionContext,
-    hc: HeaderCarrier,
-    reads: Reads[Response]
-  ): TtppEnvelope[Response] = {
+    implicit def httpReads: HttpReads[Either[ProxyEnvelopeError, ViewPlanResponse]] =
+      httpReadsBuilderForViewPlan.httpReads(logger)
+
     val path =
       if (appConfig.useIf)
         s"/individuals/time-to-pay/quote/${customerReference.value}/${planId.value}"
@@ -121,13 +153,17 @@ class DefaultTtpConnector @Inject() (appConfig: AppConfig, httpClient: HttpClien
     EitherT(
       httpClient
         .get(url)
-        .execute[Either[ProxyEnvelopeError, Response]]
+        .execute[Either[ProxyEnvelopeError, ViewPlanResponse]]
     )
   }
 
   def updatePlan(
     updatePlanRequest: UpdatePlanRequest
   )(implicit ec: ExecutionContext, hc: HeaderCarrier): TtppEnvelope[UpdatePlanResponse] = {
+
+    implicit def httpReads: HttpReads[Either[ProxyEnvelopeError, UpdatePlanResponse]] =
+      httpReadsBuilderForUpdatePlan.httpReads(logger)
+
     val path = if (appConfig.useIf) "individuals/time-to-pay/quote" else "debts/time-to-pay/quote"
 
     val urlAsString = List(
@@ -153,6 +189,9 @@ class DefaultTtpConnector @Inject() (appConfig: AppConfig, httpClient: HttpClien
   )(implicit ec: ExecutionContext, hc: HeaderCarrier): TtppEnvelope[CreatePlanResponse] = {
     logger.info(s"Create plan instalments: \n${Json.toJson(createPlanRequest.instalments)}")
 
+    implicit def httpReads: HttpReads[Either[ProxyEnvelopeError, CreatePlanResponse]] =
+      httpReadsBuilderForCreatePlan.httpReads(logger)
+
     val path =
       if (appConfig.useIf) "/individuals/debts/time-to-pay/quote/arrangement"
       else "/debts/time-to-pay/quote/arrangement"
@@ -173,6 +212,10 @@ class DefaultTtpConnector @Inject() (appConfig: AppConfig, httpClient: HttpClien
   def getAffordableQuotes(
     affordableQuotesRequest: AffordableQuotesRequest
   )(implicit ec: ExecutionContext, hc: HeaderCarrier): TtppEnvelope[AffordableQuoteResponse] = {
+
+    implicit def httpReads: HttpReads[Either[ProxyEnvelopeError, AffordableQuoteResponse]] =
+      httpReadsBuilderForAffordableQuotes.httpReads(logger)
+
     val path =
       if (appConfig.useIf) "/individuals/time-to-pay/affordability/affordable-quotes"
       else "/debts/time-to-pay/affordability/affordable-quotes"
