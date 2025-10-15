@@ -108,6 +108,16 @@ post:
               value:
                 statusCode: 400
                 errorMessage: 'Invalid request payload: missing identifications'
+    '401':
+      description: ''
+      headers: {}
+      content:
+        application/json:
+          schema:
+            $ref: ../components/schemas/ErrorResponse.yaml
+          example:
+            statusCode: 401
+            errorMessage: A user with no active session will return 401 response
     '500':
       description: |
         Internal TTP error or failure to parse responses from downstream HoDs.
