@@ -1,0 +1,32 @@
+type: object
+required:
+  - identifications
+  - paymentPlan
+  - instalments
+  - channelIdentifier
+properties:
+  identifications:
+    type: array
+    minItems: 1
+    items:
+      $ref: ./CancelIdentification.yaml
+    description: Array of customer identifiers; CDCS must provide at least one (e.g. UTR).
+  paymentPlan:
+    $ref: ./CancelPaymentPlan.yaml
+  instalments:
+    type: array
+    minItems: 1
+    items:
+      $ref: ./CancelInstalment.yaml
+    description: Array of payment instalments
+  channelIdentifier:
+    type: string
+    enum:
+      - advisor
+      - selfService
+    description: Channel through which arrangement was made (e.g. advisor, selfService)
+    example: advisor
+  transitioned:
+    type: boolean
+    description: Indicates whether the customer only has FDLs.
+    example: true

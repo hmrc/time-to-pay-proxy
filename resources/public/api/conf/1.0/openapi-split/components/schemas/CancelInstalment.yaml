@@ -1,0 +1,15 @@
+type: object
+required:
+  - dueDate
+  - amountDue
+properties:
+  dueDate:
+    type: string
+    format: date
+    description: Due date for each regular instalment
+    example: '2025-06-01'
+  amountDue:
+    type: number
+    multipleOf: 0.01
+    description: Amount due for the instalment
+    example: 300

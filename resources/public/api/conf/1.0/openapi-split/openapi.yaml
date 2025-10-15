@@ -78,8 +78,9 @@ info:
       | 1.0.14 | 14-08-2025 | Alex Olkhovskiy | refactor the spec with linter|
       | 1.0.15 | 18-09-2025 | Alex Olkhovskiy | Restrict regimeType enum to only 'SA' value for /quote endpoint |
       | 1.0.15-proposedF | 18-09-2025 | Alex Olkhovskiy | Add 409 conflict response to PUT /quote endpoint for duplicate plan ID|
+      | 1.0.15-proposedG| 19-08-2024 | Alex Olkhovskiy | Added new cancel endpoint    |
   contact: {}
-  version: 1.0.15-proposedF
+  version: 1.0.15-proposedG
 servers:
   - url: https://api.service.hmrc.gov.uk
     variables: {}
@@ -95,6 +96,8 @@ paths:
     $ref: paths/individuals_time-to-pay-proxy_self-serve_affordable-quotes.yaml
   /individuals/time-to-pay-proxy/charge-info:
     $ref: paths/individuals_time-to-pay-proxy_charge-info.yaml
+  /individuals/time-to-pay-proxy/cancel:
+    $ref: paths/individuals_time-to-pay-proxy_cancel.yaml
 components:
   securitySchemes:
     userRestricted:
