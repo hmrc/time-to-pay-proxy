@@ -1,6 +1,7 @@
 type: object
 required:
   - processingDateTime
+  - internalErrors
 properties:
   apisCalled:
     type: array
