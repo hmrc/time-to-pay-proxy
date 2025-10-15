@@ -26,6 +26,7 @@ import uk.gov.hmrc.timetopayproxy.logging.RequestAwareLogger
 import uk.gov.hmrc.timetopayproxy.models.TimeToPayError
 import uk.gov.hmrc.timetopayproxy.models.error.ProxyEnvelopeError
 import uk.gov.hmrc.timetopayproxy.models.error.TtppEnvelope.TtppEnvelope
+import uk.gov.hmrc.timetopayproxy.models.saonly.fullAmend.{ FullAmendErrorResponse, FullAmendRequest, FullAmendSuccessResponse }
 import uk.gov.hmrc.timetopayproxy.models.saonly.ttpcancel.{ TtpCancelInformativeError, TtpCancelRequest, TtpCancelSuccessfulResponse }
 import uk.gov.hmrc.timetopayproxy.models.saonly.ttpinform.{ TtpInformInformativeError, TtpInformRequest, TtpInformSuccessfulResponse }
 
@@ -74,6 +75,33 @@ class TtpFeedbackLoopConnector @Inject() (appConfig: AppConfig, httpClient: Http
         .withBody(Json.toJson(ttppRequest))
         .setHeader(requestHeaders: _*)
         .execute[Either[ProxyEnvelopeError, TtpCancelSuccessfulResponse]]
+    )
+  }
+
+  private val httpReadsBuilderForFullAmend: HttpReadsWithLoggingBuilder[ProxyEnvelopeError, FullAmendSuccessResponse] =
+    HttpReadsWithLoggingBuilder
+      .empty[ProxyEnvelopeError, FullAmendSuccessResponse]
+      .orSuccess[FullAmendSuccessResponse](200)
+      .orError[FullAmendErrorResponse](500)
+      .orErrorTransformed[TimeToPayError](400, ttpError => ttpError.toConnectorError(status = 400))
+
+  def fullAmendTtp(
+    request: FullAmendRequest
+  )(implicit ec: ExecutionContext, hc: HeaderCarrier): TtppEnvelope[FullAmendSuccessResponse] = {
+
+    implicit def httpReads: HttpReads[Either[ProxyEnvelopeError, FullAmendSuccessResponse]] =
+      httpReadsBuilderForFullAmend.httpReads(logger)
+
+    val path = if (appConfig.useIf) "/individuals/debts/time-to-pay/full-amend" else "/debts/time-to-pay/full-amend"
+
+    val url = url"${appConfig.ttpBaseUrl + path}"
+
+    EitherT(
+      httpClient
+        .post(url)
+        .withBody(Json.toJson(request))
+        .setHeader(requestHeaders: _*)
+        .execute[Either[ProxyEnvelopeError, FullAmendSuccessResponse]]
     )
   }
 

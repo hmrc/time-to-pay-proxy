@@ -29,7 +29,7 @@ import uk.gov.hmrc.timetopayproxy.models.error.{ ConnectorError, TtppEnvelope }
 import uk.gov.hmrc.timetopayproxy.models.saonly.common.apistatus.{ ApiName, ApiStatus, ApiStatusCode }
 import uk.gov.hmrc.timetopayproxy.models.saonly.common._
 import uk.gov.hmrc.timetopayproxy.models.saonly.ttpcancel.{ CancellationDate, TtpCancelPaymentPlan, TtpCancelRequest, TtpCancelSuccessfulResponse }
-import uk.gov.hmrc.timetopayproxy.models.saonly.ttpinform.{ DdiReference, TtpInformPaymentPlan, TtpInformRequest, TtpInformSuccessfulResponse }
+import uk.gov.hmrc.timetopayproxy.models.saonly.ttpinform.{ DdiReference, TtpInformRequest, TtpInformSuccessfulResponse }
 import uk.gov.hmrc.timetopayproxy.models._
 
 import java.time.{ Instant, LocalDate }
@@ -117,7 +117,7 @@ class TtpFeedbackLoopServiceSpec extends AnyFreeSpec with MockFactory with Scala
         identifications = NonEmptyList.of(
           Identification(idType = IdType("NINO"), idValue = IdValue("AB123456C"))
         ),
-        paymentPlan = TtpInformPaymentPlan(
+        paymentPlan = TtpPaymentPlan(
           arrangementAgreedDate = ArrangementAgreedDate(LocalDate.of(2025, 1, 1)),
           ttpEndDate = TtpEndDate(LocalDate.of(2025, 2, 1)),
           frequency = FrequencyLowercase.Monthly,

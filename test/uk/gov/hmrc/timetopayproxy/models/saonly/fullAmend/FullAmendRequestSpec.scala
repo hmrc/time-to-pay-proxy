@@ -14,26 +14,27 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.timetopayproxy.models.saonly.ttpinform
+package uk.gov.hmrc.timetopayproxy.models.saonly.fullAmend
 
 import cats.data.NonEmptyList
 import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.should.Matchers._
 import play.api.libs.json._
-import uk.gov.hmrc.timetopayproxy.models.saonly.common._
 import uk.gov.hmrc.timetopayproxy.models._
 import uk.gov.hmrc.timetopayproxy.models.currency.GbpPounds
+import uk.gov.hmrc.timetopayproxy.models.saonly.common._
+import uk.gov.hmrc.timetopayproxy.models.saonly.ttpinform.{ DdiReference, TtpPaymentPlan }
 import uk.gov.hmrc.timetopayproxy.testutils.JsonAssertionOps._
 import uk.gov.hmrc.timetopayproxy.testutils.schematestutils.Validators
 
 import java.time.LocalDate
 
-final class TtpInformRequestSpec extends AnyFreeSpec {
+final class FullAmendRequestSpec extends AnyFreeSpec {
 
-  "TtpInformRequest" - {
+  "FullAmendRequest" - {
     object TestData {
       object WithOnlySomes {
-        def obj: TtpInformRequest = TtpInformRequest(
+        def obj: FullAmendRequest = FullAmendRequest(
           identifications = NonEmptyList.of(
             Identification(
               idType = IdType("idtype"),
@@ -55,7 +56,7 @@ final class TtpInformRequestSpec extends AnyFreeSpec {
             )
           ),
           channelIdentifier = ChannelIdentifier.SelfService,
-          transitioned = Some(TransitionedIndicator(true))
+          transitioned = TransitionedIndicator(true)
         )
 
         def json: JsValue = Json.parse(
@@ -88,7 +89,7 @@ final class TtpInformRequestSpec extends AnyFreeSpec {
       }
 
       object With0SomeOnEachPath {
-        def obj: TtpInformRequest = TtpInformRequest(
+        def obj: FullAmendRequest = FullAmendRequest(
           identifications = NonEmptyList.of(
             Identification(
               idType = IdType("idtype"),
@@ -110,7 +111,7 @@ final class TtpInformRequestSpec extends AnyFreeSpec {
             )
           ),
           channelIdentifier = ChannelIdentifier.SelfService,
-          transitioned = None
+          transitioned = TransitionedIndicator(true)
         )
 
         def json: JsValue = Json.parse(
@@ -132,7 +133,8 @@ final class TtpInformRequestSpec extends AnyFreeSpec {
             |    "arrangementAgreedDate" : "2020-01-02",
             |    "frequency" : "weekly",
             |    "ttpEndDate" : "2020-02-04"
-            |  }
+            |  },
+            |  "transitioned" : true
             |}
             |""".stripMargin
         )
@@ -141,18 +143,19 @@ final class TtpInformRequestSpec extends AnyFreeSpec {
     }
 
     "implicit JSON writer (data going to time-to-pay)" - {
-      def writerToTtp: Writes[TtpInformRequest] = implicitly[Writes[TtpInformRequest]]
+      def writerToTtp: Writes[FullAmendRequest] = implicitly[Writes[FullAmendRequest]]
 
       "when all the optional fields are fully populated" - {
         def json: JsValue = TestData.WithOnlySomes.json
-        def obj: TtpInformRequest = TestData.WithOnlySomes.obj
+        def obj: FullAmendRequest = TestData.WithOnlySomes.obj
 
         "writes the correct JSON" in {
           writerToTtp.writes(obj) shouldBeEquivalentTo json
         }
 
         "writes JSON compatible with the time-to-pay schema" in {
-          val schema = Validators.TimeToPay.TtpInform.openApiRequestSchema
+          // TTP schema is the same as proxy schema
+          val schema = Validators.TimeToPayProxy.FullAmend.openApiRequestSchema
           val writtenJson: JsValue = writerToTtp.writes(obj)
 
           schema.validateAndGetErrors(writtenJson) shouldBe Nil
@@ -161,14 +164,15 @@ final class TtpInformRequestSpec extends AnyFreeSpec {
 
       "when none of the optional fields are populated" - {
         def json: JsValue = TestData.With0SomeOnEachPath.json
-        def obj: TtpInformRequest = TestData.With0SomeOnEachPath.obj
+        def obj: FullAmendRequest = TestData.With0SomeOnEachPath.obj
 
         "writes the correct JSON" in {
           writerToTtp.writes(obj) shouldBeEquivalentTo json
         }
 
         "writes JSON compatible with the time-to-pay schema" in {
-          val schema = Validators.TimeToPay.TtpInform.openApiRequestSchema
+          // TTP schema is the same as proxy schema
+          val schema = Validators.TimeToPayProxy.FullAmend.openApiRequestSchema
           val writtenJson: JsValue = writerToTtp.writes(obj)
 
           schema.validateAndGetErrors(writtenJson) shouldBe Nil
@@ -177,18 +181,18 @@ final class TtpInformRequestSpec extends AnyFreeSpec {
     }
 
     "implicit JSON reader (data coming from our clients)" - {
-      def readerFromClients: Reads[TtpInformRequest] = implicitly[Reads[TtpInformRequest]]
+      def readerFromClients: Reads[FullAmendRequest] = implicitly[Reads[FullAmendRequest]]
 
       "when all the optional fields are fully populated" - {
         def json: JsValue = TestData.WithOnlySomes.json
-        def obj: TtpInformRequest = TestData.WithOnlySomes.obj
+        def obj: FullAmendRequest = TestData.WithOnlySomes.obj
 
         "reads the JSON correctly" in {
           readerFromClients.reads(json) shouldBe JsSuccess(obj)
         }
 
         "was tested against JSON compatible with our schema" in {
-          val schema = Validators.TimeToPayProxy.TtpInform.openApiRequestSchema
+          val schema = Validators.TimeToPayProxy.FullAmend.openApiRequestSchema
 
           schema.validateAndGetErrors(json) shouldBe Nil
         }
@@ -196,14 +200,14 @@ final class TtpInformRequestSpec extends AnyFreeSpec {
 
       "when none of the optional fields are populated" - {
         def json: JsValue = TestData.With0SomeOnEachPath.json
-        def obj: TtpInformRequest = TestData.With0SomeOnEachPath.obj
+        def obj: FullAmendRequest = TestData.With0SomeOnEachPath.obj
 
         "reads the JSON correctly" in {
           readerFromClients.reads(json) shouldBe JsSuccess(obj)
         }
 
         "was tested against JSON compatible with our schema" in {
-          val schema = Validators.TimeToPayProxy.TtpInform.openApiRequestSchema
+          val schema = Validators.TimeToPayProxy.FullAmend.openApiRequestSchema
 
           schema.validateAndGetErrors(json) shouldBe Nil
         }

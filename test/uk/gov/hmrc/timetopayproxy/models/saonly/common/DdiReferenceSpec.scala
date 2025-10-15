@@ -14,11 +14,12 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.timetopayproxy.models.saonly.ttpinform
+package uk.gov.hmrc.timetopayproxy.models.saonly.common
 
 import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.should.Matchers._
 import play.api.libs.json.{ JsNumber, JsResultException, JsString, Json }
+import uk.gov.hmrc.timetopayproxy.models.saonly.ttpinform.DdiReference
 
 class DdiReferenceSpec extends AnyFreeSpec {
 
