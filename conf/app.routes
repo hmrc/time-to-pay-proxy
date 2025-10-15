@@ -10,3 +10,4 @@ POST       /charge-info                             uk.gov.hmrc.timetopayproxy.c
 
 POST       /cancel                                  uk.gov.hmrc.timetopayproxy.controllers.TimeToPayProxyController.cancelTtp
 POST       /inform                                  uk.gov.hmrc.timetopayproxy.controllers.TimeToPayProxyController.informTtp
+POST       /full-amend                              uk.gov.hmrc.timetopayproxy.controllers.TimeToPayProxyController.fullAmendTtp

@@ -27,6 +27,7 @@ final case class TtpCancelRequest(
   paymentPlan: TtpCancelPaymentPlan,
   instalments: NonEmptyList[SaOnlyInstalment],
   channelIdentifier: ChannelIdentifier,
+  // Unlike the FullAmend request, CDCS requested this field to be optional due to delivery constraints.
   transitioned: Option[TransitionedIndicator]
 )
 

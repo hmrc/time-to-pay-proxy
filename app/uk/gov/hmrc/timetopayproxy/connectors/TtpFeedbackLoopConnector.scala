@@ -26,6 +26,7 @@ import uk.gov.hmrc.timetopayproxy.logging.RequestAwareLogger
 import uk.gov.hmrc.timetopayproxy.models.TimeToPayError
 import uk.gov.hmrc.timetopayproxy.models.error.ProxyEnvelopeError
 import uk.gov.hmrc.timetopayproxy.models.error.TtppEnvelope.TtppEnvelope
+import uk.gov.hmrc.timetopayproxy.models.saonly.ttpfullamend.{ TtpFullAmendInformativeError, TtpFullAmendRequest, TtpFullAmendSuccessfulResponse }
 import uk.gov.hmrc.timetopayproxy.models.saonly.ttpcancel.{ TtpCancelInformativeError, TtpCancelRequest, TtpCancelSuccessfulResponse }
 import uk.gov.hmrc.timetopayproxy.models.saonly.ttpinform.{ TtpInformInformativeError, TtpInformRequest, TtpInformSuccessfulResponse }
 
@@ -57,6 +58,14 @@ class TtpFeedbackLoopConnector @Inject() (appConfig: AppConfig, httpClient: Http
       .orError[TtpInformInformativeError](500)
       .orErrorTransformed[TimeToPayError](400, ttpError => ttpError.toConnectorError(status = 400))
 
+  private val httpReadsBuilderForFullAmend
+    : HttpReadsWithLoggingBuilder[ProxyEnvelopeError, TtpFullAmendSuccessfulResponse] =
+    HttpReadsWithLoggingBuilder
+      .empty[ProxyEnvelopeError, TtpFullAmendSuccessfulResponse]
+      .orSuccess[TtpFullAmendSuccessfulResponse](200)
+      .orError[TtpFullAmendInformativeError](500)
+      .orErrorTransformed[TimeToPayError](400, ttpError => ttpError.toConnectorError(status = 400))
+
   def cancelTtp(
     ttppRequest: TtpCancelRequest
   )(implicit ec: ExecutionContext, hc: HeaderCarrier): TtppEnvelope[TtpCancelSuccessfulResponse] = {
@@ -74,6 +83,26 @@ class TtpFeedbackLoopConnector @Inject() (appConfig: AppConfig, httpClient: Http
         .withBody(Json.toJson(ttppRequest))
         .setHeader(requestHeaders: _*)
         .execute[Either[ProxyEnvelopeError, TtpCancelSuccessfulResponse]]
+    )
+  }
+
+  def fullAmendTtp(
+    request: TtpFullAmendRequest
+  )(implicit ec: ExecutionContext, hc: HeaderCarrier): TtppEnvelope[TtpFullAmendSuccessfulResponse] = {
+
+    implicit def httpReads: HttpReads[Either[ProxyEnvelopeError, TtpFullAmendSuccessfulResponse]] =
+      httpReadsBuilderForFullAmend.httpReads(logger)
+
+    val path = if (appConfig.useIf) "/individuals/debts/time-to-pay/full-amend" else "/debts/time-to-pay/full-amend"
+
+    val url = url"${appConfig.ttpBaseUrl + path}"
+
+    EitherT(
+      httpClient
+        .post(url)
+        .withBody(Json.toJson(request))
+        .setHeader(requestHeaders: _*)
+        .execute[Either[ProxyEnvelopeError, TtpFullAmendSuccessfulResponse]]
     )
   }
 

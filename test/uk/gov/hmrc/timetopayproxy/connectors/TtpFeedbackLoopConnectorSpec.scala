@@ -28,14 +28,15 @@ import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.http.client.HttpClientV2
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 import uk.gov.hmrc.timetopayproxy.config.AppConfig
+import uk.gov.hmrc.timetopayproxy.models._
 import uk.gov.hmrc.timetopayproxy.models.currency.GbpPounds
 import uk.gov.hmrc.timetopayproxy.models.error.ConnectorError
 import uk.gov.hmrc.timetopayproxy.models.error.TtppEnvelope.TtppEnvelope
-import uk.gov.hmrc.timetopayproxy.models.saonly.common.apistatus.{ ApiName, ApiStatus, ApiStatusCode }
 import uk.gov.hmrc.timetopayproxy.models.saonly.common._
+import uk.gov.hmrc.timetopayproxy.models.saonly.common.apistatus.{ ApiName, ApiStatus, ApiStatusCode }
 import uk.gov.hmrc.timetopayproxy.models.saonly.ttpcancel._
+import uk.gov.hmrc.timetopayproxy.models.saonly.ttpfullamend.{ TtpFullAmendInformativeError, TtpFullAmendInternalError, TtpFullAmendRequest, TtpFullAmendSuccessfulResponse }
 import uk.gov.hmrc.timetopayproxy.models.saonly.ttpinform._
-import uk.gov.hmrc.timetopayproxy.models._
 import uk.gov.hmrc.timetopayproxy.support.WireMockUtils
 
 import java.time.{ Instant, LocalDate }
@@ -108,7 +109,7 @@ final class TtpFeedbackLoopConnectorSpec
     val connector: TtpFeedbackLoopConnector = new TtpFeedbackLoopConnector(mockConfiguration, httpClient)
   }
 
-  "DefaultTtpFeedbackLoopConnector" should {
+  "TtpFeedbackLoopConnector" should {
     ".cancelTtp" should {
 
       val ttpCancelRequest: TtpCancelRequest = TtpCancelRequest(
@@ -274,159 +275,294 @@ final class TtpFeedbackLoopConnectorSpec
         }
       }
     }
-  }
 
-  ".informTtp" should {
+    ".informTtp" should {
+      val ttpInformRequest: TtpInformRequest = TtpInformRequest(
+        identifications = NonEmptyList.of(
+          Identification(idType = IdType("NINO"), idValue = IdValue("AB123456C"))
+        ),
+        paymentPlan = SaOnlyPaymentPlan(
+          arrangementAgreedDate = ArrangementAgreedDate(LocalDate.parse("2025-01-01")),
+          ttpEndDate = TtpEndDate(LocalDate.parse("2025-02-01")),
+          frequency = FrequencyLowercase.Monthly,
+          initialPaymentDate = Some(InitialPaymentDate(LocalDate.parse("2025-01-05"))),
+          initialPaymentAmount = Some(GbpPounds.createOrThrow(100.00)),
+          ddiReference = Some(DdiReference("TestDDIReference"))
+        ),
+        instalments = NonEmptyList.of(
+          SaOnlyInstalment(
+            dueDate = InstalmentDueDate(LocalDate.parse("2025-01-31")),
+            amountDue = GbpPounds.createOrThrow(500.00)
+          )
+        ),
+        channelIdentifier = ChannelIdentifier.Advisor,
+        transitioned = Some(TransitionedIndicator(true))
+      )
 
-    val ttpInformRequest: TtpInformRequest = TtpInformRequest(
-      identifications = NonEmptyList.of(
-        Identification(idType = IdType("NINO"), idValue = IdValue("AB123456C"))
-      ),
-      paymentPlan = TtpInformPaymentPlan(
-        arrangementAgreedDate = ArrangementAgreedDate(LocalDate.parse("2025-01-01")),
-        ttpEndDate = TtpEndDate(LocalDate.parse("2025-02-01")),
-        frequency = FrequencyLowercase.Monthly,
-        initialPaymentDate = Some(InitialPaymentDate(LocalDate.parse("2025-01-05"))),
-        initialPaymentAmount = Some(GbpPounds.createOrThrow(100.00)),
-        ddiReference = Some(DdiReference("TestDDIReference"))
-      ),
-      instalments = NonEmptyList.of(
-        SaOnlyInstalment(
-          dueDate = InstalmentDueDate(LocalDate.parse("2025-01-31")),
-          amountDue = GbpPounds.createOrThrow(500.00)
-        )
-      ),
-      channelIdentifier = ChannelIdentifier.Advisor,
-      transitioned = Some(TransitionedIndicator(true))
-    )
-
-    val ttpInformResponse: TtpInformSuccessfulResponse = TtpInformSuccessfulResponse(
-      apisCalled = List(
-        ApiStatus(
-          name = ApiName("API1"),
-          statusCode = ApiStatusCode(200),
-          processingDateTime = ProcessingDateTimeInstant(Instant.parse("2025-01-01T12:00:00Z")),
-          errorResponse = None
-        )
-      ),
-      processingDateTime = ProcessingDateTimeInstant(Instant.parse("2025-01-01T12:00:00Z"))
-    )
-
-    val ttpInformErrorResponse: TtpInformInformativeError = TtpInformInformativeError(
-      apisCalled = Some(
-        List(
+      val ttpInformResponse: TtpInformSuccessfulResponse = TtpInformSuccessfulResponse(
+        apisCalled = List(
           ApiStatus(
             name = ApiName("API1"),
             statusCode = ApiStatusCode(200),
             processingDateTime = ProcessingDateTimeInstant(Instant.parse("2025-01-01T12:00:00Z")),
             errorResponse = None
           )
-        )
-      ),
-      internalErrors = List(
-        TtpInformInternalError("some error that ttp is responsible for"),
-        TtpInformInternalError("another error that ttp is responsible for")
-      ),
-      processingDateTime = ProcessingDateTimeInstant(Instant.parse("2025-01-01T12:00:00Z"))
-    )
+        ),
+        processingDateTime = ProcessingDateTimeInstant(Instant.parse("2025-01-01T12:00:00Z"))
+      )
 
-    "using IF" should {
-      "return a successful response" in new Setup(ifImpl = true) {
-        stubPostWithResponseBodyEnsuringRequest(
-          "/individuals/debts/time-to-pay/inform",
-          Json.toJson(ttpInformRequest).toString(),
-          200,
-          Json.toJson(ttpInformResponse).toString()
-        )
+      val ttpInformErrorResponse: TtpInformInformativeError = TtpInformInformativeError(
+        apisCalled = Some(
+          List(
+            ApiStatus(
+              name = ApiName("API1"),
+              statusCode = ApiStatusCode(200),
+              processingDateTime = ProcessingDateTimeInstant(Instant.parse("2025-01-01T12:00:00Z")),
+              errorResponse = None
+            )
+          )
+        ),
+        internalErrors = List(
+          TtpInformInternalError("some error that ttp is responsible for"),
+          TtpInformInternalError("another error that ttp is responsible for")
+        ),
+        processingDateTime = ProcessingDateTimeInstant(Instant.parse("2025-01-01T12:00:00Z"))
+      )
 
-        val result: TtppEnvelope[TtpInformSuccessfulResponse] = connector.informTtp(ttpInformRequest)
+      "using IF" should {
+        "return a successful response" in new Setup(ifImpl = true) {
+          stubPostWithResponseBodyEnsuringRequest(
+            "/individuals/debts/time-to-pay/inform",
+            Json.toJson(ttpInformRequest).toString(),
+            200,
+            Json.toJson(ttpInformResponse).toString()
+          )
 
-        result.value.futureValue shouldBe Right(ttpInformResponse)
+          val result: TtppEnvelope[TtpInformSuccessfulResponse] = connector.informTtp(ttpInformRequest)
+
+          result.value.futureValue shouldBe Right(ttpInformResponse)
+        }
+
+        "parse an error response from an upstream service" in new Setup(ifImpl = true) {
+          stubPostWithResponseBodyEnsuringRequest(
+            "/individuals/debts/time-to-pay/inform",
+            Json.toJson(ttpInformRequest).toString(),
+            400,
+            """{"failures": [{"code": "400", "reason": "Invalid request body"}]}"""
+          )
+
+          val result: TtppEnvelope[TtpInformSuccessfulResponse] = connector.informTtp(ttpInformRequest)
+
+          result.value.futureValue shouldBe Left(ConnectorError(400, "Invalid request body"))
+        }
+
+        "handle 500 responses" in new Setup(ifImpl = true) {
+          stubPostWithResponseBodyEnsuringRequest(
+            "/individuals/debts/time-to-pay/inform",
+            Json.toJson(ttpInformRequest).toString(),
+            500,
+            Json.toJson(ttpInformErrorResponse).toString()
+          )
+
+          val result: TtppEnvelope[TtpInformSuccessfulResponse] = connector.informTtp(ttpInformRequest)
+
+          val informativeError = TtpInformInformativeError(
+            apisCalled = Some(ttpInformResponse.apisCalled),
+            internalErrors = List(
+              TtpInformInternalError("some error that ttp is responsible for"),
+              TtpInformInternalError("another error that ttp is responsible for")
+            ),
+            processingDateTime = ttpInformResponse.processingDateTime
+          )
+
+          result.value.futureValue shouldBe Left(informativeError)
+        }
       }
 
-      "parse an error response from an upstream service" in new Setup(ifImpl = true) {
-        stubPostWithResponseBodyEnsuringRequest(
-          "/individuals/debts/time-to-pay/inform",
-          Json.toJson(ttpInformRequest).toString(),
-          400,
-          """{"failures": [{"code": "400", "reason": "Invalid request body"}]}"""
-        )
+      "using TTP" should {
+        "return a successful response" in new Setup(ifImpl = false) {
+          stubPostWithResponseBodyEnsuringRequest(
+            "/debts/time-to-pay/inform",
+            Json.toJson(ttpInformRequest).toString(),
+            200,
+            Json.toJson(ttpInformResponse).toString()
+          )
 
-        val result: TtppEnvelope[TtpInformSuccessfulResponse] = connector.informTtp(ttpInformRequest)
+          val result: TtppEnvelope[TtpInformSuccessfulResponse] = connector.informTtp(ttpInformRequest)
 
-        result.value.futureValue shouldBe Left(ConnectorError(400, "Invalid request body"))
-      }
+          result.value.futureValue shouldBe Right(ttpInformResponse)
+        }
 
-      "handle 500 responses" in new Setup(ifImpl = true) {
-        stubPostWithResponseBodyEnsuringRequest(
-          "/individuals/debts/time-to-pay/inform",
-          Json.toJson(ttpInformRequest).toString(),
-          500,
-          Json.toJson(ttpInformErrorResponse).toString()
-        )
+        "parse an error response from an upstream service" in new Setup(ifImpl = false) {
+          stubPostWithResponseBodyEnsuringRequest(
+            "/debts/time-to-pay/inform",
+            Json.toJson(ttpInformRequest).toString(),
+            400,
+            """{"failures": [{"code": "400", "reason": "Invalid request body"}]}"""
+          )
 
-        val result: TtppEnvelope[TtpInformSuccessfulResponse] = connector.informTtp(ttpInformRequest)
+          val result: TtppEnvelope[TtpInformSuccessfulResponse] = connector.informTtp(ttpInformRequest)
 
-        val informativeError = TtpInformInformativeError(
-          apisCalled = Some(ttpInformResponse.apisCalled),
-          internalErrors = List(
-            TtpInformInternalError("some error that ttp is responsible for"),
-            TtpInformInternalError("another error that ttp is responsible for")
-          ),
-          processingDateTime = ttpInformResponse.processingDateTime
-        )
+          result.value.futureValue shouldBe Left(ConnectorError(400, "Invalid request body"))
+        }
 
-        result.value.futureValue shouldBe Left(informativeError)
+        "handle 500 responses" in new Setup(ifImpl = false) {
+          stubPostWithResponseBodyEnsuringRequest(
+            "/debts/time-to-pay/inform",
+            Json.toJson(ttpInformRequest).toString(),
+            500,
+            Json.toJson(ttpInformErrorResponse).toString()
+          )
+
+          val result: TtppEnvelope[TtpInformSuccessfulResponse] = connector.informTtp(ttpInformRequest)
+
+          val informativeError = TtpInformInformativeError(
+            apisCalled = Some(ttpInformResponse.apisCalled),
+            internalErrors = List(
+              TtpInformInternalError("some error that ttp is responsible for"),
+              TtpInformInternalError("another error that ttp is responsible for")
+            ),
+            processingDateTime = ttpInformResponse.processingDateTime
+          )
+
+          result.value.futureValue shouldBe Left(informativeError)
+        }
       }
     }
 
-    "using TTP" should {
-      "return a successful response" in new Setup(ifImpl = false) {
-        stubPostWithResponseBodyEnsuringRequest(
-          "/debts/time-to-pay/inform",
-          Json.toJson(ttpInformRequest).toString(),
-          200,
-          Json.toJson(ttpInformResponse).toString()
-        )
+    ".fullAmendTtp" should {
+      val fullAmendRequest: TtpFullAmendRequest = TtpFullAmendRequest(
+        identifications = NonEmptyList.of(
+          Identification(idType = IdType("NINO"), idValue = IdValue("AB123456C"))
+        ),
+        paymentPlan = SaOnlyPaymentPlan(
+          arrangementAgreedDate = ArrangementAgreedDate(LocalDate.parse("2025-01-01")),
+          ttpEndDate = TtpEndDate(LocalDate.parse("2025-02-01")),
+          frequency = FrequencyLowercase.Monthly,
+          initialPaymentDate = Some(InitialPaymentDate(LocalDate.parse("2025-01-05"))),
+          initialPaymentAmount = Some(GbpPounds.createOrThrow(100.00)),
+          ddiReference = Some(DdiReference("TestDDIReference"))
+        ),
+        instalments = NonEmptyList.of(
+          SaOnlyInstalment(
+            dueDate = InstalmentDueDate(LocalDate.parse("2025-01-31")),
+            amountDue = GbpPounds.createOrThrow(500.00)
+          )
+        ),
+        channelIdentifier = ChannelIdentifier.Advisor,
+        transitioned = TransitionedIndicator(true)
+      )
 
-        val result: TtppEnvelope[TtpInformSuccessfulResponse] = connector.informTtp(ttpInformRequest)
+      val fullAmendResponse: TtpFullAmendSuccessfulResponse = TtpFullAmendSuccessfulResponse(
+        apisCalled = List(
+          ApiStatus(
+            name = ApiName("API1"),
+            statusCode = ApiStatusCode(200),
+            processingDateTime = ProcessingDateTimeInstant(Instant.parse("2025-01-01T12:00:00Z")),
+            errorResponse = None
+          )
+        ),
+        processingDateTime = ProcessingDateTimeInstant(Instant.parse("2025-01-01T12:00:00Z"))
+      )
 
-        result.value.futureValue shouldBe Right(ttpInformResponse)
+      val fullAmendInformativeError = TtpFullAmendInformativeError(
+        apisCalled = Some(
+          List(
+            ApiStatus(
+              name = ApiName("API1"),
+              statusCode = ApiStatusCode(200),
+              processingDateTime = ProcessingDateTimeInstant(Instant.parse("2025-01-01T12:00:00Z")),
+              errorResponse = None
+            )
+          )
+        ),
+        internalErrors = List(
+          TtpFullAmendInternalError("some error that ttp is responsible for"),
+          TtpFullAmendInternalError("another error that ttp is responsible for")
+        ),
+        processingDateTime = ProcessingDateTimeInstant(Instant.parse("2025-01-01T12:00:00Z"))
+      )
+
+      "using IF" should {
+        "return a successful response" in new Setup(ifImpl = true) {
+          stubPostWithResponseBodyEnsuringRequest(
+            "/individuals/debts/time-to-pay/full-amend",
+            Json.toJson(fullAmendRequest).toString(),
+            200,
+            Json.toJson(fullAmendResponse).toString()
+          )
+
+          val result: TtppEnvelope[TtpFullAmendSuccessfulResponse] = connector.fullAmendTtp(fullAmendRequest)
+
+          result.value.futureValue shouldBe Right(fullAmendResponse)
+        }
+
+        "parse an error response from an upstream service" in new Setup(ifImpl = true) {
+          stubPostWithResponseBodyEnsuringRequest(
+            "/individuals/debts/time-to-pay/full-amend",
+            Json.toJson(fullAmendRequest).toString(),
+            400,
+            """{"failures": [{"code": "400", "reason": "Invalid request body"}]}"""
+          )
+
+          val result: TtppEnvelope[TtpFullAmendSuccessfulResponse] = connector.fullAmendTtp(fullAmendRequest)
+
+          result.value.futureValue shouldBe Left(ConnectorError(400, "Invalid request body"))
+        }
+
+        "handle 500 responses" in new Setup(ifImpl = true) {
+          stubPostWithResponseBodyEnsuringRequest(
+            "/individuals/debts/time-to-pay/full-amend",
+            Json.toJson(fullAmendRequest).toString(),
+            500,
+            Json.toJson(fullAmendInformativeError).toString()
+          )
+
+          val result: TtppEnvelope[TtpFullAmendSuccessfulResponse] = connector.fullAmendTtp(fullAmendRequest)
+
+          result.value.futureValue shouldBe Left(fullAmendInformativeError)
+        }
       }
 
-      "parse an error response from an upstream service" in new Setup(ifImpl = false) {
-        stubPostWithResponseBodyEnsuringRequest(
-          "/debts/time-to-pay/inform",
-          Json.toJson(ttpInformRequest).toString(),
-          400,
-          """{"failures": [{"code": "400", "reason": "Invalid request body"}]}"""
-        )
+      "using TTP" should {
+        "return a successful response" in new Setup(ifImpl = false) {
+          stubPostWithResponseBodyEnsuringRequest(
+            "/debts/time-to-pay/full-amend",
+            Json.toJson(fullAmendRequest).toString(),
+            200,
+            Json.toJson(fullAmendResponse).toString()
+          )
 
-        val result: TtppEnvelope[TtpInformSuccessfulResponse] = connector.informTtp(ttpInformRequest)
+          val result: TtppEnvelope[TtpFullAmendSuccessfulResponse] = connector.fullAmendTtp(fullAmendRequest)
 
-        result.value.futureValue shouldBe Left(ConnectorError(400, "Invalid request body"))
-      }
+          result.value.futureValue shouldBe Right(fullAmendResponse)
+        }
 
-      "handle 500 responses" in new Setup(ifImpl = false) {
-        stubPostWithResponseBodyEnsuringRequest(
-          "/debts/time-to-pay/inform",
-          Json.toJson(ttpInformRequest).toString(),
-          500,
-          Json.toJson(ttpInformErrorResponse).toString()
-        )
+        "parse an error response from an upstream service" in new Setup(ifImpl = false) {
+          stubPostWithResponseBodyEnsuringRequest(
+            "/debts/time-to-pay/full-amend",
+            Json.toJson(fullAmendRequest).toString(),
+            400,
+            """{"failures": [{"code": "400", "reason": "Invalid request body"}]}"""
+          )
 
-        val result: TtppEnvelope[TtpInformSuccessfulResponse] = connector.informTtp(ttpInformRequest)
+          val result: TtppEnvelope[TtpFullAmendSuccessfulResponse] = connector.fullAmendTtp(fullAmendRequest)
 
-        val informativeError = TtpInformInformativeError(
-          apisCalled = Some(ttpInformResponse.apisCalled),
-          internalErrors = List(
-            TtpInformInternalError("some error that ttp is responsible for"),
-            TtpInformInternalError("another error that ttp is responsible for")
-          ),
-          processingDateTime = ttpInformResponse.processingDateTime
-        )
+          result.value.futureValue shouldBe Left(ConnectorError(400, "Invalid request body"))
+        }
 
-        result.value.futureValue shouldBe Left(informativeError)
+        "handle 500 responses" in new Setup(ifImpl = false) {
+          stubPostWithResponseBodyEnsuringRequest(
+            "/debts/time-to-pay/full-amend",
+            Json.toJson(fullAmendRequest).toString(),
+            500,
+            Json.toJson(fullAmendInformativeError).toString()
+          )
+
+          val result: TtppEnvelope[TtpFullAmendSuccessfulResponse] = connector.fullAmendTtp(fullAmendRequest)
+
+          result.value.futureValue shouldBe Left(fullAmendInformativeError)
+        }
       }
     }
   }

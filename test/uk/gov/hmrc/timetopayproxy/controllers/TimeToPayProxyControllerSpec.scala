@@ -38,10 +38,11 @@ import uk.gov.hmrc.timetopayproxy.models.currency.GbpPounds
 import uk.gov.hmrc.timetopayproxy.models.error.TtppEnvelope.TtppEnvelope
 import uk.gov.hmrc.timetopayproxy.models.error.{ ConnectorError, TtppEnvelope, TtppErrorResponse }
 import uk.gov.hmrc.timetopayproxy.models.saonly.chargeInfoApi._
-import uk.gov.hmrc.timetopayproxy.models.saonly.common._
 import uk.gov.hmrc.timetopayproxy.models.saonly.common.apistatus.{ ApiName, ApiStatus, ApiStatusCode }
+import uk.gov.hmrc.timetopayproxy.models.saonly.common._
 import uk.gov.hmrc.timetopayproxy.models.saonly.ttpcancel.{ CancellationDate, TtpCancelPaymentPlan, TtpCancelRequest, TtpCancelSuccessfulResponse }
-import uk.gov.hmrc.timetopayproxy.models.saonly.ttpinform.{ DdiReference, TtpInformPaymentPlan, TtpInformRequest, TtpInformSuccessfulResponse }
+import uk.gov.hmrc.timetopayproxy.models.saonly.ttpfullamend.{ TtpFullAmendRequest, TtpFullAmendSuccessfulResponse }
+import uk.gov.hmrc.timetopayproxy.models.saonly.ttpinform.{ TtpInformRequest, TtpInformSuccessfulResponse }
 import uk.gov.hmrc.timetopayproxy.services.{ TTPEService, TTPQuoteService, TtpFeedbackLoopService }
 
 import java.time.{ Instant, LocalDate, LocalDateTime }
@@ -1399,7 +1400,7 @@ class TimeToPayProxyControllerSpec extends AnyWordSpec with MockFactory {
       identifications = NonEmptyList.of(
         Identification(idType = IdType("NINO"), idValue = IdValue("AB123456C"))
       ),
-      paymentPlan = TtpInformPaymentPlan(
+      paymentPlan = SaOnlyPaymentPlan(
         arrangementAgreedDate = ArrangementAgreedDate(LocalDate.parse("2025-01-01")),
         ttpEndDate = TtpEndDate(LocalDate.parse("2025-02-01")),
         frequency = FrequencyLowercase.Monthly,
@@ -1561,6 +1562,180 @@ class TimeToPayProxyControllerSpec extends AnyWordSpec with MockFactory {
         status(response) shouldBe Status.SERVICE_UNAVAILABLE
         (contentAsJson(response) \ "errorMessage")
           .as[String] shouldBe "/inform endpoint is not currently enabled"
+      }
+    }
+  }
+
+  "POST /individuals/time-to-pay-proxy/full-amend" should {
+    val ttpFullAmendRequest: TtpFullAmendRequest = TtpFullAmendRequest(
+      identifications = NonEmptyList.of(
+        Identification(
+          idType = IdType("idtype"),
+          idValue = IdValue("idvalue")
+        )
+      ),
+      paymentPlan = SaOnlyPaymentPlan(
+        arrangementAgreedDate = ArrangementAgreedDate(LocalDate.parse("2020-01-02")),
+        ttpEndDate = TtpEndDate(LocalDate.parse("2020-02-04")),
+        frequency = FrequencyLowercase.Weekly,
+        initialPaymentDate = Some(InitialPaymentDate(LocalDate.parse("2020-04-06"))),
+        initialPaymentAmount = Some(GbpPounds.createOrThrow(100.12)),
+        ddiReference = Some(DdiReference("TestDDIReference"))
+      ),
+      instalments = NonEmptyList.of(
+        SaOnlyInstalment(
+          dueDate = InstalmentDueDate(LocalDate.parse("2020-05-07")),
+          amountDue = GbpPounds.createOrThrow(200.34)
+        )
+      ),
+      channelIdentifier = ChannelIdentifier.SelfService,
+      transitioned = TransitionedIndicator(true)
+    )
+
+    val ttpFullAmendResponse: TtpFullAmendSuccessfulResponse = TtpFullAmendSuccessfulResponse(
+      apisCalled = List(
+        ApiStatus(
+          name = ApiName("API1"),
+          statusCode = ApiStatusCode(200),
+          processingDateTime = ProcessingDateTimeInstant(Instant.parse("2025-01-01T12:00:00Z")),
+          errorResponse = None
+        )
+      ),
+      processingDateTime = ProcessingDateTimeInstant(Instant.parse("2025-01-01T12:00:00Z"))
+    )
+
+    "return 200" when {
+      "service returns success" in {
+        (() => fs.fullAmendEndpointEnabled)
+          .expects()
+          .returning(true)
+
+        (authConnector
+          .authorise[Unit](_: Predicate, _: Retrieval[Unit])(
+            _: HeaderCarrier,
+            _: ExecutionContext
+          ))
+          .expects(*, *, *, *)
+          .returning(Future.successful(()))
+
+        (ttpFeedbackLoopService
+          .fullAmendTtp(_: TtpFullAmendRequest)(
+            _: ExecutionContext,
+            _: HeaderCarrier
+          ))
+          .expects(ttpFullAmendRequest, *, *)
+          .returning(TtppEnvelope(ttpFullAmendResponse))
+
+        val fakeRequest: FakeRequest[JsValue] =
+          FakeRequest("POST", "/individuals/time-to-pay-proxy/full-amend")
+            .withHeaders(CONTENT_TYPE -> MimeTypes.JSON)
+            .withBody(Json.toJson[TtpFullAmendRequest](ttpFullAmendRequest))
+
+        val response: Future[Result] = controller.fullAmendTtp()(fakeRequest)
+
+        status(response) shouldBe Status.OK
+        contentAsJson(response) shouldBe Json.toJson[TtpFullAmendSuccessfulResponse](
+          ttpFullAmendResponse
+        )
+      }
+    }
+
+    "return 400" when {
+      "request body is in wrong format" in {
+        (() => fs.fullAmendEndpointEnabled)
+          .expects()
+          .returning(true)
+
+        (authConnector
+          .authorise[Unit](_: Predicate, _: Retrieval[Unit])(
+            _: HeaderCarrier,
+            _: ExecutionContext
+          ))
+          .expects(*, *, *, *)
+          .returning(Future.successful(()))
+
+        val wrongFormattedBody = """{
+          "identifications": [],
+          "paymentPlan": {
+            "arrangementAgreedDate": "invalid-date",
+            "ttpEndDate": "2025-02-01",
+            "frequency": "monthly"
+          }
+        }"""
+
+        val fakeRequest: FakeRequest[JsValue] =
+          FakeRequest("POST", "/individuals/time-to-pay-proxy/full-amend") // PLay
+            .withHeaders(CONTENT_TYPE -> MimeTypes.JSON)
+            .withBody(Json.parse(wrongFormattedBody))
+
+        val response: Future[Result] = controller.fullAmendTtp()(fakeRequest)
+
+        status(response) shouldBe Status.BAD_REQUEST
+      }
+    }
+
+    "return 500" when {
+      "service returns failure" in {
+        (() => fs.fullAmendEndpointEnabled)
+          .expects()
+          .returning(true)
+
+        (authConnector
+          .authorise[Unit](_: Predicate, _: Retrieval[Unit])(
+            _: HeaderCarrier,
+            _: ExecutionContext
+          ))
+          .expects(*, *, *, *)
+          .returning(Future.successful(()))
+
+        val errorFromTtpService = ConnectorError(500, "Internal Service Error")
+        (ttpFeedbackLoopService
+          .fullAmendTtp(_: TtpFullAmendRequest)(
+            _: ExecutionContext,
+            _: HeaderCarrier
+          ))
+          .expects(ttpFullAmendRequest, *, *)
+          .returning(
+            TtppEnvelope(errorFromTtpService.asLeft[TtpFullAmendSuccessfulResponse])
+          )
+
+        val fakeRequest: FakeRequest[JsValue] =
+          FakeRequest("POST", "/individuals/time-to-pay-proxy/full-amend")
+            .withHeaders(CONTENT_TYPE -> MimeTypes.JSON)
+            .withBody(Json.toJson[TtpFullAmendRequest](ttpFullAmendRequest))
+
+        val response: Future[Result] = controller.fullAmendTtp()(fakeRequest)
+
+        status(response) shouldBe Status.INTERNAL_SERVER_ERROR
+        (contentAsJson(response) \ "errorMessage")
+          .as[String] shouldBe "Internal Service Error"
+      }
+    }
+
+    "return 503" when {
+      "the full amend endpoint is disabled" in {
+        (() => fs.fullAmendEndpointEnabled)
+          .expects()
+          .returning(false)
+
+        (authConnector
+          .authorise[Unit](_: Predicate, _: Retrieval[Unit])(
+            _: HeaderCarrier,
+            _: ExecutionContext
+          ))
+          .expects(*, *, *, *)
+          .returning(Future.successful(()))
+
+        val fakeRequest: FakeRequest[JsValue] =
+          FakeRequest("POST", "/individuals/time-to-pay-proxy/full-amend")
+            .withHeaders(CONTENT_TYPE -> MimeTypes.JSON)
+            .withBody(Json.toJson[TtpFullAmendRequest](ttpFullAmendRequest))
+
+        val response: Future[Result] = controller.fullAmendTtp()(fakeRequest)
+
+        status(response) shouldBe Status.SERVICE_UNAVAILABLE
+        (contentAsJson(response) \ "errorMessage")
+          .as[String] shouldBe "/full-amend endpoint is not currently enabled"
       }
     }
   }
