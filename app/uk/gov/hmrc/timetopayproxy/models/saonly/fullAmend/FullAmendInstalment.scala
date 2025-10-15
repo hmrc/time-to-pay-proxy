@@ -14,17 +14,3 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.timetopayproxy.models.saonly.fullAmend
-
-import play.api.libs.json.{ Json, OFormat }
-import uk.gov.hmrc.timetopayproxy.models.currency.GbpPounds
-import uk.gov.hmrc.timetopayproxy.models.saonly.chargeInfoApi.DueDate
-
-case class FullAmendInstalment(
-  dueDate: DueDate,
-  amountDue: GbpPounds
-)
-
-object FullAmendInstalment {
-  implicit val format: OFormat[FullAmendInstalment] = Json.format[FullAmendInstalment]
-}

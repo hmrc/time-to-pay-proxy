@@ -29,8 +29,9 @@ import uk.gov.hmrc.timetopayproxy.models.saonly.chargeInfoApi._
 import uk.gov.hmrc.timetopayproxy.models.saonly.common.apistatus.{ ApiErrorResponse, ApiName, ApiStatus, ApiStatusCode }
 import uk.gov.hmrc.timetopayproxy.models.saonly.common._
 import uk.gov.hmrc.timetopayproxy.models.saonly.ttpcancel.{ CancellationDate, TtpCancelPaymentPlan, TtpCancelRequest, TtpCancelSuccessfulResponse }
-import uk.gov.hmrc.timetopayproxy.models.saonly.ttpinform.{ DdiReference, TtpInformInformativeError, TtpInformPaymentPlan, TtpInformRequest, TtpInformSuccessfulResponse }
 import uk.gov.hmrc.timetopayproxy.models._
+import uk.gov.hmrc.timetopayproxy.models.saonly.fullAmend.{ FullAmendPaymentPlan, FullAmendRequest, FullAmendSuccessResponse }
+import uk.gov.hmrc.timetopayproxy.models.saonly.ttpinform.{ DdiReference, TtpInformInformativeError, TtpInformPaymentPlan, TtpInformRequest, TtpInformSuccessfulResponse }
 import uk.gov.hmrc.timetopayproxy.support.IntegrationBaseSpec
 import uk.gov.hmrc.timetopayproxy.testutils.TestOnlyJsonFormats._
 
@@ -1300,5 +1301,46 @@ class TimeToPayProxyControllerItSpec extends IntegrationBaseSpec {
       ),
       processingDateTime = ProcessingDateTimeInstant(java.time.Instant.parse("2025-10-15T10:31:00Z"))
     )
+    val fullAmendRequest: FullAmendRequest = FullAmendRequest(
+      identifications = NonEmptyList.of(
+        Identification(idType = IdType("NINO"), idValue = IdValue("AA000000A")),
+        Identification(idType = IdType("MTDITID"), idValue = IdValue("XAIT00000000054"))
+      ),
+      paymentPlan = FullAmendPaymentPlan(
+        arrangementAgreedDate = ArrangementAgreedDate(LocalDate.parse("2025-01-01")),
+        ttpEndDate = TtpEndDate(LocalDate.parse("2025-12-31")),
+        frequency = FrequencyLowercase.Monthly,
+        initialPaymentDate = Some(InitialPaymentDate(LocalDate.parse("2025-02-01"))),
+        initialPaymentAmount = Some(GbpPounds.createOrThrow(BigDecimal("123.45"))),
+        ddiReference = Some("DDI Reference")
+      ),
+      instalments = NonEmptyList.of(
+        SaOnlyInstalment(
+          dueDate = InstalmentDueDate(LocalDate.parse("2025-11-28")),
+          amountDue = GbpPounds.createOrThrow(BigDecimal("100.00"))
+        )
+      ),
+      channelIdentifier = ChannelIdentifier.SelfService,
+      transitioned = TransitionedIndicator(true)
+    )
+
+    val fullAmendResponse: FullAmendSuccessResponse = FullAmendSuccessResponse(
+      apisCalled = List(
+        ApiStatus(
+          name = ApiName("CESA"),
+          statusCode = ApiStatusCode("200"),
+          processingDateTime = ProcessingDateTimeInstant(java.time.Instant.parse("2025-05-01T14:30:00Z")),
+          errorResponse = None
+        ),
+        ApiStatus(
+          name = ApiName("ETMP"),
+          statusCode = ApiStatusCode("201"),
+          processingDateTime = ProcessingDateTimeInstant(java.time.Instant.parse("2025-05-01T14:31:00Z")),
+          errorResponse = None
+        )
+      ),
+      processingDateTime = ProcessingDateTimeInstant(java.time.Instant.parse("2025-10-15T10:31:00Z"))
+    )
+
   }
 }

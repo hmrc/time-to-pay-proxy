@@ -18,14 +18,14 @@ package uk.gov.hmrc.timetopayproxy.models.saonly.fullAmend
 
 import cats.data.NonEmptyList
 import play.api.libs.json.{ Format, Json, OFormat }
-import uk.gov.hmrc.timetopayproxy.models.saonly.common.TransitionedIndicator
+import uk.gov.hmrc.timetopayproxy.models.saonly.common.{ SaOnlyInstalment, TransitionedIndicator }
 import uk.gov.hmrc.timetopayproxy.models.{ ChannelIdentifier, Identification }
 import uk.gov.hmrc.timetopayproxy.utils.json.CatsNonEmptyListJson
 
 case class FullAmendRequest(
   identifications: NonEmptyList[Identification],
   paymentPlan: FullAmendPaymentPlan,
-  instalments: NonEmptyList[FullAmendInstalment],
+  instalments: NonEmptyList[SaOnlyInstalment],
   channelIdentifier: ChannelIdentifier,
   transitioned: TransitionedIndicator
 )
