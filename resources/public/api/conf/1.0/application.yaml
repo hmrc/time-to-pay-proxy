@@ -491,6 +491,16 @@ paths:
               example:
                 statusCode: 401
                 errorMessage: A user with no active session will return 401 response
+        '409':
+          description: Conflict - Plan ID exists in both op led and self serve collections
+          headers: {}
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                statusCode: 409
+                errorMessage: Plan ID exists in both op led and self serve collections
         '500':
           description: ''
           headers: {}
