@@ -1,4 +1,7 @@
 title: ErrorResponse
+required:
+  - statusCode
+  - errorMessage
 properties:
   statusCode:
     type: integer

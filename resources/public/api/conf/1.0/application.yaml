@@ -49,9 +49,9 @@ info:
       | 1.0.15 | 18-09-2025 | Alex Olkhovskiy | Restrict regimeType enum to only 'SA' value for /quote endpoint |
       | 1.0.16 | 24-09-2025 | Alex Olkhovskiy | Added new cancel endpoint  |
       | 1.0.17 | 07-10-2025 | Vinnie Brice | Change cancel scope to writes  |
-      | 1.0.17-proposedAll-1 | 15-10-2025 | Alex Olkhovskiy | Combined proposed changes  |
+      | 1.0.17-proposedAll-2 | 15-10-2025 | Alex Olkhovskiy | Combined proposed changes  |
   contact: {}
-  version: 1.0.17-proposedAll-1
+  version: 1.0.17-proposedAll-2
 servers:
   - url: https://api.service.hmrc.gov.uk
     variables: {}
@@ -1610,6 +1610,9 @@ components:
           $ref: '#/components/schemas/PlanCollections'
     ErrorResponse:
       title: ErrorResponse
+      required:
+        - statusCode
+        - errorMessage
       properties:
         statusCode:
           type: integer
