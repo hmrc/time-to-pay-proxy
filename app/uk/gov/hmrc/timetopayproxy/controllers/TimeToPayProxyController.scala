@@ -19,9 +19,10 @@ package uk.gov.hmrc.timetopayproxy.controllers
 import cats.syntax.either._
 import play.api.libs.json._
 import play.api.mvc._
-import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
+import uk.gov.hmrc.play.bootstrap.backend.controller.BackendBaseController
 import uk.gov.hmrc.timetopayproxy.actions.auth.AuthoriseAction
 import uk.gov.hmrc.timetopayproxy.config.FeatureSwitch
+import uk.gov.hmrc.timetopayproxy.logging.RequestAwareLogger
 import uk.gov.hmrc.timetopayproxy.models._
 import uk.gov.hmrc.timetopayproxy.models.affordablequotes.AffordableQuotesRequest
 import uk.gov.hmrc.timetopayproxy.models.error.TtppEnvelope.TtppEnvelope
@@ -29,6 +30,7 @@ import uk.gov.hmrc.timetopayproxy.models.error.{ TtppEnvelope, TtppErrorResponse
 import uk.gov.hmrc.timetopayproxy.models.saonly.chargeInfoApi.ChargeInfoRequest
 import uk.gov.hmrc.timetopayproxy.models.saonly.ttpcancel.TtpCancelRequest
 import uk.gov.hmrc.timetopayproxy.services.{ TTPEService, TTPQuoteService, TtpFeedbackLoopService }
+import uk.gov.hmrc.timetopayproxy.utils.HeaderCarrierWithForcedCorrelationId
 
 import javax.inject.{ Inject, Singleton }
 import scala.annotation.unused
@@ -38,14 +40,16 @@ import scala.util.{ Failure, Success, Try }
 @Singleton()
 class TimeToPayProxyController @Inject() (
   authoriseAction: AuthoriseAction,
-  cc: ControllerComponents,
+  override val controllerComponents: ControllerComponents,
   timeToPayQuoteService: TTPQuoteService,
   ttpFeedbackLoopService: TtpFeedbackLoopService,
   timeToPayEligibilityService: TTPEService,
   @unused
   featureSwitch: FeatureSwitch
-) extends BackendController(cc) with BaseController {
-  implicit val ec: ExecutionContext = cc.executionContext
+) extends BackendBaseController with BaseController with HeaderCarrierWithForcedCorrelationId {
+  implicit val ec: ExecutionContext = controllerComponents.executionContext
+
+  protected val logger: RequestAwareLogger = new RequestAwareLogger(this.getClass)
 
   private val queryParameterNotMatchingPayload =
     "customerReference and planId in the query parameters should match the ones in the request payload"
@@ -167,7 +171,7 @@ class TimeToPayProxyController @Inject() (
     s"$fieldInfo. $detailedMessage"
   }
 
-  def withJsonBody[T](
+  private def withJsonBody[T](
     f: T => Future[Result]
   )(implicit request: Request[JsValue], m: Manifest[T], reads: Reads[T]): Future[Result] =
     Try(request.body.validate[T]) match {
