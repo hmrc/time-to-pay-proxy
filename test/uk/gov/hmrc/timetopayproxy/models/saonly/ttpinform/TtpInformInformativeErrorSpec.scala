@@ -20,7 +20,7 @@ import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.should.Matchers._
 import play.api.libs.json._
 import uk.gov.hmrc.timetopayproxy.models.saonly.common.ProcessingDateTimeInstant
-import uk.gov.hmrc.timetopayproxy.models.saonly.common.apistatus.{ ApiErrorResponse, ApiName, ApiStatus, ApiStatusCode }
+import uk.gov.hmrc.timetopayproxy.models.saonly.common.apistatus.{ ApiErrorResponse, ApiName, ApiStatusCodeString, ApiStatusWithStringCode }
 import uk.gov.hmrc.timetopayproxy.testutils.JsonAssertionOps._
 import uk.gov.hmrc.timetopayproxy.testutils.schematestutils.Validators
 
@@ -32,9 +32,9 @@ final class TtpInformInformativeErrorSpec extends AnyFreeSpec {
     object WithOnlySomes {
       def obj: TtpInformInformativeError = TtpInformInformativeError(
         apisCalled = List(
-          ApiStatus(
+          ApiStatusWithStringCode(
             name = ApiName("api name"),
-            statusCode = ApiStatusCode("400"),
+            statusCode = ApiStatusCodeString("400"),
             processingDateTime = ProcessingDateTimeInstant(Instant.parse("2000-01-02T14:35:00.788998Z")),
             errorResponse = Some(ApiErrorResponse("api error response"))
           )
@@ -61,9 +61,9 @@ final class TtpInformInformativeErrorSpec extends AnyFreeSpec {
     object With0SomeOnEachPath {
       def obj: TtpInformInformativeError = TtpInformInformativeError(
         apisCalled = List(
-          ApiStatus(
+          ApiStatusWithStringCode(
             name = ApiName("api name"),
-            statusCode = ApiStatusCode("400"),
+            statusCode = ApiStatusCodeString("400"),
             processingDateTime = ProcessingDateTimeInstant(Instant.parse("2000-01-02T14:35:00.788998Z")),
             errorResponse = None
           )

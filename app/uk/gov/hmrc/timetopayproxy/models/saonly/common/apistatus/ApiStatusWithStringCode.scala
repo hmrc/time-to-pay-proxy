@@ -16,10 +16,16 @@
 
 package uk.gov.hmrc.timetopayproxy.models.saonly.common.apistatus
 
-import play.api.libs.json.{ Format, Json }
+import play.api.libs.json.{ Json, OFormat }
+import uk.gov.hmrc.timetopayproxy.models.saonly.common.ProcessingDateTimeInstant
 
-final case class ApiStatusCodeInt(value: Int)
+case class ApiStatusWithStringCode(
+  name: ApiName,
+  statusCode: ApiStatusCodeString,
+  processingDateTime: ProcessingDateTimeInstant,
+  errorResponse: Option[ApiErrorResponse]
+)
 
-object ApiStatusCodeInt {
-  implicit val format: Format[ApiStatusCodeInt] = Json.valueFormat[ApiStatusCodeInt]
+object ApiStatusWithStringCode {
+  implicit val format: OFormat[ApiStatusWithStringCode] = Json.format[ApiStatusWithStringCode]
 }

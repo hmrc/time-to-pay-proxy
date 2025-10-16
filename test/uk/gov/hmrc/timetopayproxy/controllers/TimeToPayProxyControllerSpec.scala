@@ -39,7 +39,7 @@ import uk.gov.hmrc.timetopayproxy.models.error.TtppEnvelope.TtppEnvelope
 import uk.gov.hmrc.timetopayproxy.models.error.{ ConnectorError, TtppEnvelope, TtppErrorResponse }
 import uk.gov.hmrc.timetopayproxy.models.saonly.chargeInfoApi._
 import uk.gov.hmrc.timetopayproxy.models.saonly.common._
-import uk.gov.hmrc.timetopayproxy.models.saonly.common.apistatus.{ ApiName, ApiStatus, ApiStatusCode }
+import uk.gov.hmrc.timetopayproxy.models.saonly.common.apistatus.{ ApiName, ApiStatusCodeString, ApiStatusWithStringCode }
 import uk.gov.hmrc.timetopayproxy.models.saonly.ttpcancel.{ CancellationDate, TtpCancelPaymentPlan, TtpCancelRequest, TtpCancelSuccessfulResponse }
 import uk.gov.hmrc.timetopayproxy.models.saonly.ttpinform.{ DdiReference, TtpInformPaymentPlan, TtpInformRequest, TtpInformSuccessfulResponse }
 import uk.gov.hmrc.timetopayproxy.services.{ TTPEService, TTPQuoteService, TtpFeedbackLoopService }
@@ -1243,9 +1243,9 @@ class TimeToPayProxyControllerSpec extends AnyWordSpec with MockFactory {
 
     val ttpCancelResponse = TtpCancelSuccessfulResponse(
       apisCalled = List(
-        ApiStatus(
+        ApiStatusWithStringCode(
           name = ApiName("API1"),
-          statusCode = ApiStatusCode("SUCCESS"),
+          statusCode = ApiStatusCodeString("SUCCESS"),
           processingDateTime = ProcessingDateTimeInstant(Instant.parse("2025-01-01T12:00:00Z")),
           errorResponse = None
         )
@@ -1419,9 +1419,9 @@ class TimeToPayProxyControllerSpec extends AnyWordSpec with MockFactory {
 
     val ttpInformResponse: TtpInformSuccessfulResponse = TtpInformSuccessfulResponse(
       apisCalled = List(
-        ApiStatus(
+        ApiStatusWithStringCode(
           name = ApiName("API1"),
-          statusCode = ApiStatusCode("SUCCESS"),
+          statusCode = ApiStatusCodeString("SUCCESS"),
           processingDateTime = ProcessingDateTimeInstant(Instant.parse("2025-01-01T12:00:00Z")),
           errorResponse = None
         )

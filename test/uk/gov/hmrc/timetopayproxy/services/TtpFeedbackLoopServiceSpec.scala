@@ -26,7 +26,7 @@ import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.timetopayproxy.connectors.TtpFeedbackLoopConnector
 import uk.gov.hmrc.timetopayproxy.models.currency.GbpPounds
 import uk.gov.hmrc.timetopayproxy.models.error.{ ConnectorError, TtppEnvelope }
-import uk.gov.hmrc.timetopayproxy.models.saonly.common.apistatus.{ ApiName, ApiStatus, ApiStatusCode }
+import uk.gov.hmrc.timetopayproxy.models.saonly.common.apistatus.{ ApiName, ApiStatusCodeString, ApiStatusWithStringCode }
 import uk.gov.hmrc.timetopayproxy.models.saonly.common._
 import uk.gov.hmrc.timetopayproxy.models.saonly.ttpcancel.{ CancellationDate, TtpCancelPaymentPlan, TtpCancelRequest, TtpCancelSuccessfulResponse }
 import uk.gov.hmrc.timetopayproxy.models.saonly.ttpinform.{ DdiReference, TtpInformPaymentPlan, TtpInformRequest, TtpInformSuccessfulResponse }
@@ -70,9 +70,9 @@ class TtpFeedbackLoopServiceSpec extends AnyFreeSpec with MockFactory with Scala
 
       val ttpCancelResponse = TtpCancelSuccessfulResponse(
         apisCalled = List(
-          ApiStatus(
+          ApiStatusWithStringCode(
             name = ApiName("TTP_PROXY"),
-            statusCode = ApiStatusCode("SUCCESS"),
+            statusCode = ApiStatusCodeString("SUCCESS"),
             processingDateTime = ProcessingDateTimeInstant(Instant.parse("2024-01-15T10:30:00Z")),
             errorResponse = None
           )
@@ -137,9 +137,9 @@ class TtpFeedbackLoopServiceSpec extends AnyFreeSpec with MockFactory with Scala
 
       val ttpInformResponse = TtpInformSuccessfulResponse(
         apisCalled = List(
-          ApiStatus(
+          ApiStatusWithStringCode(
             name = ApiName("TTP_PROXY"),
-            statusCode = ApiStatusCode("SUCCESS"),
+            statusCode = ApiStatusCodeString("SUCCESS"),
             processingDateTime = ProcessingDateTimeInstant(Instant.parse("2024-01-15T10:30:00Z")),
             errorResponse = None
           )

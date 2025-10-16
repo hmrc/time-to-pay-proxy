@@ -20,12 +20,12 @@ import play.api.libs.json.{ Json, OFormat }
 import play.api.mvc.{ Result, Results }
 import uk.gov.hmrc.timetopayproxy.models.error.{ ProxyEnvelopeError, TtppWriteableError }
 import uk.gov.hmrc.timetopayproxy.models.saonly.common.ProcessingDateTimeInstant
-import uk.gov.hmrc.timetopayproxy.models.saonly.common.apistatus.ApiStatus
+import uk.gov.hmrc.timetopayproxy.models.saonly.common.apistatus.ApiStatusWithStringCode
 
 /** Outgoing error for `500 Internal Server Error`. Also the incoming error from the `time-to-pay` service. */
 final case class TtpCancelInformativeError(
   // TODO DTD-3785: Implement the internalErrors field which won't exist in the 200 OK class.
-  apisCalled: List[ApiStatus],
+  apisCalled: List[ApiStatusWithStringCode],
   processingDateTime: ProcessingDateTimeInstant
 ) extends ProxyEnvelopeError with TtppWriteableError {
 

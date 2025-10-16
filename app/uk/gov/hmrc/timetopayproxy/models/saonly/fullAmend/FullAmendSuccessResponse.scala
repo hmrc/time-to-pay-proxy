@@ -18,10 +18,10 @@ package uk.gov.hmrc.timetopayproxy.models.saonly.fullAmend
 
 import play.api.libs.json.{ Json, OFormat }
 import uk.gov.hmrc.timetopayproxy.models.saonly.common.ProcessingDateTimeInstant
-import uk.gov.hmrc.timetopayproxy.models.saonly.common.apistatus.ApiStatusWithIntStatus
+import uk.gov.hmrc.timetopayproxy.models.saonly.common.apistatus.ApiStatus
 
 case class FullAmendSuccessResponse(
-  apisCalled: List[ApiStatusWithIntStatus],
+  apisCalled: List[ApiStatus],
   processingDateTime: ProcessingDateTimeInstant
 )
 

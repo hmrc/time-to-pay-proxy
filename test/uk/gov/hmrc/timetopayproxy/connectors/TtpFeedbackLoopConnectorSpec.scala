@@ -31,11 +31,11 @@ import uk.gov.hmrc.timetopayproxy.config.AppConfig
 import uk.gov.hmrc.timetopayproxy.models.currency.GbpPounds
 import uk.gov.hmrc.timetopayproxy.models.error.ConnectorError
 import uk.gov.hmrc.timetopayproxy.models.error.TtppEnvelope.TtppEnvelope
-import uk.gov.hmrc.timetopayproxy.models.saonly.common.apistatus.{ ApiName, ApiStatus, ApiStatusCode }
-import uk.gov.hmrc.timetopayproxy.models.saonly.common.{ ArrangementAgreedDate, InitialPaymentDate, ProcessingDateTimeInstant, SaOnlyInstalment, TransitionedIndicator, TtpEndDate }
-import uk.gov.hmrc.timetopayproxy.models.saonly.ttpcancel.{ CancellationDate, TtpCancelInformativeError, TtpCancelPaymentPlan, TtpCancelRequest, TtpCancelSuccessfulResponse }
-import uk.gov.hmrc.timetopayproxy.models.saonly.ttpinform.{ DdiReference, TtpInformInformativeError, TtpInformPaymentPlan, TtpInformRequest, TtpInformSuccessfulResponse }
-import uk.gov.hmrc.timetopayproxy.models.{ ChannelIdentifier, FrequencyLowercase, IdType, IdValue, Identification, InstalmentDueDate }
+import uk.gov.hmrc.timetopayproxy.models.saonly.common.apistatus.{ ApiName, ApiStatusCodeString, ApiStatusWithStringCode }
+import uk.gov.hmrc.timetopayproxy.models.saonly.common._
+import uk.gov.hmrc.timetopayproxy.models.saonly.ttpcancel._
+import uk.gov.hmrc.timetopayproxy.models.saonly.ttpinform._
+import uk.gov.hmrc.timetopayproxy.models._
 import uk.gov.hmrc.timetopayproxy.support.WireMockUtils
 
 import java.time.{ Instant, LocalDate }
@@ -135,9 +135,9 @@ final class TtpFeedbackLoopConnectorSpec
 
       val ttpCancelResponse: TtpCancelSuccessfulResponse = TtpCancelSuccessfulResponse(
         apisCalled = List(
-          ApiStatus(
+          ApiStatusWithStringCode(
             name = ApiName("API1"),
-            statusCode = ApiStatusCode("SUCCESS"),
+            statusCode = ApiStatusCodeString("SUCCESS"),
             processingDateTime = ProcessingDateTimeInstant(Instant.parse("2025-01-01T12:00:00Z")),
             errorResponse = None
           )
@@ -186,9 +186,9 @@ final class TtpFeedbackLoopConnectorSpec
             Left(
               TtpCancelInformativeError(
                 List(
-                  ApiStatus(
+                  ApiStatusWithStringCode(
                     ApiName("API1"),
-                    ApiStatusCode("SUCCESS"),
+                    ApiStatusCodeString("SUCCESS"),
                     ProcessingDateTimeInstant(Instant.parse("2025-01-01T12:00:00Z")),
                     errorResponse = None
                   )
@@ -240,9 +240,9 @@ final class TtpFeedbackLoopConnectorSpec
             Left(
               TtpCancelInformativeError(
                 List(
-                  ApiStatus(
+                  ApiStatusWithStringCode(
                     ApiName("API1"),
-                    ApiStatusCode("SUCCESS"),
+                    ApiStatusCodeString("SUCCESS"),
                     ProcessingDateTimeInstant(Instant.parse("2025-01-01T12:00:00Z")),
                     errorResponse = None
                   )
@@ -281,9 +281,9 @@ final class TtpFeedbackLoopConnectorSpec
 
     val ttpInformResponse: TtpInformSuccessfulResponse = TtpInformSuccessfulResponse(
       apisCalled = List(
-        ApiStatus(
+        ApiStatusWithStringCode(
           name = ApiName("API1"),
-          statusCode = ApiStatusCode("SUCCESS"),
+          statusCode = ApiStatusCodeString("SUCCESS"),
           processingDateTime = ProcessingDateTimeInstant(Instant.parse("2025-01-01T12:00:00Z")),
           errorResponse = None
         )

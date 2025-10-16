@@ -22,6 +22,7 @@ import com.github.tomakehurst.wiremock.client.WireMock.{ postRequestedFor, urlPa
 import play.api.libs.json.{ JsNull, JsObject, JsValue, Json }
 import play.api.libs.ws.{ WSRequest, WSResponse }
 import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.timetopayproxy.models._
 import uk.gov.hmrc.timetopayproxy.models.affordablequotes.{ AffordableQuoteResponse, AffordableQuotesRequest }
 import uk.gov.hmrc.timetopayproxy.models.currency.GbpPounds
 import uk.gov.hmrc.timetopayproxy.models.error.TtppErrorResponse
@@ -31,7 +32,6 @@ import uk.gov.hmrc.timetopayproxy.models.saonly.common._
 import uk.gov.hmrc.timetopayproxy.models.saonly.fullAmend.{ FullAmendPaymentPlan, FullAmendRequest, FullAmendSuccessResponse }
 import uk.gov.hmrc.timetopayproxy.models.saonly.ttpcancel.{ CancellationDate, TtpCancelPaymentPlan, TtpCancelRequest, TtpCancelSuccessfulResponse }
 import uk.gov.hmrc.timetopayproxy.models.saonly.ttpinform._
-import uk.gov.hmrc.timetopayproxy.models._
 import uk.gov.hmrc.timetopayproxy.support.IntegrationBaseSpec
 import uk.gov.hmrc.timetopayproxy.testutils.TestOnlyJsonFormats._
 
@@ -637,9 +637,9 @@ class TimeToPayProxyControllerItSpec extends IntegrationBaseSpec {
           "when TimeToPay returns an error response with 500" in new TimeToPayProxyControllerTestBase {
             val errorResponse = TtpCancelSuccessfulResponse(
               apisCalled = List(
-                ApiStatus(
+                ApiStatusWithStringCode(
                   name = ApiName("CESA"),
-                  statusCode = ApiStatusCode("400"),
+                  statusCode = ApiStatusCodeString("400"),
                   processingDateTime = ProcessingDateTimeInstant(java.time.Instant.parse("2025-10-15T10:30:00Z")),
                   errorResponse = Some(ApiErrorResponse("Invalid cancellationDate"))
                 )
@@ -938,9 +938,9 @@ class TimeToPayProxyControllerItSpec extends IntegrationBaseSpec {
           "when TimeToPay returns an error response with 500" in new TimeToPayProxyControllerTestBase {
             val errorResponse = TtpInformInformativeError(
               apisCalled = List(
-                ApiStatus(
+                ApiStatusWithStringCode(
                   name = ApiName("CESA"),
-                  statusCode = ApiStatusCode("400"),
+                  statusCode = ApiStatusCodeString("400"),
                   processingDateTime = ProcessingDateTimeInstant(java.time.Instant.parse("2025-10-15T10:30:00Z")),
                   errorResponse = Some(ApiErrorResponse("Invalid cancellationDate"))
                 )
@@ -1180,6 +1180,57 @@ class TimeToPayProxyControllerItSpec extends IntegrationBaseSpec {
             response.json shouldBe jsonResponse
             response.status shouldBe 200
           }
+
+          "when TimeToPay returns a successful response with Json Bala sent" in new TimeToPayProxyControllerTestBase {
+            val jsonResponse = Json.toJson(fullAmendResponse)
+            stubPostWithResponseBody(url = "/auth/authorise", status = 200, responseBody = "null")
+            stubPostWithResponseBody(
+              url = "/debts/time-to-pay/full-amend",
+              status = 200,
+              responseBody = jsonResponse.toString()
+            )
+
+            val requestForFullAmend: WSRequest = buildRequest("/full-amend")
+
+            val validRequestBody = Json.parse(
+              """
+                |{
+                |    "identifications": [
+                |        {
+                |            "idType": "UTR",
+                |            "idValue": "1234567890"
+                |        }
+                |    ],
+                |    "paymentPlan": {
+                |        "arrangementAgreedDate": "2090-06-08",
+                |        "ttpEndDate": "2025-02-01",
+                |        "frequency": "monthly",
+                |        "initialPaymentDate": "2025-05-05",
+                |        "initialPaymentAmount": 150,
+                |        "ddiReference": "DD123456789"
+                |    },
+                |    "instalments": [
+                |        {
+                |            "dueDate": "2025-06-01",
+                |            "amountDue": 300
+                |        },
+                |        {
+                |            "dueDate": "2025-06-01",
+                |            "amountDue": 300
+                |        }
+                |    ],
+                |    "channelIdentifier": "advisor",
+                |    "transitioned": true
+                |}
+                |""".stripMargin
+            )
+            val response: WSResponse = await(
+              requestForFullAmend.post(validRequestBody)
+            )
+
+            response.json shouldBe jsonResponse
+            response.status shouldBe 200
+          }
         }
       }
 
@@ -1188,9 +1239,9 @@ class TimeToPayProxyControllerItSpec extends IntegrationBaseSpec {
           "when TimeToPay returns an error response with 500" in new TimeToPayProxyControllerTestBase {
             val errorResponse = FullAmendSuccessResponse(
               apisCalled = List(
-                ApiStatusWithIntStatus(
+                ApiStatus(
                   name = ApiName("CESA"),
-                  statusCode = ApiStatusCodeInt(400),
+                  statusCode = ApiStatusCode(400),
                   processingDateTime = ProcessingDateTimeInstant(java.time.Instant.parse("2025-10-15T10:30:00Z")),
                   errorResponse = Some(ApiErrorResponse("Invalid arrangementAgreedDate"))
                 )
@@ -1282,11 +1333,11 @@ class TimeToPayProxyControllerItSpec extends IntegrationBaseSpec {
               """{
                 |   "identifications": [
                 |      {
-                |      "idType": "id type 1",
+                |      "idType": "UTR",
                 |      "idValue": "id value 1"
                 |    },
                 |    {
-                |      "idType": "id type 2",
+                |      "idType": "NINO",
                 |      "idValue": "id value 2"
                 |    }
                 |   ],
@@ -1624,15 +1675,15 @@ class TimeToPayProxyControllerItSpec extends IntegrationBaseSpec {
 
     val cancelResponse: TtpCancelSuccessfulResponse = TtpCancelSuccessfulResponse(
       apisCalled = List(
-        ApiStatus(
+        ApiStatusWithStringCode(
           name = ApiName("CESA"),
-          statusCode = ApiStatusCode("200"),
+          statusCode = ApiStatusCodeString("200"),
           processingDateTime = ProcessingDateTimeInstant(java.time.Instant.parse("2025-05-01T14:30:00Z")),
           errorResponse = None
         ),
-        ApiStatus(
+        ApiStatusWithStringCode(
           name = ApiName("ETMP"),
-          statusCode = ApiStatusCode("201"),
+          statusCode = ApiStatusCodeString("201"),
           processingDateTime = ProcessingDateTimeInstant(java.time.Instant.parse("2025-05-01T14:31:00Z")),
           errorResponse = None
         )
@@ -1687,21 +1738,22 @@ class TimeToPayProxyControllerItSpec extends IntegrationBaseSpec {
 
     val informResponse: TtpInformSuccessfulResponse = TtpInformSuccessfulResponse(
       apisCalled = List(
-        ApiStatus(
+        ApiStatusWithStringCode(
           name = ApiName("CESA"),
-          statusCode = ApiStatusCode("200"),
+          statusCode = ApiStatusCodeString("200"),
           processingDateTime = ProcessingDateTimeInstant(java.time.Instant.parse("2025-05-01T14:30:00Z")),
           errorResponse = None
         ),
-        ApiStatus(
+        ApiStatusWithStringCode(
           name = ApiName("ETMP"),
-          statusCode = ApiStatusCode("201"),
+          statusCode = ApiStatusCodeString("201"),
           processingDateTime = ProcessingDateTimeInstant(java.time.Instant.parse("2025-05-01T14:31:00Z")),
           errorResponse = None
         )
       ),
       processingDateTime = ProcessingDateTimeInstant(java.time.Instant.parse("2025-10-15T10:31:00Z"))
     )
+
     val fullAmendRequest: FullAmendRequest = FullAmendRequest(
       identifications = NonEmptyList.of(
         Identification(idType = IdType("NINO"), idValue = IdValue("AA000000A")),
@@ -1727,15 +1779,15 @@ class TimeToPayProxyControllerItSpec extends IntegrationBaseSpec {
 
     val fullAmendResponse: FullAmendSuccessResponse = FullAmendSuccessResponse(
       apisCalled = List(
-        ApiStatusWithIntStatus(
+        ApiStatus(
           name = ApiName("CESA"),
-          statusCode = ApiStatusCodeInt(200),
+          statusCode = ApiStatusCode(200),
           processingDateTime = ProcessingDateTimeInstant(java.time.Instant.parse("2025-05-01T14:30:00Z")),
           errorResponse = None
         ),
-        ApiStatusWithIntStatus(
+        ApiStatus(
           name = ApiName("ETMP"),
-          statusCode = ApiStatusCodeInt(201),
+          statusCode = ApiStatusCode(201),
           processingDateTime = ProcessingDateTimeInstant(java.time.Instant.parse("2025-05-01T14:31:00Z")),
           errorResponse = None
         )

@@ -18,11 +18,11 @@ package uk.gov.hmrc.timetopayproxy.models.saonly.ttpinform
 
 import play.api.libs.json.{ Json, OFormat }
 import uk.gov.hmrc.timetopayproxy.models.saonly.common.ProcessingDateTimeInstant
-import uk.gov.hmrc.timetopayproxy.models.saonly.common.apistatus.ApiStatus
+import uk.gov.hmrc.timetopayproxy.models.saonly.common.apistatus.ApiStatusWithStringCode
 
 /** This is intended only for `200 OK`. */
 final case class TtpInformSuccessfulResponse(
-  apisCalled: List[ApiStatus],
+  apisCalled: List[ApiStatusWithStringCode],
   processingDateTime: ProcessingDateTimeInstant
 )
 
