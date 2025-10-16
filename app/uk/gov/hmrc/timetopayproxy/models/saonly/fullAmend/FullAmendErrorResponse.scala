@@ -20,12 +20,12 @@ import play.api.libs.json.{ Json, OFormat }
 import play.api.mvc.{ Result, Results }
 import uk.gov.hmrc.timetopayproxy.models.error.{ ProxyEnvelopeError, TtppWriteableError }
 import uk.gov.hmrc.timetopayproxy.models.saonly.common.ProcessingDateTimeInstant
-import uk.gov.hmrc.timetopayproxy.models.saonly.common.apistatus.ApiStatus
+import uk.gov.hmrc.timetopayproxy.models.saonly.common.apistatus.ApiStatusWithIntStatus
 
 final case class FullAmendErrorResponse(
   processingDateTime: ProcessingDateTimeInstant,
-  apisCalled: List[ApiStatus],
-  internalErrors: List[InternalError]
+  apisCalled: Option[List[ApiStatusWithIntStatus]],
+  internalErrors: Option[List[InternalError]]
 ) extends ProxyEnvelopeError with TtppWriteableError {
 
   def toWriteableProxyError: TtppWriteableError = this

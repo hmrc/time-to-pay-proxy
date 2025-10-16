@@ -26,12 +26,12 @@ import uk.gov.hmrc.timetopayproxy.models.affordablequotes.{ AffordableQuoteRespo
 import uk.gov.hmrc.timetopayproxy.models.currency.GbpPounds
 import uk.gov.hmrc.timetopayproxy.models.error.TtppErrorResponse
 import uk.gov.hmrc.timetopayproxy.models.saonly.chargeInfoApi._
-import uk.gov.hmrc.timetopayproxy.models.saonly.common.apistatus.{ ApiErrorResponse, ApiName, ApiStatus, ApiStatusCode }
+import uk.gov.hmrc.timetopayproxy.models.saonly.common.apistatus._
 import uk.gov.hmrc.timetopayproxy.models.saonly.common._
-import uk.gov.hmrc.timetopayproxy.models.saonly.ttpcancel.{ CancellationDate, TtpCancelPaymentPlan, TtpCancelRequest, TtpCancelSuccessfulResponse }
-import uk.gov.hmrc.timetopayproxy.models._
 import uk.gov.hmrc.timetopayproxy.models.saonly.fullAmend.{ FullAmendPaymentPlan, FullAmendRequest, FullAmendSuccessResponse }
-import uk.gov.hmrc.timetopayproxy.models.saonly.ttpinform.{ DdiReference, TtpInformInformativeError, TtpInformPaymentPlan, TtpInformRequest, TtpInformSuccessfulResponse }
+import uk.gov.hmrc.timetopayproxy.models.saonly.ttpcancel.{ CancellationDate, TtpCancelPaymentPlan, TtpCancelRequest, TtpCancelSuccessfulResponse }
+import uk.gov.hmrc.timetopayproxy.models.saonly.ttpinform._
+import uk.gov.hmrc.timetopayproxy.models._
 import uk.gov.hmrc.timetopayproxy.support.IntegrationBaseSpec
 import uk.gov.hmrc.timetopayproxy.testutils.TestOnlyJsonFormats._
 
@@ -1108,6 +1108,305 @@ class TimeToPayProxyControllerItSpec extends IntegrationBaseSpec {
         }
       }
     }
+    ".fullAmend" - {
+      "should return a 200 statusCode" - {
+        "when given a valid json payload" - {
+          "when TimeToPay returns a successful response" in new TimeToPayProxyControllerTestBase {
+            val jsonResponse = Json.toJson(fullAmendResponse)
+            stubPostWithResponseBody(url = "/auth/authorise", status = 200, responseBody = "null")
+            stubPostWithResponseBody(
+              url = "/debts/time-to-pay/full-amend",
+              status = 200,
+              responseBody = jsonResponse.toString()
+            )
+
+            val requestForFullAmend: WSRequest = buildRequest("/full-amend")
+
+            val response: WSResponse = await(
+              requestForFullAmend.post(Json.toJson(fullAmendRequest))
+            )
+
+            response.json shouldBe jsonResponse
+            response.status shouldBe 200
+          }
+        }
+      }
+
+      "should return a 500 statusCode" - {
+        "when given a valid json payload" - {
+          "when TimeToPay returns an error response with 500" in new TimeToPayProxyControllerTestBase {
+            val errorResponse = FullAmendSuccessResponse(
+              apisCalled = List(
+                ApiStatusWithIntStatus(
+                  name = ApiName("CESA"),
+                  statusCode = ApiStatusCodeInt(400),
+                  processingDateTime = ProcessingDateTimeInstant(java.time.Instant.parse("2025-10-15T10:30:00Z")),
+                  errorResponse = Some(ApiErrorResponse("Invalid arrangementAgreedDate"))
+                )
+              ),
+              processingDateTime = ProcessingDateTimeInstant(java.time.Instant.parse("2025-10-15T10:31:00Z"))
+            )
+            val jsonResponse = Json.toJson(errorResponse)
+
+            stubPostWithResponseBody(url = "/auth/authorise", status = 200, responseBody = "null")
+            stubPostWithResponseBody(
+              url = "/debts/time-to-pay/full-amend",
+              status = 500,
+              responseBody = jsonResponse.toString()
+            )
+
+            val requestForFullAmend: WSRequest = buildRequest("/full-amend")
+
+            val response: WSResponse = await(
+              requestForFullAmend.post(Json.toJson(fullAmendRequest))
+            )
+
+            response.json shouldBe jsonResponse
+            response.status shouldBe 500
+          }
+        }
+      }
+
+      "should return a 400 statusCode" - {
+        "when given a valid json payload" - {
+          "when TimeToPay returns an error response of 400" in new TimeToPayProxyControllerTestBase {
+            val upstreamErrorResponse = TimeToPayError(
+              List(
+                TimeToPayInnerError(
+                  code = "400",
+                  reason = "Invalid request payload: missing identifications"
+                )
+              )
+            )
+
+            val expectedTtppErrorResponse = TtppErrorResponse(
+              statusCode = 400,
+              errorMessage = "Invalid request payload: missing identifications"
+            )
+
+            stubPostWithResponseBody(url = "/auth/authorise", status = 200, responseBody = "null")
+            stubPostWithResponseBody(
+              url = "/debts/time-to-pay/full-amend",
+              status = 400,
+              responseBody = Json.toJson(upstreamErrorResponse).toString()
+            )
+
+            val requestForFullAmend: WSRequest = buildRequest("/full-amend")
+
+            val response: WSResponse = await(
+              requestForFullAmend.post(Json.toJson(fullAmendRequest))
+            )
+
+            response.json shouldBe Json.toJson(expectedTtppErrorResponse)
+            response.status shouldBe 400
+          }
+        }
+
+        "when given an invalid json payload" - {
+          "with an empty json object" in new TimeToPayProxyControllerTestBase {
+            stubPostWithResponseBody(url = "/auth/authorise", status = 200, responseBody = "null")
+
+            val requestForFullAmend: WSRequest = buildRequest("/full-amend")
+
+            val response: WSResponse = await(
+              requestForFullAmend.post(JsObject.empty)
+            )
+
+            val expectedTtppErrorResponse: TtppErrorResponse = TtppErrorResponse(
+              statusCode = 400,
+              errorMessage =
+                "Invalid FullAmendRequest payload: Payload has a missing field or an invalid format. Field name: identifications. "
+            )
+
+            response.json shouldBe Json.toJson(expectedTtppErrorResponse)
+            response.status shouldBe 400
+          }
+
+          "with mandatory fields missing" - {
+            "when 'identifications' is missing" in new TimeToPayProxyControllerTestBase {
+              stubPostWithResponseBody(url = "/auth/authorise", status = 200, responseBody = "null")
+
+              val requestForFullAmend: WSRequest = buildRequest("/full-amend")
+
+              val invalidRequestBody: JsValue = Json.parse(
+                """{
+                  |  "paymentPlan": {
+                  |    "arrangementAgreedDate": "2025-05-01",
+                  |    "ttpEndDate": "2025-03-22",
+                  |    "initialPaymentDate": "2025-05-22",
+                  |    "initialPaymentAmount": 40.7,
+                  |    "frequency": "Monthly",
+                  |    "ddiReference": "ddi ref"
+                  |  },
+                  |  "channelIdentifier": "selfService",
+                  |  "transitioned": false
+                  |}
+                  |""".stripMargin
+              )
+
+              val response: WSResponse = await(
+                requestForFullAmend.post(invalidRequestBody)
+              )
+
+              val expectedTtppErrorResponse: TtppErrorResponse = TtppErrorResponse(
+                statusCode = 400,
+                errorMessage =
+                  "Invalid FullAmendRequest payload: Payload has a missing field or an invalid format. Field name: identifications. "
+              )
+
+              response.json shouldBe Json.toJson(expectedTtppErrorResponse)
+              response.status shouldBe 400
+            }
+
+            "when 'instalments' is missing" in new TimeToPayProxyControllerTestBase {
+              stubPostWithResponseBody(url = "/auth/authorise", status = 200, responseBody = "null")
+
+              val requestForFullAmend: WSRequest = buildRequest("/full-amend")
+
+              val invalidRequestBody: JsValue = Json.parse(
+                """{
+                  |   "identifications": [
+                  |      {
+                  |      "idType": "id type 1",
+                  |      "idValue": "id value 1"
+                  |    },
+                  |    {
+                  |      "idType": "id type 2",
+                  |      "idValue": "id value 2"
+                  |    }
+                  |   ],
+                  |  "paymentPlan": {
+                  |    "arrangementAgreedDate": "2025-05-01",
+                  |    "ttpEndDate": "2025-03-22",
+                  |    "initialPaymentDate": "2025-05-22",
+                  |    "initialPaymentAmount": 40.7,
+                  |    "frequency": "Monthly",
+                  |    "ddiReference": "ddi ref"
+                  |  },
+                  |  "channelIdentifier": "selfService",
+                  |  "transitioned": false
+                  |}
+                  |""".stripMargin
+              )
+
+              val response: WSResponse = await(
+                requestForFullAmend.post(invalidRequestBody)
+              )
+
+              val expectedTtppErrorResponse: TtppErrorResponse = TtppErrorResponse(
+                statusCode = 400,
+                errorMessage =
+                  "Invalid FullAmendRequest payload: Payload has a missing field or an invalid format. Field name: instalments. "
+              )
+
+              response.json shouldBe Json.toJson(expectedTtppErrorResponse)
+              response.status shouldBe 400
+            }
+          }
+        }
+      }
+
+      "should return a 503 statusCode" - {
+        "when given a valid json payload" - {
+          "when TimeToPay returns an expected 200 response" - {
+            "with a null json response from TTP" in new TimeToPayProxyControllerTestBase {
+              stubPostWithResponseBody(url = "/auth/authorise", status = 200, responseBody = "null")
+              stubPostWithResponseBody(
+                url = "/debts/time-to-pay/full-amend",
+                status = 200,
+                responseBody = JsNull.toString()
+              )
+
+              val requestForFullAmend: WSRequest = buildRequest("/full-amend")
+
+              val response: WSResponse = await(
+                requestForFullAmend.post(Json.toJson(fullAmendRequest))
+              )
+
+              val expectedTtppErrorResponse: TtppErrorResponse =
+                TtppErrorResponse(
+                  statusCode = 503,
+                  errorMessage = "JSON structure is not valid in received successful HTTP response."
+                )
+
+              response.json shouldBe Json.toJson(expectedTtppErrorResponse)
+              response.status shouldBe 503
+            }
+          }
+
+          "when TimeToPay returns an expected error response" - {
+            for (responseStatus <- List(400, 500))
+              s"<$responseStatus>" - {
+                "with a null json response from TTP" in new TimeToPayProxyControllerTestBase {
+                  stubPostWithResponseBody(url = "/auth/authorise", status = 200, responseBody = "null")
+                  stubPostWithResponseBody(
+                    url = "/debts/time-to-pay/full-amend",
+                    status = responseStatus,
+                    responseBody = JsNull.toString()
+                  )
+
+                  val requestForFullAmend: WSRequest = buildRequest("/full-amend")
+
+                  val response: WSResponse = await(
+                    requestForFullAmend.post(Json.toJson(fullAmendRequest))
+                  )
+
+                  val expectedTtppErrorResponse: TtppErrorResponse =
+                    TtppErrorResponse(
+                      statusCode = 503,
+                      errorMessage = "JSON structure is not valid in received error HTTP response."
+                    )
+
+                  response.json shouldBe Json.toJson(expectedTtppErrorResponse)
+                  response.status shouldBe 503
+                }
+              }
+          }
+
+          "when TimeToPay returns unexpected success status" in new TimeToPayProxyControllerTestBase {
+            stubPostWithResponseBody(url = "/auth/authorise", status = 200, responseBody = "null")
+            stubPostWithResponseBody(
+              url = "/debts/time-to-pay/full-amend",
+              status = 201,
+              responseBody = Json.obj().toString()
+            )
+
+            val requestForFullAmend: WSRequest = buildRequest("/full-amend")
+
+            val response: WSResponse = await(
+              requestForFullAmend.post(Json.toJson(fullAmendRequest))
+            )
+
+            val expectedTtppErrorResponse: TtppErrorResponse =
+              TtppErrorResponse(statusCode = 503, errorMessage = "HTTP status is unexpected in received HTTP response.")
+
+            response.json shouldBe Json.toJson(expectedTtppErrorResponse)
+            response.status shouldBe 503
+          }
+
+          "when TimeToPay returns unexpected error status" in new TimeToPayProxyControllerTestBase {
+            stubPostWithResponseBody(url = "/auth/authorise", status = 200, responseBody = "null")
+            stubPostWithResponseBody(
+              url = "/debts/time-to-pay/full-amend",
+              status = 403,
+              responseBody = Json.obj().toString()
+            )
+
+            val requestForFullAmend: WSRequest = buildRequest("/full-amend")
+
+            val response: WSResponse = await(
+              requestForFullAmend.post(Json.toJson(fullAmendRequest))
+            )
+
+            val expectedTtppErrorResponse: TtppErrorResponse =
+              TtppErrorResponse(statusCode = 503, errorMessage = "HTTP status is unexpected in received HTTP response.")
+
+            response.json shouldBe Json.toJson(expectedTtppErrorResponse)
+            response.status shouldBe 503
+          }
+        }
+      }
+    }
   }
 
   trait TimeToPayProxyControllerTestBase {
@@ -1326,15 +1625,15 @@ class TimeToPayProxyControllerItSpec extends IntegrationBaseSpec {
 
     val fullAmendResponse: FullAmendSuccessResponse = FullAmendSuccessResponse(
       apisCalled = List(
-        ApiStatus(
+        ApiStatusWithIntStatus(
           name = ApiName("CESA"),
-          statusCode = ApiStatusCode("200"),
+          statusCode = ApiStatusCodeInt(200),
           processingDateTime = ProcessingDateTimeInstant(java.time.Instant.parse("2025-05-01T14:30:00Z")),
           errorResponse = None
         ),
-        ApiStatus(
+        ApiStatusWithIntStatus(
           name = ApiName("ETMP"),
-          statusCode = ApiStatusCode("201"),
+          statusCode = ApiStatusCodeInt(201),
           processingDateTime = ProcessingDateTimeInstant(java.time.Instant.parse("2025-05-01T14:31:00Z")),
           errorResponse = None
         )

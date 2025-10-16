@@ -14,17 +14,18 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.timetopayproxy.models.saonly.fullAmend
+package uk.gov.hmrc.timetopayproxy.models.saonly.common.apistatus
 
 import play.api.libs.json.{ Json, OFormat }
 import uk.gov.hmrc.timetopayproxy.models.saonly.common.ProcessingDateTimeInstant
-import uk.gov.hmrc.timetopayproxy.models.saonly.common.apistatus.ApiStatusWithIntStatus
 
-case class FullAmendSuccessResponse(
-  apisCalled: List[ApiStatusWithIntStatus],
-  processingDateTime: ProcessingDateTimeInstant
+case class ApiStatusWithIntStatus(
+  name: ApiName,
+  statusCode: ApiStatusCodeInt,
+  processingDateTime: ProcessingDateTimeInstant,
+  errorResponse: Option[ApiErrorResponse]
 )
 
-object FullAmendSuccessResponse {
-  implicit val format: OFormat[FullAmendSuccessResponse] = Json.format[FullAmendSuccessResponse]
+object ApiStatusWithIntStatus {
+  implicit val format: OFormat[ApiStatusWithIntStatus] = Json.format[ApiStatusWithIntStatus]
 }
