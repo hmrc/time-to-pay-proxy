@@ -29,7 +29,7 @@ import uk.gov.hmrc.timetopayproxy.models.error.TtppErrorResponse
 import uk.gov.hmrc.timetopayproxy.models.saonly.chargeInfoApi._
 import uk.gov.hmrc.timetopayproxy.models.saonly.common.apistatus._
 import uk.gov.hmrc.timetopayproxy.models.saonly.common._
-import uk.gov.hmrc.timetopayproxy.models.saonly.fullAmend.{ FullAmendPaymentPlan, FullAmendRequest, FullAmendSuccessResponse }
+import uk.gov.hmrc.timetopayproxy.models.saonly.fullAmend.{ TtpPaymentPlan, FullAmendRequest, FullAmendSuccessResponse }
 import uk.gov.hmrc.timetopayproxy.models.saonly.ttpcancel.{ CancellationDate, TtpCancelPaymentPlan, TtpCancelRequest, TtpCancelSuccessfulResponse }
 import uk.gov.hmrc.timetopayproxy.models.saonly.ttpinform._
 import uk.gov.hmrc.timetopayproxy.support.IntegrationBaseSpec
@@ -1760,7 +1760,7 @@ class TimeToPayProxyControllerItSpec extends IntegrationBaseSpec {
         Identification(idType = IdType("NINO"), idValue = IdValue("AA000000A")),
         Identification(idType = IdType("MTDITID"), idValue = IdValue("XAIT00000000054"))
       ),
-      paymentPlan = FullAmendPaymentPlan(
+      paymentPlan = TtpPaymentPlan(
         arrangementAgreedDate = ArrangementAgreedDate(LocalDate.parse("2025-01-01")),
         ttpEndDate = TtpEndDate(LocalDate.parse("2025-12-31")),
         frequency = FrequencyLowercase.Monthly,
