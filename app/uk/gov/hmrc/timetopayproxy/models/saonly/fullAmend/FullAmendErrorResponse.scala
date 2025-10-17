@@ -25,7 +25,7 @@ import uk.gov.hmrc.timetopayproxy.models.saonly.common.apistatus.ApiStatus
 final case class FullAmendErrorResponse(
   processingDateTime: ProcessingDateTimeInstant,
   apisCalled: List[ApiStatus],
-  internalErrors: Option[List[InternalError]]
+  internalErrors: List[FullAmendInternalError]
 ) extends ProxyEnvelopeError with TtppWriteableError {
 
   def toWriteableProxyError: TtppWriteableError = this
@@ -37,8 +37,8 @@ object FullAmendErrorResponse {
   implicit val format: OFormat[FullAmendErrorResponse] = Json.format[FullAmendErrorResponse]
 }
 
-case class InternalError(messages: String)
+case class FullAmendInternalError(message: String)
 
-object InternalError {
-  implicit val format: OFormat[InternalError] = Json.format[InternalError]
+object FullAmendInternalError {
+  implicit val format: OFormat[FullAmendInternalError] = Json.format[FullAmendInternalError]
 }

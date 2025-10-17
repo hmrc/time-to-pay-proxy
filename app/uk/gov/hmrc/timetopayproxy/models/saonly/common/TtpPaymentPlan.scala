@@ -21,7 +21,7 @@ import uk.gov.hmrc.timetopayproxy.models.FrequencyLowercase
 import uk.gov.hmrc.timetopayproxy.models.currency.GbpPounds
 import uk.gov.hmrc.timetopayproxy.models.saonly.common.{ ArrangementAgreedDate, InitialPaymentDate, TtpEndDate }
 
-final case class TtpInformPaymentPlan(
+final case class TtpPaymentPlan(
   arrangementAgreedDate: ArrangementAgreedDate,
   ttpEndDate: TtpEndDate,
   frequency: FrequencyLowercase,
@@ -30,6 +30,6 @@ final case class TtpInformPaymentPlan(
   ddiReference: Option[DdiReference]
 )
 
-object TtpInformPaymentPlan {
-  implicit val format: OFormat[TtpInformPaymentPlan] = Json.format[TtpInformPaymentPlan]
+object TtpPaymentPlan {
+  implicit val format: OFormat[TtpPaymentPlan] = Json.format[TtpPaymentPlan]
 }

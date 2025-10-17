@@ -261,7 +261,7 @@ final class TtpFeedbackLoopConnectorSpec
       identifications = NonEmptyList.of(
         Identification(idType = IdType("NINO"), idValue = IdValue("AB123456C"))
       ),
-      paymentPlan = TtpInformPaymentPlan(
+      paymentPlan = TtpPaymentPlan(
         arrangementAgreedDate = ArrangementAgreedDate(LocalDate.parse("2025-01-01")),
         ttpEndDate = TtpEndDate(LocalDate.parse("2025-02-01")),
         frequency = FrequencyLowercase.Monthly,

@@ -40,7 +40,7 @@ final class TtpInformRequestSpec extends AnyFreeSpec {
               idValue = IdValue("idvalue")
             )
           ),
-          paymentPlan = TtpInformPaymentPlan(
+          paymentPlan = TtpPaymentPlan(
             arrangementAgreedDate = ArrangementAgreedDate(LocalDate.parse("2020-01-02")),
             ttpEndDate = TtpEndDate(LocalDate.parse("2020-02-04")),
             frequency = FrequencyLowercase.Weekly,
@@ -95,7 +95,7 @@ final class TtpInformRequestSpec extends AnyFreeSpec {
               idValue = IdValue("idvalue")
             )
           ),
-          paymentPlan = TtpInformPaymentPlan(
+          paymentPlan = TtpPaymentPlan(
             arrangementAgreedDate = ArrangementAgreedDate(LocalDate.parse("2020-01-02")),
             ttpEndDate = TtpEndDate(LocalDate.parse("2020-02-04")),
             frequency = FrequencyLowercase.Weekly,

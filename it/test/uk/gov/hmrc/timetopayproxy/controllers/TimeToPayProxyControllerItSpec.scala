@@ -1159,6 +1159,7 @@ class TimeToPayProxyControllerItSpec extends IntegrationBaseSpec {
         }
       }
     }
+
     ".fullAmend" - {
       "should return a 200 statusCode" - {
         "when given a valid json payload" - {
@@ -1718,7 +1719,7 @@ class TimeToPayProxyControllerItSpec extends IntegrationBaseSpec {
       identifications = NonEmptyList.of(
         Identification(idType = IdType("NINO"), idValue = IdValue("AB123456C"))
       ),
-      paymentPlan = TtpInformPaymentPlan(
+      paymentPlan = TtpPaymentPlan(
         arrangementAgreedDate = ArrangementAgreedDate(LocalDate.parse("2025-01-01")),
         ttpEndDate = TtpEndDate(LocalDate.parse("2025-02-01")),
         frequency = FrequencyLowercase.Monthly,

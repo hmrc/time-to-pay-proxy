@@ -122,6 +122,36 @@ object Validators {
         )
     }
 
+    object FullAmend {
+      // Downloaded from:
+      //  https://confluence.tools.tax.service.gov.uk/display/DTDT/TTP+API+%28Current+Version%29+Proxy?preview=/828113579/1156972715/time-to-pay-v1.0.17.yaml
+      // Official location:
+      //  https://confluence.tools.tax.service.gov.uk/display/DTDT/TTP+API+%28Current+Version%29+Proxy?preview=/828113579/1156972715/time-to-pay-v1.0.17.yaml
+      def openApiRequestSchema: OpenApi3DerivedSchema =
+        new OpenApi3DerivedSchema(
+          path,
+          defaultJsonSubschemaName = "FullAmendRequest",
+          metaSchemaValidation = Some(Valid(())),
+          restrictAdditionalProperties = true
+        )
+
+      def openApiInformativeResponseSchema: OpenApi3DerivedSchema =
+        new OpenApi3DerivedSchema(
+          path,
+          defaultJsonSubschemaName = "FullAmendResponse",
+          metaSchemaValidation = Some(Valid(())),
+          restrictAdditionalProperties = true
+        )
+
+      def openApiResponseGeneralFailureSchema: OpenApi3DerivedSchema =
+        new OpenApi3DerivedSchema(
+          path,
+          defaultJsonSubschemaName = "FullAmendErrorResponse",
+          metaSchemaValidation = Some(Valid(())),
+          restrictAdditionalProperties = true
+        )
+    }
+
     /** For now, this applies to all responses from the proxy */
     def openApiResponseErrorSchema: OpenApi3DerivedSchema =
       new OpenApi3DerivedSchema(
