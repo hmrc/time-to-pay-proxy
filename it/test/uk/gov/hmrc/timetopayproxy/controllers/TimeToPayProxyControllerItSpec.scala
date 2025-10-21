@@ -29,7 +29,7 @@ import uk.gov.hmrc.timetopayproxy.models.error.TtppErrorResponse
 import uk.gov.hmrc.timetopayproxy.models.saonly.chargeInfoApi._
 import uk.gov.hmrc.timetopayproxy.models.saonly.common.apistatus._
 import uk.gov.hmrc.timetopayproxy.models.saonly.common._
-import uk.gov.hmrc.timetopayproxy.models.saonly.fullAmend.{ TtpPaymentPlan, FullAmendRequest, FullAmendSuccessResponse }
+import uk.gov.hmrc.timetopayproxy.models.saonly.fullAmend.{ FullAmendErrorResponse, FullAmendInternalError, FullAmendRequest, FullAmendSuccessResponse }
 import uk.gov.hmrc.timetopayproxy.models.saonly.ttpcancel.{ CancellationDate, TtpCancelPaymentPlan, TtpCancelRequest, TtpCancelSuccessfulResponse }
 import uk.gov.hmrc.timetopayproxy.models.saonly.ttpinform._
 import uk.gov.hmrc.timetopayproxy.support.IntegrationBaseSpec
@@ -1238,7 +1238,7 @@ class TimeToPayProxyControllerItSpec extends IntegrationBaseSpec {
       "should return a 500 statusCode" - {
         "when given a valid json payload" - {
           "when TimeToPay returns an error response with 500" in new TimeToPayProxyControllerTestBase {
-            val errorResponse = FullAmendSuccessResponse(
+            val errorResponse = FullAmendErrorResponse(
               apisCalled = List(
                 ApiStatus(
                   name = ApiName("CESA"),
@@ -1247,7 +1247,8 @@ class TimeToPayProxyControllerItSpec extends IntegrationBaseSpec {
                   errorResponse = Some(ApiErrorResponse("Invalid arrangementAgreedDate"))
                 )
               ),
-              processingDateTime = ProcessingDateTimeInstant(java.time.Instant.parse("2025-10-15T10:31:00Z"))
+              processingDateTime = ProcessingDateTimeInstant(java.time.Instant.parse("2025-10-15T10:31:00Z")),
+              internalErrors = List(FullAmendInternalError("something happened"))
             )
             val jsonResponse = Json.toJson(errorResponse)
 
@@ -1766,7 +1767,7 @@ class TimeToPayProxyControllerItSpec extends IntegrationBaseSpec {
         frequency = FrequencyLowercase.Monthly,
         initialPaymentDate = Some(InitialPaymentDate(LocalDate.parse("2025-02-01"))),
         initialPaymentAmount = Some(GbpPounds.createOrThrow(BigDecimal("123.45"))),
-        ddiReference = Some("DDI Reference")
+        ddiReference = Some(DdiReference("DDI Reference"))
       ),
       instalments = NonEmptyList.of(
         SaOnlyInstalment(

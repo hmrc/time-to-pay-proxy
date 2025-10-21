@@ -29,7 +29,7 @@ import uk.gov.hmrc.timetopayproxy.models.error.{ ConnectorError, TtppEnvelope }
 import uk.gov.hmrc.timetopayproxy.models.saonly.common.apistatus.{ ApiName, ApiStatusCodeString, ApiStatusWithStringCode }
 import uk.gov.hmrc.timetopayproxy.models.saonly.common._
 import uk.gov.hmrc.timetopayproxy.models.saonly.ttpcancel.{ CancellationDate, TtpCancelPaymentPlan, TtpCancelRequest, TtpCancelSuccessfulResponse }
-import uk.gov.hmrc.timetopayproxy.models.saonly.ttpinform.{ DdiReference, TtpPaymentPlan, TtpInformRequest, TtpInformSuccessfulResponse }
+import uk.gov.hmrc.timetopayproxy.models.saonly.ttpinform.{ DdiReference, TtpInformRequest, TtpInformSuccessfulResponse, TtpPaymentPlan }
 import uk.gov.hmrc.timetopayproxy.models._
 
 import java.time.{ Instant, LocalDate }

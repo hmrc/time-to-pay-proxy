@@ -23,11 +23,11 @@ import uk.gov.hmrc.timetopayproxy.models.{ ChannelIdentifier, Identification }
 import uk.gov.hmrc.timetopayproxy.utils.json.CatsNonEmptyListJson
 
 final case class TtpInformRequest(
-                                   identifications: NonEmptyList[Identification],
-                                   paymentPlan: TtpPaymentPlan,
-                                   instalments: NonEmptyList[SaOnlyInstalment],
-                                   channelIdentifier: ChannelIdentifier,
-                                   transitioned: Option[TransitionedIndicator]
+  identifications: NonEmptyList[Identification],
+  paymentPlan: TtpPaymentPlan,
+  instalments: NonEmptyList[SaOnlyInstalment],
+  channelIdentifier: ChannelIdentifier,
+  transitioned: Option[TransitionedIndicator]
 )
 
 object TtpInformRequest {
