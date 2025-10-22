@@ -72,7 +72,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/CancelResponse'
+                $ref: '#/components/schemas/CancelSuccessResponse'
               examples:
                 successExample:
                   summary: Successful cancellation notification to CESA
@@ -98,20 +98,21 @@ paths:
                     code: 400
                     details: "Invalid request payload: missing identifications or cancellationDate"
         '500':
-          description: Internal error or partial failure in calls to HoDs.
+          description: Internal error.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/CancelResponse'
+                $ref: '#/components/schemas/CancelErrorResponse'
               examples:
                 partialFailureExample:
-                  summary: Partial failure example with error reported
+                  summary: Internal error example with error reported
                   value:
                     apisCalled:
                       - name: CESA
                         statusCode: "400"
                         processingDateTime: "2025-10-15T10:30:00Z"
                         errorResponse: "Invalid cancellationDate"
+                    internalErrors: [ { "message": "internal error 1" }, { "message": "internal error 2" } ]
                     processingDateTime: "2025-10-15T10:31:00Z"
 components:
   securitySchemes:
@@ -252,7 +253,7 @@ components:
           type: boolean
           description: Indicates whether the customer only has FDLs.
           example: true
-    APIStatus:
+    CancelAPIStatus:
       type: object
       required:
         - name
@@ -285,13 +286,58 @@ components:
         apisCalled:
           type: array
           items:
-            $ref: '#/components/schemas/APIStatus'
+            $ref: '#/components/schemas/CancelAPIStatus'
           description: Status of calls to each HoD API
         processingDateTime:
           type: string
           format: date-time
           description: Timestamp for processing the cancel request
           example: "2025-10-15T10:31:00Z"
+    CancelSuccessResponse:
+      type: object
+      required:
+        - apisCalled
+        - processingDateTime
+      properties:
+        apisCalled:
+          type: array
+          items:
+            $ref: '#/components/schemas/CancelAPIStatus'
+          description: Status of calls to each HoD API
+        processingDateTime:
+          type: string
+          format: date-time
+          description: Timestamp for processing the cancel request
+          example: "2025-10-15T10:31:00Z"
+    CancelErrorResponse:
+      type: object
+      required:
+        - apisCalled
+        - internalErrors
+        - processingDateTime
+      properties:
+        apisCalled:
+          type: array
+          items:
+            $ref: '#/components/schemas/CancelAPIStatus'
+          description: Status of calls to each HoD API (present when HoD APIs were called successfully)
+        internalErrors:
+          type: array
+          items:
+            type: object
+            required:
+              - message
+            properties:
+              message:
+                type: string
+                description: Error message describing the internal failure
+                example: Could not parse response from calling CESA
+          description: Internal errors that occurred during processing (present when TTP cannot parse HoD responses)
+        processingDateTime:
+          type: string
+          format: date-time
+          description: Timestamp for processing the cancel request
+          example: '2025-10-15T10:31:00Z'
     ErrorResponse:
       type: object
       required:
