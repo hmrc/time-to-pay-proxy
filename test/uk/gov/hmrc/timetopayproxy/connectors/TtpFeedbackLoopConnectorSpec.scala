@@ -420,6 +420,15 @@ final class TtpFeedbackLoopConnectorSpec
         processingDateTime = ProcessingDateTimeInstant(Instant.parse("2025-01-01T12:00:00Z"))
       )
 
+      val informativeError = FullAmendErrorResponse(
+        apisCalled = fullAmendResponse.apisCalled,
+        processingDateTime = fullAmendResponse.processingDateTime,
+        internalErrors = List(
+          FullAmendInternalError("Something bad about to happen"),
+          FullAmendInternalError("It happened")
+        )
+      )
+
       "using IF" should {
         "return a successful response" in new Setup(ifImpl = true) {
           stubPostWithResponseBodyEnsuringRequest(
@@ -448,12 +457,6 @@ final class TtpFeedbackLoopConnectorSpec
         }
 
         "handle 500 responses" in new Setup(ifImpl = true) {
-          val informativeError = FullAmendErrorResponse(
-            apisCalled = fullAmendResponse.apisCalled,
-            processingDateTime = fullAmendResponse.processingDateTime,
-            internalErrors = List(FullAmendInternalError("something bad about to happen"))
-          )
-
           stubPostWithResponseBodyEnsuringRequest(
             "/individuals/debts/time-to-pay/full-amend",
             Json.toJson(fullAmendRequest).toString(),
@@ -495,12 +498,6 @@ final class TtpFeedbackLoopConnectorSpec
         }
 
         "handle 500 responses" in new Setup(ifImpl = false) {
-          val informativeError = FullAmendErrorResponse(
-            apisCalled = fullAmendResponse.apisCalled,
-            processingDateTime = fullAmendResponse.processingDateTime,
-            internalErrors = List(FullAmendInternalError("something bad about to happen"))
-          )
-
           stubPostWithResponseBodyEnsuringRequest(
             "/debts/time-to-pay/full-amend",
             Json.toJson(fullAmendRequest).toString(),
