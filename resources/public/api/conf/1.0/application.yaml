@@ -49,8 +49,9 @@ info:
       | 1.0.15 | 18-09-2025 | Alex Olkhovskiy | Restrict regimeType enum to only 'SA' value for /quote endpoint |
       | 1.0.16-cancel-inform| 23-09-2024 | Alex Olkhovskiy | Added new cancel and inform endpoint    |
       | 1.0.17 | 07-10-2025 | Vinnie Brice | Change cancel scope to writes  |
+      | 1.0.18 | 28-10-2025 | Alex Olkhovskiy | Add 409 conflict response to PUT /quote endpoint for duplicate plan ID|
+  version: 1.0.18
   contact: {}
-  version: 1.0.17
 servers:
   - url: https://api.service.hmrc.gov.uk
     variables: {}
@@ -491,6 +492,16 @@ paths:
               example:
                 statusCode: 401
                 errorMessage: A user with no active session will return 401 response
+        '409':
+          description: Conflict - Plan ID exists in both op led and self serve collections
+          headers: {}
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                statusCode: 409
+                errorMessage: Plan ID exists in both op led and self serve collections
         '500':
           description: ''
           headers: {}
@@ -2785,3 +2796,4 @@ components:
           format: date-time
           description: Timestamp for processing the inform request
           example: '2025-05-01T14:35:00Z'
+
