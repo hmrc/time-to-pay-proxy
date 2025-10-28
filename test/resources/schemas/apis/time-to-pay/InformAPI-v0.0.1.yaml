@@ -261,9 +261,9 @@ components:
           description: The API name (CESA or ETMP)
           example: CESA
         statusCode:
-          type: string
+          type: number
           description: HTTP status code from the downstream API
-          example: "200"
+          example: 200
         processingDateTime:
           type: string
           format: date-time
@@ -292,7 +292,6 @@ components:
     InformErrorResponse:
       type: object
       required:
-        - apisCalled
         - internalErrors
         - processingDateTime
       properties:

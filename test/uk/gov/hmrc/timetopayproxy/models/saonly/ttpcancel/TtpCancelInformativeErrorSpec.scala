@@ -34,7 +34,7 @@ final class TtpCancelInformativeErrorSpec extends AnyFreeSpec {
         apisCalled = List(
           ApiStatus(
             name = ApiName("api name"),
-            statusCode = ApiStatusCode("400"),
+            statusCode = ApiStatusCode(400),
             processingDateTime = ProcessingDateTimeInstant(Instant.parse("2000-01-02T14:35:00.788998Z")),
             errorResponse = Some(ApiErrorResponse("api error response"))
           )
@@ -53,7 +53,7 @@ final class TtpCancelInformativeErrorSpec extends AnyFreeSpec {
           |      "errorResponse" : "api error response",
           |      "name" : "api name",
           |      "processingDateTime" : "2000-01-02T14:35:00.788998Z",
-          |      "statusCode" : "400"
+          |      "statusCode" : 400
           |    }
           |  ],
           |  "internalErrors": [
@@ -71,7 +71,7 @@ final class TtpCancelInformativeErrorSpec extends AnyFreeSpec {
         apisCalled = List(
           ApiStatus(
             name = ApiName("api name"),
-            statusCode = ApiStatusCode("400"),
+            statusCode = ApiStatusCode(400),
             processingDateTime = ProcessingDateTimeInstant(Instant.parse("2000-01-02T14:35:00.788998Z")),
             errorResponse = None
           )
@@ -89,7 +89,7 @@ final class TtpCancelInformativeErrorSpec extends AnyFreeSpec {
           |    {
           |      "name" : "api name",
           |      "processingDateTime" : "2000-01-02T14:35:00.788998Z",
-          |      "statusCode" : "400"
+          |      "statusCode" : 400
           |    }
           |  ],
           |  "internalErrors": [
@@ -120,11 +120,7 @@ final class TtpCancelInformativeErrorSpec extends AnyFreeSpec {
           val schema = Validators.TimeToPayProxy.TtpCancel.openApiCancelErrorResponseSchema
           val writtenJson: JsValue = writerToClients.writes(obj)
 
-          // TODO DTD-3785: These errors should be resolved.
-          schema.validateAndGetErrors(writtenJson) shouldBe List(
-            """apisCalled.0.statusCode: Type expected 'integer', found 'string'. (code: 1027)
-              |From: apisCalled.0.<items>.<#/components/schemas/CancelAPIStatus>.statusCode.<type>""".stripMargin
-          )
+          schema.validateAndGetErrors(writtenJson) shouldBe Nil
         }
       }
 
@@ -140,11 +136,7 @@ final class TtpCancelInformativeErrorSpec extends AnyFreeSpec {
           val schema = Validators.TimeToPayProxy.TtpCancel.openApiCancelErrorResponseSchema
           val writtenJson: JsValue = writerToClients.writes(obj)
 
-          // TODO DTD-3785: These errors should be resolved.
-          schema.validateAndGetErrors(writtenJson) shouldBe List(
-            """apisCalled.0.statusCode: Type expected 'integer', found 'string'. (code: 1027)
-              |From: apisCalled.0.<items>.<#/components/schemas/CancelAPIStatus>.statusCode.<type>""".stripMargin
-          )
+          schema.validateAndGetErrors(writtenJson) shouldBe Nil
         }
       }
     }

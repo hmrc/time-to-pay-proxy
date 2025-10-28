@@ -695,7 +695,7 @@ class TimeToPayProxyControllerItSpec extends IntegrationBaseSpec {
               apisCalled = List(
                 ApiStatus(
                   name = ApiName("CESA"),
-                  statusCode = ApiStatusCode("400"),
+                  statusCode = ApiStatusCode(400),
                   processingDateTime = ProcessingDateTimeInstant(java.time.Instant.parse("2025-10-15T10:30:00Z")),
                   errorResponse = Some(ApiErrorResponse("Invalid cancellationDate"))
                 )
@@ -949,7 +949,7 @@ class TimeToPayProxyControllerItSpec extends IntegrationBaseSpec {
               apisCalled = List(
                 ApiStatus(
                   name = ApiName("CESA"),
-                  statusCode = ApiStatusCode("400"),
+                  statusCode = ApiStatusCode(400),
                   processingDateTime = ProcessingDateTimeInstant(java.time.Instant.parse("2025-10-15T10:30:00Z")),
                   errorResponse = Some(ApiErrorResponse("Invalid cancellationDate"))
                 )
@@ -1289,13 +1289,13 @@ class TimeToPayProxyControllerItSpec extends IntegrationBaseSpec {
       apisCalled = List(
         ApiStatus(
           name = ApiName("CESA"),
-          statusCode = ApiStatusCode("200"),
+          statusCode = ApiStatusCode(200),
           processingDateTime = ProcessingDateTimeInstant(java.time.Instant.parse("2025-05-01T14:30:00Z")),
           errorResponse = None
         ),
         ApiStatus(
           name = ApiName("ETMP"),
-          statusCode = ApiStatusCode("201"),
+          statusCode = ApiStatusCode(201),
           processingDateTime = ProcessingDateTimeInstant(java.time.Instant.parse("2025-05-01T14:31:00Z")),
           errorResponse = None
         )
@@ -1352,13 +1352,13 @@ class TimeToPayProxyControllerItSpec extends IntegrationBaseSpec {
       apisCalled = List(
         ApiStatus(
           name = ApiName("CESA"),
-          statusCode = ApiStatusCode("200"),
+          statusCode = ApiStatusCode(200),
           processingDateTime = ProcessingDateTimeInstant(java.time.Instant.parse("2025-05-01T14:30:00Z")),
           errorResponse = None
         ),
         ApiStatus(
           name = ApiName("ETMP"),
-          statusCode = ApiStatusCode("201"),
+          statusCode = ApiStatusCode(201),
           processingDateTime = ProcessingDateTimeInstant(java.time.Instant.parse("2025-05-01T14:31:00Z")),
           errorResponse = None
         )

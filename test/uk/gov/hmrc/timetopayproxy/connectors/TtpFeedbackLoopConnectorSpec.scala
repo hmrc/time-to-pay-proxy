@@ -137,7 +137,7 @@ final class TtpFeedbackLoopConnectorSpec
         apisCalled = List(
           ApiStatus(
             name = ApiName("API1"),
-            statusCode = ApiStatusCode("SUCCESS"),
+            statusCode = ApiStatusCode(200),
             processingDateTime = ProcessingDateTimeInstant(Instant.parse("2025-01-01T12:00:00Z")),
             errorResponse = None
           )
@@ -149,7 +149,7 @@ final class TtpFeedbackLoopConnectorSpec
         apisCalled = List(
           ApiStatus(
             name = ApiName("API1"),
-            statusCode = ApiStatusCode("SUCCESS"),
+            statusCode = ApiStatusCode(200),
             processingDateTime = ProcessingDateTimeInstant(Instant.parse("2025-01-01T12:00:00Z")),
             errorResponse = None
           )
@@ -201,7 +201,7 @@ final class TtpFeedbackLoopConnectorSpec
                 apisCalled = List(
                   ApiStatus(
                     ApiName("API1"),
-                    ApiStatusCode("SUCCESS"),
+                    ApiStatusCode(200),
                     ProcessingDateTimeInstant(Instant.parse("2025-01-01T12:00:00Z")),
                     errorResponse = None
                   )
@@ -256,7 +256,7 @@ final class TtpFeedbackLoopConnectorSpec
                 apisCalled = List(
                   ApiStatus(
                     ApiName("API1"),
-                    ApiStatusCode("SUCCESS"),
+                    ApiStatusCode(200),
                     ProcessingDateTimeInstant(Instant.parse("2025-01-01T12:00:00Z")),
                     errorResponse = None
                   )
@@ -298,7 +298,7 @@ final class TtpFeedbackLoopConnectorSpec
       apisCalled = List(
         ApiStatus(
           name = ApiName("API1"),
-          statusCode = ApiStatusCode("SUCCESS"),
+          statusCode = ApiStatusCode(200),
           processingDateTime = ProcessingDateTimeInstant(Instant.parse("2025-01-01T12:00:00Z")),
           errorResponse = None
         )
@@ -310,7 +310,7 @@ final class TtpFeedbackLoopConnectorSpec
       apisCalled = List(
         ApiStatus(
           name = ApiName("API1"),
-          statusCode = ApiStatusCode("SUCCESS"),
+          statusCode = ApiStatusCode(200),
           processingDateTime = ProcessingDateTimeInstant(Instant.parse("2025-01-01T12:00:00Z")),
           errorResponse = None
         )

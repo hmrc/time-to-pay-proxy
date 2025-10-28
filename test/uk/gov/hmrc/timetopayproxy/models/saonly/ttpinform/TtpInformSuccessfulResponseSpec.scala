@@ -34,7 +34,7 @@ final class TtpInformSuccessfulResponseSpec extends AnyFreeSpec {
         apisCalled = List(
           ApiStatus(
             name = ApiName("api name"),
-            statusCode = ApiStatusCode("400"),
+            statusCode = ApiStatusCode(400),
             processingDateTime = ProcessingDateTimeInstant(Instant.parse("2000-01-02T14:35:00.788998Z")),
             errorResponse = Some(ApiErrorResponse("api error response"))
           )
@@ -49,7 +49,7 @@ final class TtpInformSuccessfulResponseSpec extends AnyFreeSpec {
           |      "errorResponse" : "api error response",
           |      "name" : "api name",
           |      "processingDateTime" : "2000-01-02T14:35:00.788998Z",
-          |      "statusCode" : "400"
+          |      "statusCode" : 400
           |    }
           |  ],
           |  "processingDateTime" : "2222-02-24T14:35:00.788998Z"
@@ -63,7 +63,7 @@ final class TtpInformSuccessfulResponseSpec extends AnyFreeSpec {
         apisCalled = List(
           ApiStatus(
             name = ApiName("api name"),
-            statusCode = ApiStatusCode("400"),
+            statusCode = ApiStatusCode(400),
             processingDateTime = ProcessingDateTimeInstant(Instant.parse("2000-01-02T14:35:00.788998Z")),
             errorResponse = None
           )
@@ -77,7 +77,7 @@ final class TtpInformSuccessfulResponseSpec extends AnyFreeSpec {
           |    {
           |      "name" : "api name",
           |      "processingDateTime" : "2000-01-02T14:35:00.788998Z",
-          |      "statusCode" : "400"
+          |      "statusCode" : 400
           |    }
           |  ],
           |  "processingDateTime" : "2222-02-24T14:35:00.788998Z"
@@ -104,11 +104,7 @@ final class TtpInformSuccessfulResponseSpec extends AnyFreeSpec {
           val schema = Validators.TimeToPayProxy.TtpInform.openApiInformSuccessResponseSchema
           val writtenJson: JsValue = writerToClients.writes(obj)
 
-          // TODO DTD-3779: These errors should be resolved.
-          schema.validateAndGetErrors(writtenJson) shouldBe List(
-            """apisCalled.0.statusCode: Type expected 'integer', found 'string'. (code: 1027)
-              |From: apisCalled.0.<items>.<#/components/schemas/InformAPIStatus>.statusCode.<type>""".stripMargin
-          )
+          schema.validateAndGetErrors(writtenJson) shouldBe Nil
         }
       }
 
@@ -125,10 +121,7 @@ final class TtpInformSuccessfulResponseSpec extends AnyFreeSpec {
           val writtenJson: JsValue = writerToClients.writes(obj)
 
           // TODO DTD-3779: These errors should be resolved.
-          schema.validateAndGetErrors(writtenJson) shouldBe List(
-            """apisCalled.0.statusCode: Type expected 'integer', found 'string'. (code: 1027)
-              |From: apisCalled.0.<items>.<#/components/schemas/InformAPIStatus>.statusCode.<type>""".stripMargin
-          )
+          schema.validateAndGetErrors(writtenJson) shouldBe Nil
         }
       }
     }
