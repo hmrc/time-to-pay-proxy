@@ -26,7 +26,7 @@ import uk.gov.hmrc.timetopayproxy.logging.RequestAwareLogger
 import uk.gov.hmrc.timetopayproxy.models.TimeToPayError
 import uk.gov.hmrc.timetopayproxy.models.error.ProxyEnvelopeError
 import uk.gov.hmrc.timetopayproxy.models.error.TtppEnvelope.TtppEnvelope
-import uk.gov.hmrc.timetopayproxy.models.saonly.fullAmend.{ FullAmendErrorResponse, FullAmendRequest, FullAmendSuccessResponse }
+import uk.gov.hmrc.timetopayproxy.models.saonly.ttpfullAmend.{ TtpFullAmendInformativeError, TtpFullAmendRequest, TtpFullAmendSuccessfulResponse }
 import uk.gov.hmrc.timetopayproxy.models.saonly.ttpcancel.{ TtpCancelInformativeError, TtpCancelRequest, TtpCancelSuccessfulResponse }
 import uk.gov.hmrc.timetopayproxy.models.saonly.ttpinform.{ TtpInformInformativeError, TtpInformRequest, TtpInformSuccessfulResponse }
 
@@ -58,6 +58,14 @@ class TtpFeedbackLoopConnector @Inject() (appConfig: AppConfig, httpClient: Http
       .orError[TtpInformInformativeError](500)
       .orErrorTransformed[TimeToPayError](400, ttpError => ttpError.toConnectorError(status = 400))
 
+  private val httpReadsBuilderForFullAmend
+    : HttpReadsWithLoggingBuilder[ProxyEnvelopeError, TtpFullAmendSuccessfulResponse] =
+    HttpReadsWithLoggingBuilder
+      .empty[ProxyEnvelopeError, TtpFullAmendSuccessfulResponse]
+      .orSuccess[TtpFullAmendSuccessfulResponse](200)
+      .orError[TtpFullAmendInformativeError](500)
+      .orErrorTransformed[TimeToPayError](400, ttpError => ttpError.toConnectorError(status = 400))
+
   def cancelTtp(
     ttppRequest: TtpCancelRequest
   )(implicit ec: ExecutionContext, hc: HeaderCarrier): TtppEnvelope[TtpCancelSuccessfulResponse] = {
@@ -78,18 +86,11 @@ class TtpFeedbackLoopConnector @Inject() (appConfig: AppConfig, httpClient: Http
     )
   }
 
-  private val httpReadsBuilderForFullAmend: HttpReadsWithLoggingBuilder[ProxyEnvelopeError, FullAmendSuccessResponse] =
-    HttpReadsWithLoggingBuilder
-      .empty[ProxyEnvelopeError, FullAmendSuccessResponse]
-      .orSuccess[FullAmendSuccessResponse](200)
-      .orError[FullAmendErrorResponse](500)
-      .orErrorTransformed[TimeToPayError](400, ttpError => ttpError.toConnectorError(status = 400))
-
   def fullAmendTtp(
-    request: FullAmendRequest
-  )(implicit ec: ExecutionContext, hc: HeaderCarrier): TtppEnvelope[FullAmendSuccessResponse] = {
+    request: TtpFullAmendRequest
+  )(implicit ec: ExecutionContext, hc: HeaderCarrier): TtppEnvelope[TtpFullAmendSuccessfulResponse] = {
 
-    implicit def httpReads: HttpReads[Either[ProxyEnvelopeError, FullAmendSuccessResponse]] =
+    implicit def httpReads: HttpReads[Either[ProxyEnvelopeError, TtpFullAmendSuccessfulResponse]] =
       httpReadsBuilderForFullAmend.httpReads(logger)
 
     val path = if (appConfig.useIf) "/individuals/debts/time-to-pay/full-amend" else "/debts/time-to-pay/full-amend"
@@ -101,7 +102,7 @@ class TtpFeedbackLoopConnector @Inject() (appConfig: AppConfig, httpClient: Http
         .post(url)
         .withBody(Json.toJson(request))
         .setHeader(requestHeaders: _*)
-        .execute[Either[ProxyEnvelopeError, FullAmendSuccessResponse]]
+        .execute[Either[ProxyEnvelopeError, TtpFullAmendSuccessfulResponse]]
     )
   }
 

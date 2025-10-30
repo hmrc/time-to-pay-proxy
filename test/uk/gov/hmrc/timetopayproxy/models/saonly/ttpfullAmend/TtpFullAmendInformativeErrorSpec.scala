@@ -14,23 +14,23 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.timetopayproxy.models.saonly.fullAmend
+package uk.gov.hmrc.timetopayproxy.models.saonly.ttpfullAmend
 
 import org.scalatest.freespec.AnyFreeSpec
-import uk.gov.hmrc.timetopayproxy.models.saonly.common.ProcessingDateTimeInstant
-import uk.gov.hmrc.timetopayproxy.models.saonly.common.apistatus.{ ApiErrorResponse, ApiName, ApiStatus, ApiStatusCode }
-
-import java.time.Instant
 import org.scalatest.matchers.should.Matchers._
 import play.api.libs.json._
+import uk.gov.hmrc.timetopayproxy.models.saonly.common.ProcessingDateTimeInstant
+import uk.gov.hmrc.timetopayproxy.models.saonly.common.apistatus.{ ApiErrorResponse, ApiName, ApiStatus, ApiStatusCode }
 import uk.gov.hmrc.timetopayproxy.testutils.JsonAssertionOps._
 import uk.gov.hmrc.timetopayproxy.testutils.schematestutils.Validators
 
-final class FullAmendSuccessResponseSpec extends AnyFreeSpec {
+import java.time.Instant
+
+final class TtpFullAmendInformativeErrorSpec extends AnyFreeSpec {
 
   object TestData {
     object WithOnlySomes {
-      def obj: FullAmendSuccessResponse = FullAmendSuccessResponse(
+      def obj: TtpFullAmendInformativeError = TtpFullAmendInformativeError(
         apisCalled = List(
           ApiStatus(
             name = ApiName("api name"),
@@ -39,7 +39,10 @@ final class FullAmendSuccessResponseSpec extends AnyFreeSpec {
             errorResponse = Some(ApiErrorResponse("api error response"))
           )
         ),
-        processingDateTime = ProcessingDateTimeInstant(Instant.parse("2222-02-24T14:35:00.788998Z"))
+        processingDateTime = ProcessingDateTimeInstant(Instant.parse("2222-02-24T14:35:00.788998Z")),
+        internalErrors = List(
+          FullAmendInternalError("Ops")
+        )
       )
 
       def json: JsValue = Json.parse(
@@ -52,14 +55,19 @@ final class FullAmendSuccessResponseSpec extends AnyFreeSpec {
           |      "statusCode" : 400
           |    }
           |  ],
-          |  "processingDateTime" : "2222-02-24T14:35:00.788998Z"
+          |  "processingDateTime" : "2222-02-24T14:35:00.788998Z",
+          |  "internalErrors": [
+          |   {
+          |     "message": "Ops"
+          |   }
+          |  ]
           |}
           |""".stripMargin
       )
     }
 
     object With0SomeOnEachPath {
-      def obj: FullAmendSuccessResponse = FullAmendSuccessResponse(
+      def obj: TtpFullAmendInformativeError = TtpFullAmendInformativeError(
         apisCalled = List(
           ApiStatus(
             name = ApiName("api name"),
@@ -68,7 +76,10 @@ final class FullAmendSuccessResponseSpec extends AnyFreeSpec {
             errorResponse = None
           )
         ),
-        processingDateTime = ProcessingDateTimeInstant(Instant.parse("2222-02-24T14:35:00.788998Z"))
+        processingDateTime = ProcessingDateTimeInstant(Instant.parse("2222-02-24T14:35:00.788998Z")),
+        internalErrors = List(
+          FullAmendInternalError("Ops")
+        )
       )
 
       def json: JsValue = Json.parse(
@@ -80,28 +91,33 @@ final class FullAmendSuccessResponseSpec extends AnyFreeSpec {
           |      "statusCode" : 400
           |    }
           |  ],
-          |  "processingDateTime" : "2222-02-24T14:35:00.788998Z"
+          |  "processingDateTime" : "2222-02-24T14:35:00.788998Z",
+          |  "internalErrors": [
+          |     {
+          |       "message": "Ops"
+          |     }
+          |  ]
           |}
           |""".stripMargin
       )
     }
   }
 
-  "FullAmendSuccessResponseSpec" - {
+  "FullAmendErrorResponse" - {
 
     "implicit JSON writer (data going to our clients)" - {
-      def writerToClients: Writes[FullAmendSuccessResponse] = implicitly[Writes[FullAmendSuccessResponse]]
+      def writerToClients: Writes[TtpFullAmendInformativeError] = implicitly[Writes[TtpFullAmendInformativeError]]
 
       "when all the optional fields are fully populated" - {
         def json: JsValue = TestData.WithOnlySomes.json
-        def obj: FullAmendSuccessResponse = TestData.WithOnlySomes.obj
+        def obj: TtpFullAmendInformativeError = TestData.WithOnlySomes.obj
 
         "writes the correct JSON" in {
           writerToClients.writes(obj) shouldBeEquivalentTo json
         }
 
         "writes JSON compatible with our schema" in {
-          val schema = Validators.TimeToPayProxy.FullAmend.openApiInformativeResponseSchema
+          val schema = Validators.TimeToPayProxy.FullAmend.openApiResponseGeneralFailureSchema
           val writtenJson: JsValue = writerToClients.writes(obj)
 
           schema.validateAndGetErrors(writtenJson) shouldBe Nil
@@ -110,14 +126,14 @@ final class FullAmendSuccessResponseSpec extends AnyFreeSpec {
 
       "when none of the optional fields are populated" - {
         def json: JsValue = TestData.With0SomeOnEachPath.json
-        def obj: FullAmendSuccessResponse = TestData.With0SomeOnEachPath.obj
+        def obj: TtpFullAmendInformativeError = TestData.With0SomeOnEachPath.obj
 
         "writes the correct JSON" in {
           writerToClients.writes(obj) shouldBeEquivalentTo json
         }
 
         "writes JSON compatible with our schema" in {
-          val schema = Validators.TimeToPayProxy.FullAmend.openApiInformativeResponseSchema
+          val schema = Validators.TimeToPayProxy.FullAmend.openApiResponseGeneralFailureSchema
           val writtenJson: JsValue = writerToClients.writes(obj)
 
           schema.validateAndGetErrors(writtenJson) shouldBe Nil
@@ -126,34 +142,64 @@ final class FullAmendSuccessResponseSpec extends AnyFreeSpec {
     }
 
     "implicit JSON reader (data coming from time-to-pay)" - {
-      def readerFromTtp: Reads[FullAmendSuccessResponse] = implicitly[Reads[FullAmendSuccessResponse]]
+      def readerFromTtp: Reads[TtpFullAmendInformativeError] = implicitly[Reads[TtpFullAmendInformativeError]]
 
       "when all the optional fields are fully populated" - {
         def json: JsValue = TestData.WithOnlySomes.json
-        def obj: FullAmendSuccessResponse = TestData.WithOnlySomes.obj
+
+        def obj: TtpFullAmendInformativeError = TestData.WithOnlySomes.obj
 
         "reads the JSON correctly" in {
           readerFromTtp.reads(json) shouldBe JsSuccess(obj)
         }
 
         "was tested against JSON compatible with the time-to-pay schema" in {
-          // TTP uses same Schema as proxy
-          val schema = Validators.TimeToPayProxy.FullAmend.openApiInformativeResponseSchema
+          // Schema for TTP is same as proxy schema
+          val schema = Validators.TimeToPayProxy.FullAmend.openApiResponseGeneralFailureSchema
 
           schema.validateAndGetErrors(json) shouldBe Nil
+        }
+
+        "should not be compatible to schema" in {
+          val notAcceptedJson: JsValue = Json.parse(
+            """{
+              |  "apisCalled" : [
+              |    {
+              |      "name" : "api name",
+              |      "processingDateTime" : "2000-01-02T14:35:00.788998Z",
+              |      "statusCode" : 400
+              |    }
+              |  ],
+              |  "processingDateTime" : "2222-02-24T14:35:00.788998Z",
+              |  "internalErrors": [
+              |     {
+              |       "message": "Ops"
+              |     }
+              |  ],
+              |  "notWanted": "but here"
+              |}
+              |""".stripMargin
+          )
+
+          val schema = Validators.TimeToPayProxy.FullAmend.openApiResponseGeneralFailureSchema
+
+          schema.validateAndGetErrors(notAcceptedJson) shouldBe
+            List("Additional property 'notWanted' is not allowed. (code: 1000)\nFrom: <additionalProperties>")
         }
       }
 
       "when none of the optional fields are populated" - {
         def json: JsValue = TestData.With0SomeOnEachPath.json
-        def obj: FullAmendSuccessResponse = TestData.With0SomeOnEachPath.obj
+
+        def obj: TtpFullAmendInformativeError = TestData.With0SomeOnEachPath.obj
 
         "reads the JSON correctly" in {
           readerFromTtp.reads(json) shouldBe JsSuccess(obj)
         }
 
         "was tested against JSON compatible with the time-to-pay schema" in {
-          val schema = Validators.TimeToPayProxy.FullAmend.openApiInformativeResponseSchema
+          // Schema for TTP is same as proxy schema
+          val schema = Validators.TimeToPayProxy.FullAmend.openApiResponseGeneralFailureSchema
 
           schema.validateAndGetErrors(json) shouldBe Nil
         }

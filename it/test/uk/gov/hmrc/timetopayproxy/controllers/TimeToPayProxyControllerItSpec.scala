@@ -18,27 +18,24 @@ package uk.gov.hmrc.timetopayproxy.controllers
 
 import cats.data.NonEmptyList
 import com.github.tomakehurst.wiremock.client.WireMock
-import com.github.tomakehurst.wiremock.client.WireMock.{ postRequestedFor, urlPathEqualTo }
-import play.api.libs.json.{ JsNull, JsObject, JsValue, Json }
-import play.api.libs.ws.{ WSRequest, WSResponse }
+import com.github.tomakehurst.wiremock.client.WireMock.{postRequestedFor, urlPathEqualTo}
+import play.api.libs.json.{JsNull, JsObject, JsValue, Json}
+import play.api.libs.ws.{WSRequest, WSResponse}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.timetopayproxy.models._
-import uk.gov.hmrc.timetopayproxy.models.affordablequotes.{ AffordableQuoteResponse, AffordableQuotesRequest }
+import uk.gov.hmrc.timetopayproxy.models.affordablequotes.{AffordableQuoteResponse, AffordableQuotesRequest}
 import uk.gov.hmrc.timetopayproxy.models.currency.GbpPounds
 import uk.gov.hmrc.timetopayproxy.models.error.TtppErrorResponse
 import uk.gov.hmrc.timetopayproxy.models.saonly.chargeInfoApi._
-import uk.gov.hmrc.timetopayproxy.models.saonly.common.apistatus._
 import uk.gov.hmrc.timetopayproxy.models.saonly.common._
-import uk.gov.hmrc.timetopayproxy.models.saonly.fullAmend.{ FullAmendErrorResponse, FullAmendInternalError, FullAmendRequest, FullAmendSuccessResponse }
-import uk.gov.hmrc.timetopayproxy.models.saonly.ttpcancel.{ CancellationDate, TtpCancelPaymentPlan, TtpCancelRequest, TtpCancelSuccessfulResponse }
-import uk.gov.hmrc.timetopayproxy.models.saonly.ttpinform._
-import uk.gov.hmrc.timetopayproxy.models.saonly.common.apistatus.{ ApiErrorResponse, ApiName, ApiStatus, ApiStatusCode }
+import uk.gov.hmrc.timetopayproxy.models.saonly.common.apistatus._
 import uk.gov.hmrc.timetopayproxy.models.saonly.ttpcancel._
+import uk.gov.hmrc.timetopayproxy.models.saonly.ttpfullAmend.{FullAmendInternalError, TtpFullAmendInformativeError, TtpFullAmendRequest, TtpFullAmendSuccessfulResponse}
 import uk.gov.hmrc.timetopayproxy.models.saonly.ttpinform._
 import uk.gov.hmrc.timetopayproxy.support.IntegrationBaseSpec
 import uk.gov.hmrc.timetopayproxy.testutils.TestOnlyJsonFormats._
 
-import java.time.{ LocalDate, LocalDateTime }
+import java.time.{LocalDate, LocalDateTime}
 import scala.concurrent.ExecutionContext
 
 class TimeToPayProxyControllerItSpec extends IntegrationBaseSpec {
@@ -1253,64 +1250,13 @@ class TimeToPayProxyControllerItSpec extends IntegrationBaseSpec {
             response.json shouldBe jsonResponse
             response.status shouldBe 200
           }
-
-          "when TimeToPay returns a successful response with Json Bala sent" in new TimeToPayProxyControllerTestBase {
-            val jsonResponse = Json.toJson(fullAmendResponse)
-            stubPostWithResponseBody(url = "/auth/authorise", status = 200, responseBody = "null")
-            stubPostWithResponseBody(
-              url = "/debts/time-to-pay/full-amend",
-              status = 200,
-              responseBody = jsonResponse.toString()
-            )
-
-            val requestForFullAmend: WSRequest = buildRequest("/full-amend")
-
-            val validRequestBody = Json.parse(
-              """
-                |{
-                |    "identifications": [
-                |        {
-                |            "idType": "UTR",
-                |            "idValue": "1234567890"
-                |        }
-                |    ],
-                |    "paymentPlan": {
-                |        "arrangementAgreedDate": "2090-06-08",
-                |        "ttpEndDate": "2025-02-01",
-                |        "frequency": "monthly",
-                |        "initialPaymentDate": "2025-05-05",
-                |        "initialPaymentAmount": 150,
-                |        "ddiReference": "DD123456789"
-                |    },
-                |    "instalments": [
-                |        {
-                |            "dueDate": "2025-06-01",
-                |            "amountDue": 300
-                |        },
-                |        {
-                |            "dueDate": "2025-06-01",
-                |            "amountDue": 300
-                |        }
-                |    ],
-                |    "channelIdentifier": "advisor",
-                |    "transitioned": true
-                |}
-                |""".stripMargin
-            )
-            val response: WSResponse = await(
-              requestForFullAmend.post(validRequestBody)
-            )
-
-            response.json shouldBe jsonResponse
-            response.status shouldBe 200
-          }
         }
       }
 
       "should return a 500 statusCode" - {
         "when given a valid json payload" - {
           "when TimeToPay returns an error response with 500" in new TimeToPayProxyControllerTestBase {
-            val errorResponse = FullAmendErrorResponse(
+            val errorResponse = TtpFullAmendInformativeError(
               apisCalled = List(
                 ApiStatus(
                   name = ApiName("CESA"),
@@ -1391,7 +1337,7 @@ class TimeToPayProxyControllerItSpec extends IntegrationBaseSpec {
             val expectedTtppErrorResponse: TtppErrorResponse = TtppErrorResponse(
               statusCode = 400,
               errorMessage =
-                "Invalid FullAmendRequest payload: Payload has a missing field or an invalid format. Field name: identifications. "
+                "Invalid TtpFullAmendRequest payload: Payload has a missing field or an invalid format. Field name: identifications. "
             )
 
             response.json shouldBe Json.toJson(expectedTtppErrorResponse)
@@ -1442,7 +1388,7 @@ class TimeToPayProxyControllerItSpec extends IntegrationBaseSpec {
             val expectedTtppErrorResponse: TtppErrorResponse = TtppErrorResponse(
               statusCode = 400,
               errorMessage =
-                "Invalid FullAmendRequest payload: Payload has a missing field or an invalid format. Field name: arrangementAgreedDate. Date format should be correctly provided"
+                "Invalid TtpFullAmendRequest payload: Payload has a missing field or an invalid format. Field name: arrangementAgreedDate. Date format should be correctly provided"
             )
 
             response.json shouldBe Json.toJson(expectedTtppErrorResponse)
@@ -1478,7 +1424,7 @@ class TimeToPayProxyControllerItSpec extends IntegrationBaseSpec {
               val expectedTtppErrorResponse: TtppErrorResponse = TtppErrorResponse(
                 statusCode = 400,
                 errorMessage =
-                  "Invalid FullAmendRequest payload: Payload has a missing field or an invalid format. Field name: identifications. "
+                  "Invalid TtpFullAmendRequest payload: Payload has a missing field or an invalid format. Field name: identifications. "
               )
 
               response.json shouldBe Json.toJson(expectedTtppErrorResponse)
@@ -1523,7 +1469,7 @@ class TimeToPayProxyControllerItSpec extends IntegrationBaseSpec {
               val expectedTtppErrorResponse: TtppErrorResponse = TtppErrorResponse(
                 statusCode = 400,
                 errorMessage =
-                  "Invalid FullAmendRequest payload: Payload has a missing field or an invalid format. Field name: instalments. "
+                  "Invalid TtpFullAmendRequest payload: Payload has a missing field or an invalid format. Field name: instalments. "
               )
 
               response.json shouldBe Json.toJson(expectedTtppErrorResponse)
@@ -1828,30 +1774,35 @@ class TimeToPayProxyControllerItSpec extends IntegrationBaseSpec {
       processingDateTime = ProcessingDateTimeInstant(java.time.Instant.parse("2025-10-15T10:31:00Z"))
     )
 
-    val fullAmendRequest: FullAmendRequest = FullAmendRequest(
+    val fullAmendRequest: TtpFullAmendRequest = TtpFullAmendRequest(
       identifications = NonEmptyList.of(
         Identification(idType = IdType("NINO"), idValue = IdValue("AA000000A")),
-        Identification(idType = IdType("MTDITID"), idValue = IdValue("XAIT00000000054"))
+        Identification(idType = IdType("MTDITID"), idValue = IdValue("XAIT00000000054")),
+        Identification(idType = IdType("UTR"), idValue = IdValue("1234567890"))
       ),
       paymentPlan = TtpPaymentPlan(
-        arrangementAgreedDate = ArrangementAgreedDate(LocalDate.parse("2025-01-01")),
-        ttpEndDate = TtpEndDate(LocalDate.parse("2025-12-31")),
+        arrangementAgreedDate = ArrangementAgreedDate(LocalDate.parse("2090-06-08")),
+        ttpEndDate = TtpEndDate(LocalDate.parse("2025-02-01")),
         frequency = FrequencyLowercase.Monthly,
-        initialPaymentDate = Some(InitialPaymentDate(LocalDate.parse("2025-02-01"))),
-        initialPaymentAmount = Some(GbpPounds.createOrThrow(BigDecimal("123.45"))),
-        ddiReference = Some(DdiReference("DDI Reference"))
+        initialPaymentDate = Some(InitialPaymentDate(LocalDate.parse("2025-05-05"))),
+        initialPaymentAmount = Some(GbpPounds.createOrThrow(BigDecimal("150.00"))),
+        ddiReference = Some(DdiReference("DD123456789"))
       ),
       instalments = NonEmptyList.of(
         SaOnlyInstalment(
-          dueDate = InstalmentDueDate(LocalDate.parse("2025-11-28")),
-          amountDue = GbpPounds.createOrThrow(BigDecimal("100.00"))
+          dueDate = InstalmentDueDate(LocalDate.parse("2025-06-01")),
+          amountDue = GbpPounds.createOrThrow(BigDecimal("300.00"))
+        ),
+        SaOnlyInstalment(
+          dueDate = InstalmentDueDate(LocalDate.parse("2025-06-01")),
+          amountDue = GbpPounds.createOrThrow(BigDecimal("300.00"))
         )
       ),
-      channelIdentifier = ChannelIdentifier.SelfService,
+      channelIdentifier = ChannelIdentifier.Advisor,
       transitioned = TransitionedIndicator(true)
     )
 
-    val fullAmendResponse: FullAmendSuccessResponse = FullAmendSuccessResponse(
+    val fullAmendResponse: TtpFullAmendSuccessfulResponse = TtpFullAmendSuccessfulResponse(
       apisCalled = List(
         ApiStatus(
           name = ApiName("CESA"),

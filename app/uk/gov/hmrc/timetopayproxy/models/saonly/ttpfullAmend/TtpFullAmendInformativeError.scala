@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.timetopayproxy.models.saonly.fullAmend
+package uk.gov.hmrc.timetopayproxy.models.saonly.ttpfullAmend
 
 import play.api.libs.json.{ Json, OFormat }
 import play.api.mvc.{ Result, Results }
@@ -22,7 +22,7 @@ import uk.gov.hmrc.timetopayproxy.models.error.{ ProxyEnvelopeError, TtppWriteab
 import uk.gov.hmrc.timetopayproxy.models.saonly.common.ProcessingDateTimeInstant
 import uk.gov.hmrc.timetopayproxy.models.saonly.common.apistatus.ApiStatus
 
-final case class FullAmendErrorResponse(
+final case class TtpFullAmendInformativeError(
   processingDateTime: ProcessingDateTimeInstant,
   apisCalled: List[ApiStatus],
   internalErrors: List[FullAmendInternalError]
@@ -33,8 +33,8 @@ final case class FullAmendErrorResponse(
   def toErrorResult: Result = Results.InternalServerError(Json.toJson(this))
 }
 
-object FullAmendErrorResponse {
-  implicit val format: OFormat[FullAmendErrorResponse] = Json.format[FullAmendErrorResponse]
+object TtpFullAmendInformativeError {
+  implicit val format: OFormat[TtpFullAmendInformativeError] = Json.format[TtpFullAmendInformativeError]
 }
 
 case class FullAmendInternalError(message: String)

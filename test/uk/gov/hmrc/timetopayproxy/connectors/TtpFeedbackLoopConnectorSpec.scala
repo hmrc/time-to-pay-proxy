@@ -34,7 +34,7 @@ import uk.gov.hmrc.timetopayproxy.models.error.ConnectorError
 import uk.gov.hmrc.timetopayproxy.models.error.TtppEnvelope.TtppEnvelope
 import uk.gov.hmrc.timetopayproxy.models.saonly.common._
 import uk.gov.hmrc.timetopayproxy.models.saonly.common.apistatus.{ ApiName, ApiStatus, ApiStatusCode }
-import uk.gov.hmrc.timetopayproxy.models.saonly.fullAmend.{ FullAmendErrorResponse, FullAmendInternalError, FullAmendRequest, FullAmendSuccessResponse }
+import uk.gov.hmrc.timetopayproxy.models.saonly.ttpfullAmend.{ TtpFullAmendInformativeError, FullAmendInternalError, TtpFullAmendRequest, TtpFullAmendSuccessfulResponse }
 import uk.gov.hmrc.timetopayproxy.models.saonly.ttpcancel._
 import uk.gov.hmrc.timetopayproxy.models.saonly.ttpinform._
 import uk.gov.hmrc.timetopayproxy.support.WireMockUtils
@@ -432,7 +432,7 @@ final class TtpFeedbackLoopConnectorSpec
 
     ".fullAmendTtp" should {
 
-      val fullAmendRequest: FullAmendRequest = FullAmendRequest(
+      val fullAmendRequest: TtpFullAmendRequest = TtpFullAmendRequest(
         identifications = NonEmptyList.of(
           Identification(idType = IdType("NINO"), idValue = IdValue("AB123456C"))
         ),
@@ -454,7 +454,7 @@ final class TtpFeedbackLoopConnectorSpec
         transitioned = TransitionedIndicator(true)
       )
 
-      val fullAmendResponse: FullAmendSuccessResponse = FullAmendSuccessResponse(
+      val fullAmendResponse: TtpFullAmendSuccessfulResponse = TtpFullAmendSuccessfulResponse(
         apisCalled = List(
           ApiStatus(
             name = ApiName("API1"),
@@ -466,7 +466,7 @@ final class TtpFeedbackLoopConnectorSpec
         processingDateTime = ProcessingDateTimeInstant(Instant.parse("2025-01-01T12:00:00Z"))
       )
 
-      val informativeError = FullAmendErrorResponse(
+      val fullAmendInformativeError = TtpFullAmendInformativeError(
         apisCalled = fullAmendResponse.apisCalled,
         processingDateTime = fullAmendResponse.processingDateTime,
         internalErrors = List(
@@ -484,7 +484,7 @@ final class TtpFeedbackLoopConnectorSpec
             Json.toJson(fullAmendResponse).toString()
           )
 
-          val result: TtppEnvelope[FullAmendSuccessResponse] = connector.fullAmendTtp(fullAmendRequest)
+          val result: TtppEnvelope[TtpFullAmendSuccessfulResponse] = connector.fullAmendTtp(fullAmendRequest)
 
           result.value.futureValue shouldBe Right(fullAmendResponse)
         }
@@ -497,7 +497,7 @@ final class TtpFeedbackLoopConnectorSpec
             """{"failures": [{"code": "400", "reason": "Invalid request body"}]}"""
           )
 
-          val result: TtppEnvelope[FullAmendSuccessResponse] = connector.fullAmendTtp(fullAmendRequest)
+          val result: TtppEnvelope[TtpFullAmendSuccessfulResponse] = connector.fullAmendTtp(fullAmendRequest)
 
           result.value.futureValue shouldBe Left(ConnectorError(400, "Invalid request body"))
         }
@@ -507,12 +507,12 @@ final class TtpFeedbackLoopConnectorSpec
             "/individuals/debts/time-to-pay/full-amend",
             Json.toJson(fullAmendRequest).toString(),
             500,
-            Json.toJson(informativeError).toString()
+            Json.toJson(fullAmendInformativeError).toString()
           )
 
-          val result: TtppEnvelope[FullAmendSuccessResponse] = connector.fullAmendTtp(fullAmendRequest)
+          val result: TtppEnvelope[TtpFullAmendSuccessfulResponse] = connector.fullAmendTtp(fullAmendRequest)
 
-          result.value.futureValue shouldBe Left(informativeError)
+          result.value.futureValue shouldBe Left(fullAmendInformativeError)
         }
       }
 
@@ -525,7 +525,7 @@ final class TtpFeedbackLoopConnectorSpec
             Json.toJson(fullAmendResponse).toString()
           )
 
-          val result: TtppEnvelope[FullAmendSuccessResponse] = connector.fullAmendTtp(fullAmendRequest)
+          val result: TtppEnvelope[TtpFullAmendSuccessfulResponse] = connector.fullAmendTtp(fullAmendRequest)
 
           result.value.futureValue shouldBe Right(fullAmendResponse)
         }
@@ -538,7 +538,7 @@ final class TtpFeedbackLoopConnectorSpec
             """{"failures": [{"code": "400", "reason": "Invalid request body"}]}"""
           )
 
-          val result: TtppEnvelope[FullAmendSuccessResponse] = connector.fullAmendTtp(fullAmendRequest)
+          val result: TtppEnvelope[TtpFullAmendSuccessfulResponse] = connector.fullAmendTtp(fullAmendRequest)
 
           result.value.futureValue shouldBe Left(ConnectorError(400, "Invalid request body"))
         }
@@ -548,12 +548,12 @@ final class TtpFeedbackLoopConnectorSpec
             "/debts/time-to-pay/full-amend",
             Json.toJson(fullAmendRequest).toString(),
             500,
-            Json.toJson(informativeError).toString()
+            Json.toJson(fullAmendInformativeError).toString()
           )
 
-          val result: TtppEnvelope[FullAmendSuccessResponse] = connector.fullAmendTtp(fullAmendRequest)
+          val result: TtppEnvelope[TtpFullAmendSuccessfulResponse] = connector.fullAmendTtp(fullAmendRequest)
 
-          result.value.futureValue shouldBe Left(informativeError)
+          result.value.futureValue shouldBe Left(fullAmendInformativeError)
         }
       }
     }
