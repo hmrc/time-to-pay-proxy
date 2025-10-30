@@ -77,11 +77,39 @@ class UpdatePlanServiceSpec extends UnitSpec {
         ) shouldBe responseFromTtp.asRight[ProxyEnvelopeError]
       }
     }
+
     "return a failure response" when {
       "connector returns failure" in {
 
         val errorFromTtpConnector =
           ConnectorError(500, "Internal Service Error")
+        val connector = mock[TtpConnector]
+        (
+          connector
+            .updatePlan(_: UpdatePlanRequest)(
+              _: ExecutionContext,
+              _: HeaderCarrier
+            )
+          )
+          .expects(updatePlanRequest, *, *)
+          .returning(
+            TtppEnvelope(errorFromTtpConnector.asLeft[UpdatePlanResponse])
+          )
+
+        val ttpQuoteService = new DefaultTTPQuoteService(connector)
+        await(
+          ttpQuoteService.updatePlan(updatePlanRequest).value,
+          5,
+          TimeUnit.SECONDS
+        ) shouldBe errorFromTtpConnector.asLeft[UpdatePlanResponse]
+      }
+    }
+
+    "return a conflict response" when {
+      "connector returns conflict" in {
+
+        val errorFromTtpConnector =
+          ConnectorError(409, "Plan ID exists in both op led and self serve collections")
         val connector = mock[TtpConnector]
         (
           connector
