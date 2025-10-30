@@ -328,7 +328,7 @@ final class TtpFeedbackLoopConnectorSpec
           "/individuals/debts/time-to-pay/inform",
           Json.toJson(ttpInformRequest).toString(),
           200,
-          Json.toJson(ttpInformErrorResponse).toString()
+          Json.toJson(ttpInformResponse).toString()
         )
 
         val result: TtppEnvelope[TtpInformSuccessfulResponse] = connector.informTtp(ttpInformRequest)

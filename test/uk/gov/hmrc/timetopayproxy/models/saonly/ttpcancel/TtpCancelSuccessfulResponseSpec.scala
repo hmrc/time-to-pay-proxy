@@ -101,7 +101,7 @@ final class TtpCancelSuccessfulResponseSpec extends AnyFreeSpec {
         }
 
         "writes JSON compatible with our schema" in {
-          val schema = Validators.TimeToPayProxy.TtpCancel.openApiCancelSuccessResponseSchema
+          val schema = Validators.TimeToPayProxy.TtpCancel.openApiCancelResponseSchema
           val writtenJson: JsValue = writerToClients.writes(obj)
 
           schema.validateAndGetErrors(writtenJson) shouldBe Nil
@@ -117,7 +117,7 @@ final class TtpCancelSuccessfulResponseSpec extends AnyFreeSpec {
         }
 
         "writes JSON compatible with our schema" in {
-          val schema = Validators.TimeToPayProxy.TtpCancel.openApiCancelSuccessResponseSchema
+          val schema = Validators.TimeToPayProxy.TtpCancel.openApiCancelResponseSchema
           val writtenJson: JsValue = writerToClients.writes(obj)
 
           schema.validateAndGetErrors(writtenJson) shouldBe Nil
@@ -137,7 +137,7 @@ final class TtpCancelSuccessfulResponseSpec extends AnyFreeSpec {
         }
 
         "was tested against JSON compatible with the time-to-pay schema" in {
-          val schema = Validators.TimeToPay.TtpCancel.openApiCancelSuccessResponseSchema
+          val schema = Validators.TimeToPay.TtpCancel.openApiCancelResponseSchema
 
           schema.validateAndGetErrors(json) shouldBe Nil
         }
@@ -152,7 +152,7 @@ final class TtpCancelSuccessfulResponseSpec extends AnyFreeSpec {
         }
 
         "was tested against JSON compatible with the time-to-pay schema" in {
-          val schema = Validators.TimeToPay.TtpCancel.openApiCancelSuccessResponseSchema
+          val schema = Validators.TimeToPay.TtpCancel.openApiCancelResponseSchema
 
           schema.validateAndGetErrors(json) shouldBe Nil
         }

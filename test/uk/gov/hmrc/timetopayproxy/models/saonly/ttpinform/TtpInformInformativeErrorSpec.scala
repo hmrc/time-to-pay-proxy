@@ -136,7 +136,6 @@ final class TtpInformInformativeErrorSpec extends AnyFreeSpec {
           val schema = Validators.TimeToPayProxy.TtpInform.openApiInformErrorResponseSchema
           val writtenJson: JsValue = writerToClients.writes(obj)
 
-          // TODO DTD-3779: These errors should be resolved.
           schema.validateAndGetErrors(writtenJson) shouldBe Nil
         }
       }

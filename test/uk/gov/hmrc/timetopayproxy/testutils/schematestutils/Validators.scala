@@ -80,10 +80,10 @@ object Validators {
         )
 
       /** This is used for 200 statuses. */
-      def openApiCancelSuccessResponseSchema: OpenApi3DerivedSchema =
+      def openApiCancelResponseSchema: OpenApi3DerivedSchema =
         new OpenApi3DerivedSchema(
           path,
-          defaultJsonSubschemaName = "CancelSuccessResponse",
+          defaultJsonSubschemaName = "CancelResponse",
           metaSchemaValidation = Some(Valid(())),
           restrictAdditionalProperties = true
         )
@@ -113,7 +113,6 @@ object Validators {
         )
 
       /** This is used for both 200 and 500 statuses. */
-      // TODO DTD-3779: Split into the separate schemas for 200 and 500 responses. 500 will have an extra field.
       def openApiInformErrorResponseSchema: OpenApi3DerivedSchema =
         new OpenApi3DerivedSchema(
           path,
@@ -122,18 +121,10 @@ object Validators {
           restrictAdditionalProperties = true
         )
 
-      def openApiInformSuccessResponseSchema: OpenApi3DerivedSchema =
+      def openApiInformResponseSchema: OpenApi3DerivedSchema =
         new OpenApi3DerivedSchema(
           path,
-          defaultJsonSubschemaName = "InformSuccessResponse",
-          metaSchemaValidation = Some(Valid(())),
-          restrictAdditionalProperties = true
-        )
-
-      def openApiResponseGeneralFailureSchema: OpenApi3DerivedSchema =
-        new OpenApi3DerivedSchema(
-          path,
-          defaultJsonSubschemaName = "ErrorResponse",
+          defaultJsonSubschemaName = "InformResponse",
           metaSchemaValidation = Some(Valid(())),
           restrictAdditionalProperties = true
         )
@@ -223,10 +214,10 @@ object Validators {
           restrictAdditionalProperties = true
         )
 
-      def openApiCancelSuccessResponseSchema: OpenApi3DerivedSchema =
+      def openApiCancelResponseSchema: OpenApi3DerivedSchema =
         new OpenApi3DerivedSchema(
           path,
-          defaultJsonSubschemaName = "CancelSuccessResponse",
+          defaultJsonSubschemaName = "CancelResponse",
           metaSchemaValidation = Some(Valid(())),
           restrictAdditionalProperties = true
         )
@@ -271,10 +262,10 @@ object Validators {
           restrictAdditionalProperties = true
         )
 
-      def openApiInformSuccessResponseSchema: OpenApi3DerivedSchema =
+      def openApiInformResponseSchema: OpenApi3DerivedSchema =
         new OpenApi3DerivedSchema(
           path,
-          defaultJsonSubschemaName = "InformSuccessResponse",
+          defaultJsonSubschemaName = "InformResponse",
           metaSchemaValidation = Some(Valid(())),
           restrictAdditionalProperties = true
         )
