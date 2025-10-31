@@ -374,7 +374,9 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/InformAPIStatus'
-          description: Status of calls to each HoD API (present when HoD APIs were called successfully)
+          description: |
+            Status of each downstream endpoint that we attempted to call;
+            present when the service knows which downstream endpoints were called successfully
         internalErrors:
           type: array
           items:
