@@ -31,14 +31,14 @@ final class TtpInformInformativeErrorSpec extends AnyFreeSpec {
   object TestData {
     object WithOnlySomes {
       def obj: TtpInformInformativeError = TtpInformInformativeError(
-        apisCalled = List(
+        apisCalled = Some(List(
           ApiStatus(
             name = ApiName("api name"),
             statusCode = ApiStatusCode(400),
             processingDateTime = ProcessingDateTimeInstant(Instant.parse("2000-01-02T14:35:00.788998Z")),
             errorResponse = Some(ApiErrorResponse("api error response"))
           )
-        ),
+        )),
         internalErrors = List(
           TtpInformInternalError("some error that ttp is responsible for"),
           TtpInformInternalError("another error that ttp is responsible for")
@@ -68,14 +68,14 @@ final class TtpInformInformativeErrorSpec extends AnyFreeSpec {
 
     object With0SomeOnEachPath {
       def obj: TtpInformInformativeError = TtpInformInformativeError(
-        apisCalled = List(
+        apisCalled = Some(List(
           ApiStatus(
             name = ApiName("api name"),
             statusCode = ApiStatusCode(400),
             processingDateTime = ProcessingDateTimeInstant(Instant.parse("2000-01-02T14:35:00.788998Z")),
             errorResponse = None
           )
-        ),
+        )),
         internalErrors = List(
           TtpInformInternalError("some error that ttp is responsible for"),
           TtpInformInternalError("another error that ttp is responsible for")

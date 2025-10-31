@@ -692,14 +692,14 @@ class TimeToPayProxyControllerItSpec extends IntegrationBaseSpec {
         "when given a valid json payload" - {
           "when TimeToPay returns an error response with 500" in new TimeToPayProxyControllerTestBase {
             val errorResponse: TtpCancelInformativeError = TtpCancelInformativeError(
-              apisCalled = List(
+              apisCalled = Some(List(
                 ApiStatus(
                   name = ApiName("CESA"),
                   statusCode = ApiStatusCode(400),
                   processingDateTime = ProcessingDateTimeInstant(java.time.Instant.parse("2025-10-15T10:30:00Z")),
                   errorResponse = Some(ApiErrorResponse("Invalid cancellationDate"))
                 )
-              ),
+              )),
               internalErrors = List(
                 TtpCancelInternalError("some error that ttp is responsible for"),
                 TtpCancelInternalError("another error that ttp is responsible for")
@@ -946,14 +946,14 @@ class TimeToPayProxyControllerItSpec extends IntegrationBaseSpec {
         "when given a valid json payload" - {
           "when TimeToPay returns an error response with 500" in new TimeToPayProxyControllerTestBase {
             val errorResponse: TtpInformInformativeError = TtpInformInformativeError(
-              apisCalled = List(
+              apisCalled = Some(List(
                 ApiStatus(
                   name = ApiName("CESA"),
                   statusCode = ApiStatusCode(400),
                   processingDateTime = ProcessingDateTimeInstant(java.time.Instant.parse("2025-10-15T10:30:00Z")),
                   errorResponse = Some(ApiErrorResponse("Invalid cancellationDate"))
                 )
-              ),
+              )),
               internalErrors = List(
                 TtpInformInternalError("some error that ttp is responsible for"),
                 TtpInformInternalError("another error that ttp is responsible for")

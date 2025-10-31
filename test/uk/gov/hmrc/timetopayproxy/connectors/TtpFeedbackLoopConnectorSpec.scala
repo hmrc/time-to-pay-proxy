@@ -146,14 +146,14 @@ final class TtpFeedbackLoopConnectorSpec
       )
 
       val ttpCancelInformativeErrorResponse: TtpCancelInformativeError = TtpCancelInformativeError(
-        apisCalled = List(
+        apisCalled = Some(List(
           ApiStatus(
             name = ApiName("API1"),
             statusCode = ApiStatusCode(200),
             processingDateTime = ProcessingDateTimeInstant(Instant.parse("2025-01-01T12:00:00Z")),
             errorResponse = None
           )
-        ),
+        )),
         internalErrors = List(TtpCancelInternalError("some error that ttp is responsible for")),
         processingDateTime = ProcessingDateTimeInstant(Instant.parse("2025-01-01T12:00:00Z"))
       )
@@ -198,14 +198,14 @@ final class TtpFeedbackLoopConnectorSpec
           await(result.value) mustBe
             Left(
               TtpCancelInformativeError(
-                apisCalled = List(
+                apisCalled = Some(List(
                   ApiStatus(
                     ApiName("API1"),
                     ApiStatusCode(200),
                     ProcessingDateTimeInstant(Instant.parse("2025-01-01T12:00:00Z")),
                     errorResponse = None
                   )
-                ),
+                )),
                 internalErrors = List(TtpCancelInternalError("some error that ttp is responsible for")),
                 processingDateTime = ProcessingDateTimeInstant(Instant.parse("2025-01-01T12:00:00Z"))
               )
@@ -253,14 +253,14 @@ final class TtpFeedbackLoopConnectorSpec
           await(result.value) mustBe
             Left(
               TtpCancelInformativeError(
-                apisCalled = List(
+                apisCalled = Some(List(
                   ApiStatus(
                     ApiName("API1"),
                     ApiStatusCode(200),
                     ProcessingDateTimeInstant(Instant.parse("2025-01-01T12:00:00Z")),
                     errorResponse = None
                   )
-                ),
+                )),
                 internalErrors = List(TtpCancelInternalError("some error that ttp is responsible for")),
                 processingDateTime = ProcessingDateTimeInstant(Instant.parse("2025-01-01T12:00:00Z"))
               )
@@ -307,14 +307,14 @@ final class TtpFeedbackLoopConnectorSpec
     )
 
     val ttpInformErrorResponse: TtpInformInformativeError = TtpInformInformativeError(
-      apisCalled = List(
+      apisCalled = Some(List(
         ApiStatus(
           name = ApiName("API1"),
           statusCode = ApiStatusCode(200),
           processingDateTime = ProcessingDateTimeInstant(Instant.parse("2025-01-01T12:00:00Z")),
           errorResponse = None
         )
-      ),
+      )),
       internalErrors = List(
         TtpInformInternalError("some error that ttp is responsible for"),
         TtpInformInternalError("another error that ttp is responsible for")
@@ -360,7 +360,7 @@ final class TtpFeedbackLoopConnectorSpec
         val result: TtppEnvelope[TtpInformSuccessfulResponse] = connector.informTtp(ttpInformRequest)
 
         val informativeError = TtpInformInformativeError(
-          apisCalled = ttpInformResponse.apisCalled,
+          apisCalled = Some(ttpInformResponse.apisCalled),
           internalErrors = List(
             TtpInformInternalError("some error that ttp is responsible for"),
             TtpInformInternalError("another error that ttp is responsible for")
@@ -410,7 +410,7 @@ final class TtpFeedbackLoopConnectorSpec
         val result: TtppEnvelope[TtpInformSuccessfulResponse] = connector.informTtp(ttpInformRequest)
 
         val informativeError = TtpInformInformativeError(
-          apisCalled = ttpInformResponse.apisCalled,
+          apisCalled = Some(ttpInformResponse.apisCalled),
           internalErrors = List(
             TtpInformInternalError("some error that ttp is responsible for"),
             TtpInformInternalError("another error that ttp is responsible for")
