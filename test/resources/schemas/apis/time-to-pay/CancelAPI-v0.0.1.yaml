@@ -192,7 +192,7 @@ components:
           scopes:
             "write:time-to-pay-proxy-cancel": "Write access for TTP cancel notifications"
   schemas:
-    Identification:
+    CancelIdentification:
       type: object
       required:
         - idType
@@ -201,44 +201,14 @@ components:
         idType:
           type: string
           description: Identifier type, e.g. UTR
-          pattern: "^[A-Za-z0-9]{1,6}$"
+          pattern: ^[A-Za-z0-9]{1,6}$
           example: UTR
         idValue:
           type: string
           description: Identifier value
-          pattern: "^[A-Za-z0-9]{1,25}$"
-          example: "1234567890"
-    Charge:
-      type: object
-      required:
-        - chargeReference
-        - chargeSource
-      properties:
-        chargeReference:
-          type: string
-          description: Reference for the charge
-          example: "628BxY"
-        chargeSource:
-          type: string
-          description: Source system of the charge
-          example: "CESA"
-    Instalment:
-      type: object
-      required:
-        - dueDate
-        - amountDue
-      properties:
-        dueDate:
-          type: string
-          format: date
-          description: Due date for each regular instalment
-          example: "2025-06-01"
-        amountDue:
-          type: number
-          multipleOf: 0.01
-          description: Amount due for the instalment
-          example: 300.00
-    PaymentPlan:
+          pattern: ^[A-Za-z0-9]{1,25}$
+          example: '1234567890'
+    CancelPaymentPlan:
       type: object
       required:
         - arrangementAgreedDate
@@ -250,12 +220,12 @@ components:
           type: string
           format: date
           description: The date when the plan was created
-          example: "2025-05-01"
+          example: '2025-05-01'
         ttpEndDate:
           type: string
           format: date
           description: Date for the last payment/instalment
-          example: "2025-11-01"
+          example: '2025-11-01'
         frequency:
           type: string
           enum:
@@ -273,17 +243,33 @@ components:
           type: string
           format: date
           description: Date when the cancellation was made
-          example: "2025-10-15"
+          example: '2025-10-15'
         initialPaymentDate:
           type: string
           format: date
           description: Optional upfront payment date
-          example: "2025-05-05"
+          example: '2025-05-05'
         initialPaymentAmount:
           type: number
           multipleOf: 0.01
           description: Optional upfront payment amount
-          example: 150.00
+          example: 150
+    CancelInstalment:
+      type: object
+      required:
+        - dueDate
+        - amountDue
+      properties:
+        dueDate:
+          type: string
+          format: date
+          description: Due date for each regular instalment
+          example: '2025-06-01'
+        amountDue:
+          type: number
+          multipleOf: 0.01
+          description: Amount due for the instalment
+          example: 300
     CancelRequest:
       type: object
       required:
@@ -296,15 +282,15 @@ components:
           type: array
           minItems: 1
           items:
-            $ref: '#/components/schemas/Identification'
+            $ref: '#/components/schemas/CancelIdentification'
           description: Array of customer identifiers; CDCS must provide at least one (e.g. UTR).
         paymentPlan:
-          $ref: '#/components/schemas/PaymentPlan'
+          $ref: '#/components/schemas/CancelPaymentPlan'
         instalments:
           type: array
           minItems: 1
           items:
-            $ref: '#/components/schemas/Instalment'
+            $ref: '#/components/schemas/CancelInstalment'
           description: Array of payment instalments
         channelIdentifier:
           type: string
@@ -312,7 +298,7 @@ components:
             - advisor
             - selfService
           description: Channel through which arrangement was made (e.g. advisor, selfService)
-          example: "advisor"
+          example: advisor
         transitioned:
           type: boolean
           description: Indicates whether the customer only has FDLs.
@@ -329,18 +315,20 @@ components:
           description: The API name (CESA, ETMP)
           example: CESA
         statusCode:
-          type: number
+          type: integer
           description: HTTP status code from the downstream API
           example: 200
         processingDateTime:
           type: string
           format: date-time
           description: Timestamp of processing the request in downstream API
-          example: "2025-10-15T10:30:00Z"
+          example: '2025-10-15T10:30:00Z'
         errorResponse:
           type: string
-          description: Error message if downstream API call failed
-          example: "Invalid cancellationDate"
+          description: |
+            Error message returned by the downstream API when the call failed.
+            This field is present when the downstream API returns an error status code but TTP can parse the response.
+          example: Invalid cancellationDate provided for cancellation
     CancelResponse:
       type: object
       required:
@@ -356,12 +344,12 @@ components:
           type: string
           format: date-time
           description: Timestamp for processing the cancel request
-          example: "2025-10-15T10:31:00Z"
+          example: '2025-10-15T10:31:00Z'
     CancelErrorResponse:
       type: object
       required:
-        - internalErrors
         - processingDateTime
+        - internalErrors
       properties:
         apisCalled:
           type: array
@@ -386,14 +374,14 @@ components:
           description: Timestamp for processing the cancel request
           example: '2025-10-15T10:31:00Z'
     ErrorResponse:
-      type: object
+      title: ErrorResponse
       required:
-        - code
-        - details
+        - statusCode
+        - errorMessage
       properties:
-        code:
+        statusCode:
           type: integer
-          example: 400
-        details:
+          description: http status code
+        errorMessage:
           type: string
-          example: "Invalid request payload: missing identifications or cancellationDate"
+          description: Reason for error request

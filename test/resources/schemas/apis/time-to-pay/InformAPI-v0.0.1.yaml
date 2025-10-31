@@ -189,7 +189,7 @@ components:
           authorizationUrl: https://api.service.hmrc.gov.uk/oauth/authorize
           tokenUrl: https://api.service.hmrc.gov.uk/oauth/token
           refreshUrl: https://api.service.hmrc.gov.uk/oauth/refresh
-          scopes: {}
+          scopes: { }
     applicationRestricted:
       type: oauth2
       description: |
@@ -199,10 +199,21 @@ components:
         clientCredentials:
           tokenUrl: https://api.service.hmrc.gov.uk/oauth/token
           scopes:
-            "read:time-to-pay-proxy": "read ttp data"
-
+            read:time-to-pay-proxy: read ttp data
   schemas:
-    Identification:
+    ErrorResponse:
+      title: ErrorResponse
+      required:
+        - statusCode
+        - errorMessage
+      properties:
+        statusCode:
+          type: integer
+          description: http status code
+        errorMessage:
+          type: string
+          description: Reason for error request
+    InformIdentification:
       type: object
       required:
         - idType
@@ -211,31 +222,14 @@ components:
         idType:
           type: string
           description: Identifier type, e.g. UTR, EMPREF
-          pattern: "^[A-Za-z0-9]{1,6}$"
+          pattern: ^[A-Za-z0-9]{1,6}$
           example: UTR
         idValue:
           type: string
           description: Identifier value
-          pattern: "^[A-Za-z0-9]{1,25}$"
-          example: "1234567890"
-    Instalment:
-      type: object
-      required:
-        - dueDate
-        - amountDue
-      properties:
-        dueDate:
-          type: string
-          format: date
-          description: Due date for each regular instalment
-          example: "2025-06-01"
-        amountDue:
-          type: number
-          multipleOf: 0.01
-          description: Amount due for the instalment
-          example: 300.00
-        # Add any additional fields as needed here with descriptions and examples
-    PaymentPlan:
+          pattern: ^[A-Za-z0-9]{1,25}$
+          example: '1234567890'
+    InformPaymentPlan:
       type: object
       required:
         - arrangementAgreedDate
@@ -246,12 +240,12 @@ components:
           type: string
           format: date
           description: The date when the plan was created
-          example: "2025-05-01"
+          example: '2025-05-01'
         ttpEndDate:
           type: string
           format: date
           description: Date for the last payment/instalment
-          example: "2025-11-01"
+          example: '2025-11-01'
         frequency:
           type: string
           enum:
@@ -269,16 +263,32 @@ components:
           type: string
           format: date
           description: Optional upfront payment date
-          example: "2025-05-05"
+          example: '2025-05-05'
         initialPaymentAmount:
           type: number
           multipleOf: 0.01
           description: Optional upfront payment amount
-          example: 150.00
+          example: 150
         ddiReference:
           type: string
           description: Direct Debit Instruction reference number, if applicable
-          example: "DD123456789"
+          example: DD123456789
+    InformInstalment:
+      type: object
+      required:
+        - dueDate
+        - amountDue
+      properties:
+        dueDate:
+          type: string
+          format: date
+          description: Due date for each regular instalment
+          example: '2025-06-01'
+        amountDue:
+          type: number
+          multipleOf: 0.01
+          description: Amount due for the instalment
+          example: 300
     InformRequest:
       type: object
       required:
@@ -291,15 +301,15 @@ components:
           type: array
           minItems: 1
           items:
-            $ref: '#/components/schemas/Identification'
+            $ref: '#/components/schemas/InformIdentification'
           description: Array of identifiers for the customer
         paymentPlan:
-          $ref: '#/components/schemas/PaymentPlan'
+          $ref: '#/components/schemas/InformPaymentPlan'
         instalments:
           type: array
           minItems: 1
           items:
-            $ref: '#/components/schemas/Instalment'
+            $ref: '#/components/schemas/InformInstalment'
           description: Array of payment instalments
         channelIdentifier:
           type: string
@@ -307,7 +317,7 @@ components:
             - advisor
             - selfService
           description: Channel through which arrangement was made (e.g. advisor, selfService)
-          example: "advisor"
+          example: advisor
         transitioned:
           type: boolean
           description: Indicates whether the customer only has FDLs.
@@ -324,18 +334,20 @@ components:
           description: The API name (CESA or ETMP)
           example: CESA
         statusCode:
-          type: number
+          type: integer
           description: HTTP status code from the downstream API
           example: 200
         processingDateTime:
           type: string
           format: date-time
           description: Timestamp of processing the request in downstream API
-          example: "2025-05-01T14:30:00Z"
+          example: '2025-05-01T14:30:00Z'
         errorResponse:
           type: string
-          description: Error message if downstream API call failed
-          example: "Invalid request"
+          description: |
+            Error message returned by the downstream API when the call failed.
+            This field is present when the downstream API returns an error status code but TTP can parse the response.
+          example: Invalid lockReason provided for inform
     InformResponse:
       type: object
       required:
@@ -345,25 +357,24 @@ components:
         apisCalled:
           type: array
           items:
-            $ref: "#/components/schemas/InformAPIStatus"
+            $ref: '#/components/schemas/InformAPIStatus'
           description: Status of calls to each HoD API
         processingDateTime:
           type: string
           format: date-time
           description: Timestamp for processing the inform request
-          example: 2025-05-01T14:35:00Z
+          example: '2025-05-01T14:35:00Z'
     InformErrorResponse:
       type: object
       required:
-        - internalErrors
         - processingDateTime
+        - internalErrors
       properties:
         apisCalled:
           type: array
           items:
-            $ref: "#/components/schemas/InformAPIStatus"
-          description: Status of calls to each HoD API (present when HoD APIs were called
-            successfully)
+            $ref: '#/components/schemas/InformAPIStatus'
+          description: Status of calls to each HoD API (present when HoD APIs were called successfully)
         internalErrors:
           type: array
           items:
@@ -375,22 +386,9 @@ components:
                 type: string
                 description: Error message describing the internal failure
                 example: Could not parse response from calling CESA
-          description: Internal errors that occurred during processing (present when TTP
-            cannot parse HoD responses)
+          description: Internal errors that occurred during processing (present when TTP cannot parse HoD responses)
         processingDateTime:
           type: string
           format: date-time
-          description: Timestamp for processing the cancel request
-          example: 2025-10-15T10:31:00Z
-    ErrorResponse:
-      type: object
-      required:
-        - code
-        - details
-      properties:
-        code:
-          type: integer
-          example: 400
-        details:
-          type: string
-          example: "Invalid request payload: missing identifications"
+          description: Timestamp for processing the inform request
+          example: '2025-10-15T10:31:00Z'
