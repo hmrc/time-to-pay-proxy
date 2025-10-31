@@ -117,7 +117,7 @@ final class TtpFullAmendInformativeErrorSpec extends AnyFreeSpec {
         }
 
         "writes JSON compatible with our schema" in {
-          val schema = Validators.TimeToPayProxy.FullAmend.openApiResponseGeneralFailureSchema
+          val schema = Validators.TimeToPayProxy.FullAmend.openApiFullAmendErrorResponseSchema
           val writtenJson: JsValue = writerToClients.writes(obj)
 
           schema.validateAndGetErrors(writtenJson) shouldBe Nil
@@ -133,7 +133,7 @@ final class TtpFullAmendInformativeErrorSpec extends AnyFreeSpec {
         }
 
         "writes JSON compatible with our schema" in {
-          val schema = Validators.TimeToPayProxy.FullAmend.openApiResponseGeneralFailureSchema
+          val schema = Validators.TimeToPayProxy.FullAmend.openApiFullAmendErrorResponseSchema
           val writtenJson: JsValue = writerToClients.writes(obj)
 
           schema.validateAndGetErrors(writtenJson) shouldBe Nil
@@ -155,7 +155,7 @@ final class TtpFullAmendInformativeErrorSpec extends AnyFreeSpec {
 
         "was tested against JSON compatible with the time-to-pay schema" in {
           // Schema for TTP is same as proxy schema
-          val schema = Validators.TimeToPayProxy.FullAmend.openApiResponseGeneralFailureSchema
+          val schema = Validators.TimeToPayProxy.FullAmend.openApiFullAmendErrorResponseSchema
 
           schema.validateAndGetErrors(json) shouldBe Nil
         }
@@ -181,7 +181,7 @@ final class TtpFullAmendInformativeErrorSpec extends AnyFreeSpec {
               |""".stripMargin
           )
 
-          val schema = Validators.TimeToPayProxy.FullAmend.openApiResponseGeneralFailureSchema
+          val schema = Validators.TimeToPayProxy.FullAmend.openApiFullAmendErrorResponseSchema
 
           schema.validateAndGetErrors(notAcceptedJson) shouldBe
             List("Additional property 'notWanted' is not allowed. (code: 1000)\nFrom: <additionalProperties>")
@@ -199,7 +199,7 @@ final class TtpFullAmendInformativeErrorSpec extends AnyFreeSpec {
 
         "was tested against JSON compatible with the time-to-pay schema" in {
           // Schema for TTP is same as proxy schema
-          val schema = Validators.TimeToPayProxy.FullAmend.openApiResponseGeneralFailureSchema
+          val schema = Validators.TimeToPayProxy.FullAmend.openApiFullAmendErrorResponseSchema
 
           schema.validateAndGetErrors(json) shouldBe Nil
         }

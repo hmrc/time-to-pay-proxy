@@ -25,15 +25,15 @@ import org.scalatest.matchers.should.Matchers._
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.timetopayproxy.connectors.TtpFeedbackLoopConnector
 import uk.gov.hmrc.timetopayproxy.models.currency.GbpPounds
-import uk.gov.hmrc.timetopayproxy.models.error.{ConnectorError, TtppEnvelope}
-import uk.gov.hmrc.timetopayproxy.models.saonly.common.apistatus.{ApiName, ApiStatus, ApiStatusCode}
+import uk.gov.hmrc.timetopayproxy.models.error.{ ConnectorError, TtppEnvelope }
+import uk.gov.hmrc.timetopayproxy.models.saonly.common.apistatus.{ ApiName, ApiStatus, ApiStatusCode }
 import uk.gov.hmrc.timetopayproxy.models.saonly.common._
-import uk.gov.hmrc.timetopayproxy.models.saonly.ttpcancel.{CancellationDate, TtpCancelPaymentPlan, TtpCancelRequest, TtpCancelSuccessfulResponse}
-import uk.gov.hmrc.timetopayproxy.models.saonly.ttpinform.{DdiReference, TtpInformRequest, TtpInformSuccessfulResponse}
+import uk.gov.hmrc.timetopayproxy.models.saonly.ttpcancel.{ CancellationDate, TtpCancelPaymentPlan, TtpCancelRequest, TtpCancelSuccessfulResponse }
+import uk.gov.hmrc.timetopayproxy.models.saonly.ttpinform.{ DdiReference, TtpInformRequest, TtpInformSuccessfulResponse }
 import uk.gov.hmrc.timetopayproxy.models._
-import uk.gov.hmrc.timetopayproxy.models.saonly.ttpfullAmend.{TtpFullAmendRequest, TtpFullAmendSuccessfulResponse}
+import uk.gov.hmrc.timetopayproxy.models.saonly.ttpfullAmend.{ TtpFullAmendRequest, TtpFullAmendSuccessfulResponse }
 
-import java.time.{Instant, LocalDate}
+import java.time.{ Instant, LocalDate }
 import scala.concurrent.ExecutionContext
 import scala.concurrent.ExecutionContext.Implicits.global
 

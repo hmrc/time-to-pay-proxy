@@ -101,7 +101,7 @@ final class TtpFullAmendSuccessfulResponseSpec extends AnyFreeSpec {
         }
 
         "writes JSON compatible with our schema" in {
-          val schema = Validators.TimeToPayProxy.FullAmend.openApiInformativeResponseSchema
+          val schema = Validators.TimeToPayProxy.FullAmend.openApiFullAmendResponseSchema
           val writtenJson: JsValue = writerToClients.writes(obj)
 
           schema.validateAndGetErrors(writtenJson) shouldBe Nil
@@ -117,7 +117,7 @@ final class TtpFullAmendSuccessfulResponseSpec extends AnyFreeSpec {
         }
 
         "writes JSON compatible with our schema" in {
-          val schema = Validators.TimeToPayProxy.FullAmend.openApiInformativeResponseSchema
+          val schema = Validators.TimeToPayProxy.FullAmend.openApiFullAmendResponseSchema
           val writtenJson: JsValue = writerToClients.writes(obj)
 
           schema.validateAndGetErrors(writtenJson) shouldBe Nil
@@ -138,7 +138,7 @@ final class TtpFullAmendSuccessfulResponseSpec extends AnyFreeSpec {
 
         "was tested against JSON compatible with the time-to-pay schema" in {
           // TTP uses same Schema as proxy
-          val schema = Validators.TimeToPayProxy.FullAmend.openApiInformativeResponseSchema
+          val schema = Validators.TimeToPayProxy.FullAmend.openApiFullAmendResponseSchema
 
           schema.validateAndGetErrors(json) shouldBe Nil
         }
@@ -153,7 +153,7 @@ final class TtpFullAmendSuccessfulResponseSpec extends AnyFreeSpec {
         }
 
         "was tested against JSON compatible with the time-to-pay schema" in {
-          val schema = Validators.TimeToPayProxy.FullAmend.openApiInformativeResponseSchema
+          val schema = Validators.TimeToPayProxy.FullAmend.openApiFullAmendResponseSchema
 
           schema.validateAndGetErrors(json) shouldBe Nil
         }

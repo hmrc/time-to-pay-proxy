@@ -143,7 +143,7 @@ object Validators {
           restrictAdditionalProperties = true
         )
 
-      def openApiInformativeResponseSchema: OpenApi3DerivedSchema =
+      def openApiFullAmendResponseSchema: OpenApi3DerivedSchema =
         new OpenApi3DerivedSchema(
           path,
           defaultJsonSubschemaName = "FullAmendResponse",
@@ -151,7 +151,7 @@ object Validators {
           restrictAdditionalProperties = true
         )
 
-      def openApiResponseGeneralFailureSchema: OpenApi3DerivedSchema =
+      def openApiFullAmendErrorResponseSchema: OpenApi3DerivedSchema =
         new OpenApi3DerivedSchema(
           path,
           defaultJsonSubschemaName = "FullAmendErrorResponse",
