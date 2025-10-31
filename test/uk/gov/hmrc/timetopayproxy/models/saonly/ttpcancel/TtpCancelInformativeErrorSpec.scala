@@ -31,13 +31,19 @@ final class TtpCancelInformativeErrorSpec extends AnyFreeSpec {
   object TestData {
     object WithOnlySomes {
       def obj: TtpCancelInformativeError = TtpCancelInformativeError(
-        apisCalled = List(
-          ApiStatus(
-            name = ApiName("api name"),
-            statusCode = ApiStatusCode("400"),
-            processingDateTime = ProcessingDateTimeInstant(Instant.parse("2000-01-02T14:35:00.788998Z")),
-            errorResponse = Some(ApiErrorResponse("api error response"))
+        apisCalled = Some(
+          List(
+            ApiStatus(
+              name = ApiName("api name"),
+              statusCode = ApiStatusCode(400),
+              processingDateTime = ProcessingDateTimeInstant(Instant.parse("2000-01-02T14:35:00.788998Z")),
+              errorResponse = Some(ApiErrorResponse("api error response"))
+            )
           )
+        ),
+        internalErrors = List(
+          TtpCancelInternalError("some error that ttp is responsible for"),
+          TtpCancelInternalError("another error that ttp is responsible for")
         ),
         processingDateTime = ProcessingDateTimeInstant(Instant.parse("2222-02-24T14:35:00.788998Z"))
       )
@@ -49,8 +55,12 @@ final class TtpCancelInformativeErrorSpec extends AnyFreeSpec {
           |      "errorResponse" : "api error response",
           |      "name" : "api name",
           |      "processingDateTime" : "2000-01-02T14:35:00.788998Z",
-          |      "statusCode" : "400"
+          |      "statusCode" : 400
           |    }
+          |  ],
+          |  "internalErrors": [
+          |     {"message": "some error that ttp is responsible for"},
+          |     {"message": "another error that ttp is responsible for"}
           |  ],
           |  "processingDateTime" : "2222-02-24T14:35:00.788998Z"
           |}
@@ -60,13 +70,19 @@ final class TtpCancelInformativeErrorSpec extends AnyFreeSpec {
 
     object With0SomeOnEachPath {
       def obj: TtpCancelInformativeError = TtpCancelInformativeError(
-        apisCalled = List(
-          ApiStatus(
-            name = ApiName("api name"),
-            statusCode = ApiStatusCode("400"),
-            processingDateTime = ProcessingDateTimeInstant(Instant.parse("2000-01-02T14:35:00.788998Z")),
-            errorResponse = None
+        apisCalled = Some(
+          List(
+            ApiStatus(
+              name = ApiName("api name"),
+              statusCode = ApiStatusCode(400),
+              processingDateTime = ProcessingDateTimeInstant(Instant.parse("2000-01-02T14:35:00.788998Z")),
+              errorResponse = None
+            )
           )
+        ),
+        internalErrors = List(
+          TtpCancelInternalError("some error that ttp is responsible for"),
+          TtpCancelInternalError("another error that ttp is responsible for")
         ),
         processingDateTime = ProcessingDateTimeInstant(Instant.parse("2222-02-24T14:35:00.788998Z"))
       )
@@ -77,8 +93,12 @@ final class TtpCancelInformativeErrorSpec extends AnyFreeSpec {
           |    {
           |      "name" : "api name",
           |      "processingDateTime" : "2000-01-02T14:35:00.788998Z",
-          |      "statusCode" : "400"
+          |      "statusCode" : 400
           |    }
+          |  ],
+          |  "internalErrors": [
+          |     {"message": "some error that ttp is responsible for"},
+          |     {"message": "another error that ttp is responsible for"}
           |  ],
           |  "processingDateTime" : "2222-02-24T14:35:00.788998Z"
           |}
@@ -101,14 +121,10 @@ final class TtpCancelInformativeErrorSpec extends AnyFreeSpec {
         }
 
         "writes JSON compatible with our schema" in {
-          val schema = Validators.TimeToPayProxy.TtpCancel.openApiInformativeResponseSchema
+          val schema = Validators.TimeToPayProxy.TtpCancel.openApiCancelErrorResponseSchema
           val writtenJson: JsValue = writerToClients.writes(obj)
 
-          // TODO DTD-3785: These errors should be resolved.
-          schema.validateAndGetErrors(writtenJson) shouldBe List(
-            """apisCalled.0.statusCode: Type expected 'integer', found 'string'. (code: 1027)
-              |From: apisCalled.0.<items>.<#/components/schemas/CancelAPIStatus>.statusCode.<type>""".stripMargin
-          )
+          schema.validateAndGetErrors(writtenJson) shouldBe Nil
         }
       }
 
@@ -121,14 +137,10 @@ final class TtpCancelInformativeErrorSpec extends AnyFreeSpec {
         }
 
         "writes JSON compatible with our schema" in {
-          val schema = Validators.TimeToPayProxy.TtpCancel.openApiInformativeResponseSchema
+          val schema = Validators.TimeToPayProxy.TtpCancel.openApiCancelErrorResponseSchema
           val writtenJson: JsValue = writerToClients.writes(obj)
 
-          // TODO DTD-3785: These errors should be resolved.
-          schema.validateAndGetErrors(writtenJson) shouldBe List(
-            """apisCalled.0.statusCode: Type expected 'integer', found 'string'. (code: 1027)
-              |From: apisCalled.0.<items>.<#/components/schemas/CancelAPIStatus>.statusCode.<type>""".stripMargin
-          )
+          schema.validateAndGetErrors(writtenJson) shouldBe Nil
         }
       }
     }
@@ -145,7 +157,7 @@ final class TtpCancelInformativeErrorSpec extends AnyFreeSpec {
         }
 
         "was tested against JSON compatible with the time-to-pay schema" in {
-          val schema = Validators.TimeToPay.TtpCancel.openApiInformativeResponseSchema
+          val schema = Validators.TimeToPay.TtpCancel.openApiCancelErrorResponseSchema
 
           schema.validateAndGetErrors(json) shouldBe Nil
         }
@@ -160,7 +172,7 @@ final class TtpCancelInformativeErrorSpec extends AnyFreeSpec {
         }
 
         "was tested against JSON compatible with the time-to-pay schema" in {
-          val schema = Validators.TimeToPay.TtpCancel.openApiInformativeResponseSchema
+          val schema = Validators.TimeToPay.TtpCancel.openApiCancelErrorResponseSchema
 
           schema.validateAndGetErrors(json) shouldBe Nil
         }

@@ -1245,7 +1245,7 @@ class TimeToPayProxyControllerSpec extends AnyWordSpec with MockFactory {
       apisCalled = List(
         ApiStatus(
           name = ApiName("API1"),
-          statusCode = ApiStatusCode("SUCCESS"),
+          statusCode = ApiStatusCode(200),
           processingDateTime = ProcessingDateTimeInstant(Instant.parse("2025-01-01T12:00:00Z")),
           errorResponse = None
         )
@@ -1421,7 +1421,7 @@ class TimeToPayProxyControllerSpec extends AnyWordSpec with MockFactory {
       apisCalled = List(
         ApiStatus(
           name = ApiName("API1"),
-          statusCode = ApiStatusCode("SUCCESS"),
+          statusCode = ApiStatusCode(200),
           processingDateTime = ProcessingDateTimeInstant(Instant.parse("2025-01-01T12:00:00Z")),
           errorResponse = None
         )

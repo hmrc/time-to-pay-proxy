@@ -72,7 +72,7 @@ class TtpFeedbackLoopServiceSpec extends AnyFreeSpec with MockFactory with Scala
         apisCalled = List(
           ApiStatus(
             name = ApiName("TTP_PROXY"),
-            statusCode = ApiStatusCode("SUCCESS"),
+            statusCode = ApiStatusCode(200),
             processingDateTime = ProcessingDateTimeInstant(Instant.parse("2024-01-15T10:30:00Z")),
             errorResponse = None
           )
@@ -139,7 +139,7 @@ class TtpFeedbackLoopServiceSpec extends AnyFreeSpec with MockFactory with Scala
         apisCalled = List(
           ApiStatus(
             name = ApiName("TTP_PROXY"),
-            statusCode = ApiStatusCode("SUCCESS"),
+            statusCode = ApiStatusCode(200),
             processingDateTime = ProcessingDateTimeInstant(Instant.parse("2024-01-15T10:30:00Z")),
             errorResponse = None
           )
