@@ -18,23 +18,24 @@ package uk.gov.hmrc.timetopayproxy.controllers
 
 import cats.data.NonEmptyList
 import com.github.tomakehurst.wiremock.client.WireMock
-import com.github.tomakehurst.wiremock.client.WireMock.{ postRequestedFor, urlPathEqualTo }
-import play.api.libs.json.{ JsNull, JsObject, JsValue, Json }
-import play.api.libs.ws.{ WSRequest, WSResponse }
+import com.github.tomakehurst.wiremock.client.WireMock.{postRequestedFor, urlPathEqualTo}
+import play.api.libs.json.{JsNull, JsObject, JsValue, Json}
+import play.api.libs.ws.{WSRequest, WSResponse}
 import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.timetopayproxy.models.PlanStatus.Success
 import uk.gov.hmrc.timetopayproxy.models._
-import uk.gov.hmrc.timetopayproxy.models.affordablequotes.{ AffordableQuoteResponse, AffordableQuotesRequest }
+import uk.gov.hmrc.timetopayproxy.models.affordablequotes.{AffordableQuoteResponse, AffordableQuotesRequest}
 import uk.gov.hmrc.timetopayproxy.models.currency.GbpPounds
 import uk.gov.hmrc.timetopayproxy.models.error.TtppErrorResponse
 import uk.gov.hmrc.timetopayproxy.models.saonly.chargeInfoApi._
 import uk.gov.hmrc.timetopayproxy.models.saonly.common._
-import uk.gov.hmrc.timetopayproxy.models.saonly.common.apistatus.{ ApiErrorResponse, ApiName, ApiStatus, ApiStatusCode }
+import uk.gov.hmrc.timetopayproxy.models.saonly.common.apistatus.{ApiErrorResponse, ApiName, ApiStatus, ApiStatusCode}
 import uk.gov.hmrc.timetopayproxy.models.saonly.ttpcancel._
 import uk.gov.hmrc.timetopayproxy.models.saonly.ttpinform._
 import uk.gov.hmrc.timetopayproxy.support.IntegrationBaseSpec
 import uk.gov.hmrc.timetopayproxy.testutils.TestOnlyJsonFormats._
 
-import java.time.{ LocalDate, LocalDateTime }
+import java.time.{LocalDate, LocalDateTime}
 import scala.concurrent.ExecutionContext
 
 class TimeToPayProxyControllerItSpec extends IntegrationBaseSpec {
@@ -1176,6 +1177,202 @@ class TimeToPayProxyControllerItSpec extends IntegrationBaseSpec {
         }
       }
     }
+
+    ".updatePlan" - {
+      "should return a 409 statusCode" - {
+        "when given a valid json payload" - {
+          "when TimeToPay returns an expected 409 response" in new TimeToPayProxyControllerTestBase {
+            // Auth
+            stubPostWithResponseBody(url = "/auth/authorise", status = 200, responseBody = "null")
+
+            // TTP response
+            val ttpResponseBody: String =
+              """{
+                |  "failures": [
+                |    {
+                |      "code": "CONFLICT",
+                |      "reason": "Plan ID exists in both op led and self serve collections"
+                |    }
+                |  ]
+                |}""".stripMargin
+
+            stubPutWithResponseBody(
+              url = "/debts/time-to-pay/quote/customerRef1234/95011519-4d29-4e58-95ca-d21d1ec7ba4e",
+              status = 409,
+              responseBody = ttpResponseBody
+            )
+
+            // TTPP request
+            val requestForUpdatePlan: WSRequest =
+              buildRequest("/quote/customerRef1234/95011519-4d29-4e58-95ca-d21d1ec7ba4e")
+
+            val response: WSResponse = await(
+              requestForUpdatePlan.put(Json.toJson(updatePlanRequest))
+            )
+
+            val expectedTtppErrorResponse: TtppErrorResponse =
+              TtppErrorResponse(
+                statusCode = 409,
+                errorMessage = "Plan ID exists in both op led and self serve collections"
+              )
+
+            response.json shouldBe Json.toJson(expectedTtppErrorResponse)
+            response.status shouldBe 409
+          }
+        }
+      }
+
+      "should return a 400 statusCode" - {
+        "when given a valid json payload" - {
+          "when TimeToPay returns an expected 400 response" in new TimeToPayProxyControllerTestBase {
+            stubPostWithResponseBody(url = "/auth/authorise", status = 200, responseBody = "null")
+
+            val ttpResponseBody: String =
+              """{
+                |  "failures": [
+                |    {
+                |      "code": "BAD REQUEST",
+                |      "reason": "There was no plan found for 95011519-4d29-4e58-95ca-d21d1ec7ba4e"
+                |    }
+                |  ]
+                |}""".stripMargin
+
+            stubPutWithResponseBody(
+              url = "/debts/time-to-pay/quote/customerRef1234/95011519-4d29-4e58-95ca-d21d1ec7ba4e",
+              status = 400,
+              responseBody = ttpResponseBody
+            )
+
+            val requestForUpdatePlan: WSRequest =
+              buildRequest("/quote/customerRef1234/95011519-4d29-4e58-95ca-d21d1ec7ba4e")
+
+            val response: WSResponse = await(
+              requestForUpdatePlan.put(Json.toJson(updatePlanRequest))
+            )
+
+            val expectedTtppErrorResponse: TtppErrorResponse =
+              TtppErrorResponse(
+                statusCode = 400,
+                errorMessage = "There was no plan found for 95011519-4d29-4e58-95ca-d21d1ec7ba4e"
+              )
+
+            response.json shouldBe Json.toJson(expectedTtppErrorResponse)
+            response.status shouldBe 400
+          }
+        }
+      }
+
+      "should return a 200 statusCode" - {
+        "when given a valid json payload" - {
+          "when TimeToPay returns an expected 200 response" in new TimeToPayProxyControllerTestBase {
+            stubPostWithResponseBody(url = "/auth/authorise", status = 200, responseBody = "null")
+
+            val ttpResponseBody: String =
+              """{
+                |   "customerReference":"customerRef1234",
+                |   "planId":"95011519-4d29-4e58-95ca-d21d1ec7ba4e",
+                |   "planStatus":"success",
+                |   "planUpdatedDate":"1970-01-01"
+                |}""".stripMargin
+
+            stubPutWithResponseBody(
+              url = "/debts/time-to-pay/quote/customerRef1234/95011519-4d29-4e58-95ca-d21d1ec7ba4e",
+              status = 200,
+              responseBody = ttpResponseBody
+            )
+
+            val requestForUpdatePlan: WSRequest =
+              buildRequest("/quote/customerRef1234/95011519-4d29-4e58-95ca-d21d1ec7ba4e")
+
+            val response: WSResponse = await(
+              requestForUpdatePlan.put(Json.toJson(updatePlanRequest))
+            )
+
+            val updatePlanResponse: UpdatePlanResponse = UpdatePlanResponse(
+              CustomerReference("customerRef1234"),
+              PlanId("95011519-4d29-4e58-95ca-d21d1ec7ba4e"),
+              Success,
+              LocalDate.EPOCH
+            )
+
+            response.json shouldBe Json.toJson(updatePlanResponse)
+            response.status shouldBe 200
+          }
+        }
+      }
+
+      "should return a 500 statusCode" - {
+        "when given a valid json payload" - {
+          "when TimeToPay returns a 500 response" in new TimeToPayProxyControllerTestBase {
+            stubPostWithResponseBody(url = "/auth/authorise", status = 200, responseBody = "null")
+
+            val ttpResponseBody: String =
+              """{
+                |   "statusCode":500,
+                |   "errorMessage":"Internal Service Error"
+                |}""".stripMargin
+
+            stubPutWithResponseBody(
+              url = "/debts/time-to-pay/quote/customerRef1234/95011519-4d29-4e58-95ca-d21d1ec7ba4e",
+              status = 500,
+              responseBody = ttpResponseBody
+            )
+
+            val requestForUpdatePlan: WSRequest =
+              buildRequest("/quote/customerRef1234/95011519-4d29-4e58-95ca-d21d1ec7ba4e")
+
+            val response: WSResponse = await(
+              requestForUpdatePlan.put(Json.toJson(updatePlanRequest))
+            )
+
+            val expectedTtppErrorResponse: TtppErrorResponse =
+              TtppErrorResponse(
+                statusCode = 503,
+                errorMessage = "HTTP status is unexpected in received HTTP response."
+              )
+
+            response.json shouldBe Json.toJson(expectedTtppErrorResponse)
+            response.status shouldBe 503
+          }
+        }
+      }
+
+      "should return a 503 statusCode" - {
+        "when given a valid json payload" - {
+          "when TimeToPay returns a 503 response" in new TimeToPayProxyControllerTestBase {
+            stubPostWithResponseBody(url = "/auth/authorise", status = 200, responseBody = "null")
+
+            val ttpResponseBody: String =
+              """{
+                |   "statusCode":503,
+                |   "errorMessage":"HTTP status is unexpected in received HTTP response."
+                |}""".stripMargin
+
+            stubPutWithResponseBody(
+              url = "/debts/time-to-pay/quote/customerRef1234/95011519-4d29-4e58-95ca-d21d1ec7ba4e",
+              status = 503,
+              responseBody = ttpResponseBody
+            )
+
+            val requestForUpdatePlan: WSRequest =
+              buildRequest("/quote/customerRef1234/95011519-4d29-4e58-95ca-d21d1ec7ba4e")
+
+            val response: WSResponse = await(
+              requestForUpdatePlan.put(Json.toJson(updatePlanRequest))
+            )
+
+            val expectedTtppErrorResponse: TtppErrorResponse =
+              TtppErrorResponse(
+                statusCode = 503,
+                errorMessage = "HTTP status is unexpected in received HTTP response."
+              )
+
+            response.json shouldBe Json.toJson(expectedTtppErrorResponse)
+            response.status shouldBe 503
+          }
+        }
+      }
+    }
   }
 
   trait TimeToPayProxyControllerTestBase {
@@ -1368,6 +1565,25 @@ class TimeToPayProxyControllerItSpec extends IntegrationBaseSpec {
         )
       ),
       processingDateTime = ProcessingDateTimeInstant(java.time.Instant.parse("2025-10-15T10:31:00Z"))
+    )
+
+    val updatePlanRequest: UpdatePlanRequest = UpdatePlanRequest(
+      customerReference = CustomerReference("customerRef1234"),
+      planId = PlanId("95011519-4d29-4e58-95ca-d21d1ec7ba4e"),
+      updateType = UpdateType("paymentDetails"),
+      channelIdentifier = Some(ChannelIdentifier.Advisor),
+      planStatus = Some(PlanStatus.ResolvedCompleted),
+      completeReason = Some(CompleteReason.PaymentInFullCaps),
+      cancellationReason = Some(CancellationReason("debt-resolved")),
+      thirdPartyBank = Some(true),
+      payments = Some(
+        List(
+          PaymentInformation(
+            paymentMethod = PaymentMethod.Cheque,
+            paymentReference = Some(PaymentReference("paymentRef"))
+          )
+        )
+      )
     )
   }
 }
