@@ -24,8 +24,8 @@ import uk.gov.hmrc.timetopayproxy.models.saonly.common.apistatus.ApiStatus
 
 /** Outgoing error for `500 Internal Server Error`. Also the incoming error from the `time-to-pay` service. */
 final case class TtpInformInformativeError(
-  // TODO DTD-3779: Implement the internalErrors field which won't exist in the 200 OK class.
-  apisCalled: List[ApiStatus],
+  apisCalled: Option[List[ApiStatus]],
+  internalErrors: List[TtpInformInternalError],
   processingDateTime: ProcessingDateTimeInstant
 ) extends ProxyEnvelopeError with TtppWriteableError {
 
@@ -36,4 +36,9 @@ final case class TtpInformInformativeError(
 
 object TtpInformInformativeError {
   implicit val format: OFormat[TtpInformInformativeError] = Json.format[TtpInformInformativeError]
+}
+
+case class TtpInformInternalError(message: String)
+object TtpInformInternalError {
+  implicit val format: OFormat[TtpInformInternalError] = Json.format[TtpInformInternalError]
 }
