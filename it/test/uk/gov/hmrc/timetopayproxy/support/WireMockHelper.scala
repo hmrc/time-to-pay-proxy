@@ -97,7 +97,7 @@ trait WireMockHelper {
     requestHeaderContaining: Option[Seq[(String, StringValuePattern)]],
     requestBodyContaining: Option[String],
     mapping: MappingBuilder
-  ) = {
+  ): MappingBuilder = {
     val response = aResponse()
       .withStatus(status)
       .withBody(responseBody)

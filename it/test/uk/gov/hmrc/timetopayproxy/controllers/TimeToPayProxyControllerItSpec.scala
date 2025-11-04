@@ -22,7 +22,6 @@ import com.github.tomakehurst.wiremock.client.WireMock.{ postRequestedFor, urlPa
 import play.api.libs.json.{ JsNull, JsObject, JsValue, Json }
 import play.api.libs.ws.{ WSRequest, WSResponse }
 import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.timetopayproxy.models.PlanStatus.Success
 import uk.gov.hmrc.timetopayproxy.models._
 import uk.gov.hmrc.timetopayproxy.models.affordablequotes.{ AffordableQuoteResponse, AffordableQuotesRequest }
 import uk.gov.hmrc.timetopayproxy.models.currency.GbpPounds
@@ -1179,7 +1178,7 @@ class TimeToPayProxyControllerItSpec extends IntegrationBaseSpec {
     }
 
     ".updatePlan" - {
-      "should return a 409 statusCode" - {
+      "should forward a 409 statusCode" - {
         "when given a valid json payload" - {
           "when TimeToPay returns an expected 409 response" in new TimeToPayProxyControllerTestBase {
             // Auth
@@ -1288,27 +1287,27 @@ class TimeToPayProxyControllerItSpec extends IntegrationBaseSpec {
               requestForUpdatePlan.put(Json.toJson(updatePlanRequest))
             )
 
-            val updatePlanResponse: UpdatePlanResponse = UpdatePlanResponse(
+            val expectedResponse: UpdatePlanResponse = UpdatePlanResponse(
               CustomerReference("customerRef1234"),
               PlanId("95011519-4d29-4e58-95ca-d21d1ec7ba4e"),
-              Success,
+              PlanStatus.Success,
               LocalDate.EPOCH
             )
 
-            response.json shouldBe Json.toJson(updatePlanResponse)
+            response.json shouldBe Json.toJson(expectedResponse)
             response.status shouldBe 200
           }
         }
       }
 
-      "should return a 500 statusCode" - {
+      "should return a 503 statusCode" - {
         "when given a valid json payload" - {
-          "when TimeToPay returns a 500 response" in new TimeToPayProxyControllerTestBase {
+          "when TimeToPay returns a 503 response in the event of an error status code" in new TimeToPayProxyControllerTestBase {
             stubPostWithResponseBody(url = "/auth/authorise", status = 200, responseBody = "null")
 
             val ttpResponseBody: String =
               """{
-                |   "statusCode":500,
+                |   "statusCode":999,
                 |   "errorMessage":"Internal Service Error"
                 |}""".stripMargin
 
