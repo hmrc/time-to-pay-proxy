@@ -1178,9 +1178,9 @@ class TimeToPayProxyControllerItSpec extends IntegrationBaseSpec {
     }
 
     ".updatePlan" - {
-      "should forward a 409 statusCode" - {
+      "when time-to-pay responds with a 409 http response code" - {
         "when given a valid json payload" - {
-          "when TimeToPay returns an expected 409 response" in new TimeToPayProxyControllerTestBase {
+          "responds with a 409 status code " in new TimeToPayProxyControllerTestBase {
             // Auth
             stubPostWithResponseBody(url = "/auth/authorise", status = 200, responseBody = "null")
 
@@ -1221,9 +1221,9 @@ class TimeToPayProxyControllerItSpec extends IntegrationBaseSpec {
         }
       }
 
-      "should return a 400 statusCode" - {
+      "when time-to-pay responds with a 400 http response code" - {
         "when given a valid json payload" - {
-          "when TimeToPay returns an expected 400 response" in new TimeToPayProxyControllerTestBase {
+          "responds with a 400 response" in new TimeToPayProxyControllerTestBase {
             stubPostWithResponseBody(url = "/auth/authorise", status = 200, responseBody = "null")
 
             val ttpResponseBody: String =
@@ -1261,9 +1261,9 @@ class TimeToPayProxyControllerItSpec extends IntegrationBaseSpec {
         }
       }
 
-      "should return a 200 statusCode" - {
+      "when time-to-pay responds with a 200 http response code" - {
         "when given a valid json payload" - {
-          "when TimeToPay returns an expected 200 response" in new TimeToPayProxyControllerTestBase {
+          "responds with a 200 status code " in new TimeToPayProxyControllerTestBase {
             stubPostWithResponseBody(url = "/auth/authorise", status = 200, responseBody = "null")
 
             val ttpResponseBody: String =
@@ -1300,9 +1300,9 @@ class TimeToPayProxyControllerItSpec extends IntegrationBaseSpec {
         }
       }
 
-      "should return a 503 statusCode" - {
+      "when time-to-pay responds with a 500 http response code" - {
         "when given a valid json payload" - {
-          "when TimeToPay returns a 503 response in the event of an error status code" in new TimeToPayProxyControllerTestBase {
+          "responds with a 503 status code because 500 is unexpected" in new TimeToPayProxyControllerTestBase {
             stubPostWithResponseBody(url = "/auth/authorise", status = 200, responseBody = "null")
 
             val ttpResponseBody: String =
@@ -1336,14 +1336,14 @@ class TimeToPayProxyControllerItSpec extends IntegrationBaseSpec {
         }
       }
 
-      "should return a 503 statusCode" - {
+      "when time-to-pay responds with a 503 http response code" - {
         "when given a valid json payload" - {
-          "when TimeToPay returns a 503 response" in new TimeToPayProxyControllerTestBase {
+          "responds with a 503 status code" in new TimeToPayProxyControllerTestBase {
             stubPostWithResponseBody(url = "/auth/authorise", status = 200, responseBody = "null")
 
             val ttpResponseBody: String =
               """{
-                |   "statusCode":503,
+                |   "statusCode":999,
                 |   "errorMessage":"HTTP status is unexpected in received HTTP response."
                 |}""".stripMargin
 
