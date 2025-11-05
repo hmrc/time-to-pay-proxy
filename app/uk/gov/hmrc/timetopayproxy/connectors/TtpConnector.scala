@@ -82,6 +82,7 @@ class DefaultTtpConnector @Inject() (appConfig: AppConfig, httpClient: HttpClien
       .empty[ProxyEnvelopeError, UpdatePlanResponse]
       .orSuccess[UpdatePlanResponse](200)
       .orErrorTransformed[TimeToPayError](400, ttpError => ttpError.toConnectorError(status = 400))
+      .orErrorTransformed[TimeToPayError](409, ttpError => ttpError.toConnectorError(status = 409))
 
   private val httpReadsBuilderForCreatePlan: HttpReadsWithLoggingBuilder[ProxyEnvelopeError, CreatePlanResponse] =
     HttpReadsWithLoggingBuilder
