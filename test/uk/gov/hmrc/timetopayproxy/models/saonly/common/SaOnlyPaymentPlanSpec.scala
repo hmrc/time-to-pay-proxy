@@ -14,23 +14,22 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.timetopayproxy.models.saonly.ttpinform
+package uk.gov.hmrc.timetopayproxy.models.saonly.common
 
 import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.should.Matchers._
 import play.api.libs.json.{ JsNumber, JsResultException, Json }
 import uk.gov.hmrc.timetopayproxy.models.FrequencyLowercase
 import uk.gov.hmrc.timetopayproxy.models.currency.GbpPounds
-import uk.gov.hmrc.timetopayproxy.models.saonly.common.{ ArrangementAgreedDate, InitialPaymentDate, TtpEndDate }
 
 import java.time.LocalDate
 
-class TtpInformPaymentPlanSpec extends AnyFreeSpec {
+class SaOnlyPaymentPlanSpec extends AnyFreeSpec {
 
-  "DDIReference" - {
+  "SaOnlyPaymentPlan" - {
     "should encode and decode correctly" - {
       "with no optional values present" in {
-        val planWithNoOptionalFields = TtpInformPaymentPlan(
+        val planWithNoOptionalFields = SaOnlyPaymentPlan(
           arrangementAgreedDate = ArrangementAgreedDate(LocalDate.parse("2025-05-05")),
           ttpEndDate = TtpEndDate(LocalDate.parse("2026-05-05")),
           frequency = FrequencyLowercase.Monthly,
@@ -50,11 +49,11 @@ class TtpInformPaymentPlanSpec extends AnyFreeSpec {
         )
 
         Json.toJson(planWithNoOptionalFields) shouldBe jsonPlanWithNoOptionalFields
-        jsonPlanWithNoOptionalFields.as[TtpInformPaymentPlan] shouldBe planWithNoOptionalFields
+        jsonPlanWithNoOptionalFields.as[SaOnlyPaymentPlan] shouldBe planWithNoOptionalFields
       }
 
       "with all optional values present" in {
-        val planWithAllOptionalFields = TtpInformPaymentPlan(
+        val planWithAllOptionalFields = SaOnlyPaymentPlan(
           arrangementAgreedDate = ArrangementAgreedDate(LocalDate.parse("2025-05-05")),
           ttpEndDate = TtpEndDate(LocalDate.parse("2026-05-05")),
           frequency = FrequencyLowercase.Monthly,
@@ -77,7 +76,7 @@ class TtpInformPaymentPlanSpec extends AnyFreeSpec {
         )
 
         Json.toJson(planWithAllOptionalFields) shouldBe jsonPlanWithAllOptionalFields
-        jsonPlanWithAllOptionalFields.as[TtpInformPaymentPlan] shouldBe planWithAllOptionalFields
+        jsonPlanWithAllOptionalFields.as[SaOnlyPaymentPlan] shouldBe planWithAllOptionalFields
       }
     }
 
@@ -85,7 +84,7 @@ class TtpInformPaymentPlanSpec extends AnyFreeSpec {
       val badJson = JsNumber(2)
 
       assertThrows[JsResultException](
-        badJson.as[TtpInformPaymentPlan]
+        badJson.as[SaOnlyPaymentPlan]
       )
     }
   }

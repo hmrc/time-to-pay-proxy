@@ -27,12 +27,12 @@ import uk.gov.hmrc.timetopayproxy.models.affordablequotes.AffordableQuotesReques
 import uk.gov.hmrc.timetopayproxy.models.error.TtppEnvelope.TtppEnvelope
 import uk.gov.hmrc.timetopayproxy.models.error.{ TtppEnvelope, TtppErrorResponse, ValidationError }
 import uk.gov.hmrc.timetopayproxy.models.saonly.chargeInfoApi.ChargeInfoRequest
+import uk.gov.hmrc.timetopayproxy.models.saonly.ttpfullamend.TtpFullAmendRequest
 import uk.gov.hmrc.timetopayproxy.models.saonly.ttpcancel.TtpCancelRequest
 import uk.gov.hmrc.timetopayproxy.models.saonly.ttpinform.TtpInformRequest
 import uk.gov.hmrc.timetopayproxy.services.{ TTPEService, TTPQuoteService, TtpFeedbackLoopService }
 
 import javax.inject.{ Inject, Singleton }
-import scala.annotation.unused
 import scala.concurrent.{ ExecutionContext, Future }
 import scala.util.{ Failure, Success, Try }
 
@@ -43,7 +43,6 @@ class TimeToPayProxyController @Inject() (
   timeToPayQuoteService: TTPQuoteService,
   ttpFeedbackLoopService: TtpFeedbackLoopService,
   timeToPayEligibilityService: TTPEService,
-  @unused
   featureSwitch: FeatureSwitch
 ) extends BackendController(cc) with BaseController {
   implicit val ec: ExecutionContext = cc.executionContext
@@ -145,6 +144,24 @@ class TimeToPayProxyController @Inject() (
     } else {
       Future.successful(
         TtppErrorResponse(statusCode = 503, errorMessage = "/inform endpoint is not currently enabled").toErrorResult
+      )
+    }
+  }
+
+  def fullAmendTtp: Action[JsValue] = authoriseAction.async(parse.json) { implicit request =>
+    if (featureSwitch.fullAmendEndpointEnabled) {
+      withJsonBody[TtpFullAmendRequest] { deserialisedRequest: TtpFullAmendRequest =>
+        ttpFeedbackLoopService
+          .fullAmendTtp(deserialisedRequest)
+          .leftMap(ttppError => ttppError.toWriteableProxyError)
+          .fold(e => e.toErrorResult, r => Results.Ok(Json.toJson(r)))
+      }
+    } else {
+      Future.successful(
+        TtppErrorResponse(
+          statusCode = 503,
+          errorMessage = "/full-amend endpoint is not currently enabled"
+        ).toErrorResult
       )
     }
   }

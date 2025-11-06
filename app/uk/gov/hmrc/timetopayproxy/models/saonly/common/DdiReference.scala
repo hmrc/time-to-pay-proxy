@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.timetopayproxy.models.saonly.ttpinform
+package uk.gov.hmrc.timetopayproxy.models.saonly.common
 
 import play.api.libs.json.{ Format, Json }
 

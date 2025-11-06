@@ -112,7 +112,16 @@ object Validators {
           restrictAdditionalProperties = true
         )
 
-      /** This is used for both 200 and 500 statuses. */
+      /** This is used for 200 statuses. */
+      def openApiInformResponseSchema: OpenApi3DerivedSchema =
+        new OpenApi3DerivedSchema(
+          path,
+          defaultJsonSubschemaName = "InformResponse",
+          metaSchemaValidation = Some(Valid(())),
+          restrictAdditionalProperties = true
+        )
+
+      /** This is used for 500 statuses. */
       def openApiInformErrorResponseSchema: OpenApi3DerivedSchema =
         new OpenApi3DerivedSchema(
           path,
@@ -120,11 +129,35 @@ object Validators {
           metaSchemaValidation = Some(Valid(())),
           restrictAdditionalProperties = true
         )
+    }
 
-      def openApiInformResponseSchema: OpenApi3DerivedSchema =
+    object TtpFullAmend {
+      // Downloaded from:
+      //   https://confluence.tools.tax.service.gov.uk/display/DTDT/TTP+API+%28Current+Version%29+Proxy?preview=/828113579/1168278271/time-to-pay-v1.0.19.yaml
+      // Official location:
+      //   https://confluence.tools.tax.service.gov.uk/display/DTDT/TTP+API+%28Current+Version%29+Proxy
+      def openApiRequestSchema: OpenApi3DerivedSchema =
         new OpenApi3DerivedSchema(
           path,
-          defaultJsonSubschemaName = "InformResponse",
+          defaultJsonSubschemaName = "FullAmendRequest",
+          metaSchemaValidation = Some(Valid(())),
+          restrictAdditionalProperties = true
+        )
+
+      /** This is used for 200 statuses. */
+      def openApiFullAmendResponseSchema: OpenApi3DerivedSchema =
+        new OpenApi3DerivedSchema(
+          path,
+          defaultJsonSubschemaName = "FullAmendResponse",
+          metaSchemaValidation = Some(Valid(())),
+          restrictAdditionalProperties = true
+        )
+
+      /** This is used for 500 statuses. */
+      def openApiFullAmendErrorResponseSchema: OpenApi3DerivedSchema =
+        new OpenApi3DerivedSchema(
+          path,
+          defaultJsonSubschemaName = "FullAmendErrorResponse",
           metaSchemaValidation = Some(Valid(())),
           restrictAdditionalProperties = true
         )
@@ -241,9 +274,9 @@ object Validators {
 
     object TtpInform {
       // Downloaded from:
-      //   https://github.com/hmrc/time-to-pay/blob/main/resources/public/api/conf/1.0/InformAPI-v0.0.1.yaml
+      //   https://github.com/hmrc/time-to-pay/blob/af176ffca7a0bb85bb6c180d9eff0d2d6755a37a/resources/public/api/conf/1.0/InformAPI-v0.0.1.yaml
       // Official location:
-      //   https://github.com/hmrc/time-to-pay/blob/main/resources/public/api/conf/1.0/InformAPI-v0.0.1.yaml
+      //   https://github.com/hmrc/time-to-pay/blob/main/resources/public/api/conf/1.0
       private val path = "test/resources/schemas/apis/time-to-pay/InformAPI-v0.0.1.yaml"
 
       def openApiRequestSchema: OpenApi3DerivedSchema =
@@ -271,6 +304,46 @@ object Validators {
         )
 
       def openApiResponseGeneralFailureSchema: OpenApi3DerivedSchema =
+        new OpenApi3DerivedSchema(
+          path,
+          defaultJsonSubschemaName = "ErrorResponse",
+          metaSchemaValidation = Some(Valid(())),
+          restrictAdditionalProperties = true
+        )
+    }
+
+    object TtpFullAmend {
+      // Downloaded from:
+      //   https://github.com/hmrc/time-to-pay/blob/fe8fee3d7dead5d6241d7d085cff4179ea5834ef/resources/public/api/conf/1.0/FullAmendAPI-v0.0.1.yaml
+      // Official location:
+      //   https://github.com/hmrc/time-to-pay/tree/main/resources/public/api/conf/1.0
+      private val path = "test/resources/schemas/apis/time-to-pay/FullAmendAPI-v0.0.1.yaml"
+
+      def openApiRequestSchema: OpenApi3DerivedSchema =
+        new OpenApi3DerivedSchema(
+          path,
+          defaultJsonSubschemaName = "FullAmendRequest",
+          metaSchemaValidation = Some(Valid(())),
+          restrictAdditionalProperties = true
+        )
+
+      def openApiFullAmendErrorResponseSchema: OpenApi3DerivedSchema =
+        new OpenApi3DerivedSchema(
+          path,
+          defaultJsonSubschemaName = "FullAmendErrorResponse",
+          metaSchemaValidation = Some(Valid(())),
+          restrictAdditionalProperties = true
+        )
+
+      def openApiFullAmendResponseSchema: OpenApi3DerivedSchema =
+        new OpenApi3DerivedSchema(
+          path,
+          defaultJsonSubschemaName = "FullAmendResponse",
+          metaSchemaValidation = Some(Valid(())),
+          restrictAdditionalProperties = true
+        )
+
+      def openApiFullAmendResponseGeneralFailureSchema: OpenApi3DerivedSchema =
         new OpenApi3DerivedSchema(
           path,
           defaultJsonSubschemaName = "ErrorResponse",
