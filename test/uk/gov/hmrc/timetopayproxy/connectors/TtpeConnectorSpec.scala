@@ -213,6 +213,26 @@ class TtpeConnectorSpec
 
         await(result.value) mustBe Left(ConnectorError(400, "Invalid request body"))
       }
+
+      "parse a 422 error response from an upstream service" in new Setup {
+        def errorResponse(code: String, reason: String): String =
+          s"""
+             |{
+             |  "code":"$code",
+             |  "reason":"$reason"
+             |}
+             |""".stripMargin
+
+        stubPostWithResponseBody(
+          "/debts/time-to-pay/charge-info",
+          422,
+          errorResponse("UNPROCESSABLE_CONTENT ", "Unprocessable response")
+        )
+
+        val result: TtppEnvelope[ChargeInfoResponse] = connector.checkChargeInfo(chargeInfoRequest = chargeInfoRequest)
+
+        await(result.value) mustBe Left(ConnectorError(422, "Unprocessable response"))
+      }
     }
   }
 }
