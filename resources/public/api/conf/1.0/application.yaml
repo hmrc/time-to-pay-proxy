@@ -51,7 +51,8 @@ info:
       | 1.0.17 | 07-10-2025 | Vinnie Brice | Change cancel scope to writes  |
       | 1.0.18 | 28-10-2025 | Alex Olkhovskiy | Add 409 conflict response to PUT /quote endpoint for duplicate plan ID|
       | 1.0.19 | 30-10-2025 | Alex Olkhovskiy | R1 changes for udpate cancel, inform and full amend|
-  version: 1.0.19
+      | 1.0.20 | 06-11-2025 | Alex Olkhovskiy | Add 422 error response for charge reference mismatch |
+  version: 1.0.20
   contact: {}
 servers:
   - url: https://api.service.hmrc.gov.uk
@@ -750,6 +751,16 @@ paths:
               example:
                 statusCode: 401
                 errorMessage: A user with no active session will return 401 response
+        '422':
+          description: ''
+          headers: {}
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                statusCode: 422
+                errorMessage: Charges with the same charge reference do not share the same data
         '500':
           description: ''
           headers: {}
@@ -795,7 +806,7 @@ paths:
             example: f0bd1f32-de51-45cc-9b18-0520d6e3ab1a
       security:
         - applicationRestricted:
-            - read:time-to-pay-proxy
+            - write:time-to-pay-proxy
       requestBody:
         description: Request body containing cancellation and identification details
         required: true
@@ -1113,7 +1124,7 @@ paths:
             example: f0bd1f32-de51-45cc-9b18-0520d6e3ab1a
       security:
         - applicationRestricted:
-            - read:time-to-pay-proxy
+            - write:time-to-pay-proxy
       requestBody:
         description: Request body with fields to amend a TTP in CESA and ETMP.
         required: true
