@@ -226,12 +226,14 @@ class TtpeConnectorSpec
         stubPostWithResponseBody(
           "/debts/time-to-pay/charge-info",
           422,
-          errorResponse("UNPROCESSABLE_CONTENT ", "Unprocessable response")
+          errorResponse("UNPROCESSABLE_CONTENT ", "Charges with the same charge reference do not share the same data")
         )
 
         val result: TtppEnvelope[ChargeInfoResponse] = connector.checkChargeInfo(chargeInfoRequest = chargeInfoRequest)
 
-        await(result.value) mustBe Left(ConnectorError(422, "Unprocessable response"))
+        await(result.value) mustBe Left(
+          ConnectorError(422, "Charges with the same charge reference do not share the same data")
+        )
       }
     }
   }
