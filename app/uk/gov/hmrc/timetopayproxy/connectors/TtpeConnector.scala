@@ -50,7 +50,8 @@ class DefaultTtpeConnector @Inject() (appConfig: AppConfig, httpClient: HttpClie
     HttpReadsWithLoggingBuilder
       .empty[ProxyEnvelopeError, ChargeInfoResponse]
       .orSuccess[ChargeInfoResponse](200)
-      .orErrorTransformed[TimeToPayEligibilityError](400, ttpError => ttpError.toConnectorError(status = 400))
+      .orErrorTransformed[TimeToPayEligibilityError](400, ttpeError => ttpeError.toConnectorError(status = 400))
+      .orErrorTransformed[TimeToPayEligibilityError](422, ttpeError => ttpeError.toConnectorError(status = 422))
 
   private val authorizationHeader: Seq[(String, String)] =
     if (featureSwitch.internalAuthEnabled.enabled)
