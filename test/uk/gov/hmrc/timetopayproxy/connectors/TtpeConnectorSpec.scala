@@ -215,18 +215,14 @@ class TtpeConnectorSpec
       }
 
       "parse a 422 error response from an upstream service" in new Setup {
-        def errorResponse(code: String, reason: String): String =
-          s"""
-             |{
-             |  "code":"$code",
-             |  "reason":"$reason"
-             |}
-             |""".stripMargin
-
         stubPostWithResponseBody(
           "/debts/time-to-pay/charge-info",
           422,
-          errorResponse("UNPROCESSABLE_CONTENT ", "Charges with the same charge reference do not share the same data")
+          s"""{
+             |  "code":"UNPROCESSABLE_CONTENT",
+             |  "reason":"Charges with the same charge reference do not share the same data"
+             |}
+             |""".stripMargin
         )
 
         val result: TtppEnvelope[ChargeInfoResponse] = connector.checkChargeInfo(chargeInfoRequest = chargeInfoRequest)
