@@ -27,11 +27,12 @@ import play.api.{ ConfigLoader, Configuration }
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.http.client.HttpClientV2
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
-import uk.gov.hmrc.timetopayproxy.config.AppConfig
+import uk.gov.hmrc.timetopayproxy.config.{ AppConfig, FeatureSwitch }
 import uk.gov.hmrc.timetopayproxy.models._
 import uk.gov.hmrc.timetopayproxy.models.currency.GbpPounds
 import uk.gov.hmrc.timetopayproxy.models.error.ConnectorError
 import uk.gov.hmrc.timetopayproxy.models.error.TtppEnvelope.TtppEnvelope
+import uk.gov.hmrc.timetopayproxy.models.featureSwitches.InternalAuthEnabled
 import uk.gov.hmrc.timetopayproxy.models.saonly.common._
 import uk.gov.hmrc.timetopayproxy.models.saonly.common.apistatus.{ ApiName, ApiStatus, ApiStatusCode }
 import uk.gov.hmrc.timetopayproxy.models.saonly.ttpcancel._
@@ -47,10 +48,11 @@ final class TtpFeedbackLoopConnectorSpec
 
   val config = mock[Configuration]
   val servicesConfig = mock[ServicesConfig]
+  val featureSwitch = mock[FeatureSwitch]
 
   val httpClient: HttpClientV2 = app.injector.instanceOf[HttpClientV2]
 
-  class Setup(ifImpl: Boolean) {
+  class Setup(ifImpl: Boolean, internalAuthEnabled: Boolean = false) {
     implicit val ec: ExecutionContext = ExecutionContext.global
     implicit val hc: HeaderCarrier = HeaderCarrier()
 
@@ -104,9 +106,13 @@ final class TtpFeedbackLoopConnectorSpec
       .expects("internal-auth.token", *)
       .returns("valid-auth-token")
 
-    val mockConfiguration: AppConfig = new MockAppConfig(config, servicesConfig, ifImpl)
+    (() => featureSwitch.internalAuthEnabled)
+      .expects()
+      .returning(InternalAuthEnabled(internalAuthEnabled))
 
-    val connector: TtpFeedbackLoopConnector = new TtpFeedbackLoopConnector(mockConfiguration, httpClient)
+    val mockConfiguration: AppConfig = new MockAppConfig(config, servicesConfig, ifImpl, internalAuthEnabled)
+
+    val connector: TtpFeedbackLoopConnector = new TtpFeedbackLoopConnector(mockConfiguration, httpClient, featureSwitch)
   }
 
   "TtpFeedbackLoopConnector" should {
@@ -160,7 +166,6 @@ final class TtpFeedbackLoopConnectorSpec
         internalErrors = List(TtpCancelInternalError("some error that ttp is responsible for")),
         processingDateTime = ProcessingDateTimeInstant(Instant.parse("2025-01-01T12:00:00Z"))
       )
-
       "using IF" should {
         "return a successful response" in new Setup(ifImpl = true) {
           stubPostWithResponseBodyEnsuringRequest(

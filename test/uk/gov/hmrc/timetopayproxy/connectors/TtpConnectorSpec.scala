@@ -24,11 +24,10 @@ import play.api.{ ConfigLoader, Configuration }
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.http.client.HttpClientV2
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
-import uk.gov.hmrc.timetopayproxy.config.{ AppConfig, FeatureSwitch }
+import uk.gov.hmrc.timetopayproxy.config.AppConfig
 import uk.gov.hmrc.timetopayproxy.models._
 import uk.gov.hmrc.timetopayproxy.models.affordablequotes.{ AffordableQuoteResponse, AffordableQuotesRequest }
 import uk.gov.hmrc.timetopayproxy.models.error.ConnectorError
-import uk.gov.hmrc.timetopayproxy.models.featureSwitches.InternalAuthEnabled
 import uk.gov.hmrc.timetopayproxy.support.WireMockUtils
 
 import java.time.{ LocalDate, LocalDateTime }
@@ -38,11 +37,10 @@ class TtpConnectorSpec extends PlaySpec with DefaultAwaitTimeout with FutureAwai
 
   val config = mock[Configuration]
   val servicesConfig = mock[ServicesConfig]
-  val featureSwitch = mock[FeatureSwitch]
 
   val httpClient: HttpClientV2 = app.injector.instanceOf[HttpClientV2]
 
-  class Setup(internalAuthEnabled: Boolean) {
+  class Setup(ifImpl: Boolean, internalAuthEnabled: Boolean = false) {
     implicit val ec: ExecutionContext = ExecutionContext.global
     implicit val hc: HeaderCarrier = HeaderCarrier()
 
@@ -75,7 +73,7 @@ class TtpConnectorSpec extends PlaySpec with DefaultAwaitTimeout with FutureAwai
       .get(_: String)(_: ConfigLoader[Boolean]))
       .expects("microservice.services.ttp.useIf", *)
       .once()
-      .returns(internalAuthEnabled)
+      .returns(ifImpl)
     (config
       .get(_: String)(_: ConfigLoader[Boolean]))
       .expects("auditing.enabled", *)
@@ -96,20 +94,19 @@ class TtpConnectorSpec extends PlaySpec with DefaultAwaitTimeout with FutureAwai
       .expects("internal-auth.token", *)
       .returns("valid-auth-token")
 
-    val mockConfiguration: AppConfig = new MockAppConfig(config, servicesConfig, internalAuthEnabled)
+    val mockConfiguration: AppConfig = new MockAppConfig(config, servicesConfig, ifImpl, internalAuthEnabled)
 
-    val connector: TtpConnector = new DefaultTtpConnector(mockConfiguration, httpClient, featureSwitch)
+    val connector: TtpConnector = new DefaultTtpConnector(mockConfiguration, httpClient)
   }
 
   "Generate quote" when {
     "using IF" must {
-      "parse an error response from an upstream service" in new Setup(internalAuthEnabled = true) {
+      "parse an error response from an upstream service" in new Setup(ifImpl = true) {
         stubPostWithResponseBody(
           "/individuals/debts/time-to-pay/quote",
           400,
           errorResponse("BAD_REQUEST", "Invalid request body")
         )
-        (() => featureSwitch.internalAuthEnabled).expects().returning(InternalAuthEnabled(true))
         val result = connector.generateQuote(
           GenerateQuoteRequest(
             CustomerReference("CustRef1234"),
@@ -136,9 +133,7 @@ class TtpConnectorSpec extends PlaySpec with DefaultAwaitTimeout with FutureAwai
     }
 
     "using TTP" must {
-      "return a InvalidMainAndOrSubTransTypes error that TTP-proxy passes upstream" in new Setup(internalAuthEnabled =
-        false
-      ) {
+      "return a InvalidMainAndOrSubTransTypes error that TTP-proxy passes upstream" in new Setup(ifImpl = false) {
         stubPostWithResponseBody(
           "/debts/time-to-pay/quote",
           400,
@@ -147,7 +142,6 @@ class TtpConnectorSpec extends PlaySpec with DefaultAwaitTimeout with FutureAwai
             "Invalid MainTransTypes and/or SubTransTypes. MainTransTypes: 1111 SubTransTypes:  values do not match stored charge types"
           )
         )
-        (() => featureSwitch.internalAuthEnabled).expects().returning(InternalAuthEnabled(false))
         val result = connector.generateQuote(
           GenerateQuoteRequest(
             customerReference = CustomerReference("CustRef1234"),
@@ -186,9 +180,8 @@ class TtpConnectorSpec extends PlaySpec with DefaultAwaitTimeout with FutureAwai
         )
       }
 
-      "parse an error response from an upstream service" in new Setup(internalAuthEnabled = false) {
+      "parse an error response from an upstream service" in new Setup(ifImpl = false) {
         stubPostWithResponseBody("/debts/time-to-pay/quote", 400, errorResponse("BAD_REQUEST", "Invalid request body"))
-        (() => featureSwitch.internalAuthEnabled).expects().returning(InternalAuthEnabled(false))
         val result = connector.generateQuote(
           GenerateQuoteRequest(
             CustomerReference("CustRef1234"),
@@ -217,13 +210,12 @@ class TtpConnectorSpec extends PlaySpec with DefaultAwaitTimeout with FutureAwai
 
   "Create plan" when {
     "using IF" must {
-      "parse an error response from an upstream service" in new Setup(internalAuthEnabled = true) {
+      "parse an error response from an upstream service" in new Setup(ifImpl = true) {
         stubPostWithResponseBody(
           "/individuals/debts/time-to-pay/quote/arrangement",
           400,
           errorResponse("BAD_REQUEST", "Invalid request body")
         )
-        (() => featureSwitch.internalAuthEnabled).expects().returning(InternalAuthEnabled(true))
         val result = connector.createPlan(
           CreatePlanRequest(
             CustomerReference("CustRef1234"),
@@ -262,13 +254,12 @@ class TtpConnectorSpec extends PlaySpec with DefaultAwaitTimeout with FutureAwai
     }
 
     "using TTP" must {
-      "parse an error response from an upstream service" in new Setup(internalAuthEnabled = false) {
+      "parse an error response from an upstream service" in new Setup(ifImpl = false) {
         stubPostWithResponseBody(
           "/debts/time-to-pay/quote/arrangement",
           400,
           errorResponse("BAD_REQUEST", "Invalid request body")
         )
-        (() => featureSwitch.internalAuthEnabled).expects().returning(InternalAuthEnabled(false))
         val result = connector.createPlan(
           CreatePlanRequest(
             CustomerReference("CustRef1234"),
@@ -309,7 +300,7 @@ class TtpConnectorSpec extends PlaySpec with DefaultAwaitTimeout with FutureAwai
 
   "Receiving an unrecognised body from an upstream" when {
     "The status code is 200" must {
-      "Return a TTP error" in new Setup(internalAuthEnabled = true) {
+      "Return a TTP error" in new Setup(ifImpl = true) {
         stubGetWithResponseBody(
           "/individuals/time-to-pay/quote/CustRef1234/Plan1234",
           200,
@@ -323,7 +314,7 @@ class TtpConnectorSpec extends PlaySpec with DefaultAwaitTimeout with FutureAwai
       }
     }
     "The status code is 503" must {
-      "Return a TTP error" in new Setup(internalAuthEnabled = true) {
+      "Return a TTP error" in new Setup(ifImpl = true) {
         stubGetWithResponseBody(
           "/individuals/time-to-pay/quote/CustRef1234/Plan1234",
           503,
@@ -338,7 +329,7 @@ class TtpConnectorSpec extends PlaySpec with DefaultAwaitTimeout with FutureAwai
 
   "Get plan" when {
     "using IF" must {
-      "parse an error response from an upstream service" in new Setup(internalAuthEnabled = true) {
+      "parse an error response from an upstream service" in new Setup(ifImpl = true) {
         stubGetWithResponseBody(
           "/individuals/time-to-pay/quote/CustRef1234/Plan1234",
           400,
@@ -351,7 +342,7 @@ class TtpConnectorSpec extends PlaySpec with DefaultAwaitTimeout with FutureAwai
     }
 
     "using TTP" must {
-      "parse an error response from an upstream service" in new Setup(internalAuthEnabled = false) {
+      "parse an error response from an upstream service" in new Setup(ifImpl = false) {
         stubGetWithResponseBody(
           "/debts/time-to-pay/quote/CustRef1234/Plan1234",
           400,
@@ -366,7 +357,7 @@ class TtpConnectorSpec extends PlaySpec with DefaultAwaitTimeout with FutureAwai
 
   "Update plan" when {
     "using IF" must {
-      "parse an error response from an upstream service" in new Setup(internalAuthEnabled = true) {
+      "parse an error response from an upstream service" in new Setup(ifImpl = true) {
         stubPutWithResponseBody(
           "/individuals/time-to-pay/quote/CustRef1234/PlanId1234",
           400,
@@ -391,7 +382,7 @@ class TtpConnectorSpec extends PlaySpec with DefaultAwaitTimeout with FutureAwai
     }
 
     "using TTP" must {
-      "parse an error response from an upstream service" in new Setup(internalAuthEnabled = false) {
+      "parse an error response from an upstream service" in new Setup(ifImpl = false) {
         stubPutWithResponseBody(
           "/debts/time-to-pay/quote/CustRef1234/PlanId1234",
           400,
@@ -447,7 +438,7 @@ class TtpConnectorSpec extends PlaySpec with DefaultAwaitTimeout with FutureAwai
       AffordableQuoteResponse(LocalDateTime.parse("2025-01-13T10:15:30.975"), Nil)
 
     "using IF" must {
-      "return an AffordableQuotesResponse" in new Setup(internalAuthEnabled = true) {
+      "return an AffordableQuotesResponse" in new Setup(ifImpl = true) {
         stubPostWithResponseBody(
           "/individuals/time-to-pay/affordability/affordable-quotes",
           200,
@@ -460,7 +451,7 @@ class TtpConnectorSpec extends PlaySpec with DefaultAwaitTimeout with FutureAwai
         await(result.value) must matchPattern { case Right(_: AffordableQuoteResponse) => }
       }
 
-      "parse an error response from an upstream service" in new Setup(internalAuthEnabled = true) {
+      "parse an error response from an upstream service" in new Setup(ifImpl = true) {
         stubPostWithResponseBody(
           "/individuals/time-to-pay/affordability/affordable-quotes",
           400,
@@ -475,7 +466,7 @@ class TtpConnectorSpec extends PlaySpec with DefaultAwaitTimeout with FutureAwai
     }
 
     "using TTP" must {
-      "return an AffordableQuotesResponse" in new Setup(internalAuthEnabled = false) {
+      "return an AffordableQuotesResponse" in new Setup(ifImpl = false) {
         stubPostWithResponseBody(
           "/debts/time-to-pay/affordability/affordable-quotes",
           200,
@@ -488,7 +479,7 @@ class TtpConnectorSpec extends PlaySpec with DefaultAwaitTimeout with FutureAwai
         await(result.value) must matchPattern { case Right(_: AffordableQuoteResponse) => }
       }
 
-      "parse an error response from an upstream service" in new Setup(internalAuthEnabled = false) {
+      "parse an error response from an upstream service" in new Setup(ifImpl = false) {
         stubPostWithResponseBody(
           "/debts/time-to-pay/affordability/affordable-quotes",
           400,
