@@ -21,17 +21,17 @@ import com.google.inject.ImplementedBy
 import play.api.libs.json.Json
 import uk.gov.hmrc.http.client.HttpClientV2
 import uk.gov.hmrc.timetopayproxy.connectors.util.HttpReadsWithLoggingBuilder
-import uk.gov.hmrc.http.{ HeaderCarrier, HttpReads, StringContextOps }
-import uk.gov.hmrc.timetopayproxy.config.AppConfig
+import uk.gov.hmrc.http.{HeaderCarrier, HttpReads, StringContextOps}
+import uk.gov.hmrc.timetopayproxy.config.{AppConfig, FeatureSwitch}
 import uk.gov.hmrc.timetopayproxy.logging.RequestAwareLogger
 import uk.gov.hmrc.timetopayproxy.models._
-import uk.gov.hmrc.timetopayproxy.models.affordablequotes.{ AffordableQuoteResponse, AffordableQuotesRequest }
+import uk.gov.hmrc.timetopayproxy.models.affordablequotes.{AffordableQuoteResponse, AffordableQuotesRequest}
 import uk.gov.hmrc.timetopayproxy.models.error.ProxyEnvelopeError
 import uk.gov.hmrc.timetopayproxy.models.error.TtppEnvelope.TtppEnvelope
 
 import java.net.URLEncoder
 import java.util.UUID
-import javax.inject.{ Inject, Singleton }
+import javax.inject.{Inject, Singleton}
 import scala.concurrent.ExecutionContext
 
 @ImplementedBy(classOf[DefaultTtpConnector])
@@ -61,7 +61,7 @@ trait TtpConnector {
 }
 
 @Singleton
-class DefaultTtpConnector @Inject() (appConfig: AppConfig, httpClient: HttpClientV2) extends TtpConnector {
+class DefaultTtpConnector @Inject() (appConfig: AppConfig, httpClient: HttpClientV2, featureSwitch: FeatureSwitch) extends TtpConnector {
 
   private val logger: RequestAwareLogger = new RequestAwareLogger(classOf[DefaultTtpConnector])
 
@@ -98,9 +98,9 @@ class DefaultTtpConnector @Inject() (appConfig: AppConfig, httpClient: HttpClien
       .orErrorTransformed[TimeToPayError](400, ttpError => ttpError.toConnectorError(status = 400))
 
   val headers: String => Seq[(String, String)] = (guid: String) =>
-    if (appConfig.useIf) {
+    if (featureSwitch.internalAuthEnabled.enabled) {
       Seq(
-        "Authorization" -> s"Bearer ${appConfig.ttpToken}",
+        "Authorization" -> s"$appConfig.internalAuthToken",
         "CorrelationId" -> s"$guid"
       )
     } else {
