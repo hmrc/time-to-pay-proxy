@@ -20,7 +20,7 @@ import cats.data.EitherT
 import play.api.libs.json.Json
 import uk.gov.hmrc.http.client.HttpClientV2
 import uk.gov.hmrc.http.{ HeaderCarrier, HttpReads, StringContextOps }
-import uk.gov.hmrc.timetopayproxy.config.AppConfig
+import uk.gov.hmrc.timetopayproxy.config.{ AppConfig, FeatureSwitch }
 import uk.gov.hmrc.timetopayproxy.connectors.util.HttpReadsWithLoggingBuilder
 import uk.gov.hmrc.timetopayproxy.logging.RequestAwareLogger
 import uk.gov.hmrc.timetopayproxy.models.TimeToPayError
@@ -40,7 +40,11 @@ import scala.concurrent.ExecutionContext
   * (cancel, amend, inform) so TTP can update downstream HoDs accordingly.
   */
 @Singleton
-class TtpFeedbackLoopConnector @Inject() (appConfig: AppConfig, httpClient: HttpClientV2) {
+class TtpFeedbackLoopConnector @Inject() (
+  appConfig: AppConfig,
+  httpClient: HttpClientV2,
+  featureSwitch: FeatureSwitch
+) {
 
   private val logger: RequestAwareLogger = new RequestAwareLogger(classOf[TtpFeedbackLoopConnector])
 
@@ -129,7 +133,12 @@ class TtpFeedbackLoopConnector @Inject() (appConfig: AppConfig, httpClient: Http
   private def requestHeaders(implicit hc: HeaderCarrier): Seq[(String, String)] = {
     val correlationId: String = getOrGenerateCorrelationId
 
-    if (appConfig.useIf) {
+    if (featureSwitch.internalAuthEnabled.enabled) {
+      Seq(
+        "Authorization" -> appConfig.internalAuthToken,
+        "CorrelationId" -> correlationId
+      )
+    } else if (appConfig.useIf) { // DTD-2356: Soon usage of 'useif' will be removed
       Seq(
         "Authorization" -> s"Bearer ${appConfig.ttpToken: String}",
         "CorrelationId" -> correlationId
