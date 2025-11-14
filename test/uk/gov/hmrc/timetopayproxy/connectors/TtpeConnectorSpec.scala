@@ -95,7 +95,7 @@ class TtpeConnectorSpec
       .expects()
       .returning(InternalAuthEnabled(true))
 
-    val mockConfiguration: AppConfig = new MockAppConfig(config, servicesConfig, ifImpl = false)
+    val mockConfiguration: AppConfig = new MockAppConfig(config, servicesConfig, internalAuthEnabled = false)
 
     val connector: TtpeConnector = new DefaultTtpeConnector(mockConfiguration, httpClient, featureSwitch)
 
