@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 HM Revenue & Customs
+ * Copyright 2025 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.timetopayproxy.models.error
+package uk.gov.hmrc.timetopayproxy.connectors.util.httpreadsbuilderimpl.commontoallrepos
 
-import uk.gov.hmrc.timetopayproxy.utils.WithLoggableDebugString
+import uk.gov.hmrc.http.HttpResponse
 
-trait ProxyEnvelopeError extends WithLoggableDebugString { this: Product with Serializable =>
-  def toWriteableProxyError: TtppWriteableError
-
-  /** As much debugging information as might be useful, which can be logged in production. */
-  def toStringSafeToLogInProd: String = this.toString // All Proxy errors
-}
+/** All we know about the HTTP response. */
+/* ℹ️ Note about updating this file: ℹ️
+ * This file must be kept consistent with every copy in the other debt-transformation repos.
+ * The most complex features are required by time-to-pay, so that is the best place to test any refactoring.
+ */
+private[util] final case class ResponseContext(method: String, url: String, response: HttpResponse)

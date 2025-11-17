@@ -41,8 +41,18 @@ lazy val microservice = Project(appName, file("."))
   .settings(resolvers += Resolver.jcenterRepo)
   .settings(coverageSettings: _*)
   .disablePlugins(JUnitXmlReportPlugin)
+  .settings(
+    Compile / doc / scalacOptions ++= Seq(
+      "-no-link-warnings" // Suppresses problems with Scaladoc @throws links
+    )
+  )
 
 lazy val it = project
     .enablePlugins(PlayScala)
     .dependsOn(microservice % "test->test")
     .settings(DefaultBuildSettings.itSettings())
+  .settings(
+    Compile / doc / scalacOptions ++= Seq(
+      "-no-link-warnings" // Suppresses problems with Scaladoc @throws links
+    )
+  )
