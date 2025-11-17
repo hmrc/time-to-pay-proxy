@@ -22,7 +22,7 @@ import play.api.libs.json.Json
 import uk.gov.hmrc.http.client.HttpClientV2
 import uk.gov.hmrc.http.{ HeaderCarrier, HttpReads, StringContextOps }
 import uk.gov.hmrc.timetopayproxy.config.{ AppConfig, FeatureSwitch }
-import uk.gov.hmrc.timetopayproxy.connectors.util.HttpReadsWithLoggingBuilder
+import uk.gov.hmrc.timetopayproxy.connectors.util.HttpReadsBuilder
 import uk.gov.hmrc.timetopayproxy.logging.RequestAwareLogger
 import uk.gov.hmrc.timetopayproxy.models.TimeToPayEligibilityError
 import uk.gov.hmrc.timetopayproxy.models.error.ProxyEnvelopeError
@@ -46,12 +46,12 @@ class DefaultTtpeConnector @Inject() (appConfig: AppConfig, httpClient: HttpClie
 
   private val logger: RequestAwareLogger = new RequestAwareLogger(classOf[DefaultTtpConnector])
 
-  private val httpReadsBuilderForChargeInfo: HttpReadsWithLoggingBuilder[ProxyEnvelopeError, ChargeInfoResponse] =
-    HttpReadsWithLoggingBuilder
-      .empty[ProxyEnvelopeError, ChargeInfoResponse]
-      .orSuccess[ChargeInfoResponse](200)
-      .orErrorTransformed[TimeToPayEligibilityError](400, ttpeError => ttpeError.toConnectorError(status = 400))
-      .orErrorTransformed[TimeToPayEligibilityError](422, ttpeError => ttpeError.toConnectorError(status = 422))
+  private val httpReadsBuilderForChargeInfo: HttpReadsBuilder[ProxyEnvelopeError, ChargeInfoResponse] =
+    HttpReadsBuilder
+      .withDefault503ConnectorErrorAndJsonErrors[ProxyEnvelopeError, ChargeInfoResponse](this.getClass)
+      .handleSuccess[ChargeInfoResponse](200)
+      .handleErrorTransformed[TimeToPayEligibilityError](400, ttpeError => ttpeError.toConnectorError(status = 400))
+      .handleErrorTransformed[TimeToPayEligibilityError](422, ttpeError => ttpeError.toConnectorError(status = 422))
 
   private val authorizationHeader: Seq[(String, String)] =
     if (featureSwitch.internalAuthEnabled.enabled)
@@ -72,7 +72,7 @@ class DefaultTtpeConnector @Inject() (appConfig: AppConfig, httpClient: HttpClie
   ): TtppEnvelope[ChargeInfoResponse] = {
 
     implicit def httpReads: HttpReads[Either[ProxyEnvelopeError, ChargeInfoResponse]] =
-      httpReadsBuilderForChargeInfo.httpReads(logger)
+      httpReadsBuilderForChargeInfo.httpReads(logger, makeErrorSafeToLogInProd = _.toStringSafeToLogInProd)
 
     val path = "/debts/time-to-pay/charge-info"
 
