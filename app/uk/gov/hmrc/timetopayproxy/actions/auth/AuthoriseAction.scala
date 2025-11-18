@@ -23,6 +23,7 @@ import play.api.mvc._
 import uk.gov.hmrc.auth.core._
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.http.HeaderCarrierConverter
+import uk.gov.hmrc.timetopayproxy.config.FeatureSwitch
 
 import javax.inject.Inject
 import scala.concurrent.{ ExecutionContext, Future }
@@ -39,8 +40,11 @@ object StoredEnrolmentScope extends Enum[StoredEnrolmentScope] {
 
 }
 
-sealed abstract class AuthoriseAction(override val authConnector: PlayAuthConnector, cc: ControllerComponents)
-    extends ActionBuilder[Request, AnyContent] with AuthorisedFunctions {
+sealed abstract class AuthoriseAction(
+  override val authConnector: PlayAuthConnector,
+  cc: ControllerComponents,
+  featureSwitch: FeatureSwitch
+) extends ActionBuilder[Request, AnyContent] with AuthorisedFunctions {
   private val logger = Logger(classOf[AuthoriseAction])
 
   def enrolment: Enrolment
@@ -50,9 +54,12 @@ sealed abstract class AuthoriseAction(override val authConnector: PlayAuthConnec
       HeaderCarrierConverter.fromRequest(request)
 
     val eventualResult: Future[Result] =
-      authorised(enrolment) {
+      if (featureSwitch.enrolmentAuthEnabled.enabled)
+        authorised(enrolment) {
+          block(request)
+        }(hc, cc.executionContext)
+      else
         block(request)
-      }(hc, cc.executionContext)
 
     eventualResult.recover {
       case ie: InsufficientEnrolments =>
@@ -70,12 +77,18 @@ sealed abstract class AuthoriseAction(override val authConnector: PlayAuthConnec
 
 }
 
-final class ReadAuthoriseAction @Inject() (override val authConnector: PlayAuthConnector, cc: ControllerComponents)
-    extends AuthoriseAction(authConnector: PlayAuthConnector, cc: ControllerComponents) {
+final class ReadAuthoriseAction @Inject() (
+  override val authConnector: PlayAuthConnector,
+  cc: ControllerComponents,
+  featureSwitch: FeatureSwitch
+) extends AuthoriseAction(authConnector: PlayAuthConnector, cc: ControllerComponents, featureSwitch: FeatureSwitch) {
   def enrolment: Enrolment = Enrolment(StoredEnrolmentScope.ReadTimeToPayProxy.entryName)
 }
 
-final class WriteAuthoriseAction @Inject() (override val authConnector: PlayAuthConnector, cc: ControllerComponents)
-    extends AuthoriseAction(authConnector: PlayAuthConnector, cc: ControllerComponents) {
+final class WriteAuthoriseAction @Inject() (
+  override val authConnector: PlayAuthConnector,
+  cc: ControllerComponents,
+  featureSwitch: FeatureSwitch
+) extends AuthoriseAction(authConnector: PlayAuthConnector, cc: ControllerComponents, featureSwitch: FeatureSwitch) {
   def enrolment: Enrolment = Enrolment(StoredEnrolmentScope.WriteTimeToPayProxy.entryName)
 }

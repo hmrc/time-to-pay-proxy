@@ -69,6 +69,27 @@ trait WireMockHelper {
       )
     }
 
+  def stubGetWithResponseBody(
+    url: String,
+    status: Int,
+    responseHeaderContaining: Option[Seq[(String, String)]] = None,
+    responseBody: String,
+    requestHeaderContaining: Option[Seq[(String, StringValuePattern)]] = None,
+    requestBodyContaining: Option[String] = None
+  ): StubMapping =
+    stubFor {
+      val mapping = get(urlEqualTo(url))
+
+      handleHeaderBodyAndResponse(
+        status,
+        responseHeaderContaining,
+        responseBody,
+        requestHeaderContaining,
+        requestBodyContaining,
+        mapping
+      )
+    }
+
   def stubPutWithResponseBody(
     url: String,
     status: Int,
@@ -103,13 +124,12 @@ trait WireMockHelper {
       .withBody(responseBody)
       .withHeader("Content-Type", "application/json; charset=utf-8")
 
-    requestHeaderContaining
+    val beforeCheckingRequest = requestHeaderContaining
       .fold(mapping) { headers =>
         headers.foldLeft(mapping) { case (mapping, (key, value)) =>
           mapping.withHeader(key, value)
         }
       }
-      .withRequestBody(containing(requestBodyContaining.getOrElse("")))
       .willReturn(
         responseHeaderContaining.fold(response) { headers =>
           headers.foldLeft(response) { case (response, (key, value)) =>
@@ -117,5 +137,10 @@ trait WireMockHelper {
           }
         }
       )
+
+    requestBodyContaining match {
+      case Some(value) => beforeCheckingRequest.withRequestBody(containing(value))
+      case None        => beforeCheckingRequest
+    }
   }
 }

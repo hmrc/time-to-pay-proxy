@@ -16,21 +16,24 @@
 
 package uk.gov.hmrc.timetopayproxy.auth
 
+import org.scalamock.scalatest.MockFactory
+import org.scalatest.freespec.AnyFreeSpec
+import org.scalatest.matchers.should.Matchers.convertToAnyShouldWrapper
 import play.api.http.Status
 import play.api.mvc.{ Action, AnyContent, InjectedController }
-import play.api.test.FakeRequest
-import play.api.test.Helpers.stubControllerComponents
+import play.api.test.Helpers.{ await, stubControllerComponents }
+import play.api.test.{ DefaultAwaitTimeout, FakeRequest }
 import uk.gov.hmrc.auth.core.authorise.Predicate
 import uk.gov.hmrc.auth.core.retrieve.Retrieval
-import uk.gov.hmrc.auth.core.{ Enrolment, InsufficientEnrolments, PlayAuthConnector, SessionRecordNotFound }
+import uk.gov.hmrc.auth.core.{ Enrolment, InsufficientEnrolments, PlayAuthConnector }
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.timetopayproxy.actions.auth.{ AuthoriseAction, ReadAuthoriseAction }
-import uk.gov.hmrc.timetopayproxy.support.UnitSpec
+import uk.gov.hmrc.timetopayproxy.config.FeatureSwitch
+import uk.gov.hmrc.timetopayproxy.models.featureSwitches.EnrolmentAuthEnabled
 
-import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.{ ExecutionContext, Future }
 
-class ReadAuthoriseActionSpec extends UnitSpec {
+class ReadAuthoriseActionSpec extends AnyFreeSpec with MockFactory with DefaultAwaitTimeout {
   class Harness(authAction: AuthoriseAction) extends InjectedController {
     def onPageLoad(): Action[AnyContent] = authAction { _ =>
       Ok("")
@@ -38,54 +41,82 @@ class ReadAuthoriseActionSpec extends UnitSpec {
   }
 
   lazy val mockAuthConnector: PlayAuthConnector = mock[PlayAuthConnector]
+  val featureSwitch: FeatureSwitch = mock[FeatureSwitch]
   lazy val cc = stubControllerComponents()
-  class Setup(val authConnectorResponse: Future[Unit]) {
-    (mockAuthConnector
-      .authorise[Unit](_: Predicate, _: Retrieval[Unit])(_: HeaderCarrier, _: ExecutionContext))
-      .expects(Enrolment("read:time-to-pay-proxy"), *, *, *)
-      .returning(authConnectorResponse)
-    val authAction = new ReadAuthoriseAction(mockAuthConnector, cc)
+  class Setup {
+    val authAction = new ReadAuthoriseAction(mockAuthConnector, cc, featureSwitch)
     val controller = new Harness(authAction)
   }
 
-  "A user with no active session" should {
-    "return 401 response" in {
-      val authConnectorResponse = Future.failed(new SessionRecordNotFound)
-      val setup = new Setup(authConnectorResponse)
+  "ReadAuthoriseAction" - {
 
-      val result = setup.controller.onPageLoad()(FakeRequest("", ""))
+    // Upon construction the .authorise is called
+    ".apply" - {
 
-      result.map(_.header.status shouldBe Status.UNAUTHORIZED)
-    }
-  }
-  "A user with an active session" should {
-    "return the request when the user is authorised" in {
-      val authConnectorResponse = Future.successful(())
-      val setup = new Setup(authConnectorResponse)
+      "when the auth connector responds successfully" - {
+        "return Ok and the user is authorised" in {
+          val setup = new Setup
 
-      val result = await(setup.controller.onPageLoad()(FakeRequest("GET", "/test")))
+          val authConnectorResponse = Future.successful(())
 
-      result.header.status shouldBe Status.OK
-    }
-    "return Forbidden when the enrolment is not present" in {
-      val authConnectorResponse = Future.failed(new InsufficientEnrolments)
-      val setup = new Setup(authConnectorResponse)
+          (() => featureSwitch.enrolmentAuthEnabled).expects().returning(EnrolmentAuthEnabled(true))
+          (mockAuthConnector
+            .authorise[Unit](_: Predicate, _: Retrieval[Unit])(_: HeaderCarrier, _: ExecutionContext))
+            .expects(Enrolment("read:time-to-pay-proxy"), *, *, *)
+            .returning(authConnectorResponse)
 
-      val result = await(setup.controller.onPageLoad()(FakeRequest("GET", "/test")))
+          val result = await(setup.controller.onPageLoad()(FakeRequest("GET", "/test")))
 
-      result.header.status shouldBe Status.FORBIDDEN
-    }
+          result.header.status shouldBe Status.OK
+        }
+      }
 
-  }
-  "A user with no active session" should {
-    "be able to access the TTPP endpoints" when {
-      "authentication is disabled" in {
-        val authConnectorResponse = Future.successful(())
-        val setup = new Setup(authConnectorResponse)
+      "when the auth connector responds with an InsufficientEnrolments exception" - {
+        "return Forbidden and the user is not authorised" in {
+          val setup = new Setup
 
-        val result = await(setup.controller.onPageLoad()(FakeRequest("GET", "/test")))
+          val authConnectorResponse = Future.failed(new InsufficientEnrolments)
 
-        result.header.status shouldBe Status.OK
+          (() => featureSwitch.enrolmentAuthEnabled).expects().returning(EnrolmentAuthEnabled(true))
+          (mockAuthConnector
+            .authorise[Unit](_: Predicate, _: Retrieval[Unit])(_: HeaderCarrier, _: ExecutionContext))
+            .expects(Enrolment("read:time-to-pay-proxy"), *, *, *)
+            .returning(authConnectorResponse)
+
+          val result = await(setup.controller.onPageLoad()(FakeRequest("GET", "/test")))
+
+          result.header.status shouldBe Status.FORBIDDEN
+        }
+      }
+
+      "when the auth connector responds with an InternalError exception" - {
+        "return Forbidden and the user is not authorised" in {
+          val setup = new Setup
+
+          val authConnectorResponse = Future.failed(new InternalError)
+
+          (() => featureSwitch.enrolmentAuthEnabled).expects().returning(EnrolmentAuthEnabled(true))
+          (mockAuthConnector
+            .authorise[Unit](_: Predicate, _: Retrieval[Unit])(_: HeaderCarrier, _: ExecutionContext))
+            .expects(Enrolment("read:time-to-pay-proxy"), *, *, *)
+            .returning(authConnectorResponse)
+
+          val result = await(setup.controller.onPageLoad()(FakeRequest("GET", "/test")))
+
+          result.header.status shouldBe Status.SERVICE_UNAVAILABLE
+        }
+      }
+
+      "when enrolmentAuth is disabled" - {
+        "then do not call the auth connector and return Ok" in {
+          val setup = new Setup
+
+          (() => featureSwitch.enrolmentAuthEnabled).expects().returning(EnrolmentAuthEnabled(false))
+
+          val result = await(setup.controller.onPageLoad()(FakeRequest("GET", "/test")))
+
+          result.header.status shouldBe Status.OK
+        }
       }
     }
   }

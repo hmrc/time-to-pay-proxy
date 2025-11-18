@@ -24,6 +24,8 @@ import uk.gov.hmrc.timetopayproxy.support.IntegrationBaseSpec
 class DocumentationControllerSpec extends IntegrationBaseSpec {
   def internalAuthEnabled: Boolean = false
 
+  def enrolmentAuthEnabled: Boolean = false
+
   val apiDefinitionJson: JsValue = Json.parse(
     """
       |{

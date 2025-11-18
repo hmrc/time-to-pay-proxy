@@ -17,7 +17,7 @@
 package uk.gov.hmrc.timetopayproxy.config
 
 import play.api.Configuration
-import uk.gov.hmrc.timetopayproxy.models.featureSwitches.InternalAuthEnabled
+import uk.gov.hmrc.timetopayproxy.models.featureSwitches.{ EnrolmentAuthEnabled, InternalAuthEnabled }
 
 case class FeatureSwitch(value: Option[Configuration]) {
   // Implement feature switch getter methods here.
@@ -25,11 +25,10 @@ case class FeatureSwitch(value: Option[Configuration]) {
   def chargeInfoEndpointEnabled: Boolean = value.exists(_.get[Boolean]("endpoint.charge-info.enabled"))
   def fullAmendEndpointEnabled: Boolean = value.exists(_.get[Boolean]("endpoint.full-amend.enabled"))
   def informEndpointEnabled: Boolean = value.exists(_.get[Boolean]("endpoint.inform.enabled"))
-
-  def internalAuthEnabled: InternalAuthEnabled =
-    InternalAuthEnabled(
-      value
-        .flatMap(_.getOptional[Boolean]("internalAuthEnabled"))
-        .getOrElse(false)
-    )
+  def internalAuthEnabled: InternalAuthEnabled = InternalAuthEnabled(
+    value.exists(_.get[Boolean]("internalAuthEnabled"))
+  )
+  def enrolmentAuthEnabled: EnrolmentAuthEnabled = EnrolmentAuthEnabled(
+    value.exists(_.get[Boolean]("enrolmentAuthEnabled"))
+  )
 }

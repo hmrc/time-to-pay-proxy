@@ -30,8 +30,9 @@ import uk.gov.hmrc.timetopayproxy.support.IntegrationBaseSpec
 import java.time.{ LocalDate, LocalDateTime }
 import scala.concurrent.ExecutionContext
 
-class TimeToPayProxyControllerAuthEnabledItSpec extends IntegrationBaseSpec {
+class TimeToPayProxyControllerInternalAuthEnabledItSpec extends IntegrationBaseSpec {
   def internalAuthEnabled: Boolean = true
+  def enrolmentAuthEnabled: Boolean = false
 
   implicit def ec: ExecutionContext = app.injector.instanceOf[ExecutionContext]
   implicit val hc: HeaderCarrier = HeaderCarrier()

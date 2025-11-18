@@ -38,6 +38,7 @@ import uk.gov.hmrc.timetopayproxy.models.affordablequotes._
 import uk.gov.hmrc.timetopayproxy.models.currency.GbpPounds
 import uk.gov.hmrc.timetopayproxy.models.error.TtppEnvelope.TtppEnvelope
 import uk.gov.hmrc.timetopayproxy.models.error.{ ConnectorError, TtppEnvelope, TtppErrorResponse }
+import uk.gov.hmrc.timetopayproxy.models.featureSwitches.EnrolmentAuthEnabled
 import uk.gov.hmrc.timetopayproxy.models.saonly.chargeInfoApi._
 import uk.gov.hmrc.timetopayproxy.models.saonly.common._
 import uk.gov.hmrc.timetopayproxy.models.saonly.common.apistatus.{ ApiName, ApiStatus, ApiStatusCode }
@@ -53,17 +54,17 @@ import scala.concurrent.{ ExecutionContext, Future }
 class TimeToPayProxyControllerSpec extends AnyWordSpec with MockFactory {
 
   private val authConnector: PlayAuthConnector = mock[PlayAuthConnector]
-
   private val cc: ControllerComponents = Helpers.stubControllerComponents()
+  private val featureSwitch: FeatureSwitch = mock[FeatureSwitch]
+
   private val readAuthoriseAction: ReadAuthoriseAction =
-    new ReadAuthoriseAction(authConnector, cc)
+    new ReadAuthoriseAction(authConnector, cc, featureSwitch)
   private val writeAuthoriseAction: WriteAuthoriseAction =
-    new WriteAuthoriseAction(authConnector, cc)
+    new WriteAuthoriseAction(authConnector, cc, featureSwitch)
 
   private val ttpQuoteService = mock[TTPQuoteService]
   private val ttpeService = mock[TTPEService]
   private val ttpFeedbackLoopService = mock[TtpFeedbackLoopService]
-  private val fs: FeatureSwitch = mock[FeatureSwitch]
   private val controller =
     new TimeToPayProxyController(
       readAuthoriseAction,
@@ -72,7 +73,7 @@ class TimeToPayProxyControllerSpec extends AnyWordSpec with MockFactory {
       ttpQuoteService,
       ttpFeedbackLoopService,
       ttpeService,
-      fs
+      featureSwitch
     )
 
   private val generateQuoteRequest = GenerateQuoteRequest(
@@ -219,6 +220,8 @@ class TimeToPayProxyControllerSpec extends AnyWordSpec with MockFactory {
     "return 200" when {
       "service returns success" in {
 
+        (() => featureSwitch.enrolmentAuthEnabled).expects().returning(EnrolmentAuthEnabled(true))
+
         (authConnector
           .authorise[Unit](_: Predicate, _: Retrieval[Unit])(
             _: HeaderCarrier,
@@ -304,6 +307,9 @@ class TimeToPayProxyControllerSpec extends AnyWordSpec with MockFactory {
                                 }"""
     "return 400" when {
       "request body is in wrong format" in {
+
+        (() => featureSwitch.enrolmentAuthEnabled).expects().returning(EnrolmentAuthEnabled(true))
+
         (authConnector
           .authorise[Unit](_: Predicate, _: Retrieval[Unit])(
             _: HeaderCarrier,
@@ -331,6 +337,8 @@ class TimeToPayProxyControllerSpec extends AnyWordSpec with MockFactory {
 
     "return 500" when {
       "service returns failure" in {
+
+        (() => featureSwitch.enrolmentAuthEnabled).expects().returning(EnrolmentAuthEnabled(true))
 
         (authConnector
           .authorise[Unit](_: Predicate, _: Retrieval[Unit])(
@@ -373,6 +381,8 @@ class TimeToPayProxyControllerSpec extends AnyWordSpec with MockFactory {
   "GET /individuals/time-to-pay/quote/:customerReference/:planId" should {
     "return a 200 given a successful response" in {
 
+      (() => featureSwitch.enrolmentAuthEnabled).expects().returning(EnrolmentAuthEnabled(true))
+
       (authConnector
         .authorise[Unit](_: Predicate, _: Retrieval[Unit])(
           _: HeaderCarrier,
@@ -400,6 +410,9 @@ class TimeToPayProxyControllerSpec extends AnyWordSpec with MockFactory {
     }
 
     "return a 404 if the quote is not found" in {
+
+      (() => featureSwitch.enrolmentAuthEnabled).expects().returning(EnrolmentAuthEnabled(true))
+
       (authConnector
         .authorise[Unit](_: Predicate, _: Retrieval[Unit])(
           _: HeaderCarrier,
@@ -428,6 +441,8 @@ class TimeToPayProxyControllerSpec extends AnyWordSpec with MockFactory {
     }
 
     "return 500 if the underlying service fails" in {
+
+      (() => featureSwitch.enrolmentAuthEnabled).expects().returning(EnrolmentAuthEnabled(true))
 
       (authConnector
         .authorise[Unit](_: Predicate, _: Retrieval[Unit])(
@@ -483,6 +498,8 @@ class TimeToPayProxyControllerSpec extends AnyWordSpec with MockFactory {
       planIdQueryParameter: String,
       ttpServiceResponse: Option[TtppEnvelope[UpdatePlanResponse]]
     )(implicit position: org.scalactic.source.Position): Unit = {
+      (() => featureSwitch.enrolmentAuthEnabled).expects().returning(EnrolmentAuthEnabled(true))
+
       (authConnector
         .authorise[Unit](_: Predicate, _: Retrieval[Unit])(
           _: HeaderCarrier,
@@ -858,6 +875,8 @@ class TimeToPayProxyControllerSpec extends AnyWordSpec with MockFactory {
     "return 200" when {
       "service returns success" in {
 
+        (() => featureSwitch.enrolmentAuthEnabled).expects().returning(EnrolmentAuthEnabled(true))
+
         (authConnector
           .authorise[Unit](_: Predicate, _: Retrieval[Unit])(
             _: HeaderCarrier,
@@ -897,6 +916,8 @@ class TimeToPayProxyControllerSpec extends AnyWordSpec with MockFactory {
     }
     "return 500" when {
       "service returns failure" in {
+
+        (() => featureSwitch.enrolmentAuthEnabled).expects().returning(EnrolmentAuthEnabled(true))
 
         (authConnector
           .authorise[Unit](_: Predicate, _: Retrieval[Unit])(
@@ -995,6 +1016,9 @@ class TimeToPayProxyControllerSpec extends AnyWordSpec with MockFactory {
 
     "return 200" when {
       "service returns success" in {
+
+        (() => featureSwitch.enrolmentAuthEnabled).expects().returning(EnrolmentAuthEnabled(true))
+
         (authConnector
           .authorise[Unit](_: Predicate, _: Retrieval[Unit])(
             _: HeaderCarrier,
@@ -1031,6 +1055,9 @@ class TimeToPayProxyControllerSpec extends AnyWordSpec with MockFactory {
     }
     "return 500" when {
       "TTP returns a failure" in {
+
+        (() => featureSwitch.enrolmentAuthEnabled).expects().returning(EnrolmentAuthEnabled(true))
+
         (authConnector
           .authorise[Unit](_: Predicate, _: Retrieval[Unit])(
             _: HeaderCarrier,
@@ -1152,7 +1179,9 @@ class TimeToPayProxyControllerSpec extends AnyWordSpec with MockFactory {
     "return 200" when {
       "service returns" in {
 
-        (() => fs.chargeInfoEndpointEnabled)
+        (() => featureSwitch.enrolmentAuthEnabled).expects().returning(EnrolmentAuthEnabled(true))
+
+        (() => featureSwitch.chargeInfoEndpointEnabled)
           .expects()
           .returning(true)
 
@@ -1192,7 +1221,9 @@ class TimeToPayProxyControllerSpec extends AnyWordSpec with MockFactory {
     "return 500" when {
       "TTPEligibility returns a failure" in {
 
-        (() => fs.chargeInfoEndpointEnabled)
+        (() => featureSwitch.enrolmentAuthEnabled).expects().returning(EnrolmentAuthEnabled(true))
+
+        (() => featureSwitch.chargeInfoEndpointEnabled)
           .expects()
           .returning(true)
 
@@ -1238,7 +1269,9 @@ class TimeToPayProxyControllerSpec extends AnyWordSpec with MockFactory {
     "return 503" when {
       "if the charge-info endpoint is disabled" in {
 
-        (() => fs.chargeInfoEndpointEnabled)
+        (() => featureSwitch.enrolmentAuthEnabled).expects().returning(EnrolmentAuthEnabled(true))
+
+        (() => featureSwitch.chargeInfoEndpointEnabled)
           .expects()
           .returning(false)
 
@@ -1308,7 +1341,9 @@ class TimeToPayProxyControllerSpec extends AnyWordSpec with MockFactory {
     "return 200" when {
       "service returns success" in {
 
-        (() => fs.cancelEndpointEnabled)
+        (() => featureSwitch.enrolmentAuthEnabled).expects().returning(EnrolmentAuthEnabled(true))
+
+        (() => featureSwitch.cancelEndpointEnabled)
           .expects()
           .returning(true)
 
@@ -1349,7 +1384,9 @@ class TimeToPayProxyControllerSpec extends AnyWordSpec with MockFactory {
     "return 400" when {
       "request body is in wrong format" in {
 
-        (() => fs.cancelEndpointEnabled)
+        (() => featureSwitch.enrolmentAuthEnabled).expects().returning(EnrolmentAuthEnabled(true))
+
+        (() => featureSwitch.cancelEndpointEnabled)
           .expects()
           .returning(true)
 
@@ -1388,7 +1425,9 @@ class TimeToPayProxyControllerSpec extends AnyWordSpec with MockFactory {
     "return 500" when {
       "service returns failure" in {
 
-        (() => fs.cancelEndpointEnabled)
+        (() => featureSwitch.enrolmentAuthEnabled).expects().returning(EnrolmentAuthEnabled(true))
+
+        (() => featureSwitch.cancelEndpointEnabled)
           .expects()
           .returning(true)
 
@@ -1431,7 +1470,9 @@ class TimeToPayProxyControllerSpec extends AnyWordSpec with MockFactory {
     "return 503" when {
       "the cancel endpoint is disabled" in {
 
-        (() => fs.cancelEndpointEnabled)
+        (() => featureSwitch.enrolmentAuthEnabled).expects().returning(EnrolmentAuthEnabled(true))
+
+        (() => featureSwitch.cancelEndpointEnabled)
           .expects()
           .returning(false)
 
@@ -1499,7 +1540,10 @@ class TimeToPayProxyControllerSpec extends AnyWordSpec with MockFactory {
 
     "return 200" when {
       "service returns success" in {
-        (() => fs.informEndpointEnabled)
+
+        (() => featureSwitch.enrolmentAuthEnabled).expects().returning(EnrolmentAuthEnabled(true))
+
+        (() => featureSwitch.informEndpointEnabled)
           .expects()
           .returning(true)
 
@@ -1539,7 +1583,10 @@ class TimeToPayProxyControllerSpec extends AnyWordSpec with MockFactory {
 
     "return 400" when {
       "request body is in wrong format" in {
-        (() => fs.informEndpointEnabled)
+
+        (() => featureSwitch.enrolmentAuthEnabled).expects().returning(EnrolmentAuthEnabled(true))
+
+        (() => featureSwitch.informEndpointEnabled)
           .expects()
           .returning(true)
 
@@ -1577,7 +1624,10 @@ class TimeToPayProxyControllerSpec extends AnyWordSpec with MockFactory {
 
     "return 500" when {
       "service returns failure" in {
-        (() => fs.informEndpointEnabled)
+
+        (() => featureSwitch.enrolmentAuthEnabled).expects().returning(EnrolmentAuthEnabled(true))
+
+        (() => featureSwitch.informEndpointEnabled)
           .expects()
           .returning(true)
 
@@ -1619,7 +1669,10 @@ class TimeToPayProxyControllerSpec extends AnyWordSpec with MockFactory {
 
     "return 503" when {
       "the inform endpoint is disabled" in {
-        (() => fs.informEndpointEnabled)
+
+        (() => featureSwitch.enrolmentAuthEnabled).expects().returning(EnrolmentAuthEnabled(true))
+
+        (() => featureSwitch.informEndpointEnabled)
           .expects()
           .returning(false)
 
@@ -1689,7 +1742,10 @@ class TimeToPayProxyControllerSpec extends AnyWordSpec with MockFactory {
 
     "return 200" when {
       "service returns success" in {
-        (() => fs.fullAmendEndpointEnabled)
+
+        (() => featureSwitch.enrolmentAuthEnabled).expects().returning(EnrolmentAuthEnabled(true))
+
+        (() => featureSwitch.fullAmendEndpointEnabled)
           .expects()
           .returning(true)
 
@@ -1729,7 +1785,10 @@ class TimeToPayProxyControllerSpec extends AnyWordSpec with MockFactory {
 
     "return 400" when {
       "request body is in wrong format" in {
-        (() => fs.fullAmendEndpointEnabled)
+
+        (() => featureSwitch.enrolmentAuthEnabled).expects().returning(EnrolmentAuthEnabled(true))
+
+        (() => featureSwitch.fullAmendEndpointEnabled)
           .expects()
           .returning(true)
 
@@ -1767,7 +1826,10 @@ class TimeToPayProxyControllerSpec extends AnyWordSpec with MockFactory {
 
     "return 500" when {
       "service returns failure" in {
-        (() => fs.fullAmendEndpointEnabled)
+
+        (() => featureSwitch.enrolmentAuthEnabled).expects().returning(EnrolmentAuthEnabled(true))
+
+        (() => featureSwitch.fullAmendEndpointEnabled)
           .expects()
           .returning(true)
 
@@ -1809,7 +1871,10 @@ class TimeToPayProxyControllerSpec extends AnyWordSpec with MockFactory {
 
     "return 503" when {
       "the full amend endpoint is disabled" in {
-        (() => fs.fullAmendEndpointEnabled)
+
+        (() => featureSwitch.enrolmentAuthEnabled).expects().returning(EnrolmentAuthEnabled(true))
+
+        (() => featureSwitch.fullAmendEndpointEnabled)
           .expects()
           .returning(false)
 

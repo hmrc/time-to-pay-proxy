@@ -40,6 +40,7 @@ import scala.concurrent.ExecutionContext
 
 class TimeToPayProxyControllerItSpec extends IntegrationBaseSpec {
   def internalAuthEnabled: Boolean = false
+  def enrolmentAuthEnabled: Boolean = false
 
   "TimeToPayProxyController" - {
     ".getAffordableQuotes" - {
