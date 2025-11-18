@@ -17,23 +17,34 @@
 package uk.gov.hmrc.timetopayproxy.actions.auth
 
 import com.google.inject.ImplementedBy
+import enumeratum.{ Enum, EnumEntry }
 import play.api.Logger
 import play.api.mvc.Results.{ Forbidden, ServiceUnavailable }
 import play.api.mvc._
 import uk.gov.hmrc.auth.core._
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.http.HeaderCarrierConverter
+import uk.gov.hmrc.timetopayproxy.actions.auth.StoredEnrolment.DtdEnrolments.ReadTimeToPayProxy
 
 import javax.inject.Inject
 import scala.concurrent.{ ExecutionContext, Future }
 import scala.util.control.NonFatal
+
+sealed abstract class StoredEnrolment(override val entryName: String) extends EnumEntry
+
+object StoredEnrolment extends Enum[StoredEnrolment] {
+  def values: IndexedSeq[StoredEnrolment] = findValues
+
+  object DtdEnrolments {
+    case object ReadTimeToPayProxy extends StoredEnrolment("read:time-to-pay-proxy")
+  }
+}
 
 @ImplementedBy(classOf[AuthoriseActionImpl])
 trait AuthoriseAction extends ActionBuilder[Request, AnyContent]
 
 class AuthoriseActionImpl @Inject() (override val authConnector: PlayAuthConnector, cc: ControllerComponents)
     extends AuthoriseAction with AuthorisedFunctions {
-  private val DTDEnrolment = "read:time-to-pay-proxy"
   private val logger = Logger(classOf[AuthoriseActionImpl])
   override def parser: BodyParser[AnyContent] = cc.parsers.defaultBodyParser
 
@@ -41,7 +52,7 @@ class AuthoriseActionImpl @Inject() (override val authConnector: PlayAuthConnect
     implicit val hc: HeaderCarrier =
       HeaderCarrierConverter.fromRequest(request)
 
-    val result = authorised(Enrolment(DTDEnrolment)) {
+    val result = authorised(Enrolment(ReadTimeToPayProxy.entryName)) {
       block(request)
     }(hc, cc.executionContext)
 
