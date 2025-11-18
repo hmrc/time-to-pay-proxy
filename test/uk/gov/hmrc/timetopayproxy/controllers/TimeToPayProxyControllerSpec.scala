@@ -26,10 +26,11 @@ import play.api.libs.json.{ JsArray, JsValue, Json }
 import play.api.mvc.{ ControllerComponents, Result }
 import play.api.test.Helpers._
 import play.api.test.{ FakeRequest, Helpers }
-import uk.gov.hmrc.auth.core.PlayAuthConnector
 import uk.gov.hmrc.auth.core.authorise.Predicate
-import uk.gov.hmrc.auth.core.retrieve.Retrieval
+import uk.gov.hmrc.auth.core.retrieve.{ EmptyRetrieval, Retrieval }
+import uk.gov.hmrc.auth.core.{ Enrolment, PlayAuthConnector }
 import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.timetopayproxy.actions.auth.StoredEnrolment.DtdEnrolments.ReadTimeToPayProxy
 import uk.gov.hmrc.timetopayproxy.actions.auth.{ AuthoriseAction, AuthoriseActionImpl }
 import uk.gov.hmrc.timetopayproxy.config.FeatureSwitch
 import uk.gov.hmrc.timetopayproxy.models._
@@ -38,8 +39,8 @@ import uk.gov.hmrc.timetopayproxy.models.currency.GbpPounds
 import uk.gov.hmrc.timetopayproxy.models.error.TtppEnvelope.TtppEnvelope
 import uk.gov.hmrc.timetopayproxy.models.error.{ ConnectorError, TtppEnvelope, TtppErrorResponse }
 import uk.gov.hmrc.timetopayproxy.models.saonly.chargeInfoApi._
-import uk.gov.hmrc.timetopayproxy.models.saonly.common.apistatus.{ ApiName, ApiStatus, ApiStatusCode }
 import uk.gov.hmrc.timetopayproxy.models.saonly.common._
+import uk.gov.hmrc.timetopayproxy.models.saonly.common.apistatus.{ ApiName, ApiStatus, ApiStatusCode }
 import uk.gov.hmrc.timetopayproxy.models.saonly.ttpcancel.{ CancellationDate, TtpCancelPaymentPlan, TtpCancelRequest, TtpCancelSuccessfulResponse }
 import uk.gov.hmrc.timetopayproxy.models.saonly.ttpfullamend.{ TtpFullAmendRequest, TtpFullAmendSuccessfulResponse }
 import uk.gov.hmrc.timetopayproxy.models.saonly.ttpinform.{ TtpInformRequest, TtpInformSuccessfulResponse }
@@ -213,7 +214,11 @@ class TimeToPayProxyControllerSpec extends AnyWordSpec with MockFactory {
             _: HeaderCarrier,
             _: ExecutionContext
           ))
-          .expects(*, *, *, *)
+          .expects(where { (e: Predicate, r: Retrieval[Unit], _: HeaderCarrier, _: ExecutionContext) =>
+            e shouldBe Enrolment(ReadTimeToPayProxy.entryName)
+            r shouldBe EmptyRetrieval
+            true
+          })
           .returning(Future.successful(()))
 
         val responseFromTtp = GenerateQuoteResponse(
@@ -294,7 +299,11 @@ class TimeToPayProxyControllerSpec extends AnyWordSpec with MockFactory {
             _: HeaderCarrier,
             _: ExecutionContext
           ))
-          .expects(*, *, *, *)
+          .expects(where { (e: Predicate, r: Retrieval[Unit], _: HeaderCarrier, _: ExecutionContext) =>
+            e shouldBe Enrolment(ReadTimeToPayProxy.entryName)
+            r shouldBe EmptyRetrieval
+            true
+          })
           .returning(Future.successful(()))
 
         val fakeRequest: FakeRequest[JsValue] =
@@ -318,7 +327,11 @@ class TimeToPayProxyControllerSpec extends AnyWordSpec with MockFactory {
             _: HeaderCarrier,
             _: ExecutionContext
           ))
-          .expects(*, *, *, *)
+          .expects(where { (e: Predicate, r: Retrieval[Unit], _: HeaderCarrier, _: ExecutionContext) =>
+            e shouldBe Enrolment(ReadTimeToPayProxy.entryName)
+            r shouldBe EmptyRetrieval
+            true
+          })
           .returning(Future.successful(()))
 
         val errorFromTtpConnector =
@@ -840,7 +853,11 @@ class TimeToPayProxyControllerSpec extends AnyWordSpec with MockFactory {
             _: HeaderCarrier,
             _: ExecutionContext
           ))
-          .expects(*, *, *, *)
+          .expects(where { (e: Predicate, r: Retrieval[Unit], _: HeaderCarrier, _: ExecutionContext) =>
+            e shouldBe Enrolment(ReadTimeToPayProxy.entryName)
+            r shouldBe EmptyRetrieval
+            true
+          })
           .returning(Future.successful(()))
 
         val createPlanResponse = CreatePlanResponse(
@@ -876,7 +893,11 @@ class TimeToPayProxyControllerSpec extends AnyWordSpec with MockFactory {
             _: HeaderCarrier,
             _: ExecutionContext
           ))
-          .expects(*, *, *, *)
+          .expects(where { (e: Predicate, r: Retrieval[Unit], _: HeaderCarrier, _: ExecutionContext) =>
+            e shouldBe Enrolment(ReadTimeToPayProxy.entryName)
+            r shouldBe EmptyRetrieval
+            true
+          })
           .returning(Future.successful(()))
 
         val errorFromTtpConnector =
@@ -969,7 +990,11 @@ class TimeToPayProxyControllerSpec extends AnyWordSpec with MockFactory {
             _: HeaderCarrier,
             _: ExecutionContext
           ))
-          .expects(*, *, *, *)
+          .expects(where { (e: Predicate, r: Retrieval[Unit], _: HeaderCarrier, _: ExecutionContext) =>
+            e shouldBe Enrolment(ReadTimeToPayProxy.entryName)
+            r shouldBe EmptyRetrieval
+            true
+          })
           .returning(Future.successful(()))
 
         (ttpQuoteService
@@ -1001,7 +1026,11 @@ class TimeToPayProxyControllerSpec extends AnyWordSpec with MockFactory {
             _: HeaderCarrier,
             _: ExecutionContext
           ))
-          .expects(*, *, *, *)
+          .expects(where { (e: Predicate, r: Retrieval[Unit], _: HeaderCarrier, _: ExecutionContext) =>
+            e shouldBe Enrolment(ReadTimeToPayProxy.entryName)
+            r shouldBe EmptyRetrieval
+            true
+          })
           .returning(Future.successful(()))
 
         val errorFromTtpConnector =
@@ -1122,7 +1151,11 @@ class TimeToPayProxyControllerSpec extends AnyWordSpec with MockFactory {
             _: HeaderCarrier,
             _: ExecutionContext
           ))
-          .expects(*, *, *, *)
+          .expects(where { (e: Predicate, r: Retrieval[Unit], _: HeaderCarrier, _: ExecutionContext) =>
+            e shouldBe Enrolment(ReadTimeToPayProxy.entryName)
+            r shouldBe EmptyRetrieval
+            true
+          })
           .returning(Future.successful(()))
 
         (ttpeService
@@ -1158,7 +1191,11 @@ class TimeToPayProxyControllerSpec extends AnyWordSpec with MockFactory {
             _: HeaderCarrier,
             _: ExecutionContext
           ))
-          .expects(*, *, *, *)
+          .expects(where { (e: Predicate, r: Retrieval[Unit], _: HeaderCarrier, _: ExecutionContext) =>
+            e shouldBe Enrolment(ReadTimeToPayProxy.entryName)
+            r shouldBe EmptyRetrieval
+            true
+          })
           .returning(Future.successful(()))
 
         val errorFromTtpeConnector =
@@ -1200,7 +1237,11 @@ class TimeToPayProxyControllerSpec extends AnyWordSpec with MockFactory {
             _: HeaderCarrier,
             _: ExecutionContext
           ))
-          .expects(*, *, *, *)
+          .expects(where { (e: Predicate, r: Retrieval[Unit], _: HeaderCarrier, _: ExecutionContext) =>
+            e shouldBe Enrolment(ReadTimeToPayProxy.entryName)
+            r shouldBe EmptyRetrieval
+            true
+          })
           .returning(Future.successful(()))
 
         val fakeRequest: FakeRequest[JsValue] =
@@ -1266,7 +1307,11 @@ class TimeToPayProxyControllerSpec extends AnyWordSpec with MockFactory {
             _: HeaderCarrier,
             _: ExecutionContext
           ))
-          .expects(*, *, *, *)
+          .expects(where { (e: Predicate, r: Retrieval[Unit], _: HeaderCarrier, _: ExecutionContext) =>
+            e shouldBe Enrolment(ReadTimeToPayProxy.entryName)
+            r shouldBe EmptyRetrieval
+            true
+          })
           .returning(Future.successful(()))
 
         (ttpFeedbackLoopService
@@ -1303,7 +1348,11 @@ class TimeToPayProxyControllerSpec extends AnyWordSpec with MockFactory {
             _: HeaderCarrier,
             _: ExecutionContext
           ))
-          .expects(*, *, *, *)
+          .expects(where { (e: Predicate, r: Retrieval[Unit], _: HeaderCarrier, _: ExecutionContext) =>
+            e shouldBe Enrolment(ReadTimeToPayProxy.entryName)
+            r shouldBe EmptyRetrieval
+            true
+          })
           .returning(Future.successful(()))
 
         val wrongFormattedBody = """{
@@ -1338,7 +1387,11 @@ class TimeToPayProxyControllerSpec extends AnyWordSpec with MockFactory {
             _: HeaderCarrier,
             _: ExecutionContext
           ))
-          .expects(*, *, *, *)
+          .expects(where { (e: Predicate, r: Retrieval[Unit], _: HeaderCarrier, _: ExecutionContext) =>
+            e shouldBe Enrolment(ReadTimeToPayProxy.entryName)
+            r shouldBe EmptyRetrieval
+            true
+          })
           .returning(Future.successful(()))
 
         val errorFromTtpService = ConnectorError(500, "Internal Service Error")
@@ -1377,7 +1430,11 @@ class TimeToPayProxyControllerSpec extends AnyWordSpec with MockFactory {
             _: HeaderCarrier,
             _: ExecutionContext
           ))
-          .expects(*, *, *, *)
+          .expects(where { (e: Predicate, r: Retrieval[Unit], _: HeaderCarrier, _: ExecutionContext) =>
+            e shouldBe Enrolment(ReadTimeToPayProxy.entryName)
+            r shouldBe EmptyRetrieval
+            true
+          })
           .returning(Future.successful(()))
 
         val fakeRequest: FakeRequest[JsValue] =
@@ -1441,7 +1498,11 @@ class TimeToPayProxyControllerSpec extends AnyWordSpec with MockFactory {
             _: HeaderCarrier,
             _: ExecutionContext
           ))
-          .expects(*, *, *, *)
+          .expects(where { (e: Predicate, r: Retrieval[Unit], _: HeaderCarrier, _: ExecutionContext) =>
+            e shouldBe Enrolment(ReadTimeToPayProxy.entryName)
+            r shouldBe EmptyRetrieval
+            true
+          })
           .returning(Future.successful(()))
 
         (ttpFeedbackLoopService
@@ -1477,7 +1538,11 @@ class TimeToPayProxyControllerSpec extends AnyWordSpec with MockFactory {
             _: HeaderCarrier,
             _: ExecutionContext
           ))
-          .expects(*, *, *, *)
+          .expects(where { (e: Predicate, r: Retrieval[Unit], _: HeaderCarrier, _: ExecutionContext) =>
+            e shouldBe Enrolment(ReadTimeToPayProxy.entryName)
+            r shouldBe EmptyRetrieval
+            true
+          })
           .returning(Future.successful(()))
 
         val wrongFormattedBody = """{
@@ -1511,7 +1576,11 @@ class TimeToPayProxyControllerSpec extends AnyWordSpec with MockFactory {
             _: HeaderCarrier,
             _: ExecutionContext
           ))
-          .expects(*, *, *, *)
+          .expects(where { (e: Predicate, r: Retrieval[Unit], _: HeaderCarrier, _: ExecutionContext) =>
+            e shouldBe Enrolment(ReadTimeToPayProxy.entryName)
+            r shouldBe EmptyRetrieval
+            true
+          })
           .returning(Future.successful(()))
 
         val errorFromTtpService = ConnectorError(500, "Internal Service Error")
@@ -1549,7 +1618,11 @@ class TimeToPayProxyControllerSpec extends AnyWordSpec with MockFactory {
             _: HeaderCarrier,
             _: ExecutionContext
           ))
-          .expects(*, *, *, *)
+          .expects(where { (e: Predicate, r: Retrieval[Unit], _: HeaderCarrier, _: ExecutionContext) =>
+            e shouldBe Enrolment(ReadTimeToPayProxy.entryName)
+            r shouldBe EmptyRetrieval
+            true
+          })
           .returning(Future.successful(()))
 
         val fakeRequest: FakeRequest[JsValue] =
@@ -1615,7 +1688,11 @@ class TimeToPayProxyControllerSpec extends AnyWordSpec with MockFactory {
             _: HeaderCarrier,
             _: ExecutionContext
           ))
-          .expects(*, *, *, *)
+          .expects(where { (e: Predicate, r: Retrieval[Unit], _: HeaderCarrier, _: ExecutionContext) =>
+            e shouldBe Enrolment(ReadTimeToPayProxy.entryName)
+            r shouldBe EmptyRetrieval
+            true
+          })
           .returning(Future.successful(()))
 
         (ttpFeedbackLoopService
@@ -1651,7 +1728,11 @@ class TimeToPayProxyControllerSpec extends AnyWordSpec with MockFactory {
             _: HeaderCarrier,
             _: ExecutionContext
           ))
-          .expects(*, *, *, *)
+          .expects(where { (e: Predicate, r: Retrieval[Unit], _: HeaderCarrier, _: ExecutionContext) =>
+            e shouldBe Enrolment(ReadTimeToPayProxy.entryName)
+            r shouldBe EmptyRetrieval
+            true
+          })
           .returning(Future.successful(()))
 
         val wrongFormattedBody = """{
@@ -1685,7 +1766,11 @@ class TimeToPayProxyControllerSpec extends AnyWordSpec with MockFactory {
             _: HeaderCarrier,
             _: ExecutionContext
           ))
-          .expects(*, *, *, *)
+          .expects(where { (e: Predicate, r: Retrieval[Unit], _: HeaderCarrier, _: ExecutionContext) =>
+            e shouldBe Enrolment(ReadTimeToPayProxy.entryName)
+            r shouldBe EmptyRetrieval
+            true
+          })
           .returning(Future.successful(()))
 
         val errorFromTtpService = ConnectorError(500, "Internal Service Error")
@@ -1723,7 +1808,11 @@ class TimeToPayProxyControllerSpec extends AnyWordSpec with MockFactory {
             _: HeaderCarrier,
             _: ExecutionContext
           ))
-          .expects(*, *, *, *)
+          .expects(where { (e: Predicate, r: Retrieval[Unit], _: HeaderCarrier, _: ExecutionContext) =>
+            e shouldBe Enrolment(ReadTimeToPayProxy.entryName)
+            r shouldBe EmptyRetrieval
+            true
+          })
           .returning(Future.successful(()))
 
         val fakeRequest: FakeRequest[JsValue] =
