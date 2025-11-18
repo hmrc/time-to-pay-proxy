@@ -213,6 +213,24 @@ class TtpeConnectorSpec
 
         await(result.value) mustBe Left(ConnectorError(400, "Invalid request body"))
       }
+
+      "parse a 422 error response from an upstream service" in new Setup {
+        stubPostWithResponseBody(
+          "/debts/time-to-pay/charge-info",
+          422,
+          s"""{
+             |  "code":"UNPROCESSABLE_CONTENT",
+             |  "reason":"Charges with the same charge reference do not share the same data"
+             |}
+             |""".stripMargin
+        )
+
+        val result: TtppEnvelope[ChargeInfoResponse] = connector.checkChargeInfo(chargeInfoRequest = chargeInfoRequest)
+
+        await(result.value) mustBe Left(
+          ConnectorError(422, "Charges with the same charge reference do not share the same data")
+        )
+      }
     }
   }
 }
