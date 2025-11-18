@@ -24,19 +24,19 @@ import play.api.mvc._
 import uk.gov.hmrc.auth.core._
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.http.HeaderCarrierConverter
-import uk.gov.hmrc.timetopayproxy.actions.auth.StoredEnrolment.DtdEnrolments.ReadTimeToPayProxy
+import uk.gov.hmrc.timetopayproxy.actions.auth.StoredEnrolmentScope.DtdEnrolments.ReadTimeToPayProxy
 
 import javax.inject.Inject
 import scala.concurrent.{ ExecutionContext, Future }
 import scala.util.control.NonFatal
 
-sealed abstract class StoredEnrolment(override val entryName: String) extends EnumEntry
+sealed abstract class StoredEnrolmentScope(override val entryName: String) extends EnumEntry
 
-object StoredEnrolment extends Enum[StoredEnrolment] {
-  def values: IndexedSeq[StoredEnrolment] = findValues
+object StoredEnrolmentScope extends Enum[StoredEnrolmentScope] {
+  def values: IndexedSeq[StoredEnrolmentScope] = findValues
 
   object DtdEnrolments {
-    case object ReadTimeToPayProxy extends StoredEnrolment("read:time-to-pay-proxy")
+    case object ReadTimeToPayProxy extends StoredEnrolmentScope("read:time-to-pay-proxy")
   }
 }
 

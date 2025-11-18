@@ -30,7 +30,7 @@ import uk.gov.hmrc.auth.core.authorise.Predicate
 import uk.gov.hmrc.auth.core.retrieve.{ EmptyRetrieval, Retrieval }
 import uk.gov.hmrc.auth.core.{ Enrolment, PlayAuthConnector }
 import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.timetopayproxy.actions.auth.StoredEnrolment.DtdEnrolments.ReadTimeToPayProxy
+import uk.gov.hmrc.timetopayproxy.actions.auth.StoredEnrolmentScope.DtdEnrolments.ReadTimeToPayProxy
 import uk.gov.hmrc.timetopayproxy.actions.auth.{ AuthoriseAction, AuthoriseActionImpl }
 import uk.gov.hmrc.timetopayproxy.config.FeatureSwitch
 import uk.gov.hmrc.timetopayproxy.models._
