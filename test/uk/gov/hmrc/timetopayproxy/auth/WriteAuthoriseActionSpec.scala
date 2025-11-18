@@ -22,31 +22,32 @@ import play.api.test.FakeRequest
 import play.api.test.Helpers.stubControllerComponents
 import uk.gov.hmrc.auth.core.authorise.Predicate
 import uk.gov.hmrc.auth.core.retrieve.Retrieval
-import uk.gov.hmrc.auth.core.{ InsufficientEnrolments, PlayAuthConnector, SessionRecordNotFound }
+import uk.gov.hmrc.auth.core.{ Enrolment, InsufficientEnrolments, PlayAuthConnector, SessionRecordNotFound }
 import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.timetopayproxy.actions.auth.{ AuthoriseAction, AuthoriseActionImpl }
+import uk.gov.hmrc.timetopayproxy.actions.auth.{ AuthoriseAction, WriteAuthoriseAction }
 import uk.gov.hmrc.timetopayproxy.support.UnitSpec
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.{ ExecutionContext, Future }
 
-class Harness(authAction: AuthoriseAction) extends InjectedController {
-  def onPageLoad(): Action[AnyContent] = authAction { _ =>
-    Ok("")
+class WriteAuthoriseActionSpec extends UnitSpec {
+  class Harness(authAction: AuthoriseAction) extends InjectedController {
+    def onPageLoad(): Action[AnyContent] = authAction { _ =>
+      Ok("")
+    }
   }
-}
 
-class AuthoriseActionSpec extends UnitSpec {
   lazy val mockAuthConnector: PlayAuthConnector = mock[PlayAuthConnector]
   lazy val cc = stubControllerComponents()
   class Setup(val authConnectorResponse: Future[Unit]) {
     (mockAuthConnector
       .authorise[Unit](_: Predicate, _: Retrieval[Unit])(_: HeaderCarrier, _: ExecutionContext))
-      .expects(*, *, *, *)
+      .expects(Enrolment("write:time-to-pay-proxy"), *, *, *)
       .returning(authConnectorResponse)
-    val authAction = new AuthoriseActionImpl(mockAuthConnector, cc)
+    val authAction = new WriteAuthoriseAction(mockAuthConnector, cc)
     val controller = new Harness(authAction)
   }
+
   "A user with no active session" should {
     "return 401 response" in {
       val authConnectorResponse = Future.failed(new SessionRecordNotFound)

@@ -30,8 +30,8 @@ import uk.gov.hmrc.auth.core.authorise.Predicate
 import uk.gov.hmrc.auth.core.retrieve.{ EmptyRetrieval, Retrieval }
 import uk.gov.hmrc.auth.core.{ Enrolment, PlayAuthConnector }
 import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.timetopayproxy.actions.auth.StoredEnrolmentScope.DtdEnrolments.ReadTimeToPayProxy
-import uk.gov.hmrc.timetopayproxy.actions.auth.{ AuthoriseAction, AuthoriseActionImpl }
+import uk.gov.hmrc.timetopayproxy.actions.auth.StoredEnrolmentScope.{ ReadTimeToPayProxy, WriteTimeToPayProxy }
+import uk.gov.hmrc.timetopayproxy.actions.auth.{ ReadAuthoriseAction, WriteAuthoriseAction }
 import uk.gov.hmrc.timetopayproxy.config.FeatureSwitch
 import uk.gov.hmrc.timetopayproxy.models._
 import uk.gov.hmrc.timetopayproxy.models.affordablequotes._
@@ -55,15 +55,25 @@ class TimeToPayProxyControllerSpec extends AnyWordSpec with MockFactory {
   private val authConnector: PlayAuthConnector = mock[PlayAuthConnector]
 
   private val cc: ControllerComponents = Helpers.stubControllerComponents()
-  private val authoriseAction: AuthoriseAction =
-    new AuthoriseActionImpl(authConnector, cc)
+  private val readAuthoriseAction: ReadAuthoriseAction =
+    new ReadAuthoriseAction(authConnector, cc)
+  private val writeAuthoriseAction: WriteAuthoriseAction =
+    new WriteAuthoriseAction(authConnector, cc)
 
   private val ttpQuoteService = mock[TTPQuoteService]
   private val ttpeService = mock[TTPEService]
   private val ttpFeedbackLoopService = mock[TtpFeedbackLoopService]
   private val fs: FeatureSwitch = mock[FeatureSwitch]
   private val controller =
-    new TimeToPayProxyController(authoriseAction, cc, ttpQuoteService, ttpFeedbackLoopService, ttpeService, fs)
+    new TimeToPayProxyController(
+      readAuthoriseAction,
+      writeAuthoriseAction,
+      cc,
+      ttpQuoteService,
+      ttpFeedbackLoopService,
+      ttpeService,
+      fs
+    )
 
   private val generateQuoteRequest = GenerateQuoteRequest(
     CustomerReference("customerReference"),
@@ -1308,7 +1318,7 @@ class TimeToPayProxyControllerSpec extends AnyWordSpec with MockFactory {
             _: ExecutionContext
           ))
           .expects(where { (e: Predicate, r: Retrieval[Unit], _: HeaderCarrier, _: ExecutionContext) =>
-            e shouldBe Enrolment(ReadTimeToPayProxy.entryName)
+            e shouldBe Enrolment(WriteTimeToPayProxy.entryName)
             r shouldBe EmptyRetrieval
             true
           })
@@ -1349,7 +1359,7 @@ class TimeToPayProxyControllerSpec extends AnyWordSpec with MockFactory {
             _: ExecutionContext
           ))
           .expects(where { (e: Predicate, r: Retrieval[Unit], _: HeaderCarrier, _: ExecutionContext) =>
-            e shouldBe Enrolment(ReadTimeToPayProxy.entryName)
+            e shouldBe Enrolment(WriteTimeToPayProxy.entryName)
             r shouldBe EmptyRetrieval
             true
           })
@@ -1388,7 +1398,7 @@ class TimeToPayProxyControllerSpec extends AnyWordSpec with MockFactory {
             _: ExecutionContext
           ))
           .expects(where { (e: Predicate, r: Retrieval[Unit], _: HeaderCarrier, _: ExecutionContext) =>
-            e shouldBe Enrolment(ReadTimeToPayProxy.entryName)
+            e shouldBe Enrolment(WriteTimeToPayProxy.entryName)
             r shouldBe EmptyRetrieval
             true
           })
@@ -1431,7 +1441,7 @@ class TimeToPayProxyControllerSpec extends AnyWordSpec with MockFactory {
             _: ExecutionContext
           ))
           .expects(where { (e: Predicate, r: Retrieval[Unit], _: HeaderCarrier, _: ExecutionContext) =>
-            e shouldBe Enrolment(ReadTimeToPayProxy.entryName)
+            e shouldBe Enrolment(WriteTimeToPayProxy.entryName)
             r shouldBe EmptyRetrieval
             true
           })
@@ -1689,7 +1699,7 @@ class TimeToPayProxyControllerSpec extends AnyWordSpec with MockFactory {
             _: ExecutionContext
           ))
           .expects(where { (e: Predicate, r: Retrieval[Unit], _: HeaderCarrier, _: ExecutionContext) =>
-            e shouldBe Enrolment(ReadTimeToPayProxy.entryName)
+            e shouldBe Enrolment(WriteTimeToPayProxy.entryName)
             r shouldBe EmptyRetrieval
             true
           })
@@ -1729,7 +1739,7 @@ class TimeToPayProxyControllerSpec extends AnyWordSpec with MockFactory {
             _: ExecutionContext
           ))
           .expects(where { (e: Predicate, r: Retrieval[Unit], _: HeaderCarrier, _: ExecutionContext) =>
-            e shouldBe Enrolment(ReadTimeToPayProxy.entryName)
+            e shouldBe Enrolment(WriteTimeToPayProxy.entryName)
             r shouldBe EmptyRetrieval
             true
           })
@@ -1767,7 +1777,7 @@ class TimeToPayProxyControllerSpec extends AnyWordSpec with MockFactory {
             _: ExecutionContext
           ))
           .expects(where { (e: Predicate, r: Retrieval[Unit], _: HeaderCarrier, _: ExecutionContext) =>
-            e shouldBe Enrolment(ReadTimeToPayProxy.entryName)
+            e shouldBe Enrolment(WriteTimeToPayProxy.entryName)
             r shouldBe EmptyRetrieval
             true
           })
@@ -1809,7 +1819,7 @@ class TimeToPayProxyControllerSpec extends AnyWordSpec with MockFactory {
             _: ExecutionContext
           ))
           .expects(where { (e: Predicate, r: Retrieval[Unit], _: HeaderCarrier, _: ExecutionContext) =>
-            e shouldBe Enrolment(ReadTimeToPayProxy.entryName)
+            e shouldBe Enrolment(WriteTimeToPayProxy.entryName)
             r shouldBe EmptyRetrieval
             true
           })
