@@ -36,7 +36,6 @@ import uk.gov.hmrc.timetopayproxy.support.IntegrationBaseSpec
 import java.time.{ Instant, LocalDate, LocalDateTime }
 import scala.concurrent.ExecutionContext
 
-// TODO Stubs are not per test
 class TimeToPayProxyControllerEnrolmentAuthEnabledItSpec extends IntegrationBaseSpec {
   def internalAuthEnabled: Boolean = false
   def enrolmentAuthEnabled: Boolean = true

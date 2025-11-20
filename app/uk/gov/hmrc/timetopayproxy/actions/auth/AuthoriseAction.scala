@@ -29,7 +29,10 @@ import javax.inject.Inject
 import scala.concurrent.{ ExecutionContext, Future }
 import scala.util.control.NonFatal
 
-sealed abstract class StoredEnrolmentScope(override val entryName: String) extends EnumEntry
+sealed abstract class StoredEnrolmentScope(override val entryName: String) extends EnumEntry {
+
+  def toEnrolment: Enrolment = Enrolment(this.entryName)
+}
 
 object StoredEnrolmentScope extends Enum[StoredEnrolmentScope] {
   def values: IndexedSeq[StoredEnrolmentScope] = findValues
@@ -79,5 +82,5 @@ final class ReadAuthoriseAction @Inject() (
   cc: ControllerComponents,
   featureSwitch: FeatureSwitch
 ) extends AuthoriseAction(authConnector: PlayAuthConnector, cc: ControllerComponents, featureSwitch: FeatureSwitch) {
-  def enrolment: Enrolment = Enrolment(StoredEnrolmentScope.ReadTimeToPayProxy.entryName)
+  def enrolment: Enrolment = StoredEnrolmentScope.ReadTimeToPayProxy.toEnrolment
 }
