@@ -20,7 +20,7 @@ import cats.syntax.either._
 import play.api.libs.json._
 import play.api.mvc._
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
-import uk.gov.hmrc.timetopayproxy.actions.auth.{ ReadAuthoriseAction, WriteAuthoriseAction }
+import uk.gov.hmrc.timetopayproxy.actions.auth.ReadAuthoriseAction
 import uk.gov.hmrc.timetopayproxy.config.FeatureSwitch
 import uk.gov.hmrc.timetopayproxy.models._
 import uk.gov.hmrc.timetopayproxy.models.affordablequotes.AffordableQuotesRequest
@@ -39,7 +39,6 @@ import scala.util.{ Failure, Success, Try }
 @Singleton()
 class TimeToPayProxyController @Inject() (
   readAuthoriseAction: ReadAuthoriseAction,
-  writeAuthoriseAction: WriteAuthoriseAction,
   cc: ControllerComponents,
   timeToPayQuoteService: TTPQuoteService,
   ttpFeedbackLoopService: TtpFeedbackLoopService,
@@ -119,7 +118,7 @@ class TimeToPayProxyController @Inject() (
     }
   }
 
-  def cancelTtp: Action[JsValue] = writeAuthoriseAction.async(parse.json) { implicit request =>
+  def cancelTtp: Action[JsValue] = readAuthoriseAction.async(parse.json) { implicit request =>
     if (featureSwitch.cancelEndpointEnabled) {
       withJsonBody[TtpCancelRequest] { deserialisedRequest: TtpCancelRequest =>
         ttpFeedbackLoopService
@@ -149,7 +148,7 @@ class TimeToPayProxyController @Inject() (
     }
   }
 
-  def fullAmendTtp: Action[JsValue] = writeAuthoriseAction.async(parse.json) { implicit request =>
+  def fullAmendTtp: Action[JsValue] = readAuthoriseAction.async(parse.json) { implicit request =>
     if (featureSwitch.fullAmendEndpointEnabled) {
       withJsonBody[TtpFullAmendRequest] { deserialisedRequest: TtpFullAmendRequest =>
         ttpFeedbackLoopService

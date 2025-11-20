@@ -35,9 +35,6 @@ object StoredEnrolmentScope extends Enum[StoredEnrolmentScope] {
   def values: IndexedSeq[StoredEnrolmentScope] = findValues
 
   case object ReadTimeToPayProxy extends StoredEnrolmentScope("read:time-to-pay-proxy")
-
-  case object WriteTimeToPayProxy extends StoredEnrolmentScope("write:time-to-pay-proxy")
-
 }
 
 sealed abstract class AuthoriseAction(
@@ -83,12 +80,4 @@ final class ReadAuthoriseAction @Inject() (
   featureSwitch: FeatureSwitch
 ) extends AuthoriseAction(authConnector: PlayAuthConnector, cc: ControllerComponents, featureSwitch: FeatureSwitch) {
   def enrolment: Enrolment = Enrolment(StoredEnrolmentScope.ReadTimeToPayProxy.entryName)
-}
-
-final class WriteAuthoriseAction @Inject() (
-  override val authConnector: PlayAuthConnector,
-  cc: ControllerComponents,
-  featureSwitch: FeatureSwitch
-) extends AuthoriseAction(authConnector: PlayAuthConnector, cc: ControllerComponents, featureSwitch: FeatureSwitch) {
-  def enrolment: Enrolment = Enrolment(StoredEnrolmentScope.WriteTimeToPayProxy.entryName)
 }

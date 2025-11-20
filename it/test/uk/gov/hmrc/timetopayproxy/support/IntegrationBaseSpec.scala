@@ -70,6 +70,11 @@ trait IntegrationBaseSpec
     super.afterAll()
   }
 
+  override def afterEach(): Unit = {
+    resetWireMock()
+    super.afterEach()
+  }
+
   def buildRequest(path: String): WSRequest =
     client.url(s"http://localhost:$port$path").withFollowRedirects(false).withHttpHeaders("Authorization" -> "dummy")
 

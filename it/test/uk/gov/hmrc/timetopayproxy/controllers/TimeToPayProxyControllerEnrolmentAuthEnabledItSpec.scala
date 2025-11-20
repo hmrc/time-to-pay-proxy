@@ -36,6 +36,7 @@ import uk.gov.hmrc.timetopayproxy.support.IntegrationBaseSpec
 import java.time.{ Instant, LocalDate, LocalDateTime }
 import scala.concurrent.ExecutionContext
 
+// TODO Stubs are not per test
 class TimeToPayProxyControllerEnrolmentAuthEnabledItSpec extends IntegrationBaseSpec {
   def internalAuthEnabled: Boolean = false
   def enrolmentAuthEnabled: Boolean = true
@@ -608,7 +609,7 @@ class TimeToPayProxyControllerEnrolmentAuthEnabledItSpec extends IntegrationBase
             requestBodyContaining = Some(
               Json
                 .parse(
-                  """{"authorise":[{"identifiers":[],"state":"Activated","enrolment":"write:time-to-pay-proxy"}],"retrieve":[]}"""
+                  """{"authorise":[{"identifiers":[],"state":"Activated","enrolment":"read:time-to-pay-proxy"}],"retrieve":[]}"""
                 )
                 .toString()
             )
@@ -756,7 +757,7 @@ class TimeToPayProxyControllerEnrolmentAuthEnabledItSpec extends IntegrationBase
             requestBodyContaining = Some(
               Json
                 .parse(
-                  """{"authorise":[{"identifiers":[],"state":"Activated","enrolment":"write:time-to-pay-proxy"}],"retrieve":[]}"""
+                  """{"authorise":[{"identifiers":[],"state":"Activated","enrolment":"read:time-to-pay-proxy"}],"retrieve":[]}"""
                 )
                 .toString()
             )
