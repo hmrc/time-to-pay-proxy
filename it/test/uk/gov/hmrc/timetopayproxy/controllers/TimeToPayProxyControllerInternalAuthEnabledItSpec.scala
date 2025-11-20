@@ -18,16 +18,16 @@ package uk.gov.hmrc.timetopayproxy.controllers
 
 import cats.data.NonEmptyList
 import com.github.tomakehurst.wiremock.client.WireMock
-import com.github.tomakehurst.wiremock.client.WireMock.{ equalTo, postRequestedFor, urlPathEqualTo }
+import com.github.tomakehurst.wiremock.client.WireMock.{equalTo, post, postRequestedFor, urlPathEqualTo}
 import play.api.libs.json.Json
-import play.api.libs.ws.{ WSRequest, WSResponse }
+import play.api.libs.ws.{WSRequest, WSResponse}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.timetopayproxy.models._
 import uk.gov.hmrc.timetopayproxy.models.saonly.chargeInfoApi._
 import uk.gov.hmrc.timetopayproxy.models.saonly.common._
 import uk.gov.hmrc.timetopayproxy.support.IntegrationBaseSpec
 
-import java.time.{ LocalDate, LocalDateTime }
+import java.time.{LocalDate, LocalDateTime}
 import scala.concurrent.ExecutionContext
 
 class TimeToPayProxyControllerInternalAuthEnabledItSpec extends IntegrationBaseSpec {
@@ -122,12 +122,12 @@ class TimeToPayProxyControllerInternalAuthEnabledItSpec extends IntegrationBaseS
 
       "should send a request with an Authorization header" - {
         "and return a 200" in {
-          stubPostWithResponseBody(url = "/auth/authorise", status = 200, responseBody = "null")
-          stubPostWithResponseBody(
+          stubRequest(
             url = "/debts/time-to-pay/charge-info",
             status = 200,
             responseBody = Json.toJson(chargeInfoResponse).toString(),
-            requestHeaderContaining = Some(Seq("Authorization" -> equalTo("configured-auth-token")))
+            requestHeaderContaining = Some(Seq("Authorization" -> equalTo("configured-auth-token"))),
+            urlToMappingBuilder = post
           )
 
           val requestForChargeInfo: WSRequest = buildRequest("/charge-info")

@@ -18,22 +18,22 @@ package uk.gov.hmrc.timetopayproxy.controllers
 
 import cats.data.NonEmptyList
 import com.github.tomakehurst.wiremock.client.WireMock
-import com.github.tomakehurst.wiremock.client.WireMock.{ equalTo, getRequestedFor, postRequestedFor, putRequestedFor, urlPathEqualTo }
+import com.github.tomakehurst.wiremock.client.WireMock._
 import play.api.libs.json.Json
-import play.api.libs.ws.{ WSRequest, WSResponse }
+import play.api.libs.ws.{WSRequest, WSResponse}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.timetopayproxy.models._
-import uk.gov.hmrc.timetopayproxy.models.affordablequotes.{ AffordableQuoteResponse, AffordableQuotesRequest }
+import uk.gov.hmrc.timetopayproxy.models.affordablequotes.{AffordableQuoteResponse, AffordableQuotesRequest}
 import uk.gov.hmrc.timetopayproxy.models.currency.GbpPounds
 import uk.gov.hmrc.timetopayproxy.models.saonly.chargeInfoApi._
 import uk.gov.hmrc.timetopayproxy.models.saonly.common._
-import uk.gov.hmrc.timetopayproxy.models.saonly.common.apistatus.{ ApiErrorResponse, ApiName, ApiStatus, ApiStatusCode }
-import uk.gov.hmrc.timetopayproxy.models.saonly.ttpcancel.{ CancellationDate, TtpCancelPaymentPlan, TtpCancelRequest, TtpCancelSuccessfulResponse }
-import uk.gov.hmrc.timetopayproxy.models.saonly.ttpfullamend.{ TtpFullAmendRequest, TtpFullAmendSuccessfulResponse }
-import uk.gov.hmrc.timetopayproxy.models.saonly.ttpinform.{ TtpInformRequest, TtpInformSuccessfulResponse }
+import uk.gov.hmrc.timetopayproxy.models.saonly.common.apistatus.{ApiErrorResponse, ApiName, ApiStatus, ApiStatusCode}
+import uk.gov.hmrc.timetopayproxy.models.saonly.ttpcancel.{CancellationDate, TtpCancelPaymentPlan, TtpCancelRequest, TtpCancelSuccessfulResponse}
+import uk.gov.hmrc.timetopayproxy.models.saonly.ttpfullamend.{TtpFullAmendRequest, TtpFullAmendSuccessfulResponse}
+import uk.gov.hmrc.timetopayproxy.models.saonly.ttpinform.{TtpInformRequest, TtpInformSuccessfulResponse}
 import uk.gov.hmrc.timetopayproxy.support.IntegrationBaseSpec
 
-import java.time.{ Instant, LocalDate, LocalDateTime }
+import java.time.{Instant, LocalDate, LocalDateTime}
 import scala.concurrent.ExecutionContext
 
 class TimeToPayProxyControllerEnrolmentAuthEnabledItSpec extends IntegrationBaseSpec {
@@ -96,7 +96,7 @@ class TimeToPayProxyControllerEnrolmentAuthEnabledItSpec extends IntegrationBase
 
       "should send the enrolment scope to the authorise endpoint" - {
         "and return a 200" in {
-          stubPostWithResponseBody(
+          stubRequest(
             url = "/auth/authorise",
             status = 200,
             responseBody = "null",
@@ -106,13 +106,15 @@ class TimeToPayProxyControllerEnrolmentAuthEnabledItSpec extends IntegrationBase
                   """{"authorise":[{"identifiers":[],"state":"Activated","enrolment":"read:time-to-pay-proxy"}],"retrieve":[]}"""
                 )
                 .toString()
-            )
+            ),
+            urlToMappingBuilder = post
           )
 
-          stubPostWithResponseBody(
+          stubRequest(
             url = "/debts/time-to-pay/quote",
             status = 201,
-            responseBody = Json.toJson(responsePayload).toString()
+            responseBody = Json.toJson(responsePayload).toString(),
+            urlToMappingBuilder = post
           )
 
           val request: WSRequest = buildRequest("/quote")
@@ -120,6 +122,7 @@ class TimeToPayProxyControllerEnrolmentAuthEnabledItSpec extends IntegrationBase
             request.post(Json.toJson(requestPayload))
           )
 
+          WireMock.verify(1, postRequestedFor(urlPathEqualTo("/auth/authorise")))
           WireMock.verify(1, postRequestedFor(urlPathEqualTo("/debts/time-to-pay/quote")))
 
           response.json.as[GenerateQuoteResponse] shouldBe responsePayload
@@ -184,7 +187,7 @@ class TimeToPayProxyControllerEnrolmentAuthEnabledItSpec extends IntegrationBase
 
       "should send the enrolment scope to the authorise endpoint" - {
         "and return a 200" in {
-          stubPostWithResponseBody(
+          stubRequest(
             url = "/auth/authorise",
             status = 200,
             responseBody = "null",
@@ -194,13 +197,15 @@ class TimeToPayProxyControllerEnrolmentAuthEnabledItSpec extends IntegrationBase
                   """{"authorise":[{"identifiers":[],"state":"Activated","enrolment":"read:time-to-pay-proxy"}],"retrieve":[]}"""
                 )
                 .toString()
-            )
+            ),
+            urlToMappingBuilder = post
           )
 
-          stubGetWithResponseBody(
+          stubRequest(
             url = "/debts/time-to-pay/quote/customerReference/planId",
             status = 200,
-            responseBody = Json.toJson(responsePayload).toString()
+            responseBody = Json.toJson(responsePayload).toString(),
+            urlToMappingBuilder = get
           )
 
           val request: WSRequest = buildRequest("/quote/customerReference/planId")
@@ -208,6 +213,7 @@ class TimeToPayProxyControllerEnrolmentAuthEnabledItSpec extends IntegrationBase
             request.get()
           )
 
+          WireMock.verify(1, postRequestedFor(urlPathEqualTo("/auth/authorise")))
           WireMock.verify(1, getRequestedFor(urlPathEqualTo("/debts/time-to-pay/quote/customerReference/planId")))
 
           response.json.as[ViewPlanResponse] shouldBe responsePayload
@@ -244,7 +250,7 @@ class TimeToPayProxyControllerEnrolmentAuthEnabledItSpec extends IntegrationBase
 
       "should send the enrolment scope to the authorise endpoint" - {
         "and return a 200" in {
-          stubPostWithResponseBody(
+          stubRequest(
             url = "/auth/authorise",
             status = 200,
             responseBody = "null",
@@ -254,13 +260,15 @@ class TimeToPayProxyControllerEnrolmentAuthEnabledItSpec extends IntegrationBase
                   """{"authorise":[{"identifiers":[],"state":"Activated","enrolment":"read:time-to-pay-proxy"}],"retrieve":[]}"""
                 )
                 .toString()
-            )
+            ),
+            urlToMappingBuilder = post
           )
 
-          stubPutWithResponseBody(
+          stubRequest(
             url = "/debts/time-to-pay/quote/customerReference/planId",
             status = 200,
-            responseBody = Json.toJson(responsePayload).toString()
+            responseBody = Json.toJson(responsePayload).toString(),
+            urlToMappingBuilder = put
           )
 
           val request: WSRequest = buildRequest("/quote/customerReference/planId")
@@ -268,6 +276,7 @@ class TimeToPayProxyControllerEnrolmentAuthEnabledItSpec extends IntegrationBase
             request.put(Json.toJson(requestPayload))
           )
 
+          WireMock.verify(1, postRequestedFor(urlPathEqualTo("/auth/authorise")))
           WireMock.verify(1, putRequestedFor(urlPathEqualTo("/debts/time-to-pay/quote/customerReference/planId")))
 
           response.json.as[UpdatePlanResponse] shouldBe responsePayload
@@ -342,7 +351,7 @@ class TimeToPayProxyControllerEnrolmentAuthEnabledItSpec extends IntegrationBase
 
       "should send the enrolment scope to the authorise endpoint" - {
         "and return a 200" in {
-          stubPostWithResponseBody(
+          stubRequest(
             url = "/auth/authorise",
             status = 200,
             responseBody = "null",
@@ -352,13 +361,15 @@ class TimeToPayProxyControllerEnrolmentAuthEnabledItSpec extends IntegrationBase
                   """{"authorise":[{"identifiers":[],"state":"Activated","enrolment":"read:time-to-pay-proxy"}],"retrieve":[]}"""
                 )
                 .toString()
-            )
+            ),
+            urlToMappingBuilder = post
           )
 
-          stubPostWithResponseBody(
+          stubRequest(
             url = "/debts/time-to-pay/quote/arrangement",
             status = 201,
-            responseBody = Json.toJson(responsePayload).toString()
+            responseBody = Json.toJson(responsePayload).toString(),
+            urlToMappingBuilder = post
           )
 
           val request: WSRequest = buildRequest("/quote/arrangement")
@@ -366,6 +377,7 @@ class TimeToPayProxyControllerEnrolmentAuthEnabledItSpec extends IntegrationBase
             request.post(Json.toJson(requestPayload))
           )
 
+          WireMock.verify(1, postRequestedFor(urlPathEqualTo("/auth/authorise")))
           WireMock.verify(1, postRequestedFor(urlPathEqualTo("/debts/time-to-pay/quote/arrangement")))
 
           response.json.as[CreatePlanResponse] shouldBe responsePayload
@@ -411,7 +423,7 @@ class TimeToPayProxyControllerEnrolmentAuthEnabledItSpec extends IntegrationBase
 
       "should send the enrolment scope to the authorise endpoint" - {
         "and return a 200" in {
-          stubPostWithResponseBody(
+          stubRequest(
             url = "/auth/authorise",
             status = 200,
             responseBody = "null",
@@ -421,13 +433,15 @@ class TimeToPayProxyControllerEnrolmentAuthEnabledItSpec extends IntegrationBase
                   """{"authorise":[{"identifiers":[],"state":"Activated","enrolment":"read:time-to-pay-proxy"}],"retrieve":[]}"""
                 )
                 .toString()
-            )
+            ),
+            urlToMappingBuilder = post
           )
 
-          stubPostWithResponseBody(
+          stubRequest(
             url = "/debts/time-to-pay/affordability/affordable-quotes",
             status = 200,
-            responseBody = Json.toJson(responsePayload).toString()
+            responseBody = Json.toJson(responsePayload).toString(),
+            urlToMappingBuilder = post
           )
 
           val request: WSRequest = buildRequest("/self-serve/affordable-quotes")
@@ -435,6 +449,7 @@ class TimeToPayProxyControllerEnrolmentAuthEnabledItSpec extends IntegrationBase
             request.post(Json.toJson(requestPayload))
           )
 
+          WireMock.verify(1, postRequestedFor(urlPathEqualTo("/auth/authorise")))
           WireMock.verify(1, postRequestedFor(urlPathEqualTo("/debts/time-to-pay/affordability/affordable-quotes")))
 
           response.json.as[AffordableQuoteResponse] shouldBe responsePayload
@@ -527,7 +542,7 @@ class TimeToPayProxyControllerEnrolmentAuthEnabledItSpec extends IntegrationBase
 
       "should send the enrolment scope to the authorise endpoint" - {
         "and return a 200" in {
-          stubPostWithResponseBody(
+          stubRequest(
             url = "/auth/authorise",
             status = 200,
             responseBody = "null",
@@ -537,13 +552,15 @@ class TimeToPayProxyControllerEnrolmentAuthEnabledItSpec extends IntegrationBase
                   """{"authorise":[{"identifiers":[],"state":"Activated","enrolment":"read:time-to-pay-proxy"}],"retrieve":[]}"""
                 )
                 .toString()
-            )
+            ),
+            urlToMappingBuilder = post
           )
 
-          stubPostWithResponseBody(
+          stubRequest(
             url = "/debts/time-to-pay/charge-info",
             status = 200,
-            responseBody = Json.toJson(responsePayload).toString()
+            responseBody = Json.toJson(responsePayload).toString(),
+            urlToMappingBuilder = post
           )
 
           val request: WSRequest = buildRequest("/charge-info")
@@ -551,6 +568,7 @@ class TimeToPayProxyControllerEnrolmentAuthEnabledItSpec extends IntegrationBase
             request.post(Json.toJson(requestPayload))
           )
 
+          WireMock.verify(1, postRequestedFor(urlPathEqualTo("/auth/authorise")))
           WireMock.verify(1, postRequestedFor(urlPathEqualTo("/debts/time-to-pay/charge-info")))
 
           response.json.as[ChargeInfoResponse] shouldBe responsePayload
@@ -601,7 +619,7 @@ class TimeToPayProxyControllerEnrolmentAuthEnabledItSpec extends IntegrationBase
 
       "should send the enrolment scope to the authorise endpoint" - {
         "and return a 200" in {
-          stubPostWithResponseBody(
+          stubRequest(
             url = "/auth/authorise",
             status = 200,
             responseBody = "null",
@@ -611,13 +629,15 @@ class TimeToPayProxyControllerEnrolmentAuthEnabledItSpec extends IntegrationBase
                   """{"authorise":[{"identifiers":[],"state":"Activated","enrolment":"read:time-to-pay-proxy"}],"retrieve":[]}"""
                 )
                 .toString()
-            )
+            ),
+            urlToMappingBuilder = post
           )
 
-          stubPostWithResponseBody(
+          stubRequest(
             url = "/debts/time-to-pay/cancel",
             status = 200,
-            responseBody = Json.toJson(responsePayload).toString()
+            responseBody = Json.toJson(responsePayload).toString(),
+            urlToMappingBuilder = post
           )
 
           val request: WSRequest = buildRequest("/cancel")
@@ -625,6 +645,7 @@ class TimeToPayProxyControllerEnrolmentAuthEnabledItSpec extends IntegrationBase
             request.post(Json.toJson(requestPayload))
           )
 
+          WireMock.verify(1, postRequestedFor(urlPathEqualTo("/auth/authorise")))
           WireMock.verify(1, postRequestedFor(urlPathEqualTo("/debts/time-to-pay/cancel")))
 
           response.json.as[TtpCancelSuccessfulResponse] shouldBe responsePayload
@@ -675,7 +696,7 @@ class TimeToPayProxyControllerEnrolmentAuthEnabledItSpec extends IntegrationBase
 
       "should send the enrolment scope to the authorise endpoint" - {
         "and return a 200" in {
-          stubPostWithResponseBody(
+          stubRequest(
             url = "/auth/authorise",
             status = 200,
             responseBody = "null",
@@ -685,13 +706,15 @@ class TimeToPayProxyControllerEnrolmentAuthEnabledItSpec extends IntegrationBase
                   """{"authorise":[{"identifiers":[],"state":"Activated","enrolment":"read:time-to-pay-proxy"}],"retrieve":[]}"""
                 )
                 .toString()
-            )
+            ),
+            urlToMappingBuilder = post
           )
 
-          stubPostWithResponseBody(
+          stubRequest(
             url = "/debts/time-to-pay/inform",
             status = 200,
-            responseBody = Json.toJson(responsePayload).toString()
+            responseBody = Json.toJson(responsePayload).toString(),
+            urlToMappingBuilder = post
           )
 
           val request: WSRequest = buildRequest("/inform")
@@ -699,6 +722,7 @@ class TimeToPayProxyControllerEnrolmentAuthEnabledItSpec extends IntegrationBase
             request.post(Json.toJson(requestPayload))
           )
 
+          WireMock.verify(1, postRequestedFor(urlPathEqualTo("/auth/authorise")))
           WireMock.verify(1, postRequestedFor(urlPathEqualTo("/debts/time-to-pay/inform")))
 
           response.json.as[TtpInformSuccessfulResponse] shouldBe responsePayload
@@ -749,7 +773,7 @@ class TimeToPayProxyControllerEnrolmentAuthEnabledItSpec extends IntegrationBase
 
       "should send the enrolment scope to the authorise endpoint" - {
         "and return a 200" in {
-          stubPostWithResponseBody(
+          stubRequest(
             url = "/auth/authorise",
             status = 200,
             responseBody = "null",
@@ -759,13 +783,15 @@ class TimeToPayProxyControllerEnrolmentAuthEnabledItSpec extends IntegrationBase
                   """{"authorise":[{"identifiers":[],"state":"Activated","enrolment":"read:time-to-pay-proxy"}],"retrieve":[]}"""
                 )
                 .toString()
-            )
+            ),
+            urlToMappingBuilder = post
           )
 
-          stubPostWithResponseBody(
+          stubRequest(
             url = "/debts/time-to-pay/full-amend",
             status = 200,
-            responseBody = Json.toJson(responsePayload).toString()
+            responseBody = Json.toJson(responsePayload).toString(),
+            urlToMappingBuilder = post
           )
 
           val request: WSRequest = buildRequest("/full-amend")
@@ -773,6 +799,7 @@ class TimeToPayProxyControllerEnrolmentAuthEnabledItSpec extends IntegrationBase
             request.post(Json.toJson(requestPayload))
           )
 
+          WireMock.verify(1, postRequestedFor(urlPathEqualTo("/auth/authorise")))
           WireMock.verify(1, postRequestedFor(urlPathEqualTo("/debts/time-to-pay/full-amend")))
 
           response.json.as[TtpFullAmendSuccessfulResponse] shouldBe responsePayload

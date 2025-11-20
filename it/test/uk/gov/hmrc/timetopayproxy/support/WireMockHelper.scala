@@ -22,7 +22,7 @@ import com.github.tomakehurst.wiremock.client.{ MappingBuilder, WireMock }
 import com.github.tomakehurst.wiremock.common.ConsoleNotifier
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration._
-import com.github.tomakehurst.wiremock.matching.StringValuePattern
+import com.github.tomakehurst.wiremock.matching.{ StringValuePattern, UrlPattern }
 import com.github.tomakehurst.wiremock.stubbing.StubMapping
 import org.scalatest.concurrent.{ Eventually, IntegrationPatience }
 
@@ -48,99 +48,41 @@ trait WireMockHelper {
 
   def resetWireMock(): Unit = WireMock.reset()
 
-  def stubPostWithResponseBody(
+  def stubRequest(
     url: String,
     status: Int,
     responseHeaderContaining: Option[Seq[(String, String)]] = None,
     responseBody: String,
     requestHeaderContaining: Option[Seq[(String, StringValuePattern)]] = None,
-    requestBodyContaining: Option[String] = None
+    requestBodyContaining: Option[String] = None,
+    urlToMappingBuilder: UrlPattern => MappingBuilder
   ): StubMapping =
     stubFor {
-      val mapping = post(urlEqualTo(url))
+      val mapping = urlToMappingBuilder(urlEqualTo(url))
 
-      handleHeaderBodyAndResponse(
-        status,
-        responseHeaderContaining,
-        responseBody,
-        requestHeaderContaining,
-        requestBodyContaining,
-        mapping
-      )
-    }
+      val response = aResponse()
+        .withStatus(status)
+        .withBody(responseBody)
+        .withHeader("Content-Type", "application/json; charset=utf-8")
 
-  def stubGetWithResponseBody(
-    url: String,
-    status: Int,
-    responseHeaderContaining: Option[Seq[(String, String)]] = None,
-    responseBody: String,
-    requestHeaderContaining: Option[Seq[(String, StringValuePattern)]] = None,
-    requestBodyContaining: Option[String] = None
-  ): StubMapping =
-    stubFor {
-      val mapping = get(urlEqualTo(url))
-
-      handleHeaderBodyAndResponse(
-        status,
-        responseHeaderContaining,
-        responseBody,
-        requestHeaderContaining,
-        requestBodyContaining,
-        mapping
-      )
-    }
-
-  def stubPutWithResponseBody(
-    url: String,
-    status: Int,
-    responseHeaderContaining: Option[Seq[(String, String)]] = None,
-    responseBody: String,
-    requestHeaderContaining: Option[Seq[(String, StringValuePattern)]] = None,
-    requestBodyContaining: Option[String] = None
-  ): StubMapping =
-    stubFor {
-      val mapping = put(urlEqualTo(url))
-
-      handleHeaderBodyAndResponse(
-        status,
-        responseHeaderContaining,
-        responseBody,
-        requestHeaderContaining,
-        requestBodyContaining,
-        mapping
-      )
-    }
-
-  private def handleHeaderBodyAndResponse(
-    status: Int,
-    responseHeaderContaining: Option[Seq[(String, String)]],
-    responseBody: String,
-    requestHeaderContaining: Option[Seq[(String, StringValuePattern)]],
-    requestBodyContaining: Option[String],
-    mapping: MappingBuilder
-  ): MappingBuilder = {
-    val response = aResponse()
-      .withStatus(status)
-      .withBody(responseBody)
-      .withHeader("Content-Type", "application/json; charset=utf-8")
-
-    val beforeCheckingRequest = requestHeaderContaining
-      .fold(mapping) { headers =>
-        headers.foldLeft(mapping) { case (mapping, (key, value)) =>
-          mapping.withHeader(key, value)
-        }
-      }
-      .willReturn(
-        responseHeaderContaining.fold(response) { headers =>
-          headers.foldLeft(response) { case (response, (key, value)) =>
-            response.withHeader(key, value)
+      val beforeCheckingRequest = requestHeaderContaining
+        .fold(mapping) { headers =>
+          headers.foldLeft(mapping) { case (mapping, (key, value)) =>
+            mapping.withHeader(key, value)
           }
         }
-      )
+        .willReturn(
+          responseHeaderContaining.fold(response) { headers =>
+            headers.foldLeft(response) { case (response, (key, value)) =>
+              response.withHeader(key, value)
+            }
+          }
+        )
 
-    requestBodyContaining match {
-      case Some(value) => beforeCheckingRequest.withRequestBody(containing(value))
-      case None        => beforeCheckingRequest
+      requestBodyContaining match {
+        case Some(value) => beforeCheckingRequest.withRequestBody(containing(value))
+        case None        => beforeCheckingRequest
+      }
     }
-  }
+
 }
