@@ -20,20 +20,21 @@ import cats.data.NonEmptyList
 import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.client.WireMock._
 import play.api.libs.json.Json
-import play.api.libs.ws.{WSRequest, WSResponse}
+import play.api.libs.ws.{ WSRequest, WSResponse }
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.timetopayproxy.models._
-import uk.gov.hmrc.timetopayproxy.models.affordablequotes.{AffordableQuoteResponse, AffordableQuotesRequest}
+import uk.gov.hmrc.timetopayproxy.models.affordablequotes.{ AffordableQuoteResponse, AffordableQuotesRequest }
 import uk.gov.hmrc.timetopayproxy.models.currency.GbpPounds
 import uk.gov.hmrc.timetopayproxy.models.saonly.chargeInfoApi._
 import uk.gov.hmrc.timetopayproxy.models.saonly.common._
-import uk.gov.hmrc.timetopayproxy.models.saonly.common.apistatus.{ApiErrorResponse, ApiName, ApiStatus, ApiStatusCode}
-import uk.gov.hmrc.timetopayproxy.models.saonly.ttpcancel.{CancellationDate, TtpCancelPaymentPlan, TtpCancelRequest, TtpCancelSuccessfulResponse}
-import uk.gov.hmrc.timetopayproxy.models.saonly.ttpfullamend.{TtpFullAmendRequest, TtpFullAmendSuccessfulResponse}
-import uk.gov.hmrc.timetopayproxy.models.saonly.ttpinform.{TtpInformRequest, TtpInformSuccessfulResponse}
+import uk.gov.hmrc.timetopayproxy.models.saonly.common.apistatus.{ ApiErrorResponse, ApiName, ApiStatus, ApiStatusCode }
+import uk.gov.hmrc.timetopayproxy.models.saonly.ttpcancel.{ CancellationDate, TtpCancelPaymentPlan, TtpCancelRequest, TtpCancelSuccessfulResponse }
+import uk.gov.hmrc.timetopayproxy.models.saonly.ttpfullamend.{ TtpFullAmendRequest, TtpFullAmendSuccessfulResponse }
+import uk.gov.hmrc.timetopayproxy.models.saonly.ttpinform.{ TtpInformRequest, TtpInformSuccessfulResponse }
 import uk.gov.hmrc.timetopayproxy.support.IntegrationBaseSpec
+import com.github.tomakehurst.wiremock.http.RequestMethod.{ GET, POST, PUT }
 
-import java.time.{Instant, LocalDate, LocalDateTime}
+import java.time.{ Instant, LocalDate, LocalDateTime }
 import scala.concurrent.ExecutionContext
 
 class TimeToPayProxyControllerEnrolmentAuthEnabledItSpec extends IntegrationBaseSpec {
@@ -97,6 +98,7 @@ class TimeToPayProxyControllerEnrolmentAuthEnabledItSpec extends IntegrationBase
       "should send the enrolment scope to the authorise endpoint" - {
         "and return a 200" in {
           stubRequest(
+            httpMethod = POST,
             url = "/auth/authorise",
             status = 200,
             responseBody = "null",
@@ -106,15 +108,14 @@ class TimeToPayProxyControllerEnrolmentAuthEnabledItSpec extends IntegrationBase
                   """{"authorise":[{"identifiers":[],"state":"Activated","enrolment":"read:time-to-pay-proxy"}],"retrieve":[]}"""
                 )
                 .toString()
-            ),
-            urlToMappingBuilder = post
+            )
           )
 
           stubRequest(
+            httpMethod = POST,
             url = "/debts/time-to-pay/quote",
             status = 201,
-            responseBody = Json.toJson(responsePayload).toString(),
-            urlToMappingBuilder = post
+            responseBody = Json.toJson(responsePayload).toString()
           )
 
           val request: WSRequest = buildRequest("/quote")
@@ -188,6 +189,7 @@ class TimeToPayProxyControllerEnrolmentAuthEnabledItSpec extends IntegrationBase
       "should send the enrolment scope to the authorise endpoint" - {
         "and return a 200" in {
           stubRequest(
+            httpMethod = POST,
             url = "/auth/authorise",
             status = 200,
             responseBody = "null",
@@ -197,15 +199,14 @@ class TimeToPayProxyControllerEnrolmentAuthEnabledItSpec extends IntegrationBase
                   """{"authorise":[{"identifiers":[],"state":"Activated","enrolment":"read:time-to-pay-proxy"}],"retrieve":[]}"""
                 )
                 .toString()
-            ),
-            urlToMappingBuilder = post
+            )
           )
 
           stubRequest(
+            httpMethod = GET,
             url = "/debts/time-to-pay/quote/customerReference/planId",
             status = 200,
-            responseBody = Json.toJson(responsePayload).toString(),
-            urlToMappingBuilder = get
+            responseBody = Json.toJson(responsePayload).toString()
           )
 
           val request: WSRequest = buildRequest("/quote/customerReference/planId")
@@ -251,6 +252,7 @@ class TimeToPayProxyControllerEnrolmentAuthEnabledItSpec extends IntegrationBase
       "should send the enrolment scope to the authorise endpoint" - {
         "and return a 200" in {
           stubRequest(
+            httpMethod = POST,
             url = "/auth/authorise",
             status = 200,
             responseBody = "null",
@@ -260,15 +262,14 @@ class TimeToPayProxyControllerEnrolmentAuthEnabledItSpec extends IntegrationBase
                   """{"authorise":[{"identifiers":[],"state":"Activated","enrolment":"read:time-to-pay-proxy"}],"retrieve":[]}"""
                 )
                 .toString()
-            ),
-            urlToMappingBuilder = post
+            )
           )
 
           stubRequest(
+            httpMethod = PUT,
             url = "/debts/time-to-pay/quote/customerReference/planId",
             status = 200,
-            responseBody = Json.toJson(responsePayload).toString(),
-            urlToMappingBuilder = put
+            responseBody = Json.toJson(responsePayload).toString()
           )
 
           val request: WSRequest = buildRequest("/quote/customerReference/planId")
@@ -352,6 +353,7 @@ class TimeToPayProxyControllerEnrolmentAuthEnabledItSpec extends IntegrationBase
       "should send the enrolment scope to the authorise endpoint" - {
         "and return a 200" in {
           stubRequest(
+            httpMethod = POST,
             url = "/auth/authorise",
             status = 200,
             responseBody = "null",
@@ -361,15 +363,14 @@ class TimeToPayProxyControllerEnrolmentAuthEnabledItSpec extends IntegrationBase
                   """{"authorise":[{"identifiers":[],"state":"Activated","enrolment":"read:time-to-pay-proxy"}],"retrieve":[]}"""
                 )
                 .toString()
-            ),
-            urlToMappingBuilder = post
+            )
           )
 
           stubRequest(
+            httpMethod = POST,
             url = "/debts/time-to-pay/quote/arrangement",
             status = 201,
-            responseBody = Json.toJson(responsePayload).toString(),
-            urlToMappingBuilder = post
+            responseBody = Json.toJson(responsePayload).toString()
           )
 
           val request: WSRequest = buildRequest("/quote/arrangement")
@@ -424,6 +425,7 @@ class TimeToPayProxyControllerEnrolmentAuthEnabledItSpec extends IntegrationBase
       "should send the enrolment scope to the authorise endpoint" - {
         "and return a 200" in {
           stubRequest(
+            httpMethod = POST,
             url = "/auth/authorise",
             status = 200,
             responseBody = "null",
@@ -433,15 +435,14 @@ class TimeToPayProxyControllerEnrolmentAuthEnabledItSpec extends IntegrationBase
                   """{"authorise":[{"identifiers":[],"state":"Activated","enrolment":"read:time-to-pay-proxy"}],"retrieve":[]}"""
                 )
                 .toString()
-            ),
-            urlToMappingBuilder = post
+            )
           )
 
           stubRequest(
+            httpMethod = POST,
             url = "/debts/time-to-pay/affordability/affordable-quotes",
             status = 200,
-            responseBody = Json.toJson(responsePayload).toString(),
-            urlToMappingBuilder = post
+            responseBody = Json.toJson(responsePayload).toString()
           )
 
           val request: WSRequest = buildRequest("/self-serve/affordable-quotes")
@@ -543,6 +544,7 @@ class TimeToPayProxyControllerEnrolmentAuthEnabledItSpec extends IntegrationBase
       "should send the enrolment scope to the authorise endpoint" - {
         "and return a 200" in {
           stubRequest(
+            httpMethod = POST,
             url = "/auth/authorise",
             status = 200,
             responseBody = "null",
@@ -552,15 +554,14 @@ class TimeToPayProxyControllerEnrolmentAuthEnabledItSpec extends IntegrationBase
                   """{"authorise":[{"identifiers":[],"state":"Activated","enrolment":"read:time-to-pay-proxy"}],"retrieve":[]}"""
                 )
                 .toString()
-            ),
-            urlToMappingBuilder = post
+            )
           )
 
           stubRequest(
+            httpMethod = POST,
             url = "/debts/time-to-pay/charge-info",
             status = 200,
-            responseBody = Json.toJson(responsePayload).toString(),
-            urlToMappingBuilder = post
+            responseBody = Json.toJson(responsePayload).toString()
           )
 
           val request: WSRequest = buildRequest("/charge-info")
@@ -620,6 +621,7 @@ class TimeToPayProxyControllerEnrolmentAuthEnabledItSpec extends IntegrationBase
       "should send the enrolment scope to the authorise endpoint" - {
         "and return a 200" in {
           stubRequest(
+            httpMethod = POST,
             url = "/auth/authorise",
             status = 200,
             responseBody = "null",
@@ -629,15 +631,14 @@ class TimeToPayProxyControllerEnrolmentAuthEnabledItSpec extends IntegrationBase
                   """{"authorise":[{"identifiers":[],"state":"Activated","enrolment":"read:time-to-pay-proxy"}],"retrieve":[]}"""
                 )
                 .toString()
-            ),
-            urlToMappingBuilder = post
+            )
           )
 
           stubRequest(
+            httpMethod = POST,
             url = "/debts/time-to-pay/cancel",
             status = 200,
-            responseBody = Json.toJson(responsePayload).toString(),
-            urlToMappingBuilder = post
+            responseBody = Json.toJson(responsePayload).toString()
           )
 
           val request: WSRequest = buildRequest("/cancel")
@@ -697,6 +698,7 @@ class TimeToPayProxyControllerEnrolmentAuthEnabledItSpec extends IntegrationBase
       "should send the enrolment scope to the authorise endpoint" - {
         "and return a 200" in {
           stubRequest(
+            httpMethod = POST,
             url = "/auth/authorise",
             status = 200,
             responseBody = "null",
@@ -706,15 +708,14 @@ class TimeToPayProxyControllerEnrolmentAuthEnabledItSpec extends IntegrationBase
                   """{"authorise":[{"identifiers":[],"state":"Activated","enrolment":"read:time-to-pay-proxy"}],"retrieve":[]}"""
                 )
                 .toString()
-            ),
-            urlToMappingBuilder = post
+            )
           )
 
           stubRequest(
+            httpMethod = POST,
             url = "/debts/time-to-pay/inform",
             status = 200,
-            responseBody = Json.toJson(responsePayload).toString(),
-            urlToMappingBuilder = post
+            responseBody = Json.toJson(responsePayload).toString()
           )
 
           val request: WSRequest = buildRequest("/inform")
@@ -774,6 +775,7 @@ class TimeToPayProxyControllerEnrolmentAuthEnabledItSpec extends IntegrationBase
       "should send the enrolment scope to the authorise endpoint" - {
         "and return a 200" in {
           stubRequest(
+            httpMethod = POST,
             url = "/auth/authorise",
             status = 200,
             responseBody = "null",
@@ -783,15 +785,14 @@ class TimeToPayProxyControllerEnrolmentAuthEnabledItSpec extends IntegrationBase
                   """{"authorise":[{"identifiers":[],"state":"Activated","enrolment":"read:time-to-pay-proxy"}],"retrieve":[]}"""
                 )
                 .toString()
-            ),
-            urlToMappingBuilder = post
+            )
           )
 
           stubRequest(
+            httpMethod = POST,
             url = "/debts/time-to-pay/full-amend",
             status = 200,
-            responseBody = Json.toJson(responsePayload).toString(),
-            urlToMappingBuilder = post
+            responseBody = Json.toJson(responsePayload).toString()
           )
 
           val request: WSRequest = buildRequest("/full-amend")

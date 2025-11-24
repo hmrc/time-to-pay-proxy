@@ -22,6 +22,7 @@ import com.github.tomakehurst.wiremock.client.{ MappingBuilder, WireMock }
 import com.github.tomakehurst.wiremock.common.ConsoleNotifier
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration._
+import com.github.tomakehurst.wiremock.http.RequestMethod
 import com.github.tomakehurst.wiremock.matching.{ StringValuePattern, UrlPattern }
 import com.github.tomakehurst.wiremock.stubbing.StubMapping
 import org.scalatest.concurrent.{ Eventually, IntegrationPatience }
@@ -49,16 +50,16 @@ trait WireMockHelper {
   def resetWireMock(): Unit = WireMock.reset()
 
   def stubRequest(
+    httpMethod: RequestMethod,
     url: String,
     status: Int,
     responseHeaderContaining: Option[Seq[(String, String)]] = None,
     responseBody: String,
     requestHeaderContaining: Option[Seq[(String, StringValuePattern)]] = None,
-    requestBodyContaining: Option[String] = None,
-    urlToMappingBuilder: UrlPattern => MappingBuilder
+    requestBodyContaining: Option[String] = None
   ): StubMapping =
     stubFor {
-      val mapping = urlToMappingBuilder(urlEqualTo(url))
+      val mapping = request(httpMethod.value(), urlEqualTo(url))
 
       val response = aResponse()
         .withStatus(status)
