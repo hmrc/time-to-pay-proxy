@@ -47,7 +47,7 @@ sealed abstract class AuthoriseAction(
 ) extends ActionBuilder[Request, AnyContent] with AuthorisedFunctions {
   private val logger = Logger(classOf[AuthoriseAction])
 
-  def enrolment: Enrolment
+  def storedEnrolmentScope: StoredEnrolmentScope
 
   final def invokeBlock[A](request: Request[A], block: Request[A] => Future[Result]): Future[Result] = {
     implicit val hc: HeaderCarrier =
@@ -55,7 +55,7 @@ sealed abstract class AuthoriseAction(
 
     val eventualResult: Future[Result] =
       if (featureSwitch.enrolmentAuthEnabled.enabled)
-        authorised(enrolment) {
+        authorised(storedEnrolmentScope.toEnrolment) {
           block(request)
         }(hc, cc.executionContext)
       else
@@ -82,5 +82,5 @@ final class ReadAuthoriseAction @Inject() (
   cc: ControllerComponents,
   featureSwitch: FeatureSwitch
 ) extends AuthoriseAction(authConnector: PlayAuthConnector, cc: ControllerComponents, featureSwitch: FeatureSwitch) {
-  def enrolment: Enrolment = StoredEnrolmentScope.ReadTimeToPayProxy.toEnrolment
+  def storedEnrolmentScope: StoredEnrolmentScope = StoredEnrolmentScope.ReadTimeToPayProxy
 }
