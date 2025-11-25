@@ -16,36 +16,52 @@
 
 package uk.gov.hmrc.timetopayproxy.actions.auth
 
-import com.google.inject.ImplementedBy
+import enumeratum.{ Enum, EnumEntry }
 import play.api.Logger
 import play.api.mvc.Results.{ Forbidden, ServiceUnavailable }
 import play.api.mvc._
 import uk.gov.hmrc.auth.core._
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.http.HeaderCarrierConverter
+import uk.gov.hmrc.timetopayproxy.config.FeatureSwitch
 
 import javax.inject.Inject
 import scala.concurrent.{ ExecutionContext, Future }
 import scala.util.control.NonFatal
 
-@ImplementedBy(classOf[AuthoriseActionImpl])
-trait AuthoriseAction extends ActionBuilder[Request, AnyContent]
+sealed abstract class StoredEnrolmentScope(override val entryName: String) extends EnumEntry {
 
-class AuthoriseActionImpl @Inject() (override val authConnector: PlayAuthConnector, cc: ControllerComponents)
-    extends AuthoriseAction with AuthorisedFunctions {
-  private val DTDEnrolment = "read:time-to-pay-proxy"
-  private val logger = Logger(classOf[AuthoriseActionImpl])
-  override def parser: BodyParser[AnyContent] = cc.parsers.defaultBodyParser
+  def toEnrolment: Enrolment = Enrolment(this.entryName)
+}
 
-  override def invokeBlock[A](request: Request[A], block: Request[A] => Future[Result]): Future[Result] = {
+object StoredEnrolmentScope extends Enum[StoredEnrolmentScope] {
+  def values: IndexedSeq[StoredEnrolmentScope] = findValues
+
+  case object ReadTimeToPayProxy extends StoredEnrolmentScope("read:time-to-pay-proxy")
+}
+
+sealed abstract class AuthoriseAction(
+  override val authConnector: PlayAuthConnector,
+  cc: ControllerComponents,
+  featureSwitch: FeatureSwitch
+) extends ActionBuilder[Request, AnyContent] with AuthorisedFunctions {
+  private val logger = Logger(classOf[AuthoriseAction])
+
+  def storedEnrolmentScope: StoredEnrolmentScope
+
+  final def invokeBlock[A](request: Request[A], block: Request[A] => Future[Result]): Future[Result] = {
     implicit val hc: HeaderCarrier =
       HeaderCarrierConverter.fromRequest(request)
 
-    val result = authorised(Enrolment(DTDEnrolment)) {
-      block(request)
-    }(hc, cc.executionContext)
+    val eventualResult: Future[Result] =
+      if (featureSwitch.enrolmentAuthEnabled.enabled)
+        authorised(storedEnrolmentScope.toEnrolment) {
+          block(request)
+        }(hc, cc.executionContext)
+      else
+        block(request)
 
-    result.recover {
+    eventualResult.recover {
       case ie: InsufficientEnrolments =>
         logger.debug(s"Forbidden request - Insufficient Enrolments: ${ie.reason}")
         Forbidden
@@ -55,6 +71,16 @@ class AuthoriseActionImpl @Inject() (override val authConnector: PlayAuthConnect
     }(cc.executionContext)
   }
 
-  override protected def executionContext: ExecutionContext = cc.executionContext
+  final def parser: BodyParser[AnyContent] = cc.parsers.defaultBodyParser
 
+  protected final def executionContext: ExecutionContext = cc.executionContext
+
+}
+
+final class ReadAuthoriseAction @Inject() (
+  override val authConnector: PlayAuthConnector,
+  cc: ControllerComponents,
+  featureSwitch: FeatureSwitch
+) extends AuthoriseAction(authConnector: PlayAuthConnector, cc: ControllerComponents, featureSwitch: FeatureSwitch) {
+  def storedEnrolmentScope: StoredEnrolmentScope = StoredEnrolmentScope.ReadTimeToPayProxy
 }

@@ -190,7 +190,7 @@ components:
         clientCredentials:
           tokenUrl: https://api.service.hmrc.gov.uk/oauth/token
           scopes:
-            "write:time-to-pay-proxy-cancel": "Write access for TTP cancel notifications"
+            "read:time-to-pay-proxy-cancel": "Write access for TTP cancel notifications"
   schemas:
     CancelIdentification:
       type: object

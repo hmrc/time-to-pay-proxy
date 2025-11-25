@@ -41,7 +41,7 @@ paths:
             example: f0bd1f32-de51-45cc-9b18-0520d6e3ab1a
       security:
         - applicationRestricted:
-            - write:time-to-pay-proxy
+            - read:time-to-pay-proxy
       requestBody:
         description: Request body with fields to amend a TTP in CESA and ETMP.
         required: true

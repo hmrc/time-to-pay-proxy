@@ -20,15 +20,15 @@ import cats.syntax.either._
 import play.api.libs.json._
 import play.api.mvc._
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
-import uk.gov.hmrc.timetopayproxy.actions.auth.AuthoriseAction
+import uk.gov.hmrc.timetopayproxy.actions.auth.ReadAuthoriseAction
 import uk.gov.hmrc.timetopayproxy.config.FeatureSwitch
 import uk.gov.hmrc.timetopayproxy.models._
 import uk.gov.hmrc.timetopayproxy.models.affordablequotes.AffordableQuotesRequest
 import uk.gov.hmrc.timetopayproxy.models.error.TtppEnvelope.TtppEnvelope
 import uk.gov.hmrc.timetopayproxy.models.error.{ TtppEnvelope, TtppErrorResponse, ValidationError }
 import uk.gov.hmrc.timetopayproxy.models.saonly.chargeInfoApi.ChargeInfoRequest
-import uk.gov.hmrc.timetopayproxy.models.saonly.ttpfullamend.TtpFullAmendRequest
 import uk.gov.hmrc.timetopayproxy.models.saonly.ttpcancel.TtpCancelRequest
+import uk.gov.hmrc.timetopayproxy.models.saonly.ttpfullamend.TtpFullAmendRequest
 import uk.gov.hmrc.timetopayproxy.models.saonly.ttpinform.TtpInformRequest
 import uk.gov.hmrc.timetopayproxy.services.{ TTPEService, TTPQuoteService, TtpFeedbackLoopService }
 
@@ -38,7 +38,7 @@ import scala.util.{ Failure, Success, Try }
 
 @Singleton()
 class TimeToPayProxyController @Inject() (
-  authoriseAction: AuthoriseAction,
+  readAuthoriseAction: ReadAuthoriseAction,
   cc: ControllerComponents,
   timeToPayQuoteService: TTPQuoteService,
   ttpFeedbackLoopService: TtpFeedbackLoopService,
@@ -50,7 +50,7 @@ class TimeToPayProxyController @Inject() (
   private val queryParameterNotMatchingPayload =
     "customerReference and planId in the query parameters should match the ones in the request payload"
 
-  def generateQuote: Action[JsValue] = authoriseAction.async(parse.json) { implicit request =>
+  def generateQuote: Action[JsValue] = readAuthoriseAction.async(parse.json) { implicit request =>
     withJsonBody[GenerateQuoteRequest] { timeToPayRequest: GenerateQuoteRequest =>
       timeToPayQuoteService
         .generateQuote(timeToPayRequest, request.queryString)
@@ -60,7 +60,7 @@ class TimeToPayProxyController @Inject() (
   }
 
   def viewPlan(customerReference: String, planId: String) =
-    authoriseAction.async { implicit request =>
+    readAuthoriseAction.async { implicit request =>
       timeToPayQuoteService
         .getExistingPlan(CustomerReference(customerReference), PlanId(planId))
         .leftMap(ttppError => ttppError.toWriteableProxyError)
@@ -68,7 +68,7 @@ class TimeToPayProxyController @Inject() (
     }
 
   def updatePlan(customerReference: String, planId: String): Action[JsValue] =
-    authoriseAction.async(parse.json) { implicit request =>
+    readAuthoriseAction.async(parse.json) { implicit request =>
       withJsonBody[UpdatePlanRequest] { updatePlanRequest: UpdatePlanRequest =>
         val result = for {
           validatedUpdatePlanRequest <-
@@ -82,7 +82,7 @@ class TimeToPayProxyController @Inject() (
       }
     }
 
-  def createPlan = authoriseAction.async(parse.json) { implicit request =>
+  def createPlan = readAuthoriseAction.async(parse.json) { implicit request =>
     withJsonBody[CreatePlanRequest] { createPlanRequest: CreatePlanRequest =>
       timeToPayQuoteService
         .createPlan(createPlanRequest, request.queryString)
@@ -91,7 +91,7 @@ class TimeToPayProxyController @Inject() (
     }
   }
 
-  def getAffordableQuotes = authoriseAction.async(parse.json) { implicit request =>
+  def getAffordableQuotes = readAuthoriseAction.async(parse.json) { implicit request =>
     withJsonBody[AffordableQuotesRequest] { affordableQuoteRequest: AffordableQuotesRequest =>
       timeToPayQuoteService
         .getAffordableQuotes(affordableQuoteRequest)
@@ -100,7 +100,7 @@ class TimeToPayProxyController @Inject() (
     }
   }
 
-  def checkChargeInfo: Action[JsValue] = authoriseAction.async(parse.json) { implicit request =>
+  def checkChargeInfo: Action[JsValue] = readAuthoriseAction.async(parse.json) { implicit request =>
     if (featureSwitch.chargeInfoEndpointEnabled) {
       withJsonBody[ChargeInfoRequest] { chargeInfoRequest: ChargeInfoRequest =>
         timeToPayEligibilityService
@@ -118,7 +118,7 @@ class TimeToPayProxyController @Inject() (
     }
   }
 
-  def cancelTtp: Action[JsValue] = authoriseAction.async(parse.json) { implicit request =>
+  def cancelTtp: Action[JsValue] = readAuthoriseAction.async(parse.json) { implicit request =>
     if (featureSwitch.cancelEndpointEnabled) {
       withJsonBody[TtpCancelRequest] { deserialisedRequest: TtpCancelRequest =>
         ttpFeedbackLoopService
@@ -133,7 +133,7 @@ class TimeToPayProxyController @Inject() (
     }
   }
 
-  def informTtp: Action[JsValue] = authoriseAction.async(parse.json) { implicit request =>
+  def informTtp: Action[JsValue] = readAuthoriseAction.async(parse.json) { implicit request =>
     if (featureSwitch.informEndpointEnabled) {
       withJsonBody[TtpInformRequest] { deserialisedRequest: TtpInformRequest =>
         ttpFeedbackLoopService
@@ -148,7 +148,7 @@ class TimeToPayProxyController @Inject() (
     }
   }
 
-  def fullAmendTtp: Action[JsValue] = authoriseAction.async(parse.json) { implicit request =>
+  def fullAmendTtp: Action[JsValue] = readAuthoriseAction.async(parse.json) { implicit request =>
     if (featureSwitch.fullAmendEndpointEnabled) {
       withJsonBody[TtpFullAmendRequest] { deserialisedRequest: TtpFullAmendRequest =>
         ttpFeedbackLoopService
