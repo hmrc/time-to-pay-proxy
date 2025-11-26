@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 HM Revenue & Customs
+ * Copyright 2025 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,13 +14,10 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.timetopayproxy.models.error
+package uk.gov.hmrc.timetopayproxy.utils
 
-import uk.gov.hmrc.timetopayproxy.utils.WithLoggableDebugString
-
-trait ProxyEnvelopeError extends WithLoggableDebugString { this: Product with Serializable =>
-  def toWriteableProxyError: TtppWriteableError
+trait WithLoggableDebugString {
 
   /** As much debugging information as might be useful, which can be logged in production. */
-  def toStringSafeToLogInProd: String = this.toString // All Proxy errors
+  def toStringSafeToLogInProd: String
 }

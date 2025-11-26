@@ -291,7 +291,8 @@ class TimeToPayProxyControllerItSpec extends IntegrationBaseSpec {
               val expectedTtppErrorResponse: TtppErrorResponse =
                 TtppErrorResponse(
                   statusCode = 503,
-                  errorMessage = "JSON structure is not valid in received successful HTTP response."
+                  errorMessage =
+                    "Received status code 200 with incorrect JSON body for request: POST http://localhost:11111/debts/time-to-pay/affordability/affordable-quotes"
                 )
 
               response.json shouldBe Json.toJson(expectedTtppErrorResponse)
@@ -317,7 +318,9 @@ class TimeToPayProxyControllerItSpec extends IntegrationBaseSpec {
               val expectedTtppErrorResponse: TtppErrorResponse =
                 TtppErrorResponse(
                   statusCode = 503,
-                  errorMessage = "JSON structure is not valid in received error HTTP response."
+                  errorMessage = """Status code 400: JSON structure is not valid in received error HTTP response.
+                                   |  Validation errors:
+                                   |    - For path  , errors: [error.expected.jsobject].""".stripMargin
                 )
 
               response.json shouldBe Json.toJson(expectedTtppErrorResponse)
@@ -621,7 +624,8 @@ class TimeToPayProxyControllerItSpec extends IntegrationBaseSpec {
             val expectedTtppErrorResponse: TtppErrorResponse =
               TtppErrorResponse(
                 statusCode = 503,
-                errorMessage = "JSON structure is not valid in received successful HTTP response."
+                errorMessage =
+                  "Received status code 200 with incorrect JSON body for request: POST http://localhost:11111/debts/time-to-pay/charge-info"
               )
 
             response.json shouldBe Json.toJson(expectedTtppErrorResponse)
@@ -647,7 +651,8 @@ class TimeToPayProxyControllerItSpec extends IntegrationBaseSpec {
             val expectedTtppErrorResponse: TtppErrorResponse =
               TtppErrorResponse(
                 statusCode = 503,
-                errorMessage = "JSON structure is not valid in received error HTTP response."
+                errorMessage =
+                  "Status code 400: JSON structure is not valid in received error HTTP response.\n  Validation errors:\n    - For path  , errors: [error.expected.jsobject]."
               )
 
             response.json shouldBe Json.toJson(expectedTtppErrorResponse)
@@ -880,7 +885,8 @@ class TimeToPayProxyControllerItSpec extends IntegrationBaseSpec {
               val expectedTtppErrorResponse: TtppErrorResponse =
                 TtppErrorResponse(
                   statusCode = 503,
-                  errorMessage = "JSON structure is not valid in received successful HTTP response."
+                  errorMessage =
+                    "Received status code 200 with incorrect JSON body for request: POST http://localhost:11111/debts/time-to-pay/cancel"
                 )
 
               response.json shouldBe Json.toJson(expectedTtppErrorResponse)
@@ -908,7 +914,10 @@ class TimeToPayProxyControllerItSpec extends IntegrationBaseSpec {
                   val expectedTtppErrorResponse: TtppErrorResponse =
                     TtppErrorResponse(
                       statusCode = 503,
-                      errorMessage = "JSON structure is not valid in received error HTTP response."
+                      errorMessage =
+                        s"""Status code $responseStatus: JSON structure is not valid in received error HTTP response.
+                           |  Validation errors:
+                           |    - For path  , errors: [error.expected.jsobject].""".stripMargin
                     )
 
                   response.json shouldBe Json.toJson(expectedTtppErrorResponse)
@@ -932,7 +941,10 @@ class TimeToPayProxyControllerItSpec extends IntegrationBaseSpec {
             )
 
             val expectedTtppErrorResponse: TtppErrorResponse =
-              TtppErrorResponse(statusCode = 503, errorMessage = "HTTP status is unexpected in received HTTP response.")
+              TtppErrorResponse(
+                statusCode = 503,
+                errorMessage = "Status code 201: HTTP status is unexpected in received HTTP response."
+              )
 
             response.json shouldBe Json.toJson(expectedTtppErrorResponse)
             response.status shouldBe 503
@@ -953,7 +965,10 @@ class TimeToPayProxyControllerItSpec extends IntegrationBaseSpec {
             )
 
             val expectedTtppErrorResponse: TtppErrorResponse =
-              TtppErrorResponse(statusCode = 503, errorMessage = "HTTP status is unexpected in received HTTP response.")
+              TtppErrorResponse(
+                statusCode = 503,
+                errorMessage = "Status code 403: HTTP status is unexpected in received HTTP response."
+              )
 
             response.json shouldBe Json.toJson(expectedTtppErrorResponse)
             response.status shouldBe 503
@@ -1134,7 +1149,8 @@ class TimeToPayProxyControllerItSpec extends IntegrationBaseSpec {
               val expectedTtppErrorResponse: TtppErrorResponse =
                 TtppErrorResponse(
                   statusCode = 503,
-                  errorMessage = "JSON structure is not valid in received successful HTTP response."
+                  errorMessage =
+                    "Received status code 200 with incorrect JSON body for request: POST http://localhost:11111/debts/time-to-pay/inform"
                 )
 
               response.json shouldBe Json.toJson(expectedTtppErrorResponse)
@@ -1162,7 +1178,10 @@ class TimeToPayProxyControllerItSpec extends IntegrationBaseSpec {
                   val expectedTtppErrorResponse: TtppErrorResponse =
                     TtppErrorResponse(
                       statusCode = 503,
-                      errorMessage = "JSON structure is not valid in received error HTTP response."
+                      errorMessage =
+                        s"""Status code $responseStatus: JSON structure is not valid in received error HTTP response.
+                           |  Validation errors:
+                           |    - For path  , errors: [error.expected.jsobject].""".stripMargin
                     )
 
                   response.json shouldBe Json.toJson(expectedTtppErrorResponse)
@@ -1186,7 +1205,10 @@ class TimeToPayProxyControllerItSpec extends IntegrationBaseSpec {
             )
 
             val expectedTtppErrorResponse: TtppErrorResponse =
-              TtppErrorResponse(statusCode = 503, errorMessage = "HTTP status is unexpected in received HTTP response.")
+              TtppErrorResponse(
+                statusCode = 503,
+                errorMessage = "Status code 201: HTTP status is unexpected in received HTTP response."
+              )
 
             response.json shouldBe Json.toJson(expectedTtppErrorResponse)
             response.status shouldBe 503
@@ -1207,7 +1229,10 @@ class TimeToPayProxyControllerItSpec extends IntegrationBaseSpec {
             )
 
             val expectedTtppErrorResponse: TtppErrorResponse =
-              TtppErrorResponse(statusCode = 503, errorMessage = "HTTP status is unexpected in received HTTP response.")
+              TtppErrorResponse(
+                statusCode = 503,
+                errorMessage = "Status code 403: HTTP status is unexpected in received HTTP response."
+              )
 
             response.json shouldBe Json.toJson(expectedTtppErrorResponse)
             response.status shouldBe 503
@@ -1484,7 +1509,8 @@ class TimeToPayProxyControllerItSpec extends IntegrationBaseSpec {
               val expectedTtppErrorResponse: TtppErrorResponse =
                 TtppErrorResponse(
                   statusCode = 503,
-                  errorMessage = "JSON structure is not valid in received successful HTTP response."
+                  errorMessage =
+                    "Received status code 200 with incorrect JSON body for request: POST http://localhost:11111/debts/time-to-pay/full-amend"
                 )
 
               response.json shouldBe Json.toJson(expectedTtppErrorResponse)
@@ -1512,7 +1538,10 @@ class TimeToPayProxyControllerItSpec extends IntegrationBaseSpec {
                   val expectedTtppErrorResponse: TtppErrorResponse =
                     TtppErrorResponse(
                       statusCode = 503,
-                      errorMessage = "JSON structure is not valid in received error HTTP response."
+                      errorMessage =
+                        s"""Status code $responseStatus: JSON structure is not valid in received error HTTP response.
+                           |  Validation errors:
+                           |    - For path  , errors: [error.expected.jsobject].""".stripMargin
                     )
 
                   response.json shouldBe Json.toJson(expectedTtppErrorResponse)
@@ -1536,7 +1565,10 @@ class TimeToPayProxyControllerItSpec extends IntegrationBaseSpec {
             )
 
             val expectedTtppErrorResponse: TtppErrorResponse =
-              TtppErrorResponse(statusCode = 503, errorMessage = "HTTP status is unexpected in received HTTP response.")
+              TtppErrorResponse(
+                statusCode = 503,
+                errorMessage = "Status code 201: HTTP status is unexpected in received HTTP response."
+              )
 
             response.json shouldBe Json.toJson(expectedTtppErrorResponse)
             response.status shouldBe 503
@@ -1557,7 +1589,10 @@ class TimeToPayProxyControllerItSpec extends IntegrationBaseSpec {
             )
 
             val expectedTtppErrorResponse: TtppErrorResponse =
-              TtppErrorResponse(statusCode = 503, errorMessage = "HTTP status is unexpected in received HTTP response.")
+              TtppErrorResponse(
+                statusCode = 503,
+                errorMessage = "Status code 403: HTTP status is unexpected in received HTTP response."
+              )
 
             response.json shouldBe Json.toJson(expectedTtppErrorResponse)
             response.status shouldBe 503
@@ -1716,7 +1751,7 @@ class TimeToPayProxyControllerItSpec extends IntegrationBaseSpec {
             val expectedTtppErrorResponse: TtppErrorResponse =
               TtppErrorResponse(
                 statusCode = 503,
-                errorMessage = "HTTP status is unexpected in received HTTP response."
+                errorMessage = "Status code 500: HTTP status is unexpected in received HTTP response."
               )
 
             response.json shouldBe Json.toJson(expectedTtppErrorResponse)
@@ -1752,7 +1787,7 @@ class TimeToPayProxyControllerItSpec extends IntegrationBaseSpec {
             val expectedTtppErrorResponse: TtppErrorResponse =
               TtppErrorResponse(
                 statusCode = 503,
-                errorMessage = "HTTP status is unexpected in received HTTP response."
+                errorMessage = "Status code 503: HTTP status is unexpected in received HTTP response."
               )
 
             response.json shouldBe Json.toJson(expectedTtppErrorResponse)

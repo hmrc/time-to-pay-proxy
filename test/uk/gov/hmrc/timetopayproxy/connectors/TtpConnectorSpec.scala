@@ -309,7 +309,10 @@ class TtpConnectorSpec extends PlaySpec with DefaultAwaitTimeout with FutureAwai
         val result = connector.getExistingQuote(CustomerReference("CustRef1234"), PlanId("Plan1234"))
 
         await(result.value) mustBe Left(
-          ConnectorError(503, "JSON structure is not valid in received successful HTTP response.")
+          ConnectorError(
+            503,
+            "Received status code 200 with incorrect JSON body for request: GET http://localhost:11111/individuals/time-to-pay/quote/CustRef1234/Plan1234"
+          )
         )
       }
     }
@@ -322,7 +325,9 @@ class TtpConnectorSpec extends PlaySpec with DefaultAwaitTimeout with FutureAwai
         )
         val result = connector.getExistingQuote(CustomerReference("CustRef1234"), PlanId("Plan1234"))
 
-        await(result.value) mustBe Left(ConnectorError(503, "HTTP status is unexpected in received HTTP response."))
+        await(result.value) mustBe Left(
+          ConnectorError(503, "Status code 503: HTTP status is unexpected in received HTTP response.")
+        )
       }
     }
   }
