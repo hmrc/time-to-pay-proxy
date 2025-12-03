@@ -54,6 +54,7 @@ class TtpFeedbackLoopConnector @Inject() (
       .orSuccess[TtpCancelSuccessfulResponse](200)
       .orError[TtpCancelInformativeError](500)
       .orErrorTransformed[TimeToPayError](400, ttpError => ttpError.toConnectorError(status = 400))
+      .orErrorTransformed[TimeToPayError](401, ttpError => ttpError.toConnectorError(status = 401))
 
   private val httpReadsBuilderForInform: HttpReadsWithLoggingBuilder[ProxyEnvelopeError, TtpInformSuccessfulResponse] =
     HttpReadsWithLoggingBuilder
@@ -61,6 +62,7 @@ class TtpFeedbackLoopConnector @Inject() (
       .orSuccess[TtpInformSuccessfulResponse](200)
       .orError[TtpInformInformativeError](500)
       .orErrorTransformed[TimeToPayError](400, ttpError => ttpError.toConnectorError(status = 400))
+      .orErrorTransformed[TimeToPayError](401, ttpError => ttpError.toConnectorError(status = 401))
 
   private val httpReadsBuilderForFullAmend
     : HttpReadsWithLoggingBuilder[ProxyEnvelopeError, TtpFullAmendSuccessfulResponse] =
@@ -69,6 +71,7 @@ class TtpFeedbackLoopConnector @Inject() (
       .orSuccess[TtpFullAmendSuccessfulResponse](200)
       .orError[TtpFullAmendInformativeError](500)
       .orErrorTransformed[TimeToPayError](400, ttpError => ttpError.toConnectorError(status = 400))
+      .orErrorTransformed[TimeToPayError](401, ttpError => ttpError.toConnectorError(status = 401))
 
   def cancelTtp(
     ttppRequest: TtpCancelRequest

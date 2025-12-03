@@ -294,6 +294,22 @@ final class TtpFeedbackLoopConnectorSpec
           await(result.value) mustBe Right(ttpCancelResponse: TtpCancelSuccessfulResponse)
         }
 
+        "return an unauthorized response from an upstream service" in new Setup(
+          ifImpl = false,
+          internalAuthEnabled = true
+        ) {
+          stubPostWithResponseBodyEnsuringRequest(
+            "/debts/time-to-pay/cancel",
+            Json.toJson(ttpCancelRequest).toString(),
+            401,
+            """{"failures": [{"code": "401", "reason": "Unauthorized"}]}"""
+          )
+
+          val result = connector.cancelTtp(ttpCancelRequest)
+
+          await(result.value) mustBe Left(ConnectorError(401, "Unauthorized"))
+        }
+
         "parse an error response from an upstream service" in new Setup(ifImpl = false, internalAuthEnabled = true) {
           stubPostWithResponseBodyEnsuringRequest(
             "/debts/time-to-pay/cancel",
@@ -505,6 +521,22 @@ final class TtpFeedbackLoopConnectorSpec
           result.value.futureValue shouldBe Right(ttpInformResponse)
         }
 
+        "return an unauthorized response from an upstream service" in new Setup(
+          ifImpl = false,
+          internalAuthEnabled = true
+        ) {
+          stubPostWithResponseBodyEnsuringRequest(
+            "/debts/time-to-pay/inform",
+            Json.toJson(ttpInformRequest).toString(),
+            401,
+            """{"failures": [{"code": "401", "reason": "Unauthorized"}]}"""
+          )
+
+          val result: TtppEnvelope[TtpInformSuccessfulResponse] = connector.informTtp(ttpInformRequest)
+
+          result.value.futureValue shouldBe Left(ConnectorError(401, "Unauthorized"))
+        }
+
         "parse an error response from an upstream service" in new Setup(ifImpl = false, internalAuthEnabled = true) {
           stubPostWithResponseBodyEnsuringRequest(
             "/debts/time-to-pay/inform",
@@ -689,6 +721,22 @@ final class TtpFeedbackLoopConnectorSpec
           val result: TtppEnvelope[TtpFullAmendSuccessfulResponse] = connector.fullAmendTtp(fullAmendRequest)
 
           result.value.futureValue shouldBe Right(fullAmendResponse)
+        }
+
+        "return an unauthorized response from an upstream service" in new Setup(
+          ifImpl = false,
+          internalAuthEnabled = true
+        ) {
+          stubPostWithResponseBodyEnsuringRequest(
+            "/debts/time-to-pay/full-amend",
+            Json.toJson(fullAmendRequest).toString(),
+            401,
+            """{"failures": [{"code": "401", "reason": "Unauthorized"}]}"""
+          )
+
+          val result: TtppEnvelope[TtpFullAmendSuccessfulResponse] = connector.fullAmendTtp(fullAmendRequest)
+
+          result.value.futureValue shouldBe Left(ConnectorError(401, "Unauthorized"))
         }
 
         "parse an error response from an upstream service" in new Setup(ifImpl = false, internalAuthEnabled = true) {
