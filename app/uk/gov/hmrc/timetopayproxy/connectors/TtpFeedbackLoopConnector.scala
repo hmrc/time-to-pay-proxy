@@ -141,7 +141,7 @@ class TtpFeedbackLoopConnector @Inject() (
         "Authorization" -> appConfig.internalAuthToken,
         "CorrelationId" -> correlationId
       )
-    } else if (appConfig.useIf) { // DTD-2356: Soon usage of 'useif' will be removed
+    } else if (appConfig.useIf) { // DTD-3927: Soon usage of 'useif' will be removed
       Seq(
         "Authorization" -> s"Bearer ${appConfig.ttpToken: String}",
         "CorrelationId" -> correlationId
