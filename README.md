@@ -18,12 +18,24 @@ To run locally with Internal Auth enabled, a valid authentication token is neede
 To generate a test-only token, ensure INTERNAL_AUTH is running and send a POST request to `http://localhost:8470/test-only/token`
 
 The curl request below will generate an Authorization token, `valid-auth-token`, giving full permissions to access `time-to-pay-eligibility`:
-```
+```shell
 curl -i -X POST -H 'Content-Type: application/json'  -d '{
   "token": "valid-auth-token",         
   "principal": "object-store",
   "permissions": [{
     "resourceType": "time-to-pay-eligibility",
+    "resourceLocation": "*",
+    "actions": ["*"]
+  }]
+}' 'http://localhost:8470/test-only/token'
+```
+Similarly, if you need a token for `time-to-pay`:
+```shell
+curl -i -X POST -H 'Content-Type: application/json'  -d '{
+  "token": "valid-auth-token",         
+  "principal": "object-store",
+  "permissions": [{
+    "resourceType": "time-to-pay",
     "resourceLocation": "*",
     "actions": ["*"]
   }]
