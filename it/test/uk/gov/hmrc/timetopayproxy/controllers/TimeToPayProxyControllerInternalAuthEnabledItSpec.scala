@@ -128,7 +128,8 @@ class TimeToPayProxyControllerInternalAuthEnabledItSpec extends IntegrationBaseS
             url = "/debts/time-to-pay/charge-info",
             status = 200,
             responseBody = Json.toJson(chargeInfoResponse).toString(),
-            requestHeaderContaining = Some(Seq("Authorization" -> equalTo("configured-auth-token")))
+            requestHeaderContaining = Some(Seq("Authorization" -> equalTo("configured-auth-token"))),
+            requestBodyContaining = Some(Json.toJson(chargeInfoRequest).toString)
           )
 
           val requestForChargeInfo: WSRequest = buildRequest("/charge-info")
@@ -140,6 +141,93 @@ class TimeToPayProxyControllerInternalAuthEnabledItSpec extends IntegrationBaseS
 
           response.json.as[ChargeInfoResponse] shouldBe chargeInfoResponse
           response.status shouldBe 200
+        }
+      }
+    }
+
+    ".createPlan" - {
+      val createPlanRequest: CreatePlanRequest = CreatePlanRequest(
+        CustomerReference("customerReference"),
+        QuoteReference("quoteReference"),
+        ChannelIdentifier.Advisor,
+        PlanToCreatePlan(
+          QuoteId("quoteId"),
+          QuoteType.Duration,
+          quoteDate = LocalDate.parse("2010-02-02"),
+          instalmentStartDate = LocalDate.parse("2010-02-02"),
+          instalmentAmount = Some(100),
+          PaymentPlanType.TimeToPay,
+          thirdPartyBank = false,
+          numberOfInstalments = 2,
+          Some(FrequencyLowercase.Single),
+          Some(Duration(2)),
+          Some(PaymentMethod.Bacs),
+          Some(PaymentReference("ref123")),
+          initialPaymentDate = Some(LocalDate.parse("2010-02-02")),
+          initialPaymentAmount = Some(100),
+          totalDebtIncInt = 100,
+          totalInterest = 10,
+          interestAccrued = 10,
+          planInterest = 10
+        ),
+        List(
+          CreatePlanDebtItemCharge(
+            DebtItemChargeId("debtItemChargeId"),
+            mainTrans = "1525",
+            subTrans = "1000",
+            originalDebtAmount = 100,
+            interestStartDate = Some(LocalDate.parse("2010-02-02")),
+            List(Payment(LocalDate.parse("2020-01-01"), 100)),
+            dueDate = None,
+            chargeSource = None,
+            parentChargeReference = None,
+            parentMainTrans = None
+          )
+        ),
+        List(PaymentInformation(PaymentMethod.Bacs, Some(PaymentReference("ref123")))),
+        List(CustomerPostCode(PostCode("NW1 AB1"), postcodeDate = LocalDate.parse("2010-02-02"))),
+        List(
+          Instalment(
+            DebtItemChargeId("id1"),
+            dueDate = LocalDate.parse("2010-02-02"),
+            amountDue = 100,
+            expectedPayment = 100,
+            interestRate = 0.24,
+            instalmentNumber = 1,
+            instalmentInterestAccrued = 10,
+            instalmentBalance = 90
+          )
+        ),
+        regimeType = None
+      )
+
+      val createPlanResponse: CreatePlanResponse =
+        CreatePlanResponse(
+          CustomerReference("customerReference"),
+          PlanId("planId"),
+          CaseId("caseId"),
+          PlanStatus.Success
+        )
+
+      "should send a request with an Authorization header" - {
+        "and return a 200" in {
+          stubRequest(
+            httpMethod = POST,
+            url = "/debts/time-to-pay/quote/arrangement",
+            status = 201,
+            responseBody = Json.toJson(createPlanResponse).toString,
+            requestHeaderContaining = Some(Seq("Authorization" -> equalTo("configured-auth-token"))),
+            requestBodyContaining = Some(Json.toJson(createPlanRequest).toString)
+          )
+
+          val requestForCreatePlan: WSRequest = buildRequest("/quote/arrangement")
+
+          val postResponse: WSResponse =
+            await(requestForCreatePlan.post(Json.toJson(createPlanRequest)))
+
+          postResponse.status shouldBe 200
+
+          postResponse.json.as[CreatePlanResponse] shouldBe createPlanResponse
         }
       }
     }
