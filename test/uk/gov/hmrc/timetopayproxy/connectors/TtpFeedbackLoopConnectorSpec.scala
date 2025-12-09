@@ -27,11 +27,12 @@ import play.api.{ ConfigLoader, Configuration }
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.http.client.HttpClientV2
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
-import uk.gov.hmrc.timetopayproxy.config.AppConfig
+import uk.gov.hmrc.timetopayproxy.config.{ AppConfig, FeatureSwitch }
 import uk.gov.hmrc.timetopayproxy.models._
 import uk.gov.hmrc.timetopayproxy.models.currency.GbpPounds
 import uk.gov.hmrc.timetopayproxy.models.error.ConnectorError
 import uk.gov.hmrc.timetopayproxy.models.error.TtppEnvelope.TtppEnvelope
+import uk.gov.hmrc.timetopayproxy.models.featureSwitches.InternalAuthEnabled
 import uk.gov.hmrc.timetopayproxy.models.saonly.common._
 import uk.gov.hmrc.timetopayproxy.models.saonly.common.apistatus.{ ApiName, ApiStatus, ApiStatusCode }
 import uk.gov.hmrc.timetopayproxy.models.saonly.ttpcancel._
@@ -47,10 +48,11 @@ final class TtpFeedbackLoopConnectorSpec
 
   val config = mock[Configuration]
   val servicesConfig = mock[ServicesConfig]
+  val featureSwitch = mock[FeatureSwitch]
 
   val httpClient: HttpClientV2 = app.injector.instanceOf[HttpClientV2]
 
-  class Setup(ifImpl: Boolean) {
+  class Setup(ifImpl: Boolean, internalAuthEnabled: Boolean = false) {
     implicit val ec: ExecutionContext = ExecutionContext.global
     implicit val hc: HeaderCarrier = HeaderCarrier()
 
@@ -104,9 +106,13 @@ final class TtpFeedbackLoopConnectorSpec
       .expects("internal-auth.token", *)
       .returns("valid-auth-token")
 
-    val mockConfiguration: AppConfig = new MockAppConfig(config, servicesConfig, ifImpl)
+    (() => featureSwitch.internalAuthEnabled)
+      .expects()
+      .returning(InternalAuthEnabled(internalAuthEnabled))
 
-    val connector: TtpFeedbackLoopConnector = new TtpFeedbackLoopConnector(mockConfiguration, httpClient)
+    val mockConfiguration: AppConfig = new MockAppConfig(config, servicesConfig, ifImpl, internalAuthEnabled)
+
+    val connector: TtpFeedbackLoopConnector = new TtpFeedbackLoopConnector(mockConfiguration, httpClient, featureSwitch)
   }
 
   "TtpFeedbackLoopConnector" should {
@@ -160,7 +166,6 @@ final class TtpFeedbackLoopConnectorSpec
         internalErrors = List(TtpCancelInternalError("some error that ttp is responsible for")),
         processingDateTime = ProcessingDateTimeInstant(Instant.parse("2025-01-01T12:00:00Z"))
       )
-
       "using IF" should {
         "return a successful response" in new Setup(ifImpl = true) {
           stubPostWithResponseBodyEnsuringRequest(
@@ -246,6 +251,79 @@ final class TtpFeedbackLoopConnectorSpec
         }
 
         "handle 500 responses" in new Setup(ifImpl = false) {
+          stubPostWithResponseBodyEnsuringRequest(
+            "/debts/time-to-pay/cancel",
+            Json.toJson(ttpCancelRequest).toString(),
+            500,
+            Json.toJson(ttpCancelInformativeErrorResponse).toString()
+          )
+
+          val result = connector.cancelTtp(ttpCancelRequest)
+
+          await(result.value) mustBe
+            Left(
+              TtpCancelInformativeError(
+                apisCalled = Some(
+                  List(
+                    ApiStatus(
+                      ApiName("API1"),
+                      ApiStatusCode(200),
+                      ProcessingDateTimeInstant(Instant.parse("2025-01-01T12:00:00Z")),
+                      errorResponse = None
+                    )
+                  )
+                ),
+                internalErrors = List(TtpCancelInternalError("some error that ttp is responsible for")),
+                processingDateTime = ProcessingDateTimeInstant(Instant.parse("2025-01-01T12:00:00Z"))
+              )
+            )
+        }
+      }
+
+      "using InternalAuth" should {
+        "return a successful response" in new Setup(ifImpl = false, internalAuthEnabled = true) {
+          stubPostWithResponseBodyEnsuringRequest(
+            "/debts/time-to-pay/cancel",
+            Json.toJson(ttpCancelRequest).toString(),
+            200,
+            Json.toJson(ttpCancelResponse).toString()
+          )
+
+          val result = connector.cancelTtp(ttpCancelRequest)
+
+          await(result.value) mustBe Right(ttpCancelResponse: TtpCancelSuccessfulResponse)
+        }
+
+        "return an unauthorized response from an upstream service" in new Setup(
+          ifImpl = false,
+          internalAuthEnabled = true
+        ) {
+          stubPostWithResponseBodyEnsuringRequest(
+            "/debts/time-to-pay/cancel",
+            Json.toJson(ttpCancelRequest).toString(),
+            401,
+            """{"failures": [{"code": "401", "reason": "Unauthorized"}]}"""
+          )
+
+          val result = connector.cancelTtp(ttpCancelRequest)
+
+          await(result.value) mustBe Left(ConnectorError(401, "Unauthorized"))
+        }
+
+        "parse an error response from an upstream service" in new Setup(ifImpl = false, internalAuthEnabled = true) {
+          stubPostWithResponseBodyEnsuringRequest(
+            "/debts/time-to-pay/cancel",
+            Json.toJson(ttpCancelRequest).toString(),
+            400,
+            """{"failures": [{"code": "400", "reason": "Invalid request body"}]}"""
+          )
+
+          val result = connector.cancelTtp(ttpCancelRequest)
+
+          await(result.value) mustBe Left(ConnectorError(400, "Invalid request body"))
+        }
+
+        "handle 500 responses" in new Setup(ifImpl = false, internalAuthEnabled = true) {
           stubPostWithResponseBodyEnsuringRequest(
             "/debts/time-to-pay/cancel",
             Json.toJson(ttpCancelRequest).toString(),
@@ -428,6 +506,72 @@ final class TtpFeedbackLoopConnectorSpec
           result.value.futureValue shouldBe Left(informativeError)
         }
       }
+
+      "using Internal Auth" should {
+        "return a successful response" in new Setup(ifImpl = false, internalAuthEnabled = true) {
+          stubPostWithResponseBodyEnsuringRequest(
+            "/debts/time-to-pay/inform",
+            Json.toJson(ttpInformRequest).toString(),
+            200,
+            Json.toJson(ttpInformResponse).toString()
+          )
+
+          val result: TtppEnvelope[TtpInformSuccessfulResponse] = connector.informTtp(ttpInformRequest)
+
+          result.value.futureValue shouldBe Right(ttpInformResponse)
+        }
+
+        "return an unauthorized response from an upstream service" in new Setup(
+          ifImpl = false,
+          internalAuthEnabled = true
+        ) {
+          stubPostWithResponseBodyEnsuringRequest(
+            "/debts/time-to-pay/inform",
+            Json.toJson(ttpInformRequest).toString(),
+            401,
+            """{"failures": [{"code": "401", "reason": "Unauthorized"}]}"""
+          )
+
+          val result: TtppEnvelope[TtpInformSuccessfulResponse] = connector.informTtp(ttpInformRequest)
+
+          result.value.futureValue shouldBe Left(ConnectorError(401, "Unauthorized"))
+        }
+
+        "parse an error response from an upstream service" in new Setup(ifImpl = false, internalAuthEnabled = true) {
+          stubPostWithResponseBodyEnsuringRequest(
+            "/debts/time-to-pay/inform",
+            Json.toJson(ttpInformRequest).toString(),
+            400,
+            """{"failures": [{"code": "400", "reason": "Invalid request body"}]}"""
+          )
+
+          val result: TtppEnvelope[TtpInformSuccessfulResponse] = connector.informTtp(ttpInformRequest)
+
+          result.value.futureValue shouldBe Left(ConnectorError(400, "Invalid request body"))
+        }
+
+        "handle 500 responses" in new Setup(ifImpl = false, internalAuthEnabled = true) {
+          stubPostWithResponseBodyEnsuringRequest(
+            "/debts/time-to-pay/inform",
+            Json.toJson(ttpInformRequest).toString(),
+            500,
+            Json.toJson(ttpInformErrorResponse).toString()
+          )
+
+          val result: TtppEnvelope[TtpInformSuccessfulResponse] = connector.informTtp(ttpInformRequest)
+
+          val informativeError = TtpInformInformativeError(
+            apisCalled = Some(ttpInformResponse.apisCalled),
+            internalErrors = List(
+              TtpInformInternalError("some error that ttp is responsible for"),
+              TtpInformInternalError("another error that ttp is responsible for")
+            ),
+            processingDateTime = ttpInformResponse.processingDateTime
+          )
+
+          result.value.futureValue shouldBe Left(informativeError)
+        }
+      }
     }
 
     ".fullAmendTtp" should {
@@ -552,6 +696,63 @@ final class TtpFeedbackLoopConnectorSpec
         }
 
         "handle 500 responses" in new Setup(ifImpl = false) {
+          stubPostWithResponseBodyEnsuringRequest(
+            "/debts/time-to-pay/full-amend",
+            Json.toJson(fullAmendRequest).toString(),
+            500,
+            Json.toJson(fullAmendInformativeError).toString()
+          )
+
+          val result: TtppEnvelope[TtpFullAmendSuccessfulResponse] = connector.fullAmendTtp(fullAmendRequest)
+
+          result.value.futureValue shouldBe Left(fullAmendInformativeError)
+        }
+      }
+
+      "using Internal Auth" should {
+        "return a successful response" in new Setup(ifImpl = false, internalAuthEnabled = true) {
+          stubPostWithResponseBodyEnsuringRequest(
+            "/debts/time-to-pay/full-amend",
+            Json.toJson(fullAmendRequest).toString(),
+            200,
+            Json.toJson(fullAmendResponse).toString()
+          )
+
+          val result: TtppEnvelope[TtpFullAmendSuccessfulResponse] = connector.fullAmendTtp(fullAmendRequest)
+
+          result.value.futureValue shouldBe Right(fullAmendResponse)
+        }
+
+        "return an unauthorized response from an upstream service" in new Setup(
+          ifImpl = false,
+          internalAuthEnabled = true
+        ) {
+          stubPostWithResponseBodyEnsuringRequest(
+            "/debts/time-to-pay/full-amend",
+            Json.toJson(fullAmendRequest).toString(),
+            401,
+            """{"failures": [{"code": "401", "reason": "Unauthorized"}]}"""
+          )
+
+          val result: TtppEnvelope[TtpFullAmendSuccessfulResponse] = connector.fullAmendTtp(fullAmendRequest)
+
+          result.value.futureValue shouldBe Left(ConnectorError(401, "Unauthorized"))
+        }
+
+        "parse an error response from an upstream service" in new Setup(ifImpl = false, internalAuthEnabled = true) {
+          stubPostWithResponseBodyEnsuringRequest(
+            "/debts/time-to-pay/full-amend",
+            Json.toJson(fullAmendRequest).toString(),
+            400,
+            """{"failures": [{"code": "400", "reason": "Invalid request body"}]}"""
+          )
+
+          val result: TtppEnvelope[TtpFullAmendSuccessfulResponse] = connector.fullAmendTtp(fullAmendRequest)
+
+          result.value.futureValue shouldBe Left(ConnectorError(400, "Invalid request body"))
+        }
+
+        "handle 500 responses" in new Setup(ifImpl = false, internalAuthEnabled = true) {
           stubPostWithResponseBodyEnsuringRequest(
             "/debts/time-to-pay/full-amend",
             Json.toJson(fullAmendRequest).toString(),

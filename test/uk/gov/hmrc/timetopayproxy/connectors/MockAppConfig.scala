@@ -20,8 +20,12 @@ import play.api.Configuration
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 import uk.gov.hmrc.timetopayproxy.config.AppConfig
 
-class MockAppConfig(config: Configuration, servicesConfig: ServicesConfig, ifImpl: Boolean)
-    extends AppConfig(config, servicesConfig) {
+class MockAppConfig(
+  config: Configuration,
+  servicesConfig: ServicesConfig,
+  ifImpl: Boolean,
+  internalAuthEnabled: Boolean
+) extends AppConfig(config, servicesConfig) {
   override val authBaseUrl: String = "http://localhost:11111"
   override val ttpBaseUrl: String = "http://localhost:11111"
   override val ttpeBaseUrl: String = "http://localhost:11111"
@@ -29,4 +33,5 @@ class MockAppConfig(config: Configuration, servicesConfig: ServicesConfig, ifImp
   override val useIf: Boolean = ifImpl
   override val auditingEnabled: Boolean = false
   override val graphiteHost: String = "http://localhost:11111"
+  override val featureSwitch: Some[Configuration] = Some(Configuration("internalAuthEnabled" -> internalAuthEnabled))
 }

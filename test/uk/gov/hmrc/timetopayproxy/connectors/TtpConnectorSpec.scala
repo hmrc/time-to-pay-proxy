@@ -40,7 +40,7 @@ class TtpConnectorSpec extends PlaySpec with DefaultAwaitTimeout with FutureAwai
 
   val httpClient: HttpClientV2 = app.injector.instanceOf[HttpClientV2]
 
-  class Setup(ifImpl: Boolean) {
+  class Setup(ifImpl: Boolean, internalAuthEnabled: Boolean = false) {
     implicit val ec: ExecutionContext = ExecutionContext.global
     implicit val hc: HeaderCarrier = HeaderCarrier()
 
@@ -94,7 +94,7 @@ class TtpConnectorSpec extends PlaySpec with DefaultAwaitTimeout with FutureAwai
       .expects("internal-auth.token", *)
       .returns("valid-auth-token")
 
-    val mockConfiguration: AppConfig = new MockAppConfig(config, servicesConfig, ifImpl)
+    val mockConfiguration: AppConfig = new MockAppConfig(config, servicesConfig, ifImpl, internalAuthEnabled)
 
     val connector: TtpConnector = new DefaultTtpConnector(mockConfiguration, httpClient)
   }
