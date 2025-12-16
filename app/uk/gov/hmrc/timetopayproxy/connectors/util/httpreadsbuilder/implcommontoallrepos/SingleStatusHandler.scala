@@ -125,7 +125,7 @@ private[httpreadsbuilder] object SingleStatusHandler {
             sourceClass = sourceClass,
             responseContext,
             HttpReadsBuilderError.OriginallyMeantToBeLeft,
-            errs.toSeq.map { e => (e._1, e._2.toSeq) }
+            errs.toSeq.map(e => (e._1, e._2.toSeq))
           )
 
           maybeLoggingContext.foreach(_.logError(responseContext, error))
