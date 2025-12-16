@@ -21,7 +21,7 @@ import play.api.libs.json.Json
 import uk.gov.hmrc.http.client.HttpClientV2
 import uk.gov.hmrc.http.{ HeaderCarrier, HttpReads, StringContextOps }
 import uk.gov.hmrc.timetopayproxy.config.{ AppConfig, FeatureSwitch }
-import uk.gov.hmrc.timetopayproxy.connectors.util.HttpReadsWithLoggingBuilder
+import uk.gov.hmrc.timetopayproxy.connectors.util.httpreadsbuilder.HttpReadsBuilder
 import uk.gov.hmrc.timetopayproxy.logging.RequestAwareLogger
 import uk.gov.hmrc.timetopayproxy.models.TimeToPayError
 import uk.gov.hmrc.timetopayproxy.models.error.ProxyEnvelopeError
@@ -48,37 +48,36 @@ class TtpFeedbackLoopConnector @Inject() (
 
   private val logger: RequestAwareLogger = new RequestAwareLogger(classOf[TtpFeedbackLoopConnector])
 
-  private val httpReadsBuilderForCancel: HttpReadsWithLoggingBuilder[ProxyEnvelopeError, TtpCancelSuccessfulResponse] =
-    HttpReadsWithLoggingBuilder
-      .empty[ProxyEnvelopeError, TtpCancelSuccessfulResponse]
-      .orSuccess[TtpCancelSuccessfulResponse](200)
-      .orError[TtpCancelInformativeError](500)
-      .orErrorTransformed[TimeToPayError](400, ttpError => ttpError.toConnectorError(status = 400))
-      .orErrorTransformed[TimeToPayError](401, ttpError => ttpError.toConnectorError(status = 401))
+  private val httpReadsBuilderForCancel: HttpReadsBuilder[ProxyEnvelopeError, TtpCancelSuccessfulResponse] =
+    HttpReadsBuilder
+      .withDefault503ConnectorError[ProxyEnvelopeError, TtpCancelSuccessfulResponse](this.getClass)
+      .handleSuccess[TtpCancelSuccessfulResponse](200)
+      .handleError[TtpCancelInformativeError](500)
+      .handleErrorTransformed[TimeToPayError](400, ttpError => ttpError.toConnectorError(status = 400))
+      .handleErrorTransformed[TimeToPayError](401, ttpError => ttpError.toConnectorError(status = 401))
 
-  private val httpReadsBuilderForInform: HttpReadsWithLoggingBuilder[ProxyEnvelopeError, TtpInformSuccessfulResponse] =
-    HttpReadsWithLoggingBuilder
-      .empty[ProxyEnvelopeError, TtpInformSuccessfulResponse]
-      .orSuccess[TtpInformSuccessfulResponse](200)
-      .orError[TtpInformInformativeError](500)
-      .orErrorTransformed[TimeToPayError](400, ttpError => ttpError.toConnectorError(status = 400))
-      .orErrorTransformed[TimeToPayError](401, ttpError => ttpError.toConnectorError(status = 401))
+  private val httpReadsBuilderForInform: HttpReadsBuilder[ProxyEnvelopeError, TtpInformSuccessfulResponse] =
+    HttpReadsBuilder
+      .withDefault503ConnectorError[ProxyEnvelopeError, TtpInformSuccessfulResponse](this.getClass)
+      .handleSuccess[TtpInformSuccessfulResponse](200)
+      .handleError[TtpInformInformativeError](500)
+      .handleErrorTransformed[TimeToPayError](400, ttpError => ttpError.toConnectorError(status = 400))
+      .handleErrorTransformed[TimeToPayError](401, ttpError => ttpError.toConnectorError(status = 401))
 
-  private val httpReadsBuilderForFullAmend
-    : HttpReadsWithLoggingBuilder[ProxyEnvelopeError, TtpFullAmendSuccessfulResponse] =
-    HttpReadsWithLoggingBuilder
-      .empty[ProxyEnvelopeError, TtpFullAmendSuccessfulResponse]
-      .orSuccess[TtpFullAmendSuccessfulResponse](200)
-      .orError[TtpFullAmendInformativeError](500)
-      .orErrorTransformed[TimeToPayError](400, ttpError => ttpError.toConnectorError(status = 400))
-      .orErrorTransformed[TimeToPayError](401, ttpError => ttpError.toConnectorError(status = 401))
+  private val httpReadsBuilderForFullAmend: HttpReadsBuilder[ProxyEnvelopeError, TtpFullAmendSuccessfulResponse] =
+    HttpReadsBuilder
+      .withDefault503ConnectorError[ProxyEnvelopeError, TtpFullAmendSuccessfulResponse](this.getClass)
+      .handleSuccess[TtpFullAmendSuccessfulResponse](200)
+      .handleError[TtpFullAmendInformativeError](500)
+      .handleErrorTransformed[TimeToPayError](400, ttpError => ttpError.toConnectorError(status = 400))
+      .handleErrorTransformed[TimeToPayError](401, ttpError => ttpError.toConnectorError(status = 401))
 
   def cancelTtp(
     ttppRequest: TtpCancelRequest
   )(implicit ec: ExecutionContext, hc: HeaderCarrier): TtppEnvelope[TtpCancelSuccessfulResponse] = {
 
     implicit def httpReads: HttpReads[Either[ProxyEnvelopeError, TtpCancelSuccessfulResponse]] =
-      httpReadsBuilderForCancel.httpReads(logger)
+      httpReadsBuilderForCancel.httpReads(logger, makeErrorSafeToLogInProd = _.toStringSafeToLogInProd)
 
     val path = if (appConfig.useIf) "/individuals/debts/time-to-pay/cancel" else "/debts/time-to-pay/cancel"
 
@@ -98,7 +97,7 @@ class TtpFeedbackLoopConnector @Inject() (
   )(implicit ec: ExecutionContext, hc: HeaderCarrier): TtppEnvelope[TtpFullAmendSuccessfulResponse] = {
 
     implicit def httpReads: HttpReads[Either[ProxyEnvelopeError, TtpFullAmendSuccessfulResponse]] =
-      httpReadsBuilderForFullAmend.httpReads(logger)
+      httpReadsBuilderForFullAmend.httpReads(logger, _.toStringSafeToLogInProd)
 
     val path = if (appConfig.useIf) "/individuals/debts/time-to-pay/full-amend" else "/debts/time-to-pay/full-amend"
 
@@ -118,7 +117,7 @@ class TtpFeedbackLoopConnector @Inject() (
   )(implicit ec: ExecutionContext, hc: HeaderCarrier): TtppEnvelope[TtpInformSuccessfulResponse] = {
 
     implicit def httpReads: HttpReads[Either[ProxyEnvelopeError, TtpInformSuccessfulResponse]] =
-      httpReadsBuilderForInform.httpReads(logger)
+      httpReadsBuilderForInform.httpReads(logger, _.toStringSafeToLogInProd)
 
     val path = if (appConfig.useIf) "/individuals/debts/time-to-pay/inform" else "/debts/time-to-pay/inform"
 
