@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.timetopayproxy.connectors.util.httpreadsbuilderimpl.commontoallrepos
+package uk.gov.hmrc.timetopayproxy.connectors.util.httpreadsbuilder.implcommontoallrepos
 
 import play.api.http.Status
 import uk.gov.hmrc.http.{ HeaderCarrier, HttpResponse }
@@ -27,15 +27,15 @@ import uk.gov.hmrc.timetopayproxy.logging.RequestAwareLogger
  * This file must be kept consistent with every copy in the other debt-transformation repos.
  * The most complex features are required by time-to-pay, so that is the best place to test any refactoring.
  */
-private[util] final class LoggingContext[-ServError](
+private[httpreadsbuilder] final class LoggingContext[-ServiceError](
   logger: RequestAwareLogger,
   hc: HeaderCarrier,
-  makeErrorSafeToLogInProd: HttpReadsBuilderError[ServError] => String
+  makeErrorSafeToLogInProd: HttpReadsBuilderError[ServiceError] => String
 ) {
 
-  def logError(responseContext: ResponseContext, simpleMessage: String, error: HttpReadsBuilderError[ServError]): Unit =
+  def logError(responseContext: ResponseContext, error: HttpReadsBuilderError.CentrallyImmplementedVariant): Unit =
     logger.error(
-      s"""$simpleMessage
+      s"""${error.prodSummaryAndDetail}
          |Returning: ${makeErrorSafeToLogInProd(error)} .
          |Request made for received HTTP response: ${responseContext.method} ${responseContext.url} .
          |Received HTTP response status: ${responseContext.response.status}.

@@ -14,20 +14,20 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.timetopayproxy.connectors.util.httpreadsbuilderimpl.repospecific
+package uk.gov.hmrc.timetopayproxy.connectors.util.httpreadsbuilder.implrepospecific
 
-import uk.gov.hmrc.timetopayproxy.connectors.util.HttpReadsBuilder
+import uk.gov.hmrc.timetopayproxy.connectors.util.httpreadsbuilder.HttpReadsBuilder
 
 /** The repo-specific interface of [[HttpReadsBuilder]]. Separated out so it can be maintained more easily across repos. */
-private[util] trait HttpReadsBuilderCompanionInterfaces { this: HttpReadsBuilder.type =>
+private[httpreadsbuilder] trait HttpReadsBuilderCompanionInterfaces { this: HttpReadsBuilder.type =>
 
   /** See [[ConverterDefaultingTo503AndWithJsonSpecificErrors]] for what errors this `HttpReads` will generate. */
   def withDefault503ConnectorErrorAndJsonErrors[
-    ServError >: ConverterDefaultingTo503AndWithJsonSpecificErrors.ServErrorLowerBound,
+    ServiceError >: ConverterDefaultingTo503AndWithJsonSpecificErrors.ServiceErrorLowerBound,
     Result
   ](
     sourceClass: Class[_]
-  ): HttpReadsBuilder[ServError, Result] =
+  ): HttpReadsBuilder[ServiceError, Result] =
     HttpReadsBuilder.empty(
       sourceClass = sourceClass,
       converter = ConverterDefaultingTo503AndWithJsonSpecificErrors

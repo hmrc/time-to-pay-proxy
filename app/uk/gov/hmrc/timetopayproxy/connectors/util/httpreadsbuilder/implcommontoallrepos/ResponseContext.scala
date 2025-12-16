@@ -14,15 +14,13 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.timetopayproxy.connectors.util.httpreadsbuilderimpl.commontoallrepos
+package uk.gov.hmrc.timetopayproxy.connectors.util.httpreadsbuilder.implcommontoallrepos
 
-/** Instances can convert given `HttpReadsBuilderError` into something connectors might understand. */
+import uk.gov.hmrc.http.HttpResponse
+
+/** All we know about the HTTP response. */
 /* ℹ️ Note about updating this file: ℹ️
  * This file must be kept consistent with every copy in the other debt-transformation repos.
  * The most complex features are required by time-to-pay, so that is the best place to test any refactoring.
- *
- * Not sealed because tests might want to do something simpler so they don't have to deal with the repo-specific errors.
  */
-trait HttpReadsBuilderErrorConverter[+InternalConnectorErrors] {
-  def toConnectorError[ServError >: InternalConnectorErrors](builderError: HttpReadsBuilderError[ServError]): ServError
-}
+private[httpreadsbuilder] final case class ResponseContext(method: String, url: String, response: HttpResponse)

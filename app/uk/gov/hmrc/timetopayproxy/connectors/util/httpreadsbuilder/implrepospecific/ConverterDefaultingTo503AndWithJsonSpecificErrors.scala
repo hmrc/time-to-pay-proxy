@@ -14,55 +14,56 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.timetopayproxy.connectors.util.httpreadsbuilderimpl.repospecific
+package uk.gov.hmrc.timetopayproxy.connectors.util.httpreadsbuilder.implrepospecific
 
-import uk.gov.hmrc.timetopayproxy.connectors.util.httpreadsbuilderimpl.commontoallrepos.{ HttpReadsBuilderError, HttpReadsBuilderErrorConverter }
-import uk.gov.hmrc.timetopayproxy.connectors.util.httpreadsbuilderimpl.commontoallrepos.HttpReadsBuilderError.Impl
+import uk.gov.hmrc.timetopayproxy.connectors.util.httpreadsbuilder.implcommontoallrepos.{ HttpReadsBuilderError, HttpReadsBuilderErrorConverter }
 import uk.gov.hmrc.timetopayproxy.models.error.ConnectorError
 
 /** <li>Returns a 503 error when an unexpected status code is received.</li>
   * <li>Returns special error classes when expected JSON responses can't be understood.</li>
   * <li>Returns a special error class when an unexpected HTTP body is returned and we expected no body.</li>
   */
-private[util] object ConverterDefaultingTo503AndWithJsonSpecificErrors
+private[httpreadsbuilder] object ConverterDefaultingTo503AndWithJsonSpecificErrors
     extends HttpReadsBuilderErrorConverter[ConnectorError] {
 
-  type ServErrorLowerBound = ConnectorError
+  type ServiceErrorLowerBound = ConnectorError
 
   /** `ServError` is what we expect to have to convert, which has to include every possible `ConnectorError`. */
   def toConnectorError[ServError >: ConnectorError](builderError: HttpReadsBuilderError[ServError]): ServError =
     builderError match {
-      case variant: Impl.PassthroughServiceError[ServError] =>
+      case variant: HttpReadsBuilderError.PassthroughServiceError[ServError] =>
         variant.error: ServError
-      case variant: Impl.GeneralErrorForUnsuccessfulStatusCode =>
+      case variant: HttpReadsBuilderError.UnexpectedStatusCode =>
+        import variant.responseContext
         ConnectorError(
           // The ConnectorError statusCode field will be forwarded to our clients. It's not the status code we received.
           // Hardcoded to 503 because unknown upstream status codes cannot be blindly forwarded, because:
           //   1. They will likely break our own schema by returning undocumented status codes with mismatched JSON.
           //   2. Some status codes don't make sense to be forwarded except in very special situations, e.g. 403, 404.
           statusCode = 503,
-          message = s"Status code ${variant.responseContext.response.status}: ${variant.simpleMessage}"
+          message =
+            s"For status code ${variant.responseContext.response.status} for request to ${responseContext.method} ${responseContext.url}: ${variant.prodSummaryAndDetail}"
         )
-      case variant: Impl.NotJsonErrorForSuccess =>
+      case variant: HttpReadsBuilderError.ResponseBodyNotJson =>
         import variant.responseContext
         ConnectorError(
           statusCode = 503,
           message =
-            s"Received status code ${responseContext.response.status} with non-JSON body for request: ${responseContext.method} ${responseContext.url}"
+            s"For status code ${responseContext.response.status} for request to ${responseContext.method} ${responseContext.url}: ${variant.prodSummaryAndDetail}"
         )
-      case variant: Impl.JsonNotValidErrorForSuccess =>
+      case variant: HttpReadsBuilderError.ResponseBodyInvalidJsonStructure =>
         import variant.responseContext
         ConnectorError(
           statusCode = 503,
           message =
-            s"""Received status code ${responseContext.response.status} with incorrect JSON body for request: ${responseContext.method} ${responseContext.url}"""
+            s"For status code ${responseContext.response.status} for request to ${responseContext.method} ${responseContext.url}: ${variant.prodSummaryAndDetail}"
         )
-      case variant: Impl.BodyNotEmptyErrorForSuccess =>
+      case variant: HttpReadsBuilderError.ResponseBodyNotEmpty =>
         import variant.responseContext
         ConnectorError(
           statusCode = 503,
           message =
-            s"Received status code ${responseContext.response.status} with non-empty body when none was expected for request: ${responseContext.method} ${responseContext.url}"
+            s"For status code ${responseContext.response.status} for request to ${responseContext.method} ${responseContext.url}: ${variant.prodSummaryAndDetail}"
         )
     }
 
