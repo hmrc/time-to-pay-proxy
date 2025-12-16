@@ -50,7 +50,7 @@ class TtpFeedbackLoopConnector @Inject() (
 
   private val httpReadsBuilderForCancel: HttpReadsBuilder[ProxyEnvelopeError, TtpCancelSuccessfulResponse] =
     HttpReadsBuilder
-      .withDefault503ConnectorErrorAndJsonErrors[ProxyEnvelopeError, TtpCancelSuccessfulResponse](this.getClass)
+      .withDefault503ConnectorError[ProxyEnvelopeError, TtpCancelSuccessfulResponse](this.getClass)
       .handleSuccess[TtpCancelSuccessfulResponse](200)
       .handleError[TtpCancelInformativeError](500)
       .handleErrorTransformed[TimeToPayError](400, ttpError => ttpError.toConnectorError(status = 400))
@@ -58,7 +58,7 @@ class TtpFeedbackLoopConnector @Inject() (
 
   private val httpReadsBuilderForInform: HttpReadsBuilder[ProxyEnvelopeError, TtpInformSuccessfulResponse] =
     HttpReadsBuilder
-      .withDefault503ConnectorErrorAndJsonErrors[ProxyEnvelopeError, TtpInformSuccessfulResponse](this.getClass)
+      .withDefault503ConnectorError[ProxyEnvelopeError, TtpInformSuccessfulResponse](this.getClass)
       .handleSuccess[TtpInformSuccessfulResponse](200)
       .handleError[TtpInformInformativeError](500)
       .handleErrorTransformed[TimeToPayError](400, ttpError => ttpError.toConnectorError(status = 400))
@@ -66,7 +66,7 @@ class TtpFeedbackLoopConnector @Inject() (
 
   private val httpReadsBuilderForFullAmend: HttpReadsBuilder[ProxyEnvelopeError, TtpFullAmendSuccessfulResponse] =
     HttpReadsBuilder
-      .withDefault503ConnectorErrorAndJsonErrors[ProxyEnvelopeError, TtpFullAmendSuccessfulResponse](this.getClass)
+      .withDefault503ConnectorError[ProxyEnvelopeError, TtpFullAmendSuccessfulResponse](this.getClass)
       .handleSuccess[TtpFullAmendSuccessfulResponse](200)
       .handleError[TtpFullAmendInformativeError](500)
       .handleErrorTransformed[TimeToPayError](400, ttpError => ttpError.toConnectorError(status = 400))

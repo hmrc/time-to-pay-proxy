@@ -67,32 +67,32 @@ class DefaultTtpConnector @Inject() (appConfig: AppConfig, httpClient: HttpClien
 
   private val httpReadsBuilderForGenerateQuote: HttpReadsBuilder[ProxyEnvelopeError, GenerateQuoteResponse] =
     HttpReadsBuilder
-      .withDefault503ConnectorErrorAndJsonErrors[ProxyEnvelopeError, GenerateQuoteResponse](this.getClass)
+      .withDefault503ConnectorError[ProxyEnvelopeError, GenerateQuoteResponse](this.getClass)
       .handleSuccess[GenerateQuoteResponse](201)
       .handleErrorTransformed[TimeToPayError](400, ttpError => ttpError.toConnectorError(status = 400))
 
   private val httpReadsBuilderForViewPlan: HttpReadsBuilder[ProxyEnvelopeError, ViewPlanResponse] =
     HttpReadsBuilder
-      .withDefault503ConnectorErrorAndJsonErrors[ProxyEnvelopeError, ViewPlanResponse](this.getClass)
+      .withDefault503ConnectorError[ProxyEnvelopeError, ViewPlanResponse](this.getClass)
       .handleSuccess[ViewPlanResponse](200)
       .handleErrorTransformed[TimeToPayError](400, ttpError => ttpError.toConnectorError(status = 400))
 
   private val httpReadsBuilderForUpdatePlan: HttpReadsBuilder[ProxyEnvelopeError, UpdatePlanResponse] =
     HttpReadsBuilder
-      .withDefault503ConnectorErrorAndJsonErrors[ProxyEnvelopeError, UpdatePlanResponse](this.getClass)
+      .withDefault503ConnectorError[ProxyEnvelopeError, UpdatePlanResponse](this.getClass)
       .handleSuccess[UpdatePlanResponse](200)
       .handleErrorTransformed[TimeToPayError](400, ttpError => ttpError.toConnectorError(status = 400))
       .handleErrorTransformed[TimeToPayError](409, ttpError => ttpError.toConnectorError(status = 409))
 
   private val httpReadsBuilderForCreatePlan: HttpReadsBuilder[ProxyEnvelopeError, CreatePlanResponse] =
     HttpReadsBuilder
-      .withDefault503ConnectorErrorAndJsonErrors[ProxyEnvelopeError, CreatePlanResponse](this.getClass)
+      .withDefault503ConnectorError[ProxyEnvelopeError, CreatePlanResponse](this.getClass)
       .handleSuccess[CreatePlanResponse](201)
       .handleErrorTransformed[TimeToPayError](400, ttpError => ttpError.toConnectorError(status = 400))
 
   private val httpReadsBuilderForAffordableQuotes: HttpReadsBuilder[ProxyEnvelopeError, AffordableQuoteResponse] =
     HttpReadsBuilder
-      .withDefault503ConnectorErrorAndJsonErrors[ProxyEnvelopeError, AffordableQuoteResponse](this.getClass)
+      .withDefault503ConnectorError[ProxyEnvelopeError, AffordableQuoteResponse](this.getClass)
       .handleSuccess[AffordableQuoteResponse](200)
       .handleErrorTransformed[TimeToPayError](400, ttpError => ttpError.toConnectorError(status = 400))
 

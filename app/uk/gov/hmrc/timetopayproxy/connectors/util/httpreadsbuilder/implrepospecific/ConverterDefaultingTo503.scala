@@ -23,8 +23,7 @@ import uk.gov.hmrc.timetopayproxy.models.error.ConnectorError
   * <li>Returns special error classes when expected JSON responses can't be understood.</li>
   * <li>Returns a special error class when an unexpected HTTP body is returned and we expected no body.</li>
   */
-private[httpreadsbuilder] object ConverterDefaultingTo503AndWithJsonSpecificErrors
-    extends HttpReadsBuilderErrorConverter[ConnectorError] {
+private[httpreadsbuilder] object ConverterDefaultingTo503 extends HttpReadsBuilderErrorConverter[ConnectorError] {
 
   type ServiceErrorLowerBound = ConnectorError
 

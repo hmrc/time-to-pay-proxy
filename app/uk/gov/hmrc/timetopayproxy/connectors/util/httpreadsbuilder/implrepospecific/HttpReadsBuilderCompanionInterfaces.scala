@@ -21,15 +21,12 @@ import uk.gov.hmrc.timetopayproxy.connectors.util.httpreadsbuilder.HttpReadsBuil
 /** The repo-specific interface of [[HttpReadsBuilder]]. Separated out so it can be maintained more easily across repos. */
 private[httpreadsbuilder] trait HttpReadsBuilderCompanionInterfaces { this: HttpReadsBuilder.type =>
 
-  /** See [[ConverterDefaultingTo503AndWithJsonSpecificErrors]] for what errors this `HttpReads` will generate. */
-  def withDefault503ConnectorErrorAndJsonErrors[
-    ServiceError >: ConverterDefaultingTo503AndWithJsonSpecificErrors.ServiceErrorLowerBound,
-    Result
-  ](
+  /** See [[ConverterDefaultingTo503]] for what errors this `HttpReads` will generate. */
+  def withDefault503ConnectorError[ServiceError >: ConverterDefaultingTo503.ServiceErrorLowerBound, Result](
     sourceClass: Class[_]
   ): HttpReadsBuilder[ServiceError, Result] =
     HttpReadsBuilder.empty(
       sourceClass = sourceClass,
-      converter = ConverterDefaultingTo503AndWithJsonSpecificErrors
+      converter = ConverterDefaultingTo503
     )
 }

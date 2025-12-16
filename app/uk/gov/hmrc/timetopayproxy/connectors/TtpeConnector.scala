@@ -48,7 +48,7 @@ class DefaultTtpeConnector @Inject() (appConfig: AppConfig, httpClient: HttpClie
 
   private val httpReadsBuilderForChargeInfo: HttpReadsBuilder[ProxyEnvelopeError, ChargeInfoResponse] =
     HttpReadsBuilder
-      .withDefault503ConnectorErrorAndJsonErrors[ProxyEnvelopeError, ChargeInfoResponse](this.getClass)
+      .withDefault503ConnectorError[ProxyEnvelopeError, ChargeInfoResponse](this.getClass)
       .handleSuccess[ChargeInfoResponse](200)
       .handleErrorTransformed[TimeToPayEligibilityError](400, ttpeError => ttpeError.toConnectorError(status = 400))
       .handleErrorTransformed[TimeToPayEligibilityError](422, ttpeError => ttpeError.toConnectorError(status = 422))
