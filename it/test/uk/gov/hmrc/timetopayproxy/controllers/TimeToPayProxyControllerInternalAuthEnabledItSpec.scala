@@ -118,7 +118,8 @@ class TimeToPayProxyControllerInternalAuthEnabledItSpec extends IntegrationBaseS
               )
             )
           )
-        )
+        ),
+        chargeTypesExcluded = false
       )
 
       "should send a request with an Authorization header" - {
