@@ -1909,6 +1909,7 @@ class TimeToPayProxyControllerItSpec extends IntegrationBaseSpec {
           )
         )
       ),
+      chargeTypesExcluded = false,
       customerSignals = Some(
         List(
           Signal(SignalType("Rls"), SignalValue("signal value"), Some("description")),

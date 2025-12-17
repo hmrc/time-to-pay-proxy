@@ -180,7 +180,8 @@ class TtpeConnectorSpec
             )
           )
         )
-      )
+      ),
+      chargeTypesExcluded = false
     )
 
     def chargeInfoResponseR2: ChargeInfoResponseR2 = ChargeInfoResponseR2(

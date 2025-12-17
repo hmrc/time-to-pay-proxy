@@ -26,13 +26,13 @@ final class TimeToPayEligibilityErrorSpec extends AnyFreeSpec {
     object TestData {
       object WithNoDeclaredOptions {
         def obj: TimeToPayEligibilityError = TimeToPayEligibilityError(
-          code = "TIME_TO_PAY_ELIGIBILITY_ERROR_CODE",
+          code = "INVALID_JSON",
           reason = "A reason for the time-to-pay-eligibility error"
         )
 
         def json: JsValue = Json.parse(
           """{
-            |  "code": "TIME_TO_PAY_ELIGIBILITY_ERROR_CODE",
+            |  "code": "INVALID_JSON",
             |  "reason": "A reason for the time-to-pay-eligibility error"
             |}
             |""".stripMargin

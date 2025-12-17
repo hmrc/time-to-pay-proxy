@@ -102,7 +102,8 @@ class ChargeInfoResponseSpec extends AnyFreeSpec with MockFactory {
               )
             )
           )
-        )
+        ),
+        chargeTypesExcluded = false
       )
 
       def r2: ChargeInfoResponse = ChargeInfoResponseR2(
@@ -175,6 +176,7 @@ class ChargeInfoResponseSpec extends AnyFreeSpec with MockFactory {
             )
           )
         ),
+        chargeTypesExcluded = false,
         customerSignals = Some(
           List(
             Signal(SignalType("Rls"), SignalValue("signal value"), Some("description")),
@@ -255,7 +257,8 @@ class ChargeInfoResponseSpec extends AnyFreeSpec with MockFactory {
             |    "title" : "Mr",
             |    "transitionToCDCS" : true
             |  },
-            |  "processingDateTime" : "2025-07-02T15:00:41.689"
+            |  "processingDateTime" : "2025-07-02T15:00:41.689",
+            |  "chargeTypesExcluded" : false
             |}
             |""".stripMargin
         )
@@ -349,7 +352,8 @@ class ChargeInfoResponseSpec extends AnyFreeSpec with MockFactory {
               )
             )
           )
-        )
+        ),
+        chargeTypesExcluded = false
       )
 
       def r2: ChargeInfoResponse = ChargeInfoResponseR2(
@@ -422,6 +426,7 @@ class ChargeInfoResponseSpec extends AnyFreeSpec with MockFactory {
             )
           )
         ),
+        chargeTypesExcluded = false,
         customerSignals = Some(
           List(
             Signal(SignalType("Welsh Language Signal"), SignalValue("signal value"), None)
@@ -490,7 +495,8 @@ class ChargeInfoResponseSpec extends AnyFreeSpec with MockFactory {
             |    "customerType" : "MTD(ITSA)",
             |    "transitionToCDCS" : true
             |  },
-            |  "processingDateTime" : "2025-07-02T15:00:41.689"
+            |  "processingDateTime" : "2025-07-02T15:00:41.689",
+            |  "chargeTypesExcluded" : false
             |}
             |""".stripMargin
         )
@@ -570,7 +576,8 @@ class ChargeInfoResponseSpec extends AnyFreeSpec with MockFactory {
               )
             )
           )
-        )
+        ),
+        chargeTypesExcluded = false
       )
 
       def r2: ChargeInfoResponse = ChargeInfoResponseR2(
@@ -635,6 +642,7 @@ class ChargeInfoResponseSpec extends AnyFreeSpec with MockFactory {
             )
           )
         ),
+        chargeTypesExcluded = false,
         customerSignals = None
       )
 
@@ -682,7 +690,8 @@ class ChargeInfoResponseSpec extends AnyFreeSpec with MockFactory {
           |    "customerType" : "MTD(ITSA)",
           |    "transitionToCDCS" : true
           |  },
-          |  "processingDateTime" : "2025-07-02T15:00:41.689"
+          |  "processingDateTime" : "2025-07-02T15:00:41.689",
+          |  "chargeTypesExcluded" : false
           |}
           |""".stripMargin
       )

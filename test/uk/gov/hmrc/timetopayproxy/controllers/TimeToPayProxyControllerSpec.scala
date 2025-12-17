@@ -1171,6 +1171,7 @@ class TimeToPayProxyControllerSpec extends AnyWordSpec with MockFactory {
           )
         )
       ),
+      chargeTypesExcluded = false,
       customerSignals = Some(
         List(
           Signal(SignalType("Rls"), SignalValue("signal value"), Some("description")),

@@ -45,7 +45,8 @@ final case class ChargeInfoResponseR1(
   identification: List[Identification],
   individualDetails: IndividualDetails,
   addresses: List[Address],
-  chargeTypeAssessment: List[ChargeTypeAssessment]
+  chargeTypeAssessment: List[ChargeTypeAssessment],
+  chargeTypesExcluded: Boolean
 ) extends ChargeInfoResponse
 
 object ChargeInfoResponseR1 {
@@ -58,6 +59,7 @@ final case class ChargeInfoResponseR2(
   individualDetails: IndividualDetails,
   addresses: List[Address],
   chargeTypeAssessment: List[ChargeTypeAssessment],
+  chargeTypesExcluded: Boolean,
   customerSignals: Option[List[Signal]]
 ) extends ChargeInfoResponse
 

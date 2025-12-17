@@ -113,6 +113,7 @@ class TTPEServiceSpec extends AnyFreeSpec with MockFactory {
         )
       )
     ),
+    chargeTypesExcluded = false,
     customerSignals = Some(
       List(
         Signal(SignalType("Rls"), SignalValue("signal value"), Some("description")),
@@ -141,7 +142,7 @@ class TTPEServiceSpec extends AnyFreeSpec with MockFactory {
 
       val ttpeService = new DefaultTTPEService(connectorStub)
 
-      await(ttpeService.checkChargeInfo(chargeInfoRequest).value) shouldBe chargeInfoResponseWithR2Fields
+      await(ttpeService.checkChargeInfo(chargeInfoRequest).value) shouldBe chargeInfoResponse
         .asRight[ProxyEnvelopeError]
     }
 

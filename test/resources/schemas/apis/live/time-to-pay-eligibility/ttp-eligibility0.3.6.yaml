@@ -18,8 +18,10 @@ info:
       | 0.3.4 | 08-07-2025 | Alex Olkhovskiy | Update charge-info: removed R2 and returnFinancialAssessment, added isInterestBearingCharge, fixed ChargeTypeAssessment nesting, resolved 5xx errors |
       | 0.3.5 | 09-07-2025 | Alex Olkhovskiy | Fix a dash bug in customer type|
       | 0.3.6 | 21-07-2025 | Alex Olkhovskiy | remove country and altFormats and make individualDetails mandatory and indentations non-empty  for charge-info|
+      | 0.3.6 | 24-09-2025 | Vinnie Brice    | Adds error code enums |
+      | 0.3.7 | 01-10-2025 | Alex Olkhovskiy | Simplified error codes to 8 standard values and updated error response format |
 
-  version: 0.3.6
+  version: 0.3.7
 paths:
   /debts/time-to-pay/eligibility:
     post:
@@ -52,10 +54,10 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/BadRequestError'
+                $ref: '#/components/schemas/ErrorResponse'
               example:
-                code: INVALID_ID_TYPE
-                reason: Submission has not passed validation.Invalid parameter idType.
+                code: INVALID_JSON
+                reason: "Validation error: statusCode: 400, description: Couldn't validate body from upstream against model"
 
   /debts/time-to-pay/charge-info:
     post:
@@ -88,10 +90,10 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/BadRequestError'
+                $ref: '#/components/schemas/ErrorResponse'
               example:
-                code: INVALID_ID_TYPE
-                reason: Submission has not passed validation.Invalid parameter idType.
+                code: INVALID_JSON
+                reason: "Validation error: statusCode: 400, description: Couldn't validate body from upstream against model"
         '500':
           description: ''
           headers: {}
@@ -101,7 +103,7 @@ paths:
                 $ref: '#/components/schemas/ErrorResponse'
               example:
                 code: INTERNAL_SERVER
-                reason: "Eligibility service is currently experiencing problems that require live service intervention; statusCode: 500 description: No valid idType found in customer data identifications when calling CDCS"
+                reason: "Eligibility service is currently experiencing problems that require live service intervention; statusCode: 500, description: No valid idType found in customer data identifications when calling CDCS"
         '503':
           description: ''
           headers: {}
@@ -110,8 +112,8 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
               example:
-                code: INVALID_JSON
-                reason: "Dependent systems are currently not responding; statusCode: 503 description: Couldn't validate body from upstream against model"
+                code: UPSTREAM_ERROR_RESPONSE
+                reason: "Dependent systems are currently not responding; statusCode: 503, description: Couldn't validate body from upstream against model"
 components:
   securitySchemes:
     bearerAuth:
@@ -556,20 +558,6 @@ components:
         - futureChargeLiabilitiesExcluded
         - chargeTypeAssessment
         - addresses
-    BadRequestError:
-      type: object
-      description: A JSON Error Schema for BadRequest Error
-      properties:
-        code:
-          type: string
-          description: Keys for all the errors returned
-        reason:
-          type: string
-          description: A simple description for the failure
-      required:
-        - code
-        - reason
-
     TTPEligibilityRequestChargeInfo:
       type: object
       description: A JSON Schema for TTP Eligibility Service API.
@@ -798,22 +786,28 @@ components:
                     - outstandingAmount
                     - dueDate
                     - accruedInterest
+        chargeTypesExcluded:
+          type: boolean
+          description: Indicates whether any charge types have been excluded from the response
       required:
         - processingDateTime
         - identification
         - chargeTypeAssessment
         - addresses
         - individualDetails
+        - chargeTypesExcluded
     ErrorResponse:
       type: object
-      description: A JSON Error Schema for ErrorResponse
+      description: Error response returned when a request cannot be processed
       properties:
         code:
           type: string
-          description: Keys for all the errors returned
+          description: One or more comma-separated error codes indicating the type of error
+          pattern: '^(INVALID_JSON|INTERNAL_SERVER|UPSTREAM_ERROR_RESPONSE|INVALID_CORRELATIONID|INVALID_REGIME_TYPE|MISSING_OR_INVALID_ID_NUMBER|MISMATCHING_CHARGES_FROM_CESA|DUPLICATE_CHARGE_REFERENCES)(,\s?(INVALID_JSON|INTERNAL_SERVER|UPSTREAM_ERROR_RESPONSE|INVALID_CORRELATIONID|INVALID_REGIME_TYPE|MISSING_OR_INVALID_ID_NUMBER|MISMATCHING_CHARGES_FROM_CESA|DUPLICATE_CHARGE_REFERENCES))*$'
+          example: "INVALID_JSON, INTERNAL_SERVER"
         reason:
           type: string
-          description: A simple description for the failure
+          description: Detailed description of the error including context and status information
       required:
         - code
         - reason
