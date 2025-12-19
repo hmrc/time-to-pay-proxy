@@ -59,3 +59,12 @@ final case class QuoteDebtItemCharge(
 object QuoteDebtItemCharge {
   implicit val format: OFormat[QuoteDebtItemCharge] = Json.format[QuoteDebtItemCharge]
 }
+
+final case class InformDebtItemCharge(
+  debtItemChargeId: DebtItemChargeId,
+  chargeSource: ChargeSource
+)
+
+object InformDebtItemCharge {
+  implicit val format: OFormat[InformDebtItemCharge] = Json.format[InformDebtItemCharge]
+}

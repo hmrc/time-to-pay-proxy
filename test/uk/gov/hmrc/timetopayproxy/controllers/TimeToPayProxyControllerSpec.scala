@@ -1520,7 +1520,10 @@ class TimeToPayProxyControllerSpec extends AnyWordSpec with MockFactory {
         )
       ),
       channelIdentifier = ChannelIdentifier.Advisor,
-      transitioned = Some(TransitionedIndicator(true))
+      transitioned = Some(TransitionedIndicator(true)),
+      debtItemCharges = NonEmptyList.of(
+        InformDebtItemCharge(DebtItemChargeId("debtItemChargeID"), ChargeSource("CESA"))
+      )
     )
 
     val ttpInformResponse: TtpInformSuccessfulResponse = TtpInformSuccessfulResponse(
