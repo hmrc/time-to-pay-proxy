@@ -22,7 +22,7 @@ import play.api.libs.json.Json
 import uk.gov.hmrc.http.client.HttpClientV2
 import uk.gov.hmrc.timetopayproxy.connectors.util.httpreadsbuilder.HttpReadsBuilder
 import uk.gov.hmrc.http.{ HeaderCarrier, HttpReads, StringContextOps }
-import uk.gov.hmrc.timetopayproxy.config.AppConfig
+import uk.gov.hmrc.timetopayproxy.config.{ AppConfig, FeatureSwitch }
 import uk.gov.hmrc.timetopayproxy.logging.RequestAwareLogger
 import uk.gov.hmrc.timetopayproxy.models._
 import uk.gov.hmrc.timetopayproxy.models.affordablequotes.{ AffordableQuoteResponse, AffordableQuotesRequest }
@@ -61,7 +61,8 @@ trait TtpConnector {
 }
 
 @Singleton
-class DefaultTtpConnector @Inject() (appConfig: AppConfig, httpClient: HttpClientV2) extends TtpConnector {
+class DefaultTtpConnector @Inject() (appConfig: AppConfig, httpClient: HttpClientV2, featureSwitch: FeatureSwitch)
+    extends TtpConnector {
 
   private val logger: RequestAwareLogger = new RequestAwareLogger(classOf[DefaultTtpConnector])
 
@@ -200,11 +201,21 @@ class DefaultTtpConnector @Inject() (appConfig: AppConfig, httpClient: HttpClien
 
     val url = url"${appConfig.ttpBaseUrl + pathWithQueryParameters}"
 
+    val authorizationHeader: Seq[(String, String)] =
+      if (featureSwitch.internalAuthEnabled.enabled) {
+        Seq("Authorization" -> appConfig.internalAuthToken)
+      } else {
+        Seq.empty
+      }
+
+    val headers: Seq[(String, String)] =
+      Seq("CorrelationId" -> getOrGenerateCorrelationId) ++ authorizationHeader
+
     EitherT(
       httpClient
         .post(url)
         .withBody(Json.toJson(createPlanRequest))
-        .setHeader(headers(getOrGenerateCorrelationId): _*)
+        .setHeader(headers: _*)
         .execute[Either[ProxyEnvelopeError, CreatePlanResponse]]
     )
   }

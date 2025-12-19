@@ -24,10 +24,11 @@ import play.api.{ ConfigLoader, Configuration }
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.http.client.HttpClientV2
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
-import uk.gov.hmrc.timetopayproxy.config.AppConfig
+import uk.gov.hmrc.timetopayproxy.config.{ AppConfig, FeatureSwitch }
 import uk.gov.hmrc.timetopayproxy.models._
 import uk.gov.hmrc.timetopayproxy.models.affordablequotes.{ AffordableQuoteResponse, AffordableQuotesRequest }
 import uk.gov.hmrc.timetopayproxy.models.error.ConnectorError
+import uk.gov.hmrc.timetopayproxy.models.featureSwitches.InternalAuthEnabled
 import uk.gov.hmrc.timetopayproxy.support.WireMockUtils
 
 import java.time.{ LocalDate, LocalDateTime }
@@ -37,6 +38,8 @@ class TtpConnectorSpec extends PlaySpec with DefaultAwaitTimeout with FutureAwai
 
   val config = mock[Configuration]
   val servicesConfig = mock[ServicesConfig]
+
+  val featureSwitch: FeatureSwitch = mock[FeatureSwitch]
 
   val httpClient: HttpClientV2 = app.injector.instanceOf[HttpClientV2]
 
@@ -96,7 +99,7 @@ class TtpConnectorSpec extends PlaySpec with DefaultAwaitTimeout with FutureAwai
 
     val mockConfiguration: AppConfig = new MockAppConfig(config, servicesConfig, ifImpl, internalAuthEnabled)
 
-    val connector: TtpConnector = new DefaultTtpConnector(mockConfiguration, httpClient)
+    val connector: TtpConnector = new DefaultTtpConnector(mockConfiguration, httpClient, featureSwitch)
   }
 
   "Generate quote" when {
@@ -211,6 +214,10 @@ class TtpConnectorSpec extends PlaySpec with DefaultAwaitTimeout with FutureAwai
   "Create plan" when {
     "using IF" must {
       "parse an error response from an upstream service" in new Setup(ifImpl = true) {
+        (() => featureSwitch.internalAuthEnabled)
+          .expects()
+          .returning(InternalAuthEnabled(true))
+
         stubPostWithResponseBody(
           "/individuals/debts/time-to-pay/quote/arrangement",
           400,
@@ -255,6 +262,10 @@ class TtpConnectorSpec extends PlaySpec with DefaultAwaitTimeout with FutureAwai
 
     "using TTP" must {
       "parse an error response from an upstream service" in new Setup(ifImpl = false) {
+        (() => featureSwitch.internalAuthEnabled)
+          .expects()
+          .returning(InternalAuthEnabled(true))
+
         stubPostWithResponseBody(
           "/debts/time-to-pay/quote/arrangement",
           400,
