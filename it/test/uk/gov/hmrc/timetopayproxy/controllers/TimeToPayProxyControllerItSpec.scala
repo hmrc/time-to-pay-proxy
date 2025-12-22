@@ -18,7 +18,7 @@ package uk.gov.hmrc.timetopayproxy.controllers
 
 import cats.data.NonEmptyList
 import com.github.tomakehurst.wiremock.client.WireMock
-import com.github.tomakehurst.wiremock.client.WireMock.{ post, postRequestedFor, put, urlPathEqualTo }
+import com.github.tomakehurst.wiremock.client.WireMock.{ postRequestedFor, urlPathEqualTo }
 import com.github.tomakehurst.wiremock.http.RequestMethod.{ POST, PUT }
 import play.api.libs.json.{ JsNull, JsObject, JsValue, Json }
 import play.api.libs.ws.{ WSRequest, WSResponse }
@@ -1092,7 +1092,7 @@ class TimeToPayProxyControllerItSpec extends IntegrationBaseSpec {
             val expectedTtppErrorResponse: TtppErrorResponse = TtppErrorResponse(
               statusCode = 400,
               errorMessage =
-                "Invalid TtpInformRequest payload: Payload has a missing field or an invalid format. Field name: identifications. "
+                "Invalid TtpInformRequest payload: Payload has a missing field or an invalid format. Field name: debtItemCharges. "
             )
 
             response.json shouldBe Json.toJson(expectedTtppErrorResponse)
@@ -1112,7 +1112,13 @@ class TimeToPayProxyControllerItSpec extends IntegrationBaseSpec {
                   |    "upfrontPaymentAmount": 123.45,
                   |    "startDate": "2025-10-15"
                   |  },
-                  |  "channelIdentifier": "eSSTTP"
+                  |  "channelIdentifier": "eSSTTP",
+                  |  "debtItemCharges": [
+                  |     {
+                  |       "debtItemChargeId": "debtItemChargeID",
+                  |       "chargeSource": "CESA"
+                  |     }
+                  |  ]
                   |}
                   |""".stripMargin
               )
@@ -1980,7 +1986,10 @@ class TimeToPayProxyControllerItSpec extends IntegrationBaseSpec {
         )
       ),
       channelIdentifier = ChannelIdentifier.Advisor,
-      transitioned = Some(TransitionedIndicator(true))
+      transitioned = Some(TransitionedIndicator(true)),
+      debtItemCharges = NonEmptyList.of(
+        InformDebtItemCharge(DebtItemChargeId("debtItemChargeID"), ChargeSource("CESA"))
+      )
     )
 
     val informResponse: TtpInformSuccessfulResponse = TtpInformSuccessfulResponse(
