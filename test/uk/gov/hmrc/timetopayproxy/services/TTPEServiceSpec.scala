@@ -111,7 +111,8 @@ class TTPEServiceSpec extends AnyFreeSpec {
           )
         )
       )
-    )
+    ),
+    chargeTypesExcluded = false
   )
 
   ".checkChargeInfo" - {

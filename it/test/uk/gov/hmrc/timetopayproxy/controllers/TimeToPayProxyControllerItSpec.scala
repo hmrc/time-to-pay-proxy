@@ -1908,7 +1908,8 @@ class TimeToPayProxyControllerItSpec extends IntegrationBaseSpec {
             )
           )
         )
-      )
+      ),
+      chargeTypesExcluded = false
     )
 
     val chargeInfoRequest: ChargeInfoRequest = ChargeInfoRequest(
