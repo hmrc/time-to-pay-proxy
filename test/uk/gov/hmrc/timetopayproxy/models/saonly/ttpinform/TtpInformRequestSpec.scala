@@ -55,10 +55,7 @@ final class TtpInformRequestSpec extends AnyFreeSpec {
             )
           ),
           channelIdentifier = ChannelIdentifier.SelfService,
-          transitioned = Some(TransitionedIndicator(true)),
-          debtItemCharges = NonEmptyList.of(
-            InformDebtItemCharge(DebtItemChargeId("debtItemChargeID"), ChargeSource("CESA"))
-          )
+          transitioned = Some(TransitionedIndicator(true))
         )
 
         def json: JsValue = Json.parse(
@@ -84,13 +81,7 @@ final class TtpInformRequestSpec extends AnyFreeSpec {
             |    "ttpEndDate" : "2020-02-04",
             |    "ddiReference" : "TestDDIReference"
             |  },
-            |  "transitioned" : true,
-            |  "debtItemCharges": [
-            |     {
-            |       "debtItemChargeId": "debtItemChargeID",
-            |       "chargeSource": "CESA"
-            |     }
-            |  ]
+            |  "transitioned" : true
             |}
             |""".stripMargin
         )
@@ -119,10 +110,7 @@ final class TtpInformRequestSpec extends AnyFreeSpec {
             )
           ),
           channelIdentifier = ChannelIdentifier.SelfService,
-          transitioned = None,
-          debtItemCharges = NonEmptyList.of(
-            InformDebtItemCharge(DebtItemChargeId("debtItemChargeID"), ChargeSource("CESA"))
-          )
+          transitioned = None
         )
 
         def json: JsValue = Json.parse(
@@ -144,13 +132,7 @@ final class TtpInformRequestSpec extends AnyFreeSpec {
             |    "arrangementAgreedDate" : "2020-01-02",
             |    "frequency" : "weekly",
             |    "ttpEndDate" : "2020-02-04"
-            |  },
-            |  "debtItemCharges": [
-            |     {
-            |       "debtItemChargeId": "debtItemChargeID",
-            |       "chargeSource": "CESA"
-            |     }
-            |  ]
+            |  }
             |}
             |""".stripMargin
         )

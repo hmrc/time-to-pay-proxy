@@ -374,10 +374,7 @@ final class TtpFeedbackLoopConnectorSpec
           )
         ),
         channelIdentifier = ChannelIdentifier.Advisor,
-        transitioned = Some(TransitionedIndicator(true)),
-        debtItemCharges = NonEmptyList.of(
-          InformDebtItemCharge(DebtItemChargeId("debtItemChargeID"), ChargeSource("CESA"))
-        )
+        transitioned = Some(TransitionedIndicator(true))
       )
 
       val ttpInformResponse: TtpInformSuccessfulResponse = TtpInformSuccessfulResponse(

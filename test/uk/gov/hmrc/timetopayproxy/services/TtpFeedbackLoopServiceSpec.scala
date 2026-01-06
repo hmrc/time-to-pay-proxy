@@ -131,10 +131,7 @@ class TtpFeedbackLoopServiceSpec extends AnyFreeSpec with MockFactory with Scala
           )
         ),
         channelIdentifier = ChannelIdentifier.Advisor,
-        transitioned = Some(TransitionedIndicator(true)),
-        debtItemCharges = NonEmptyList.of(
-          InformDebtItemCharge(DebtItemChargeId("debtItemChargeID"), ChargeSource("CESA"))
-        )
+        transitioned = Some(TransitionedIndicator(true))
       )
 
       val ttpInformResponse = TtpInformSuccessfulResponse(

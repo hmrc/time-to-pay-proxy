@@ -679,10 +679,7 @@ class TimeToPayProxyControllerEnrolmentAuthEnabledItSpec extends IntegrationBase
             )
           ),
           channelIdentifier = ChannelIdentifier.SelfService,
-          transitioned = Some(TransitionedIndicator(true)),
-          debtItemCharges = NonEmptyList.of(
-            InformDebtItemCharge(DebtItemChargeId("debtItemChargeID"), ChargeSource("CESA"))
-          )
+          transitioned = Some(TransitionedIndicator(true))
         )
 
       val responsePayload: TtpInformSuccessfulResponse =

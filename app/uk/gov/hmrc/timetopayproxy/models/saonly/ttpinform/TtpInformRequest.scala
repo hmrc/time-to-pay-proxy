@@ -28,6 +28,14 @@ final case class TtpInformRequest(
   instalments: NonEmptyList[SaOnlyInstalment],
   channelIdentifier: ChannelIdentifier,
   // Unlike the FullAmend request, CDCS requested this field to be optional due to delivery constraints.
+  transitioned: Option[TransitionedIndicator])
+
+final case class TtpInformRequestR2(
+  identifications: NonEmptyList[Identification],
+  paymentPlan: SaOnlyPaymentPlan,
+  instalments: NonEmptyList[SaOnlyInstalment],
+  channelIdentifier: ChannelIdentifier,
+  // Unlike the FullAmend request, CDCS requested this field to be optional due to delivery constraints.
   transitioned: Option[TransitionedIndicator],
   debtItemCharges: NonEmptyList[InformDebtItemCharge]
 )
@@ -37,5 +45,13 @@ object TtpInformRequest {
     implicit def nelFormat[T: Format]: Format[NonEmptyList[T]] = CatsNonEmptyListJson.nonEmptyListFormat
 
     Json.format[TtpInformRequest]
+  }
+}
+
+object TtpInformRequestR2 {
+  implicit val format: OFormat[TtpInformRequestR2] = {
+    implicit def nelFormat[T: Format]: Format[NonEmptyList[T]] = CatsNonEmptyListJson.nonEmptyListFormat
+
+    Json.format[TtpInformRequestR2]
   }
 }

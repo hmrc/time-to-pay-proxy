@@ -1092,7 +1092,7 @@ class TimeToPayProxyControllerItSpec extends IntegrationBaseSpec {
             val expectedTtppErrorResponse: TtppErrorResponse = TtppErrorResponse(
               statusCode = 400,
               errorMessage =
-                "Invalid TtpInformRequest payload: Payload has a missing field or an invalid format. Field name: debtItemCharges. "
+                "Invalid TtpInformRequest payload: Payload has a missing field or an invalid format. Field name: identifications. "
             )
 
             response.json shouldBe Json.toJson(expectedTtppErrorResponse)
@@ -1112,13 +1112,7 @@ class TimeToPayProxyControllerItSpec extends IntegrationBaseSpec {
                   |    "upfrontPaymentAmount": 123.45,
                   |    "startDate": "2025-10-15"
                   |  },
-                  |  "channelIdentifier": "eSSTTP",
-                  |  "debtItemCharges": [
-                  |     {
-                  |       "debtItemChargeId": "debtItemChargeID",
-                  |       "chargeSource": "CESA"
-                  |     }
-                  |  ]
+                  |  "channelIdentifier": "eSSTTP"
                   |}
                   |""".stripMargin
               )
@@ -1986,10 +1980,7 @@ class TimeToPayProxyControllerItSpec extends IntegrationBaseSpec {
         )
       ),
       channelIdentifier = ChannelIdentifier.Advisor,
-      transitioned = Some(TransitionedIndicator(true)),
-      debtItemCharges = NonEmptyList.of(
-        InformDebtItemCharge(DebtItemChargeId("debtItemChargeID"), ChargeSource("CESA"))
-      )
+      transitioned = Some(TransitionedIndicator(true))
     )
 
     val informResponse: TtpInformSuccessfulResponse = TtpInformSuccessfulResponse(
