@@ -18,15 +18,20 @@ info:
       | 0.3.4 | 08-07-2025 | Alex Olkhovskiy | Update charge-info: removed R2 and returnFinancialAssessment, added isInterestBearingCharge, fixed ChargeTypeAssessment nesting, resolved 5xx errors |
       | 0.3.5 | 09-07-2025 | Alex Olkhovskiy | Fix a dash bug in customer type|
       | 0.3.6 | 21-07-2025 | Alex Olkhovskiy | remove country and altFormats and make individualDetails mandatory and indentations non-empty  for charge-info|
-      | 0.3.6 | 24-09-2025 | Vinnie Brice    | Adds error code enums |
-      | 0.3.7 | 01-10-2025 | Alex Olkhovskiy | Simplified error codes to 8 standard values and updated error response format |
-
-  version: 0.3.7
+      | 0.3.7 | 21-07-2025 | Alex Olkhovskiy | Added 422 error response to charge-info endpoint|
+      | 0.3.8 | 06-01-2026 | Alex Olkhovskiy | DTD-2985: Add chargeTypesExcluded field to charge-info response |
+  version: 0.3.8
+servers:
+  - url: https://time-to-pay-eligibility.protected.mdtp
+    description: Production
 paths:
   /debts/time-to-pay/eligibility:
     post:
       operationId: checkEligibilitySSTTP
       summary: Check eligibility for SSTTP
+      description: Checks customer eligibility for Self-Service Time To Pay (SSTTP) arrangement
+      security:
+        - bearerAuth: []
       requestBody:
         required: true
         content:
@@ -54,15 +59,17 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: '#/components/schemas/BadRequestError'
               example:
-                code: INVALID_JSON
-                reason: "Validation error: statusCode: 400, description: Couldn't validate body from upstream against model"
-
+                code: INVALID_ID_TYPE
+                reason: Submission has not passed validation.Invalid parameter idType.
   /debts/time-to-pay/charge-info:
     post:
       operationId: checkEligibilityChargeInfo
       summary: Gets customer charge information, but does not determine eligibility
+      description: Retrieves customer charge information for time-to-pay assessment without determining final eligibility
+      security:
+        - bearerAuth: []
       requestBody:
         required: true
         content:
@@ -90,12 +97,22 @@ paths:
           content:
             application/json:
               schema:
+                $ref: '#/components/schemas/BadRequestError'
+              example:
+                code: INVALID_ID_TYPE
+                reason: Submission has not passed validation.Invalid parameter idType.
+        '422':
+          description: Unprocessable Entity
+          headers: {}
+          content:
+            application/json:
+              schema:
                 $ref: '#/components/schemas/ErrorResponse'
               example:
-                code: INVALID_JSON
-                reason: "Validation error: statusCode: 400, description: Couldn't validate body from upstream against model"
+                code: '422'
+                reason: Charges with the same charge reference do not share the same data
         '500':
-          description: ''
+          description: Internal Server Error
           headers: {}
           content:
             application/json:
@@ -103,29 +120,22 @@ paths:
                 $ref: '#/components/schemas/ErrorResponse'
               example:
                 code: INTERNAL_SERVER
-                reason: "Eligibility service is currently experiencing problems that require live service intervention; statusCode: 500, description: No valid idType found in customer data identifications when calling CDCS"
+                reason: Eligibility service is currently experiencing problems that require live service intervention. No valid idType found in customer data identifications when calling CDCS
         '503':
-          description: ''
+          description: Service Unavailable
           headers: {}
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
               example:
-                code: UPSTREAM_ERROR_RESPONSE
-                reason: "Dependent systems are currently not responding; statusCode: 503, description: Couldn't validate body from upstream against model"
+                code: INVALID_JSON
+                reason: Dependent systems are currently not responding. Couldn't validate body from upstream against model
 components:
   securitySchemes:
     bearerAuth:
       type: http
       scheme: bearer
-  headers:
-    CorrelationId:
-      description: A UUID format string for the transaction used for traceability purposes.
-      schema:
-        type: string
-        pattern: '^[0-9a-fA-F]{8}[-][0-9a-fA-F]{4}[-][0-9a-fA-F]{4}[-][0-9a-fA-F]{4}[-][0-9a-fA-F]{12}$'
-        example: f92d12cd-7087-42b9-b7ae-b32665c5dc31
   schemas:
     TTPEligibilityRequest:
       type: object
@@ -520,10 +530,10 @@ components:
                           lockType:
                             type: string
                             enum:
-                              - "Dunning"
-                              - "Calculate Interest"
-                              - "Posting/Clearing"
-                              - "Payments"
+                              - Dunning
+                              - Calculate Interest
+                              - Posting/Clearing
+                              - Payments
                           lockReason:
                             type: string
                           disallowedChargeLockType:
@@ -558,6 +568,19 @@ components:
         - futureChargeLiabilitiesExcluded
         - chargeTypeAssessment
         - addresses
+    BadRequestError:
+      type: object
+      description: A JSON Error Schema for BadRequest Error
+      properties:
+        code:
+          type: string
+          description: Keys for all the errors returned
+        reason:
+          type: string
+          description: A simple description for the failure
+      required:
+        - code
+        - reason
     TTPEligibilityRequestChargeInfo:
       type: object
       description: A JSON Schema for TTP Eligibility Service API.
@@ -702,6 +725,9 @@ components:
               - addressLine1
               - addressType
               - postcodeHistory
+        chargeTypesExcluded:
+          type: boolean
+          description: Indicates whether any charge types have been excluded from the response
         chargeTypeAssessment:
           type: array
           items:
@@ -786,9 +812,6 @@ components:
                     - outstandingAmount
                     - dueDate
                     - accruedInterest
-        chargeTypesExcluded:
-          type: boolean
-          description: Indicates whether any charge types have been excluded from the response
       required:
         - processingDateTime
         - identification
@@ -798,85 +821,73 @@ components:
         - chargeTypesExcluded
     ErrorResponse:
       type: object
-      description: Error response returned when a request cannot be processed
+      description: A JSON Error Schema for ErrorResponse
       properties:
         code:
           type: string
-          description: One or more comma-separated error codes indicating the type of error
-          pattern: '^(INVALID_JSON|INTERNAL_SERVER|UPSTREAM_ERROR_RESPONSE|INVALID_CORRELATIONID|INVALID_REGIME_TYPE|MISSING_OR_INVALID_ID_NUMBER|MISMATCHING_CHARGES_FROM_CESA|DUPLICATE_CHARGE_REFERENCES)(,\s?(INVALID_JSON|INTERNAL_SERVER|UPSTREAM_ERROR_RESPONSE|INVALID_CORRELATIONID|INVALID_REGIME_TYPE|MISSING_OR_INVALID_ID_NUMBER|MISMATCHING_CHARGES_FROM_CESA|DUPLICATE_CHARGE_REFERENCES))*$'
-          example: "INVALID_JSON, INTERNAL_SERVER"
+          description: Keys for all the errors returned
         reason:
           type: string
-          description: Detailed description of the error including context and status information
+          description: A simple description for the failure
       required:
         - code
         - reason
-
   examples:
     TTPEligibilityRequestExample:
       summary: Example of a TTP Eligibility Request
       value:
-        channelIdentifier: "channelIdentifier"
-        idType: "EMPREF"
-        idValue: "064XZ36815"
-        regimeType: "PAYE"
+        channelIdentifier: channelIdentifier
+        idType: EMPREF
+        idValue: 064XZ36815
+        regimeType: PAYE
         returnFinancialAssessment: true
-    TTPEligibilityRequestExampleChargeInfo:
-      summary: Example of a TTP Eligibility Request
-      value:
-        channelIdentifier: "Advisor"
-        identifications:
-          - idType: "UTR"
-            idValue: "1234567890"
-        regimeType: "SA"
-
     TTPEligibilitySuccessResponseExample:
       summary: Example of a TTP Eligibility Success Response
       value:
-        processingDateTime: "2022-03-23T13:49:51.141Z"
+        processingDateTime: '2022-03-23T13:49:51.141Z'
         identification:
-          - idType: "UTR"
-            idValue: "1234567890"
+          - idType: UTR
+            idValue: '1234567890'
         invalidSignals:
-          - signalType: "ITSA Migrated"
-            signalValue: "true"
-            signalDescription: "Description"
+          - signalType: ITSA Migrated
+            signalValue: 'true'
+            signalDescription: Description
         customerPostcodes:
-          - addressPostcode: "BN127ER"
-            postcodeDate: "2022-05-22"
+          - addressPostcode: BN127ER
+            postcodeDate: '2022-05-22'
         customerDetails:
-          - emailAddress: "notmymail@yourmail.com"
-            emailSource: "ETMP"
+          - emailAddress: notmymail@yourmail.com
+            emailSource: ETMP
         individualDetails:
-          title: "Mr"
-          firstName: "John"
-          lastName: "Doe"
-          dateOfBirth: "2069-06-06"
-          districtNumber: "xyz"
-          customerType: "MTD(ITSA)"
+          title: Mr
+          firstName: John
+          lastName: Doe
+          dateOfBirth: '2069-06-06'
+          districtNumber: xyz
+          customerType: MTD(ITSA)
           transitionToCDCS: true
         addresses:
-          - addressType: "ppob"
-            addressLine1: "999 Elm Street"
-            addressLine2: "Suite 12C"
-            addressLine3: "Northshire"
-            addressLine4: "London"
+          - addressType: ppob
+            addressLine1: 999 Elm Street
+            addressLine2: Suite 12C
+            addressLine3: Northshire
+            addressLine4: London
             rls: true
             contactDetails:
-              telephoneNumber: "+44 20 1234 5678"
-              fax: "01234"
-              mobile: "07123456789"
-              emailAddress: "john@example.com"
-              emailSource: "ETMP"
+              telephoneNumber: +44 20 1234 5678
+              fax: '01234'
+              mobile: '07123456789'
+              emailAddress: john@example.com
+              emailSource: ETMP
               altFormat: 123
-            postCode: "W1A 1ZZ"
-            country: "ZZ"
+            postCode: W1A 1ZZ
+            country: ZZ
             postcodeHistory:
-              - addressPostcode: "BN12 9ER"
-                postcodeDate: "2022-04-30"
+              - addressPostcode: BN12 9ER
+                postcodeDate: '2022-04-30'
         regimeDigitalCorrespondence: true
-        regimePaymentFrequency: "Monthly"
-        paymentPlanFrequency: "Monthly"
+        regimePaymentFrequency: Monthly
+        paymentPlanFrequency: Monthly
         paymentPlanMinLength: 1
         paymentPlanMaxLength: 6
         eligibilityStatus:
@@ -907,18 +918,18 @@ components:
         futureChargeLiabilitiesExcluded: false
         chargeTypesExcluded: false
         chargeTypeAssessment:
-          - taxPeriodFrom: "2022-04-01"
-            taxPeriodTo: "2022-06-30"
+          - taxPeriodFrom: '2022-04-01'
+            taxPeriodTo: '2022-06-30'
             debtTotalAmount: 148781
-            chargeReference: "XW006559808862"
+            chargeReference: XW006559808862
             charges:
-              - chargeType: "VAT Return Debit Charge"
-                mainType: "VAT Return charge"
-                mainTrans: "4700"
-                subTrans: "1174"
+              - chargeType: VAT Return Debit Charge
+                mainType: VAT Return charge
+                mainTrans: '4700'
+                subTrans: '1174'
                 outstandingAmount: 148781
-                dueDate: "2022-08-01"
-                interestStartDate: "2022-08-01"
+                dueDate: '2022-08-01'
+                interestStartDate: '2022-08-01'
                 accruedInterest: 3
                 ineligibleChargeType: false
                 chargeOverMaxDebtAge: false
@@ -927,82 +938,97 @@ components:
                 isInterestBearingCharge: false
                 useChargeReference: false
                 ddInProgress: false
-                chargeSource: "CESA"
-                parentChargeReference: "XW006559808862"
-                parentMainTrans: "4700"
-                originalCreationDate: "2022-08-01"
-                tieBreaker: "xyz"
-                originalTieBreaker: "xyz"
-                saTaxYearEnd: "2022-08-01"
-                creationDate: "2022-08-01"
-                originalChargeType: "VAT Return Debit Charge"
+                chargeSource: CESA
+                parentChargeReference: XW006559808862
+                parentMainTrans: '4700'
+                originalCreationDate: '2022-08-01'
+                tieBreaker: xyz
+                originalTieBreaker: xyz
+                saTaxYearEnd: '2022-08-01'
+                creationDate: '2022-08-01'
+                originalChargeType: VAT Return Debit Charge
                 locks:
-                  - lockType: "Payments"
-                    lockReason: "Risk/Fraud"
+                  - lockType: Payments
+                    lockReason: Risk/Fraud
                     disallowedChargeLockType: false
-                  - lockType: "Calculate Interest"
-                    lockReason: "ClericalInterestSignal"
+                  - lockType: Calculate Interest
+                    lockReason: ClericalInterestSignal
                     disallowedChargeLockType: false
-                  - lockType: "Dunning"
-                    lockReason: "Complaint"
+                  - lockType: Dunning
+                    lockReason: Complaint
                     disallowedChargeLockType: false
-                  - lockType: "Posting/Clearing"
-                    lockReason: "ClearLockInterest"
+                  - lockType: Posting/Clearing
+                    lockReason: ClearLockInterest
                     disallowedChargeLockType: false
-
+    TTPEligibilityRequestExampleChargeInfo:
+      summary: Example of a TTP Eligibility Request
+      value:
+        channelIdentifier: Advisor
+        identifications:
+          - idType: UTR
+            idValue: '1234567890'
+        regimeType: SA
     TTPEligibilitySuccessResponseExampleChargeInfo:
       summary: Example of a get SA customer data Success Response
       value:
-        processingDateTime: "2022-03-23T13:49:51.141Z"
+        processingDateTime: '2022-03-23T13:49:51.141Z'
         identification:
-          - idType: "UTR"
-            idValue: "1234567890"
+          - idType: UTR
+            idValue: '1234567890'
         individualDetails:
-          title: "Mr"
-          firstName: "John"
-          lastName: "Doe"
-          dateOfBirth: "2069-06-06"
-          districtNumber: "xyz"
-          customerType: "MTD(ITSA)"
+          title: Mr
+          firstName: John
+          lastName: Doe
+          dateOfBirth: '2069-06-06'
+          districtNumber: xyz
+          customerType: MTD(ITSA)
           transitionToCDCS: true
         addresses:
-          - addressType: "ppob"
-            addressLine1: "999 Elm Street"
-            addressLine2: "Suite 12C"
-            addressLine3: "Northshire"
-            addressLine4: "London"
+          - addressType: ppob
+            addressLine1: 999 Elm Street
+            addressLine2: Suite 12C
+            addressLine3: Northshire
+            addressLine4: London
             rls: true
             contactDetails:
-              telephoneNumber: "+44 20 1234 5678"
-              fax: "01234"
-              mobile: "07123456789"
-              emailAddress: "john@example.com"
-              emailSource: "ETMP"
-            postCode: "W1A 1ZZ"
+              telephoneNumber: +44 20 1234 5678
+              fax: '01234'
+              mobile: '07123456789'
+              emailAddress: john@example.com
+              emailSource: ETMP
+            postCode: W1A 1ZZ
             postcodeHistory:
-              - addressPostcode: "BN12 9ER"
-                postcodeDate: "2022-04-30"
+              - addressPostcode: BN12 9ER
+                postcodeDate: '2022-04-30'
+        chargeTypesExcluded: false
         chargeTypeAssessment:
           - debtTotalAmount: 148781
-            chargeReference: "XW006559808862"
-            mainTrans: "4700"
-            parentChargeReference: "XW006559808862"
+            chargeReference: XW006559808862
+            mainTrans: '4700'
+            parentChargeReference: XW006559808862
             charges:
-              - taxPeriodFrom: "2022-04-01"
-                taxPeriodTo: "2022-06-30"
-                chargeType: "VAT Return Debit Charge"
-                mainType: "VAT Return charge"
-                subTrans: "1174"
+              - taxPeriodFrom: '2022-04-01'
+                taxPeriodTo: '2022-06-30'
+                chargeType: VAT Return Debit Charge
+                mainType: VAT Return charge
+                subTrans: '1174'
                 outstandingAmount: 148781
-                dueDate: "2022-08-01"
+                dueDate: '2022-08-01'
                 isInterestBearingCharge: true
-                interestStartDate: "2022-08-01"
+                interestStartDate: '2022-08-01'
                 accruedInterest: 3
-                chargeSource: "CESA"
-                parentMainTrans: "4700"
-                originalCreationDate: "2022-08-01"
-                tieBreaker: "xyz"
-                originalTieBreaker: "xyz"
-                saTaxYearEnd: "2022-08-01"
-                creationDate: "2022-08-01"
-                originalChargeType: "VAT Return Debit Charge"
+                chargeSource: CESA
+                parentMainTrans: '4700'
+                originalCreationDate: '2022-08-01'
+                tieBreaker: xyz
+                originalTieBreaker: xyz
+                saTaxYearEnd: '2022-08-01'
+                creationDate: '2022-08-01'
+                originalChargeType: VAT Return Debit Charge
+  headers:
+    CorrelationId:
+      description: A UUID format string for the transaction used for traceability purposes.
+      schema:
+        type: string
+        pattern: ^[0-9a-fA-F]{8}[-][0-9a-fA-F]{4}[-][0-9a-fA-F]{4}[-][0-9a-fA-F]{4}[-][0-9a-fA-F]{12}$
+        example: f92d12cd-7087-42b9-b7ae-b32665c5dc31
