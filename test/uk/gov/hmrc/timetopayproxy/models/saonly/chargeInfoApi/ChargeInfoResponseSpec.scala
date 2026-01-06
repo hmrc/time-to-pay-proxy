@@ -18,7 +18,7 @@ package uk.gov.hmrc.timetopayproxy.models.saonly.chargeInfoApi
 
 import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.should.Matchers._
-import play.api.libs.json.{ JsSuccess, JsValue, Json, Reads, Writes }
+import play.api.libs.json._
 import uk.gov.hmrc.timetopayproxy.models.{ IdType, IdValue, Identification }
 import uk.gov.hmrc.timetopayproxy.testutils.JsonAssertionOps.RichJsValueWithAssertions
 import uk.gov.hmrc.timetopayproxy.testutils.schematestutils.Validators
@@ -98,7 +98,8 @@ class ChargeInfoResponseSpec extends AnyFreeSpec {
               )
             )
           )
-        )
+        ),
+        chargeTypesExcluded = false
       )
 
       def json: JsValue = Json.parse(
@@ -172,7 +173,8 @@ class ChargeInfoResponseSpec extends AnyFreeSpec {
           |    "title" : "Mr",
           |    "transitionToCDCS" : true
           |  },
-          |  "processingDateTime" : "2025-07-02T15:00:41.689"
+          |  "processingDateTime" : "2025-07-02T15:00:41.689",
+          |  "chargeTypesExcluded" : false
           |}
           |""".stripMargin
       )
@@ -248,7 +250,8 @@ class ChargeInfoResponseSpec extends AnyFreeSpec {
               )
             )
           )
-        )
+        ),
+        chargeTypesExcluded = false
       )
 
       def json: JsValue = Json.parse(
@@ -311,7 +314,8 @@ class ChargeInfoResponseSpec extends AnyFreeSpec {
           |    "customerType" : "MTD(ITSA)",
           |    "transitionToCDCS" : true
           |  },
-          |  "processingDateTime" : "2025-07-02T15:00:41.689"
+          |  "processingDateTime" : "2025-07-02T15:00:41.689",
+          |  "chargeTypesExcluded" : false
           |}
           |""".stripMargin
       )
@@ -379,7 +383,8 @@ class ChargeInfoResponseSpec extends AnyFreeSpec {
               )
             )
           )
-        )
+        ),
+        chargeTypesExcluded = false
       )
 
       def json: JsValue = Json.parse(
@@ -426,7 +431,8 @@ class ChargeInfoResponseSpec extends AnyFreeSpec {
           |    "customerType" : "MTD(ITSA)",
           |    "transitionToCDCS" : true
           |  },
-          |  "processingDateTime" : "2025-07-02T15:00:41.689"
+          |  "processingDateTime" : "2025-07-02T15:00:41.689",
+          |  "chargeTypesExcluded" : false
           |}
           |""".stripMargin
       )

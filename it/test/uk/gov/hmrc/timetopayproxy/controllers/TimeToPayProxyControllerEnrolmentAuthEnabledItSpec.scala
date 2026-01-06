@@ -538,7 +538,8 @@ class TimeToPayProxyControllerEnrolmentAuthEnabledItSpec extends IntegrationBase
               )
             )
           )
-        )
+        ),
+        chargeTypesExcluded = false
       )
 
       "should send the enrolment scope to the authorise endpoint" - {
