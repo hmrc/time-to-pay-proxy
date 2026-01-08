@@ -385,7 +385,6 @@ object Validators {
         )
     }
 
-
     object TtpFullAmend {
       // Downloaded from:
       //   https://github.com/hmrc/time-to-pay/blob/fe8fee3d7dead5d6241d7d085cff4179ea5834ef/resources/public/api/conf/1.0/FullAmendAPI-v0.0.1.yaml

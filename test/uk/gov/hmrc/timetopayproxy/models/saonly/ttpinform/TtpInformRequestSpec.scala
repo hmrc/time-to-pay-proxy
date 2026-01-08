@@ -229,7 +229,8 @@ final class TtpInformRequestSpec extends AnyFreeSpec {
             initialPaymentDate = Some(InitialPaymentDate(LocalDate.parse("2020-04-06"))),
             initialPaymentAmount = Some(GbpPounds.createOrThrow(100.12)),
             ddiReference = Some(DdiReference("TestDDIReference")),
-            debtItemCharges = NonEmptyList.of(InformDebtItemCharge(DebtItemChargeId("ID-OF-DOOM"), ChargeSource("CESA")))
+            debtItemCharges =
+              NonEmptyList.of(InformDebtItemCharge(DebtItemChargeId("ID-OF-DOOM"), ChargeSource("CESA")))
           ),
           instalments = NonEmptyList.of(
             SaOnlyInstalment(
@@ -291,7 +292,8 @@ final class TtpInformRequestSpec extends AnyFreeSpec {
             initialPaymentDate = None,
             initialPaymentAmount = None,
             ddiReference = None,
-            debtItemCharges = NonEmptyList.of(InformDebtItemCharge(DebtItemChargeId("ID-OF-DOOM"), ChargeSource("CESA")))
+            debtItemCharges =
+              NonEmptyList.of(InformDebtItemCharge(DebtItemChargeId("ID-OF-DOOM"), ChargeSource("CESA")))
           ),
           instalments = NonEmptyList.of(
             SaOnlyInstalment(

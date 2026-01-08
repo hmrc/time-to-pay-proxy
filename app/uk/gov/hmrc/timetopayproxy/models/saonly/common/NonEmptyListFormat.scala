@@ -17,7 +17,7 @@
 package uk.gov.hmrc.timetopayproxy.models.saonly.common
 
 import cats.data.NonEmptyList
-import play.api.libs.json.{Format, JsonValidationError, Reads, Writes}
+import play.api.libs.json.{ Format, JsonValidationError, Reads, Writes }
 
 object NonEmptyListFormat {
 
@@ -26,8 +26,8 @@ object NonEmptyListFormat {
       .of[List[T]]
       .collect(
         JsonValidationError("expected a list with at least one element but got an empty list")
-      ) {
-        case head :: tail => NonEmptyList(head, tail)
+      ) { case head :: tail =>
+        NonEmptyList(head, tail)
       }
 
   def writes[T: Writes]: Writes[NonEmptyList[T]] =
