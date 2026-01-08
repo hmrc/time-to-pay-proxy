@@ -8,18 +8,17 @@ ThisBuild / scalaVersion := "2.13.18"
 
 val silencerVersion = "1.7.3"
 lazy val ItTest = config("it") extend Test
-lazy val coverageSettings: Seq[Setting[_]] = {
+lazy val coverageSettings: Seq[Setting[_]] =
   Seq(
     ScoverageKeys.coverageExcludedPackages := "<empty>;Reverse.*;.*Module.*;.*AuthService.*;models\\.data\\..*;uk.gov.hmrc.BuildInfo;app.*;nr.*;res.*;prod.*;.*RuleAST.*;config.*;testOnlyDoNotUseInAppConf.*;definition.*;.*FeatureSwitch.*",
     ScoverageKeys.coverageMinimumStmtTotal := 90,
     ScoverageKeys.coverageFailOnMinimum := true,
     ScoverageKeys.coverageHighlighting := true
   )
-}
 lazy val microservice = Project(appName, file("."))
   .enablePlugins(play.sbt.PlayScala, SbtDistributablesPlugin)
   .settings(
-    libraryDependencies              ++= AppDependencies.compile ++ AppDependencies.test,
+    libraryDependencies ++= AppDependencies.compile ++ AppDependencies.test,
     scalacOptions ++= Seq(
       "-Wconf:src=routes/.*:s",
       "-Ywarn-dead-code",
@@ -48,9 +47,9 @@ lazy val microservice = Project(appName, file("."))
   )
 
 lazy val it = project
-    .enablePlugins(PlayScala)
-    .dependsOn(microservice % "test->test")
-    .settings(DefaultBuildSettings.itSettings())
+  .enablePlugins(PlayScala)
+  .dependsOn(microservice % "test->test")
+  .settings(DefaultBuildSettings.itSettings())
   .settings(
     Compile / doc / scalacOptions ++= Seq(
       "-no-link-warnings" // Suppresses problems with Scaladoc @throws links

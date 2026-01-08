@@ -18,7 +18,7 @@ package uk.gov.hmrc.timetopayproxy.models.saonly.ttpinform
 
 import cats.data.NonEmptyList
 import play.api.libs.json.{ Format, Json, OFormat }
-import uk.gov.hmrc.timetopayproxy.models.saonly.common.{ SaOnlyInstalment, SaOnlyPaymentPlan, TransitionedIndicator }
+import uk.gov.hmrc.timetopayproxy.models.saonly.common.{ SaOnlyInstalment, SaOnlyPaymentPlan, SaOnlyPaymentPlanR2, TransitionedIndicator }
 import uk.gov.hmrc.timetopayproxy.models.{ ChannelIdentifier, Identification }
 import uk.gov.hmrc.timetopayproxy.utils.json.CatsNonEmptyListJson
 
@@ -31,10 +31,27 @@ final case class TtpInformRequest(
   transitioned: Option[TransitionedIndicator]
 )
 
+final case class TtpInformRequestR2(
+  identifications: NonEmptyList[Identification],
+  paymentPlan: SaOnlyPaymentPlanR2,
+  instalments: NonEmptyList[SaOnlyInstalment],
+  channelIdentifier: ChannelIdentifier,
+  // Unlike the FullAmend request, CDCS requested this field to be optional due to delivery constraints.
+  transitioned: Option[TransitionedIndicator]
+)
+
 object TtpInformRequest {
   implicit val format: OFormat[TtpInformRequest] = {
     implicit def nelFormat[T: Format]: Format[NonEmptyList[T]] = CatsNonEmptyListJson.nonEmptyListFormat
 
     Json.format[TtpInformRequest]
+  }
+}
+
+object TtpInformRequestR2 {
+  implicit val format: OFormat[TtpInformRequestR2] = {
+    implicit def nelFormat[T: Format]: Format[NonEmptyList[T]] = CatsNonEmptyListJson.nonEmptyListFormat
+
+    Json.format[TtpInformRequestR2]
   }
 }
