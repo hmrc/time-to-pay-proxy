@@ -17,9 +17,9 @@
 package uk.gov.hmrc.timetopayproxy.models.saonly.ttpinform
 
 import cats.data.NonEmptyList
-import play.api.libs.json.{ Format, Json, OFormat }
-import uk.gov.hmrc.timetopayproxy.models.saonly.common.{ SaOnlyInstalment, SaOnlyPaymentPlan, TransitionedIndicator }
-import uk.gov.hmrc.timetopayproxy.models.{ ChannelIdentifier, Identification, InformDebtItemCharge }
+import play.api.libs.json.{Format, Json, OFormat}
+import uk.gov.hmrc.timetopayproxy.models.saonly.common.{SaOnlyInstalment, SaOnlyPaymentPlan, SaOnlyPaymentPlanR2, TransitionedIndicator}
+import uk.gov.hmrc.timetopayproxy.models.{ChannelIdentifier, Identification}
 import uk.gov.hmrc.timetopayproxy.utils.json.CatsNonEmptyListJson
 
 final case class TtpInformRequest(
@@ -28,16 +28,16 @@ final case class TtpInformRequest(
   instalments: NonEmptyList[SaOnlyInstalment],
   channelIdentifier: ChannelIdentifier,
   // Unlike the FullAmend request, CDCS requested this field to be optional due to delivery constraints.
-  transitioned: Option[TransitionedIndicator])
+  transitioned: Option[TransitionedIndicator]
+)
 
 final case class TtpInformRequestR2(
   identifications: NonEmptyList[Identification],
-  paymentPlan: SaOnlyPaymentPlan,
+  paymentPlan: SaOnlyPaymentPlanR2,
   instalments: NonEmptyList[SaOnlyInstalment],
   channelIdentifier: ChannelIdentifier,
   // Unlike the FullAmend request, CDCS requested this field to be optional due to delivery constraints.
-  transitioned: Option[TransitionedIndicator],
-  debtItemCharges: NonEmptyList[InformDebtItemCharge]
+  transitioned: Option[TransitionedIndicator]
 )
 
 object TtpInformRequest {

@@ -131,6 +131,39 @@ object Validators {
         )
     }
 
+    object TtpInformR2 {
+      // Downloaded from:
+      //   https://jira.tools.tax.service.gov.uk/browse/DTD-2856
+      // Official location:
+      //   ???
+      private val pathR2: String = "resources/public/api/conf/1.0/time-to-pay-v1.0.20-proposedAll-R2.yaml"
+      def openApiRequestSchema: OpenApi3DerivedSchema =
+        new OpenApi3DerivedSchema(
+          pathR2,
+          defaultJsonSubschemaName = "InformRequest",
+          metaSchemaValidation = Some(Valid(())),
+          restrictAdditionalProperties = true
+        )
+
+      /** This is used for 200 statuses. */
+      def openApiInformResponseSchema: OpenApi3DerivedSchema =
+        new OpenApi3DerivedSchema(
+          pathR2,
+          defaultJsonSubschemaName = "InformResponse",
+          metaSchemaValidation = Some(Valid(())),
+          restrictAdditionalProperties = true
+        )
+
+      /** This is used for 500 statuses. */
+      def openApiInformErrorResponseSchema: OpenApi3DerivedSchema =
+        new OpenApi3DerivedSchema(
+          pathR2,
+          defaultJsonSubschemaName = "InformErrorResponse",
+          metaSchemaValidation = Some(Valid(())),
+          restrictAdditionalProperties = true
+        )
+    }
+
     object TtpFullAmend {
       // Downloaded from:
       //   https://confluence.tools.tax.service.gov.uk/display/DTDT/TTP+API+%28Current+Version%29+Proxy?preview=/828113579/1168278271/time-to-pay-v1.0.19.yaml
@@ -311,6 +344,47 @@ object Validators {
           restrictAdditionalProperties = true
         )
     }
+
+    object TtpInformR2 {
+      // Downloaded from:
+      //   https://github.com/hmrc/time-to-pay/blob/af176ffca7a0bb85bb6c180d9eff0d2d6755a37a/resources/public/api/conf/1.0/InformAPI-v0.0.1.yaml
+      // Official location:
+      //   https://github.com/hmrc/time-to-pay/blob/main/resources/public/api/conf/1.0
+      private val path = "test/resources/schemas/apis/time-to-pay/InformAPI-v0.0.3-proposed.yaml"
+
+      def openApiRequestSchema: OpenApi3DerivedSchema =
+        new OpenApi3DerivedSchema(
+          path,
+          defaultJsonSubschemaName = "InformRequest",
+          metaSchemaValidation = Some(Valid(())),
+          restrictAdditionalProperties = true
+        )
+
+      def openApiInformErrorResponseSchema: OpenApi3DerivedSchema =
+        new OpenApi3DerivedSchema(
+          path,
+          defaultJsonSubschemaName = "InformErrorResponse",
+          metaSchemaValidation = Some(Valid(())),
+          restrictAdditionalProperties = true
+        )
+
+      def openApiInformResponseSchema: OpenApi3DerivedSchema =
+        new OpenApi3DerivedSchema(
+          path,
+          defaultJsonSubschemaName = "InformResponse",
+          metaSchemaValidation = Some(Valid(())),
+          restrictAdditionalProperties = true
+        )
+
+      def openApiResponseGeneralFailureSchema: OpenApi3DerivedSchema =
+        new OpenApi3DerivedSchema(
+          path,
+          defaultJsonSubschemaName = "ErrorResponse",
+          metaSchemaValidation = Some(Valid(())),
+          restrictAdditionalProperties = true
+        )
+    }
+
 
     object TtpFullAmend {
       // Downloaded from:
