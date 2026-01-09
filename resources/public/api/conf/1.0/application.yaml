@@ -731,6 +731,95 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/TTPChargeInfoResponse'
+              example:
+                processingDateTime: '2022-03-23T13:49:51.141'
+                identification:
+                  - idType: UTR
+                    idValue: '1234567890'
+                individualDetails:
+                  title: Mr
+                  firstName: John
+                  lastName: Doe
+                  dateOfBirth: '2069-06-06'
+                  districtNumber: xyz
+                  customerType: MTD(ITSA)
+                  transitionToCDCS: true
+                addresses:
+                  - addressType: ppob
+                    addressLine1: 999 Elm Street
+                    addressLine2: Suite 12C
+                    addressLine3: Northshire
+                    addressLine4: London
+                    rls: true
+                    contactDetails:
+                      telephoneNumber: +44 20 1234 5678
+                      fax: '01234'
+                      mobile: '07123456789'
+                      emailAddress: john@example.com
+                      emailSource: ETMP
+                    postCode: W1A 1ZZ
+                    postcodeHistory:
+                      - addressPostcode: BN12 9ER
+                        postcodeDate: '2022-04-30'
+                customerSignals:
+                  - signalType: Insolvency
+                    signalValue: 'true'
+                    signalDescription: Description
+                  - signalType: ITSA Migrated
+                    signalValue: 'true'
+                    signalDescription: Customer has migrated to ITSA
+                chargeTypesExcluded: false
+                chargeTypeAssessment:
+                  - debtTotalAmount: 250000
+                    chargeReference: XW006559808863
+                    mainTrans: '4700'
+                    parentChargeReference: XW006559808863
+                    isInsolvent: true
+                    charges:
+                      - taxPeriodFrom: '2022-04-01'
+                        taxPeriodTo: '2022-06-30'
+                        chargeType: Payment
+                        mainType: Payment
+                        subTrans: '1174'
+                        outstandingAmount: 250000
+                        dueDate: '2022-08-01'
+                        isInterestBearingCharge: true
+                        interestStartDate: '2022-08-01'
+                        accruedInterest: 5000
+                        chargeSource: ETMP
+                        parentMainTrans: '4700'
+                        tieBreaker: abc123
+                        saTaxYearEnd: '2022-04-05'
+                        creationDate: '2022-08-01'
+                        originalChargeType: Payment
+                        locks:
+                          - lockType: no reallocation
+                            lockReason: Insolvency
+                  - debtTotalAmount: 148781
+                    chargeReference: XW006559808862
+                    mainTrans: '4700'
+                    parentChargeReference: XW006559808862
+                    isInsolvent: true
+                    charges:
+                      - taxPeriodFrom: '2022-04-01'
+                        taxPeriodTo: '2022-06-30'
+                        chargeType: VAT Return Debit Charge
+                        mainType: VAT Return charge
+                        subTrans: '1174'
+                        outstandingAmount: 148781
+                        dueDate: '2022-08-01'
+                        isInterestBearingCharge: true
+                        interestStartDate: '2022-08-01'
+                        accruedInterest: 3
+                        chargeSource: CESA
+                        parentMainTrans: '4700'
+                        tieBreaker: xyz
+                        saTaxYearEnd: '2022-08-01'
+                        creationDate: '2022-08-01'
+                        originalChargeType: VAT Return Debit Charge
+                        locks:
+                          - lockType: Payment
+                            lockReason: Insolvency
         '400':
           description: ''
           headers: {}
@@ -2618,6 +2707,14 @@ components:
               - addressLine1
               - addressType
               - postcodeHistory
+        customerSignals:
+          type: array
+          items:
+            $ref: '#/components/schemas/CustomerSignal'
+          description: Signal information to be considered by the operator. Not all signals will be returned.  Examples of signals returned include ring-fenced signals, insolvency and Welsh Language signal.
+        chargeTypesExcluded:
+          type: boolean
+          description: Indicates whether any charge types have been excluded from the response
         chargeTypeAssessment:
           type: array
           items:
@@ -2702,6 +2799,24 @@ components:
                     - outstandingAmount
                     - dueDate
                     - accruedInterest
+    CustomerSignal:
+      type: object
+      required:
+        - signalType
+        - signalValue
+      properties:
+        signalType:
+          type: string
+          description: Type of customer signal
+          example: ITSA Migrated
+        signalValue:
+          type: string
+          description: Value of the signal
+          example: 'true'
+        signalDescription:
+          type: string
+          description: Description of the signal
+          example: Description
     CancelIdentification:
       type: object
       required:

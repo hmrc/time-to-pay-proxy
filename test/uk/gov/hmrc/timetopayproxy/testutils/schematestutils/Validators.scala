@@ -174,11 +174,13 @@ object Validators {
   }
 
   object TimeToPayEligibility {
+    // TODO DTD-3508: Proposed schema used temporarily
+    //    - Update comments to use prod ready schema
     // Downloaded from:
     //   https://github.com/hmrc/time-to-pay-eligibility/blob/dfc3c970abfe7ee8bafbd32e2dc77d35b829a37b/test/resources/schemas/apis/time-to-pay-eligibility/ttp-eligibility0.3.6.yaml
     // Official location:
     //   https://confluence.tools.tax.service.gov.uk/display/DTDT/TTP+Eligibility+API
-    private val path = "test/resources/schemas/apis/time-to-pay-eligibility/ttp-eligibility0.3.6.yaml"
+    private val path = "test/resources/schemas/apis/time-to-pay-eligibility/ttp-eligibility0.3.8.yaml"
 
     object ChargeInfo {
       def openApiRequestSchema: OpenApi3DerivedSchema =

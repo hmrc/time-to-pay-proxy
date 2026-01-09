@@ -714,6 +714,12 @@ components:
               - addressLine1
               - addressType
               - postcodeHistory
+        customerSignals:
+          type: array
+          items:
+            $ref: '#/components/schemas/CustomerSignal'
+          description: Signal information to be considered by the operator. Not all signals will be returned. Examples of signals returned include ring-fenced signals, insolvency and Welsh Language signal.
+
         chargeTypeAssessment:
           type: array
           items:
@@ -804,6 +810,25 @@ components:
         - chargeTypeAssessment
         - addresses
         - individualDetails
+    CustomerSignal:
+      type: object
+      description: Signal information for operator consideration
+      required:
+        - signalType
+        - signalValue
+      properties:
+        signalType:
+          type: string
+          description: Type of the signal
+          example: ITSA Migrated
+        signalValue:
+          type: string
+          description: Value of the signal
+          example: 'true'
+        signalDescription:
+          type: string
+          description: Description of the signal
+          example: Description
     ErrorResponse:
       type: object
       description: A JSON Error Schema for ErrorResponse
@@ -988,6 +1013,13 @@ components:
             postcodeHistory:
               - addressPostcode: "BN12 9ER"
                 postcodeDate: "2022-04-30"
+        customerSignals:
+          - signalType: Insolvency
+            signalValue: 'true'
+            signalDescription: Description
+          - signalType: ITSA Migrated
+            signalValue: 'true'
+
         chargeTypeAssessment:
           - debtTotalAmount: 148781
             chargeReference: "XW006559808862"

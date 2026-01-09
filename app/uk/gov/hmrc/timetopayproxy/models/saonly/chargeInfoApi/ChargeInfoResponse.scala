@@ -28,7 +28,8 @@ final case class ChargeInfoResponse(
   identification: List[Identification],
   individualDetails: IndividualDetails,
   addresses: List[Address],
-  chargeTypeAssessment: List[ChargeTypeAssessment]
+  chargeTypeAssessment: List[ChargeTypeAssessment],
+  customerSignals: Option[List[Signal]]
 )
 
 object ChargeInfoResponse {

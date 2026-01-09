@@ -19,6 +19,7 @@ package uk.gov.hmrc.timetopayproxy.controllers
 import cats.data.NonEmptyList
 import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.client.WireMock._
+import com.github.tomakehurst.wiremock.http.RequestMethod.{ GET, POST, PUT }
 import play.api.libs.json.Json
 import play.api.libs.ws.{ WSRequest, WSResponse }
 import uk.gov.hmrc.http.HeaderCarrier
@@ -32,7 +33,6 @@ import uk.gov.hmrc.timetopayproxy.models.saonly.ttpcancel.{ CancellationDate, Tt
 import uk.gov.hmrc.timetopayproxy.models.saonly.ttpfullamend.{ TtpFullAmendRequest, TtpFullAmendSuccessfulResponse }
 import uk.gov.hmrc.timetopayproxy.models.saonly.ttpinform.{ TtpInformRequest, TtpInformSuccessfulResponse }
 import uk.gov.hmrc.timetopayproxy.support.IntegrationBaseSpec
-import com.github.tomakehurst.wiremock.http.RequestMethod.{ GET, POST, PUT }
 
 import java.time.{ Instant, LocalDate, LocalDateTime }
 import scala.concurrent.ExecutionContext
@@ -537,6 +537,12 @@ class TimeToPayProxyControllerEnrolmentAuthEnabledItSpec extends IntegrationBase
                 originalChargeType = Some(OriginalChargeType("Original Charge Type"))
               )
             )
+          )
+        ),
+        customerSignals = Some(
+          List(
+            Signal(SignalType("Rls"), SignalValue("signal value"), Some("description")),
+            Signal(SignalType("Welsh Language Signal"), SignalValue("signal value"), Some("description"))
           )
         )
       )

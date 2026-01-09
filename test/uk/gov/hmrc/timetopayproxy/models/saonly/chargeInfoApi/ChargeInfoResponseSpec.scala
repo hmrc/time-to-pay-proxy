@@ -98,6 +98,12 @@ class ChargeInfoResponseSpec extends AnyFreeSpec {
               )
             )
           )
+        ),
+        customerSignals = Some(
+          List(
+            Signal(SignalType("Rls"), SignalValue("signal value"), Some("description")),
+            Signal(SignalType("Welsh Language Signal"), SignalValue("signal value"), Some("description"))
+          )
         )
       )
 
@@ -172,7 +178,19 @@ class ChargeInfoResponseSpec extends AnyFreeSpec {
           |    "title" : "Mr",
           |    "transitionToCDCS" : true
           |  },
-          |  "processingDateTime" : "2025-07-02T15:00:41.689"
+          |  "processingDateTime" : "2025-07-02T15:00:41.689",
+          |  "customerSignals": [
+          |    {
+          |      "signalType": "Rls",
+          |      "signalValue": "signal value",
+          |      "signalDescription": "description"
+          |    },
+          |    {
+          |      "signalType": "Welsh Language Signal",
+          |      "signalValue": "signal value",
+          |      "signalDescription": "description"
+          |    }
+          |  ]
           |}
           |""".stripMargin
       )
@@ -248,6 +266,11 @@ class ChargeInfoResponseSpec extends AnyFreeSpec {
               )
             )
           )
+        ),
+        customerSignals = Some(
+          List(
+            Signal(SignalType("Welsh Language Signal"), SignalValue("signal value"), None)
+          )
         )
       )
 
@@ -311,7 +334,13 @@ class ChargeInfoResponseSpec extends AnyFreeSpec {
           |    "customerType" : "MTD(ITSA)",
           |    "transitionToCDCS" : true
           |  },
-          |  "processingDateTime" : "2025-07-02T15:00:41.689"
+          |  "processingDateTime" : "2025-07-02T15:00:41.689",
+          |  "customerSignals": [
+          |    {
+          |      "signalType": "Welsh Language Signal",
+          |      "signalValue": "signal value"
+          |    }
+          |  ]
           |}
           |""".stripMargin
       )
@@ -379,7 +408,8 @@ class ChargeInfoResponseSpec extends AnyFreeSpec {
               )
             )
           )
-        )
+        ),
+        customerSignals = None
       )
 
       def json: JsValue = Json.parse(

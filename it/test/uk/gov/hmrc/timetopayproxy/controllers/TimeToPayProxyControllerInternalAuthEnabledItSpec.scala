@@ -18,7 +18,7 @@ package uk.gov.hmrc.timetopayproxy.controllers
 
 import cats.data.NonEmptyList
 import com.github.tomakehurst.wiremock.client.WireMock
-import com.github.tomakehurst.wiremock.client.WireMock.{ equalTo, post, postRequestedFor, urlPathEqualTo }
+import com.github.tomakehurst.wiremock.client.WireMock.{ equalTo, postRequestedFor, urlPathEqualTo }
 import com.github.tomakehurst.wiremock.http.RequestMethod.POST
 import play.api.libs.json.Json
 import play.api.libs.ws.{ WSRequest, WSResponse }
@@ -117,6 +117,12 @@ class TimeToPayProxyControllerInternalAuthEnabledItSpec extends IntegrationBaseS
                 originalChargeType = Some(OriginalChargeType("Original Charge Type"))
               )
             )
+          )
+        ),
+        customerSignals = Some(
+          List(
+            Signal(SignalType("Rls"), SignalValue("signal value"), Some("description")),
+            Signal(SignalType("Welsh Language Signal"), SignalValue("signal value"), Some("description"))
           )
         )
       )
