@@ -18,6 +18,7 @@ package uk.gov.hmrc.timetopayproxy.services
 
 import cats.data.NonEmptyList
 import cats.implicits.catsSyntaxEitherId
+import org.scalamock.scalatest.MockFactory
 import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.should.Matchers._
 import play.api.test.Helpers.{ await, defaultAwaitTimeout }
@@ -33,7 +34,7 @@ import java.time.{ LocalDate, LocalDateTime }
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.{ ExecutionContext, Future }
 
-class TTPEServiceSpec extends AnyFreeSpec {
+class TTPEServiceSpec extends AnyFreeSpec with MockFactory {
   implicit val hc: HeaderCarrier = HeaderCarrier()
 
   private val chargeInfoRequest: ChargeInfoRequest = ChargeInfoRequest(
@@ -45,7 +46,7 @@ class TTPEServiceSpec extends AnyFreeSpec {
     regimeType = SaOnlyRegimeType.SA
   )
 
-  private val chargeInfoResponse: ChargeInfoResponse = ChargeInfoResponse(
+  private val chargeInfoResponseWithR2Fields: ChargeInfoResponseR2 = ChargeInfoResponseR2(
     processingDateTime = LocalDateTime.parse("2025-07-02T15:00:41.689"),
     identification = List(
       Identification(idType = IdType("ID_TYPE"), idValue = IdValue("ID_VALUE"))
@@ -111,18 +112,36 @@ class TTPEServiceSpec extends AnyFreeSpec {
           )
         )
       )
+    ),
+    customerSignals = Some(
+      List(
+        Signal(SignalType("Rls"), SignalValue("signal value"), Some("description")),
+        Signal(SignalType("Welsh Language Signal"), SignalValue("signal value"), Some("description"))
+      )
     )
   )
 
   ".checkChargeInfo" - {
-    "returns a ChargeInfoResponse from the connector" in {
+    "should return a ChargeInfoResponse from the connector, with only R1 fields" in {
+      val expectedResponse = chargeInfoResponseWithR2Fields.copy(customerSignals = None)
       val connectorStub = new TtpeConnectorStub(
-        Right(chargeInfoResponse)
+        Right(expectedResponse)
       )
 
       val ttpeService = new DefaultTTPEService(connectorStub)
 
-      await(ttpeService.checkChargeInfo(chargeInfoRequest).value) shouldBe chargeInfoResponse
+      await(ttpeService.checkChargeInfo(chargeInfoRequest).value) shouldBe expectedResponse
+        .asRight[ProxyEnvelopeError]
+    }
+
+    "should return a ChargeInfoResponse from the connector, with both R1 and R2 fields" in {
+      val connectorStub = new TtpeConnectorStub(
+        Right(chargeInfoResponseWithR2Fields)
+      )
+
+      val ttpeService = new DefaultTTPEService(connectorStub)
+
+      await(ttpeService.checkChargeInfo(chargeInfoRequest).value) shouldBe chargeInfoResponseWithR2Fields
         .asRight[ProxyEnvelopeError]
     }
 

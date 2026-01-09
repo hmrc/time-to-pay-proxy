@@ -17,22 +17,52 @@
 package uk.gov.hmrc.timetopayproxy.models.saonly.chargeInfoApi
 
 import enumeratum.{ Enum, EnumEntry, PlayJsonEnum }
-import play.api.libs.json.{ Format, Json, OFormat }
+import play.api.libs.json._
+import uk.gov.hmrc.timetopayproxy.config.FeatureSwitch
 import uk.gov.hmrc.timetopayproxy.models.Identification
 
 import java.time.{ LocalDate, LocalDateTime }
 import scala.collection.immutable
 
-final case class ChargeInfoResponse(
+sealed trait ChargeInfoResponse
+
+object ChargeInfoResponse {
+  def reads(featureSwitch: FeatureSwitch): Reads[ChargeInfoResponse] = Reads { jsValue =>
+    if (featureSwitch.saRelease2Enabled.enabled) ChargeInfoResponseR2.format.reads(jsValue)
+    else ChargeInfoResponseR1.format.reads(jsValue)
+  }
+
+  implicit val writes: OWrites[ChargeInfoResponse] = OWrites {
+    case r1: ChargeInfoResponseR1 => ChargeInfoResponseR1.format.writes(r1)
+    case r2: ChargeInfoResponseR2 => ChargeInfoResponseR2.format.writes(r2)
+  }
+
+  def format(featureSwitch: FeatureSwitch): OFormat[ChargeInfoResponse] = OFormat.apply(reads(featureSwitch), writes)
+}
+
+final case class ChargeInfoResponseR1(
   processingDateTime: LocalDateTime,
   identification: List[Identification],
   individualDetails: IndividualDetails,
   addresses: List[Address],
   chargeTypeAssessment: List[ChargeTypeAssessment]
-)
+) extends ChargeInfoResponse
 
-object ChargeInfoResponse {
-  implicit val format: OFormat[ChargeInfoResponse] = Json.format[ChargeInfoResponse]
+object ChargeInfoResponseR1 {
+  implicit val format: OFormat[ChargeInfoResponseR1] = Json.format[ChargeInfoResponseR1]
+}
+
+final case class ChargeInfoResponseR2(
+  processingDateTime: LocalDateTime,
+  identification: List[Identification],
+  individualDetails: IndividualDetails,
+  addresses: List[Address],
+  chargeTypeAssessment: List[ChargeTypeAssessment],
+  customerSignals: Option[List[Signal]]
+) extends ChargeInfoResponse
+
+object ChargeInfoResponseR2 {
+  implicit val format: OFormat[ChargeInfoResponseR2] = Json.format[ChargeInfoResponseR2]
 }
 
 final case class IndividualDetails(

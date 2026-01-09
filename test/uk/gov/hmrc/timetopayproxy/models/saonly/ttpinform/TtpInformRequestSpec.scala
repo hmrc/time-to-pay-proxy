@@ -188,7 +188,7 @@ final class TtpInformRequestSpec extends AnyFreeSpec {
         }
 
         "was tested against JSON compatible with our schema" in {
-          val schema = Validators.TimeToPayProxy.TtpInform.openApiRequestSchema
+          val schema = Validators.TimeToPayProxy.TtpInform.Live.openApiRequestSchema
 
           schema.validateAndGetErrors(json) shouldBe Nil
         }
@@ -203,7 +203,7 @@ final class TtpInformRequestSpec extends AnyFreeSpec {
         }
 
         "was tested against JSON compatible with our schema" in {
-          val schema = Validators.TimeToPayProxy.TtpInform.openApiRequestSchema
+          val schema = Validators.TimeToPayProxy.TtpInform.Live.openApiRequestSchema
 
           schema.validateAndGetErrors(json) shouldBe Nil
         }
@@ -412,7 +412,7 @@ final class TtpInformRequestSpec extends AnyFreeSpec {
         }
 
         "was tested against JSON compatible with our schema" in {
-          val schema = Validators.TimeToPayProxy.TtpInformR2.openApiRequestSchema
+          val schema = Validators.TimeToPayProxy.TtpInform.Proposed.openApiRequestSchema
 
           schema.validateAndGetErrors(json) shouldBe Nil
         }
@@ -427,7 +427,7 @@ final class TtpInformRequestSpec extends AnyFreeSpec {
         }
 
         "was tested against JSON compatible with our schema" in {
-          val schema = Validators.TimeToPayProxy.TtpInformR2.openApiRequestSchema
+          val schema = Validators.TimeToPayProxy.TtpInform.Proposed.openApiRequestSchema
 
           schema.validateAndGetErrors(json) shouldBe Nil
         }

@@ -1842,7 +1842,7 @@ class TimeToPayProxyControllerItSpec extends IntegrationBaseSpec {
       regimeType = Some(SsttpRegimeType.SA)
     )
 
-    val ttpeResponse: ChargeInfoResponse = ChargeInfoResponse(
+    val ttpeResponse: ChargeInfoResponse = ChargeInfoResponseR2(
       processingDateTime = LocalDateTime.parse("2025-07-02T15:00:41.689"),
       identification = List(
         Identification(idType = IdType("ID_TYPE"), idValue = IdValue("ID_VALUE"))
@@ -1907,6 +1907,12 @@ class TimeToPayProxyControllerItSpec extends IntegrationBaseSpec {
               originalChargeType = Some(OriginalChargeType("Original Charge Type"))
             )
           )
+        )
+      ),
+      customerSignals = Some(
+        List(
+          Signal(SignalType("Rls"), SignalValue("signal value"), Some("description")),
+          Signal(SignalType("Welsh Language Signal"), SignalValue("signal value"), Some("description"))
         )
       )
     )

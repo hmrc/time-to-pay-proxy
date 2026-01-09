@@ -20,7 +20,7 @@ import com.typesafe.config.ConfigFactory
 import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.should.Matchers
 import play.api.Configuration
-import uk.gov.hmrc.timetopayproxy.models.featureSwitches.InternalAuthEnabled
+import uk.gov.hmrc.timetopayproxy.models.featureSwitches.{ InternalAuthEnabled, SARelease2Enabled }
 
 class FeatureSwitchSpec extends AnyFreeSpec with Matchers {
   val config: Configuration = Configuration(ConfigFactory.load())
@@ -55,6 +55,12 @@ class FeatureSwitchSpec extends AnyFreeSpec with Matchers {
     "informEndpointEnabled" - {
       "should retrieve the correct value from application.conf" in {
         featureSwitch.informEndpointEnabled shouldBe true
+      }
+    }
+
+    "saRelease2Enabled" - {
+      "should retrieve the correct value from application.conf" in {
+        featureSwitch.saRelease2Enabled shouldBe SARelease2Enabled(true)
       }
     }
   }

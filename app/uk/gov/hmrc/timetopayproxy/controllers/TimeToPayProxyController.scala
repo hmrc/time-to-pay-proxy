@@ -26,7 +26,7 @@ import uk.gov.hmrc.timetopayproxy.models._
 import uk.gov.hmrc.timetopayproxy.models.affordablequotes.AffordableQuotesRequest
 import uk.gov.hmrc.timetopayproxy.models.error.TtppEnvelope.TtppEnvelope
 import uk.gov.hmrc.timetopayproxy.models.error.{ TtppEnvelope, TtppErrorResponse, ValidationError }
-import uk.gov.hmrc.timetopayproxy.models.saonly.chargeInfoApi.ChargeInfoRequest
+import uk.gov.hmrc.timetopayproxy.models.saonly.chargeInfoApi.{ ChargeInfoRequest, ChargeInfoResponse }
 import uk.gov.hmrc.timetopayproxy.models.saonly.ttpcancel.TtpCancelRequest
 import uk.gov.hmrc.timetopayproxy.models.saonly.ttpfullamend.TtpFullAmendRequest
 import uk.gov.hmrc.timetopayproxy.models.saonly.ttpinform.TtpInformRequest
@@ -106,7 +106,7 @@ class TimeToPayProxyController @Inject() (
         timeToPayEligibilityService
           .checkChargeInfo(chargeInfoRequest)
           .leftMap(ttppError => ttppError.toWriteableProxyError)
-          .fold(e => e.toErrorResult, r => Results.Ok(Json.toJson(r)))
+          .fold(e => e.toErrorResult, r => Results.Ok(Json.toJson(r)(ChargeInfoResponse.writes)))
       }
     } else {
       Future.successful(

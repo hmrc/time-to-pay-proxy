@@ -53,7 +53,7 @@ final class TimeToPayEligibilityErrorSpec extends AnyFreeSpec {
 
         "was tested against JSON compatible with the time-to-pay-eligibility schema" - {
           "for the charge info endpoint" in {
-            val schema = Validators.TimeToPayEligibility.ChargeInfo.openApiErrorSchema
+            val schema = Validators.TimeToPayEligibility.ChargeInfo.Live.openApiErrorSchema
 
             schema.validateAndGetErrors(json) shouldBe Nil
           }

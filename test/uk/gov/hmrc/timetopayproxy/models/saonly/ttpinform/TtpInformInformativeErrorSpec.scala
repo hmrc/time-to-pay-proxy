@@ -121,7 +121,7 @@ final class TtpInformInformativeErrorSpec extends AnyFreeSpec {
         }
 
         "writes JSON compatible with our schema" in {
-          val schema = Validators.TimeToPayProxy.TtpInform.openApiInformErrorResponseSchema
+          val schema = Validators.TimeToPayProxy.TtpInform.Live.openApiInformErrorResponseSchema
           val writtenJson: JsValue = writerToClients.writes(obj)
 
           schema.validateAndGetErrors(writtenJson) shouldBe Nil
@@ -137,7 +137,7 @@ final class TtpInformInformativeErrorSpec extends AnyFreeSpec {
         }
 
         "writes JSON compatible with our schema" in {
-          val schema = Validators.TimeToPayProxy.TtpInform.openApiInformErrorResponseSchema
+          val schema = Validators.TimeToPayProxy.TtpInform.Live.openApiInformErrorResponseSchema
           val writtenJson: JsValue = writerToClients.writes(obj)
 
           schema.validateAndGetErrors(writtenJson) shouldBe Nil
