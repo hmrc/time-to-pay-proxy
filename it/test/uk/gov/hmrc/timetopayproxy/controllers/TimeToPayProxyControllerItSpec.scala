@@ -18,7 +18,7 @@ package uk.gov.hmrc.timetopayproxy.controllers
 
 import cats.data.NonEmptyList
 import com.github.tomakehurst.wiremock.client.WireMock
-import com.github.tomakehurst.wiremock.client.WireMock.{ post, postRequestedFor, put, urlPathEqualTo }
+import com.github.tomakehurst.wiremock.client.WireMock.{ postRequestedFor, urlPathEqualTo }
 import com.github.tomakehurst.wiremock.http.RequestMethod.{ POST, PUT }
 import play.api.libs.json.{ JsNull, JsObject, JsValue, Json }
 import play.api.libs.ws.{ WSRequest, WSResponse }
@@ -42,6 +42,7 @@ import scala.concurrent.ExecutionContext
 class TimeToPayProxyControllerItSpec extends IntegrationBaseSpec {
   def internalAuthEnabled: Boolean = false
   def enrolmentAuthEnabled: Boolean = false
+  def saRelease2Enabled: Boolean = false
 
   "TimeToPayProxyController" - {
     ".getAffordableQuotes" - {
@@ -1909,7 +1910,7 @@ class TimeToPayProxyControllerItSpec extends IntegrationBaseSpec {
           )
         )
       ),
-      chargeTypesExcluded = false
+      chargeTypesExcluded = None
     )
 
     val chargeInfoRequest: ChargeInfoRequest = ChargeInfoRequest(

@@ -18,7 +18,7 @@ package uk.gov.hmrc.timetopayproxy.controllers
 
 import cats.data.NonEmptyList
 import com.github.tomakehurst.wiremock.client.WireMock
-import com.github.tomakehurst.wiremock.client.WireMock.{ equalTo, post, postRequestedFor, urlPathEqualTo }
+import com.github.tomakehurst.wiremock.client.WireMock.{ equalTo, postRequestedFor, urlPathEqualTo }
 import com.github.tomakehurst.wiremock.http.RequestMethod.POST
 import play.api.libs.json.Json
 import play.api.libs.ws.{ WSRequest, WSResponse }
@@ -34,6 +34,7 @@ import scala.concurrent.ExecutionContext
 class TimeToPayProxyControllerInternalAuthEnabledItSpec extends IntegrationBaseSpec {
   def internalAuthEnabled: Boolean = true
   def enrolmentAuthEnabled: Boolean = false
+  def saRelease2Enabled: Boolean = true
 
   implicit def ec: ExecutionContext = app.injector.instanceOf[ExecutionContext]
   implicit val hc: HeaderCarrier = HeaderCarrier()
@@ -119,7 +120,7 @@ class TimeToPayProxyControllerInternalAuthEnabledItSpec extends IntegrationBaseS
             )
           )
         ),
-        chargeTypesExcluded = false
+        chargeTypesExcluded = None
       )
 
       "should send a request with an Authorization header" - {

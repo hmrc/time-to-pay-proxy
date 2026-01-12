@@ -99,7 +99,7 @@ class ChargeInfoResponseSpec extends AnyFreeSpec {
             )
           )
         ),
-        chargeTypesExcluded = false
+        chargeTypesExcluded = Some(false)
       )
 
       def json: JsValue = Json.parse(
@@ -251,7 +251,7 @@ class ChargeInfoResponseSpec extends AnyFreeSpec {
             )
           )
         ),
-        chargeTypesExcluded = false
+        chargeTypesExcluded = Some(false)
       )
 
       def json: JsValue = Json.parse(
@@ -384,7 +384,7 @@ class ChargeInfoResponseSpec extends AnyFreeSpec {
             )
           )
         ),
-        chargeTypesExcluded = false
+        chargeTypesExcluded = Some(false)
       )
 
       def json: JsValue = Json.parse(

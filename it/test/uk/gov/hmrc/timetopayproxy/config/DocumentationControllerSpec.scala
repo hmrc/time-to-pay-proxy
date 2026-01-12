@@ -26,6 +26,8 @@ class DocumentationControllerSpec extends IntegrationBaseSpec {
 
   def enrolmentAuthEnabled: Boolean = false
 
+  def saRelease2Enabled: Boolean = false
+
   val apiDefinitionJson: JsValue = Json.parse(
     """
       |{
