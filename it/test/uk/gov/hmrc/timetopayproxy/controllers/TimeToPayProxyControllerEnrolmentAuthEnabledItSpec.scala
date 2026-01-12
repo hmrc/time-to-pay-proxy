@@ -43,6 +43,7 @@ import scala.concurrent.ExecutionContext
 class TimeToPayProxyControllerEnrolmentAuthEnabledItSpec extends IntegrationBaseSpec {
   def internalAuthEnabled: Boolean = false
   def enrolmentAuthEnabled: Boolean = true
+  def saRelease2Enabled: Boolean = true
 
   implicit def ec: ExecutionContext = app.injector.instanceOf[ExecutionContext]
   implicit val hc: HeaderCarrier = HeaderCarrier()

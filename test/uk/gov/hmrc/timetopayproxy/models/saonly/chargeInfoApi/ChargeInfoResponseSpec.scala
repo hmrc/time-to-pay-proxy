@@ -103,7 +103,7 @@ class ChargeInfoResponseSpec extends AnyFreeSpec with MockFactory {
             )
           )
         ),
-        chargeTypesExcluded = false
+        chargeTypesExcluded = Some(false)
       )
 
       def r2: ChargeInfoResponse = ChargeInfoResponseR2(
@@ -353,7 +353,7 @@ class ChargeInfoResponseSpec extends AnyFreeSpec with MockFactory {
             )
           )
         ),
-        chargeTypesExcluded = false
+        chargeTypesExcluded = Some(false)
       )
 
       def r2: ChargeInfoResponse = ChargeInfoResponseR2(
@@ -577,7 +577,7 @@ class ChargeInfoResponseSpec extends AnyFreeSpec with MockFactory {
             )
           )
         ),
-        chargeTypesExcluded = false
+        chargeTypesExcluded = Some(false)
       )
 
       def r2: ChargeInfoResponse = ChargeInfoResponseR2(

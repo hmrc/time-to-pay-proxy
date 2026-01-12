@@ -19,13 +19,17 @@ package uk.gov.hmrc.timetopayproxy.services
 import cats.data.NonEmptyList
 import cats.implicits.catsSyntaxEitherId
 import org.scalamock.scalatest.MockFactory
+import org.scalamock.scalatest.MockFactory
+import org.scalatest.Inside.inside
 import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.should.Matchers._
 import play.api.test.Helpers.{ await, defaultAwaitTimeout }
 import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.timetopayproxy.config.FeatureSwitch
 import uk.gov.hmrc.timetopayproxy.connectors.TtpeConnector
 import uk.gov.hmrc.timetopayproxy.models.error.TtppEnvelope.TtppEnvelope
 import uk.gov.hmrc.timetopayproxy.models.error.{ ConnectorError, ProxyEnvelopeError, TtppEnvelope }
+import uk.gov.hmrc.timetopayproxy.models.featureSwitches.SARelease2Enabled
 import uk.gov.hmrc.timetopayproxy.models.saonly.chargeInfoApi._
 import uk.gov.hmrc.timetopayproxy.models.saonly.common.SaOnlyRegimeType
 import uk.gov.hmrc.timetopayproxy.models.{ IdType, IdValue, Identification }
@@ -36,6 +40,8 @@ import scala.concurrent.{ ExecutionContext, Future }
 
 class TTPEServiceSpec extends AnyFreeSpec with MockFactory {
   implicit val hc: HeaderCarrier = HeaderCarrier()
+
+  private val featureSwitch: FeatureSwitch = mock[FeatureSwitch]
 
   private val chargeInfoRequest: ChargeInfoRequest = ChargeInfoRequest(
     channelIdentifier = ChargeInfoChannelIdentifier("Channel Identifier"),
@@ -120,6 +126,77 @@ class TTPEServiceSpec extends AnyFreeSpec with MockFactory {
         Signal(SignalType("Welsh Language Signal"), SignalValue("signal value"), Some("description"))
       )
     )
+    chargeTypesExcluded = None
+  )
+
+  private val chargeInfoResponseWithChargeTypesExcludedSetToTrue: ChargeInfoResponse = ChargeInfoResponse(
+    processingDateTime = LocalDateTime.parse("2025-07-02T15:00:41.689"),
+    identification = List(
+      Identification(idType = IdType("ID_TYPE"), idValue = IdValue("ID_VALUE"))
+    ),
+    individualDetails = IndividualDetails(
+      title = Some(Title("Mr")),
+      firstName = Some(FirstName("John")),
+      lastName = Some(LastName("Doe")),
+      dateOfBirth = Some(DateOfBirth(LocalDate.parse("1980-01-01"))),
+      districtNumber = Some(DistrictNumber("1234")),
+      customerType = CustomerType.ItsaMigtrated,
+      transitionToCDCS = TransitionToCdcs(value = true)
+    ),
+    addresses = List(
+      Address(
+        addressType = AddressType("Address Type"),
+        addressLine1 = AddressLine1("Address Line 1"),
+        addressLine2 = Some(AddressLine2("Address Line 2")),
+        addressLine3 = Some(AddressLine3("Address Line 3")),
+        addressLine4 = Some(AddressLine4("Address Line 4")),
+        rls = Some(Rls(true)),
+        contactDetails = Some(
+          ContactDetails(
+            telephoneNumber = Some(TelephoneNumber("telephone-number")),
+            fax = Some(Fax("fax-number")),
+            mobile = Some(Mobile("mobile-number")),
+            emailAddress = Some(Email("email address")),
+            emailSource = Some(EmailSource("email source"))
+          )
+        ),
+        postCode = Some(ChargeInfoPostCode("AB12 3CD")),
+        postcodeHistory = List(
+          PostCodeInfo(addressPostcode = ChargeInfoPostCode("AB12 3CD"), postcodeDate = LocalDate.parse("2020-01-01"))
+        )
+      )
+    ),
+    chargeTypeAssessment = List(
+      ChargeTypeAssessment(
+        debtTotalAmount = BigInt(1000),
+        chargeReference = ChargeReference("CHARGE REFERENCE"),
+        parentChargeReference = Some(ChargeInfoParentChargeReference("PARENT CHARGE REF")),
+        mainTrans = MainTrans("2000"),
+        charges = List(
+          Charge(
+            taxPeriodFrom = TaxPeriodFrom(LocalDate.parse("2020-01-02")),
+            taxPeriodTo = TaxPeriodTo(LocalDate.parse("2020-12-31")),
+            chargeType = ChargeType("charge type"),
+            mainType = MainType("main type"),
+            subTrans = SubTrans("1000"),
+            outstandingAmount = OutstandingAmount(BigInt(500)),
+            dueDate = DueDate(LocalDate.parse("2021-01-31")),
+            isInterestBearingCharge = Some(ChargeInfoIsInterestBearingCharge(true)),
+            interestStartDate = Some(InterestStartDate(LocalDate.parse("2020-01-03"))),
+            accruedInterest = AccruedInterest(BigInt(50)),
+            chargeSource = ChargeInfoChargeSource("Source"),
+            parentMainTrans = Some(ChargeInfoParentMainTrans("Parent Main Transaction")),
+            originalCreationDate = Some(OriginalCreationDate(LocalDate.parse("2025-07-02"))),
+            tieBreaker = Some(TieBreaker("Tie Breaker")),
+            originalTieBreaker = Some(OriginalTieBreaker("Original Tie Breaker")),
+            saTaxYearEnd = Some(SaTaxYearEnd(LocalDate.parse("2020-04-05"))),
+            creationDate = Some(CreationDate(LocalDate.parse("2025-07-02"))),
+            originalChargeType = Some(OriginalChargeType("Original Charge Type"))
+          )
+        )
+      )
+    ),
+    chargeTypesExcluded = Some(true)
   )
 
   ".checkChargeInfo" - {
@@ -140,10 +217,48 @@ class TTPEServiceSpec extends AnyFreeSpec with MockFactory {
         Right(chargeInfoResponseWithR2Fields)
       )
 
-      val ttpeService = new DefaultTTPEService(connectorStub)
+      (() => featureSwitch.saRelease2Enabled).expects().returning(SARelease2Enabled(false))
+
+      val ttpeService = new DefaultTTPEService(connectorStub, featureSwitch)
 
       await(ttpeService.checkChargeInfo(chargeInfoRequest).value) shouldBe chargeInfoResponse
         .asRight[ProxyEnvelopeError]
+    }
+
+    "returns a ChargeInfoResponse from the connector, with chargeTypesExcluded set to true" in {
+      val connectorStub = new TtpeConnectorStub(
+        Right(chargeInfoResponseWithChargeTypesExcludedSetToTrue)
+      )
+
+      (() => featureSwitch.saRelease2Enabled).expects().returning(SARelease2Enabled(true))
+
+      val ttpeService = new DefaultTTPEService(connectorStub, featureSwitch)
+
+      val result =
+        await(ttpeService.checkChargeInfo(chargeInfoRequest).value)
+
+      inside(result) { case Right(response) =>
+        println(response)
+        response.chargeTypesExcluded shouldBe Some(true) // or None
+      }
+    }
+
+    "returns a ChargeInfoResponse from the connector, with chargeTypesExcluded set to false" in {
+      val connectorStub = new TtpeConnectorStub(
+        Right(chargeInfoResponse)
+      )
+
+      (() => featureSwitch.saRelease2Enabled).expects().returning(SARelease2Enabled(false))
+
+      val ttpeService = new DefaultTTPEService(connectorStub, featureSwitch)
+
+      val result =
+        await(ttpeService.checkChargeInfo(chargeInfoRequest).value)
+
+      inside(result) { case Right(response) =>
+        println(response)
+        response.chargeTypesExcluded shouldBe None
+      }
     }
 
     "returns an error from the connector" in {
@@ -151,7 +266,7 @@ class TTPEServiceSpec extends AnyFreeSpec with MockFactory {
         Left(ConnectorError(500, "Internal server error"))
       )
 
-      val ttpeService = new DefaultTTPEService(connectorStub)
+      val ttpeService = new DefaultTTPEService(connectorStub, featureSwitch)
 
       await(ttpeService.checkChargeInfo(chargeInfoRequest).value) shouldBe ConnectorError(
         statusCode = 500,
