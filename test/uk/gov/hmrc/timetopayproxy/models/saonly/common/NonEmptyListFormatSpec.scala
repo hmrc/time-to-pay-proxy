@@ -48,12 +48,25 @@ class NonEmptyListFormatSpec extends AnyFreeSpec {
       intsListJson.as[NelInts] shouldBe intsList
     }
 
-    "should correctly fail to decode invalid JSON" in {
-      val naughtyJson = JsString("I'm a naughty JSON String!")
+    "should correctly fail to decode invalid JSON" - {
 
-      assertThrows[JsResultException](
-        naughtyJson.as[NelInts]
-      )
+      "when given a string instead of a JSON array" in {
+        val naughtyJson = JsString("I'm a naughty JSON String!")
+
+        assertThrows[JsResultException](
+          naughtyJson.as[NelInts]
+        )
+      }
+
+      "when given an empty JSON array" in {
+        val emptyJsonArray = Json.parse(
+          """{
+            | "values": []
+            |}""".stripMargin
+        )
+
+        assertThrows[JsResultException](emptyJsonArray.as[NelInts])
+      }
     }
   }
 }
