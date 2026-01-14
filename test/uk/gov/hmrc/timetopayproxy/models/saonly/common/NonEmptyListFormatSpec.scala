@@ -35,11 +35,13 @@ class NonEmptyListFormatSpec extends AnyFreeSpec {
 
     "should encode and decode correctly" in {
       val intsList = NelInts(NonEmptyList.of(1, 2))
-      val intsListJson = Json.parse("""{
-          "values": [
-                                      | 1, 2
-                                      |]
-                                      |}""".stripMargin)
+      val intsListJson = Json.parse(
+        """{
+          | "values": [
+          | 1, 2
+          |]
+          |}""".stripMargin
+      )
 
       Json.toJson(intsList) shouldBe intsListJson
 

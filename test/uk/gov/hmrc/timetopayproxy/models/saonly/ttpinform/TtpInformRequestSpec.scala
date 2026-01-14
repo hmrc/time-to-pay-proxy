@@ -20,9 +20,9 @@ import cats.data.NonEmptyList
 import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.should.Matchers._
 import play.api.libs.json._
-import uk.gov.hmrc.timetopayproxy.models.saonly.common._
 import uk.gov.hmrc.timetopayproxy.models._
 import uk.gov.hmrc.timetopayproxy.models.currency.GbpPounds
+import uk.gov.hmrc.timetopayproxy.models.saonly.common._
 import uk.gov.hmrc.timetopayproxy.testutils.JsonAssertionOps._
 import uk.gov.hmrc.timetopayproxy.testutils.schematestutils.Validators
 
@@ -336,6 +336,32 @@ final class TtpInformRequestSpec extends AnyFreeSpec {
         )
       }
 
+      object WithEmptyNel {
+        def json: JsValue = Json.parse(
+          """{
+            |  "channelIdentifier" : "selfService",
+            |  "identifications" : [
+            |    {
+            |      "idType" : "idtype",
+            |      "idValue" : "idvalue"
+            |    }
+            |  ],
+            |  "instalments" : [
+            |    {
+            |      "amountDue" : 200.34,
+            |      "dueDate" : "2020-05-07"
+            |    }
+            |  ],
+            |  "paymentPlan" : {
+            |    "arrangementAgreedDate" : "2020-01-02",
+            |    "frequency" : "weekly",
+            |    "ttpEndDate" : "2020-02-04",
+            |    "debtItemCharges": []
+            |  }
+            |}
+            |""".stripMargin
+        )
+      }
     }
 
     "implicit JSON writer (data going to time-to-pay)" - {
@@ -404,6 +430,15 @@ final class TtpInformRequestSpec extends AnyFreeSpec {
           val schema = Validators.TimeToPayProxy.TtpInformR2.openApiRequestSchema
 
           schema.validateAndGetErrors(json) shouldBe Nil
+        }
+      }
+
+      "when non-empty lists are empty" - {
+
+        "fails to read the JSON" in {
+          def json: JsValue = TestData.WithEmptyNel.json
+
+          assertThrows[JsResultException](json.as[TtpInformRequestR2])
         }
       }
     }
