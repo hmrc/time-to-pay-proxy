@@ -18,6 +18,7 @@ package uk.gov.hmrc.timetopayproxy.services
 
 import com.google.inject.ImplementedBy
 import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.timetopayproxy.config.FeatureSwitch
 import uk.gov.hmrc.timetopayproxy.connectors.TtpeConnector
 import uk.gov.hmrc.timetopayproxy.models.error.TtppEnvelope.TtppEnvelope
 import uk.gov.hmrc.timetopayproxy.models.saonly.chargeInfoApi.{ ChargeInfoRequest, ChargeInfoResponse }
@@ -33,9 +34,17 @@ trait TTPEService {
 }
 
 @Singleton
-class DefaultTTPEService @Inject() (ttpeConnector: TtpeConnector) extends TTPEService {
+class DefaultTTPEService @Inject() (ttpeConnector: TtpeConnector, featureSwitch: FeatureSwitch) extends TTPEService {
   def checkChargeInfo(
     chargeInfoRequest: ChargeInfoRequest
   )(implicit ec: ExecutionContext, hc: HeaderCarrier): TtppEnvelope[ChargeInfoResponse] =
-    ttpeConnector.checkChargeInfo(chargeInfoRequest)
+    ttpeConnector
+      .checkChargeInfo(chargeInfoRequest)
+      .map { response =>
+        if (featureSwitch.saRelease2Enabled.enabled) {
+          response
+        } else {
+          response.copy(chargeTypesExcluded = None)
+        }
+      }
 }

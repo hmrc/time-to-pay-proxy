@@ -179,7 +179,8 @@ class TtpeConnectorSpec
             )
           )
         )
-      )
+      ),
+      chargeTypesExcluded = None
     )
 
     ".checkChargeInfo" should {
