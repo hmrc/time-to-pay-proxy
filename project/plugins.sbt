@@ -1,5 +1,6 @@
 resolvers += Resolver.url("HMRC-open-artefacts-ivy2", url("https://open.artefacts.tax.service.gov.uk/ivy2"))(
-  Resolver.ivyStylePatterns)
+  Resolver.ivyStylePatterns
+)
 resolvers += MavenRepository("HMRC-open-artefacts-maven2", "https://open.artefacts.tax.service.gov.uk/maven2")
 resolvers += "Typesafe Releases" at "https://repo.typesafe.com/typesafe/releases/"
 
@@ -10,7 +11,7 @@ addSbtPlugin("org.scoverage"     % "sbt-scoverage"      % "2.4.2")
 addSbtPlugin("org.scalameta"     % "sbt-scalafmt"       % "2.5.6")
 
 // To use this plugin, run: sbt dependencyUpdates
-addSbtPlugin("com.timushev.sbt"  % "sbt-updates"        % "0.6.4")
+addSbtPlugin("com.timushev.sbt" % "sbt-updates" % "0.6.4")
 
 /* Allows commands like `sbt dependencyBrowseGraph` to view the dependency graph locally. */
 addDependencyTreePlugin
