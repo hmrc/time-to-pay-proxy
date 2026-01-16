@@ -18,8 +18,9 @@ info:
       | 0.3.4 | 08-07-2025 | Alex Olkhovskiy | Update charge-info: removed R2 and returnFinancialAssessment, added isInterestBearingCharge, fixed ChargeTypeAssessment nesting, resolved 5xx errors |
       | 0.3.5 | 09-07-2025 | Alex Olkhovskiy | Fix a dash bug in customer type|
       | 0.3.6 | 21-07-2025 | Alex Olkhovskiy | remove country and altFormats and make individualDetails mandatory and indentations non-empty  for charge-info|
-
-  version: 0.3.6
+      | 0.3.7 | 21-07-2025 | Alex Olkhovskiy | Added 422 error response to charge-info endpoint|
+      | 0.3.8 | 08-01-2026 | Alex Olkhovskiy | Added customerSignals to charge-info response to match proxy spec |
+  version: 0.3.8
 paths:
   /debts/time-to-pay/eligibility:
     post:

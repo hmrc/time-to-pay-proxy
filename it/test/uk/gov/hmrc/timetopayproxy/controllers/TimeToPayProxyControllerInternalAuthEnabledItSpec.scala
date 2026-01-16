@@ -118,6 +118,12 @@ class TimeToPayProxyControllerInternalAuthEnabledItSpec extends IntegrationBaseS
               )
             )
           )
+        ),
+        customerSignals = Some(
+          List(
+            Signal(SignalType("Rls"), SignalValue("signal value"), Some("description")),
+            Signal(SignalType("Welsh Language Signal"), SignalValue("signal value"), Some("description"))
+          )
         )
       )
 
