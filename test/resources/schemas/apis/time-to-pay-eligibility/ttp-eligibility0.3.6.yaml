@@ -18,8 +18,9 @@ info:
       | 0.3.4 | 08-07-2025 | Alex Olkhovskiy | Update charge-info: removed R2 and returnFinancialAssessment, added isInterestBearingCharge, fixed ChargeTypeAssessment nesting, resolved 5xx errors |
       | 0.3.5 | 09-07-2025 | Alex Olkhovskiy | Fix a dash bug in customer type|
       | 0.3.6 | 21-07-2025 | Alex Olkhovskiy | remove country and altFormats and make individualDetails mandatory and indentations non-empty  for charge-info|
-
-  version: 0.3.6
+      | 0.3.7 | 21-07-2025 | Alex Olkhovskiy | Added 422 error response to charge-info endpoint|
+      | 0.3.8 | 08-01-2026 | Alex Olkhovskiy | Added customerSignals to charge-info response to match proxy spec |
+  version: 0.3.8
 paths:
   /debts/time-to-pay/eligibility:
     post:
@@ -714,12 +715,6 @@ components:
               - addressLine1
               - addressType
               - postcodeHistory
-        customerSignals:
-          type: array
-          items:
-            $ref: '#/components/schemas/CustomerSignal'
-          description: Signal information to be considered by the operator. Not all signals will be returned. Examples of signals returned include ring-fenced signals, insolvency and Welsh Language signal.
-
         chargeTypeAssessment:
           type: array
           items:
@@ -810,25 +805,6 @@ components:
         - chargeTypeAssessment
         - addresses
         - individualDetails
-    CustomerSignal:
-      type: object
-      description: Signal information for operator consideration
-      required:
-        - signalType
-        - signalValue
-      properties:
-        signalType:
-          type: string
-          description: Type of the signal
-          example: ITSA Migrated
-        signalValue:
-          type: string
-          description: Value of the signal
-          example: 'true'
-        signalDescription:
-          type: string
-          description: Description of the signal
-          example: Description
     ErrorResponse:
       type: object
       description: A JSON Error Schema for ErrorResponse
@@ -1013,13 +989,6 @@ components:
             postcodeHistory:
               - addressPostcode: "BN12 9ER"
                 postcodeDate: "2022-04-30"
-        customerSignals:
-          - signalType: Insolvency
-            signalValue: 'true'
-            signalDescription: Description
-          - signalType: ITSA Migrated
-            signalValue: 'true'
-
         chargeTypeAssessment:
           - debtTotalAmount: 148781
             chargeReference: "XW006559808862"

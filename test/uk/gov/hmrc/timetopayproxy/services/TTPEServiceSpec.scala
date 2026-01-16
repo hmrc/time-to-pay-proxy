@@ -18,13 +18,16 @@ package uk.gov.hmrc.timetopayproxy.services
 
 import cats.data.NonEmptyList
 import cats.implicits.catsSyntaxEitherId
+import org.scalamock.scalatest.MockFactory
 import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.should.Matchers._
 import play.api.test.Helpers.{ await, defaultAwaitTimeout }
 import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.timetopayproxy.config.FeatureSwitch
 import uk.gov.hmrc.timetopayproxy.connectors.TtpeConnector
 import uk.gov.hmrc.timetopayproxy.models.error.TtppEnvelope.TtppEnvelope
 import uk.gov.hmrc.timetopayproxy.models.error.{ ConnectorError, ProxyEnvelopeError, TtppEnvelope }
+import uk.gov.hmrc.timetopayproxy.models.featureSwitches.SARelease2Enabled
 import uk.gov.hmrc.timetopayproxy.models.saonly.chargeInfoApi._
 import uk.gov.hmrc.timetopayproxy.models.saonly.common.SaOnlyRegimeType
 import uk.gov.hmrc.timetopayproxy.models.{ IdType, IdValue, Identification }
@@ -33,8 +36,10 @@ import java.time.{ LocalDate, LocalDateTime }
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.{ ExecutionContext, Future }
 
-class TTPEServiceSpec extends AnyFreeSpec {
+class TTPEServiceSpec extends AnyFreeSpec with MockFactory {
   implicit val hc: HeaderCarrier = HeaderCarrier()
+
+  private val mockFeatureSwitch: FeatureSwitch = mock[FeatureSwitch]
 
   private val chargeInfoRequest: ChargeInfoRequest = ChargeInfoRequest(
     channelIdentifier = ChargeInfoChannelIdentifier("Channel Identifier"),
@@ -45,7 +50,7 @@ class TTPEServiceSpec extends AnyFreeSpec {
     regimeType = SaOnlyRegimeType.SA
   )
 
-  private val chargeInfoResponse: ChargeInfoResponse = ChargeInfoResponse(
+  private val chargeInfoResponseWithR2Fields: ChargeInfoResponse = ChargeInfoResponse(
     processingDateTime = LocalDateTime.parse("2025-07-02T15:00:41.689"),
     identification = List(
       Identification(idType = IdType("ID_TYPE"), idValue = IdValue("ID_VALUE"))
@@ -121,14 +126,31 @@ class TTPEServiceSpec extends AnyFreeSpec {
   )
 
   ".checkChargeInfo" - {
-    "returns a ChargeInfoResponse from the connector" in {
+    "should return a ChargeInfoResponse from the connector, with only R1 fields" in {
       val connectorStub = new TtpeConnectorStub(
-        Right(chargeInfoResponse)
+        Right(chargeInfoResponseWithR2Fields)
       )
 
-      val ttpeService = new DefaultTTPEService(connectorStub)
+      (() => mockFeatureSwitch.saRelease2Enabled).expects().returning(SARelease2Enabled(false))
 
-      await(ttpeService.checkChargeInfo(chargeInfoRequest).value) shouldBe chargeInfoResponse
+      val ttpeService = new DefaultTTPEService(connectorStub, mockFeatureSwitch)
+
+      val expectedResponse = chargeInfoResponseWithR2Fields.copy(customerSignals = None)
+
+      await(ttpeService.checkChargeInfo(chargeInfoRequest).value) shouldBe expectedResponse
+        .asRight[ProxyEnvelopeError]
+    }
+
+    "should return a ChargeInfoResponse from the connector, with both R1 and R2 fields" in {
+      val connectorStub = new TtpeConnectorStub(
+        Right(chargeInfoResponseWithR2Fields)
+      )
+
+      (() => mockFeatureSwitch.saRelease2Enabled).expects().returning(SARelease2Enabled(true))
+
+      val ttpeService = new DefaultTTPEService(connectorStub, mockFeatureSwitch)
+
+      await(ttpeService.checkChargeInfo(chargeInfoRequest).value) shouldBe chargeInfoResponseWithR2Fields
         .asRight[ProxyEnvelopeError]
     }
 
@@ -137,7 +159,7 @@ class TTPEServiceSpec extends AnyFreeSpec {
         Left(ConnectorError(500, "Internal server error"))
       )
 
-      val ttpeService = new DefaultTTPEService(connectorStub)
+      val ttpeService = new DefaultTTPEService(connectorStub, mockFeatureSwitch)
 
       await(ttpeService.checkChargeInfo(chargeInfoRequest).value) shouldBe ConnectorError(
         statusCode = 500,
