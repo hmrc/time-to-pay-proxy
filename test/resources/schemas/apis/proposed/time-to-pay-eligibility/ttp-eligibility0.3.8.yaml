@@ -1,0 +1,1059 @@
+openapi: 3.0.3
+info:
+  title: TTP Eligibility API
+  description: |-
+    API to check Eligibility for SSTTP
+    ```
+    Change Log
+    ```
+
+      | Version | Date | Author | Description |
+      |---|-----|------|-----|
+      | 0.1.0 | 01-12-2024 | Alex Olkhovskiy| Baselined Version |
+      | 0.1.1 | 12-12-2024 | Alex Olkhovskiy | Remove fdl endpoint |
+      | 0.1.2 | 12-12-2024 | Alex Olkhovskiy | make dmSpecialOfficeProcessingRequired nullable |
+      | 0.2.2 | 21-01-2025 | Alex Olkhovskiy |                     |
+      | 0.3.2 | 17-03-2025 | Alex Olkhovskiy | Add charge info Eligibility endpoint |
+      | 0.3.3 | 28-03-2025 | Alex Olkhovskiy | Update charge info Eligibility endpoint  |
+      | 0.3.4 | 08-07-2025 | Alex Olkhovskiy | Update charge-info: removed R2 and returnFinancialAssessment, added isInterestBearingCharge, fixed ChargeTypeAssessment nesting, resolved 5xx errors |
+      | 0.3.5 | 09-07-2025 | Alex Olkhovskiy | Fix a dash bug in customer type|
+      | 0.3.6 | 21-07-2025 | Alex Olkhovskiy | remove country and altFormats and make individualDetails mandatory and indentations non-empty  for charge-info|
+      | 0.3.7 | 21-07-2025 | Alex Olkhovskiy | Added 422 error response to charge-info endpoint|
+      | 0.3.8 | 08-01-2026 | Alex Olkhovskiy | Added customerSignals to charge-info response to match proxy spec |
+  version: 0.3.8
+servers:
+  - url: https://time-to-pay-eligibility.protected.mdtp
+    description: Production
+paths:
+  /debts/time-to-pay/eligibility:
+    post:
+      operationId: checkEligibilitySSTTP
+      summary: Check eligibility for SSTTP
+      description: Checks customer eligibility for Self-Service Time To Pay (SSTTP) arrangement
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TTPEligibilityRequest'
+            examples:
+              exampleRequest:
+                $ref: '#/components/examples/TTPEligibilityRequestExample'
+      responses:
+        '200':
+          description: Successful eligibility check
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TTPEligibilitySuccessResponse'
+              examples:
+                exampleResponse:
+                  $ref: '#/components/examples/TTPEligibilitySuccessResponseExample'
+        '400':
+          description: Bad request
+          headers:
+            CorrelationId:
+              $ref: '#/components/headers/CorrelationId'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BadRequestError'
+              example:
+                code: INVALID_ID_TYPE
+                reason: Submission has not passed validation.Invalid parameter idType.
+  /debts/time-to-pay/charge-info:
+    post:
+      operationId: checkEligibilityChargeInfo
+      summary: Gets customer charge information, but does not determine eligibility
+      description: Retrieves customer charge information for time-to-pay assessment without determining final eligibility
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TTPEligibilityRequestChargeInfo'
+            examples:
+              exampleRequest:
+                $ref: '#/components/examples/TTPEligibilityRequestExampleChargeInfo'
+      responses:
+        '200':
+          description: Gets customer charge information
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TTPEligibilitySuccessResponseChargeInfo'
+              examples:
+                exampleResponse:
+                  $ref: '#/components/examples/TTPEligibilitySuccessResponseExampleChargeInfo'
+        '400':
+          description: Bad request
+          headers:
+            CorrelationId:
+              $ref: '#/components/headers/CorrelationId'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BadRequestError'
+              example:
+                code: INVALID_ID_TYPE
+                reason: Submission has not passed validation.Invalid parameter idType.
+        '422':
+          description: Unprocessable Entity
+          headers: {}
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                code: '422'
+                reason: Charges with the same charge reference do not share the same data
+        '500':
+          description: Internal Server Error
+          headers: {}
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                code: INTERNAL_SERVER
+                reason: Eligibility service is currently experiencing problems that require live service intervention. No valid idType found in customer data identifications when calling CDCS
+        '503':
+          description: Service Unavailable
+          headers: {}
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                code: INVALID_JSON
+                reason: Dependent systems are currently not responding. Couldn't validate body from upstream against model
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+  schemas:
+    TTPEligibilityRequest:
+      type: object
+      description: A JSON Schema for TTP Eligibility Service API.
+      properties:
+        channelIdentifier:
+          type: string
+          description: Channel Identifier
+        idType:
+          type: string
+          description: ID Type
+        idValue:
+          type: string
+          description: ID Value
+        regimeType:
+          type: string
+          description: Regime Type
+        returnFinancialAssessment:
+          type: boolean
+          description: Return Financials data flag
+      required:
+        - channelIdentifier
+        - idType
+        - idValue
+        - regimeType
+        - returnFinancialAssessment
+    TTPEligibilitySuccessResponse:
+      type: object
+      description: A JSON Schema for TTP Eligibility Service API success response.
+      properties:
+        processingDateTime:
+          type: string
+        identification:
+          type: array
+          items:
+            type: object
+            properties:
+              idType:
+                type: string
+                description: ID type
+              idValue:
+                type: string
+                description: ID value
+            required:
+              - idType
+              - idValue
+        invalidSignals:
+          type: array
+          items:
+            type: object
+            properties:
+              signalType:
+                type: string
+                description: Signal type
+              signalValue:
+                type: string
+                description: Signal value
+              signalDescription:
+                type: string
+                description: Signal description
+            required:
+              - signalType
+              - signalValue
+        customerPostcodes:
+          type: array
+          items:
+            type: object
+            properties:
+              addressPostcode:
+                type: string
+                description: Address Postcode
+              postcodeDate:
+                type: string
+                format: date
+                description: Date the customer used this postcode from
+            required:
+              - addressPostcode
+              - postcodeDate
+        customerDetails:
+          type: array
+          items:
+            type: object
+            properties:
+              emailAddress:
+                type: string
+                description: Email address
+              emailSource:
+                type: string
+                description: Email source
+        individualDetails:
+          type: object
+          properties:
+            title:
+              type: string
+              description: Title
+            firstName:
+              type: string
+              description: Firstname
+            lastName:
+              type: string
+              description: Lastname
+            dateOfBirth:
+              type: string
+              format: date
+              description: Date of birth
+            districtNumber:
+              type: string
+              description: District Number
+            customerType:
+              type: string
+              description: Customer Type
+              enum:
+                - MTD(ITSA)
+                - Classic SA - Transitioned
+                - Classic SA - Non Transitioned
+            transitionToCDCS:
+              type: boolean
+              description: Signifies if the customer must be transitioned to CDCS
+        addresses:
+          type: array
+          items:
+            type: object
+            properties:
+              addressType:
+                type: string
+                description: Type of address
+              addressLine1:
+                type: string
+                description: Address line 1
+              addressLine2:
+                type: string
+                description: Address line 2
+              addressLine3:
+                type: string
+                description: Address line 3
+              addressLine4:
+                type: string
+                description: Address line 4
+              rls:
+                type: boolean
+                description: Returned Letter Service indicates tax payer is no longer resident
+              contactDetails:
+                type: object
+                properties:
+                  telephoneNumber:
+                    type: string
+                    description: Telephone number
+                  fax:
+                    type: string
+                    description: Fax number
+                  mobile:
+                    type: string
+                    description: Mobile number
+                  emailAddress:
+                    type: string
+                    description: Email address
+                  emailSource:
+                    type: string
+                    description: Email source
+                  altFormat:
+                    type: integer
+                    description: Specifies alternative format for letters
+              postCode:
+                type: string
+                description: Post code
+              country:
+                type: string
+                description: Country
+              postcodeHistory:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    addressPostcode:
+                      type: string
+                      description: Customer postcode
+                    postcodeDate:
+                      type: string
+                      format: date
+                      description: Date the customer used this postcode from
+                  required:
+                    - addressPostcode
+                    - postcodeDate
+            required:
+              - addressType
+              - postcodeHistory
+        regimeDigitalCorrespondence:
+          type: boolean
+          description: Regime Digital Correspondence
+        regimePaymentFrequency:
+          type: string
+          description: Regime Payment Frequency
+        paymentPlanFrequency:
+          type: string
+          description: Payment Plan Frequency
+        paymentPlanMinLength:
+          type: integer
+          description: Payment plan minimum length
+        paymentPlanMaxLength:
+          type: integer
+          description: Payment plan maximum length
+        eligibilityStatus:
+          type: object
+          properties:
+            eligibilityPass:
+              type: boolean
+              description: Overall eligibility status
+          required:
+            - eligibilityPass
+        eligibilityRules:
+          type: object
+          properties:
+            hasRlsOnAddress:
+              type: boolean
+              description: Has RLS on address
+            markedAsInsolvent:
+              type: boolean
+              description: Marked as insolvent
+            isLessThanMinDebtAllowance:
+              type: boolean
+              description: Less than minimum allowance
+            isMoreThanMaxDebtAllowance:
+              type: boolean
+              description: More than maximum allowance
+            chargesOverMaxDebtAge:
+              type: boolean
+              description: Charges over max debt age
+            ineligibleChargeTypes:
+              type: boolean
+              description: Ineligible charge types
+            disallowedChargeLockTypes:
+              type: boolean
+              description: Disallowed charge lock types
+            existingTTP:
+              type: boolean
+              description: Existing TTP
+            missingFiledReturns:
+              type: boolean
+              description: Missing filed returns
+            hasInvalidInterestSignals:
+              type: boolean
+              description: Invalid interest signals
+            hasInvalidInterestSignalsCESA:
+              type: boolean
+              description: Has invalid interest signals CESA
+            noDueDatesReached:
+              type: boolean
+              description: No due dates reached
+            dmSpecialOfficeProcessingRequired:
+              type: boolean
+              nullable: true
+              description: DM special office processing required, based on IDMS debt check
+            dmSpecialOfficeProcessingRequiredCDCS:
+              type: boolean
+              description: DM special office processing required, based on CDCS debt check
+            dmSpecialOfficeProcessingRequiredCESA:
+              type: boolean
+              description: DM special office processing required, based on CESA debt chec
+            chargesBeforeMaxAccountingDate:
+              type: boolean
+              description: Charge before max accounting date
+            creditsNotAllowed:
+              type: boolean
+              description: Credits not allowed flag
+            cannotFindLockReason:
+              type: boolean
+              description: Lock reason not found
+            isAnMtdCustomer:
+              type: boolean
+              description: MTD customer flag
+            hasCapacitor:
+              type: boolean
+              description: Has capacitor
+            isMoreThanMaxPaymentReference:
+              type: boolean
+              description: Amount exceeds allowed tax months/quarters
+            hasDisguisedRemuneration:
+              type: boolean
+              description: Has disguised remuneration
+          required:
+            - hasRlsOnAddress
+            - markedAsInsolvent
+            - isLessThanMinDebtAllowance
+            - isMoreThanMaxDebtAllowance
+            - ineligibleChargeTypes
+            - disallowedChargeLockTypes
+            - existingTTP
+            - missingFiledReturns
+            - hasInvalidInterestSignals
+            - noDueDatesReached
+            - creditsNotAllowed
+            - cannotFindLockReason
+            - isMoreThanMaxPaymentReference
+            - dmSpecialOfficeProcessingRequired
+        futureChargeLiabilitiesExcluded:
+          type: boolean
+          description: Has future charge liabilities excluded
+        chargeTypesExcluded:
+          type: boolean
+          description: Indicator to show that some charge types have been filtered out
+        chargeTypeAssessment:
+          type: array
+          items:
+            type: object
+            required:
+              - taxPeriodFrom
+              - taxPeriodTo
+              - debtTotalAmount
+              - chargeReference
+              - charges
+            properties:
+              taxPeriodFrom:
+                type: string
+                format: date
+                description: Tax period start date
+              taxPeriodTo:
+                type: string
+                format: date
+                description: Tax period end date
+              debtTotalAmount:
+                type: integer
+                description: Total debt amount
+              chargeReference:
+                type: string
+                description: Charge reference
+              charges:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    chargeType:
+                      type: string
+                    mainType:
+                      type: string
+                    mainTrans:
+                      type: string
+                      description: |
+                        Represents main transaction types. Unrecognized values is treated
+                        as "UsedMainTrans" with the provided string value.
+                    subTrans:
+                      type: string
+                    outstandingAmount:
+                      type: integer
+                    dueDate:
+                      type: string
+                      format: date
+                    interestStartDate:
+                      type: string
+                      format: date
+                    accruedInterest:
+                      type: integer
+                    ineligibleChargeType:
+                      type: boolean
+                    chargeOverMaxDebtAge:
+                      type: boolean
+                    chargeBeforeMaxAccountingDate:
+                      type: boolean
+                    dueDateNotReached:
+                      type: boolean
+                    isInterestBearingCharge:
+                      type: boolean
+                    useChargeReference:
+                      type: boolean
+                    ddInProgress:
+                      type: boolean
+                    chargeSource:
+                      type: string
+                    parentChargeReference:
+                      type: string
+                    parentMainTrans:
+                      type: string
+                    originalCreationDate:
+                      type: string
+                      format: date
+                    tieBreaker:
+                      type: string
+                    originalTieBreaker:
+                      type: string
+                    saTaxYearEnd:
+                      type: string
+                      format: date
+                    creationDate:
+                      type: string
+                      format: date
+                    originalChargeType:
+                      type: string
+                    locks:
+                      type: array
+                      items:
+                        type: object
+                        properties:
+                          lockType:
+                            type: string
+                            enum:
+                              - Dunning
+                              - Calculate Interest
+                              - Posting/Clearing
+                              - Payments
+                          lockReason:
+                            type: string
+                          disallowedChargeLockType:
+                            type: boolean
+                        required:
+                          - lockType
+                          - lockReason
+                          - disallowedChargeLockType
+                  required:
+                    - chargeType
+                    - mainType
+                    - mainTrans
+                    - subTrans
+                    - outstandingAmount
+                    - dueDate
+                    - accruedInterest
+                    - ineligibleChargeType
+                    - dueDateNotReached
+      required:
+        - processingDateTime
+        - identification
+        - invalidSignals
+        - customerPostcodes
+        - customerDetails
+        - regimeDigitalCorrespondence
+        - regimePaymentFrequency
+        - paymentPlanFrequency
+        - paymentPlanMinLength
+        - paymentPlanMaxLength
+        - eligibilityStatus
+        - eligibilityRules
+        - futureChargeLiabilitiesExcluded
+        - chargeTypeAssessment
+        - addresses
+    BadRequestError:
+      type: object
+      description: A JSON Error Schema for BadRequest Error
+      properties:
+        code:
+          type: string
+          description: Keys for all the errors returned
+        reason:
+          type: string
+          description: A simple description for the failure
+      required:
+        - code
+        - reason
+    TTPEligibilityRequestChargeInfo:
+      type: object
+      description: A JSON Schema for TTP Eligibility Service API.
+      properties:
+        channelIdentifier:
+          type: string
+          description: Channel Identifier
+        identifications:
+          type: array
+          minItems: 1
+          items:
+            type: object
+            properties:
+              idType:
+                type: string
+                description: ID type
+              idValue:
+                type: string
+                description: ID value
+            required:
+              - idType
+              - idValue
+        regimeType:
+          type: string
+          description: Regime Type
+      required:
+        - channelIdentifier
+        - identifications
+        - regimeType
+    CustomerSignal:
+      type: object
+      description: Signal information for operator consideration
+      required:
+        - signalType
+        - signalValue
+      properties:
+        signalType:
+          type: string
+          description: Type of the signal
+          example: ITSA Migrated
+        signalValue:
+          type: string
+          description: Value of the signal
+          example: 'true'
+        signalDescription:
+          type: string
+          description: Description of the signal
+          example: Description
+    TTPEligibilitySuccessResponseChargeInfo:
+      type: object
+      description: A JSON Schema for TTP Eligibility Service API success response.
+      properties:
+        processingDateTime:
+          type: string
+        identification:
+          type: array
+          items:
+            type: object
+            properties:
+              idType:
+                type: string
+                description: ID type
+              idValue:
+                type: string
+                description: ID value
+            required:
+              - idType
+              - idValue
+        individualDetails:
+          type: object
+          properties:
+            title:
+              type: string
+              description: Title
+            firstName:
+              type: string
+              description: Firstname
+            lastName:
+              type: string
+              description: Lastname
+            dateOfBirth:
+              type: string
+              format: date
+              description: Date of birth
+            districtNumber:
+              type: string
+              description: District Number
+            customerType:
+              type: string
+              description: Customer Type
+              enum:
+                - MTD(ITSA)
+                - Classic SA - Transitioned
+                - Classic SA - Non Transitioned
+            transitionToCDCS:
+              type: boolean
+              description: Signifies if the customer must be transitioned to CDCS
+          required:
+            - customerType
+            - transitionToCDCS
+        addresses:
+          type: array
+          items:
+            type: object
+            properties:
+              addressType:
+                type: string
+                description: Type of address
+              addressLine1:
+                type: string
+                description: Address line 1
+              addressLine2:
+                type: string
+                description: Address line 2
+              addressLine3:
+                type: string
+                description: Address line 3
+              addressLine4:
+                type: string
+                description: Address line 4
+              rls:
+                type: boolean
+                description: Returned Letter Service indicates tax payer is no longer resident
+              contactDetails:
+                type: object
+                properties:
+                  telephoneNumber:
+                    type: string
+                    description: Telephone number
+                  fax:
+                    type: string
+                    description: Fax number
+                  mobile:
+                    type: string
+                    description: Mobile number
+                  emailAddress:
+                    type: string
+                    description: Email address
+                  emailSource:
+                    type: string
+                    description: Email source
+              postCode:
+                type: string
+                description: Post code
+              postcodeHistory:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    addressPostcode:
+                      type: string
+                      description: Customer postcode
+                    postcodeDate:
+                      type: string
+                      format: date
+                      description: Date the customer used this postcode from
+                  required:
+                    - addressPostcode
+                    - postcodeDate
+            required:
+              - addressLine1
+              - addressType
+              - postcodeHistory
+        customerSignals:
+          type: array
+          items:
+            $ref: '#/components/schemas/CustomerSignal'
+          description: Signal information to be considered by the operator. Not all signals will be returned. Examples of signals returned include ring-fenced signals, insolvency and Welsh Language signal.
+        chargeTypeAssessment:
+          type: array
+          items:
+            type: object
+            required:
+              - debtTotalAmount
+              - chargeReference
+              - charges
+              - mainTrans
+            properties:
+              debtTotalAmount:
+                type: integer
+                description: Total debt amount
+              chargeReference:
+                type: string
+                description: Charge reference
+              parentChargeReference:
+                type: string
+              mainTrans:
+                type: string
+                description: |
+                  Represents main transaction types. Unrecognized values is treated
+                  as "UsedMainTrans" with the provided string value.
+              charges:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    taxPeriodFrom:
+                      type: string
+                      format: date
+                      description: Tax period start date
+                    taxPeriodTo:
+                      type: string
+                      format: date
+                      description: Tax period end date
+                    chargeType:
+                      type: string
+                    mainType:
+                      type: string
+                    subTrans:
+                      type: string
+                    outstandingAmount:
+                      type: integer
+                    dueDate:
+                      type: string
+                      format: date
+                    isInterestBearingCharge:
+                      type: boolean
+                      description: shows whether its an interest bearing charge
+                    interestStartDate:
+                      type: string
+                      format: date
+                    accruedInterest:
+                      type: integer
+                    chargeSource:
+                      type: string
+                    parentMainTrans:
+                      type: string
+                    originalCreationDate:
+                      type: string
+                      format: date
+                    tieBreaker:
+                      type: string
+                    originalTieBreaker:
+                      type: string
+                    saTaxYearEnd:
+                      type: string
+                      format: date
+                    creationDate:
+                      type: string
+                      format: date
+                    originalChargeType:
+                      type: string
+                  required:
+                    - taxPeriodFrom
+                    - taxPeriodTo
+                    - chargeSource
+                    - chargeType
+                    - mainType
+                    - subTrans
+                    - outstandingAmount
+                    - dueDate
+                    - accruedInterest
+      required:
+        - processingDateTime
+        - identification
+        - chargeTypeAssessment
+        - addresses
+        - individualDetails
+    ErrorResponse:
+      type: object
+      description: A JSON Error Schema for ErrorResponse
+      properties:
+        code:
+          type: string
+          description: Keys for all the errors returned
+        reason:
+          type: string
+          description: A simple description for the failure
+      required:
+        - code
+        - reason
+  examples:
+    TTPEligibilityRequestExample:
+      summary: Example of a TTP Eligibility Request
+      value:
+        channelIdentifier: channelIdentifier
+        idType: EMPREF
+        idValue: 064XZ36815
+        regimeType: PAYE
+        returnFinancialAssessment: true
+    TTPEligibilitySuccessResponseExample:
+      summary: Example of a TTP Eligibility Success Response
+      value:
+        processingDateTime: '2022-03-23T13:49:51.141Z'
+        identification:
+          - idType: UTR
+            idValue: '1234567890'
+        invalidSignals:
+          - signalType: ITSA Migrated
+            signalValue: 'true'
+            signalDescription: Description
+        customerPostcodes:
+          - addressPostcode: BN127ER
+            postcodeDate: '2022-05-22'
+        customerDetails:
+          - emailAddress: notmymail@yourmail.com
+            emailSource: ETMP
+        individualDetails:
+          title: Mr
+          firstName: John
+          lastName: Doe
+          dateOfBirth: '2069-06-06'
+          districtNumber: xyz
+          customerType: MTD(ITSA)
+          transitionToCDCS: true
+        addresses:
+          - addressType: ppob
+            addressLine1: 999 Elm Street
+            addressLine2: Suite 12C
+            addressLine3: Northshire
+            addressLine4: London
+            rls: true
+            contactDetails:
+              telephoneNumber: +44 20 1234 5678
+              fax: '01234'
+              mobile: '07123456789'
+              emailAddress: john@example.com
+              emailSource: ETMP
+              altFormat: 123
+            postCode: W1A 1ZZ
+            country: ZZ
+            postcodeHistory:
+              - addressPostcode: BN12 9ER
+                postcodeDate: '2022-04-30'
+        regimeDigitalCorrespondence: true
+        regimePaymentFrequency: Monthly
+        paymentPlanFrequency: Monthly
+        paymentPlanMinLength: 1
+        paymentPlanMaxLength: 6
+        eligibilityStatus:
+          eligibilityPass: true
+        eligibilityRules:
+          hasRlsOnAddress: false
+          markedAsInsolvent: false
+          isLessThanMinDebtAllowance: false
+          isMoreThanMaxDebtAllowance: false
+          chargesOverMaxDebtAge: false
+          ineligibleChargeTypes: false
+          disallowedChargeLockTypes: false
+          existingTTP: false
+          missingFiledReturns: false
+          hasInvalidInterestSignals: false
+          hasInvalidInterestSignalsCESA: false
+          noDueDatesReached: false
+          dmSpecialOfficeProcessingRequired: false
+          dmSpecialOfficeProcessingRequiredCDCS: false
+          dmSpecialOfficeProcessingRequiredCESA: false
+          creditsNotAllowed: false
+          cannotFindLockReason: false
+          isMoreThanMaxPaymentReference: false
+          hasDisguisedRemuneration: false
+          hasCapacitor: false
+          chargesBeforeMaxAccountingDate: false
+          isAnMtdCustomer: false
+        futureChargeLiabilitiesExcluded: false
+        chargeTypesExcluded: false
+        chargeTypeAssessment:
+          - taxPeriodFrom: '2022-04-01'
+            taxPeriodTo: '2022-06-30'
+            debtTotalAmount: 148781
+            chargeReference: XW006559808862
+            charges:
+              - chargeType: VAT Return Debit Charge
+                mainType: VAT Return charge
+                mainTrans: '4700'
+                subTrans: '1174'
+                outstandingAmount: 148781
+                dueDate: '2022-08-01'
+                interestStartDate: '2022-08-01'
+                accruedInterest: 3
+                ineligibleChargeType: false
+                chargeOverMaxDebtAge: false
+                chargeBeforeMaxAccountingDate: false
+                dueDateNotReached: false
+                isInterestBearingCharge: false
+                useChargeReference: false
+                ddInProgress: false
+                chargeSource: CESA
+                parentChargeReference: XW006559808862
+                parentMainTrans: '4700'
+                originalCreationDate: '2022-08-01'
+                tieBreaker: xyz
+                originalTieBreaker: xyz
+                saTaxYearEnd: '2022-08-01'
+                creationDate: '2022-08-01'
+                originalChargeType: VAT Return Debit Charge
+                locks:
+                  - lockType: Payments
+                    lockReason: Risk/Fraud
+                    disallowedChargeLockType: false
+                  - lockType: Calculate Interest
+                    lockReason: ClericalInterestSignal
+                    disallowedChargeLockType: false
+                  - lockType: Dunning
+                    lockReason: Complaint
+                    disallowedChargeLockType: false
+                  - lockType: Posting/Clearing
+                    lockReason: ClearLockInterest
+                    disallowedChargeLockType: false
+    TTPEligibilityRequestExampleChargeInfo:
+      summary: Example of a TTP Eligibility Request
+      value:
+        channelIdentifier: Advisor
+        identifications:
+          - idType: UTR
+            idValue: '1234567890'
+        regimeType: SA
+    TTPEligibilitySuccessResponseExampleChargeInfo:
+      summary: Example of a get SA customer data Success Response
+      value:
+        processingDateTime: '2022-03-23T13:49:51.141Z'
+        identification:
+          - idType: UTR
+            idValue: '1234567890'
+        individualDetails:
+          title: Mr
+          firstName: John
+          lastName: Doe
+          dateOfBirth: '2069-06-06'
+          districtNumber: xyz
+          customerType: MTD(ITSA)
+          transitionToCDCS: true
+        addresses:
+          - addressType: ppob
+            addressLine1: 999 Elm Street
+            addressLine2: Suite 12C
+            addressLine3: Northshire
+            addressLine4: London
+            rls: true
+            contactDetails:
+              telephoneNumber: +44 20 1234 5678
+              fax: '01234'
+              mobile: '07123456789'
+              emailAddress: john@example.com
+              emailSource: ETMP
+            postCode: W1A 1ZZ
+            postcodeHistory:
+              - addressPostcode: BN12 9ER
+                postcodeDate: '2022-04-30'
+        customerSignals:
+          - signalType: Insolvency
+            signalValue: 'true'
+            signalDescription: Description
+          - signalType: ITSA Migrated
+            signalValue: 'true'
+        chargeTypeAssessment:
+          - debtTotalAmount: 148781
+            chargeReference: XW006559808862
+            mainTrans: '4700'
+            parentChargeReference: XW006559808862
+            charges:
+              - taxPeriodFrom: '2022-04-01'
+                taxPeriodTo: '2022-06-30'
+                chargeType: VAT Return Debit Charge
+                mainType: VAT Return charge
+                subTrans: '1174'
+                outstandingAmount: 148781
+                dueDate: '2022-08-01'
+                isInterestBearingCharge: true
+                interestStartDate: '2022-08-01'
+                accruedInterest: 3
+                chargeSource: CESA
+                parentMainTrans: '4700'
+                originalCreationDate: '2022-08-01'
+                tieBreaker: xyz
+                originalTieBreaker: xyz
+                saTaxYearEnd: '2022-08-01'
+                creationDate: '2022-08-01'
+                originalChargeType: VAT Return Debit Charge
+  headers:
+    CorrelationId:
+      description: A UUID format string for the transaction used for traceability purposes.
+      schema:
+        type: string
+        pattern: ^[0-9a-fA-F]{8}[-][0-9a-fA-F]{4}[-][0-9a-fA-F]{4}[-][0-9a-fA-F]{4}[-][0-9a-fA-F]{12}$
+        example: f92d12cd-7087-42b9-b7ae-b32665c5dc31

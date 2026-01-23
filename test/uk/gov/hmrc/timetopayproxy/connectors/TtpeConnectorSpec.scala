@@ -18,6 +18,7 @@ package uk.gov.hmrc.timetopayproxy.connectors
 
 import cats.data.NonEmptyList
 import org.scalamock.scalatest.MockFactory
+import org.scalatest.Inside.inside
 import org.scalatestplus.play.PlaySpec
 import play.api.libs.json.Json
 import play.api.test.{ DefaultAwaitTimeout, FutureAwaits }
@@ -26,9 +27,9 @@ import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.http.client.HttpClientV2
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 import uk.gov.hmrc.timetopayproxy.config.{ AppConfig, FeatureSwitch }
-import uk.gov.hmrc.timetopayproxy.models.error.ConnectorError
+import uk.gov.hmrc.timetopayproxy.models.error.{ ConnectorError, ProxyEnvelopeError }
 import uk.gov.hmrc.timetopayproxy.models.error.TtppEnvelope.TtppEnvelope
-import uk.gov.hmrc.timetopayproxy.models.featureSwitches.InternalAuthEnabled
+import uk.gov.hmrc.timetopayproxy.models.featureSwitches.{ InternalAuthEnabled, SARelease2Enabled }
 import uk.gov.hmrc.timetopayproxy.models.saonly.chargeInfoApi._
 import uk.gov.hmrc.timetopayproxy.models.saonly.common.SaOnlyRegimeType
 import uk.gov.hmrc.timetopayproxy.models.{ IdType, IdValue, Identification }
@@ -113,7 +114,7 @@ class TtpeConnectorSpec
       regimeType = SaOnlyRegimeType.SA
     )
 
-    def chargeInfoResponse: ChargeInfoResponse = ChargeInfoResponse(
+    def chargeInfoResponseR1: ChargeInfoResponseR1 = ChargeInfoResponseR1(
       processingDateTime = LocalDateTime.parse("2025-07-02T15:00:41.689"),
       identification = List(
         Identification(idType = IdType("ID_TYPE"), idValue = IdValue("ID_VALUE"))
@@ -182,20 +183,128 @@ class TtpeConnectorSpec
       )
     )
 
-    ".checkChargeInfo" should {
-      "make an http call to Charge Info API in Eligibility and retrieve the correct response" in new Setup {
-        stubPostWithResponseBody(
-          "/debts/time-to-pay/charge-info",
-          200,
-          Json.toJson(chargeInfoResponse).toString()
+    def chargeInfoResponseR2: ChargeInfoResponseR2 = ChargeInfoResponseR2(
+      processingDateTime = LocalDateTime.parse("2025-07-02T15:00:41.689"),
+      identification = List(
+        Identification(idType = IdType("ID_TYPE"), idValue = IdValue("ID_VALUE"))
+      ),
+      individualDetails = IndividualDetails(
+        title = Some(Title("Mr")),
+        firstName = Some(FirstName("John")),
+        lastName = Some(LastName("Doe")),
+        dateOfBirth = Some(DateOfBirth(LocalDate.parse("1980-01-01"))),
+        districtNumber = Some(DistrictNumber("1234")),
+        customerType = CustomerType.ItsaMigtrated,
+        transitionToCDCS = TransitionToCdcs(value = true)
+      ),
+      addresses = List(
+        Address(
+          addressType = AddressType("Address Type"),
+          addressLine1 = AddressLine1("Address Line 1"),
+          addressLine2 = Some(AddressLine2("Address Line 2")),
+          addressLine3 = Some(AddressLine3("Address Line 3")),
+          addressLine4 = Some(AddressLine4("Address Line 4")),
+          rls = Some(Rls(true)),
+          contactDetails = Some(
+            ContactDetails(
+              telephoneNumber = Some(TelephoneNumber("telephone-number")),
+              fax = Some(Fax("fax-number")),
+              mobile = Some(Mobile("mobile-number")),
+              emailAddress = Some(Email("email address")),
+              emailSource = Some(EmailSource("email source"))
+            )
+          ),
+          postCode = Some(ChargeInfoPostCode("AB12 3CD")),
+          postcodeHistory = List(
+            PostCodeInfo(addressPostcode = ChargeInfoPostCode("AB12 3CD"), postcodeDate = LocalDate.parse("2020-01-01"))
+          )
         )
+      ),
+      chargeTypeAssessment = List(
+        ChargeTypeAssessment(
+          debtTotalAmount = BigInt(1000),
+          chargeReference = ChargeReference("CHARGE REFERENCE"),
+          parentChargeReference = Some(ChargeInfoParentChargeReference("PARENT CHARGE REF")),
+          mainTrans = MainTrans("2000"),
+          charges = List(
+            Charge(
+              taxPeriodFrom = TaxPeriodFrom(LocalDate.parse("2020-01-02")),
+              taxPeriodTo = TaxPeriodTo(LocalDate.parse("2020-12-31")),
+              chargeType = ChargeType("charge type"),
+              mainType = MainType("main type"),
+              subTrans = SubTrans("1000"),
+              outstandingAmount = OutstandingAmount(BigInt(500)),
+              dueDate = DueDate(LocalDate.parse("2021-01-31")),
+              isInterestBearingCharge = Some(ChargeInfoIsInterestBearingCharge(true)),
+              interestStartDate = Some(InterestStartDate(LocalDate.parse("2020-01-03"))),
+              accruedInterest = AccruedInterest(BigInt(50)),
+              chargeSource = ChargeInfoChargeSource("Source"),
+              parentMainTrans = Some(ChargeInfoParentMainTrans("Parent Main Transaction")),
+              originalCreationDate = Some(OriginalCreationDate(LocalDate.parse("2025-07-02"))),
+              tieBreaker = Some(TieBreaker("Tie Breaker")),
+              originalTieBreaker = Some(OriginalTieBreaker("Original Tie Breaker")),
+              saTaxYearEnd = Some(SaTaxYearEnd(LocalDate.parse("2020-04-05"))),
+              creationDate = Some(CreationDate(LocalDate.parse("2025-07-02"))),
+              originalChargeType = Some(OriginalChargeType("Original Charge Type"))
+            )
+          )
+        )
+      ),
+      customerSignals = Some(
+        List(
+          Signal(SignalType("Welsh Language Signal"), SignalValue("signal value"), Some("description"))
+        )
+      )
+    )
 
-        val result: TtppEnvelope[ChargeInfoResponse] = connector.checkChargeInfo(chargeInfoRequest = chargeInfoRequest)
+    ".checkChargeInfo" should {
+      "make an http call to Charge Info API in Eligibility" when {
+        "the feature switch is false, parse a Release 1 response" in new Setup {
+          (() => featureSwitch.saRelease2Enabled)
+            .expects()
+            .returning(SARelease2Enabled(false))
 
-        await(result.value) must matchPattern { case Right(_: ChargeInfoResponse) => }
+          stubPostWithResponseBody(
+            "/debts/time-to-pay/charge-info",
+            200,
+            Json.toJson(chargeInfoResponseR1).toString()
+          )
+
+          val result: TtppEnvelope[ChargeInfoResponse] =
+            connector.checkChargeInfo(chargeInfoRequest = chargeInfoRequest)
+
+          private val response: Either[ProxyEnvelopeError, ChargeInfoResponse] = await(result.value)
+          inside(response) { case Right(chargeInfoResponse: ChargeInfoResponseR1) =>
+            chargeInfoResponse mustBe chargeInfoResponseR1
+          }
+        }
+
+        "the feature switch is true, parse a Release 2 response" in new Setup {
+          (() => featureSwitch.saRelease2Enabled)
+            .expects()
+            .returning(SARelease2Enabled(true))
+
+          stubPostWithResponseBody(
+            "/debts/time-to-pay/charge-info",
+            200,
+            Json.toJson(chargeInfoResponseR2).toString()
+          )
+
+          val result: TtppEnvelope[ChargeInfoResponse] =
+            connector.checkChargeInfo(chargeInfoRequest = chargeInfoRequest)
+
+          private val response: Either[ProxyEnvelopeError, ChargeInfoResponse] = await(result.value)
+          inside(response) { case Right(chargeInfoResponse: ChargeInfoResponseR2) =>
+            chargeInfoResponse mustBe chargeInfoResponseR2
+          }
+        }
       }
 
       "parse an error response from an upstream service" in new Setup {
+        (() => featureSwitch.saRelease2Enabled)
+          .expects()
+          .returning(SARelease2Enabled(true))
+
         def errorResponse(code: String, reason: String): String =
           s"""
              |{
@@ -216,6 +325,10 @@ class TtpeConnectorSpec
       }
 
       "parse a 422 error response from an upstream service" in new Setup {
+        (() => featureSwitch.saRelease2Enabled)
+          .expects()
+          .returning(SARelease2Enabled(true))
+
         stubPostWithResponseBody(
           "/debts/time-to-pay/charge-info",
           422,

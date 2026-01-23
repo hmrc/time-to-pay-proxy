@@ -20,10 +20,12 @@ import cats.data.NonEmptyList
 import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.client.WireMock.{ equalTo, postRequestedFor, urlPathEqualTo }
 import com.github.tomakehurst.wiremock.http.RequestMethod.POST
-import play.api.libs.json.Json
+import play.api.libs.json.{ Json, Reads }
 import play.api.libs.ws.{ WSRequest, WSResponse }
 import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.timetopayproxy.config.FeatureSwitch
 import uk.gov.hmrc.timetopayproxy.models._
+import uk.gov.hmrc.timetopayproxy.models.featureSwitches.SARelease2Enabled
 import uk.gov.hmrc.timetopayproxy.models.saonly.chargeInfoApi._
 import uk.gov.hmrc.timetopayproxy.models.saonly.common._
 import uk.gov.hmrc.timetopayproxy.support.IntegrationBaseSpec
@@ -49,7 +51,7 @@ class TimeToPayProxyControllerInternalAuthEnabledItSpec extends IntegrationBaseS
         regimeType = SaOnlyRegimeType.SA
       )
 
-      val chargeInfoResponse: ChargeInfoResponse = ChargeInfoResponse(
+      val chargeInfoResponse: ChargeInfoResponse = ChargeInfoResponseR2(
         processingDateTime = LocalDateTime.parse("2025-07-02T15:00:41.689"),
         identification = List(
           Identification(idType = IdType("ID_TYPE"), idValue = IdValue("ID_VALUE"))
@@ -118,11 +120,24 @@ class TimeToPayProxyControllerInternalAuthEnabledItSpec extends IntegrationBaseS
               )
             )
           )
+        ),
+        customerSignals = Some(
+          List(
+            Signal(SignalType("Rls"), SignalValue("signal value"), Some("description")),
+            Signal(SignalType("Welsh Language Signal"), SignalValue("signal value"), Some("description"))
+          )
         )
       )
 
       "should send a request with an Authorization header" - {
         "and return a 200" in {
+          val mockFeatureSwitch = mock[FeatureSwitch]
+          implicit val chargeInfoResponseReads: Reads[ChargeInfoResponse] = ChargeInfoResponse.reads(mockFeatureSwitch)
+
+          (() => mockFeatureSwitch.saRelease2Enabled)
+            .expects()
+            .returning(SARelease2Enabled(true))
+
           stubRequest(
             httpMethod = POST,
             url = "/debts/time-to-pay/charge-info",

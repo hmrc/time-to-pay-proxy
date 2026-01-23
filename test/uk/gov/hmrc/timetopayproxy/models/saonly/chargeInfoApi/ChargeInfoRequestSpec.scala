@@ -72,7 +72,7 @@ class ChargeInfoRequestSpec extends AnyFreeSpec {
         }
 
         "writes JSON compatible with the time-to-pay-eligibility schema" in {
-          val schema = Validators.TimeToPayEligibility.ChargeInfo.openApiRequestSchema
+          val schema = Validators.TimeToPayEligibility.ChargeInfo.Live.openApiRequestSchema
           val writtenJson: JsValue = writerToTtp.writes(obj)
 
           schema.validateAndGetErrors(writtenJson) shouldBe Nil
@@ -92,7 +92,7 @@ class ChargeInfoRequestSpec extends AnyFreeSpec {
         }
 
         "was tested against JSON compatible with our schema" in {
-          val schema = Validators.TimeToPayProxy.ChargeInfo.openApiRequestSchema
+          val schema = Validators.TimeToPayProxy.ChargeInfo.Live.openApiRequestSchema
 
           schema.validateAndGetErrors(json) shouldBe Nil
         }

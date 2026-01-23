@@ -52,8 +52,10 @@ info:
       | 1.0.18 | 28-10-2025 | Alex Olkhovskiy | Add 409 conflict response to PUT /quote endpoint for duplicate plan ID|
       | 1.0.19 | 30-10-2025 | Alex Olkhovskiy | R1 changes for udpate cancel, inform and full amend|
       | 1.0.20 | 06-11-2025 | Alex Olkhovskiy | Add 422 error response for charge reference mismatch |
-      | 1.0.20-proposedAll-R2| 28-10-2025 | Alex Olkhovskiy | R2 changes|
-  version: 1.0.20-proposedAll-R2
+      | 1.0.20a | 28-10-2025 | Alex Olkhovskiy | DTD-3508: Added customer signals to Get Charges response |
+      | 1.0.20-proposedAll-R2| 28-10-2025 | Alex Olkhovskiy | DTD-3512: R2 changes - update Inform request to have new debtItemCharges field |
+      | 1.0.21-proposedAll | 18-12-2025 | Alex Olkhovskiy | Make signalDescription optional in CustomerSignal schema |
+  version: 1.0.21-proposedAll
   contact: {}
 servers:
   - url: https://api.service.hmrc.gov.uk
@@ -775,7 +777,6 @@ paths:
                     chargeReference: XW006559808863
                     mainTrans: '4700'
                     parentChargeReference: XW006559808863
-                    isInsolvent: true
                     charges:
                       - taxPeriodFrom: '2022-04-01'
                         taxPeriodTo: '2022-06-30'
@@ -793,14 +794,10 @@ paths:
                         saTaxYearEnd: '2022-04-05'
                         creationDate: '2022-08-01'
                         originalChargeType: Payment
-                        locks:
-                          - lockType: no reallocation
-                            lockReason: Insolvency
                   - debtTotalAmount: 148781
                     chargeReference: XW006559808862
                     mainTrans: '4700'
                     parentChargeReference: XW006559808862
-                    isInsolvent: true
                     charges:
                       - taxPeriodFrom: '2022-04-01'
                         taxPeriodTo: '2022-06-30'
@@ -818,9 +815,6 @@ paths:
                         saTaxYearEnd: '2022-08-01'
                         creationDate: '2022-08-01'
                         originalChargeType: VAT Return Debit Charge
-                        locks:
-                          - lockType: Payment
-                            lockReason: Insolvency
         '400':
           description: ''
           headers: {}
@@ -2636,7 +2630,6 @@ components:
       required:
         - signalType
         - signalValue
-        - signalDescription
       properties:
         signalType:
           type: string
@@ -2650,20 +2643,6 @@ components:
           type: string
           description: Description of the signal
           example: Description
-    Lock:
-      type: object
-      required:
-        - lockType
-        - lockReason
-      properties:
-        lockType:
-          type: string
-          description: Type of lock applied to the charge
-          example: Payment
-        lockReason:
-          type: string
-          description: Reason for the lock
-          example: Insolvency
     TTPChargeInfoResponse:
       title: TTPChargeInfoResponse
       required:
@@ -2672,7 +2651,6 @@ components:
         - chargeTypeAssessment
         - addresses
         - individualDetails
-        - chargeTypesExcluded
       properties:
         processingDateTime:
           type: string
@@ -2805,7 +2783,6 @@ components:
               - chargeReference
               - charges
               - mainTrans
-              - isInsolvent
             properties:
               debtTotalAmount:
                 type: integer
@@ -2815,11 +2792,6 @@ components:
                 description: Charge reference
               parentChargeReference:
                 type: string
-              isInsolvent:
-                type: boolean
-                description: |
-                  Debt level insolvency indicator. Indicates if this charge should be shown as insolvent and excluded from TTP.
-                  For ETMP (MTD ITSA): True only when BOTH conditions are met: (1) customer level insolvency signal exists AND (2) charge has 'no reallocation' lock applied. If customer signal exists but no lock, this field is false.
               mainTrans:
                 type: string
                 description: |
@@ -2861,7 +2833,12 @@ components:
                       type: string
                     parentMainTrans:
                       type: string
+                    originalCreationDate:
+                      type: string
+                      format: date
                     tieBreaker:
+                      type: string
+                    originalTieBreaker:
                       type: string
                     saTaxYearEnd:
                       type: string
@@ -2871,11 +2848,6 @@ components:
                       format: date
                     originalChargeType:
                       type: string
-                    locks:
-                      type: array
-                      items:
-                        $ref: '#/components/schemas/Lock'
-                      description: Locks applied to this charge
                   required:
                     - taxPeriodFrom
                     - taxPeriodTo

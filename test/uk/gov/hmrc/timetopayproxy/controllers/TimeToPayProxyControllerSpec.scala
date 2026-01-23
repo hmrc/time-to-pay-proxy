@@ -1104,7 +1104,7 @@ class TimeToPayProxyControllerSpec extends AnyWordSpec with MockFactory {
       ),
       regimeType = SaOnlyRegimeType.SA
     )
-    val chargeInfoResponse: ChargeInfoResponse = ChargeInfoResponse(
+    val chargeInfoResponse: ChargeInfoResponse = ChargeInfoResponseR2(
       processingDateTime = LocalDateTime.parse("2025-07-02T15:00:41.689"),
       identification = List(
         Identification(idType = IdType("ID_TYPE"), idValue = IdValue("ID_VALUE"))
@@ -1169,6 +1169,12 @@ class TimeToPayProxyControllerSpec extends AnyWordSpec with MockFactory {
               originalChargeType = Some(OriginalChargeType("Original Charge Type"))
             )
           )
+        )
+      ),
+      customerSignals = Some(
+        List(
+          Signal(SignalType("Rls"), SignalValue("signal value"), Some("description")),
+          Signal(SignalType("Welsh Language Signal"), SignalValue("signal value"), Some("description"))
         )
       )
     )

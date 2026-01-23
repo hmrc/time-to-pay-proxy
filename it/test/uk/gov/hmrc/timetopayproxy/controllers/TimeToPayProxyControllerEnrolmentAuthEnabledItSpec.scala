@@ -19,12 +19,15 @@ package uk.gov.hmrc.timetopayproxy.controllers
 import cats.data.NonEmptyList
 import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.client.WireMock._
-import play.api.libs.json.Json
+import com.github.tomakehurst.wiremock.http.RequestMethod.{ GET, POST, PUT }
+import play.api.libs.json.{ Json, Reads }
 import play.api.libs.ws.{ WSRequest, WSResponse }
 import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.timetopayproxy.config.FeatureSwitch
 import uk.gov.hmrc.timetopayproxy.models._
 import uk.gov.hmrc.timetopayproxy.models.affordablequotes.{ AffordableQuoteResponse, AffordableQuotesRequest }
 import uk.gov.hmrc.timetopayproxy.models.currency.GbpPounds
+import uk.gov.hmrc.timetopayproxy.models.featureSwitches.SARelease2Enabled
 import uk.gov.hmrc.timetopayproxy.models.saonly.chargeInfoApi._
 import uk.gov.hmrc.timetopayproxy.models.saonly.common._
 import uk.gov.hmrc.timetopayproxy.models.saonly.common.apistatus.{ ApiErrorResponse, ApiName, ApiStatus, ApiStatusCode }
@@ -32,7 +35,6 @@ import uk.gov.hmrc.timetopayproxy.models.saonly.ttpcancel.{ CancellationDate, Tt
 import uk.gov.hmrc.timetopayproxy.models.saonly.ttpfullamend.{ TtpFullAmendRequest, TtpFullAmendSuccessfulResponse }
 import uk.gov.hmrc.timetopayproxy.models.saonly.ttpinform.{ TtpInformRequest, TtpInformSuccessfulResponse }
 import uk.gov.hmrc.timetopayproxy.support.IntegrationBaseSpec
-import com.github.tomakehurst.wiremock.http.RequestMethod.{ GET, POST, PUT }
 
 import java.time.{ Instant, LocalDate, LocalDateTime }
 import scala.concurrent.ExecutionContext
@@ -469,7 +471,7 @@ class TimeToPayProxyControllerEnrolmentAuthEnabledItSpec extends IntegrationBase
         regimeType = SaOnlyRegimeType.SA
       )
 
-      val responsePayload: ChargeInfoResponse = ChargeInfoResponse(
+      val responsePayload: ChargeInfoResponse = ChargeInfoResponseR2(
         processingDateTime = LocalDateTime.parse("2025-07-02T15:00:41.689"),
         identification = List(
           Identification(idType = IdType("ID_TYPE"), idValue = IdValue("ID_VALUE"))
@@ -538,11 +540,24 @@ class TimeToPayProxyControllerEnrolmentAuthEnabledItSpec extends IntegrationBase
               )
             )
           )
+        ),
+        customerSignals = Some(
+          List(
+            Signal(SignalType("Rls"), SignalValue("signal value"), Some("description")),
+            Signal(SignalType("Welsh Language Signal"), SignalValue("signal value"), Some("description"))
+          )
         )
       )
 
       "should send the enrolment scope to the authorise endpoint" - {
         "and return a 200" in {
+          val mockFeatureSwitch = mock[FeatureSwitch]
+          implicit val chargeInfoResponseReads: Reads[ChargeInfoResponse] = ChargeInfoResponse.reads(mockFeatureSwitch)
+
+          (() => mockFeatureSwitch.saRelease2Enabled)
+            .expects()
+            .returning(SARelease2Enabled(true))
+
           stubRequest(
             httpMethod = POST,
             url = "/auth/authorise",
