@@ -156,10 +156,6 @@ object Validators {
       }
 
       object Proposed {
-        // Downloaded from:
-        //   https://jira.tools.tax.service.gov.uk/browse/DTD-2856
-        // Official location:
-        //   ???
         private val pathR2: String = "test/resources/schemas/apis/proposed/time-to-pay-proxy/time-to-pay-v1.0.21.yaml"
         def openApiRequestSchema: OpenApi3DerivedSchema =
           new OpenApi3DerivedSchema(
@@ -233,7 +229,7 @@ object Validators {
 
   object TimeToPayEligibility {
     // Downloaded from:
-    //   https://github.com/hmrc/time-to-pay-eligibility/blob/dfc3c970abfe7ee8bafbd32e2dc77d35b829a37b/test/resources/schemas/apis/time-to-pay-eligibility/ttp-eligibility0.3.8.yaml
+    //   https://github.com/hmrc/time-to-pay-eligibility/blob/dfc3c970abfe7ee8bafbd32e2dc77d35b829a37b/test/resources/schemas/apis/time-to-pay-eligibility/ttp-eligibility0.3.6.yaml
     // Official location:
     //   https://confluence.tools.tax.service.gov.uk/display/DTDT/TTP+Eligibility+API
     private val livePath = "test/resources/schemas/apis/live/time-to-pay-eligibility/ttp-eligibility0.3.6.yaml"
