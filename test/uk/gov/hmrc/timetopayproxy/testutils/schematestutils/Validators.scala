@@ -50,7 +50,8 @@ object Validators {
       }
 
       object Proposed {
-        private val proposedPath = "test/resources/schemas/apis/proposed/time-to-pay-proxy/time-to-pay-v1.0.21.yaml"
+        private val proposedPath =
+          "test/resources/schemas/apis/proposed/time-to-pay-proxy/time-to-pay-v1.0.22-proposedAll.yaml"
 
         def openApiRequestSchema: OpenApi3DerivedSchema =
           new OpenApi3DerivedSchema(
@@ -305,7 +306,7 @@ object Validators {
 
       object Proposed {
         private val proposedPath =
-          "test/resources/schemas/apis/proposed/time-to-pay-eligibility/ttp-eligibility0.3.8.yaml"
+          "test/resources/schemas/apis/proposed/time-to-pay-eligibility/ttp-eligibility0.3.8-proposed.yaml"
 
         def openApiResponseSuccessfulSchema =
           new OpenApi3DerivedSchema(

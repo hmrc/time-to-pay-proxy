@@ -52,7 +52,7 @@ info:
       | 1.0.18 | 28-10-2025 | Alex Olkhovskiy | Add 409 conflict response to PUT /quote endpoint for duplicate plan ID|
       | 1.0.19 | 30-10-2025 | Alex Olkhovskiy | R1 changes for udpate cancel, inform and full amend|
       | 1.0.20 | 06-11-2025 | Alex Olkhovskiy | Add 422 error response for charge reference mismatch |
-      | 1.0.20a | 28-10-2025 | Alex Olkhovskiy | Get charges: Added customer signals, insolvency indicator, locks data and charge types excluded|
+      | 1.0.20a | 28-10-2025 | Alex Olkhovskiy | Get charges: Added customer signals, insolvency indicator, locks data|
       | 1.0.20b | 28-10-2025 | Alex Olkhovskiy | Inform API: Added debtItemCharges array and ddiReference for ETMP integration                             |
       | 1.0.20c | 28-10-2025 | Alex Olkhovskiy | Cancel API: Added debtItemCharges array and ddiReference for ETMP integration|
       | 1.0.20-proposedAll-R4 | 28-10-2025 | Alex Olkhovskiy | Full Amend API: Split into originalPaymentPlan and newPaymentPlan with charge amendment to understand which HoD API to call and which plan data to provide     |
@@ -774,7 +774,6 @@ paths:
                   - signalType: ITSA Migrated
                     signalValue: 'true'
                     signalDescription: Customer has migrated to ITSA
-                chargeTypesExcluded: false
                 chargeTypeAssessment:
                   - debtTotalAmount: 250000
                     chargeReference: XW006559808863
@@ -2722,7 +2721,6 @@ components:
         - chargeTypeAssessment
         - addresses
         - individualDetails
-        - chargeTypesExcluded
       properties:
         processingDateTime:
           type: string
@@ -2843,9 +2841,6 @@ components:
           items:
             $ref: '#/components/schemas/CustomerSignal'
           description: Signal information to be considered by the operator. Not all signals will be returned.  Examples of signals returned include ring-fenced signals, insolvency and Welsh Language signal.
-        chargeTypesExcluded:
-          type: boolean
-          description: Indicates whether any charge types have been excluded from the response
         chargeTypeAssessment:
           type: array
           items:
@@ -2911,7 +2906,12 @@ components:
                       type: string
                     parentMainTrans:
                       type: string
+                    originalCreationDate:
+                      type: string
+                      format: date
                     tieBreaker:
+                      type: string
+                    originalTieBreaker:
                       type: string
                     saTaxYearEnd:
                       type: string

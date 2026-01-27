@@ -84,13 +84,13 @@ class TTPEServiceSpec extends AnyFreeSpec with MockFactory {
       )
     ),
     chargeTypeAssessment = List(
-      ChargeTypeAssessment(
+      ChargeTypeAssessmentR2(
         debtTotalAmount = BigInt(1000),
         chargeReference = ChargeReference("CHARGE REFERENCE"),
         parentChargeReference = Some(ChargeInfoParentChargeReference("PARENT CHARGE REF")),
         mainTrans = MainTrans("2000"),
         charges = List(
-          Charge(
+          ChargeR2(
             taxPeriodFrom = TaxPeriodFrom(LocalDate.parse("2020-01-02")),
             taxPeriodTo = TaxPeriodTo(LocalDate.parse("2020-12-31")),
             chargeType = ChargeType("charge type"),
@@ -108,9 +108,15 @@ class TTPEServiceSpec extends AnyFreeSpec with MockFactory {
             originalTieBreaker = Some(OriginalTieBreaker("Original Tie Breaker")),
             saTaxYearEnd = Some(SaTaxYearEnd(LocalDate.parse("2020-04-05"))),
             creationDate = Some(CreationDate(LocalDate.parse("2025-07-02"))),
-            originalChargeType = Some(OriginalChargeType("Original Charge Type"))
+            originalChargeType = Some(OriginalChargeType("Original Charge Type")),
+            locks = Some(
+              List(
+                Lock(lockType = "Posting/Clearing", lockReason = "No Reallocation")
+              )
+            )
           )
-        )
+        ),
+        isInsolvent = IsInsolvent(false)
       )
     ),
     customerSignals = Some(
