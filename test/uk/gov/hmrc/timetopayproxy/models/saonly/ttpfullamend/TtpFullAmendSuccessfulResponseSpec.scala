@@ -138,7 +138,7 @@ final class TtpFullAmendSuccessfulResponseSpec extends AnyFreeSpec {
 
         "was tested against JSON compatible with the time-to-pay schema" in {
           // TTP uses same Schema as proxy
-          val schema = Validators.TimeToPay.TtpFullAmend.openApiFullAmendResponseSchema
+          val schema = Validators.TimeToPay.TtpFullAmend.Live.openApiFullAmendResponseSchema
 
           schema.validateAndGetErrors(json) shouldBe Nil
         }
@@ -153,7 +153,7 @@ final class TtpFullAmendSuccessfulResponseSpec extends AnyFreeSpec {
         }
 
         "was tested against JSON compatible with the time-to-pay schema" in {
-          val schema = Validators.TimeToPay.TtpFullAmend.openApiFullAmendResponseSchema
+          val schema = Validators.TimeToPay.TtpFullAmend.Live.openApiFullAmendResponseSchema
 
           schema.validateAndGetErrors(json) shouldBe Nil
         }

@@ -31,7 +31,7 @@ import uk.gov.hmrc.timetopayproxy.models.saonly.chargeInfoApi._
 import uk.gov.hmrc.timetopayproxy.models.saonly.common._
 import uk.gov.hmrc.timetopayproxy.models.saonly.common.apistatus._
 import uk.gov.hmrc.timetopayproxy.models.saonly.ttpcancel._
-import uk.gov.hmrc.timetopayproxy.models.saonly.ttpfullamend.{ TtpFullAmendInformativeError, TtpFullAmendInternalError, TtpFullAmendRequest, TtpFullAmendSuccessfulResponse }
+import uk.gov.hmrc.timetopayproxy.models.saonly.ttpfullamend.{ TtpFullAmendInformativeError, TtpFullAmendInternalError, TtpFullAmendRequestR1, TtpFullAmendSuccessfulResponse }
 import uk.gov.hmrc.timetopayproxy.models.saonly.ttpinform._
 import uk.gov.hmrc.timetopayproxy.support.IntegrationBaseSpec
 import uk.gov.hmrc.timetopayproxy.testutils.TestOnlyJsonFormats._
@@ -1357,7 +1357,7 @@ class TimeToPayProxyControllerItSpec extends IntegrationBaseSpec {
             val expectedTtppErrorResponse: TtppErrorResponse = TtppErrorResponse(
               statusCode = 400,
               errorMessage =
-                "Invalid TtpFullAmendRequest payload: Payload has a missing field or an invalid format. Field name: identifications. "
+                "Invalid TtpFullAmendRequestR1 payload: Payload has a missing field or an invalid format. Field name: identifications. "
             )
 
             response.json shouldBe Json.toJson(expectedTtppErrorResponse)
@@ -1407,7 +1407,7 @@ class TimeToPayProxyControllerItSpec extends IntegrationBaseSpec {
             val expectedTtppErrorResponse: TtppErrorResponse = TtppErrorResponse(
               statusCode = 400,
               errorMessage =
-                "Invalid TtpFullAmendRequest payload: Payload has a missing field or an invalid format. Field name: arrangementAgreedDate. Date format should be correctly provided"
+                "Invalid TtpFullAmendRequestR1 payload: Payload has a missing field or an invalid format. Field name: arrangementAgreedDate. Date format should be correctly provided"
             )
 
             response.json shouldBe Json.toJson(expectedTtppErrorResponse)
@@ -1442,7 +1442,7 @@ class TimeToPayProxyControllerItSpec extends IntegrationBaseSpec {
               val expectedTtppErrorResponse: TtppErrorResponse = TtppErrorResponse(
                 statusCode = 400,
                 errorMessage =
-                  "Invalid TtpFullAmendRequest payload: Payload has a missing field or an invalid format. Field name: identifications. "
+                  "Invalid TtpFullAmendRequestR1 payload: Payload has a missing field or an invalid format. Field name: identifications. "
               )
 
               response.json shouldBe Json.toJson(expectedTtppErrorResponse)
@@ -1486,7 +1486,7 @@ class TimeToPayProxyControllerItSpec extends IntegrationBaseSpec {
               val expectedTtppErrorResponse: TtppErrorResponse = TtppErrorResponse(
                 statusCode = 400,
                 errorMessage =
-                  "Invalid TtpFullAmendRequest payload: Payload has a missing field or an invalid format. Field name: instalments. "
+                  "Invalid TtpFullAmendRequestR1 payload: Payload has a missing field or an invalid format. Field name: instalments. "
               )
 
               response.json shouldBe Json.toJson(expectedTtppErrorResponse)
@@ -2007,7 +2007,7 @@ class TimeToPayProxyControllerItSpec extends IntegrationBaseSpec {
       processingDateTime = ProcessingDateTimeInstant(java.time.Instant.parse("2025-10-15T10:31:00Z"))
     )
 
-    val fullAmendRequest: TtpFullAmendRequest = TtpFullAmendRequest(
+    val fullAmendRequest: TtpFullAmendRequestR1 = TtpFullAmendRequestR1(
       identifications = NonEmptyList.of(
         Identification(idType = IdType("NINO"), idValue = IdValue("AA000000A")),
         Identification(idType = IdType("MTDITID"), idValue = IdValue("XAIT00000000054")),

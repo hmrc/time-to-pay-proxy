@@ -159,7 +159,7 @@ final class TtpFullAmendInformativeErrorSpec extends AnyFreeSpec {
 
         "was tested against JSON compatible with the time-to-pay schema" in {
           // Schema for TTP is same as proxy schema
-          val schema = Validators.TimeToPay.TtpFullAmend.openApiFullAmendErrorResponseSchema
+          val schema = Validators.TimeToPay.TtpFullAmend.Live.openApiFullAmendErrorResponseSchema
 
           schema.validateAndGetErrors(json) shouldBe Nil
         }
@@ -185,7 +185,7 @@ final class TtpFullAmendInformativeErrorSpec extends AnyFreeSpec {
               |""".stripMargin
           )
 
-          val schema = Validators.TimeToPay.TtpFullAmend.openApiFullAmendErrorResponseSchema
+          val schema = Validators.TimeToPay.TtpFullAmend.Live.openApiFullAmendErrorResponseSchema
 
           schema.validateAndGetErrors(notAcceptedJson) shouldBe
             List("Additional property 'notWanted' is not allowed. (code: 1000)\nFrom: <additionalProperties>")
@@ -203,7 +203,7 @@ final class TtpFullAmendInformativeErrorSpec extends AnyFreeSpec {
 
         "was tested against JSON compatible with the time-to-pay schema" in {
           // Schema for TTP is same as proxy schema
-          val schema = Validators.TimeToPay.TtpFullAmend.openApiFullAmendErrorResponseSchema
+          val schema = Validators.TimeToPay.TtpFullAmend.Live.openApiFullAmendErrorResponseSchema
 
           schema.validateAndGetErrors(json) shouldBe Nil
         }

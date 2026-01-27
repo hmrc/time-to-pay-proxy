@@ -43,7 +43,7 @@ import uk.gov.hmrc.timetopayproxy.models.saonly.chargeInfoApi._
 import uk.gov.hmrc.timetopayproxy.models.saonly.common._
 import uk.gov.hmrc.timetopayproxy.models.saonly.common.apistatus.{ ApiName, ApiStatus, ApiStatusCode }
 import uk.gov.hmrc.timetopayproxy.models.saonly.ttpcancel.{ CancellationDate, TtpCancelPaymentPlan, TtpCancelRequest, TtpCancelSuccessfulResponse }
-import uk.gov.hmrc.timetopayproxy.models.saonly.ttpfullamend.{ TtpFullAmendRequest, TtpFullAmendSuccessfulResponse }
+import uk.gov.hmrc.timetopayproxy.models.saonly.ttpfullamend.{ TtpFullAmendRequestR1, TtpFullAmendSuccessfulResponse }
 import uk.gov.hmrc.timetopayproxy.models.saonly.ttpinform.{ TtpInformRequest, TtpInformSuccessfulResponse }
 import uk.gov.hmrc.timetopayproxy.services.{ TTPEService, TTPQuoteService, TtpFeedbackLoopService }
 
@@ -1706,7 +1706,7 @@ class TimeToPayProxyControllerSpec extends AnyWordSpec with MockFactory {
   }
 
   "POST /individuals/time-to-pay-proxy/full-amend" should {
-    val ttpFullAmendRequest: TtpFullAmendRequest = TtpFullAmendRequest(
+    val ttpFullAmendRequest: TtpFullAmendRequestR1 = TtpFullAmendRequestR1(
       identifications = NonEmptyList.of(
         Identification(
           idType = IdType("idtype"),
@@ -1765,7 +1765,7 @@ class TimeToPayProxyControllerSpec extends AnyWordSpec with MockFactory {
           .returning(Future.successful(()))
 
         (ttpFeedbackLoopService
-          .fullAmendTtp(_: TtpFullAmendRequest)(
+          .fullAmendTtp(_: TtpFullAmendRequestR1)(
             _: ExecutionContext,
             _: HeaderCarrier
           ))
@@ -1775,7 +1775,7 @@ class TimeToPayProxyControllerSpec extends AnyWordSpec with MockFactory {
         val fakeRequest: FakeRequest[JsValue] =
           FakeRequest("POST", "/individuals/time-to-pay-proxy/full-amend")
             .withHeaders(CONTENT_TYPE -> MimeTypes.JSON)
-            .withBody(Json.toJson[TtpFullAmendRequest](ttpFullAmendRequest))
+            .withBody(Json.toJson[TtpFullAmendRequestR1](ttpFullAmendRequest))
 
         val response: Future[Result] = controller.fullAmendTtp()(fakeRequest)
 
@@ -1850,7 +1850,7 @@ class TimeToPayProxyControllerSpec extends AnyWordSpec with MockFactory {
 
         val errorFromTtpService = ConnectorError(500, "Internal Service Error")
         (ttpFeedbackLoopService
-          .fullAmendTtp(_: TtpFullAmendRequest)(
+          .fullAmendTtp(_: TtpFullAmendRequestR1)(
             _: ExecutionContext,
             _: HeaderCarrier
           ))
@@ -1862,7 +1862,7 @@ class TimeToPayProxyControllerSpec extends AnyWordSpec with MockFactory {
         val fakeRequest: FakeRequest[JsValue] =
           FakeRequest("POST", "/individuals/time-to-pay-proxy/full-amend")
             .withHeaders(CONTENT_TYPE -> MimeTypes.JSON)
-            .withBody(Json.toJson[TtpFullAmendRequest](ttpFullAmendRequest))
+            .withBody(Json.toJson[TtpFullAmendRequestR1](ttpFullAmendRequest))
 
         val response: Future[Result] = controller.fullAmendTtp()(fakeRequest)
 
@@ -1896,7 +1896,7 @@ class TimeToPayProxyControllerSpec extends AnyWordSpec with MockFactory {
         val fakeRequest: FakeRequest[JsValue] =
           FakeRequest("POST", "/individuals/time-to-pay-proxy/full-amend")
             .withHeaders(CONTENT_TYPE -> MimeTypes.JSON)
-            .withBody(Json.toJson[TtpFullAmendRequest](ttpFullAmendRequest))
+            .withBody(Json.toJson[TtpFullAmendRequestR1](ttpFullAmendRequest))
 
         val response: Future[Result] = controller.fullAmendTtp()(fakeRequest)
 

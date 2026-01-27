@@ -33,7 +33,7 @@ final class TtpFullAmendRequestSpec extends AnyFreeSpec {
   "FullAmendRequest" - {
     object TestData {
       object WithOnlySomes {
-        def obj: TtpFullAmendRequest = TtpFullAmendRequest(
+        def obj: TtpFullAmendRequestR1 = TtpFullAmendRequestR1(
           identifications = NonEmptyList.of(
             Identification(
               idType = IdType("idtype"),
@@ -88,7 +88,7 @@ final class TtpFullAmendRequestSpec extends AnyFreeSpec {
       }
 
       object With0SomeOnEachPath {
-        def obj: TtpFullAmendRequest = TtpFullAmendRequest(
+        def obj: TtpFullAmendRequestR1 = TtpFullAmendRequestR1(
           identifications = NonEmptyList.of(
             Identification(
               idType = IdType("idtype"),
@@ -142,18 +142,18 @@ final class TtpFullAmendRequestSpec extends AnyFreeSpec {
     }
 
     "implicit JSON writer (data going to time-to-pay)" - {
-      def writerToTtp: Writes[TtpFullAmendRequest] = implicitly[Writes[TtpFullAmendRequest]]
+      def writerToTtp: Writes[TtpFullAmendRequestR1] = implicitly[Writes[TtpFullAmendRequestR1]]
 
       "when all the optional fields are fully populated" - {
         def json: JsValue = TestData.WithOnlySomes.json
-        def obj: TtpFullAmendRequest = TestData.WithOnlySomes.obj
+        def obj: TtpFullAmendRequestR1 = TestData.WithOnlySomes.obj
 
         "writes the correct JSON" in {
           writerToTtp.writes(obj) shouldBeEquivalentTo json
         }
 
         "writes JSON compatible with the time-to-pay schema" in {
-          val schema = Validators.TimeToPay.TtpFullAmend.openApiRequestSchema
+          val schema = Validators.TimeToPay.TtpFullAmend.Live.openApiRequestSchema
           val writtenJson: JsValue = writerToTtp.writes(obj)
 
           schema.validateAndGetErrors(writtenJson) shouldBe Nil
@@ -162,14 +162,14 @@ final class TtpFullAmendRequestSpec extends AnyFreeSpec {
 
       "when none of the optional fields are populated" - {
         def json: JsValue = TestData.With0SomeOnEachPath.json
-        def obj: TtpFullAmendRequest = TestData.With0SomeOnEachPath.obj
+        def obj: TtpFullAmendRequestR1 = TestData.With0SomeOnEachPath.obj
 
         "writes the correct JSON" in {
           writerToTtp.writes(obj) shouldBeEquivalentTo json
         }
 
         "writes JSON compatible with the time-to-pay schema" in {
-          val schema = Validators.TimeToPay.TtpFullAmend.openApiRequestSchema
+          val schema = Validators.TimeToPay.TtpFullAmend.Live.openApiRequestSchema
           val writtenJson: JsValue = writerToTtp.writes(obj)
 
           schema.validateAndGetErrors(writtenJson) shouldBe Nil
@@ -178,11 +178,11 @@ final class TtpFullAmendRequestSpec extends AnyFreeSpec {
     }
 
     "implicit JSON reader (data coming from our clients)" - {
-      def readerFromClients: Reads[TtpFullAmendRequest] = implicitly[Reads[TtpFullAmendRequest]]
+      def readerFromClients: Reads[TtpFullAmendRequestR1] = implicitly[Reads[TtpFullAmendRequestR1]]
 
       "when all the optional fields are fully populated" - {
         def json: JsValue = TestData.WithOnlySomes.json
-        def obj: TtpFullAmendRequest = TestData.WithOnlySomes.obj
+        def obj: TtpFullAmendRequestR1 = TestData.WithOnlySomes.obj
 
         "reads the JSON correctly" in {
           readerFromClients.reads(json) shouldBe JsSuccess(obj)
@@ -197,7 +197,7 @@ final class TtpFullAmendRequestSpec extends AnyFreeSpec {
 
       "when none of the optional fields are populated" - {
         def json: JsValue = TestData.With0SomeOnEachPath.json
-        def obj: TtpFullAmendRequest = TestData.With0SomeOnEachPath.obj
+        def obj: TtpFullAmendRequestR1 = TestData.With0SomeOnEachPath.obj
 
         "reads the JSON correctly" in {
           readerFromClients.reads(json) shouldBe JsSuccess(obj)

@@ -152,7 +152,7 @@ final class TtpInformRequestSpec extends AnyFreeSpec {
         }
 
         "writes JSON compatible with the time-to-pay schema" in {
-          val schema = Validators.TimeToPay.TtpInform.openApiRequestSchema
+          val schema = Validators.TimeToPay.TtpInform.Live.openApiRequestSchema
           val writtenJson: JsValue = writerToTtp.writes(obj)
 
           schema.validateAndGetErrors(writtenJson) shouldBe Nil
@@ -168,7 +168,7 @@ final class TtpInformRequestSpec extends AnyFreeSpec {
         }
 
         "writes JSON compatible with the time-to-pay schema" in {
-          val schema = Validators.TimeToPay.TtpInform.openApiRequestSchema
+          val schema = Validators.TimeToPay.TtpInform.Live.openApiRequestSchema
           val writtenJson: JsValue = writerToTtp.writes(obj)
 
           schema.validateAndGetErrors(writtenJson) shouldBe Nil
@@ -230,7 +230,7 @@ final class TtpInformRequestSpec extends AnyFreeSpec {
             initialPaymentAmount = Some(GbpPounds.createOrThrow(100.12)),
             ddiReference = Some(DdiReference("TestDDIReference")),
             debtItemCharges =
-              NonEmptyList.of(InformDebtItemCharge(DebtItemChargeId("ID-OF-DOOM"), ChargeSource("CESA")))
+              NonEmptyList.of(DebtItemChargeReference(DebtItemChargeId("ID-OF-DOOM"), ChargeSourceSAOnly.CESA))
           ),
           instalments = NonEmptyList.of(
             SaOnlyInstalment(
@@ -293,7 +293,7 @@ final class TtpInformRequestSpec extends AnyFreeSpec {
             initialPaymentAmount = None,
             ddiReference = None,
             debtItemCharges =
-              NonEmptyList.of(InformDebtItemCharge(DebtItemChargeId("ID-OF-DOOM"), ChargeSource("CESA")))
+              NonEmptyList.of(DebtItemChargeReference(DebtItemChargeId("ID-OF-DOOM"), ChargeSourceSAOnly.CESA))
           ),
           instalments = NonEmptyList.of(
             SaOnlyInstalment(
@@ -376,7 +376,7 @@ final class TtpInformRequestSpec extends AnyFreeSpec {
         }
 
         "writes JSON compatible with the time-to-pay schema" in {
-          val schema = Validators.TimeToPay.TtpInformR2.openApiRequestSchema
+          val schema = Validators.TimeToPay.TtpInform.Proposed.openApiRequestSchema
           val writtenJson: JsValue = writerToTtp.writes(obj)
 
           schema.validateAndGetErrors(writtenJson) shouldBe Nil
@@ -392,7 +392,7 @@ final class TtpInformRequestSpec extends AnyFreeSpec {
         }
 
         "writes JSON compatible with the time-to-pay schema" in {
-          val schema = Validators.TimeToPay.TtpInformR2.openApiRequestSchema
+          val schema = Validators.TimeToPay.TtpInform.Proposed.openApiRequestSchema
           val writtenJson: JsValue = writerToTtp.writes(obj)
 
           schema.validateAndGetErrors(writtenJson) shouldBe Nil

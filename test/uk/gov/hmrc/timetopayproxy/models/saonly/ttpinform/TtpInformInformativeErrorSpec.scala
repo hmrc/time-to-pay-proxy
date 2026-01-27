@@ -157,7 +157,7 @@ final class TtpInformInformativeErrorSpec extends AnyFreeSpec {
         }
 
         "was tested against JSON compatible with the time-to-pay schema" in {
-          val schema = Validators.TimeToPay.TtpInform.openApiInformErrorResponseSchema
+          val schema = Validators.TimeToPay.TtpInform.Live.openApiInformErrorResponseSchema
 
           schema.validateAndGetErrors(json) shouldBe Nil
         }
@@ -172,7 +172,7 @@ final class TtpInformInformativeErrorSpec extends AnyFreeSpec {
         }
 
         "was tested against JSON compatible with the time-to-pay schema" in {
-          val schema = Validators.TimeToPay.TtpInform.openApiInformErrorResponseSchema
+          val schema = Validators.TimeToPay.TtpInform.Live.openApiInformErrorResponseSchema
 
           schema.validateAndGetErrors(json) shouldBe Nil
         }

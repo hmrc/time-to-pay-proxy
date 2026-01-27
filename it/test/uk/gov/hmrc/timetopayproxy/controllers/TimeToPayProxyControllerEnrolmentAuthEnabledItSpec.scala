@@ -32,7 +32,7 @@ import uk.gov.hmrc.timetopayproxy.models.saonly.chargeInfoApi._
 import uk.gov.hmrc.timetopayproxy.models.saonly.common._
 import uk.gov.hmrc.timetopayproxy.models.saonly.common.apistatus.{ ApiErrorResponse, ApiName, ApiStatus, ApiStatusCode }
 import uk.gov.hmrc.timetopayproxy.models.saonly.ttpcancel.{ CancellationDate, TtpCancelPaymentPlan, TtpCancelRequest, TtpCancelSuccessfulResponse }
-import uk.gov.hmrc.timetopayproxy.models.saonly.ttpfullamend.{ TtpFullAmendRequest, TtpFullAmendSuccessfulResponse }
+import uk.gov.hmrc.timetopayproxy.models.saonly.ttpfullamend.{ TtpFullAmendRequestR1, TtpFullAmendSuccessfulResponse }
 import uk.gov.hmrc.timetopayproxy.models.saonly.ttpinform.{ TtpInformRequest, TtpInformSuccessfulResponse }
 import uk.gov.hmrc.timetopayproxy.support.IntegrationBaseSpec
 
@@ -748,8 +748,8 @@ class TimeToPayProxyControllerEnrolmentAuthEnabledItSpec extends IntegrationBase
     }
 
     ".fullAmendTtp" - {
-      val requestPayload: TtpFullAmendRequest =
-        TtpFullAmendRequest(
+      val requestPayload: TtpFullAmendRequestR1 =
+        TtpFullAmendRequestR1(
           identifications = NonEmptyList.of(
             Identification(
               idType = IdType("idtype"),

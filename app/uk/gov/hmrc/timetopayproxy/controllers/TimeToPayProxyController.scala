@@ -28,7 +28,7 @@ import uk.gov.hmrc.timetopayproxy.models.error.TtppEnvelope.TtppEnvelope
 import uk.gov.hmrc.timetopayproxy.models.error.{ TtppEnvelope, TtppErrorResponse, ValidationError }
 import uk.gov.hmrc.timetopayproxy.models.saonly.chargeInfoApi.{ ChargeInfoRequest, ChargeInfoResponse }
 import uk.gov.hmrc.timetopayproxy.models.saonly.ttpcancel.TtpCancelRequest
-import uk.gov.hmrc.timetopayproxy.models.saonly.ttpfullamend.TtpFullAmendRequest
+import uk.gov.hmrc.timetopayproxy.models.saonly.ttpfullamend.TtpFullAmendRequestR1
 import uk.gov.hmrc.timetopayproxy.models.saonly.ttpinform.TtpInformRequest
 import uk.gov.hmrc.timetopayproxy.services.{ TTPEService, TTPQuoteService, TtpFeedbackLoopService }
 
@@ -150,7 +150,7 @@ class TimeToPayProxyController @Inject() (
 
   def fullAmendTtp: Action[JsValue] = readAuthoriseAction.async(parse.json) { implicit request =>
     if (featureSwitch.fullAmendEndpointEnabled) {
-      withJsonBody[TtpFullAmendRequest] { deserialisedRequest: TtpFullAmendRequest =>
+      withJsonBody[TtpFullAmendRequestR1] { deserialisedRequest: TtpFullAmendRequestR1 =>
         ttpFeedbackLoopService
           .fullAmendTtp(deserialisedRequest)
           .leftMap(ttppError => ttppError.toWriteableProxyError)

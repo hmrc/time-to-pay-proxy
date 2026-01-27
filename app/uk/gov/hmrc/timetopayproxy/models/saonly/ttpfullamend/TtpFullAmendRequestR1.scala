@@ -18,21 +18,37 @@ package uk.gov.hmrc.timetopayproxy.models.saonly.ttpfullamend
 
 import cats.data.NonEmptyList
 import play.api.libs.json.{ Format, Json, OFormat }
-import uk.gov.hmrc.timetopayproxy.models.saonly.common.{ SaOnlyInstalment, SaOnlyPaymentPlan, TransitionedIndicator }
-import uk.gov.hmrc.timetopayproxy.models.{ ChannelIdentifier, Identification }
+import uk.gov.hmrc.timetopayproxy.models._
+import uk.gov.hmrc.timetopayproxy.models.saonly.common._
 import uk.gov.hmrc.timetopayproxy.utils.json.CatsNonEmptyListJson
 
-final case class TtpFullAmendRequest(
+final case class TtpFullAmendRequestR1(
   identifications: NonEmptyList[Identification],
   paymentPlan: SaOnlyPaymentPlan,
   instalments: NonEmptyList[SaOnlyInstalment],
   channelIdentifier: ChannelIdentifier,
   transitioned: TransitionedIndicator
 )
-object TtpFullAmendRequest {
-  implicit val format: OFormat[TtpFullAmendRequest] = {
+object TtpFullAmendRequestR1 {
+  implicit val format: OFormat[TtpFullAmendRequestR1] = {
     implicit def nelFormat[T: Format]: Format[NonEmptyList[T]] = CatsNonEmptyListJson.nonEmptyListFormat[T]
 
-    Json.format[TtpFullAmendRequest]
+    Json.format[TtpFullAmendRequestR1]
+  }
+}
+case class FullAmendRequestR2(
+  identifications: NonEmptyList[Identification],
+  originalPaymentPlan: OriginalPaymentPlan,
+  newPaymentPlan: NewPaymentPlan,
+  instalments: NonEmptyList[SaOnlyInstalment],
+  channelIdentifier: ChannelIdentifier,
+  transitioned: TransitionedIndicator
+)
+
+object FullAmendRequestR2 {
+  implicit val format: OFormat[FullAmendRequestR2] = {
+    implicit def nelFormat[T: Format]: Format[NonEmptyList[T]] = CatsNonEmptyListJson.nonEmptyListFormat[T]
+
+    Json.format[FullAmendRequestR2]
   }
 }
