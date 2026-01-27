@@ -26,6 +26,6 @@ object ChargeAmendment extends Enum[ChargeAmendment] with PlayJsonEnum[ChargeAme
   val values: immutable.IndexedSeq[ChargeAmendment] = findValues
 
   case object New extends ChargeAmendment("new")
-  case object Remove extends ChargeAmendment("remove")
+  case object Removed extends ChargeAmendment("removed")
   case object Remain extends ChargeAmendment("remain")
 }
