@@ -1,0 +1,3595 @@
+openapi: 3.0.0
+info:
+  title: Time To Pay Proxy
+  description: |
+    This API provides resources related to [Time To Pay] (https://confluence.tools.tax.service.gov.uk/display/DTDT/TTP+1).
+    When an API changes in a way that is backwards-incompatible, we increase the version number of the API.
+    See our [reference guide](/api-documentation/docs/reference-guide#versioning) for more on
+    versioning.
+    We use standard HTTP status codes to show whether an API request succeeded or not. They are usually in the range:
+    * 200 to 299 if it succeeded, including code 202 if it was accepted by an API that needs to wait for further action
+    * 400 to 499 if it failed because of a client error by your application
+    * 500 to 599 if it failed because of an error on our server
+
+    Errors specific to each API are shown in the Endpoints section, under Response.
+    See our [reference guide](/api-documentation/docs/reference-guide#errors) for more on errors.
+    You can use the [HMRC Developer Sandbox](https://test-developer.service.hmrc.gov.uk/api-documentation/docs/sandbox/introduction)
+    to test the API. The Sandbox is an enhanced testing service that functions as a simulator of HMRC’s production environment.
+    HMRC monitors transactions to help protect your customers' confidential data from criminals and fraudsters.
+
+    <div class="govuk-warning-text warning-icon-fix">
+      <span class="govuk-warning-text__icon warning-icon-ui-fix" aria-hidden="true">!</span>
+      <strong class="govuk-warning-text__text">
+        <span class="govuk-warning-text__assistive">Warning</span>
+        You are required by law to submit header data for this API. This includes all associated APIs and endpoints.
+      </strong>
+    </div>
+
+    [Check the data you need to send](/guides/fraud-prevention/). You can also use the [Test API](/api-documentation/docs/api/service/txm-fph-validator-api/1.0) during initial development and as part of your quality assurance checks.
+    ```
+    Change Log
+    ```
+      | Version | Date | Author | Description |
+      |---|-----|------|-----|
+      | 1.0.0 | 11-03-2023 | Jorma Pajunen | Baselined Version |
+      | 1.0.1 | 27-03-2024 | Jorma Pajunen | Added new affordable quotes endpoint |
+      | 1.0.2 | 12-04-2024 | Jorma Pajunen | Added new affordable quotes endpoint |
+      | 1.0.3 | 16-04-2024 | Vinnie Brice  | Sets InitialCollection to an object and removes duplicate |
+      | 1.0.4 | 18-04-2024 | Vinnie Brice  | Removes unused Schema AJSONSchemaforTTPAPI.7 |
+      | 1.0.5 | 19-02-2025 | Alex Olkhovskiy | Update schema to match the current code state |
+      | 1.0.6 | 14-05-2025 | Alex Olkhovskiy | Added expectedPayment field to installments schema and response examples |
+      | 1.0.7 | 14-05-2025 | Alex Olkhovskiy | Added channelIdentifier field to schemas to support Self Assessment debts |
+      | 1.0.8 | 14-05-2025 | Alex Olkhovskiy | Added regimeType and dueDate fields to support Self Assessment debts |
+      | 1.0.9 | 14-05-2025 | Alex Olkhovskiy | Add regimeType to /affordable-quotes endpoint |
+      | 1.0.10 | 14-05-2025 | Alex Olkhovskiy | Added regimeType, chargeSource, parentMainTrans, parentChargeReference and dueDate fields to DebtItemChargeArrangementRequest schema |
+      | 1.0.11 | 10-07-2025 | Alex Olkhovskiy | Added new charge-info proxy endpoint to get customer charge information |
+      | 1.0.12 | 23-07-2025 | Alex Olkhovskiy | make regimeType enum |
+      | 1.0.13 | 08-07-2025 | Alex Olkhovskiy | make indentations in charge-info request non-empty, remove altFormat and country|
+      | 1.0.14 | 14-08-2025 | Alex Olkhovskiy | refactor the spec with linter|
+      | 1.0.15 | 18-09-2025 | Alex Olkhovskiy | Restrict regimeType enum to only 'SA' value for /quote endpoint |
+      | 1.0.16-cancel-inform| 23-09-2024 | Alex Olkhovskiy | Added new cancel and inform endpoint    |
+      | 1.0.17 | 07-10-2025 | Vinnie Brice | Change cancel scope to writes  |
+      | 1.0.18 | 28-10-2025 | Alex Olkhovskiy | Add 409 conflict response to PUT /quote endpoint for duplicate plan ID|
+      | 1.0.19 | 30-10-2025 | Alex Olkhovskiy | R1 changes for udpate cancel, inform and full amend|
+      | 1.0.20 | 06-11-2025 | Alex Olkhovskiy | Add 422 error response for charge reference mismatch |
+      | 1.0.20a | 28-10-2025 | Alex Olkhovskiy | Get charges: Added customer signals, insolvency indicator, locks data and charge types excluded|
+      | 1.0.20b | 28-10-2025 | Alex Olkhovskiy | Inform API: Added debtItemCharges array and ddiReference for ETMP integration                             |
+      | 1.0.20c | 28-10-2025 | Alex Olkhovskiy | Cancel API: Added debtItemCharges array and ddiReference for ETMP integration|
+      | 1.0.20-proposedAll-R4 | 28-10-2025 | Alex Olkhovskiy | Full Amend API: Split into originalPaymentPlan and newPaymentPlan with charge amendment to understand which HoD API to call and which plan data to provide     |
+      | 1.0.21-proposedAll | 18-12-2025 | Alex Olkhovskiy | Make signalDescription optional in CustomerSignal schema |
+      | 1.0.22-proposedAll-2 | 20-01-2026 | Alex Olkhovskiy | Cancel API updates and totalDebtIncInt description change |
+  version: 1.0.22-proposedAll-2
+  contact: {}
+servers:
+  - url: https://api.service.hmrc.gov.uk
+    variables: {}
+tags:
+  - name: individuals
+    description: ''
+paths:
+  /individuals/time-to-pay-proxy/quote:
+    post:
+      tags:
+        - individuals
+      summary: Generate TTP Quote Request
+      description: This is an endpoint that triggers request to create a plan for storage from ttp service
+      operationId: GenerateTTPQuoteRequest
+      parameters:
+        - name: combineLastInstalments
+          in: query
+          description: Optional flag to combine the last instalments. When set to true, last instalments will be combined.
+          required: false
+          schema:
+            type: boolean
+            default: false
+      security:
+        - applicationRestricted:
+            - read:time-to-pay-proxy
+      requestBody:
+        description: ''
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TTPQuoteRequest'
+            example:
+              regimeType: SA
+              customerReference: uniqRef1234
+              channelIdentifier: selfService
+              plan:
+                quoteType: duration
+                quoteDate: '2021-05-13'
+                instalmentStartDate: '2021-05-13'
+                instalmentAmount: 100
+                frequency: annually
+                duration: 12
+                initialPaymentAmount: 100
+                initialPaymentDate: '2021-05-13'
+                paymentPlanType: timeToPay
+              customerPostCodes:
+                - addressPostcode: NW9 5XW
+                  postcodeDate: '2021-05-13'
+              debtItemCharges:
+                - debtItemChargeId: debtItemChrgId1
+                  mainTrans: '1546'
+                  subTrans: '1090'
+                  originalDebtAmount: 100
+                  interestStartDate: '2021-05-13'
+                  paymentHistory:
+                    - paymentDate: '2021-05-13'
+                      paymentAmount: 100
+        required: true
+      responses:
+        '200':
+          description: ''
+          headers: {}
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TTPQuoteResponse'
+        '400':
+          description: ''
+          headers: {}
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                statusCode: 400
+                errorMessage: Invalid JSON error
+        '401':
+          description: ''
+          headers: {}
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                statusCode: 401
+                errorMessage: A user with no active session will return 401 response
+        '500':
+          description: ''
+          headers: {}
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                statusCode: 500
+                errorMessage: Internal Service Error
+        '503':
+          description: ''
+          headers: {}
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                statusCode: 503
+                errorMessage: Couldn't parse body from upstream
+      deprecated: false
+  /individuals/time-to-pay-proxy/quote/arrangement:
+    post:
+      tags:
+        - individuals
+      summary: TTP Promote an Arrangement request
+      description: This is an endpoint that triggers a request to generate a draft quote from ttp service
+      operationId: TTPPromoteanArrangementrequest
+      parameters:
+        - name: combineLastInstalments
+          in: query
+          description: Optional flag to combine the last instalments. When set to true, last instalments will be combined.
+          required: false
+          schema:
+            type: boolean
+            default: false
+      security:
+        - applicationRestricted:
+            - read:time-to-pay-proxy
+      requestBody:
+        description: ''
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PromoteArrangementRequest'
+            example:
+              regimeType: SA
+              customerReference: uniqRef1234
+              quoteReference: quoteRef1234
+              channelIdentifier: advisor
+              plan:
+                quoteId: quoteId1
+                quoteType: instalmentAmount
+                quoteDate: '2021-05-13'
+                instalmentStartDate: '2021-05-13'
+                instalmentAmount: 100
+                paymentPlanType: timeToPay
+                thirdPartyBank: true
+                numberOfInstalments: 1
+                frequency: annually
+                duration: 12
+                initialPaymentAmount: 100
+                initialPaymentDate: '2021-05-13'
+                initialPaymentMethod: BACS
+                initialPaymentReference: paymentRefInit
+                totalDebtIncInt: 10
+                totalInterest: 0.14
+                interestAccrued: 10
+                planInterest: 0.24
+              debtItemCharges:
+                - debtItemChargeId: debtItemChrgId1
+                  mainTrans: '1546'
+                  subTrans: '1090'
+                  originalDebtAmount: 100
+                  interestStartDate: '2021-05-13'
+                  dueDate: '2021-06-30'
+                  chargeSource: ETMP
+                  parentChargeReference: DEF987654321
+                  parentMainTrans: YnAS
+                  paymentHistory:
+                    - paymentDate: '2021-05-13'
+                      paymentAmount: 100
+              payments:
+                - paymentMethod: BACS
+                  paymentReference: paymentRef123
+              customerPostCodes:
+                - addressPostcode: NW9 5XW
+                  postcodeDate: '2021-05-13'
+              instalments:
+                - debtItemChargeId: debtItemChrgId1
+                  dueDate: '2021-05-13'
+                  amountDue: 100
+                  expectedPayment: 10
+                  interestRate: 0.25
+                  instalmentNumber: 1
+                  instalmentInterestAccrued: 10
+                  instalmentBalance: 100
+        required: true
+      responses:
+        '200':
+          description: ''
+          headers: {}
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PromoteArrangementResponse'
+              example:
+                customerReference: customerRef1234
+                planId: planId1234
+                caseId: caseId1234
+                planStatus: success
+        '400':
+          description: ''
+          headers: {}
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                statusCode: 400
+                errorMessage: Invalid JSON error
+        '401':
+          description: ''
+          headers: {}
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                statusCode: 401
+                errorMessage: A user with no active session will return 401 response
+        '500':
+          description: ''
+          headers: {}
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                statusCode: 500
+                errorMessage: Internal Service Error
+        '503':
+          description: ''
+          headers: {}
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                statusCode: 503
+                errorMessage: Couldn't parse body from upstream
+      deprecated: false
+  /individuals/time-to-pay-proxy/quote/{customerReference}/{planId}:
+    get:
+      tags:
+        - individuals
+      summary: Get Existing TTP Plan
+      description: This is an endpoint that DAUI trigger a view a plan using ttp service
+      operationId: GetExistingTTPPlan
+      parameters:
+        - name: customerReference
+          in: path
+          description: ''
+          required: true
+          style: simple
+          schema:
+            type: string
+        - name: planId
+          in: path
+          description: ''
+          required: true
+          style: simple
+          schema:
+            type: string
+      security:
+        - applicationRestricted:
+            - read:time-to-pay-proxy
+      responses:
+        '200':
+          description: ''
+          headers: {}
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetPlanResponse'
+              example:
+                customerReference: uniqRef1234
+                channelIdentifier: advisor
+                plan:
+                  caseId: caseId1
+                  planId: planId1
+                  quoteId: quoteId1
+                  quoteDate: '2021-05-13'
+                  quoteType: instalmentAmount
+                  paymentPlanType: timeToPay
+                  thirdPartyBank: true
+                  numberOfInstalments: 0
+                  initialPaymentMethod: BACS
+                  initialPaymentReference: paymentRef123
+                  totalDebtIncInt: 0
+                  totalInterest: 0
+                  interestAccrued: 0
+                  planInterest: 0.24
+                  frequency: annually
+                debtItemCharges:
+                  - debtItemChargeId: debtItemChrgId1
+                    mainTrans: '1546'
+                    subTrans: '1090'
+                    originalDebtAmount: 100
+                    interestStartDate: '2021-05-13'
+                    paymentHistory:
+                      - paymentDate: '2021-05-13'
+                        paymentAmount: 100
+                payments:
+                  - paymentMethod: BACS
+                    paymentReference: paymentRef123
+                customerPostCodes:
+                  - addressPostcode: NW9 5XW
+                    postcodeDate: '2021-05-13'
+                instalments:
+                  - debtItemChargeId: debtItemChrgId1
+                    dueDate: '2021-05-13'
+                    amountDue: 100
+                    expectedPayment: 10
+                    interestRate: 0.25
+                    instalmentNumber: 1
+                    instalmentInterestAccrued: 10
+                    instalmentBalance: 100
+                collections:
+                  initialCollection:
+                    dueDate: '2022-06-18'
+                    amountDue: 1000
+                  regularCollections:
+                    - dueDate: '2022-07-08'
+                      amountDue: 1628.21
+                    - dueDate: '2022-08-08'
+                      amountDue: 1628.21
+        '400':
+          description: ''
+          headers: {}
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                statusCode: 400
+                errorMessage: Invalid JSON error
+        '401':
+          description: ''
+          headers: {}
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                statusCode: 401
+                errorMessage: A user with no active session will return 401 response
+        '500':
+          description: ''
+          headers: {}
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                statusCode: 500
+                errorMessage: Internal Service Error
+        '503':
+          description: ''
+          headers: {}
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                statusCode: 503
+                errorMessage: Couldn't parse body from upstream
+      deprecated: false
+    put:
+      tags:
+        - individuals
+      summary: Update Existing TTP Plan
+      description: This is an endpoint that DAUI needs to update a TTP plan using ttp service
+      operationId: UpdateExistingTTPPlan
+      parameters:
+        - name: customerReference
+          in: path
+          description: ''
+          required: true
+          style: simple
+          schema:
+            type: string
+        - name: planId
+          in: path
+          description: ''
+          required: true
+          style: simple
+          schema:
+            type: string
+      security:
+        - applicationRestricted:
+            - read:time-to-pay-proxy
+      requestBody:
+        description: ''
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdatePlanRequest'
+            example:
+              customerReference: custRef123
+              channelIdentifier: advisor
+              planId: planId1
+              updateType: paymentDetails
+              planStatus: Resolved - Completed
+              completeReason: Payment in Full
+              cancellationReason: debt-resolved
+              thirdPartyBank: true
+              payments:
+                - paymentMethod: cheque
+                  paymentReference: paymentRef
+        required: true
+      responses:
+        '200':
+          description: ''
+          headers: {}
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UpdatePlanResponse'
+              example:
+                customerReference: custRef1234
+                planId: planId1234
+                planStatus: Resolved - Completed
+                planUpdatedDate: '2021-05-13'
+        '400':
+          description: ''
+          headers: {}
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                statusCode: 400
+                errorMessage: Invalid JSON error
+        '401':
+          description: ''
+          headers: {}
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                statusCode: 401
+                errorMessage: A user with no active session will return 401 response
+        '409':
+          description: Conflict - Plan ID exists in both op led and self serve collections
+          headers: {}
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                statusCode: 409
+                errorMessage: Plan ID exists in both op led and self serve collections
+        '500':
+          description: ''
+          headers: {}
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                statusCode: 500
+                errorMessage: Internal Service Error
+        '503':
+          description: ''
+          headers: {}
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                statusCode: 503
+                errorMessage: Couldn't parse body from upstream
+      deprecated: false
+  /individuals/time-to-pay-proxy/self-serve/affordable-quotes:
+    post:
+      tags:
+        - individuals
+      summary: Affordable quotes
+      description: |
+        This API allows a request – to return affordable quotes.
+      operationId: AffordableQuotes
+      parameters: []
+      security:
+        - applicationRestricted:
+            - read:time-to-pay-proxy
+      requestBody:
+        description: ''
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AffordableQuotesRequest'
+            example:
+              regimeType: PAYE
+              channelIdentifier: advisor
+              paymentPlanAffordableAmount: 1310
+              paymentPlanFrequency: Monthly
+              paymentPlanMaxLength: 6
+              paymentPlanMinLength: 1
+              accruedDebtInterest: 13.26
+              paymentPlanStartDate: '2022-07-08'
+              initialPaymentDate: '2022-06-18'
+              initialPaymentAmount: 1000
+              debtItemCharges:
+                - outstandingDebtAmount: 1487.81
+                  mainTrans: '2000'
+                  subTrans: '1000'
+                  isInterestBearingCharge: false
+                  useChargeReference: false
+                  debtItemChargeId: XW006559808862
+                  interestStartDate: '2022-05-22'
+                  debtItemOriginalDueDate: '2022-05-22'
+                - outstandingDebtAmount: 305.8
+                  mainTrans: '2000'
+                  subTrans: '1100'
+                  isInterestBearingCharge: false
+                  useChargeReference: false
+                  debtItemChargeId: XW006559808862
+                  interestStartDate: '2022-05-22'
+                  debtItemOriginalDueDate: '2022-05-22'
+                - outstandingDebtAmount: 1246.58
+                  mainTrans: '2000'
+                  subTrans: '1023'
+                  isInterestBearingCharge: false
+                  useChargeReference: false
+                  debtItemChargeId: XW006559808862
+                  interestStartDate: '2022-05-22'
+                  debtItemOriginalDueDate: '2022-05-22'
+                - outstandingDebtAmount: 1015.64
+                  mainTrans: '2000'
+                  subTrans: '1026'
+                  isInterestBearingCharge: false
+                  useChargeReference: false
+                  debtItemChargeId: XW006559808862
+                  interestStartDate: '2022-05-22'
+                  debtItemOriginalDueDate: '2022-05-22'
+                - outstandingDebtAmount: 753.13
+                  mainTrans: '2000'
+                  subTrans: '1030'
+                  isInterestBearingCharge: false
+                  useChargeReference: false
+                  debtItemChargeId: XW005993570327
+                  interestStartDate: '2022-05-22'
+                  debtItemOriginalDueDate: '2022-05-22'
+                - outstandingDebtAmount: 1627.06
+                  mainTrans: '2040'
+                  subTrans: '1000'
+                  isInterestBearingCharge: false
+                  useChargeReference: false
+                  debtItemChargeId: XW005993570327
+                  interestStartDate: '2022-05-22'
+                  debtItemOriginalDueDate: '2022-05-22'
+                - outstandingDebtAmount: 139.81
+                  mainTrans: '2030'
+                  subTrans: '1280'
+                  isInterestBearingCharge: false
+                  useChargeReference: false
+                  debtItemChargeId: XJ006559984746
+                  interestStartDate: '2022-05-22'
+                  debtItemOriginalDueDate: '2022-05-22'
+                - outstandingDebtAmount: 876
+                  mainTrans: '2006'
+                  subTrans: '1106'
+                  isInterestBearingCharge: false
+                  useChargeReference: false
+                  debtItemChargeId: XF006579976401
+                  interestStartDate: '2022-05-22'
+                  debtItemOriginalDueDate: '2022-05-22'
+              customerPostcodes:
+                - addressPostcode: BN127ER
+                  postcodeDate: '2022-05-22'
+                - addressPostcode: BN129ER
+                  postcodeDate: '2022-04-30'
+      responses:
+        '200':
+          description: ''
+          headers: {}
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AffordableQuotesResponse'
+              example:
+                processingDateTime: '2022-03-23T13:49:51.123'
+                paymentPlans:
+                  - planDuration: 3
+                    totalDebt: 7451.83
+                    totalDebtIncInt: 7512.88
+                    planInterest: 48.05
+                    collections:
+                      initialCollection:
+                        dueDate: '2022-06-18'
+                        amountDue: 1000
+                      regularCollections:
+                        - dueDate: '2022-07-08'
+                          amountDue: 1628.21
+                        - dueDate: '2022-08-08'
+                          amountDue: 1628.21
+                        - dueDate: '2022-09-08'
+                          amountDue: 1628.21
+                    numberOfInstalments: 2
+                    instalments:
+                      - instalmentNumber: 1
+                        dueDate: '2022-06-18'
+                        instalmentInterestAccrued: 4.59
+                        instalmentBalance: 4808.96
+                        debtItemChargeId: XW006559808862
+                        amountDue: 1000
+                        debtItemOriginalDueDate: '2022-05-22'
+                        expectedPayment: 1000
+                      - instalmentNumber: 2
+                        dueDate: '2022-07-08'
+                        instalmentInterestAccrued: 7.28
+                        instalmentBalance: 3808.96
+                        debtItemChargeId: XW006559808862
+                        amountDue: 1628.21
+                        debtItemOriginalDueDate: '2022-05-22'
+                        expectedPayment: 1000
+        '400':
+          description: ''
+          headers: {}
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                statusCode: 400
+                errorMessage: Invalid JSON error
+        '401':
+          description: ''
+          headers: {}
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                statusCode: 401
+                errorMessage: A user with no active session will return 401 response
+        '500':
+          description: ''
+          headers: {}
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                statusCode: 500
+                errorMessage: Internal Service Error
+      deprecated: false
+  /individuals/time-to-pay-proxy/charge-info:
+    post:
+      tags:
+        - individuals
+      summary: Get Customer Charge Information
+      description: This is an endpoint that triggers a request to get customer charge information from ttp eligibility service
+      operationId: GetCustomerChargeInformation
+      parameters: []
+      security:
+        - applicationRestricted:
+            - read:time-to-pay-proxy
+      requestBody:
+        description: ''
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TTPChargeInfoRequest'
+            example:
+              regimeType: SA
+              channelIdentifier: advisor
+              identifications:
+                - idType: UTR
+                  idValue: '1234567890'
+        required: true
+      responses:
+        '200':
+          description: ''
+          headers: {}
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TTPChargeInfoResponse'
+              example:
+                processingDateTime: '2022-03-23T13:49:51.141'
+                identification:
+                  - idType: UTR
+                    idValue: '1234567890'
+                individualDetails:
+                  title: Mr
+                  firstName: John
+                  lastName: Doe
+                  dateOfBirth: '2069-06-06'
+                  districtNumber: xyz
+                  customerType: MTD(ITSA)
+                  transitionToCDCS: true
+                addresses:
+                  - addressType: ppob
+                    addressLine1: 999 Elm Street
+                    addressLine2: Suite 12C
+                    addressLine3: Northshire
+                    addressLine4: London
+                    rls: true
+                    contactDetails:
+                      telephoneNumber: +44 20 1234 5678
+                      fax: '01234'
+                      mobile: '07123456789'
+                      emailAddress: john@example.com
+                      emailSource: ETMP
+                    postCode: W1A 1ZZ
+                    postcodeHistory:
+                      - addressPostcode: BN12 9ER
+                        postcodeDate: '2022-04-30'
+                customerSignals:
+                  - signalType: Insolvency
+                    signalValue: 'true'
+                    signalDescription: Description
+                  - signalType: ITSA Migrated
+                    signalValue: 'true'
+                    signalDescription: Customer has migrated to ITSA
+                chargeTypesExcluded: false
+                chargeTypeAssessment:
+                  - debtTotalAmount: 250000
+                    chargeReference: XW006559808863
+                    mainTrans: '4700'
+                    parentChargeReference: XW006559808863
+                    isInsolvent: true
+                    charges:
+                      - taxPeriodFrom: '2022-04-01'
+                        taxPeriodTo: '2022-06-30'
+                        chargeType: Payment
+                        mainType: Payment
+                        subTrans: '1174'
+                        outstandingAmount: 250000
+                        dueDate: '2022-08-01'
+                        isInterestBearingCharge: true
+                        interestStartDate: '2022-08-01'
+                        accruedInterest: 5000
+                        chargeSource: ETMP
+                        parentMainTrans: '4700'
+                        tieBreaker: abc123
+                        saTaxYearEnd: '2022-04-05'
+                        creationDate: '2022-08-01'
+                        originalChargeType: Payment
+                        locks:
+                          - lockType: no reallocation
+                            lockReason: Insolvency
+                  - debtTotalAmount: 148781
+                    chargeReference: XW006559808862
+                    mainTrans: '4700'
+                    parentChargeReference: XW006559808862
+                    isInsolvent: true
+                    charges:
+                      - taxPeriodFrom: '2022-04-01'
+                        taxPeriodTo: '2022-06-30'
+                        chargeType: VAT Return Debit Charge
+                        mainType: VAT Return charge
+                        subTrans: '1174'
+                        outstandingAmount: 148781
+                        dueDate: '2022-08-01'
+                        isInterestBearingCharge: true
+                        interestStartDate: '2022-08-01'
+                        accruedInterest: 3
+                        chargeSource: CESA
+                        parentMainTrans: '4700'
+                        tieBreaker: xyz
+                        saTaxYearEnd: '2022-08-01'
+                        creationDate: '2022-08-01'
+                        originalChargeType: VAT Return Debit Charge
+                        locks:
+                          - lockType: Payment
+                            lockReason: Insolvency
+        '400':
+          description: ''
+          headers: {}
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                statusCode: 400
+                errorMessage: Invalid JSON error
+        '401':
+          description: ''
+          headers: {}
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                statusCode: 401
+                errorMessage: A user with no active session will return 401 response
+        '422':
+          description: ''
+          headers: {}
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                statusCode: 422
+                errorMessage: Charges with the same charge reference do not share the same data
+        '500':
+          description: ''
+          headers: {}
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                statusCode: 500
+                errorMessage: Internal Service Error
+        '503':
+          description: ''
+          headers: {}
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                statusCode: 503
+                errorMessage: Couldn't parse body from upstream
+      deprecated: false
+  /individuals/time-to-pay-proxy/cancel:
+    post:
+      tags:
+        - individuals
+      summary: Notify cancellation of TTP Plan to downstream HoDs
+      operationId: NotifyCancellationOfTTPPlan
+      description: |
+        An API called by CDCS to trigger the TTP service to notify HoDs (via different APIs) when a TTP set up either by an operator or the self serve journey has been cancelled.
+
+        Response Behavior:
+        - Returns HTTP 200 when all downstream HoDs are called and responses can be parsed successfully (regardless of individual HoD response status codes)
+        - Returns HTTP 500 only for internal TTP errors or when responses from downstream APIs cannot be parsed
+        - The response includes details of all HoDs called with their status codes to help operators determine any required manual steps
+      parameters:
+        - name: correlationId
+          in: header
+          description: Correlation Id used for end-to-end traceability
+          required: true
+          schema:
+            type: string
+            format: uuid
+            example: f0bd1f32-de51-45cc-9b18-0520d6e3ab1a
+      security:
+        - applicationRestricted:
+            - write:time-to-pay-proxy
+      requestBody:
+        description: Request body containing cancellation and identification details
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CancelRequest'
+            examples:
+              exampleCESA:
+                summary: Example Request (CESA only)
+                value:
+                  identifications:
+                    - idType: UTR
+                      idValue: '1234567890'
+                  paymentPlan:
+                    arrangementAgreedDate: '2025-05-01'
+                    ttpEndDate: '2025-11-01'
+                    initialPaymentDate: '2025-05-05'
+                    initialPaymentAmount: 150
+                    frequency: monthly
+                    cancellationDate: '2025-10-15'
+                    debtItemCharges:
+                      - debtItemChargeId: K0000000000001
+                        chargeSource: CESA
+                  instalments:
+                    - dueDate: '2025-06-01'
+                      amountDue: 300
+                    - dueDate: '2025-07-01'
+                      amountDue: 300
+                    - dueDate: '2025-08-01'
+                      amountDue: 300
+                  channelIdentifier: advisor
+                  transitioned: true
+              exampleETMP:
+                summary: Example Request (ETMP only)
+                value:
+                  identifications:
+                    - idType: UTR
+                      idValue: '1234567890'
+                  paymentPlan:
+                    cancellationDate: '2025-10-15'
+                    debtItemCharges:
+                      - debtItemChargeId: XW006559808863
+                        chargeSource: ETMP
+                  instalments:
+                    - dueDate: '2025-06-01'
+                      amountDue: 300
+                    - dueDate: '2025-07-01'
+                      amountDue: 300
+                    - dueDate: '2025-08-01'
+                      amountDue: 300
+                  channelIdentifier: advisor
+              exampleCESAandETMP:
+                summary: Example Request (CESA and ETMP)
+                value:
+                  identifications:
+                    - idType: UTR
+                      idValue: '1234567890'
+                  paymentPlan:
+                    arrangementAgreedDate: '2025-05-01'
+                    ttpEndDate: '2025-11-01'
+                    initialPaymentDate: '2025-05-05'
+                    initialPaymentAmount: 150
+                    frequency: monthly
+                    cancellationDate: '2025-10-15'
+                    debtItemCharges:
+                      - debtItemChargeId: K0000000000001
+                        chargeSource: CESA
+                      - debtItemChargeId: XW006559808863
+                        chargeSource: ETMP
+                  instalments:
+                    - dueDate: '2025-06-01'
+                      amountDue: 300
+                    - dueDate: '2025-07-01'
+                      amountDue: 300
+                    - dueDate: '2025-08-01'
+                      amountDue: 300
+                  channelIdentifier: advisor
+                  transitioned: true
+      responses:
+        '200':
+          description: |
+            Cancellation notification processed successfully. All downstream HoDs were called and responses were parsed successfully.
+            Individual HoD APIs may have returned success or error status codes - this is reported in the apisCalled array.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CancelResponse'
+              examples:
+                allHoDsSuccessful:
+                  summary: All downstream HoDs respond successfully (HTTP 200)
+                  value:
+                    apisCalled:
+                      - name: CESA
+                        statusCode: 200
+                        processingDateTime: '2025-05-01T14:30:00Z'
+                      - name: ETMP
+                        statusCode: 201
+                        processingDateTime: '2025-05-01T14:31:00Z'
+                    processingDateTime: '2025-10-15T10:31:00Z'
+                allHoDsUnsuccessful:
+                  summary: All downstream HoDs respond unsuccessfully but responses parsed (HTTP 200)
+                  value:
+                    apisCalled:
+                      - name: CESA
+                        statusCode: 500
+                        processingDateTime: '2025-05-01T14:30:00Z'
+                        errorResponse: Internal server error in CESA
+                      - name: ETMP
+                        statusCode: 400
+                        processingDateTime: '2025-05-01T14:31:00Z'
+                        errorResponse: Invalid request payload
+                    processingDateTime: '2025-10-15T10:31:00Z'
+                mixedHoDsResponse:
+                  summary: Mixed success/failure from HoDs but all responses parsed (HTTP 200)
+                  value:
+                    apisCalled:
+                      - name: CESA
+                        statusCode: 200
+                        processingDateTime: '2025-05-01T14:30:00Z'
+                      - name: ETMP
+                        statusCode: 500
+                        processingDateTime: '2025-05-01T14:31:00Z'
+                        errorResponse: Error processing cancellation
+                    processingDateTime: '2025-10-15T10:31:00Z'
+        '400':
+          description: |
+            Bad request due to invalid or missing data in the request payload.
+            This indicates client-side errors that prevent TTP from processing the cancellation request.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                badRequestExample:
+                  summary: Invalid cancellation request - client error
+                  value:
+                    statusCode: 400
+                    errorMessage: 'Invalid request payload: missing identifications or cancellationDate'
+        '401':
+          description: ''
+          headers: {}
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                statusCode: 401
+                errorMessage: A user with no active session will return 401 response
+        '500':
+          description: |
+            Internal TTP error or failure to parse responses from downstream HoDs.
+            This status is returned only when TTP cannot complete its processing or cannot parse HoD responses.
+            When individual HoD APIs return errors but responses can be parsed, a 200 status is returned instead.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CancelErrorResponse'
+              examples:
+                internalParsingError:
+                  summary: Internal TTP error - cannot parse HoD responses (HTTP 500)
+                  value:
+                    internalErrors:
+                      - message: Could not parse response from calling CESA
+                    processingDateTime: '2025-10-15T10:31:00Z'
+                mixedSuccessWithInternalError:
+                  summary: Some HoDs successful, others unparseable (HTTP 500)
+                  value:
+                    apisCalled:
+                      - name: CESA
+                        statusCode: 200
+                        processingDateTime: '2025-10-15T10:30:00Z'
+                    internalErrors:
+                      - message: Could not parse response from calling ETMP
+                    processingDateTime: '2025-10-15T10:31:00Z'
+        '503':
+          description: The server is temporarily unavailable due to overload or maintenance.
+          headers: {}
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                statusCode: 503
+                errorMessage: The server is temporarily unavailable.
+  /individuals/time-to-pay-proxy/inform:
+    post:
+      tags:
+        - individuals
+      summary: Inform HoDs of SA TTP Operator-led Plan (CESA + ETMP)
+      operationId: InformHoDsOfSATTPOperatorLedPlan
+      description: |
+        An API called by CDCS to inform HoDs (CESA + ETMP) when a TTP set up by an operator has been created.
+
+        Response Behavior:
+        - Returns HTTP 200 when all downstream HoDs are called and responses can be parsed successfully (regardless of individual HoD response status codes)
+        - Returns HTTP 500 only for internal TTP errors or when responses from downstream APIs cannot be parsed
+        - The response includes details of all HoDs called with their status codes to help operators determine any required manual steps
+      parameters:
+        - name: correlationId
+          in: header
+          description: Correlation Id used for end to end traceability
+          required: true
+          schema:
+            type: string
+            format: uuid
+            example: f0bd1f32-de51-45cc-9b18-0520d6e3ab1a
+      security:
+        - applicationRestricted:
+            - read:time-to-pay-proxy
+      requestBody:
+        description: Request body with fields to create a TTP in CESA and ETMP.
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InformRequest'
+            examples:
+              example:
+                summary: Sample request for Inform API
+                value:
+                  identifications:
+                    - idType: UTR
+                      idValue: '1234567890'
+                  paymentPlan:
+                    arrangementAgreedDate: '2025-05-01'
+                    ttpEndDate: '2025-11-01'
+                    initialPaymentDate: '2025-05-05'
+                    initialPaymentAmount: 150
+                    frequency: monthly
+                    ddiReference: DD123456789
+                    debtItemCharges:
+                      - debtItemChargeId: XW006559808862
+                        chargeSource: CESA
+                  instalments:
+                    - dueDate: '2025-06-01'
+                      amountDue: 300
+                  channelIdentifier: advisor
+                  transitioned: true
+      responses:
+        '200':
+          description: |
+            Inform API operation successful with results of calls to CESA and ETMP. All downstream HoDs were called and responses were parsed successfully.
+            Individual HoD APIs may have returned success or error status codes - this is reported in the apisCalled array.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InformResponse'
+              examples:
+                allHoDsSuccessful:
+                  summary: All downstream HoDs respond successfully (HTTP 200)
+                  value:
+                    apisCalled:
+                      - name: CESA
+                        statusCode: 200
+                        processingDateTime: '2025-05-01T14:30:00Z'
+                      - name: ETMP
+                        statusCode: 201
+                        processingDateTime: '2025-05-01T14:31:00Z'
+                    processingDateTime: '2025-05-01T14:32:00Z'
+                allHoDsUnsuccessful:
+                  summary: All downstream HoDs respond unsuccessfully but responses parsed (HTTP 200)
+                  value:
+                    apisCalled:
+                      - name: CESA
+                        statusCode: 500
+                        processingDateTime: '2025-05-01T14:30:00Z'
+                        errorResponse: Internal server error in CESA
+                      - name: ETMP
+                        statusCode: 400
+                        processingDateTime: '2025-05-01T14:31:00Z'
+                        errorResponse: Invalid request payload
+                    processingDateTime: '2025-05-01T14:32:00Z'
+                mixedHoDsResponse:
+                  summary: Mixed success/failure from HoDs but all responses parsed (HTTP 200)
+                  value:
+                    apisCalled:
+                      - name: CESA
+                        statusCode: 200
+                        processingDateTime: '2025-05-01T14:30:00Z'
+                      - name: ETMP
+                        statusCode: 500
+                        processingDateTime: '2025-05-01T14:31:00Z'
+                        errorResponse: Error processing inform
+                    processingDateTime: '2025-05-01T14:32:00Z'
+        '400':
+          description: |
+            Bad request due to invalid or missing data in the request payload.
+            This indicates client-side errors that prevent TTP from processing the inform request.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                badRequestExample:
+                  summary: Invalid request example
+                  value:
+                    statusCode: 400
+                    errorMessage: 'Invalid request payload: missing identifications'
+        '401':
+          description: ''
+          headers: {}
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                statusCode: 401
+                errorMessage: A user with no active session will return 401 response
+        '500':
+          description: |
+            Internal TTP error or failure to parse responses from downstream HoDs.
+            This status is returned only when TTP cannot complete its processing or cannot parse HoD responses.
+            When individual HoD APIs return errors but responses can be parsed, a 200 status is returned instead.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InformErrorResponse'
+              examples:
+                internalParsingError:
+                  summary: Internal TTP error - cannot parse HoD responses (HTTP 500)
+                  value:
+                    internalErrors:
+                      - message: Could not parse response from calling CESA
+                    processingDateTime: '2025-10-15T10:31:00Z'
+                mixedSuccessWithInternalError:
+                  summary: Some HoDs successful, others unparseable (HTTP 500)
+                  value:
+                    apisCalled:
+                      - name: CESA
+                        statusCode: 200
+                        processingDateTime: '2025-10-15T10:30:00Z'
+                    internalErrors:
+                      - message: Could not parse response from calling ETMP
+                    processingDateTime: '2025-10-15T10:31:00Z'
+        '503':
+          description: The server is temporarily unavailable due to overload or maintenance.
+          headers: {}
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                statusCode: 503
+                errorMessage: The server is temporarily unavailable.
+  /individuals/time-to-pay-proxy/full-amend:
+    post:
+      tags:
+        - individuals
+      summary: Full amend TTP plan and inform HoDs
+      operationId: FullAmendTTPPlanAndInformHoDs
+      description: |
+        An API called by CDCS to perform a full amendment of a TTP plan and inform HoDs (CESA + ETMP) of the changes.
+
+        Response Behavior:
+        - Returns HTTP 200 when all downstream HoDs are called and responses can be parsed successfully (regardless of individual HoD response status codes)
+        - Returns HTTP 500 only for internal TTP errors or when responses from downstream APIs cannot be parsed
+        - The response includes details of all HoDs called with their status codes to help operators determine any required manual steps
+      parameters:
+        - name: correlationId
+          in: header
+          description: Correlation Id used for end to end traceability
+          required: true
+          schema:
+            type: string
+            format: uuid
+            example: f0bd1f32-de51-45cc-9b18-0520d6e3ab1a
+      security:
+        - applicationRestricted:
+            - write:time-to-pay-proxy
+      requestBody:
+        description: Request body with fields to amend a TTP in CESA and ETMP.
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FullAmendRequest'
+            examples:
+              opLedExample:
+                summary: Sample request for Op-led TTP amendment
+                value:
+                  identifications:
+                    - idType: UTR
+                      idValue: '1234567890'
+                  originalPaymentPlan:
+                    arrangementAgreedDate: '2025-05-01'
+                    ttpEndDate: '2025-11-01'
+                    initialPaymentDate: '2025-05-05'
+                    initialPaymentAmount: 150
+                    frequency: monthly
+                    ddiReference: DD123456789
+                    debtItemCharges:
+                      - debtItemChargeId: XW006559808862
+                        chargeSource: CESA
+                      - debtItemChargeId: XW006559808863
+                        chargeSource: ETMP
+                  newPaymentPlan:
+                    arrangementAgreedDate: '2025-05-01'
+                    ttpEndDate: '2025-12-01'
+                    initialPaymentDate: '2025-05-05'
+                    initialPaymentAmount: 200
+                    frequency: monthly
+                    ddiReference: DD123456789
+                    debtItemCharges:
+                      - debtItemChargeId: XW006559808862
+                        chargeSource: CESA
+                        chargeAmendment: remain
+                      - debtItemChargeId: XW006559808863
+                        chargeSource: ETMP
+                        chargeAmendment: removed
+                      - debtItemChargeId: XW006559808864
+                        chargeSource: ETMP
+                        chargeAmendment: new
+                  instalments:
+                    - dueDate: '2025-06-01'
+                      amountDue: 300
+                    - dueDate: '2025-07-01'
+                      amountDue: 300
+                  channelIdentifier: advisor
+                  transitioned: true
+              ssttpExample:
+                summary: Sample request for SSTTP amendment
+                value:
+                  identifications:
+                    - idType: UTR
+                      idValue: '9876543210'
+                  originalPaymentPlan:
+                    arrangementAgreedDate: '2025-05-01'
+                    ttpEndDate: '2025-11-01'
+                    initialPaymentDate: '2025-05-05'
+                    initialPaymentAmount: 200
+                    frequency: weekly
+                    ddiReference: DD987654321
+                    debtItemCharges:
+                      - debtItemChargeId: XW006559808870
+                        chargeSource: ETMP
+                  newPaymentPlan:
+                    arrangementAgreedDate: '2025-05-01'
+                    ttpEndDate: '2025-12-01'
+                    initialPaymentDate: '2025-05-05'
+                    initialPaymentAmount: 250
+                    frequency: weekly
+                    ddiReference: DD987654321
+                    debtItemCharges:
+                      - debtItemChargeId: XW006559808870
+                        chargeSource: ETMP
+                        chargeAmendment: remain
+                      - debtItemChargeId: XW006559808871
+                        chargeSource: ETMP
+                        chargeAmendment: new
+                  instalments:
+                    - dueDate: '2025-06-01'
+                      amountDue: 100
+                    - dueDate: '2025-06-08'
+                      amountDue: 100
+                  channelIdentifier: selfService
+                  transitioned: true
+      responses:
+        '200':
+          description: |
+            Full amend API operation successful with results of calls to CESA and ETMP. All downstream HoDs were called and responses were parsed successfully.
+            Individual HoD APIs may have returned success or error status codes - this is reported in the apisCalled array.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FullAmendResponse'
+              examples:
+                allHoDsSuccessful:
+                  summary: All downstream HoDs respond successfully (HTTP 200)
+                  value:
+                    apisCalled:
+                      - processingDateTime: '2025-05-01T14:30:00Z'
+                        name: CESA
+                        statusCode: 200
+                      - processingDateTime: '2025-05-01T14:31:00Z'
+                        name: ETMP
+                        statusCode: 200
+                    processingDateTime: '2025-05-01T14:32:00Z'
+                allHoDsUnsuccessful:
+                  summary: All downstream HoDs respond unsuccessfully but responses parsed (HTTP 200)
+                  value:
+                    apisCalled:
+                      - processingDateTime: '2025-05-01T14:30:00Z'
+                        name: CESA
+                        statusCode: 500
+                        errorResponse: Internal server error in CESA
+                      - processingDateTime: '2025-05-01T14:31:00Z'
+                        name: ETMP
+                        statusCode: 400
+                        errorResponse: Invalid amendment payload
+                    processingDateTime: '2025-05-01T14:32:00Z'
+                mixedHoDsResponse:
+                  summary: Mixed success/failure from HoDs but all responses parsed (HTTP 200)
+                  value:
+                    apisCalled:
+                      - processingDateTime: '2025-05-01T14:30:00Z'
+                        name: CESA
+                        statusCode: 200
+                      - processingDateTime: '2025-05-01T14:31:00Z'
+                        name: ETMP
+                        statusCode: 500
+                        errorResponse: Error processing full amend
+                    processingDateTime: '2025-05-01T14:32:00Z'
+        '400':
+          description: |
+            Bad request due to invalid or missing data in the request payload.
+            This indicates client-side errors that prevent TTP from processing the full amend request.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                badRequestExample:
+                  summary: Invalid request example
+                  value:
+                    statusCode: 400
+                    errorMessage: 'Invalid request payload: missing identifications'
+        '401':
+          description: ''
+          headers: {}
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                statusCode: 401
+                errorMessage: A user with no active session will return 401 response
+        '500':
+          description: |
+            Internal TTP error or failure to parse responses from downstream HoDs.
+            This status is returned only when TTP cannot complete its processing or cannot parse HoD responses.
+            When individual HoD APIs return errors but responses can be parsed, a 200 status is returned instead.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FullAmendErrorResponse'
+              examples:
+                internalParsingError:
+                  summary: Internal TTP error - cannot parse HoD responses (HTTP 500)
+                  value:
+                    internalErrors:
+                      - message: Could not parse response from calling CESA
+                    processingDateTime: '2025-10-15T10:31:00Z'
+                mixedSuccessWithInternalError:
+                  summary: Some HoDs successful, others unparseable (HTTP 500)
+                  value:
+                    apisCalled:
+                      - processingDateTime: '2025-10-15T10:30:00Z'
+                        name: CESA
+                        statusCode: 200
+                    internalErrors:
+                      - message: Could not parse response from calling ETMP
+                    processingDateTime: '2025-10-15T10:31:00Z'
+        '503':
+          description: The server is temporarily unavailable due to overload or maintenance.
+          headers: {}
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                statusCode: 503
+                errorMessage: The server is temporarily unavailable.
+components:
+  securitySchemes:
+    userRestricted:
+      type: oauth2
+      description: |
+        HMRC supports OAuth 2.0 for authenticating user restricted API requests using an OAuth 2.0 Bearer Token in the AUTHORIZATION header.
+        See https://developer.service.hmrc.gov.uk/api-documentation/docs/authorisation/user-restricted-endpoints for details.
+      flows:
+        authorizationCode:
+          authorizationUrl: https://api.service.hmrc.gov.uk/oauth/authorize
+          tokenUrl: https://api.service.hmrc.gov.uk/oauth/token
+          refreshUrl: https://api.service.hmrc.gov.uk/oauth/refresh
+          scopes: {}
+    applicationRestricted:
+      type: oauth2
+      description: |
+        HMRC supports OAuth 2.0 for authenticating application restricted API requests using an OAuth 2.0 Bearer Token in the AUTHORIZATION header.
+        See https://developer.service.hmrc.gov.uk/api-documentation/docs/authorisation/application-restricted-endpoints for details.
+      flows:
+        clientCredentials:
+          tokenUrl: https://api.service.hmrc.gov.uk/oauth/token
+          scopes:
+            read:time-to-pay-proxy: read ttp data
+  schemas:
+    ChannelIdentifier:
+      title: ChannelIdentifier
+      enum:
+        - advisor
+        - selfService
+      type: string
+      description: Attribute to identify where the request is coming
+    PlanQuoteType:
+      title: PlanQuoteType
+      enum:
+        - duration
+        - instalmentAmount
+      type: string
+      description: this will determine what IFS is required
+    PaymentFrequency:
+      title: PaymentFrequency
+      enum:
+        - single
+        - weekly
+        - 2Weekly
+        - 4Weekly
+        - Monthly
+        - quarterly
+        - 6Monthly
+        - annually
+      type: string
+      description: payment frequency
+    PaymentPlanTypeStandard:
+      title: PaymentPlanTypeStandard
+      enum:
+        - timeToPay
+        - instalmentOrder
+        - childBenefits
+        - fieldCollections
+        - LFC
+      type: string
+      description: Payment plan type
+    PlanInput:
+      title: PlanInput
+      required:
+        - quoteType
+        - quoteDate
+        - instalmentStartDate
+        - paymentPlanType
+      properties:
+        quoteType:
+          allOf:
+            - $ref: '#/components/schemas/PlanQuoteType'
+            - description: this will determine what IFS is required
+        quoteDate:
+          type: string
+          description: Quote date
+          format: date
+        instalmentStartDate:
+          type: string
+          description: Instalment start date
+          format: date
+        instalmentAmount:
+          type: number
+          description: Instalment amount
+        frequency:
+          allOf:
+            - $ref: '#/components/schemas/PaymentFrequency'
+            - description: payment frequency
+        duration:
+          type: integer
+          description: Duration for the payment frequency
+          format: int32
+        initialPaymentAmount:
+          type: integer
+          description: Initial payment amount
+          format: int32
+        initialPaymentDate:
+          type: string
+          description: Initial payment date
+          format: date
+        paymentPlanType:
+          allOf:
+            - $ref: '#/components/schemas/PaymentPlanTypeStandard'
+            - description: Payment plan type
+    CustomerPostCodeRequest:
+      title: CustomerPostCodeRequest
+      required:
+        - addressPostcode
+        - postcodeDate
+      properties:
+        addressPostcode:
+          type: string
+          description: Customer postcode this will be a list of postcodes
+        postcodeDate:
+          type: string
+          description: Date the customer used this postcode from
+          format: date
+    PaymentHistoryRequest:
+      title: PaymentHistoryRequest
+      required:
+        - paymentDate
+        - paymentAmount
+      properties:
+        paymentDate:
+          type: string
+          description: Payment date
+          format: date
+        paymentAmount:
+          type: integer
+          description: Payment amount
+          format: int32
+    DebtItemChargeQuoteRequest:
+      title: DebtItemChargeQuoteRequest
+      required:
+        - debtItemChargeId
+        - mainTrans
+        - subTrans
+        - originalDebtAmount
+        - paymentHistory
+      properties:
+        debtItemChargeId:
+          maxLength: 16
+          minLength: 1
+          type: string
+          description: An ID which uniquely identifies a particular duty
+        dueDate:
+          type: string
+          format: date
+          description: Due date
+        mainTrans:
+          maxLength: 8
+          minLength: 4
+          type: string
+          description: Unique MTrans Debt Type ID e.g.1525 also known as M Trans
+        subTrans:
+          maxLength: 8
+          minLength: 4
+          type: string
+          description: Duty Type description for the UI
+        originalDebtAmount:
+          type: integer
+          description: Original debt amount
+          format: int32
+        interestStartDate:
+          type: string
+          description: The interest start date
+          format: date
+        paymentHistory:
+          type: array
+          items:
+            $ref: '#/components/schemas/PaymentHistoryRequest'
+          description: ''
+    TTPQuoteRequest:
+      title: TTPQuoteRequest
+      required:
+        - customerReference
+        - channelIdentifier
+        - plan
+        - debtItemCharges
+        - customerPostCodes
+      properties:
+        regimeType:
+          type: string
+          description: Regime type
+          enum:
+            - SA
+        customerReference:
+          maxLength: 15
+          minLength: 1
+          type: string
+          description: Unique Customer reference
+        channelIdentifier:
+          allOf:
+            - $ref: '#/components/schemas/ChannelIdentifier'
+            - description: Attribute to identify where the request is coming
+        plan:
+          $ref: '#/components/schemas/PlanInput'
+        customerPostCodes:
+          type: array
+          items:
+            $ref: '#/components/schemas/CustomerPostCodeRequest'
+          description: ''
+        debtItemCharges:
+          type: array
+          items:
+            $ref: '#/components/schemas/DebtItemChargeQuoteRequest'
+          description: ''
+    InstalmentResponse:
+      title: InstalmentResponse
+      required:
+        - amountDue
+        - debtItemChargeId
+        - dueDate
+        - expectedPayment
+        - instalmentBalance
+        - instalmentInterestAccrued
+        - instalmentNumber
+        - interestRate
+      properties:
+        debtItemChargeId:
+          maxLength: 16
+          minLength: 1
+          type: string
+          description: An ID which uniquely identifies a particular duty
+        dueDate:
+          type: string
+          description: Due date
+          format: date
+        amountDue:
+          type: number
+          description: Amount due
+          format: int32
+        expectedPayment:
+          type: integer
+          description: Expected payment
+          format: int32
+        interestRate:
+          type: number
+          description: Interest rate
+        instalmentNumber:
+          type: integer
+          description: Instalment number
+          format: int32
+        instalmentInterestAccrued:
+          type: integer
+          description: Instalment interest
+          format: int32
+        instalmentBalance:
+          type: integer
+          description: Instalment balance
+          format: int32
+    InitialCollection:
+      title: InitialCollection
+      required:
+        - dueDate
+        - amountDue
+      properties:
+        dueDate:
+          type: string
+          format: date
+        amountDue:
+          type: number
+    RegularCollection:
+      title: RegularCollection
+      required:
+        - dueDate
+        - amountDue
+      properties:
+        dueDate:
+          type: string
+          description: Due date
+          format: date
+        amountDue:
+          type: number
+          description: Amount due
+    PlanCollections:
+      title: Collections
+      required:
+        - regularCollections
+      properties:
+        initialCollection:
+          $ref: '#/components/schemas/InitialCollection'
+        regularCollections:
+          type: array
+          items:
+            $ref: '#/components/schemas/RegularCollection'
+          description: ''
+    TTPQuoteResponse:
+      title: TTPQuoteResponse
+      required:
+        - collections
+        - customerReference
+        - instalments
+        - interestAccrued
+        - numberOfInstalments
+        - planInterest
+        - quoteDate
+        - quoteReference
+        - quoteType
+        - totalDebtIncInt
+        - totalInterest
+      properties:
+        quoteReference:
+          maxLength: 15
+          minLength: 1
+          type: string
+          description: This is the Quote reference
+        customerReference:
+          maxLength: 15
+          minLength: 1
+          type: string
+          description: Unique Customer reference
+        quoteType:
+          allOf:
+            - $ref: '#/components/schemas/PlanQuoteType'
+            - description: this will determine what IFS is required to calculate either duration or instalment amount
+        quoteDate:
+          type: string
+          description: This is the Quote date
+          format: date
+        numberOfInstalments:
+          type: integer
+          description: Number of instalments
+          format: int32
+        totalDebtIncInt:
+          type: integer
+          description: This is the total debt plus interest for the plan
+          format: int32
+        interestAccrued:
+          type: integer
+          description: This is the total interest accrued prior up to the quote
+          format: int32
+        planInterest:
+          type: number
+          description: Interest accrued to the life of the plan
+        totalInterest:
+          type: number
+          description: This is the total interest accrued for the duration of the plan
+        instalments:
+          type: array
+          items:
+            $ref: '#/components/schemas/InstalmentResponse'
+          description: ''
+        collections:
+          $ref: '#/components/schemas/PlanCollections'
+    ErrorResponse:
+      title: ErrorResponse
+      required:
+        - statusCode
+        - errorMessage
+      properties:
+        statusCode:
+          type: integer
+          description: http status code
+        errorMessage:
+          type: string
+          description: Reason for error request
+    PaymentPlanTypeExtended:
+      title: PaymentPlanTypeExtended
+      enum:
+        - timeToPay
+        - instalmentOrder
+        - childBenefits
+        - fieldCollections
+        - LFC
+      type: string
+      description: Payment Plan Type
+    InitialPaymentMethodType:
+      title: InitialPaymentMethodType
+      enum:
+        - directDebit
+        - BACS
+        - cheque
+        - cardPayment
+        - Ongoing award
+      type: string
+      description: Payment method (Direct debit, BACS, Cheque, Card)
+    ArrangementPlan:
+      title: ArrangementPlan
+      required:
+        - quoteId
+        - quoteType
+        - quoteDate
+        - instalmentStartDate
+        - paymentPlanType
+        - thirdPartyBank
+        - numberOfInstalments
+        - totalDebtIncInt
+        - totalInterest
+        - interestAccrued
+        - planInterest
+      properties:
+        quoteId:
+          type: string
+          description: This is the ID for the quote associated with the plan
+        quoteType:
+          allOf:
+            - $ref: '#/components/schemas/PlanQuoteType'
+            - description: this will determine the calculation method
+        quoteDate:
+          type: string
+          description: Quote date
+          format: date
+        instalmentStartDate:
+          type: string
+          description: Instalment start date
+          format: date
+        instalmentAmount:
+          type: number
+          description: Instalment amount
+        paymentPlanType:
+          allOf:
+            - $ref: '#/components/schemas/PaymentPlanTypeExtended'
+            - description: Payment Plan Type
+        thirdPartyBank:
+          type: boolean
+          description: Third party bank
+        numberOfInstalments:
+          type: integer
+          description: Number of instalments
+          format: int32
+        frequency:
+          allOf:
+            - $ref: '#/components/schemas/PaymentFrequency'
+            - description: payment frequency
+        duration:
+          type: integer
+          description: Duration for the payment frequency
+          format: int32
+        initialPaymentAmount:
+          type: integer
+          description: Initial payment amount
+          format: int32
+        initialPaymentDate:
+          type: string
+          description: Initial payment date
+          format: date
+        totalDebtIncInt:
+          type: number
+          description: Total debts, liabilities and interest
+        totalInterest:
+          type: number
+          description: This is the total interest accrued for the duration of the plan
+        interestAccrued:
+          type: integer
+          description: This is the total interest accrued prior to plan start
+          format: int32
+        planInterest:
+          type: number
+          description: Interest accrued to the life of the plan
+        initialPaymentMethod:
+          allOf:
+            - $ref: '#/components/schemas/InitialPaymentMethodType'
+            - description: Payment method (Direct debit, BACS, Cheque, Card)
+        initialPaymentReference:
+          type: string
+          description: Payment Method reference
+    DebtItemChargeArrangementRequest:
+      title: DebtItemChargeArrangementRequest
+      required:
+        - debtItemChargeId
+        - mainTrans
+        - subTrans
+        - originalDebtAmount
+        - paymentHistory
+      properties:
+        debtItemChargeId:
+          maxLength: 16
+          minLength: 1
+          type: string
+          description: An ID which uniquely identifies a particular duty
+        mainTrans:
+          maxLength: 8
+          minLength: 4
+          type: string
+          description: Unique MTrans Debt Type ID e.g.1525 also known as M Trans
+        subTrans:
+          maxLength: 8
+          minLength: 4
+          type: string
+          description: Duty Type description for the UI
+        originalDebtAmount:
+          type: integer
+          description: Original debt amount
+          format: int32
+        interestStartDate:
+          type: string
+          description: The interest start date
+          format: date
+        paymentHistory:
+          type: array
+          items:
+            $ref: '#/components/schemas/PaymentHistoryRequest'
+          description: ''
+        dueDate:
+          type: string
+          description: Due date
+          format: date
+        chargeSource:
+          type: string
+          description: Source of the charge
+        parentMainTrans:
+          type: string
+        parentChargeReference:
+          type: string
+          description: Charge reference. Alphanumeric field
+          pattern: ^[A-Za-z0-9]{1,14}$
+    PaymentMethodStandard:
+      title: PaymentMethodStandard
+      enum:
+        - directDebit
+        - BACS
+        - cheque
+        - cardPayment
+        - Ongoing award
+      type: string
+      description: Payment method (Direct debit, BACS, Cheque, Card)
+    PaymentRequest:
+      title: PaymentRequest
+      required:
+        - paymentMethod
+      properties:
+        paymentMethod:
+          allOf:
+            - $ref: '#/components/schemas/PaymentMethodStandard'
+            - description: Payment method (Direct debit, BACS, Cheque, Card)
+        paymentReference:
+          maxLength: 15
+          minLength: 1
+          type: string
+          description: Payment Method reference
+    InstalmentRequest:
+      title: InstalmentRequest
+      required:
+        - debtItemChargeId
+        - dueDate
+        - amountDue
+        - expectedPayment
+        - interestRate
+        - instalmentNumber
+        - instalmentInterestAccrued
+        - instalmentBalance
+      properties:
+        debtItemChargeId:
+          maxLength: 32
+          minLength: 1
+          type: string
+          description: An ID which uniquely identifies a particular duty
+        dueDate:
+          type: string
+          description: Due date
+          format: date
+        amountDue:
+          type: number
+          description: Amount due
+          format: int32
+        expectedPayment:
+          type: integer
+          description: Expected payment
+          format: int32
+        interestRate:
+          type: number
+          description: Interest rate
+        instalmentNumber:
+          type: integer
+          description: Instalment number
+          format: int32
+        instalmentInterestAccrued:
+          type: integer
+          description: Instalment interest
+          format: int32
+        instalmentBalance:
+          type: integer
+          description: Instalment balance
+          format: int32
+    PromoteArrangementRequest:
+      title: PromoteArrangementRequest
+      required:
+        - customerReference
+        - quoteReference
+        - channelIdentifier
+        - plan
+        - debtItemCharges
+        - payments
+        - customerPostCodes
+        - instalments
+      properties:
+        regimeType:
+          type: string
+          description: Regime type
+          enum:
+            - SA
+        customerReference:
+          maxLength: 15
+          minLength: 1
+          type: string
+          description: Unique Customer reference
+        quoteReference:
+          maxLength: 15
+          minLength: 1
+          type: string
+          description: This is the Quote reference
+        channelIdentifier:
+          allOf:
+            - $ref: '#/components/schemas/ChannelIdentifier'
+            - description: Attribute to identify where the request is coming
+        plan:
+          $ref: '#/components/schemas/ArrangementPlan'
+        debtItemCharges:
+          type: array
+          items:
+            $ref: '#/components/schemas/DebtItemChargeArrangementRequest'
+          description: ''
+        payments:
+          type: array
+          items:
+            $ref: '#/components/schemas/PaymentRequest'
+          description: ''
+        customerPostCodes:
+          type: array
+          items:
+            $ref: '#/components/schemas/CustomerPostCodeRequest'
+          description: ''
+        instalments:
+          type: array
+          items:
+            $ref: '#/components/schemas/InstalmentRequest'
+          description: ''
+    TTPPlanStatus:
+      title: TTPPlanStatus
+      enum:
+        - success
+        - failure
+        - Resolved - Cancelled
+        - Resolved - Completed
+        - TTP Arrangement - In Progress
+        - Resolved - TTP Amended
+        - In Default - Clerical Review
+        - Pending - First Reminder
+        - In Default - First Reminder
+        - Pending - Second Reminder
+        - In Default - Second Reminder
+        - Pending - Cancellation
+        - Pending - Completion
+        - TTP - Monitoring suspended
+        - Pending - Cancellation Letter
+      type: string
+      description: This is the plan status
+    PromoteArrangementResponse:
+      title: PromoteArrangementResponse
+      required:
+        - caseId
+        - customerReference
+        - planId
+        - planStatus
+      properties:
+        customerReference:
+          maxLength: 15
+          minLength: 1
+          type: string
+          description: The Unique Customer reference
+        planId:
+          maxLength: 15
+          minLength: 1
+          type: string
+          description: Unique planId
+        caseId:
+          type: string
+          description: Unique caseId
+        planStatus:
+          allOf:
+            - $ref: '#/components/schemas/TTPPlanStatus'
+            - description: This is the plan status
+    PlanDetails:
+      title: PlanDetails
+      required:
+        - caseId
+        - interestAccrued
+        - numberOfInstalments
+        - paymentPlanType
+        - planId
+        - planInterest
+        - quoteDate
+        - quoteId
+        - quoteType
+        - thirdPartyBank
+        - totalDebtIncInt
+        - totalInterest
+      properties:
+        caseId:
+          type: string
+          description: This is the unique case id
+        planId:
+          maxLength: 15
+          minLength: 1
+          type: string
+          description: This is the unique plan id
+        quoteId:
+          type: string
+          description: This is the ID for the quote associated with the plan
+        quoteDate:
+          type: string
+          description: Quote date
+          format: date
+        quoteType:
+          allOf:
+            - $ref: '#/components/schemas/PlanQuoteType'
+            - description: this will determine what IFS is required
+        paymentPlanType:
+          allOf:
+            - $ref: '#/components/schemas/PaymentPlanTypeExtended'
+            - description: Payment Plan Type
+        thirdPartyBank:
+          type: boolean
+          description: Third party bank
+        numberOfInstalments:
+          type: integer
+          description: Number of instalments
+          format: int32
+        frequency:
+          allOf:
+            - $ref: '#/components/schemas/PaymentFrequency'
+            - description: payment frequency
+        initialPaymentMethod:
+          allOf:
+            - $ref: '#/components/schemas/InitialPaymentMethodType'
+            - description: Payment method (Direct debit, BACS, Cheque, Card)
+        initialPaymentReference:
+          type: string
+          description: Payment Method reference
+        totalDebtIncInt:
+          type: integer
+          description: This is the total debt plus interest for the plan
+          format: int32
+        totalInterest:
+          type: number
+          description: This is the total interest accrued for the duration of the plan
+        interestAccrued:
+          type: integer
+          description: This is the total interest accrued prior to plan start
+          format: int32
+        planInterest:
+          type: number
+          description: Interest accrued to the life of the plan
+    PaymentHistoryResponse:
+      title: PaymentHistoryResponse
+      required:
+        - paymentAmount
+        - paymentDate
+      properties:
+        paymentDate:
+          type: string
+          description: Payment date
+          format: date
+        paymentAmount:
+          type: integer
+          description: Payment amount
+          format: int32
+    DebtItemChargeResponse:
+      title: DebtItemChargeResponse
+      required:
+        - debtItemChargeId
+        - mainTrans
+        - originalDebtAmount
+        - paymentHistory
+        - subTrans
+      properties:
+        debtItemChargeId:
+          maxLength: 16
+          minLength: 1
+          type: string
+          description: An ID which uniquely identifies a particular duty
+        mainTrans:
+          maxLength: 8
+          minLength: 4
+          type: string
+          description: Unique MTrans Debt Type ID e.g.1525 also known as M Trans
+        subTrans:
+          maxLength: 8
+          minLength: 4
+          type: string
+          description: Duty Type description for the UI
+        originalDebtAmount:
+          type: integer
+          description: Original debt amount
+          format: int32
+        interestStartDate:
+          type: string
+          description: The interest start date
+          format: date
+        paymentHistory:
+          type: array
+          items:
+            $ref: '#/components/schemas/PaymentHistoryResponse'
+          description: ''
+    PaymentMethodExtended:
+      title: PaymentMethodExtended
+      enum:
+        - directDebit
+        - BACS
+        - cheque
+        - cardPayment
+        - Ongoing award
+      type: string
+      description: Payment method (Direct debit, BACS, Cheque, Card)
+    PaymentResponse:
+      title: PaymentResponse
+      required:
+        - paymentMethod
+      properties:
+        paymentMethod:
+          allOf:
+            - $ref: '#/components/schemas/PaymentMethodExtended'
+            - description: Payment method (Direct debit, BACS, Cheque, Card)
+        paymentReference:
+          maxLength: 15
+          minLength: 1
+          type: string
+          description: Payment Method reference
+    CustomerPostCodeResponse:
+      title: CustomerPostCodeResponse
+      required:
+        - addressPostcode
+        - postcodeDate
+      properties:
+        addressPostcode:
+          type: string
+          description: Customer postcode this will be a list of postcodes
+        postcodeDate:
+          type: string
+          description: Date the customer used this postcode from
+          format: date
+    GetPlanResponse:
+      title: GetPlanResponse
+      required:
+        - channelIdentifier
+        - collections
+        - customerPostCodes
+        - customerReference
+        - debtItemCharges
+        - instalments
+        - payments
+        - plan
+      properties:
+        customerReference:
+          maxLength: 15
+          minLength: 1
+          type: string
+          description: This is the customer reference
+        channelIdentifier:
+          allOf:
+            - $ref: '#/components/schemas/ChannelIdentifier'
+            - description: Attribute to identify where the request is coming
+        plan:
+          $ref: '#/components/schemas/PlanDetails'
+        debtItemCharges:
+          type: array
+          items:
+            $ref: '#/components/schemas/DebtItemChargeResponse'
+          description: ''
+        payments:
+          type: array
+          items:
+            $ref: '#/components/schemas/PaymentResponse'
+          description: ''
+        customerPostCodes:
+          type: array
+          items:
+            $ref: '#/components/schemas/CustomerPostCodeResponse'
+          description: ''
+        instalments:
+          type: array
+          items:
+            $ref: '#/components/schemas/InstalmentResponse'
+          description: ''
+        collections:
+          $ref: '#/components/schemas/PlanCollections'
+    PlanUpdateType:
+      title: PlanUpdateType
+      enum:
+        - paymentDetails
+        - planStatus
+      type: string
+      description: This is where there is an update to the plan
+    CompleteReason:
+      title: CompleteReason
+      enum:
+        - Payment in Full
+        - Payment in full
+        - Amendment of Charges to Nil
+        - Amendment of charges to nil
+        - Remission
+        - Paid within Tolerance
+      type: string
+      description: This needs to be added as a validation where status update is complete
+    PaymentMethodBasic:
+      title: PaymentMethodBasic
+      enum:
+        - directDebit
+        - BACS
+        - cheque
+        - cardPayment
+        - Ongoing award
+      type: string
+      description: Payment method (Direct debit, BACS, Cheque, Card)
+    PaymentUpdate:
+      title: PaymentUpdate
+      required:
+        - paymentMethod
+      properties:
+        paymentMethod:
+          allOf:
+            - $ref: '#/components/schemas/PaymentMethodBasic'
+            - description: Payment method (Direct debit, BACS, Cheque, Card)
+        paymentReference:
+          maxLength: 15
+          minLength: 1
+          type: string
+          description: Payment Method reference
+    UpdatePlanRequest:
+      title: UpdatePlanRequest
+      required:
+        - customerReference
+        - planId
+        - updateType
+      properties:
+        customerReference:
+          maxLength: 15
+          minLength: 1
+          type: string
+          description: Customer reference
+        channelIdentifier:
+          type: string
+          description: Channel Identification
+          enum:
+            - advisor
+            - selfService
+        planId:
+          maxLength: 15
+          minLength: 1
+          type: string
+          description: Unique planId
+        updateType:
+          allOf:
+            - $ref: '#/components/schemas/PlanUpdateType'
+            - description: This is where there is an update to the plan
+        planStatus:
+          allOf:
+            - $ref: '#/components/schemas/TTPPlanStatus'
+            - description: This is the plan status
+        completeReason:
+          allOf:
+            - $ref: '#/components/schemas/CompleteReason'
+            - description: This needs to be added as a validation where status update is complete
+        cancellationReason:
+          type: string
+          description: This needs to be added as a validation where status update is cancelled
+        thirdPartyBank:
+          type: boolean
+          description: Third party Bank
+        payments:
+          type: array
+          items:
+            $ref: '#/components/schemas/PaymentUpdate'
+          description: ''
+    UpdatePlanResponse:
+      title: UpdatePlanResponse
+      required:
+        - customerReference
+        - planId
+        - planStatus
+        - planUpdatedDate
+      properties:
+        customerReference:
+          maxLength: 15
+          minLength: 1
+          type: string
+          description: Customer reference
+        planId:
+          maxLength: 15
+          minLength: 1
+          type: string
+          description: Unique planId
+        planStatus:
+          allOf:
+            - $ref: '#/components/schemas/TTPPlanStatus'
+            - description: This is the plan status
+        planUpdatedDate:
+          type: string
+          description: This is the date for either the status change or the update
+          format: date
+    paymentPlanFrequency:
+      title: paymentPlanFrequency
+      type: string
+      enum:
+        - Single
+        - Weekly
+        - 2Weekly
+        - 4Weekly
+        - Monthly
+        - Quarterly
+        - 6Monthly
+        - annually
+    DebtItem:
+      title: DebtItem
+      required:
+        - debtItemChargeId
+        - debtItemOriginalDueDate
+        - mainTrans
+        - outstandingDebtAmount
+        - subTrans
+        - isInterestBearingCharge
+        - useChargeReference
+      properties:
+        outstandingDebtAmount:
+          type: number
+        mainTrans:
+          type: string
+        subTrans:
+          type: string
+        isInterestBearingCharge:
+          type: boolean
+        useChargeReference:
+          type: boolean
+        debtItemChargeId:
+          type: string
+        interestStartDate:
+          type: string
+          format: date
+        debtItemOriginalDueDate:
+          type: string
+          format: date
+    postCode:
+      title: postCode
+      required:
+        - addressPostcode
+        - postcodeDate
+      properties:
+        addressPostcode:
+          pattern: ^([A-Za-z][A-Ha-hJ-Yj-y]?[0-9][A-Za-z0-9]? ?[0-9][A-Za-z]{2}|[Gg][Ii][Rr] ?0[Aa]{2})$
+          type: string
+          description: valid UK postcode
+        postcodeDate:
+          pattern: ^\d{4}-[0-1][0-9]-[0-3][0-9]$
+          type: string
+          description: Postcode date move in
+    AffordableQuotesRequest:
+      title: AffordableQuotesRequest
+      required:
+        - channelIdentifier
+        - paymentPlanAffordableAmount
+        - paymentPlanFrequency
+        - paymentPlanMaxLength
+        - paymentPlanMinLength
+        - accruedDebtInterest
+        - paymentPlanStartDate
+        - debtItemCharges
+        - customerPostcodes
+      properties:
+        regimeType:
+          type: string
+          description: Regime type
+        channelIdentifier:
+          type: string
+        paymentPlanAffordableAmount:
+          type: integer
+          format: int32
+        paymentPlanFrequency:
+          $ref: '#/components/schemas/paymentPlanFrequency'
+        paymentPlanMaxLength:
+          type: integer
+          format: int32
+        paymentPlanMinLength:
+          type: integer
+          format: int32
+        accruedDebtInterest:
+          type: number
+        paymentPlanStartDate:
+          type: string
+          format: date
+        initialPaymentDate:
+          type: string
+          format: date
+        initialPaymentAmount:
+          type: integer
+          format: int32
+        debtItemCharges:
+          type: array
+          minItems: 1
+          items:
+            $ref: '#/components/schemas/DebtItem'
+          description: An array of DebtItems
+        customerPostcodes:
+          type: array
+          items:
+            $ref: '#/components/schemas/postCode'
+          description: An array of PostCode
+    instalments:
+      title: Instalments
+      required:
+        - instalmentNumber
+        - dueDate
+        - instalmentInterestAccrued
+        - instalmentBalance
+        - debtItemChargeId
+        - amountDue
+        - debtItemOriginalDueDate
+        - expectedPayment
+      properties:
+        instalmentNumber:
+          type: integer
+          format: int32
+        dueDate:
+          type: string
+          format: date
+        instalmentInterestAccrued:
+          type: number
+        instalmentBalance:
+          type: number
+        debtItemChargeId:
+          type: string
+        amountDue:
+          type: number
+        debtItemOriginalDueDate:
+          type: string
+          format: date
+        expectedPayment:
+          type: integer
+    paymentPlans:
+      title: PaymentPlans
+      required:
+        - planDuration
+        - totalDebt
+        - totalDebtIncInt
+        - planInterest
+        - collections
+        - numberOfInstalments
+        - instalments
+      properties:
+        planDuration:
+          type: integer
+          format: int32
+        totalDebt:
+          type: number
+        totalDebtIncInt:
+          type: number
+          description: Total debts, liabilities and interest
+        planInterest:
+          type: number
+        numberOfInstalments:
+          type: integer
+          format: int32
+        collections:
+          required:
+            - regularCollections
+          properties:
+            initialCollection:
+              $ref: '#/components/schemas/InitialCollection'
+            regularCollections:
+              type: array
+              minItems: 1
+              items:
+                $ref: '#/components/schemas/RegularCollection'
+              description: An array of regularCollections
+        instalments:
+          type: array
+          minItems: 1
+          items:
+            $ref: '#/components/schemas/instalments'
+          description: An array of instalments
+    AffordableQuotesResponse:
+      title: AffordableQuotesResponse
+      required:
+        - processingDateTime
+        - paymentPlans
+      properties:
+        processingDateTime:
+          type: string
+          pattern: ^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d{1,3})?$
+          example: '2022-03-23T13:49:51.123'
+        paymentPlans:
+          type: array
+          minItems: 1
+          items:
+            $ref: '#/components/schemas/paymentPlans'
+          description: An array of paymentPlans
+    TTPChargeInfoRequest:
+      title: TTPChargeInfoRequest
+      required:
+        - channelIdentifier
+        - identifications
+        - regimeType
+      properties:
+        regimeType:
+          type: string
+          description: Regime type
+          enum:
+            - SA
+        channelIdentifier:
+          type: string
+          description: Channel Identifier
+        identifications:
+          type: array
+          minItems: 1
+          items:
+            type: object
+            properties:
+              idType:
+                type: string
+                description: ID type
+              idValue:
+                type: string
+                description: ID value
+            required:
+              - idType
+              - idValue
+          description: An array of customer identifications
+    CustomerSignal:
+      type: object
+      required:
+        - signalType
+        - signalValue
+      properties:
+        signalType:
+          type: string
+          description: Type of customer signal
+          example: ITSA Migrated
+        signalValue:
+          type: string
+          description: Value of the signal
+          example: 'true'
+        signalDescription:
+          type: string
+          description: Description of the signal
+          example: Description
+    Lock:
+      type: object
+      required:
+        - lockType
+        - lockReason
+      properties:
+        lockType:
+          type: string
+          description: Type of lock applied to the charge
+          example: Payment
+        lockReason:
+          type: string
+          description: Reason for the lock
+          example: Insolvency
+    TTPChargeInfoResponse:
+      title: TTPChargeInfoResponse
+      required:
+        - processingDateTime
+        - identification
+        - chargeTypeAssessment
+        - addresses
+        - individualDetails
+        - chargeTypesExcluded
+      properties:
+        processingDateTime:
+          type: string
+          pattern: ^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d{1,3})?$
+          example: '2022-03-23T13:49:51.123'
+        identification:
+          type: array
+          items:
+            type: object
+            properties:
+              idType:
+                type: string
+                description: ID type
+              idValue:
+                type: string
+                description: ID value
+            required:
+              - idType
+              - idValue
+          description: An array of customer identifications
+        individualDetails:
+          type: object
+          properties:
+            title:
+              type: string
+              description: Title
+            firstName:
+              type: string
+              description: Firstname
+            lastName:
+              type: string
+              description: Lastname
+            dateOfBirth:
+              type: string
+              format: date
+              description: Date of birth
+            districtNumber:
+              type: string
+              description: District Number
+            customerType:
+              type: string
+              description: Customer Type
+              enum:
+                - MTD(ITSA)
+                - Classic SA - Transitioned
+                - Classic SA - Non Transitioned
+            transitionToCDCS:
+              type: boolean
+              description: Signifies if the customer must be transitioned to CDCS
+          required:
+            - customerType
+            - transitionToCDCS
+        addresses:
+          type: array
+          items:
+            type: object
+            properties:
+              addressType:
+                type: string
+                description: Type of address
+              addressLine1:
+                type: string
+                description: Address line 1
+              addressLine2:
+                type: string
+                description: Address line 2
+              addressLine3:
+                type: string
+                description: Address line 3
+              addressLine4:
+                type: string
+                description: Address line 4
+              rls:
+                type: boolean
+                description: Returned Letter Service indicates tax payer is no longer resident
+              contactDetails:
+                type: object
+                properties:
+                  telephoneNumber:
+                    type: string
+                    description: Telephone number
+                  fax:
+                    type: string
+                    description: Fax number
+                  mobile:
+                    type: string
+                    description: Mobile number
+                  emailAddress:
+                    type: string
+                    description: Email address
+                  emailSource:
+                    type: string
+                    description: Email source
+              postCode:
+                type: string
+                description: Post code
+              postcodeHistory:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    addressPostcode:
+                      type: string
+                      description: Customer postcode
+                    postcodeDate:
+                      type: string
+                      format: date
+                      description: Date the customer used this postcode from
+                  required:
+                    - addressPostcode
+                    - postcodeDate
+            required:
+              - addressLine1
+              - addressType
+              - postcodeHistory
+        customerSignals:
+          type: array
+          items:
+            $ref: '#/components/schemas/CustomerSignal'
+          description: Signal information to be considered by the operator. Not all signals will be returned.  Examples of signals returned include ring-fenced signals, insolvency and Welsh Language signal.
+        chargeTypesExcluded:
+          type: boolean
+          description: Indicates whether any charge types have been excluded from the response
+        chargeTypeAssessment:
+          type: array
+          items:
+            type: object
+            required:
+              - debtTotalAmount
+              - chargeReference
+              - charges
+              - mainTrans
+              - isInsolvent
+            properties:
+              debtTotalAmount:
+                type: integer
+                description: Total debt amount
+              chargeReference:
+                type: string
+                description: Charge reference
+              parentChargeReference:
+                type: string
+              isInsolvent:
+                type: boolean
+                description: |
+                  Debt level insolvency indicator. Indicates if this charge should be shown as insolvent and excluded from TTP.
+                  For ETMP (MTD ITSA): True only when BOTH conditions are met: (1) customer level insolvency signal exists AND (2) charge has 'no reallocation' lock applied. If customer signal exists but no lock, this field is false.
+              mainTrans:
+                type: string
+                description: |
+                  Represents main transaction types. Unrecognized values is treated
+                  as "UsedMainTrans" with the provided string value.
+              charges:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    taxPeriodFrom:
+                      type: string
+                      format: date
+                      description: Tax period start date
+                    taxPeriodTo:
+                      type: string
+                      format: date
+                      description: Tax period end date
+                    chargeType:
+                      type: string
+                    mainType:
+                      type: string
+                    subTrans:
+                      type: string
+                    outstandingAmount:
+                      type: integer
+                    dueDate:
+                      type: string
+                      format: date
+                    isInterestBearingCharge:
+                      type: boolean
+                      description: shows whether its an interest bearing charge
+                    interestStartDate:
+                      type: string
+                      format: date
+                    accruedInterest:
+                      type: integer
+                    chargeSource:
+                      type: string
+                    parentMainTrans:
+                      type: string
+                    tieBreaker:
+                      type: string
+                    saTaxYearEnd:
+                      type: string
+                      format: date
+                    creationDate:
+                      type: string
+                      format: date
+                    originalChargeType:
+                      type: string
+                    locks:
+                      type: array
+                      items:
+                        $ref: '#/components/schemas/Lock'
+                      description: Locks applied to this charge
+                  required:
+                    - taxPeriodFrom
+                    - taxPeriodTo
+                    - chargeSource
+                    - chargeType
+                    - mainType
+                    - subTrans
+                    - outstandingAmount
+                    - dueDate
+                    - accruedInterest
+    CancelIdentification:
+      type: object
+      required:
+        - idType
+        - idValue
+      properties:
+        idType:
+          type: string
+          description: Identifier type, e.g. UTR
+          pattern: ^[A-Za-z0-9]{1,6}$
+          example: UTR
+        idValue:
+          type: string
+          description: Identifier value
+          pattern: ^[A-Za-z0-9]{1,25}$
+          example: '1234567890'
+    DebtItemChargeReference:
+      type: object
+      required:
+        - debtItemChargeId
+        - chargeSource
+      properties:
+        debtItemChargeId:
+          type: string
+          description: An ID which uniquely identifies a particular charge. Required for ETMP but not CESA. Needed to know which charge relates to the charge source to know which HoD to call.
+          example: XW006559808862
+        chargeSource:
+          type: string
+          description: Source system of the charge. So we know when to call CESA or ETMP.
+          enum:
+            - CESA
+            - ETMP
+          example: CESA
+    CancelPaymentPlan:
+      type: object
+      required:
+        - cancellationDate
+        - debtItemCharges
+      properties:
+        arrangementAgreedDate:
+          type: string
+          format: date
+          description: The date when the plan was created
+          example: '2025-05-01'
+        ttpEndDate:
+          type: string
+          format: date
+          description: Date for the last payment/instalment
+          example: '2025-11-01'
+        frequency:
+          type: string
+          enum:
+            - single
+            - weekly
+            - 2Weekly
+            - 4Weekly
+            - monthly
+            - quarterly
+            - 6Monthly
+            - annually
+          description: Payment frequency (Note - quarterly will not be provided as it is prevented in CDCS)
+          example: monthly
+        cancellationDate:
+          type: string
+          format: date
+          description: Date when the cancellation was made
+          example: '2025-10-15'
+        initialPaymentDate:
+          type: string
+          format: date
+          description: Optional upfront payment date
+          example: '2025-05-05'
+        initialPaymentAmount:
+          type: number
+          multipleOf: 0.01
+          description: Optional upfront payment amount
+          example: 150
+        debtItemCharges:
+          type: array
+          minItems: 1
+          items:
+            $ref: '#/components/schemas/DebtItemChargeReference'
+          description: Array of debt item charges required to know which HoD to call
+    CancelInstalment:
+      type: object
+      required:
+        - dueDate
+        - amountDue
+      properties:
+        dueDate:
+          type: string
+          format: date
+          description: Due date for each regular instalment
+          example: '2025-06-01'
+        amountDue:
+          type: number
+          multipleOf: 0.01
+          description: Amount due for the instalment
+          example: 300
+    CancelRequest:
+      type: object
+      required:
+        - identifications
+        - paymentPlan
+        - instalments
+        - channelIdentifier
+      properties:
+        identifications:
+          type: array
+          minItems: 1
+          items:
+            $ref: '#/components/schemas/CancelIdentification'
+          description: Array of customer identifiers; CDCS must provide at least one (e.g. UTR).
+        paymentPlan:
+          $ref: '#/components/schemas/CancelPaymentPlan'
+        instalments:
+          type: array
+          minItems: 1
+          items:
+            $ref: '#/components/schemas/CancelInstalment'
+          description: Array of payment instalments
+        channelIdentifier:
+          type: string
+          enum:
+            - advisor
+            - selfService
+          description: Channel through which arrangement was made (e.g. advisor, selfService)
+          example: advisor
+        transitioned:
+          type: boolean
+          description: Indicates whether the customer only has FDLs.
+          example: true
+    CancelAPIStatus:
+      type: object
+      required:
+        - name
+        - statusCode
+        - processingDateTime
+      properties:
+        name:
+          type: string
+          description: The API name (CESA, ETMP)
+          example: CESA
+        statusCode:
+          type: integer
+          description: HTTP status code from the downstream API
+          example: 200
+        processingDateTime:
+          type: string
+          format: date-time
+          description: Timestamp of processing the request in downstream API
+          example: '2025-10-15T10:30:00Z'
+        errorResponse:
+          type: string
+          description: |
+            Error message returned by the downstream API when the call failed.
+            This field is present when the downstream API returns an error status code but TTP can parse the response.
+          example: Invalid cancellationDate provided for cancellation
+    CancelResponse:
+      type: object
+      required:
+        - apisCalled
+        - processingDateTime
+      properties:
+        apisCalled:
+          type: array
+          items:
+            $ref: '#/components/schemas/CancelAPIStatus'
+          description: Status of calls to each HoD API
+        processingDateTime:
+          type: string
+          format: date-time
+          description: Timestamp for processing the cancel request
+          example: '2025-10-15T10:31:00Z'
+    CancelErrorResponse:
+      type: object
+      required:
+        - processingDateTime
+        - internalErrors
+      properties:
+        apisCalled:
+          type: array
+          items:
+            $ref: '#/components/schemas/CancelAPIStatus'
+          description: Status of calls to each HoD API (present when HoD APIs were called successfully)
+        internalErrors:
+          type: array
+          items:
+            type: object
+            required:
+              - message
+            properties:
+              message:
+                type: string
+                description: Error message describing the internal failure
+                example: Could not parse response from calling CESA
+          description: Internal errors that occurred during processing (present when TTP cannot parse HoD responses)
+        processingDateTime:
+          type: string
+          format: date-time
+          description: Timestamp for processing the cancel request
+          example: '2025-10-15T10:31:00Z'
+    InformIdentification:
+      type: object
+      required:
+        - idType
+        - idValue
+      properties:
+        idType:
+          type: string
+          description: Identifier type, e.g. UTR, EMPREF
+          pattern: ^[A-Za-z0-9]{1,6}$
+          example: UTR
+        idValue:
+          type: string
+          description: Identifier value
+          pattern: ^[A-Za-z0-9]{1,25}$
+          example: '1234567890'
+    InformPaymentPlan:
+      type: object
+      required:
+        - arrangementAgreedDate
+        - ttpEndDate
+        - frequency
+        - debtItemCharges
+      properties:
+        arrangementAgreedDate:
+          type: string
+          format: date
+          description: The date when the plan was created
+          example: '2025-05-01'
+        ttpEndDate:
+          type: string
+          format: date
+          description: Date for the last payment/instalment
+          example: '2025-11-01'
+        frequency:
+          type: string
+          enum:
+            - single
+            - weekly
+            - 2Weekly
+            - 4Weekly
+            - monthly
+            - quarterly
+            - 6Monthly
+            - annually
+          description: Payment frequency (Note - quarterly will not be provided as it is prevented in CDCS)
+          example: monthly
+        initialPaymentDate:
+          type: string
+          format: date
+          description: Optional upfront payment date
+          example: '2025-05-05'
+        initialPaymentAmount:
+          type: number
+          multipleOf: 0.01
+          description: Optional upfront payment amount
+          example: 150
+        ddiReference:
+          type: string
+          description: Direct Debit Instruction reference number, if applicable
+          example: DD123456789
+        debtItemCharges:
+          type: array
+          minItems: 1
+          items:
+            $ref: '#/components/schemas/DebtItemChargeReference'
+          description: Array of debt item charges required to know which HoD to call
+    InformInstalment:
+      type: object
+      required:
+        - dueDate
+        - amountDue
+      properties:
+        dueDate:
+          type: string
+          format: date
+          description: Due date for each regular instalment
+          example: '2025-06-01'
+        amountDue:
+          type: number
+          multipleOf: 0.01
+          description: Amount due for the instalment
+          example: 300
+    InformRequest:
+      type: object
+      required:
+        - identifications
+        - paymentPlan
+        - instalments
+        - channelIdentifier
+      properties:
+        identifications:
+          type: array
+          minItems: 1
+          items:
+            $ref: '#/components/schemas/InformIdentification'
+          description: Array of identifiers for the customer
+        paymentPlan:
+          $ref: '#/components/schemas/InformPaymentPlan'
+        instalments:
+          type: array
+          minItems: 1
+          items:
+            $ref: '#/components/schemas/InformInstalment'
+          description: Array of payment instalments
+        channelIdentifier:
+          type: string
+          enum:
+            - advisor
+            - selfService
+          description: Channel through which arrangement was made (e.g. advisor, selfService)
+          example: advisor
+        transitioned:
+          type: boolean
+          description: Indicates whether the customer only has FDLs.
+          example: true
+    InformAPIStatus:
+      type: object
+      required:
+        - name
+        - statusCode
+        - processingDateTime
+      properties:
+        name:
+          type: string
+          description: The API name (CESA or ETMP)
+          example: CESA
+        statusCode:
+          type: integer
+          description: HTTP status code from the downstream API
+          example: 200
+        processingDateTime:
+          type: string
+          format: date-time
+          description: Timestamp of processing the request in downstream API
+          example: '2025-05-01T14:30:00Z'
+        errorResponse:
+          type: string
+          description: |
+            Error message returned by the downstream API when the call failed.
+            This field is present when the downstream API returns an error status code but TTP can parse the response.
+          example: Invalid lockReason provided for inform
+    InformResponse:
+      type: object
+      required:
+        - apisCalled
+        - processingDateTime
+      properties:
+        apisCalled:
+          type: array
+          items:
+            $ref: '#/components/schemas/InformAPIStatus'
+          description: Status of calls to each HoD API
+        processingDateTime:
+          type: string
+          format: date-time
+          description: Timestamp for processing the inform request
+          example: '2025-05-01T14:35:00Z'
+    InformErrorResponse:
+      type: object
+      required:
+        - processingDateTime
+        - internalErrors
+      properties:
+        apisCalled:
+          type: array
+          items:
+            $ref: '#/components/schemas/InformAPIStatus'
+          description: Status of calls to each HoD API (present when HoD APIs were called successfully)
+        internalErrors:
+          type: array
+          items:
+            type: object
+            required:
+              - message
+            properties:
+              message:
+                type: string
+                description: Error message describing the internal failure
+                example: Could not parse response from calling CESA
+          description: Internal errors that occurred during processing (present when TTP cannot parse HoD responses)
+        processingDateTime:
+          type: string
+          format: date-time
+          description: Timestamp for processing the inform request
+          example: '2025-10-15T10:31:00Z'
+    FullAmendIdentification:
+      type: object
+      required:
+        - idType
+        - idValue
+      properties:
+        idType:
+          type: string
+          description: Identifier type (e.g., UTR for Self Assessment)
+          pattern: ^[A-Za-z0-9]{1,6}$
+          example: UTR
+        idValue:
+          type: string
+          description: Identifier value
+          pattern: ^[A-Za-z0-9]{1,25}$
+          example: '1234567890'
+    OriginalPaymentPlan:
+      type: object
+      required:
+        - arrangementAgreedDate
+        - ttpEndDate
+        - frequency
+        - debtItemCharges
+      properties:
+        arrangementAgreedDate:
+          type: string
+          format: date
+          description: The date when the plan was created
+          example: '2025-05-01'
+        ttpEndDate:
+          type: string
+          format: date
+          description: Date for the last payment/instalment
+          example: '2025-11-01'
+        initialPaymentDate:
+          type: string
+          format: date
+          description: For Op-led this is initialPaymentDate, for SSTTP this is initialCollectionDueDate
+          example: '2025-05-05'
+        initialPaymentAmount:
+          type: number
+          multipleOf: 0.01
+          description: For Op-led this is initialPaymentAmount, for SSTTP this is initialCollectionAmountDue
+          example: 150
+        frequency:
+          type: string
+          enum:
+            - single
+            - weekly
+            - 2Weekly
+            - 4Weekly
+            - monthly
+            - quarterly
+            - 6Monthly
+            - annually
+          description: Payment frequency (Note - single, 4Weekly, and quarterly do not map to CESA values)
+          example: monthly
+        ddiReference:
+          type: string
+          description: Direct Debit reference (may be blank if not applicable, especially for SSTTP plans)
+          example: DD123456789
+        debtItemCharges:
+          type: array
+          minItems: 1
+          items:
+            $ref: '#/components/schemas/DebtItemChargeReference'
+          description: Array of debt item charges in the original plan. Required to know which HoD to call.
+    ChargeAmendment:
+      type: string
+      enum:
+        - new
+        - removed
+        - remain
+      description: Indicates if the charge is new (added), removed, or remains unchanged in the amended plan
+      example: new
+    FullAmendDebtItemCharge:
+      type: object
+      required:
+        - debtItemChargeId
+        - chargeSource
+        - chargeAmendment
+      properties:
+        debtItemChargeId:
+          type: string
+          description: An ID which uniquely identifies a particular charge. Required so we can tell ETMP charge references and need to know which HoD to call.
+          example: XW006559808862
+        chargeSource:
+          type: string
+          description: Source system of the charge. So we know whether to call CESA or ETMP or both.
+          enum:
+            - CESA
+            - ETMP
+          example: CESA
+        chargeAmendment:
+          $ref: '#/components/schemas/ChargeAmendment'
+    NewPaymentPlan:
+      type: object
+      required:
+        - arrangementAgreedDate
+        - ttpEndDate
+        - frequency
+        - debtItemCharges
+      properties:
+        arrangementAgreedDate:
+          type: string
+          format: date
+          description: The date when the plan was created
+          example: '2025-05-01'
+        ttpEndDate:
+          type: string
+          format: date
+          description: Date for the last payment/instalment
+          example: '2025-11-01'
+        initialPaymentDate:
+          type: string
+          format: date
+          description: For Op-led this is initialPaymentDate, for SSTTP this is initialCollectionDueDate
+          example: '2025-05-05'
+        initialPaymentAmount:
+          type: number
+          multipleOf: 0.01
+          description: For Op-led this is initialPaymentAmount, for SSTTP this is initialCollectionAmountDue
+          example: 150
+        frequency:
+          type: string
+          enum:
+            - single
+            - weekly
+            - 2Weekly
+            - 4Weekly
+            - monthly
+            - quarterly
+            - 6Monthly
+            - annually
+          description: Payment frequency (Note - single, 4Weekly, and quarterly do not map to CESA values)
+          example: monthly
+        ddiReference:
+          type: string
+          description: Direct Debit reference (may be blank if not applicable, especially for SSTTP plans)
+          example: DD123456789
+        debtItemCharges:
+          type: array
+          minItems: 1
+          items:
+            $ref: '#/components/schemas/FullAmendDebtItemCharge'
+          description: Array of debt item charges in the new plan with amendment status. Required to know which HoD to call and what action to take.
+    FullAmendInstalment:
+      type: object
+      required:
+        - dueDate
+        - amountDue
+      properties:
+        dueDate:
+          type: string
+          format: date
+          description: Due date for each regular instalment
+          example: '2025-06-01'
+        amountDue:
+          type: number
+          multipleOf: 0.01
+          description: Amount due for the instalment
+          example: 300
+    FullAmendRequest:
+      type: object
+      required:
+        - identifications
+        - originalPaymentPlan
+        - newPaymentPlan
+        - instalments
+        - channelIdentifier
+        - transitioned
+      properties:
+        identifications:
+          type: array
+          minItems: 1
+          items:
+            $ref: '#/components/schemas/FullAmendIdentification'
+          description: Array of identifiers for the customer
+        originalPaymentPlan:
+          $ref: '#/components/schemas/OriginalPaymentPlan'
+        newPaymentPlan:
+          $ref: '#/components/schemas/NewPaymentPlan'
+        instalments:
+          type: array
+          minItems: 1
+          items:
+            $ref: '#/components/schemas/FullAmendInstalment'
+          description: Array of payment instalments
+        channelIdentifier:
+          type: string
+          enum:
+            - advisor
+            - selfService
+          description: Channel through which arrangement was made (e.g. advisor, selfService)
+          example: advisor
+        transitioned:
+          type: boolean
+          description: Indicates whether the customer only has FDLs.
+          example: true
+    FullAmendAPIStatus:
+      type: object
+      required:
+        - processingDateTime
+        - name
+        - statusCode
+      properties:
+        processingDateTime:
+          type: string
+          format: date-time
+          description: Timestamp of processing the request in downstream API
+          example: '2025-05-01T14:30:00Z'
+        name:
+          type: string
+          description: The API name (CESA or ETMP)
+          example: ETMP
+        statusCode:
+          type: integer
+          description: HTTP status code from the downstream API
+          example: 400
+        errorResponse:
+          type: string
+          description: |
+            Error message returned by the downstream API when the call failed.
+            This field is present when the downstream API returns an error status code but TTP can parse the response.
+          example: Invalid amendment request provided for full-amend
+    FullAmendResponse:
+      type: object
+      required:
+        - apisCalled
+        - processingDateTime
+      properties:
+        apisCalled:
+          type: array
+          items:
+            $ref: '#/components/schemas/FullAmendAPIStatus'
+          description: Status of calls to each HoD API (done this way to future proof)
+        processingDateTime:
+          type: string
+          format: date-time
+          description: Timestamp for processing the full amend request (this is our one)
+          example: '2025-05-01T14:35:00Z'
+    FullAmendErrorResponse:
+      type: object
+      required:
+        - processingDateTime
+        - internalErrors
+      properties:
+        apisCalled:
+          type: array
+          items:
+            $ref: '#/components/schemas/FullAmendAPIStatus'
+          description: Status of calls to each HoD API (present when HoD APIs were called successfully)
+        internalErrors:
+          type: array
+          items:
+            type: object
+            required:
+              - message
+            properties:
+              message:
+                type: string
+                description: Error message describing the internal failure
+                example: Could not parse response from calling CESA
+          description: Internal errors that occurred during processing (present when TTP cannot parse HoD responses)
+        processingDateTime:
+          type: string
+          format: date-time
+          description: Timestamp for processing the full-amend request
+          example: '2025-10-15T10:31:00Z'

@@ -156,7 +156,8 @@ object Validators {
       }
 
       object Proposed {
-        private val pathR2: String = "test/resources/schemas/apis/proposed/time-to-pay-proxy/time-to-pay-v1.0.21.yaml"
+        private val pathR2: String =
+          "test/resources/schemas/apis/proposed/time-to-pay-proxy/time-to-pay-v1.0.22-proposedAll.yaml"
         def openApiRequestSchema: OpenApi3DerivedSchema =
           new OpenApi3DerivedSchema(
             pathR2,
@@ -186,35 +187,76 @@ object Validators {
     }
 
     object TtpFullAmend {
-      // Downloaded from:
-      //   https://confluence.tools.tax.service.gov.uk/display/DTDT/TTP+API+%28Current+Version%29+Proxy?preview=/828113579/1168278271/time-to-pay-v1.0.19.yaml
-      // Official location:
-      //   https://confluence.tools.tax.service.gov.uk/display/DTDT/TTP+API+%28Current+Version%29+Proxy
-      def openApiRequestSchema: OpenApi3DerivedSchema =
-        new OpenApi3DerivedSchema(
-          path,
-          defaultJsonSubschemaName = "FullAmendRequest",
-          metaSchemaValidation = Some(Valid(())),
-          restrictAdditionalProperties = true
-        )
+      object Live {
+        // Downloaded from:
+        //   https://confluence.tools.tax.service.gov.uk/display/DTDT/TTP+API+%28Current+Version%29+Proxy?preview=/828113579/1168278271/time-to-pay-v1.0.19.yaml
+        // Official location:
+        //   https://confluence.tools.tax.service.gov.uk/display/DTDT/TTP+API+%28Current+Version%29+Proxy
+        def openApiRequestSchema: OpenApi3DerivedSchema =
+          new OpenApi3DerivedSchema(
+            path,
+            defaultJsonSubschemaName = "FullAmendRequest",
+            metaSchemaValidation = Some(Valid(())),
+            restrictAdditionalProperties = true
+          )
 
-      /** This is used for 200 statuses. */
-      def openApiFullAmendResponseSchema: OpenApi3DerivedSchema =
-        new OpenApi3DerivedSchema(
-          path,
-          defaultJsonSubschemaName = "FullAmendResponse",
-          metaSchemaValidation = Some(Valid(())),
-          restrictAdditionalProperties = true
-        )
+        /** This is used for 200 statuses. */
+        def openApiFullAmendResponseSchema: OpenApi3DerivedSchema =
+          new OpenApi3DerivedSchema(
+            path,
+            defaultJsonSubschemaName = "FullAmendResponse",
+            metaSchemaValidation = Some(Valid(())),
+            restrictAdditionalProperties = true
+          )
 
-      /** This is used for 500 statuses. */
-      def openApiFullAmendErrorResponseSchema: OpenApi3DerivedSchema =
-        new OpenApi3DerivedSchema(
-          path,
-          defaultJsonSubschemaName = "FullAmendErrorResponse",
-          metaSchemaValidation = Some(Valid(())),
-          restrictAdditionalProperties = true
-        )
+        /** This is used for 500 statuses. */
+        def openApiFullAmendErrorResponseSchema: OpenApi3DerivedSchema =
+          new OpenApi3DerivedSchema(
+            path,
+            defaultJsonSubschemaName = "FullAmendErrorResponse",
+            metaSchemaValidation = Some(Valid(())),
+            restrictAdditionalProperties = true
+          )
+      }
+
+      object Proposed {
+        // Downloaded from:
+        //  https://confluence.tools.tax.service.gov.uk/display/DTDT/TTP+API+%28Current+Version%29+Proxy?preview=/828113579/1214710809/time-to-pay-v1.0.22-proposedAll-2.yaml
+        private val pathForR2 =
+          "test/resources/schemas/apis/proposed/time-to-pay-proxy/time-to-pay-v1.0.22-proposedAll.yaml"
+
+        def openApiRequestSchema: OpenApi3DerivedSchema =
+          new OpenApi3DerivedSchema(
+            pathForR2,
+            defaultJsonSubschemaName = "FullAmendRequest",
+            metaSchemaValidation = Some(Valid(())),
+            restrictAdditionalProperties = true
+          )
+
+        def openApiInformErrorResponseSchema: OpenApi3DerivedSchema =
+          new OpenApi3DerivedSchema(
+            pathForR2,
+            defaultJsonSubschemaName = "FullAmendErrorResponse",
+            metaSchemaValidation = Some(Valid(())),
+            restrictAdditionalProperties = true
+          )
+
+        def openApiInformResponseSchema: OpenApi3DerivedSchema =
+          new OpenApi3DerivedSchema(
+            pathForR2,
+            defaultJsonSubschemaName = "FullAmendResponse",
+            metaSchemaValidation = Some(Valid(())),
+            restrictAdditionalProperties = true
+          )
+
+        def openApiResponseGeneralFailureSchema: OpenApi3DerivedSchema =
+          new OpenApi3DerivedSchema(
+            pathForR2,
+            defaultJsonSubschemaName = "ErrorResponse",
+            metaSchemaValidation = Some(Valid(())),
+            restrictAdditionalProperties = true
+          )
+      }
     }
 
     /** For now, this applies to all responses from the proxy */

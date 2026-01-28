@@ -36,7 +36,7 @@ object TtpFullAmendRequestR1 {
     Json.format[TtpFullAmendRequestR1]
   }
 }
-case class FullAmendRequestR2(
+case class TtpFullAmendRequestR2(
   identifications: NonEmptyList[Identification],
   originalPaymentPlan: OriginalPaymentPlan,
   newPaymentPlan: NewPaymentPlan,
@@ -45,10 +45,10 @@ case class FullAmendRequestR2(
   transitioned: TransitionedIndicator
 )
 
-object FullAmendRequestR2 {
-  implicit val format: OFormat[FullAmendRequestR2] = {
+object TtpFullAmendRequestR2 {
+  implicit val format: OFormat[TtpFullAmendRequestR2] = {
     implicit def nelFormat[T: Format]: Format[NonEmptyList[T]] = CatsNonEmptyListJson.nonEmptyListFormat[T]
 
-    Json.format[FullAmendRequestR2]
+    Json.format[TtpFullAmendRequestR2]
   }
 }

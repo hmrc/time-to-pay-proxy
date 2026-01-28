@@ -101,7 +101,7 @@ final class TtpFullAmendSuccessfulResponseSpec extends AnyFreeSpec {
         }
 
         "writes JSON compatible with our schema" in {
-          val schema = Validators.TimeToPayProxy.TtpFullAmend.openApiFullAmendResponseSchema
+          val schema = Validators.TimeToPayProxy.TtpFullAmend.Live.openApiFullAmendResponseSchema
           val writtenJson: JsValue = writerToClients.writes(obj)
 
           schema.validateAndGetErrors(writtenJson) shouldBe Nil
@@ -117,7 +117,7 @@ final class TtpFullAmendSuccessfulResponseSpec extends AnyFreeSpec {
         }
 
         "writes JSON compatible with our schema" in {
-          val schema = Validators.TimeToPayProxy.TtpFullAmend.openApiFullAmendResponseSchema
+          val schema = Validators.TimeToPayProxy.TtpFullAmend.Live.openApiFullAmendResponseSchema
           val writtenJson: JsValue = writerToClients.writes(obj)
 
           schema.validateAndGetErrors(writtenJson) shouldBe Nil

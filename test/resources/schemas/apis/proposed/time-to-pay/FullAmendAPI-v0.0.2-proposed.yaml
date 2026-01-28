@@ -18,7 +18,7 @@ tags:
   - name: individuals
     description: Full amend TTP plans and inform HoDs (CESA and ETMP)
 paths:
-  /individuals/time-to-pay-proxy/full-amend:
+  /debts/time-to-pay/full-amend:
     post:
       tags:
         - individuals
@@ -42,7 +42,7 @@ paths:
             example: f0bd1f32-de51-45cc-9b18-0520d6e3ab1a
       security:
         - applicationRestricted:
-            - write:time-to-pay-proxy
+            - write:time-to-pay
       requestBody:
         description: Request body with fields to amend a TTP in CESA and ETMP.
         required: true
@@ -258,7 +258,7 @@ components:
         clientCredentials:
           tokenUrl: https://api.service.hmrc.gov.uk/oauth/token
           scopes:
-            read:time-to-pay-proxy: read ttp data
+            read:time-to-pay: read ttp data
   schemas:
     ErrorResponse:
       title: ErrorResponse

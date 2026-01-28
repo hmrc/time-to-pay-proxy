@@ -30,7 +30,7 @@ import java.time.LocalDate
 
 final class TtpFullAmendRequestSpec extends AnyFreeSpec {
 
-  "FullAmendRequest" - {
+  "FullAmendRequestR1" - {
     object TestData {
       object WithOnlySomes {
         def obj: TtpFullAmendRequestR1 = TtpFullAmendRequestR1(
@@ -189,7 +189,7 @@ final class TtpFullAmendRequestSpec extends AnyFreeSpec {
         }
 
         "was tested against JSON compatible with our schema" in {
-          val schema = Validators.TimeToPayProxy.TtpFullAmend.openApiRequestSchema
+          val schema = Validators.TimeToPayProxy.TtpFullAmend.Live.openApiRequestSchema
 
           schema.validateAndGetErrors(json) shouldBe Nil
         }
@@ -204,7 +204,270 @@ final class TtpFullAmendRequestSpec extends AnyFreeSpec {
         }
 
         "was tested against JSON compatible with our schema" in {
-          val schema = Validators.TimeToPayProxy.TtpFullAmend.openApiRequestSchema
+          val schema = Validators.TimeToPayProxy.TtpFullAmend.Live.openApiRequestSchema
+
+          schema.validateAndGetErrors(json) shouldBe Nil
+        }
+      }
+    }
+  }
+
+  "FullAmendRequestR2" - {
+    object TestData {
+      object WithOnlySomes {
+        def obj: TtpFullAmendRequestR2 = TtpFullAmendRequestR2(
+          identifications = NonEmptyList.of(
+            Identification(
+              idType = IdType("idtype"),
+              idValue = IdValue("idvalue")
+            )
+          ),
+          originalPaymentPlan = OriginalPaymentPlan(
+            arrangementAgreedDate = ArrangementAgreedDate(LocalDate.parse("2020-01-02")),
+            ttpEndDate = TtpEndDate(LocalDate.parse("2020-02-04")),
+            frequency = FrequencyLowercase.Weekly,
+            initialPaymentDate = Some(InitialPaymentDate(LocalDate.parse("2020-04-06"))),
+            initialPaymentAmount = Some(GbpPounds.createOrThrow(100.12)),
+            ddiReference = Some(DdiReference("TestDDIReference")),
+            debtItemCharges = NonEmptyList.of(
+              DebtItemChargeReference(
+                DebtItemChargeId("One"),
+                ChargeSourceSAOnly.CESA
+              )
+            )
+          ),
+          newPaymentPlan = NewPaymentPlan(
+            arrangementAgreedDate = ArrangementAgreedDate(LocalDate.parse("2020-01-02")),
+            ttpEndDate = TtpEndDate(LocalDate.parse("2020-02-04")),
+            frequency = FrequencyLowercase.Weekly,
+            initialPaymentDate = Some(InitialPaymentDate(LocalDate.parse("2020-04-06"))),
+            initialPaymentAmount = Some(GbpPounds.createOrThrow(100.12)),
+            ddiReference = Some(DdiReference("TestDDIReference")),
+            debtItemCharges = NonEmptyList.of(
+              NewDebtItemChargeReference(
+                DebtItemChargeId("One"),
+                ChargeSourceSAOnly.CESA,
+                ChargeAmendment.Removed
+              )
+            )
+          ),
+          instalments = NonEmptyList.of(
+            SaOnlyInstalment(
+              dueDate = InstalmentDueDate(LocalDate.parse("2020-05-07")),
+              amountDue = GbpPounds.createOrThrow(200.34)
+            )
+          ),
+          channelIdentifier = ChannelIdentifier.SelfService,
+          transitioned = TransitionedIndicator(true)
+        )
+
+        def json: JsValue = Json.parse(
+          """{
+            |  "channelIdentifier" : "selfService",
+            |  "identifications" : [
+            |    {
+            |      "idType" : "idtype",
+            |      "idValue" : "idvalue"
+            |    }
+            |  ],
+            |  "instalments" : [
+            |    {
+            |      "amountDue" : 200.34,
+            |      "dueDate" : "2020-05-07"
+            |    }
+            |  ],
+            |    "originalPaymentPlan": {
+            |    "arrangementAgreedDate" : "2020-01-02",
+            |    "frequency" : "weekly",
+            |    "initialPaymentAmount" : 100.12,
+            |    "initialPaymentDate" : "2020-04-06",
+            |    "ttpEndDate" : "2020-02-04",
+            |    "ddiReference" : "TestDDIReference",
+            |    "debtItemCharges": [
+            |    {
+            |       "debtItemChargeId": "One",
+            |        "chargeSource": "CESA"
+            |    }
+            |    ]
+            |  },
+            |    "newPaymentPlan": {
+            |    "arrangementAgreedDate" : "2020-01-02",
+            |    "frequency" : "weekly",
+            |    "initialPaymentAmount" : 100.12,
+            |    "initialPaymentDate" : "2020-04-06",
+            |    "ttpEndDate" : "2020-02-04",
+            |    "ddiReference" : "TestDDIReference",
+            |    "debtItemCharges": [
+            |    {
+            |       "debtItemChargeId": "One",
+            |        "chargeSource": "CESA",
+            |        "chargeAmendment": "removed"
+            |    }
+            |    ]
+            |  },
+            |  "transitioned" : true
+            |}
+            |""".stripMargin
+        )
+      }
+
+      object With0SomeOnEachPath {
+        def obj: TtpFullAmendRequestR2 = TtpFullAmendRequestR2(
+          identifications = NonEmptyList.of(
+            Identification(
+              idType = IdType("idtype"),
+              idValue = IdValue("idvalue")
+            )
+          ),
+          originalPaymentPlan = OriginalPaymentPlan(
+            arrangementAgreedDate = ArrangementAgreedDate(LocalDate.parse("2020-01-02")),
+            ttpEndDate = TtpEndDate(LocalDate.parse("2020-02-04")),
+            frequency = FrequencyLowercase.Weekly,
+            initialPaymentDate = None,
+            initialPaymentAmount = None,
+            ddiReference = None,
+            debtItemCharges = NonEmptyList.of(
+              DebtItemChargeReference(
+                DebtItemChargeId("One"),
+                ChargeSourceSAOnly.CESA
+              )
+            )
+          ),
+          newPaymentPlan = NewPaymentPlan(
+            arrangementAgreedDate = ArrangementAgreedDate(LocalDate.parse("2020-01-02")),
+            ttpEndDate = TtpEndDate(LocalDate.parse("2020-02-04")),
+            frequency = FrequencyLowercase.Weekly,
+            initialPaymentDate = None,
+            initialPaymentAmount = None,
+            ddiReference = None,
+            debtItemCharges = NonEmptyList.of(
+              NewDebtItemChargeReference(
+                DebtItemChargeId("Two"),
+                ChargeSourceSAOnly.ETMP,
+                ChargeAmendment.New
+              )
+            )
+          ),
+          instalments = NonEmptyList.of(
+            SaOnlyInstalment(
+              dueDate = InstalmentDueDate(LocalDate.parse("2020-05-07")),
+              amountDue = GbpPounds.createOrThrow(200.34)
+            )
+          ),
+          channelIdentifier = ChannelIdentifier.SelfService,
+          transitioned = TransitionedIndicator(true)
+        )
+
+        def json: JsValue = Json.parse(
+          """{
+            |  "channelIdentifier" : "selfService",
+            |  "identifications" : [
+            |    {
+            |      "idType" : "idtype",
+            |      "idValue" : "idvalue"
+            |    }
+            |  ],
+            |  "instalments" : [
+            |    {
+            |      "amountDue" : 200.34,
+            |      "dueDate" : "2020-05-07"
+            |    }
+            |  ],
+            |  "originalPaymentPlan" : {
+            |    "arrangementAgreedDate" : "2020-01-02",
+            |    "frequency" : "weekly",
+            |    "ttpEndDate" : "2020-02-04",
+            |    "debtItemCharges": [
+            |     {
+            |        "debtItemChargeId": "One",
+            |         "chargeSource": "CESA"
+            |     }
+            |    ]
+            |   },
+            |   "newPaymentPlan" : {
+            |    "arrangementAgreedDate" : "2020-01-02",
+            |    "frequency" : "weekly",
+            |    "ttpEndDate" : "2020-02-04",
+            |    "debtItemCharges": [
+            |     {
+            |        "debtItemChargeId": "Two",
+            |         "chargeSource": "ETMP",
+            |         "chargeAmendment": "new"
+            |     }
+            |    ]
+            |  },
+            |  "transitioned" : true
+            |}
+            |""".stripMargin
+        )
+      }
+
+    }
+
+    "implicit JSON writer (data going to time-to-pay)" - {
+      def writerToTtp: Writes[TtpFullAmendRequestR2] = implicitly[Writes[TtpFullAmendRequestR2]]
+
+      "when all the optional fields are fully populated" - {
+        def json: JsValue = TestData.WithOnlySomes.json
+        def obj: TtpFullAmendRequestR2 = TestData.WithOnlySomes.obj
+
+        "writes the correct JSON" in {
+          writerToTtp.writes(obj) shouldBeEquivalentTo json
+        }
+
+        "writes JSON compatible with the time-to-pay schema" in {
+          val schema = Validators.TimeToPay.TtpFullAmend.Proposed.openApiRequestSchema
+          val writtenJson: JsValue = writerToTtp.writes(obj)
+
+          schema.validateAndGetErrors(writtenJson) shouldBe Nil
+        }
+      }
+
+      "when none of the optional fields are populated" - {
+        def json: JsValue = TestData.With0SomeOnEachPath.json
+        def obj: TtpFullAmendRequestR2 = TestData.With0SomeOnEachPath.obj
+
+        "writes the correct JSON" in {
+          writerToTtp.writes(obj) shouldBeEquivalentTo json
+        }
+
+        "writes JSON compatible with the time-to-pay schema" in {
+          val schema = Validators.TimeToPay.TtpFullAmend.Proposed.openApiRequestSchema
+          val writtenJson: JsValue = writerToTtp.writes(obj)
+
+          schema.validateAndGetErrors(writtenJson) shouldBe Nil
+        }
+      }
+    }
+
+    "implicit JSON reader (data coming from our clients)" - {
+      def readerFromClients: Reads[TtpFullAmendRequestR2] = implicitly[Reads[TtpFullAmendRequestR2]]
+
+      "when all the optional fields are fully populated" - {
+        def json: JsValue = TestData.WithOnlySomes.json
+        def obj: TtpFullAmendRequestR2 = TestData.WithOnlySomes.obj
+
+        "reads the JSON correctly" in {
+          readerFromClients.reads(json) shouldBe JsSuccess(obj)
+        }
+
+        "was tested against JSON compatible with our schema" in {
+          val schema = Validators.TimeToPayProxy.TtpFullAmend.Proposed.openApiRequestSchema
+
+          schema.validateAndGetErrors(json) shouldBe Nil
+        }
+      }
+
+      "when none of the optional fields are populated" - {
+        def json: JsValue = TestData.With0SomeOnEachPath.json
+        def obj: TtpFullAmendRequestR2 = TestData.With0SomeOnEachPath.obj
+
+        "reads the JSON correctly" in {
+          readerFromClients.reads(json) shouldBe JsSuccess(obj)
+        }
+
+        "was tested against JSON compatible with our schema" in {
+          val schema = Validators.TimeToPayProxy.TtpFullAmend.Proposed.openApiRequestSchema
 
           schema.validateAndGetErrors(json) shouldBe Nil
         }
