@@ -27,7 +27,7 @@ import uk.gov.hmrc.timetopayproxy.config.FeatureSwitch
 import uk.gov.hmrc.timetopayproxy.models._
 import uk.gov.hmrc.timetopayproxy.models.affordablequotes.{ AffordableQuoteResponse, AffordableQuotesRequest }
 import uk.gov.hmrc.timetopayproxy.models.currency.GbpPounds
-import uk.gov.hmrc.timetopayproxy.models.featureSwitches.SARelease2Enabled
+import uk.gov.hmrc.timetopayproxy.models.featureSwitches.SaRelease2Enabled
 import uk.gov.hmrc.timetopayproxy.models.saonly.chargeInfoApi._
 import uk.gov.hmrc.timetopayproxy.models.saonly.common._
 import uk.gov.hmrc.timetopayproxy.models.saonly.common.apistatus.{ ApiErrorResponse, ApiName, ApiStatus, ApiStatusCode }
@@ -35,7 +35,6 @@ import uk.gov.hmrc.timetopayproxy.models.saonly.ttpcancel.{ CancellationDate, Tt
 import uk.gov.hmrc.timetopayproxy.models.saonly.ttpfullamend.{ TtpFullAmendRequest, TtpFullAmendSuccessfulResponse }
 import uk.gov.hmrc.timetopayproxy.models.saonly.ttpinform.{ TtpInformRequest, TtpInformSuccessfulResponse }
 import uk.gov.hmrc.timetopayproxy.support.IntegrationBaseSpec
-import com.github.tomakehurst.wiremock.http.RequestMethod.{ GET, POST, PUT }
 
 import java.time.{ Instant, LocalDate, LocalDateTime }
 import scala.concurrent.ExecutionContext
@@ -543,7 +542,7 @@ class TimeToPayProxyControllerEnrolmentAuthEnabledItSpec extends IntegrationBase
             )
           )
         ),
-        chargeTypesExcluded = false,
+        chargeTypesExcluded = Some(false),
         customerSignals = Some(
           List(
             Signal(SignalType("Rls"), SignalValue("signal value"), Some("description")),
@@ -559,7 +558,7 @@ class TimeToPayProxyControllerEnrolmentAuthEnabledItSpec extends IntegrationBase
 
           (() => mockFeatureSwitch.saRelease2Enabled)
             .expects()
-            .returning(SARelease2Enabled(true))
+            .returning(SaRelease2Enabled(true))
 
           stubRequest(
             httpMethod = POST,

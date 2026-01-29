@@ -19,7 +19,7 @@ info:
       | 0.3.5 | 09-07-2025 | Alex Olkhovskiy | Fix a dash bug in customer type|
       | 0.3.6 | 21-07-2025 | Alex Olkhovskiy | remove country and altFormats and make individualDetails mandatory and indentations non-empty  for charge-info|
       | 0.3.7 | 21-07-2025 | Alex Olkhovskiy | Added 422 error response to charge-info endpoint|
-      | 0.3.8 | 08-01-2026 | Alex Olkhovskiy | Added customerSignals to charge-info response to match proxy spec |
+      | 0.3.8 | 06-01-2026 | Alex Olkhovskiy | DTD-2985: Add chargeTypesExcluded field to charge-info response |
   version: 0.3.8
 servers:
   - url: https://time-to-pay-eligibility.protected.mdtp
@@ -744,6 +744,9 @@ components:
               - addressLine1
               - addressType
               - postcodeHistory
+        chargeTypesExcluded:
+          type: boolean
+          description: Indicates whether any charge types have been excluded from the response
         customerSignals:
           type: array
           items:
@@ -839,6 +842,7 @@ components:
         - chargeTypeAssessment
         - addresses
         - individualDetails
+        - chargeTypesExcluded
     ErrorResponse:
       type: object
       description: A JSON Error Schema for ErrorResponse
@@ -1020,6 +1024,7 @@ components:
             postcodeHistory:
               - addressPostcode: BN12 9ER
                 postcodeDate: '2022-04-30'
+        chargeTypesExcluded: false
         customerSignals:
           - signalType: Insolvency
             signalValue: 'true'

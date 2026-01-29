@@ -282,7 +282,7 @@ object Validators {
       //   https://github.com/hmrc/time-to-pay/blob/82c464a0fa7ba93ac869ee361f497fd92a206ed6/resources/public/api/conf/1.0/affordable-quotes-api-v1.3.0.yaml
       // Official location:
       //   https://github.com/hmrc/time-to-pay/tree/main/resources/public/api/conf/1.0
-      private val path = "test/resources/schemas/apis/time-to-pay/affordable-quotes-api-v1.3.0.yaml"
+      private val path = "test/resources/schemas/apis/live/time-to-pay/affordable-quotes-api-v1.3.0.yaml"
 
       def openApiRequestSchema: OpenApi3DerivedSchema =
         new OpenApi3DerivedSchema(
@@ -306,7 +306,7 @@ object Validators {
       //   https://github.com/hmrc/time-to-pay/blob/7d0903506524411871930c3a3dc81899b58c7985/resources/public/api/conf/1.0/CancelAPI-v0.0.1.yaml
       // Official location:
       //   https://github.com/hmrc/time-to-pay/tree/main/resources/public/api/conf/1.0
-      private val path = "test/resources/schemas/apis/time-to-pay/CancelAPI-v0.0.1.yaml"
+      private val path = "test/resources/schemas/apis/live/time-to-pay/CancelAPI-v0.0.1.yaml"
 
       def openApiRequestSchema: OpenApi3DerivedSchema =
         new OpenApi3DerivedSchema(
@@ -346,7 +346,7 @@ object Validators {
       //   https://github.com/hmrc/time-to-pay/blob/af176ffca7a0bb85bb6c180d9eff0d2d6755a37a/resources/public/api/conf/1.0/InformAPI-v0.0.1.yaml
       // Official location:
       //   https://github.com/hmrc/time-to-pay/blob/main/resources/public/api/conf/1.0
-      private val path = "test/resources/schemas/apis/time-to-pay/InformAPI-v0.0.1.yaml"
+      private val path = "test/resources/schemas/apis/live/time-to-pay/InformAPI-v0.0.1.yaml"
 
       def openApiRequestSchema: OpenApi3DerivedSchema =
         new OpenApi3DerivedSchema(
@@ -386,7 +386,7 @@ object Validators {
       //   https://github.com/hmrc/time-to-pay/blob/af176ffca7a0bb85bb6c180d9eff0d2d6755a37a/resources/public/api/conf/1.0/InformAPI-v0.0.1.yaml
       // Official location:
       //   https://github.com/hmrc/time-to-pay/blob/main/resources/public/api/conf/1.0
-      private val path = "test/resources/schemas/apis/time-to-pay/InformAPI-v0.0.3-proposed.yaml"
+      private val path = "test/resources/schemas/apis/proposed/time-to-pay/InformAPI-v0.0.3-proposed.yaml"
 
       def openApiRequestSchema: OpenApi3DerivedSchema =
         new OpenApi3DerivedSchema(
@@ -426,7 +426,7 @@ object Validators {
       //   https://github.com/hmrc/time-to-pay/blob/fe8fee3d7dead5d6241d7d085cff4179ea5834ef/resources/public/api/conf/1.0/FullAmendAPI-v0.0.1.yaml
       // Official location:
       //   https://github.com/hmrc/time-to-pay/tree/main/resources/public/api/conf/1.0
-      private val path = "test/resources/schemas/apis/time-to-pay/FullAmendAPI-v0.0.1.yaml"
+      private val path = "test/resources/schemas/apis/live/time-to-pay/FullAmendAPI-v0.0.1.yaml"
 
       def openApiRequestSchema: OpenApi3DerivedSchema =
         new OpenApi3DerivedSchema(

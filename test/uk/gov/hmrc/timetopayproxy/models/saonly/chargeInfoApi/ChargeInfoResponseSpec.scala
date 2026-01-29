@@ -22,7 +22,7 @@ import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.should.Matchers._
 import play.api.libs.json._
 import uk.gov.hmrc.timetopayproxy.config.FeatureSwitch
-import uk.gov.hmrc.timetopayproxy.models.featureSwitches.SARelease2Enabled
+import uk.gov.hmrc.timetopayproxy.models.featureSwitches.SaRelease2Enabled
 import uk.gov.hmrc.timetopayproxy.models.{ IdType, IdValue, Identification }
 import uk.gov.hmrc.timetopayproxy.testutils.JsonAssertionOps.RichJsValueWithAssertions
 import uk.gov.hmrc.timetopayproxy.testutils.schematestutils.Validators
@@ -38,41 +38,6 @@ class ChargeInfoResponseSpec extends AnyFreeSpec with MockFactory {
         identification = List(
           Identification(idType = IdType("ID_TYPE"), idValue = IdValue("ID_VALUE"))
         ),
-        individualDetails = IndividualDetails(
-          title = Some(Title("Mr")),
-          firstName = Some(FirstName("John")),
-          lastName = Some(LastName("Doe")),
-          dateOfBirth = Some(DateOfBirth(LocalDate.parse("1980-01-01"))),
-          districtNumber = Some(DistrictNumber("1234")),
-          customerType = CustomerType.ItsaMigtrated,
-          transitionToCDCS = TransitionToCdcs(value = true)
-        ),
-        addresses = List(
-          Address(
-            addressType = AddressType("Address Type"),
-            addressLine1 = AddressLine1("Address Line 1"),
-            addressLine2 = Some(AddressLine2("Address Line 2")),
-            addressLine3 = Some(AddressLine3("Address Line 3")),
-            addressLine4 = Some(AddressLine4("Address Line 4")),
-            rls = Some(Rls(true)),
-            contactDetails = Some(
-              ContactDetails(
-                telephoneNumber = Some(TelephoneNumber("telephone-number")),
-                fax = Some(Fax("fax-number")),
-                mobile = Some(Mobile("mobile-number")),
-                emailAddress = Some(Email("email address")),
-                emailSource = Some(EmailSource("email source"))
-              )
-            ),
-            postCode = Some(ChargeInfoPostCode("AB12 3CD")),
-            postcodeHistory = List(
-              PostCodeInfo(
-                addressPostcode = ChargeInfoPostCode("AB12 3CD"),
-                postcodeDate = LocalDate.parse("2020-01-01")
-              )
-            )
-          )
-        ),
         chargeTypeAssessment = List(
           ChargeTypeAssessment(
             debtTotalAmount = BigInt(1000),
@@ -102,6 +67,41 @@ class ChargeInfoResponseSpec extends AnyFreeSpec with MockFactory {
               )
             )
           )
+        ),
+        addresses = List(
+          Address(
+            addressType = AddressType("Address Type"),
+            addressLine1 = AddressLine1("Address Line 1"),
+            addressLine2 = Some(AddressLine2("Address Line 2")),
+            addressLine3 = Some(AddressLine3("Address Line 3")),
+            addressLine4 = Some(AddressLine4("Address Line 4")),
+            rls = Some(Rls(true)),
+            contactDetails = Some(
+              ContactDetails(
+                telephoneNumber = Some(TelephoneNumber("telephone-number")),
+                fax = Some(Fax("fax-number")),
+                mobile = Some(Mobile("mobile-number")),
+                emailAddress = Some(Email("email address")),
+                emailSource = Some(EmailSource("email source"))
+              )
+            ),
+            postCode = Some(ChargeInfoPostCode("AB12 3CD")),
+            postcodeHistory = List(
+              PostCodeInfo(
+                addressPostcode = ChargeInfoPostCode("AB12 3CD"),
+                postcodeDate = LocalDate.parse("2020-01-01")
+              )
+            )
+          )
+        ),
+        individualDetails = IndividualDetails(
+          title = Some(Title("Mr")),
+          firstName = Some(FirstName("John")),
+          lastName = Some(LastName("Doe")),
+          dateOfBirth = Some(DateOfBirth(LocalDate.parse("1980-01-01"))),
+          districtNumber = Some(DistrictNumber("1234")),
+          customerType = CustomerType.ItsaMigtrated,
+          transitionToCDCS = TransitionToCdcs(value = true)
         ),
         chargeTypesExcluded = Some(false)
       )
@@ -111,41 +111,6 @@ class ChargeInfoResponseSpec extends AnyFreeSpec with MockFactory {
         identification = List(
           Identification(idType = IdType("ID_TYPE"), idValue = IdValue("ID_VALUE"))
         ),
-        individualDetails = IndividualDetails(
-          title = Some(Title("Mr")),
-          firstName = Some(FirstName("John")),
-          lastName = Some(LastName("Doe")),
-          dateOfBirth = Some(DateOfBirth(LocalDate.parse("1980-01-01"))),
-          districtNumber = Some(DistrictNumber("1234")),
-          customerType = CustomerType.ItsaMigtrated,
-          transitionToCDCS = TransitionToCdcs(value = true)
-        ),
-        addresses = List(
-          Address(
-            addressType = AddressType("Address Type"),
-            addressLine1 = AddressLine1("Address Line 1"),
-            addressLine2 = Some(AddressLine2("Address Line 2")),
-            addressLine3 = Some(AddressLine3("Address Line 3")),
-            addressLine4 = Some(AddressLine4("Address Line 4")),
-            rls = Some(Rls(true)),
-            contactDetails = Some(
-              ContactDetails(
-                telephoneNumber = Some(TelephoneNumber("telephone-number")),
-                fax = Some(Fax("fax-number")),
-                mobile = Some(Mobile("mobile-number")),
-                emailAddress = Some(Email("email address")),
-                emailSource = Some(EmailSource("email source"))
-              )
-            ),
-            postCode = Some(ChargeInfoPostCode("AB12 3CD")),
-            postcodeHistory = List(
-              PostCodeInfo(
-                addressPostcode = ChargeInfoPostCode("AB12 3CD"),
-                postcodeDate = LocalDate.parse("2020-01-01")
-              )
-            )
-          )
-        ),
         chargeTypeAssessment = List(
           ChargeTypeAssessment(
             debtTotalAmount = BigInt(1000),
@@ -176,7 +141,42 @@ class ChargeInfoResponseSpec extends AnyFreeSpec with MockFactory {
             )
           )
         ),
-        chargeTypesExcluded = false,
+        addresses = List(
+          Address(
+            addressType = AddressType("Address Type"),
+            addressLine1 = AddressLine1("Address Line 1"),
+            addressLine2 = Some(AddressLine2("Address Line 2")),
+            addressLine3 = Some(AddressLine3("Address Line 3")),
+            addressLine4 = Some(AddressLine4("Address Line 4")),
+            rls = Some(Rls(true)),
+            contactDetails = Some(
+              ContactDetails(
+                telephoneNumber = Some(TelephoneNumber("telephone-number")),
+                fax = Some(Fax("fax-number")),
+                mobile = Some(Mobile("mobile-number")),
+                emailAddress = Some(Email("email address")),
+                emailSource = Some(EmailSource("email source"))
+              )
+            ),
+            postCode = Some(ChargeInfoPostCode("AB12 3CD")),
+            postcodeHistory = List(
+              PostCodeInfo(
+                addressPostcode = ChargeInfoPostCode("AB12 3CD"),
+                postcodeDate = LocalDate.parse("2020-01-01")
+              )
+            )
+          )
+        ),
+        individualDetails = IndividualDetails(
+          title = Some(Title("Mr")),
+          firstName = Some(FirstName("John")),
+          lastName = Some(LastName("Doe")),
+          dateOfBirth = Some(DateOfBirth(LocalDate.parse("1980-01-01"))),
+          districtNumber = Some(DistrictNumber("1234")),
+          customerType = CustomerType.ItsaMigtrated,
+          transitionToCDCS = TransitionToCdcs(value = true)
+        ),
+        chargeTypesExcluded = Some(false),
         customerSignals = Some(
           List(
             Signal(SignalType("Rls"), SignalValue("signal value"), Some("description")),
@@ -188,31 +188,14 @@ class ChargeInfoResponseSpec extends AnyFreeSpec with MockFactory {
       def r1Json: JsObject = Json
         .parse(
           """{
-            |  "addresses" : [
+            |  "processingDateTime" : "2025-07-02T15:00:41.689",
+            |    "identification" : [
             |    {
-            |      "addressLine1" : "Address Line 1",
-            |      "addressLine2" : "Address Line 2",
-            |      "addressLine3" : "Address Line 3",
-            |      "addressLine4" : "Address Line 4",
-            |      "addressType" : "Address Type",
-            |      "contactDetails" : {
-            |        "emailAddress" : "email address",
-            |        "emailSource" : "email source",
-            |        "fax" : "fax-number",
-            |        "mobile" : "mobile-number",
-            |        "telephoneNumber" : "telephone-number"
-            |      },
-            |      "postCode" : "AB12 3CD",
-            |      "postcodeHistory" : [
-            |        {
-            |          "addressPostcode" : "AB12 3CD",
-            |          "postcodeDate" : "2020-01-01"
-            |        }
-            |      ],
-            |      "rls" : true
+            |      "idType" : "ID_TYPE",
+            |      "idValue" : "ID_VALUE"
             |    }
             |  ],
-            |  "chargeTypeAssessment" : [
+            |    "chargeTypeAssessment" : [
             |    {
             |      "chargeReference" : "CHARGE REFERENCE",
             |      "charges" : [
@@ -242,10 +225,28 @@ class ChargeInfoResponseSpec extends AnyFreeSpec with MockFactory {
             |      "parentChargeReference" : "PARENT CHARGE REF"
             |    }
             |  ],
-            |  "identification" : [
+            |  "addresses" : [
             |    {
-            |      "idType" : "ID_TYPE",
-            |      "idValue" : "ID_VALUE"
+            |      "addressLine1" : "Address Line 1",
+            |      "addressLine2" : "Address Line 2",
+            |      "addressLine3" : "Address Line 3",
+            |      "addressLine4" : "Address Line 4",
+            |      "addressType" : "Address Type",
+            |      "contactDetails" : {
+            |        "emailAddress" : "email address",
+            |        "emailSource" : "email source",
+            |        "fax" : "fax-number",
+            |        "mobile" : "mobile-number",
+            |        "telephoneNumber" : "telephone-number"
+            |      },
+            |      "postCode" : "AB12 3CD",
+            |      "postcodeHistory" : [
+            |        {
+            |          "addressPostcode" : "AB12 3CD",
+            |          "postcodeDate" : "2020-01-01"
+            |        }
+            |      ],
+            |      "rls" : true
             |    }
             |  ],
             |  "individualDetails" : {
@@ -257,7 +258,6 @@ class ChargeInfoResponseSpec extends AnyFreeSpec with MockFactory {
             |    "title" : "Mr",
             |    "transitionToCDCS" : true
             |  },
-            |  "processingDateTime" : "2025-07-02T15:00:41.689",
             |  "chargeTypesExcluded" : false
             |}
             |""".stripMargin
@@ -288,41 +288,6 @@ class ChargeInfoResponseSpec extends AnyFreeSpec with MockFactory {
         identification = List(
           Identification(idType = IdType("ID_TYPE"), idValue = IdValue("ID_VALUE"))
         ),
-        individualDetails = IndividualDetails(
-          title = None,
-          firstName = None,
-          lastName = None,
-          dateOfBirth = None,
-          districtNumber = None,
-          customerType = CustomerType.ItsaMigtrated,
-          transitionToCDCS = TransitionToCdcs(value = true)
-        ),
-        addresses = List(
-          Address(
-            addressType = AddressType("Address Type"),
-            addressLine1 = AddressLine1("Address Line 1"),
-            addressLine2 = Some(AddressLine2("Address Line 2")),
-            addressLine3 = Some(AddressLine3("Address Line 3")),
-            addressLine4 = Some(AddressLine4("Address Line 4")),
-            rls = Some(Rls(true)),
-            contactDetails = Some(
-              ContactDetails(
-                telephoneNumber = None,
-                fax = None,
-                mobile = None,
-                emailAddress = None,
-                emailSource = None
-              )
-            ),
-            postCode = Some(ChargeInfoPostCode("AB12 3CD")),
-            postcodeHistory = List(
-              PostCodeInfo(
-                addressPostcode = ChargeInfoPostCode("AB12 3CD"),
-                postcodeDate = LocalDate.parse("2020-01-01")
-              )
-            )
-          )
-        ),
         chargeTypeAssessment = List(
           ChargeTypeAssessment(
             debtTotalAmount = BigInt(1000),
@@ -352,6 +317,41 @@ class ChargeInfoResponseSpec extends AnyFreeSpec with MockFactory {
               )
             )
           )
+        ),
+        addresses = List(
+          Address(
+            addressType = AddressType("Address Type"),
+            addressLine1 = AddressLine1("Address Line 1"),
+            addressLine2 = Some(AddressLine2("Address Line 2")),
+            addressLine3 = Some(AddressLine3("Address Line 3")),
+            addressLine4 = Some(AddressLine4("Address Line 4")),
+            rls = Some(Rls(true)),
+            contactDetails = Some(
+              ContactDetails(
+                telephoneNumber = None,
+                fax = None,
+                mobile = None,
+                emailAddress = None,
+                emailSource = None
+              )
+            ),
+            postCode = Some(ChargeInfoPostCode("AB12 3CD")),
+            postcodeHistory = List(
+              PostCodeInfo(
+                addressPostcode = ChargeInfoPostCode("AB12 3CD"),
+                postcodeDate = LocalDate.parse("2020-01-01")
+              )
+            )
+          )
+        ),
+        individualDetails = IndividualDetails(
+          title = None,
+          firstName = None,
+          lastName = None,
+          dateOfBirth = None,
+          districtNumber = None,
+          customerType = CustomerType.ItsaMigtrated,
+          transitionToCDCS = TransitionToCdcs(value = true)
         ),
         chargeTypesExcluded = Some(false)
       )
@@ -361,41 +361,6 @@ class ChargeInfoResponseSpec extends AnyFreeSpec with MockFactory {
         identification = List(
           Identification(idType = IdType("ID_TYPE"), idValue = IdValue("ID_VALUE"))
         ),
-        individualDetails = IndividualDetails(
-          title = None,
-          firstName = None,
-          lastName = None,
-          dateOfBirth = None,
-          districtNumber = None,
-          customerType = CustomerType.ItsaMigtrated,
-          transitionToCDCS = TransitionToCdcs(value = true)
-        ),
-        addresses = List(
-          Address(
-            addressType = AddressType("Address Type"),
-            addressLine1 = AddressLine1("Address Line 1"),
-            addressLine2 = Some(AddressLine2("Address Line 2")),
-            addressLine3 = Some(AddressLine3("Address Line 3")),
-            addressLine4 = Some(AddressLine4("Address Line 4")),
-            rls = Some(Rls(true)),
-            contactDetails = Some(
-              ContactDetails(
-                telephoneNumber = None,
-                fax = None,
-                mobile = None,
-                emailAddress = None,
-                emailSource = None
-              )
-            ),
-            postCode = Some(ChargeInfoPostCode("AB12 3CD")),
-            postcodeHistory = List(
-              PostCodeInfo(
-                addressPostcode = ChargeInfoPostCode("AB12 3CD"),
-                postcodeDate = LocalDate.parse("2020-01-01")
-              )
-            )
-          )
-        ),
         chargeTypeAssessment = List(
           ChargeTypeAssessment(
             debtTotalAmount = BigInt(1000),
@@ -426,7 +391,42 @@ class ChargeInfoResponseSpec extends AnyFreeSpec with MockFactory {
             )
           )
         ),
-        chargeTypesExcluded = false,
+        addresses = List(
+          Address(
+            addressType = AddressType("Address Type"),
+            addressLine1 = AddressLine1("Address Line 1"),
+            addressLine2 = Some(AddressLine2("Address Line 2")),
+            addressLine3 = Some(AddressLine3("Address Line 3")),
+            addressLine4 = Some(AddressLine4("Address Line 4")),
+            rls = Some(Rls(true)),
+            contactDetails = Some(
+              ContactDetails(
+                telephoneNumber = None,
+                fax = None,
+                mobile = None,
+                emailAddress = None,
+                emailSource = None
+              )
+            ),
+            postCode = Some(ChargeInfoPostCode("AB12 3CD")),
+            postcodeHistory = List(
+              PostCodeInfo(
+                addressPostcode = ChargeInfoPostCode("AB12 3CD"),
+                postcodeDate = LocalDate.parse("2020-01-01")
+              )
+            )
+          )
+        ),
+        individualDetails = IndividualDetails(
+          title = None,
+          firstName = None,
+          lastName = None,
+          dateOfBirth = None,
+          districtNumber = None,
+          customerType = CustomerType.ItsaMigtrated,
+          transitionToCDCS = TransitionToCdcs(value = true)
+        ),
+        chargeTypesExcluded = Some(false),
         customerSignals = Some(
           List(
             Signal(SignalType("Welsh Language Signal"), SignalValue("signal value"), None)
@@ -437,25 +437,14 @@ class ChargeInfoResponseSpec extends AnyFreeSpec with MockFactory {
       def r1Json: JsObject = Json
         .parse(
           """{
-            |  "addresses" : [
+            |  "processingDateTime" : "2025-07-02T15:00:41.689",
+            |    "identification" : [
             |    {
-            |      "addressLine1" : "Address Line 1",
-            |      "addressLine2" : "Address Line 2",
-            |      "addressLine3" : "Address Line 3",
-            |      "addressLine4" : "Address Line 4",
-            |      "addressType" : "Address Type",
-            |      "contactDetails" : { },
-            |      "postCode" : "AB12 3CD",
-            |      "postcodeHistory" : [
-            |        {
-            |          "addressPostcode" : "AB12 3CD",
-            |          "postcodeDate" : "2020-01-01"
-            |        }
-            |      ],
-            |      "rls" : true
+            |      "idType" : "ID_TYPE",
+            |      "idValue" : "ID_VALUE"
             |    }
             |  ],
-            |  "chargeTypeAssessment" : [
+            |    "chargeTypeAssessment" : [
             |    {
             |      "chargeReference" : "CHARGE REFERENCE",
             |      "charges" : [
@@ -485,17 +474,28 @@ class ChargeInfoResponseSpec extends AnyFreeSpec with MockFactory {
             |      "parentChargeReference" : "PARENT CHARGE REF"
             |    }
             |  ],
-            |  "identification" : [
+            |  "addresses" : [
             |    {
-            |      "idType" : "ID_TYPE",
-            |      "idValue" : "ID_VALUE"
+            |      "addressLine1" : "Address Line 1",
+            |      "addressLine2" : "Address Line 2",
+            |      "addressLine3" : "Address Line 3",
+            |      "addressLine4" : "Address Line 4",
+            |      "addressType" : "Address Type",
+            |      "contactDetails" : { },
+            |      "postCode" : "AB12 3CD",
+            |      "postcodeHistory" : [
+            |        {
+            |          "addressPostcode" : "AB12 3CD",
+            |          "postcodeDate" : "2020-01-01"
+            |        }
+            |      ],
+            |      "rls" : true
             |    }
             |  ],
             |  "individualDetails" : {
             |    "customerType" : "MTD(ITSA)",
             |    "transitionToCDCS" : true
             |  },
-            |  "processingDateTime" : "2025-07-02T15:00:41.689",
             |  "chargeTypesExcluded" : false
             |}
             |""".stripMargin
@@ -520,33 +520,6 @@ class ChargeInfoResponseSpec extends AnyFreeSpec with MockFactory {
         identification = List(
           Identification(idType = IdType("ID_TYPE"), idValue = IdValue("ID_VALUE"))
         ),
-        individualDetails = IndividualDetails(
-          title = None,
-          firstName = None,
-          lastName = None,
-          dateOfBirth = None,
-          districtNumber = None,
-          customerType = CustomerType.ItsaMigtrated,
-          transitionToCDCS = TransitionToCdcs(value = true)
-        ),
-        addresses = List(
-          Address(
-            addressType = AddressType("Address Type"),
-            addressLine1 = AddressLine1("Address Line 1"),
-            addressLine2 = None,
-            addressLine3 = None,
-            addressLine4 = None,
-            rls = None,
-            contactDetails = None,
-            postCode = None,
-            postcodeHistory = List(
-              PostCodeInfo(
-                addressPostcode = ChargeInfoPostCode("AB12 3CD"),
-                postcodeDate = LocalDate.parse("2020-01-01")
-              )
-            )
-          )
-        ),
         chargeTypeAssessment = List(
           ChargeTypeAssessment(
             debtTotalAmount = BigInt(1000),
@@ -576,6 +549,33 @@ class ChargeInfoResponseSpec extends AnyFreeSpec with MockFactory {
               )
             )
           )
+        ),
+        addresses = List(
+          Address(
+            addressType = AddressType("Address Type"),
+            addressLine1 = AddressLine1("Address Line 1"),
+            addressLine2 = None,
+            addressLine3 = None,
+            addressLine4 = None,
+            rls = None,
+            contactDetails = None,
+            postCode = None,
+            postcodeHistory = List(
+              PostCodeInfo(
+                addressPostcode = ChargeInfoPostCode("AB12 3CD"),
+                postcodeDate = LocalDate.parse("2020-01-01")
+              )
+            )
+          )
+        ),
+        individualDetails = IndividualDetails(
+          title = None,
+          firstName = None,
+          lastName = None,
+          dateOfBirth = None,
+          districtNumber = None,
+          customerType = CustomerType.ItsaMigtrated,
+          transitionToCDCS = TransitionToCdcs(value = true)
         ),
         chargeTypesExcluded = Some(false)
       )
@@ -585,33 +585,6 @@ class ChargeInfoResponseSpec extends AnyFreeSpec with MockFactory {
         identification = List(
           Identification(idType = IdType("ID_TYPE"), idValue = IdValue("ID_VALUE"))
         ),
-        individualDetails = IndividualDetails(
-          title = None,
-          firstName = None,
-          lastName = None,
-          dateOfBirth = None,
-          districtNumber = None,
-          customerType = CustomerType.ItsaMigtrated,
-          transitionToCDCS = TransitionToCdcs(value = true)
-        ),
-        addresses = List(
-          Address(
-            addressType = AddressType("Address Type"),
-            addressLine1 = AddressLine1("Address Line 1"),
-            addressLine2 = None,
-            addressLine3 = None,
-            addressLine4 = None,
-            rls = None,
-            contactDetails = None,
-            postCode = None,
-            postcodeHistory = List(
-              PostCodeInfo(
-                addressPostcode = ChargeInfoPostCode("AB12 3CD"),
-                postcodeDate = LocalDate.parse("2020-01-01")
-              )
-            )
-          )
-        ),
         chargeTypeAssessment = List(
           ChargeTypeAssessment(
             debtTotalAmount = BigInt(1000),
@@ -642,25 +615,47 @@ class ChargeInfoResponseSpec extends AnyFreeSpec with MockFactory {
             )
           )
         ),
-        chargeTypesExcluded = false,
+        addresses = List(
+          Address(
+            addressType = AddressType("Address Type"),
+            addressLine1 = AddressLine1("Address Line 1"),
+            addressLine2 = None,
+            addressLine3 = None,
+            addressLine4 = None,
+            rls = None,
+            contactDetails = None,
+            postCode = None,
+            postcodeHistory = List(
+              PostCodeInfo(
+                addressPostcode = ChargeInfoPostCode("AB12 3CD"),
+                postcodeDate = LocalDate.parse("2020-01-01")
+              )
+            )
+          )
+        ),
+        individualDetails = IndividualDetails(
+          title = None,
+          firstName = None,
+          lastName = None,
+          dateOfBirth = None,
+          districtNumber = None,
+          customerType = CustomerType.ItsaMigtrated,
+          transitionToCDCS = TransitionToCdcs(value = true)
+        ),
+        chargeTypesExcluded = Some(false),
         customerSignals = None
       )
 
       val json: JsValue = Json.parse(
         """{
-          |  "addresses" : [
+          |  "processingDateTime" : "2025-07-02T15:00:41.689",
+          |    "identification" : [
           |    {
-          |      "addressLine1" : "Address Line 1",
-          |      "addressType" : "Address Type",
-          |      "postcodeHistory" : [
-          |        {
-          |          "addressPostcode" : "AB12 3CD",
-          |          "postcodeDate" : "2020-01-01"
-          |        }
-          |      ]
+          |      "idType" : "ID_TYPE",
+          |      "idValue" : "ID_VALUE"
           |    }
           |  ],
-          |  "chargeTypeAssessment" : [
+          |    "chargeTypeAssessment" : [
           |    {
           |      "chargeReference" : "CHARGE REFERENCE",
           |      "charges" : [
@@ -680,17 +675,22 @@ class ChargeInfoResponseSpec extends AnyFreeSpec with MockFactory {
           |      "mainTrans" : "2000"
           |    }
           |  ],
-          |  "identification" : [
+          |  "addresses" : [
           |    {
-          |      "idType" : "ID_TYPE",
-          |      "idValue" : "ID_VALUE"
+          |      "addressLine1" : "Address Line 1",
+          |      "addressType" : "Address Type",
+          |      "postcodeHistory" : [
+          |        {
+          |          "addressPostcode" : "AB12 3CD",
+          |          "postcodeDate" : "2020-01-01"
+          |        }
+          |      ]
           |    }
           |  ],
           |  "individualDetails" : {
           |    "customerType" : "MTD(ITSA)",
           |    "transitionToCDCS" : true
           |  },
-          |  "processingDateTime" : "2025-07-02T15:00:41.689",
           |  "chargeTypesExcluded" : false
           |}
           |""".stripMargin
@@ -727,7 +727,7 @@ class ChargeInfoResponseSpec extends AnyFreeSpec with MockFactory {
 
       "implicit JSON reader (data coming from time-to-pay-eligibility)" - {
         val schema = Validators.TimeToPayEligibility.ChargeInfo.Live.openApiResponseSuccessfulSchema
-        val saRelease2Disabled = SARelease2Enabled(false)
+        val saRelease2Disabled = SaRelease2Enabled(false)
 
         "when all the optional fields are fully populated" - {
           val json: JsValue = TestData.WithOnlySomes.r1Json
@@ -780,7 +780,7 @@ class ChargeInfoResponseSpec extends AnyFreeSpec with MockFactory {
 
       "implicit JSON reader (data coming from time-to-pay-eligibility)" - {
         val schema = Validators.TimeToPayEligibility.ChargeInfo.Proposed.openApiResponseSuccessfulSchema
-        val saRelease2Enabled = SARelease2Enabled(true)
+        val saRelease2Enabled = SaRelease2Enabled(true)
 
         "when all the optional fields are fully populated" - {
           val json: JsValue = TestData.WithOnlySomes.r2Json
@@ -828,7 +828,7 @@ class ChargeInfoResponseSpec extends AnyFreeSpec with MockFactory {
     schema: DebtTransSchemaValidator.OpenApi3DerivedSchema,
     json: JsValue,
     obj: ChargeInfoResponse,
-    saRelease2FeatureSwitchValue: SARelease2Enabled
+    saRelease2FeatureSwitchValue: SaRelease2Enabled
   )(implicit pos: Position): Unit = {
     "reads the JSON correctly" in {
       val mockFeatureSwitch: FeatureSwitch = mock[FeatureSwitch]

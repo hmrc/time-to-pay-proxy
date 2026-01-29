@@ -25,7 +25,7 @@ import play.api.libs.ws.{ WSRequest, WSResponse }
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.timetopayproxy.config.FeatureSwitch
 import uk.gov.hmrc.timetopayproxy.models._
-import uk.gov.hmrc.timetopayproxy.models.featureSwitches.SARelease2Enabled
+import uk.gov.hmrc.timetopayproxy.models.featureSwitches.SaRelease2Enabled
 import uk.gov.hmrc.timetopayproxy.models.saonly.chargeInfoApi._
 import uk.gov.hmrc.timetopayproxy.models.saonly.common._
 import uk.gov.hmrc.timetopayproxy.support.IntegrationBaseSpec
@@ -122,7 +122,7 @@ class TimeToPayProxyControllerInternalAuthEnabledItSpec extends IntegrationBaseS
             )
           )
         ),
-        chargeTypesExcluded = false,
+        chargeTypesExcluded = Some(false),
         customerSignals = Some(
           List(
             Signal(SignalType("Rls"), SignalValue("signal value"), Some("description")),
@@ -138,7 +138,7 @@ class TimeToPayProxyControllerInternalAuthEnabledItSpec extends IntegrationBaseS
 
           (() => mockFeatureSwitch.saRelease2Enabled)
             .expects()
-            .returning(SARelease2Enabled(true))
+            .returning(SaRelease2Enabled(true))
 
           stubRequest(
             httpMethod = POST,

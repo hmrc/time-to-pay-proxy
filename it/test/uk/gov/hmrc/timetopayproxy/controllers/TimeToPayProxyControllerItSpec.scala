@@ -18,31 +18,31 @@ package uk.gov.hmrc.timetopayproxy.controllers
 
 import cats.data.NonEmptyList
 import com.github.tomakehurst.wiremock.client.WireMock
-import com.github.tomakehurst.wiremock.client.WireMock.{ postRequestedFor, urlPathEqualTo }
-import com.github.tomakehurst.wiremock.http.RequestMethod.{ POST, PUT }
-import play.api.libs.json.{ JsNull, JsObject, JsValue, Json }
-import play.api.libs.ws.{ WSRequest, WSResponse }
+import com.github.tomakehurst.wiremock.client.WireMock.{postRequestedFor, urlPathEqualTo}
+import com.github.tomakehurst.wiremock.http.RequestMethod.{POST, PUT}
+import play.api.libs.json.{JsNull, JsObject, JsValue, Json}
+import play.api.libs.ws.{WSRequest, WSResponse}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.timetopayproxy.models._
-import uk.gov.hmrc.timetopayproxy.models.affordablequotes.{ AffordableQuoteResponse, AffordableQuotesRequest }
+import uk.gov.hmrc.timetopayproxy.models.affordablequotes.{AffordableQuoteResponse, AffordableQuotesRequest}
 import uk.gov.hmrc.timetopayproxy.models.currency.GbpPounds
 import uk.gov.hmrc.timetopayproxy.models.error.TtppErrorResponse
 import uk.gov.hmrc.timetopayproxy.models.saonly.chargeInfoApi._
 import uk.gov.hmrc.timetopayproxy.models.saonly.common._
 import uk.gov.hmrc.timetopayproxy.models.saonly.common.apistatus._
 import uk.gov.hmrc.timetopayproxy.models.saonly.ttpcancel._
-import uk.gov.hmrc.timetopayproxy.models.saonly.ttpfullamend.{ TtpFullAmendInformativeError, TtpFullAmendInternalError, TtpFullAmendRequest, TtpFullAmendSuccessfulResponse }
+import uk.gov.hmrc.timetopayproxy.models.saonly.ttpfullamend.{TtpFullAmendInformativeError, TtpFullAmendInternalError, TtpFullAmendRequest, TtpFullAmendSuccessfulResponse}
 import uk.gov.hmrc.timetopayproxy.models.saonly.ttpinform._
 import uk.gov.hmrc.timetopayproxy.support.IntegrationBaseSpec
 import uk.gov.hmrc.timetopayproxy.testutils.TestOnlyJsonFormats._
 
-import java.time.{ LocalDate, LocalDateTime }
+import java.time.{LocalDate, LocalDateTime}
 import scala.concurrent.ExecutionContext
 
 class TimeToPayProxyControllerItSpec extends IntegrationBaseSpec {
   def internalAuthEnabled: Boolean = false
   def enrolmentAuthEnabled: Boolean = false
-  def saRelease2Enabled: Boolean = false
+  def saRelease2Enabled: Boolean = true
 
   "TimeToPayProxyController" - {
     ".getAffordableQuotes" - {
@@ -1848,38 +1848,6 @@ class TimeToPayProxyControllerItSpec extends IntegrationBaseSpec {
       identification = List(
         Identification(idType = IdType("ID_TYPE"), idValue = IdValue("ID_VALUE"))
       ),
-      individualDetails = IndividualDetails(
-        title = Some(Title("Mr")),
-        firstName = Some(FirstName("John")),
-        lastName = Some(LastName("Doe")),
-        dateOfBirth = Some(DateOfBirth(LocalDate.parse("1980-01-01"))),
-        districtNumber = Some(DistrictNumber("1234")),
-        customerType = CustomerType.ItsaMigtrated,
-        transitionToCDCS = TransitionToCdcs(value = true)
-      ),
-      addresses = List(
-        Address(
-          addressType = AddressType("Address Type"),
-          addressLine1 = AddressLine1("Address Line 1"),
-          addressLine2 = Some(AddressLine2("Address Line 2")),
-          addressLine3 = Some(AddressLine3("Address Line 3")),
-          addressLine4 = Some(AddressLine4("Address Line 4")),
-          rls = Some(Rls(true)),
-          contactDetails = Some(
-            ContactDetails(
-              telephoneNumber = Some(TelephoneNumber("telephone-number")),
-              fax = Some(Fax("fax-number")),
-              mobile = Some(Mobile("mobile-number")),
-              emailAddress = Some(Email("email address")),
-              emailSource = Some(EmailSource("email source"))
-            )
-          ),
-          postCode = Some(ChargeInfoPostCode("AB12 3CD")),
-          postcodeHistory = List(
-            PostCodeInfo(addressPostcode = ChargeInfoPostCode("AB12 3CD"), postcodeDate = LocalDate.parse("2020-01-01"))
-          )
-        )
-      ),
       chargeTypeAssessment = List(
         ChargeTypeAssessment(
           debtTotalAmount = BigInt(1000),
@@ -1910,7 +1878,39 @@ class TimeToPayProxyControllerItSpec extends IntegrationBaseSpec {
           )
         )
       ),
-      chargeTypesExcluded = false,
+      addresses = List(
+        Address(
+          addressType = AddressType("Address Type"),
+          addressLine1 = AddressLine1("Address Line 1"),
+          addressLine2 = Some(AddressLine2("Address Line 2")),
+          addressLine3 = Some(AddressLine3("Address Line 3")),
+          addressLine4 = Some(AddressLine4("Address Line 4")),
+          rls = Some(Rls(true)),
+          contactDetails = Some(
+            ContactDetails(
+              telephoneNumber = Some(TelephoneNumber("telephone-number")),
+              fax = Some(Fax("fax-number")),
+              mobile = Some(Mobile("mobile-number")),
+              emailAddress = Some(Email("email address")),
+              emailSource = Some(EmailSource("email source"))
+            )
+          ),
+          postCode = Some(ChargeInfoPostCode("AB12 3CD")),
+          postcodeHistory = List(
+            PostCodeInfo(addressPostcode = ChargeInfoPostCode("AB12 3CD"), postcodeDate = LocalDate.parse("2020-01-01"))
+          )
+        )
+      ),
+      individualDetails = IndividualDetails(
+        title = Some(Title("Mr")),
+        firstName = Some(FirstName("John")),
+        lastName = Some(LastName("Doe")),
+        dateOfBirth = Some(DateOfBirth(LocalDate.parse("1980-01-01"))),
+        districtNumber = Some(DistrictNumber("1234")),
+        customerType = CustomerType.ItsaMigtrated,
+        transitionToCDCS = TransitionToCdcs(value = true)
+      ),
+      chargeTypesExcluded = None,
       customerSignals = Some(
         List(
           Signal(SignalType("Rls"), SignalValue("signal value"), Some("description")),

@@ -21,7 +21,7 @@ import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.timetopayproxy.config.FeatureSwitch
 import uk.gov.hmrc.timetopayproxy.connectors.TtpeConnector
 import uk.gov.hmrc.timetopayproxy.models.error.TtppEnvelope.TtppEnvelope
-import uk.gov.hmrc.timetopayproxy.models.saonly.chargeInfoApi.{ ChargeInfoRequest, ChargeInfoResponse }
+import uk.gov.hmrc.timetopayproxy.models.saonly.chargeInfoApi.{ ChargeInfoRequest, ChargeInfoResponse, ChargeInfoResponseR2 }
 
 import javax.inject.{ Inject, Singleton }
 import scala.concurrent.ExecutionContext
@@ -44,7 +44,13 @@ class DefaultTTPEService @Inject() (ttpeConnector: TtpeConnector, featureSwitch:
         if (featureSwitch.saRelease2Enabled.enabled) {
           response
         } else {
-          response.copy(chargeTypesExcluded = None)
+          response match {
+            case r2: ChargeInfoResponseR2 =>
+              r2.copy(chargeTypesExcluded = None)
+
+            case other =>
+              other
+          }
         }
       }
 }

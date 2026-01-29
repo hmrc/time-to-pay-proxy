@@ -16,4 +16,4 @@
 
 package uk.gov.hmrc.timetopayproxy.models.featureSwitches
 
-case class SARelease2Enabled(enabled: Boolean) extends AnyVal
+case class SaRelease2Enabled(enabled: Boolean) extends AnyVal
