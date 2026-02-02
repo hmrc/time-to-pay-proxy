@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 HM Revenue & Customs
+ * Copyright 2026 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,27 +14,16 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.timetopayproxy.models.saonly.common
+package uk.gov.hmrc.timetopayproxy.models.saonly.ttpfullamend
 
 import cats.data.NonEmptyList
 import play.api.libs.json.{ Format, Json, OFormat }
-import uk.gov.hmrc.timetopayproxy.models.currency.GbpPounds
 import uk.gov.hmrc.timetopayproxy.models.{ DebtItemChargeReference, FrequencyLowercase }
+import uk.gov.hmrc.timetopayproxy.models.currency.GbpPounds
+import uk.gov.hmrc.timetopayproxy.models.saonly.common.{ ArrangementAgreedDate, DdiReference, InitialPaymentDate, TtpEndDate }
+import uk.gov.hmrc.timetopayproxy.utils.json.CatsNonEmptyListJson
 
-final case class SaOnlyPaymentPlan(
-  arrangementAgreedDate: ArrangementAgreedDate,
-  ttpEndDate: TtpEndDate,
-  frequency: FrequencyLowercase,
-  initialPaymentDate: Option[InitialPaymentDate],
-  initialPaymentAmount: Option[GbpPounds],
-  ddiReference: Option[DdiReference]
-)
-
-object SaOnlyPaymentPlan {
-  implicit val format: OFormat[SaOnlyPaymentPlan] = Json.format[SaOnlyPaymentPlan]
-}
-
-final case class SaOnlyPaymentPlanR2(
+case class OriginalPaymentPlan(
   arrangementAgreedDate: ArrangementAgreedDate,
   ttpEndDate: TtpEndDate,
   frequency: FrequencyLowercase,
@@ -44,9 +33,7 @@ final case class SaOnlyPaymentPlanR2(
   debtItemCharges: NonEmptyList[DebtItemChargeReference]
 )
 
-object SaOnlyPaymentPlanR2 {
-  implicit val informDebtItemChargeNELFormat: Format[NonEmptyList[DebtItemChargeReference]] =
-    NonEmptyListFormat.nonEmptyListFormat[DebtItemChargeReference]
-
-  implicit val format: OFormat[SaOnlyPaymentPlanR2] = Json.format[SaOnlyPaymentPlanR2]
+object OriginalPaymentPlan {
+  implicit val formats: OFormat[OriginalPaymentPlan] = Json.format[OriginalPaymentPlan]
+  implicit def nelFormat[T: Format]: Format[NonEmptyList[T]] = CatsNonEmptyListJson.nonEmptyListFormat[T]
 }
