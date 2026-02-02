@@ -36,7 +36,7 @@ import uk.gov.hmrc.timetopayproxy.models.featureSwitches.InternalAuthEnabled
 import uk.gov.hmrc.timetopayproxy.models.saonly.common._
 import uk.gov.hmrc.timetopayproxy.models.saonly.common.apistatus.{ ApiName, ApiStatus, ApiStatusCode }
 import uk.gov.hmrc.timetopayproxy.models.saonly.ttpcancel._
-import uk.gov.hmrc.timetopayproxy.models.saonly.ttpfullamend.{ TtpFullAmendInformativeError, TtpFullAmendInternalError, TtpFullAmendRequestR1, TtpFullAmendSuccessfulResponse }
+import uk.gov.hmrc.timetopayproxy.models.saonly.ttpfullamend.{ TtpFullAmendInformativeError, TtpFullAmendInternalError, TtpFullAmendRequest, TtpFullAmendSuccessfulResponse }
 import uk.gov.hmrc.timetopayproxy.models.saonly.ttpinform._
 import uk.gov.hmrc.timetopayproxy.support.WireMockUtils
 
@@ -575,7 +575,7 @@ final class TtpFeedbackLoopConnectorSpec
     }
 
     ".fullAmendTtp" should {
-      val fullAmendRequest: TtpFullAmendRequestR1 = TtpFullAmendRequestR1(
+      val fullAmendRequest: TtpFullAmendRequest = TtpFullAmendRequest(
         identifications = NonEmptyList.of(
           Identification(idType = IdType("NINO"), idValue = IdValue("AB123456C"))
         ),

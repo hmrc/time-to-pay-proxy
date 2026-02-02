@@ -22,18 +22,18 @@ import uk.gov.hmrc.timetopayproxy.models._
 import uk.gov.hmrc.timetopayproxy.models.saonly.common._
 import uk.gov.hmrc.timetopayproxy.utils.json.CatsNonEmptyListJson
 
-final case class TtpFullAmendRequestR1(
+final case class TtpFullAmendRequest(
   identifications: NonEmptyList[Identification],
   paymentPlan: SaOnlyPaymentPlan,
   instalments: NonEmptyList[SaOnlyInstalment],
   channelIdentifier: ChannelIdentifier,
   transitioned: TransitionedIndicator
 )
-object TtpFullAmendRequestR1 {
-  implicit val format: OFormat[TtpFullAmendRequestR1] = {
+object TtpFullAmendRequest {
+  implicit val format: OFormat[TtpFullAmendRequest] = {
     implicit def nelFormat[T: Format]: Format[NonEmptyList[T]] = CatsNonEmptyListJson.nonEmptyListFormat[T]
 
-    Json.format[TtpFullAmendRequestR1]
+    Json.format[TtpFullAmendRequest]
   }
 }
 case class TtpFullAmendRequestR2(

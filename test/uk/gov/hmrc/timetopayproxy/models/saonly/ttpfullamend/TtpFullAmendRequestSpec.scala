@@ -33,7 +33,7 @@ final class TtpFullAmendRequestSpec extends AnyFreeSpec {
   "FullAmendRequestR1" - {
     object TestData {
       object WithOnlySomes {
-        def obj: TtpFullAmendRequestR1 = TtpFullAmendRequestR1(
+        def obj: TtpFullAmendRequest = TtpFullAmendRequest(
           identifications = NonEmptyList.of(
             Identification(
               idType = IdType("idtype"),
@@ -88,7 +88,7 @@ final class TtpFullAmendRequestSpec extends AnyFreeSpec {
       }
 
       object With0SomeOnEachPath {
-        def obj: TtpFullAmendRequestR1 = TtpFullAmendRequestR1(
+        def obj: TtpFullAmendRequest = TtpFullAmendRequest(
           identifications = NonEmptyList.of(
             Identification(
               idType = IdType("idtype"),
@@ -142,11 +142,11 @@ final class TtpFullAmendRequestSpec extends AnyFreeSpec {
     }
 
     "implicit JSON writer (data going to time-to-pay)" - {
-      def writerToTtp: Writes[TtpFullAmendRequestR1] = implicitly[Writes[TtpFullAmendRequestR1]]
+      def writerToTtp: Writes[TtpFullAmendRequest] = implicitly[Writes[TtpFullAmendRequest]]
 
       "when all the optional fields are fully populated" - {
         def json: JsValue = TestData.WithOnlySomes.json
-        def obj: TtpFullAmendRequestR1 = TestData.WithOnlySomes.obj
+        def obj: TtpFullAmendRequest = TestData.WithOnlySomes.obj
 
         "writes the correct JSON" in {
           writerToTtp.writes(obj) shouldBeEquivalentTo json
@@ -162,7 +162,7 @@ final class TtpFullAmendRequestSpec extends AnyFreeSpec {
 
       "when none of the optional fields are populated" - {
         def json: JsValue = TestData.With0SomeOnEachPath.json
-        def obj: TtpFullAmendRequestR1 = TestData.With0SomeOnEachPath.obj
+        def obj: TtpFullAmendRequest = TestData.With0SomeOnEachPath.obj
 
         "writes the correct JSON" in {
           writerToTtp.writes(obj) shouldBeEquivalentTo json
@@ -178,11 +178,11 @@ final class TtpFullAmendRequestSpec extends AnyFreeSpec {
     }
 
     "implicit JSON reader (data coming from our clients)" - {
-      def readerFromClients: Reads[TtpFullAmendRequestR1] = implicitly[Reads[TtpFullAmendRequestR1]]
+      def readerFromClients: Reads[TtpFullAmendRequest] = implicitly[Reads[TtpFullAmendRequest]]
 
       "when all the optional fields are fully populated" - {
         def json: JsValue = TestData.WithOnlySomes.json
-        def obj: TtpFullAmendRequestR1 = TestData.WithOnlySomes.obj
+        def obj: TtpFullAmendRequest = TestData.WithOnlySomes.obj
 
         "reads the JSON correctly" in {
           readerFromClients.reads(json) shouldBe JsSuccess(obj)
@@ -197,7 +197,7 @@ final class TtpFullAmendRequestSpec extends AnyFreeSpec {
 
       "when none of the optional fields are populated" - {
         def json: JsValue = TestData.With0SomeOnEachPath.json
-        def obj: TtpFullAmendRequestR1 = TestData.With0SomeOnEachPath.obj
+        def obj: TtpFullAmendRequest = TestData.With0SomeOnEachPath.obj
 
         "reads the JSON correctly" in {
           readerFromClients.reads(json) shouldBe JsSuccess(obj)

@@ -30,7 +30,7 @@ import uk.gov.hmrc.timetopayproxy.models.error.{ ConnectorError, TtppEnvelope }
 import uk.gov.hmrc.timetopayproxy.models.saonly.common._
 import uk.gov.hmrc.timetopayproxy.models.saonly.common.apistatus.{ ApiName, ApiStatus, ApiStatusCode }
 import uk.gov.hmrc.timetopayproxy.models.saonly.ttpcancel.{ CancellationDate, TtpCancelPaymentPlan, TtpCancelRequest, TtpCancelSuccessfulResponse }
-import uk.gov.hmrc.timetopayproxy.models.saonly.ttpfullamend.{ TtpFullAmendRequestR1, TtpFullAmendSuccessfulResponse }
+import uk.gov.hmrc.timetopayproxy.models.saonly.ttpfullamend.{ TtpFullAmendRequest, TtpFullAmendSuccessfulResponse }
 import uk.gov.hmrc.timetopayproxy.models.saonly.ttpinform.{ TtpInformRequest, TtpInformSuccessfulResponse }
 
 import java.time.{ Instant, LocalDate }
@@ -178,7 +178,7 @@ class TtpFeedbackLoopServiceSpec extends AnyFreeSpec with MockFactory with Scala
     }
 
     "fullAmendTtp" - {
-      val ttpFullAmendRequest = TtpFullAmendRequestR1(
+      val ttpFullAmendRequest = TtpFullAmendRequest(
         identifications = NonEmptyList.of(
           Identification(idType = IdType("NINO"), idValue = IdValue("AB123456C"))
         ),
@@ -214,7 +214,7 @@ class TtpFeedbackLoopServiceSpec extends AnyFreeSpec with MockFactory with Scala
 
       "return success response when connector returns success" in {
         (mockConnector
-          .fullAmendTtp(_: TtpFullAmendRequestR1)(
+          .fullAmendTtp(_: TtpFullAmendRequest)(
             _: ExecutionContext,
             _: HeaderCarrier
           ))
@@ -230,7 +230,7 @@ class TtpFeedbackLoopServiceSpec extends AnyFreeSpec with MockFactory with Scala
         val error = ConnectorError(500, "Internal Server Error")
 
         (mockConnector
-          .fullAmendTtp(_: TtpFullAmendRequestR1)(
+          .fullAmendTtp(_: TtpFullAmendRequest)(
             _: ExecutionContext,
             _: HeaderCarrier
           ))
