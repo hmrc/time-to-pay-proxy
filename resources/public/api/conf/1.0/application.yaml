@@ -1,3 +1,4 @@
+
 openapi: 3.0.0
 info:
   title: Time To Pay Proxy
@@ -52,8 +53,7 @@ info:
       | 1.0.18 | 28-10-2025 | Alex Olkhovskiy | Add 409 conflict response to PUT /quote endpoint for duplicate plan ID|
       | 1.0.19 | 30-10-2025 | Alex Olkhovskiy | R1 changes for udpate cancel, inform and full amend|
       | 1.0.20 | 06-11-2025 | Alex Olkhovskiy | Add 422 error response for charge reference mismatch |
-      | 1.0.21 | 11-12-2025 | Alex Olkhovskiy | DTD-2985: Add chargeTypesExcluded field to charge-info response |
-  version: 1.0.21
+  version: 1.0.20
   contact: {}
 servers:
   - url: https://api.service.hmrc.gov.uk
@@ -732,59 +732,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/TTPChargeInfoResponse'
-              example:
-                processingDateTime: '2022-03-23T13:49:51.141'
-                identification:
-                  - idType: UTR
-                    idValue: '1234567890'
-                individualDetails:
-                  title: Mr
-                  firstName: John
-                  lastName: Doe
-                  dateOfBirth: '2069-06-06'
-                  districtNumber: xyz
-                  customerType: MTD(ITSA)
-                  transitionToCDCS: true
-                addresses:
-                  - addressType: ppob
-                    addressLine1: 999 Elm Street
-                    addressLine2: Suite 12C
-                    addressLine3: Northshire
-                    addressLine4: London
-                    rls: true
-                    contactDetails:
-                      telephoneNumber: +44 20 1234 5678
-                      fax: '01234'
-                      mobile: '07123456789'
-                      emailAddress: john@example.com
-                      emailSource: ETMP
-                    postCode: W1A 1ZZ
-                    postcodeHistory:
-                      - addressPostcode: BN12 9ER
-                        postcodeDate: '2022-04-30'
-                chargeTypesExcluded: false
-                chargeTypeAssessment:
-                  - debtTotalAmount: 250000
-                    chargeReference: XW006559808863
-                    mainTrans: '4700'
-                    parentChargeReference: XW006559808863
-                    charges:
-                      - taxPeriodFrom: '2022-04-01'
-                        taxPeriodTo: '2022-06-30'
-                        chargeType: Payment
-                        mainType: Payment
-                        subTrans: '1174'
-                        outstandingAmount: 250000
-                        dueDate: '2022-08-01'
-                        isInterestBearingCharge: true
-                        interestStartDate: '2022-08-01'
-                        accruedInterest: 5000
-                        chargeSource: ETMP
-                        parentMainTrans: '4700'
-                        tieBreaker: abc123
-                        saTaxYearEnd: '2022-04-05'
-                        creationDate: '2022-08-01'
-                        originalChargeType: Payment
         '400':
           description: ''
           headers: {}
@@ -2672,9 +2619,6 @@ components:
               - addressLine1
               - addressType
               - postcodeHistory
-        chargeTypesExcluded:
-          type: boolean
-          description: Indicates whether any charge types have been excluded from the response
         chargeTypeAssessment:
           type: array
           items:
