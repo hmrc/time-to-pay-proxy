@@ -22,7 +22,7 @@ import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.should.Matchers._
 import play.api.libs.json._
 import uk.gov.hmrc.timetopayproxy.config.FeatureSwitch
-import uk.gov.hmrc.timetopayproxy.models.featureSwitches.SARelease2Enabled
+import uk.gov.hmrc.timetopayproxy.models.featureSwitches.SaRelease2Enabled
 import uk.gov.hmrc.timetopayproxy.models.{ IdType, IdValue, Identification }
 import uk.gov.hmrc.timetopayproxy.testutils.JsonAssertionOps.RichJsValueWithAssertions
 import uk.gov.hmrc.timetopayproxy.testutils.schematestutils.Validators
@@ -61,7 +61,7 @@ class ChargeInfoResponseSpec extends AnyFreeSpec with MockFactory {
                 fax = Some(Fax("fax-number")),
                 mobile = Some(Mobile("mobile-number")),
                 emailAddress = Some(Email("email address")),
-                emailSource = Some(EmailSource("email source"))
+                emailSource = Some(EmailSource("ETMP"))
               )
             ),
             postCode = Some(ChargeInfoPostCode("AB12 3CD")),
@@ -133,7 +133,7 @@ class ChargeInfoResponseSpec extends AnyFreeSpec with MockFactory {
                 fax = Some(Fax("fax-number")),
                 mobile = Some(Mobile("mobile-number")),
                 emailAddress = Some(Email("email address")),
-                emailSource = Some(EmailSource("email source"))
+                emailSource = Some(EmailSource("ETMP"))
               )
             ),
             postCode = Some(ChargeInfoPostCode("AB12 3CD")),
@@ -143,6 +143,12 @@ class ChargeInfoResponseSpec extends AnyFreeSpec with MockFactory {
                 postcodeDate = LocalDate.parse("2020-01-01")
               )
             )
+          )
+        ),
+        customerSignals = Some(
+          List(
+            Signal(SignalType("Rls"), SignalValue("signal value"), Some("description")),
+            Signal(SignalType("Welsh Language Signal"), SignalValue("signal value"), Some("description"))
           )
         ),
         chargeTypeAssessment = List(
@@ -175,18 +181,29 @@ class ChargeInfoResponseSpec extends AnyFreeSpec with MockFactory {
             )
           )
         ),
-        customerSignals = Some(
-          List(
-            Signal(SignalType("Rls"), SignalValue("signal value"), Some("description")),
-            Signal(SignalType("Welsh Language Signal"), SignalValue("signal value"), Some("description"))
-          )
-        )
+        chargeTypesExcluded = Some(false)
       )
 
       def r1Json: JsObject = Json
         .parse(
           """{
-            |  "addresses" : [
+            |  "processingDateTime" : "2025-07-02T15:00:41.689",
+            |  "identification" : [
+            |    {
+            |      "idType" : "ID_TYPE",
+            |      "idValue" : "ID_VALUE"
+            |    }
+            |  ],
+            |  "individualDetails" : {
+            |    "customerType" : "MTD(ITSA)",
+            |    "dateOfBirth" : "1980-01-01",
+            |    "districtNumber" : "1234",
+            |    "firstName" : "John",
+            |    "lastName" : "Doe",
+            |    "title" : "Mr",
+            |    "transitionToCDCS" : true
+            |  },
+            |    "addresses" : [
             |    {
             |      "addressLine1" : "Address Line 1",
             |      "addressLine2" : "Address Line 2",
@@ -195,7 +212,7 @@ class ChargeInfoResponseSpec extends AnyFreeSpec with MockFactory {
             |      "addressType" : "Address Type",
             |      "contactDetails" : {
             |        "emailAddress" : "email address",
-            |        "emailSource" : "email source",
+            |        "emailSource" : "ETMP",
             |        "fax" : "fax-number",
             |        "mobile" : "mobile-number",
             |        "telephoneNumber" : "telephone-number"
@@ -239,23 +256,7 @@ class ChargeInfoResponseSpec extends AnyFreeSpec with MockFactory {
             |      "mainTrans" : "2000",
             |      "parentChargeReference" : "PARENT CHARGE REF"
             |    }
-            |  ],
-            |  "identification" : [
-            |    {
-            |      "idType" : "ID_TYPE",
-            |      "idValue" : "ID_VALUE"
-            |    }
-            |  ],
-            |  "individualDetails" : {
-            |    "customerType" : "MTD(ITSA)",
-            |    "dateOfBirth" : "1980-01-01",
-            |    "districtNumber" : "1234",
-            |    "firstName" : "John",
-            |    "lastName" : "Doe",
-            |    "title" : "Mr",
-            |    "transitionToCDCS" : true
-            |  },
-            |  "processingDateTime" : "2025-07-02T15:00:41.689"
+            |  ]
             |}
             |""".stripMargin
         )
@@ -274,8 +275,10 @@ class ChargeInfoResponseSpec extends AnyFreeSpec with MockFactory {
                  |      "signalValue": "signal value",
                  |      "signalDescription": "description"
                  |    }
-                 |  ]
-                 |}""".stripMargin)
+                 |  ],
+                 |  "chargeTypesExcluded" : false
+                 |}
+                 |""".stripMargin)
         .as[JsObject]
     }
 
@@ -392,6 +395,11 @@ class ChargeInfoResponseSpec extends AnyFreeSpec with MockFactory {
             )
           )
         ),
+        customerSignals = Some(
+          List(
+            Signal(SignalType("Welsh Language Signal"), SignalValue("signal value"), None)
+          )
+        ),
         chargeTypeAssessment = List(
           ChargeTypeAssessment(
             debtTotalAmount = BigInt(1000),
@@ -422,17 +430,24 @@ class ChargeInfoResponseSpec extends AnyFreeSpec with MockFactory {
             )
           )
         ),
-        customerSignals = Some(
-          List(
-            Signal(SignalType("Welsh Language Signal"), SignalValue("signal value"), None)
-          )
-        )
+        chargeTypesExcluded = Some(false)
       )
 
       def r1Json: JsObject = Json
         .parse(
           """{
-            |  "addresses" : [
+            |  "processingDateTime" : "2025-07-02T15:00:41.689",
+            |    "identification" : [
+            |    {
+            |      "idType" : "ID_TYPE",
+            |      "idValue" : "ID_VALUE"
+            |    }
+            |  ],
+            |    "individualDetails" : {
+            |    "customerType" : "MTD(ITSA)",
+            |    "transitionToCDCS" : true
+            |  },
+            |    "addresses" : [
             |    {
             |      "addressLine1" : "Address Line 1",
             |      "addressLine2" : "Address Line 2",
@@ -450,7 +465,7 @@ class ChargeInfoResponseSpec extends AnyFreeSpec with MockFactory {
             |      "rls" : true
             |    }
             |  ],
-            |  "chargeTypeAssessment" : [
+            |    "chargeTypeAssessment" : [
             |    {
             |      "chargeReference" : "CHARGE REFERENCE",
             |      "charges" : [
@@ -479,18 +494,7 @@ class ChargeInfoResponseSpec extends AnyFreeSpec with MockFactory {
             |      "mainTrans" : "2000",
             |      "parentChargeReference" : "PARENT CHARGE REF"
             |    }
-            |  ],
-            |  "identification" : [
-            |    {
-            |      "idType" : "ID_TYPE",
-            |      "idValue" : "ID_VALUE"
-            |    }
-            |  ],
-            |  "individualDetails" : {
-            |    "customerType" : "MTD(ITSA)",
-            |    "transitionToCDCS" : true
-            |  },
-            |  "processingDateTime" : "2025-07-02T15:00:41.689"
+            |  ]
             |}
             |""".stripMargin
         )
@@ -503,7 +507,8 @@ class ChargeInfoResponseSpec extends AnyFreeSpec with MockFactory {
                  |      "signalType": "Welsh Language Signal",
                  |      "signalValue": "signal value"
                  |    }
-                 |  ]
+                 |  ],
+                 |  "chargeTypesExcluded": false
                  |}""".stripMargin)
         .as[JsObject]
     }
@@ -605,6 +610,11 @@ class ChargeInfoResponseSpec extends AnyFreeSpec with MockFactory {
             )
           )
         ),
+        customerSignals = Some(
+          List(
+            Signal(SignalType("Welsh Language Signal"), SignalValue("signal value"), None)
+          )
+        ),
         chargeTypeAssessment = List(
           ChargeTypeAssessment(
             debtTotalAmount = BigInt(1000),
@@ -635,57 +645,71 @@ class ChargeInfoResponseSpec extends AnyFreeSpec with MockFactory {
             )
           )
         ),
-        customerSignals = None
+        chargeTypesExcluded = Some(false)
       )
 
-      val json: JsValue = Json.parse(
-        """{
-          |  "addresses" : [
-          |    {
-          |      "addressLine1" : "Address Line 1",
-          |      "addressType" : "Address Type",
-          |      "postcodeHistory" : [
-          |        {
-          |          "addressPostcode" : "AB12 3CD",
-          |          "postcodeDate" : "2020-01-01"
-          |        }
-          |      ]
-          |    }
-          |  ],
-          |  "chargeTypeAssessment" : [
-          |    {
-          |      "chargeReference" : "CHARGE REFERENCE",
-          |      "charges" : [
-          |        {
-          |          "accruedInterest" : 50,
-          |          "chargeSource" : "Source",
-          |          "chargeType" : "charge type",
-          |          "dueDate" : "2021-01-31",
-          |          "mainType" : "main type",
-          |          "outstandingAmount" : 500,
-          |          "subTrans" : "1000",
-          |          "taxPeriodFrom" : "2020-01-02",
-          |          "taxPeriodTo" : "2020-12-31"
-          |        }
-          |      ],
-          |      "debtTotalAmount" : 1000,
-          |      "mainTrans" : "2000"
-          |    }
-          |  ],
-          |  "identification" : [
-          |    {
-          |      "idType" : "ID_TYPE",
-          |      "idValue" : "ID_VALUE"
-          |    }
-          |  ],
-          |  "individualDetails" : {
-          |    "customerType" : "MTD(ITSA)",
-          |    "transitionToCDCS" : true
-          |  },
-          |  "processingDateTime" : "2025-07-02T15:00:41.689"
-          |}
-          |""".stripMargin
-      )
+      def r1Json: JsObject = Json
+        .parse(
+          """{
+            |  "processingDateTime" : "2025-07-02T15:00:41.689",
+            |    "identification" : [
+            |    {
+            |      "idType" : "ID_TYPE",
+            |      "idValue" : "ID_VALUE"
+            |    }
+            |  ],
+            |    "individualDetails" : {
+            |    "customerType" : "MTD(ITSA)",
+            |    "transitionToCDCS" : true
+            |  },
+            |    "addresses" : [
+            |    {
+            |      "addressLine1" : "Address Line 1",
+            |      "addressType" : "Address Type",
+            |      "postcodeHistory" : [
+            |        {
+            |          "addressPostcode" : "AB12 3CD",
+            |          "postcodeDate" : "2020-01-01"
+            |        }
+            |      ]
+            |    }
+            |  ],
+            |  "chargeTypeAssessment" : [
+            |    {
+            |      "chargeReference" : "CHARGE REFERENCE",
+            |      "charges" : [
+            |        {
+            |          "accruedInterest" : 50,
+            |          "chargeSource" : "Source",
+            |          "chargeType" : "charge type",
+            |          "dueDate" : "2021-01-31",
+            |          "mainType" : "main type",
+            |          "outstandingAmount" : 500,
+            |          "subTrans" : "1000",
+            |          "taxPeriodFrom" : "2020-01-02",
+            |          "taxPeriodTo" : "2020-12-31"
+            |        }
+            |      ],
+            |      "debtTotalAmount" : 1000,
+            |      "mainTrans" : "2000"
+            |    }
+            |  ]
+            |}
+            |""".stripMargin
+        )
+        .as[JsObject]
+
+      def r2Json: JsObject = r1Json ++ Json
+        .parse("""{
+                 |  "customerSignals": [
+                 |    {
+                 |      "signalType": "Welsh Language Signal",
+                 |      "signalValue": "signal value"
+                 |    }
+                 |  ],
+                 |  "chargeTypesExcluded" : false
+                 |}""".stripMargin)
+        .as[JsObject]
     }
   }
 
@@ -709,7 +733,7 @@ class ChargeInfoResponseSpec extends AnyFreeSpec with MockFactory {
         }
 
         "when none of the optional fields are populated" - {
-          val json: JsValue = TestData.With0SomeOnEachPath.json
+          val json: JsValue = TestData.With0SomeOnEachPath.r1Json
           val obj: ChargeInfoResponse = TestData.With0SomeOnEachPath.r1
 
           testSchemaWriter(schema, json, obj)
@@ -718,7 +742,7 @@ class ChargeInfoResponseSpec extends AnyFreeSpec with MockFactory {
 
       "implicit JSON reader (data coming from time-to-pay-eligibility)" - {
         val schema = Validators.TimeToPayEligibility.ChargeInfo.Live.openApiResponseSuccessfulSchema
-        val saRelease2Disabled = SARelease2Enabled(false)
+        val saRelease2Disabled = SaRelease2Enabled(false)
 
         "when all the optional fields are fully populated" - {
           val json: JsValue = TestData.WithOnlySomes.r1Json
@@ -735,7 +759,7 @@ class ChargeInfoResponseSpec extends AnyFreeSpec with MockFactory {
         }
 
         "when none of the optional fields are populated" - {
-          val json: JsValue = TestData.With0SomeOnEachPath.json
+          val json: JsValue = TestData.With0SomeOnEachPath.r1Json
           val obj: ChargeInfoResponse = TestData.With0SomeOnEachPath.r1
 
           testSchemaReader(schema, json, obj, saRelease2Disabled)
@@ -762,7 +786,7 @@ class ChargeInfoResponseSpec extends AnyFreeSpec with MockFactory {
         }
 
         "when none of the optional fields are populated" - {
-          val json: JsValue = TestData.With0SomeOnEachPath.json
+          val json: JsValue = TestData.With0SomeOnEachPath.r2Json
           val obj: ChargeInfoResponse = TestData.With0SomeOnEachPath.r2
 
           testSchemaWriter(schema, json, obj)
@@ -771,7 +795,7 @@ class ChargeInfoResponseSpec extends AnyFreeSpec with MockFactory {
 
       "implicit JSON reader (data coming from time-to-pay-eligibility)" - {
         val schema = Validators.TimeToPayEligibility.ChargeInfo.Proposed.openApiResponseSuccessfulSchema
-        val saRelease2Enabled = SARelease2Enabled(true)
+        val saRelease2Enabled = SaRelease2Enabled(true)
 
         "when all the optional fields are fully populated" - {
           val json: JsValue = TestData.WithOnlySomes.r2Json
@@ -788,7 +812,7 @@ class ChargeInfoResponseSpec extends AnyFreeSpec with MockFactory {
         }
 
         "when none of the optional fields are populated" - {
-          val json: JsValue = TestData.With0SomeOnEachPath.json
+          val json: JsValue = TestData.With0SomeOnEachPath.r2Json
           val obj: ChargeInfoResponse = TestData.With0SomeOnEachPath.r2
 
           testSchemaReader(schema, json, obj, saRelease2Enabled)
@@ -819,7 +843,7 @@ class ChargeInfoResponseSpec extends AnyFreeSpec with MockFactory {
     schema: DebtTransSchemaValidator.OpenApi3DerivedSchema,
     json: JsValue,
     obj: ChargeInfoResponse,
-    saRelease2FeatureSwitchValue: SARelease2Enabled
+    saRelease2FeatureSwitchValue: SaRelease2Enabled
   )(implicit pos: Position): Unit = {
     "reads the JSON correctly" in {
       val mockFeatureSwitch: FeatureSwitch = mock[FeatureSwitch]

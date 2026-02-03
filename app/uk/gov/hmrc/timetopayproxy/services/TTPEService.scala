@@ -37,5 +37,6 @@ class DefaultTTPEService @Inject() (ttpeConnector: TtpeConnector) extends TTPESe
   def checkChargeInfo(
     chargeInfoRequest: ChargeInfoRequest
   )(implicit ec: ExecutionContext, hc: HeaderCarrier): TtppEnvelope[ChargeInfoResponse] =
-    ttpeConnector.checkChargeInfo(chargeInfoRequest)
+    ttpeConnector
+      .checkChargeInfo(chargeInfoRequest)
 }

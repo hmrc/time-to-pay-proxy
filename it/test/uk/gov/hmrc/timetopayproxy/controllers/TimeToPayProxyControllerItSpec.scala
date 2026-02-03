@@ -42,6 +42,7 @@ import scala.concurrent.ExecutionContext
 class TimeToPayProxyControllerItSpec extends IntegrationBaseSpec {
   def internalAuthEnabled: Boolean = false
   def enrolmentAuthEnabled: Boolean = false
+  def saRelease2Enabled: Boolean = true
 
   "TimeToPayProxyController" - {
     ".getAffordableQuotes" - {
@@ -1879,6 +1880,12 @@ class TimeToPayProxyControllerItSpec extends IntegrationBaseSpec {
           )
         )
       ),
+      customerSignals = Some(
+        List(
+          Signal(SignalType("Rls"), SignalValue("signal value"), Some("description")),
+          Signal(SignalType("Welsh Language Signal"), SignalValue("signal value"), Some("description"))
+        )
+      ),
       chargeTypeAssessment = List(
         ChargeTypeAssessment(
           debtTotalAmount = BigInt(1000),
@@ -1909,12 +1916,7 @@ class TimeToPayProxyControllerItSpec extends IntegrationBaseSpec {
           )
         )
       ),
-      customerSignals = Some(
-        List(
-          Signal(SignalType("Rls"), SignalValue("signal value"), Some("description")),
-          Signal(SignalType("Welsh Language Signal"), SignalValue("signal value"), Some("description"))
-        )
-      )
+      chargeTypesExcluded = None
     )
 
     val chargeInfoRequest: ChargeInfoRequest = ChargeInfoRequest(
