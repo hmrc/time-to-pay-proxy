@@ -27,8 +27,8 @@ import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.http.client.HttpClientV2
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 import uk.gov.hmrc.timetopayproxy.config.{ AppConfig, FeatureSwitch }
-import uk.gov.hmrc.timetopayproxy.models.error.TtppEnvelope.TtppEnvelope
 import uk.gov.hmrc.timetopayproxy.models.error.{ ConnectorError, ProxyEnvelopeError }
+import uk.gov.hmrc.timetopayproxy.models.error.TtppEnvelope.TtppEnvelope
 import uk.gov.hmrc.timetopayproxy.models.featureSwitches.{ InternalAuthEnabled, SaRelease2Enabled }
 import uk.gov.hmrc.timetopayproxy.models.saonly.chargeInfoApi._
 import uk.gov.hmrc.timetopayproxy.models.saonly.common.SaOnlyRegimeType
@@ -119,6 +119,38 @@ class TtpeConnectorSpec
       identification = List(
         Identification(idType = IdType("ID_TYPE"), idValue = IdValue("ID_VALUE"))
       ),
+      individualDetails = IndividualDetails(
+        title = Some(Title("Mr")),
+        firstName = Some(FirstName("John")),
+        lastName = Some(LastName("Doe")),
+        dateOfBirth = Some(DateOfBirth(LocalDate.parse("1980-01-01"))),
+        districtNumber = Some(DistrictNumber("1234")),
+        customerType = CustomerType.ItsaMigtrated,
+        transitionToCDCS = TransitionToCdcs(value = true)
+      ),
+      addresses = List(
+        Address(
+          addressType = AddressType("Address Type"),
+          addressLine1 = AddressLine1("Address Line 1"),
+          addressLine2 = Some(AddressLine2("Address Line 2")),
+          addressLine3 = Some(AddressLine3("Address Line 3")),
+          addressLine4 = Some(AddressLine4("Address Line 4")),
+          rls = Some(Rls(true)),
+          contactDetails = Some(
+            ContactDetails(
+              telephoneNumber = Some(TelephoneNumber("telephone-number")),
+              fax = Some(Fax("fax-number")),
+              mobile = Some(Mobile("mobile-number")),
+              emailAddress = Some(Email("email address")),
+              emailSource = Some(EmailSource("email source"))
+            )
+          ),
+          postCode = Some(ChargeInfoPostCode("AB12 3CD")),
+          postcodeHistory = List(
+            PostCodeInfo(addressPostcode = ChargeInfoPostCode("AB12 3CD"), postcodeDate = LocalDate.parse("2020-01-01"))
+          )
+        )
+      ),
       chargeTypeAssessment = List(
         ChargeTypeAssessment(
           debtTotalAmount = BigInt(1000),
@@ -148,40 +180,7 @@ class TtpeConnectorSpec
             )
           )
         )
-      ),
-      addresses = List(
-        Address(
-          addressType = AddressType("Address Type"),
-          addressLine1 = AddressLine1("Address Line 1"),
-          addressLine2 = Some(AddressLine2("Address Line 2")),
-          addressLine3 = Some(AddressLine3("Address Line 3")),
-          addressLine4 = Some(AddressLine4("Address Line 4")),
-          rls = Some(Rls(true)),
-          contactDetails = Some(
-            ContactDetails(
-              telephoneNumber = Some(TelephoneNumber("telephone-number")),
-              fax = Some(Fax("fax-number")),
-              mobile = Some(Mobile("mobile-number")),
-              emailAddress = Some(Email("email address")),
-              emailSource = Some(EmailSource("email source"))
-            )
-          ),
-          postCode = Some(ChargeInfoPostCode("AB12 3CD")),
-          postcodeHistory = List(
-            PostCodeInfo(addressPostcode = ChargeInfoPostCode("AB12 3CD"), postcodeDate = LocalDate.parse("2020-01-01"))
-          )
-        )
-      ),
-      individualDetails = IndividualDetails(
-        title = Some(Title("Mr")),
-        firstName = Some(FirstName("John")),
-        lastName = Some(LastName("Doe")),
-        dateOfBirth = Some(DateOfBirth(LocalDate.parse("1980-01-01"))),
-        districtNumber = Some(DistrictNumber("1234")),
-        customerType = CustomerType.ItsaMigtrated,
-        transitionToCDCS = TransitionToCdcs(value = true)
-      ),
-      chargeTypesExcluded = None
+      )
     )
 
     def chargeInfoResponseR2: ChargeInfoResponseR2 = ChargeInfoResponseR2(
@@ -189,6 +188,43 @@ class TtpeConnectorSpec
       identification = List(
         Identification(idType = IdType("ID_TYPE"), idValue = IdValue("ID_VALUE"))
       ),
+      individualDetails = IndividualDetails(
+        title = Some(Title("Mr")),
+        firstName = Some(FirstName("John")),
+        lastName = Some(LastName("Doe")),
+        dateOfBirth = Some(DateOfBirth(LocalDate.parse("1980-01-01"))),
+        districtNumber = Some(DistrictNumber("1234")),
+        customerType = CustomerType.ItsaMigtrated,
+        transitionToCDCS = TransitionToCdcs(value = true)
+      ),
+      addresses = List(
+        Address(
+          addressType = AddressType("Address Type"),
+          addressLine1 = AddressLine1("Address Line 1"),
+          addressLine2 = Some(AddressLine2("Address Line 2")),
+          addressLine3 = Some(AddressLine3("Address Line 3")),
+          addressLine4 = Some(AddressLine4("Address Line 4")),
+          rls = Some(Rls(true)),
+          contactDetails = Some(
+            ContactDetails(
+              telephoneNumber = Some(TelephoneNumber("telephone-number")),
+              fax = Some(Fax("fax-number")),
+              mobile = Some(Mobile("mobile-number")),
+              emailAddress = Some(Email("email address")),
+              emailSource = Some(EmailSource("email source"))
+            )
+          ),
+          postCode = Some(ChargeInfoPostCode("AB12 3CD")),
+          postcodeHistory = List(
+            PostCodeInfo(addressPostcode = ChargeInfoPostCode("AB12 3CD"), postcodeDate = LocalDate.parse("2020-01-01"))
+          )
+        )
+      ),
+      customerSignals = Some(
+        List(
+          Signal(SignalType("Welsh Language Signal"), SignalValue("signal value"), Some("description"))
+        )
+      ),
       chargeTypeAssessment = List(
         ChargeTypeAssessment(
           debtTotalAmount = BigInt(1000),
@@ -219,44 +255,7 @@ class TtpeConnectorSpec
           )
         )
       ),
-      addresses = List(
-        Address(
-          addressType = AddressType("Address Type"),
-          addressLine1 = AddressLine1("Address Line 1"),
-          addressLine2 = Some(AddressLine2("Address Line 2")),
-          addressLine3 = Some(AddressLine3("Address Line 3")),
-          addressLine4 = Some(AddressLine4("Address Line 4")),
-          rls = Some(Rls(true)),
-          contactDetails = Some(
-            ContactDetails(
-              telephoneNumber = Some(TelephoneNumber("telephone-number")),
-              fax = Some(Fax("fax-number")),
-              mobile = Some(Mobile("mobile-number")),
-              emailAddress = Some(Email("email address")),
-              emailSource = Some(EmailSource("email source"))
-            )
-          ),
-          postCode = Some(ChargeInfoPostCode("AB12 3CD")),
-          postcodeHistory = List(
-            PostCodeInfo(addressPostcode = ChargeInfoPostCode("AB12 3CD"), postcodeDate = LocalDate.parse("2020-01-01"))
-          )
-        )
-      ),
-      individualDetails = IndividualDetails(
-        title = Some(Title("Mr")),
-        firstName = Some(FirstName("John")),
-        lastName = Some(LastName("Doe")),
-        dateOfBirth = Some(DateOfBirth(LocalDate.parse("1980-01-01"))),
-        districtNumber = Some(DistrictNumber("1234")),
-        customerType = CustomerType.ItsaMigtrated,
-        transitionToCDCS = TransitionToCdcs(value = true)
-      ),
-      chargeTypesExcluded = Some(false),
-      customerSignals = Some(
-        List(
-          Signal(SignalType("Welsh Language Signal"), SignalValue("signal value"), Some("description"))
-        )
-      )
+      chargeTypesExcluded = Some(false)
     )
 
     ".checkChargeInfo" should {

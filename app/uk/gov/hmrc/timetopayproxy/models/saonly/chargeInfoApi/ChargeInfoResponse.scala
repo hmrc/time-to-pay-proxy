@@ -43,10 +43,9 @@ object ChargeInfoResponse {
 final case class ChargeInfoResponseR1(
   processingDateTime: LocalDateTime,
   identification: List[Identification],
-  chargeTypeAssessment: List[ChargeTypeAssessment],
-  addresses: List[Address],
   individualDetails: IndividualDetails,
-  chargeTypesExcluded: Option[Boolean]
+  addresses: List[Address],
+  chargeTypeAssessment: List[ChargeTypeAssessment]
 ) extends ChargeInfoResponse
 
 object ChargeInfoResponseR1 {
@@ -56,11 +55,11 @@ object ChargeInfoResponseR1 {
 final case class ChargeInfoResponseR2(
   processingDateTime: LocalDateTime,
   identification: List[Identification],
-  chargeTypeAssessment: List[ChargeTypeAssessment],
-  addresses: List[Address],
   individualDetails: IndividualDetails,
-  chargeTypesExcluded: Option[Boolean],
-  customerSignals: Option[List[Signal]]
+  addresses: List[Address],
+  customerSignals: Option[List[Signal]],
+  chargeTypeAssessment: List[ChargeTypeAssessment],
+  chargeTypesExcluded: Option[Boolean]
 ) extends ChargeInfoResponse
 
 object ChargeInfoResponseR2 {

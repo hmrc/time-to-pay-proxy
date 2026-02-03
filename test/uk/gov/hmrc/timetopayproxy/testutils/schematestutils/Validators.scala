@@ -263,7 +263,7 @@ object Validators {
 
       object Proposed {
         private val proposedPath =
-          "test/resources/schemas/apis/proposed/time-to-pay-eligibility/ttp-eligibility0.3.8.yaml"
+          "test/resources/schemas/apis/proposed/time-to-pay-eligibility/ttp-eligibility0.3.10.yaml"
 
         def openApiResponseSuccessfulSchema =
           new OpenApi3DerivedSchema(

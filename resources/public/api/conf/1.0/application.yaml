@@ -2557,7 +2557,6 @@ components:
         - chargeTypeAssessment
         - addresses
         - individualDetails
-        - chargeTypesExcluded
       properties:
         processingDateTime:
           type: string
