@@ -1,0 +1,461 @@
+openapi: 3.0.3
+info:
+  title: Cancel API for TTP Plans
+  description: |
+    An API called by CDCS to trigger the TTP service to notify HoDs (via different APIs) when a TTP set up either by an operator or the self serve journey has been cancelled.
+
+    ```
+    Change Log
+    ```
+      | Version       | Date       | Author          | Description                                             |
+      |---------------|------------|-----------------|---------------------------------------------------------|
+      | 0.0.1 | 05-06-2024 | Alex Olkhovskiy | Initial version, R1 spec    |
+      | 0.0.2 | 12-11-2025 | William Stanistreet | Updated error response bodies for TTP |
+      | 0.0.3 | 30-02-2026 | Martin Adaramola | Updated cancel endpoint with for added debtItemCharges |
+  version: 0.0.2
+servers:
+  - url: https://api.service.hmrc.gov.uk
+tags:
+  - name: individuals
+    description: Cancel CDCS TTP Plans notification to HoDs (CESA)
+paths:
+  /individuals/time-to-pay/cancel:
+    post:
+      tags:
+        - individuals
+      summary: Notify cancellation of TTP Plan to downstream HoDs
+      operationId: NotifyCancellationOfTTPPlan
+      description: |
+        An API called by CDCS to trigger the TTP service to notify HoDs (via different APIs) when a TTP set up either by an operator or the self serve journey has been cancelled.
+
+        Response Behavior:
+        - Returns HTTP 200 when all downstream HoDs are called and responses can be parsed successfully (regardless of individual HoD response status codes)
+        - Returns HTTP 500 only for internal TTP errors or when responses from downstream APIs cannot be parsed
+        - The response includes details of all HoDs called with their status codes to help operators determine any required manual steps
+      parameters:
+        - name: correlationId
+          in: header
+          description: Correlation Id used for end-to-end traceability
+          required: true
+          schema:
+            type: string
+            format: uuid
+            example: f0bd1f32-de51-45cc-9b18-0520d6e3ab1a
+      security:
+        - applicationRestricted:
+            - write:time-to-pay
+      requestBody:
+        description: Request body containing cancellation and identification details
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CancelRequest'
+            examples:
+              exampleCESA:
+                summary: Release 1 Example Request (CESA only)
+                value:
+                  identifications:
+                    - idType: UTR
+                      idValue: '1234567890'
+                  paymentPlan:
+                    arrangementAgreedDate: '2025-05-01'
+                    ttpEndDate: '2025-11-01'
+                    initialPaymentDate: '2025-05-05'
+                    initialPaymentAmount: 150
+                    frequency: monthly
+                    cancellationDate: '2025-10-15'
+                    debtItemCharges:
+                      - debtItemChargeId: K0000000000001
+                        chargeSource: CESA
+                  instalments:
+                    - dueDate: '2025-06-01'
+                      amountDue: 300
+                    - dueDate: '2025-07-01'
+                      amountDue: 300
+                    - dueDate: '2025-08-01'
+                      amountDue: 300
+                  channelIdentifier: advisor
+                  transitioned: true
+              exampleETMP:
+                summary: Example Request (ETMP only)
+                value:
+                  identifications:
+                    - idType: UTR
+                      idValue: '1234567890'
+                  paymentPlan:
+                    cancellationDate: '2025-10-15'
+                    debtItemCharges:
+                      - debtItemChargeId: XW006559808863
+                        chargeSource: ETMP
+                  instalments:
+                    - dueDate: '2025-06-01'
+                      amountDue: 300
+                    - dueDate: '2025-07-01'
+                      amountDue: 300
+                    - dueDate: '2025-08-01'
+                      amountDue: 300
+                  channelIdentifier: advisor
+              exampleCESAandETMP:
+                summary: Example Request (CESA and ETMP)
+                value:
+                  identifications:
+                    - idType: UTR
+                      idValue: '1234567890'
+                  paymentPlan:
+                    arrangementAgreedDate: '2025-05-01'
+                    ttpEndDate: '2025-11-01'
+                    initialPaymentDate: '2025-05-05'
+                    initialPaymentAmount: 150
+                    frequency: monthly
+                    cancellationDate: '2025-10-15'
+                    debtItemCharges:
+                      - debtItemChargeId: K0000000000001
+                        chargeSource: CESA
+                      - debtItemChargeId: XW006559808863
+                        chargeSource: ETMP
+                  instalments:
+                    - dueDate: '2025-06-01'
+                      amountDue: 300
+                    - dueDate: '2025-07-01'
+                      amountDue: 300
+                    - dueDate: '2025-08-01'
+                      amountDue: 300
+                  channelIdentifier: advisor
+                  transitioned: true
+      responses:
+        '200':
+          description: |
+            Cancellation notification processed successfully. All downstream HoDs were called and responses were parsed successfully.
+            Individual HoD APIs may have returned success or error status codes - this is reported in the apisCalled array.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CancelResponse'
+              examples:
+                allHoDsSuccessful:
+                  summary: All downstream HoDs respond successfully (HTTP 200)
+                  value:
+                    apisCalled:
+                      - name: CESA
+                        statusCode: 200
+                        processingDateTime: '2025-05-01T14:30:00Z'
+                      - name: ETMP
+                        statusCode: 201
+                        processingDateTime: '2025-05-01T14:31:00Z'
+                    processingDateTime: '2025-10-15T10:31:00Z'
+                allHoDsUnsuccessful:
+                  summary: All downstream HoDs respond unsuccessfully but responses parsed (HTTP 200)
+                  value:
+                    apisCalled:
+                      - name: CESA
+                        statusCode: 500
+                        processingDateTime: '2025-05-01T14:30:00Z'
+                        errorResponse: Internal server error in CESA
+                      - name: ETMP
+                        statusCode: 400
+                        processingDateTime: '2025-05-01T14:31:00Z'
+                        errorResponse: Invalid request payload
+                    processingDateTime: '2025-10-15T10:31:00Z'
+                mixedHoDsResponse:
+                  summary: Mixed success/failure from HoDs but all responses parsed (HTTP 200)
+                  value:
+                    apisCalled:
+                      - name: CESA
+                        statusCode: 200
+                        processingDateTime: '2025-05-01T14:30:00Z'
+                      - name: ETMP
+                        statusCode: 500
+                        processingDateTime: '2025-05-01T14:31:00Z'
+                        errorResponse: Error processing cancellation
+                    processingDateTime: '2025-10-15T10:31:00Z'
+        '400':
+          description: |
+            Bad request due to invalid or missing data in the request payload.
+            This indicates client-side errors that prevent TTP from processing the cancellation request.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                badRequestExample:
+                  summary: Invalid cancellation request - client error
+                  value:
+                    statusCode: 400
+                    errorMessage: 'Invalid request payload: missing identifications or cancellationDate'
+        '401':
+          description: ''
+          headers: {}
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                statusCode: 401
+                errorMessage: A user with no active session will return 401 response
+        '500':
+          description: |
+            Internal TTP error or failure to parse responses from downstream HoDs.
+            This status is returned only when TTP cannot complete its processing or cannot parse HoD responses.
+            When individual HoD APIs return errors but responses can be parsed, a 200 status is returned instead.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CancelErrorResponse'
+              examples:
+                internalParsingError:
+                  summary: Internal TTP error - cannot parse HoD responses (HTTP 500)
+                  value:
+                    internalErrors:
+                      - message: Could not parse response from calling CESA
+                    processingDateTime: '2025-10-15T10:31:00Z'
+                mixedSuccessWithInternalError:
+                  summary: Some HoDs successful, others unparseable (HTTP 500)
+                  value:
+                    apisCalled:
+                      - name: CESA
+                        statusCode: 200
+                        processingDateTime: '2025-10-15T10:30:00Z'
+                    internalErrors:
+                      - message: Could not parse response from calling ETMP
+                    processingDateTime: '2025-10-15T10:31:00Z'
+        '503':
+          description: The server is temporarily unavailable due to overload or maintenance.
+          headers: { }
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                statusCode: 503
+                errorMessage: The server is temporarily unavailable.
+components:
+  securitySchemes:
+    applicationRestricted:
+      type: oauth2
+      description: |
+        HMRC supports OAuth 2.0 for authenticating application restricted API requests
+        using an OAuth 2.0 Bearer Token in the AUTHORIZATION header.
+        See https://developer.service.hmrc.gov.uk/api-documentation/docs/authorisation/application-restricted-endpoints for details.
+      flows:
+        clientCredentials:
+          tokenUrl: https://api.service.hmrc.gov.uk/oauth/token
+          scopes:
+            read:time-to-pay: read ttp data
+  schemas:
+    CancelIdentification:
+      type: object
+      required:
+        - idType
+        - idValue
+      properties:
+        idType:
+          type: string
+          description: Identifier type, e.g. UTR
+          pattern: ^[A-Za-z0-9]{1,6}$
+          example: UTR
+        idValue:
+          type: string
+          description: Identifier value
+          pattern: ^[A-Za-z0-9]{1,25}$
+          example: '1234567890'
+    DebtItemChargeReference:
+      type: object
+      required:
+        - debtItemChargeId
+        - chargeSource
+      properties:
+        debtItemChargeId:
+          type: string
+          description: An ID which uniquely identifies a particular charge. Required for ETMP but not CESA. Needed to know which charge relates to the charge source to know which HoD to call.
+          example: XW006559808862
+        chargeSource:
+          type: string
+          description: Source system of the charge. So we know when to call CESA or ETMP.
+          enum:
+            - CESA
+            - ETMP
+          example: CESA
+    CancelPaymentPlan:
+      type: object
+      required:
+        - cancellationDate
+        - debtItemCharges
+      properties:
+        arrangementAgreedDate:
+          type: string
+          format: date
+          description: The date when the plan was created
+          example: '2025-05-01'
+        ttpEndDate:
+          type: string
+          format: date
+          description: Date for the last payment/instalment
+          example: '2025-11-01'
+        frequency:
+          type: string
+          enum:
+            - single
+            - weekly
+            - 2Weekly
+            - 4Weekly
+            - monthly
+            - quarterly
+            - 6Monthly
+            - annually
+          description: Payment frequency (Note - quarterly will not be provided as it is prevented in CDCS)
+          example: monthly
+        cancellationDate:
+          type: string
+          format: date
+          description: Date when the cancellation was made
+          example: '2025-10-15'
+        initialPaymentDate:
+          type: string
+          format: date
+          description: Optional upfront payment date
+          example: '2025-05-05'
+        initialPaymentAmount:
+          type: number
+          multipleOf: 0.01
+          description: Optional upfront payment amount
+          example: 150
+        debtItemCharges:
+          type: array
+          minItems: 1
+          items:
+            $ref: '#/components/schemas/DebtItemChargeReference'
+          description: Array of debt item charges required to know which HoD to call
+    CancelInstalment:
+      type: object
+      required:
+        - dueDate
+        - amountDue
+      properties:
+        dueDate:
+          type: string
+          format: date
+          description: Due date for each regular instalment
+          example: '2025-06-01'
+        amountDue:
+          type: number
+          multipleOf: 0.01
+          description: Amount due for the instalment
+          example: 300
+    CancelRequest:
+      type: object
+      required:
+        - identifications
+        - paymentPlan
+        - instalments
+        - channelIdentifier
+      properties:
+        identifications:
+          type: array
+          minItems: 1
+          items:
+            $ref: '#/components/schemas/CancelIdentification'
+          description: Array of customer identifiers; CDCS must provide at least one (e.g. UTR).
+        paymentPlan:
+          $ref: '#/components/schemas/CancelPaymentPlan'
+        instalments:
+          type: array
+          minItems: 1
+          items:
+            $ref: '#/components/schemas/CancelInstalment'
+          description: Array of payment instalments
+        channelIdentifier:
+          type: string
+          enum:
+            - advisor
+            - selfService
+          description: Channel through which arrangement was made (e.g. advisor, selfService)
+          example: advisor
+        transitioned:
+          type: boolean
+          description: Indicates whether the customer only has FDLs.
+          example: true
+    CancelAPIStatus:
+      type: object
+      required:
+        - name
+        - statusCode
+        - processingDateTime
+      properties:
+        name:
+          type: string
+          description: The API name (CESA, ETMP)
+          example: CESA
+        statusCode:
+          type: integer
+          description: HTTP status code from the downstream API
+          example: 200
+        processingDateTime:
+          type: string
+          format: date-time
+          description: Timestamp of processing the request in downstream API
+          example: '2025-10-15T10:30:00Z'
+        errorResponse:
+          type: string
+          description: |
+            Error message returned by the downstream API when the call failed.
+            This field is present when the downstream API returns an error status code but TTP can parse the response.
+          example: Invalid cancellationDate provided for cancellation
+    CancelResponse:
+      type: object
+      required:
+        - apisCalled
+        - processingDateTime
+      properties:
+        apisCalled:
+          type: array
+          items:
+            $ref: '#/components/schemas/CancelAPIStatus'
+          description: Status of calls to each HoD API
+        processingDateTime:
+          type: string
+          format: date-time
+          description: Timestamp for processing the cancel request
+          example: '2025-10-15T10:31:00Z'
+    CancelErrorResponse:
+      type: object
+      required:
+        - processingDateTime
+        - internalErrors
+      properties:
+        apisCalled:
+          type: array
+          items:
+            $ref: '#/components/schemas/CancelAPIStatus'
+          description: |
+            Status of each downstream endpoint that we attempted to call;
+            present when the service knows which downstream endpoints were called successfully
+        internalErrors:
+          type: array
+          items:
+            type: object
+            required:
+              - message
+            properties:
+              message:
+                type: string
+                description: Error message describing the internal failure
+                example: Could not parse response from calling CESA
+          description: Internal errors that occurred during processing (present when TTP cannot parse HoD responses)
+        processingDateTime:
+          type: string
+          format: date-time
+          description: Timestamp for processing the cancel request
+          example: '2025-10-15T10:31:00Z'
+    ErrorResponse:
+      title: ErrorResponse
+      required:
+        - statusCode
+        - errorMessage
+      properties:
+        statusCode:
+          type: integer
+          description: http status code
+        errorMessage:
+          type: string
+          description: Reason for error request

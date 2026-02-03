@@ -1,53 +1,43 @@
-/*
- * Copyright 2025 HM Revenue & Customs
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 package uk.gov.hmrc.timetopayproxy.models.saonly.ttpcancel
 
 import cats.data.NonEmptyList
 import org.scalatest.freespec.AnyFreeSpec
-import org.scalatest.matchers.should.Matchers._
+import org.scalatest.matchers.should.Matchers.convertToAnyShouldWrapper
 import play.api.libs.json._
 import uk.gov.hmrc.timetopayproxy.models._
 import uk.gov.hmrc.timetopayproxy.models.currency.GbpPounds
 import uk.gov.hmrc.timetopayproxy.models.saonly.common._
-import uk.gov.hmrc.timetopayproxy.testutils.JsonAssertionOps._
+import uk.gov.hmrc.timetopayproxy.testutils.JsonAssertionOps.RichJsValueWithAssertions
 import uk.gov.hmrc.timetopayproxy.testutils.schematestutils.Validators
-import uk.gov.hmrc.timetopayproxy.testutils.schematestutils.Validators.TimeToPayProxy.TtpCancel.Live
+import uk.gov.hmrc.timetopayproxy.testutils.schematestutils.Validators.TimeToPayProxy.TtpCancel.Proposed
 
 import java.time.LocalDate
 
-final class TtpCancelRequestSpec extends AnyFreeSpec {
-
-  "TtpCancelRequest" - {
+// TODO DTD-4258: This R2 class should be removed when the R2 feature switch is ready to be removed
+class TtpCancelRequestR2Spec extends AnyFreeSpec {
+  "TtpCancelRequestR2" - {
     object TestData {
-      object WithOnlySomes {
-        def obj: TtpCancelRequest = TtpCancelRequest(
+      object WithAllFieldsPopulated {
+        def obj: TtpCancelRequestR2 = TtpCancelRequestR2(
           identifications = NonEmptyList.of(
             Identification(
               idType = IdType("idtype"),
               idValue = IdValue("idvalue")
             )
           ),
-          paymentPlan = TtpCancelPaymentPlan(
-            arrangementAgreedDate = ArrangementAgreedDate(LocalDate.parse("2020-01-02")),
-            ttpEndDate = TtpEndDate(LocalDate.parse("2020-02-04")),
-            frequency = FrequencyLowercase.Weekly,
+          paymentPlan = TtpCancelPaymentPlanR2(
+            arrangementAgreedDate = Some(ArrangementAgreedDate(LocalDate.parse("2020-01-02"))),
+            ttpEndDate = Some(TtpEndDate(LocalDate.parse("2020-02-04"))),
+            frequency = Some(FrequencyLowercase.Weekly),
             cancellationDate = CancellationDate(LocalDate.parse("2020-03-05")),
             initialPaymentDate = Some(InitialPaymentDate(LocalDate.parse("2020-04-06"))),
-            initialPaymentAmount = Some(GbpPounds.createOrThrow(100.12))
+            initialPaymentAmount = Some(GbpPounds.createOrThrow(100.12)),
+            debtItemCharges = NonEmptyList.of(
+              DebtItemChargeReference(
+                debtItemChargeId = DebtItemChargeId("K0000000000001"),
+                chargeSource = ChargeSourceSAOnly.CESA
+              )
+            )
           ),
           instalments = NonEmptyList.of(
             SaOnlyInstalment(
@@ -80,7 +70,13 @@ final class TtpCancelRequestSpec extends AnyFreeSpec {
             |    "frequency" : "weekly",
             |    "initialPaymentAmount" : 100.12,
             |    "initialPaymentDate" : "2020-04-06",
-            |    "ttpEndDate" : "2020-02-04"
+            |    "ttpEndDate" : "2020-02-04",
+            |    "debtItemCharges": [
+            |      {
+            |        "debtItemChargeId": "K0000000000001",
+            |        "chargeSource": "CESA"
+            |      }
+            |    ]
             |  },
             |  "transitioned" : true
             |}
@@ -88,21 +84,27 @@ final class TtpCancelRequestSpec extends AnyFreeSpec {
         )
       }
 
-      object With0SomeOnEachPath {
-        def obj: TtpCancelRequest = TtpCancelRequest(
+      object WithAllOptionalFieldsAsNone {
+        def obj: TtpCancelRequestR2 = TtpCancelRequestR2(
           identifications = NonEmptyList.of(
             Identification(
               idType = IdType("idtype"),
               idValue = IdValue("idvalue")
             )
           ),
-          paymentPlan = TtpCancelPaymentPlan(
-            arrangementAgreedDate = ArrangementAgreedDate(LocalDate.parse("2020-01-02")),
-            ttpEndDate = TtpEndDate(LocalDate.parse("2020-02-04")),
-            frequency = FrequencyLowercase.Weekly,
+          paymentPlan = TtpCancelPaymentPlanR2(
+            arrangementAgreedDate = None,
+            ttpEndDate = None,
+            frequency = None,
             cancellationDate = CancellationDate(LocalDate.parse("2020-03-05")),
             initialPaymentDate = None,
-            initialPaymentAmount = None
+            initialPaymentAmount = None,
+            debtItemCharges = NonEmptyList.of(
+              DebtItemChargeReference(
+                debtItemChargeId = DebtItemChargeId("K0000000000001"),
+                chargeSource = ChargeSourceSAOnly.CESA
+              )
+            )
           ),
           instalments = NonEmptyList.of(
             SaOnlyInstalment(
@@ -130,10 +132,13 @@ final class TtpCancelRequestSpec extends AnyFreeSpec {
             |    }
             |  ],
             |  "paymentPlan" : {
-            |    "arrangementAgreedDate" : "2020-01-02",
             |    "cancellationDate" : "2020-03-05",
-            |    "frequency" : "weekly",
-            |    "ttpEndDate" : "2020-02-04"
+            |    "debtItemCharges": [
+            |      {
+            |        "debtItemChargeId": "K0000000000001",
+            |        "chargeSource": "CESA"
+            |      }
+            |    ]
             |  }
             |}
             |""".stripMargin
@@ -162,7 +167,13 @@ final class TtpCancelRequestSpec extends AnyFreeSpec {
             |    "frequency" : "weekly",
             |    "initialPaymentAmount" : 100.129,
             |    "initialPaymentDate" : "2020-04-06",
-            |    "ttpEndDate" : "2020-02-04"
+            |    "ttpEndDate" : "2020-02-04",
+            |    "debtItemCharges": [
+            |      {
+            |        "debtItemChargeId": "K0000000000001",
+            |        "chargeSource": "CESA"
+            |      }
+            |    ]
             |  },
             |  "transitioned" : true
             |}
@@ -172,18 +183,18 @@ final class TtpCancelRequestSpec extends AnyFreeSpec {
     }
 
     "implicit JSON writer (data going to time-to-pay)" - {
-      def writerToTtp: Writes[TtpCancelRequest] = implicitly[Writes[TtpCancelRequest]]
+      def writerToTtp: Writes[TtpCancelRequestR2] = implicitly[Writes[TtpCancelRequestR2]]
 
       "when all the optional fields are fully populated" - {
-        def json: JsValue = TestData.WithOnlySomes.json
-        def obj: TtpCancelRequest = TestData.WithOnlySomes.obj
+        def json: JsValue = TestData.WithAllFieldsPopulated.json
+        def obj: TtpCancelRequestR2 = TestData.WithAllFieldsPopulated.obj
 
         "writes the correct JSON" in {
           writerToTtp.writes(obj) shouldBeEquivalentTo json
         }
 
         "writes JSON compatible with the time-to-pay schema" in {
-          val schema = Validators.TimeToPay.TtpCancel.Live.openApiRequestSchema
+          val schema = Validators.TimeToPayProxy.TtpCancel.Proposed.openApiRequestSchema
           val writtenJson: JsValue = writerToTtp.writes(obj)
 
           schema.validateAndGetErrors(writtenJson) shouldBe Nil
@@ -191,15 +202,15 @@ final class TtpCancelRequestSpec extends AnyFreeSpec {
       }
 
       "when none of the optional fields are populated" - {
-        def json: JsValue = TestData.With0SomeOnEachPath.json
-        def obj: TtpCancelRequest = TestData.With0SomeOnEachPath.obj
+        def json: JsValue = TestData.WithAllOptionalFieldsAsNone.json
+        def obj: TtpCancelRequestR2 = TestData.WithAllOptionalFieldsAsNone.obj
 
         "writes the correct JSON" in {
           writerToTtp.writes(obj) shouldBeEquivalentTo json
         }
 
         "writes JSON compatible with the time-to-pay schema" in {
-          val schema = Validators.TimeToPay.TtpCancel.Live.openApiRequestSchema
+          val schema = Validators.TimeToPayProxy.TtpCancel.Proposed.openApiRequestSchema
           val writtenJson: JsValue = writerToTtp.writes(obj)
 
           schema.validateAndGetErrors(writtenJson) shouldBe Nil
@@ -208,33 +219,33 @@ final class TtpCancelRequestSpec extends AnyFreeSpec {
     }
 
     "implicit JSON reader (data coming from our clients)" - {
-      def readerFromClients: Reads[TtpCancelRequest] = implicitly[Reads[TtpCancelRequest]]
+      def readerFromClients: Reads[TtpCancelRequestR2] = implicitly[Reads[TtpCancelRequestR2]]
 
       "when all the optional fields are fully populated" - {
-        def json: JsValue = TestData.WithOnlySomes.json
-        def obj: TtpCancelRequest = TestData.WithOnlySomes.obj
+        def json: JsValue = TestData.WithAllFieldsPopulated.json
+        def obj: TtpCancelRequestR2 = TestData.WithAllFieldsPopulated.obj
 
         "reads the JSON correctly" in {
           readerFromClients.reads(json) shouldBe JsSuccess(obj)
         }
 
         "was tested against JSON compatible with our schema" in {
-          val schema = Live.openApiRequestSchema
+          val schema = Proposed.openApiRequestSchema
 
           schema.validateAndGetErrors(json) shouldBe Nil
         }
       }
 
       "when none of the optional fields are populated" - {
-        def json: JsValue = TestData.With0SomeOnEachPath.json
-        def obj: TtpCancelRequest = TestData.With0SomeOnEachPath.obj
+        def json: JsValue = TestData.WithAllOptionalFieldsAsNone.json
+        def obj: TtpCancelRequestR2 = TestData.WithAllOptionalFieldsAsNone.obj
 
         "reads the JSON correctly" in {
           readerFromClients.reads(json) shouldBe JsSuccess(obj)
         }
 
         "was tested against JSON compatible with our schema" in {
-          val schema = Live.openApiRequestSchema
+          val schema = Proposed.openApiRequestSchema
 
           schema.validateAndGetErrors(json) shouldBe Nil
         }
@@ -268,7 +279,7 @@ final class TtpCancelRequestSpec extends AnyFreeSpec {
         }
 
         "was tested against JSON incompatible with our schema" in {
-          val schema = Live.openApiRequestSchema
+          val schema = Proposed.openApiRequestSchema
 
           schema.validateAndGetErrors(json) shouldBe List(
             """instalments.0.amountDue: Value '200.349' is not a multiple of '0.01'. (code: 1019)
@@ -282,4 +293,5 @@ final class TtpCancelRequestSpec extends AnyFreeSpec {
     }
 
   }
+
 }

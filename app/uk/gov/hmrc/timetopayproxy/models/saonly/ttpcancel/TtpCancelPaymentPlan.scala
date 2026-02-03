@@ -16,10 +16,12 @@
 
 package uk.gov.hmrc.timetopayproxy.models.saonly.ttpcancel
 
-import play.api.libs.json.{ Json, OFormat }
-import uk.gov.hmrc.timetopayproxy.models.FrequencyLowercase
+import cats.data.NonEmptyList
+import play.api.libs.json.{ Format, Json, OFormat }
+import uk.gov.hmrc.timetopayproxy.models.{ DebtItemChargeReference, FrequencyLowercase }
 import uk.gov.hmrc.timetopayproxy.models.currency.GbpPounds
 import uk.gov.hmrc.timetopayproxy.models.saonly.common.{ ArrangementAgreedDate, InitialPaymentDate, TtpEndDate }
+import uk.gov.hmrc.timetopayproxy.utils.json.CatsNonEmptyListJson
 
 final case class TtpCancelPaymentPlan(
   arrangementAgreedDate: ArrangementAgreedDate,
@@ -32,4 +34,22 @@ final case class TtpCancelPaymentPlan(
 
 object TtpCancelPaymentPlan {
   implicit val format: OFormat[TtpCancelPaymentPlan] = Json.format[TtpCancelPaymentPlan]
+}
+
+final case class TtpCancelPaymentPlanR2(
+  arrangementAgreedDate: Option[ArrangementAgreedDate],
+  ttpEndDate: Option[TtpEndDate],
+  frequency: Option[FrequencyLowercase],
+  cancellationDate: CancellationDate,
+  initialPaymentDate: Option[InitialPaymentDate],
+  initialPaymentAmount: Option[GbpPounds],
+  debtItemCharges: NonEmptyList[DebtItemChargeReference]
+)
+
+object TtpCancelPaymentPlanR2 {
+  implicit val format: OFormat[TtpCancelPaymentPlanR2] = {
+    implicit def nelFormat[T: Format]: Format[NonEmptyList[T]] = CatsNonEmptyListJson.nonEmptyListFormat[T]
+
+    Json.format[TtpCancelPaymentPlanR2]
+  }
 }

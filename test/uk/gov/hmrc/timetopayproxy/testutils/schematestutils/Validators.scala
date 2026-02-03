@@ -94,32 +94,78 @@ object Validators {
       //   https://jira.tools.tax.service.gov.uk/browse/DTD-2858
       // Official location:
       //   ???
-      def openApiRequestSchema: OpenApi3DerivedSchema =
-        new OpenApi3DerivedSchema(
-          path,
-          defaultJsonSubschemaName = "CancelRequest",
-          metaSchemaValidation = Some(Valid(())),
-          restrictAdditionalProperties = true
-        )
+      object Live {
+        private val path = "test/resources/schemas/apis/live/time-to-pay/CancelAPI-v0.0.1.yaml"
 
-      /** This is used for 200 statuses. */
-      def openApiCancelResponseSchema: OpenApi3DerivedSchema =
-        new OpenApi3DerivedSchema(
-          path,
-          defaultJsonSubschemaName = "CancelResponse",
-          metaSchemaValidation = Some(Valid(())),
-          restrictAdditionalProperties = true
-        )
+        def openApiRequestSchema: OpenApi3DerivedSchema =
+          new OpenApi3DerivedSchema(
+            path,
+            defaultJsonSubschemaName = "CancelRequest",
+            metaSchemaValidation = Some(Valid(())),
+            restrictAdditionalProperties = true
+          )
 
-      /** This is used for 500 statuses. */
-      def openApiCancelErrorResponseSchema: OpenApi3DerivedSchema =
-        new OpenApi3DerivedSchema(
-          path,
-          defaultJsonSubschemaName = "CancelErrorResponse",
-          metaSchemaValidation = Some(Valid(())),
-          restrictAdditionalProperties = true
-        )
+        def openApiCancelResponseSchema: OpenApi3DerivedSchema =
+          new OpenApi3DerivedSchema(
+            path,
+            defaultJsonSubschemaName = "CancelResponse",
+            metaSchemaValidation = Some(Valid(())),
+            restrictAdditionalProperties = true
+          )
 
+        def openApiCancelErrorResponseSchema: OpenApi3DerivedSchema =
+          new OpenApi3DerivedSchema(
+            path,
+            defaultJsonSubschemaName = "CancelErrorResponse",
+            metaSchemaValidation = Some(Valid(())),
+            restrictAdditionalProperties = true
+          )
+
+        def openApiResponseGeneralFailureSchema: OpenApi3DerivedSchema =
+          new OpenApi3DerivedSchema(
+            path,
+            defaultJsonSubschemaName = "ErrorResponse",
+            metaSchemaValidation = Some(Valid(())),
+            restrictAdditionalProperties = true
+          )
+
+      }
+
+      object Proposed {
+        private val pathForR2 = "test/resources/schemas/apis/proposed/time-to-pay/CancelAPI-v0.0.3-proposed.yaml"
+
+        def openApiRequestSchema: OpenApi3DerivedSchema =
+          new OpenApi3DerivedSchema(
+            pathForR2,
+            defaultJsonSubschemaName = "CancelRequest",
+            metaSchemaValidation = Some(Valid(())),
+            restrictAdditionalProperties = true
+          )
+
+        def openApiCancelResponseSchema: OpenApi3DerivedSchema =
+          new OpenApi3DerivedSchema(
+            pathForR2,
+            defaultJsonSubschemaName = "CancelResponse",
+            metaSchemaValidation = Some(Valid(())),
+            restrictAdditionalProperties = true
+          )
+
+        def openApiCancelErrorResponseSchema: OpenApi3DerivedSchema =
+          new OpenApi3DerivedSchema(
+            pathForR2,
+            defaultJsonSubschemaName = "CancelErrorResponse",
+            metaSchemaValidation = Some(Valid(())),
+            restrictAdditionalProperties = true
+          )
+
+        def openApiResponseGeneralFailureSchema: OpenApi3DerivedSchema =
+          new OpenApi3DerivedSchema(
+            pathForR2,
+            defaultJsonSubschemaName = "ErrorResponse",
+            metaSchemaValidation = Some(Valid(())),
+            restrictAdditionalProperties = true
+          )
+      }
     }
 
     object TtpInform {
@@ -344,43 +390,82 @@ object Validators {
     }
 
     object TtpCancel {
+      object Live {
+        private val path = "test/resources/schemas/apis/live/time-to-pay/CancelAPI-v0.0.1.yaml"
+
+        def openApiRequestSchema: OpenApi3DerivedSchema =
+          new OpenApi3DerivedSchema(
+            path,
+            defaultJsonSubschemaName = "CancelRequest",
+            metaSchemaValidation = Some(Valid(())),
+            restrictAdditionalProperties = true
+          )
+
+        def openApiCancelResponseSchema: OpenApi3DerivedSchema =
+          new OpenApi3DerivedSchema(
+            path,
+            defaultJsonSubschemaName = "CancelResponse",
+            metaSchemaValidation = Some(Valid(())),
+            restrictAdditionalProperties = true
+          )
+
+        def openApiCancelErrorResponseSchema: OpenApi3DerivedSchema =
+          new OpenApi3DerivedSchema(
+            path,
+            defaultJsonSubschemaName = "CancelErrorResponse",
+            metaSchemaValidation = Some(Valid(())),
+            restrictAdditionalProperties = true
+          )
+
+        def openApiResponseGeneralFailureSchema: OpenApi3DerivedSchema =
+          new OpenApi3DerivedSchema(
+            path,
+            defaultJsonSubschemaName = "ErrorResponse",
+            metaSchemaValidation = Some(Valid(())),
+            restrictAdditionalProperties = true
+          )
+
+      }
+
+      object Proposed {
+        private val pathForR2 = "test/resources/schemas/apis/proposed/time-to-pay/CancelAPI-v0.0.3.yaml"
+
+        def openApiRequestSchema: OpenApi3DerivedSchema =
+          new OpenApi3DerivedSchema(
+            pathForR2,
+            defaultJsonSubschemaName = "CancelRequest",
+            metaSchemaValidation = Some(Valid(())),
+            restrictAdditionalProperties = true
+          )
+
+        def openApiCancelResponseSchema: OpenApi3DerivedSchema =
+          new OpenApi3DerivedSchema(
+            pathForR2,
+            defaultJsonSubschemaName = "CancelResponse",
+            metaSchemaValidation = Some(Valid(())),
+            restrictAdditionalProperties = true
+          )
+
+        def openApiCancelErrorResponseSchema: OpenApi3DerivedSchema =
+          new OpenApi3DerivedSchema(
+            pathForR2,
+            defaultJsonSubschemaName = "CancelErrorResponse",
+            metaSchemaValidation = Some(Valid(())),
+            restrictAdditionalProperties = true
+          )
+
+        def openApiResponseGeneralFailureSchema: OpenApi3DerivedSchema =
+          new OpenApi3DerivedSchema(
+            pathForR2,
+            defaultJsonSubschemaName = "ErrorResponse",
+            metaSchemaValidation = Some(Valid(())),
+            restrictAdditionalProperties = true
+          )
+      }
       // Downloaded from:
       //   https://github.com/hmrc/time-to-pay/blob/7d0903506524411871930c3a3dc81899b58c7985/resources/public/api/conf/1.0/CancelAPI-v0.0.1.yaml
       // Official location:
       //   https://github.com/hmrc/time-to-pay/tree/main/resources/public/api/conf/1.0
-      private val path = "test/resources/schemas/apis/live/time-to-pay/CancelAPI-v0.0.1.yaml"
-
-      def openApiRequestSchema: OpenApi3DerivedSchema =
-        new OpenApi3DerivedSchema(
-          path,
-          defaultJsonSubschemaName = "CancelRequest",
-          metaSchemaValidation = Some(Valid(())),
-          restrictAdditionalProperties = true
-        )
-
-      def openApiCancelResponseSchema: OpenApi3DerivedSchema =
-        new OpenApi3DerivedSchema(
-          path,
-          defaultJsonSubschemaName = "CancelResponse",
-          metaSchemaValidation = Some(Valid(())),
-          restrictAdditionalProperties = true
-        )
-
-      def openApiCancelErrorResponseSchema: OpenApi3DerivedSchema =
-        new OpenApi3DerivedSchema(
-          path,
-          defaultJsonSubschemaName = "CancelErrorResponse",
-          metaSchemaValidation = Some(Valid(())),
-          restrictAdditionalProperties = true
-        )
-
-      def openApiResponseGeneralFailureSchema: OpenApi3DerivedSchema =
-        new OpenApi3DerivedSchema(
-          path,
-          defaultJsonSubschemaName = "ErrorResponse",
-          metaSchemaValidation = Some(Valid(())),
-          restrictAdditionalProperties = true
-        )
     }
 
     object TtpInform {
