@@ -17,7 +17,7 @@
 package uk.gov.hmrc.timetopayproxy.models.saonly.ttpcancel
 
 import cats.data.NonEmptyList
-import play.api.libs.json.{ Format, Json, OFormat }
+import play.api.libs.json.{ Format, Json, OFormat, Reads }
 import uk.gov.hmrc.timetopayproxy.models.saonly.common.{ SaOnlyInstalment, TransitionedIndicator }
 import uk.gov.hmrc.timetopayproxy.models.{ ChannelIdentifier, Identification }
 import uk.gov.hmrc.timetopayproxy.utils.json.CatsNonEmptyListJson
@@ -50,9 +50,9 @@ case class TtpCancelRequestR2(
 )
 
 object TtpCancelRequestR2 {
-  implicit val format: OFormat[TtpCancelRequestR2] = {
-    implicit def nelFormat[T: Format]: Format[NonEmptyList[T]] = CatsNonEmptyListJson.nonEmptyListFormat[T]
+  implicit val reads: Reads[TtpCancelRequestR2] = {
+    implicit def nelRead[T: Reads]: Reads[NonEmptyList[T]] = CatsNonEmptyListJson.nonEmptyListReader[T]
 
-    Json.format[TtpCancelRequestR2]
+    Json.reads[TtpCancelRequestR2]
   }
 }

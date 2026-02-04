@@ -23,8 +23,6 @@ import play.api.libs.json._
 import uk.gov.hmrc.timetopayproxy.models._
 import uk.gov.hmrc.timetopayproxy.models.currency.GbpPounds
 import uk.gov.hmrc.timetopayproxy.models.saonly.common._
-import uk.gov.hmrc.timetopayproxy.testutils.JsonAssertionOps.RichJsValueWithAssertions
-import uk.gov.hmrc.timetopayproxy.testutils.schematestutils.Validators
 import uk.gov.hmrc.timetopayproxy.testutils.schematestutils.Validators.TimeToPayProxy.TtpCancel.Proposed
 
 import java.time.LocalDate
@@ -195,42 +193,6 @@ class TtpCancelRequestR2Spec extends AnyFreeSpec {
             |}
             |""".stripMargin
         )
-      }
-    }
-
-    "implicit JSON writer (data going to time-to-pay)" - {
-      def writerToTtp: Writes[TtpCancelRequestR2] = implicitly[Writes[TtpCancelRequestR2]]
-
-      "when all the optional fields are fully populated" - {
-        def json: JsValue = TestData.WithAllFieldsPopulated.json
-        def obj: TtpCancelRequestR2 = TestData.WithAllFieldsPopulated.obj
-
-        "writes the correct JSON" in {
-          writerToTtp.writes(obj) shouldBeEquivalentTo json
-        }
-
-        "writes JSON compatible with the time-to-pay schema" in {
-          val schema = Validators.TimeToPayProxy.TtpCancel.Proposed.openApiRequestSchema
-          val writtenJson: JsValue = writerToTtp.writes(obj)
-
-          schema.validateAndGetErrors(writtenJson) shouldBe Nil
-        }
-      }
-
-      "when none of the optional fields are populated" - {
-        def json: JsValue = TestData.WithAllOptionalFieldsAsNone.json
-        def obj: TtpCancelRequestR2 = TestData.WithAllOptionalFieldsAsNone.obj
-
-        "writes the correct JSON" in {
-          writerToTtp.writes(obj) shouldBeEquivalentTo json
-        }
-
-        "writes JSON compatible with the time-to-pay schema" in {
-          val schema = Validators.TimeToPayProxy.TtpCancel.Proposed.openApiRequestSchema
-          val writtenJson: JsValue = writerToTtp.writes(obj)
-
-          schema.validateAndGetErrors(writtenJson) shouldBe Nil
-        }
       }
     }
 
