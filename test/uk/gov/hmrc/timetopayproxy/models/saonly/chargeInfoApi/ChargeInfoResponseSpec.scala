@@ -33,7 +33,7 @@ import java.time.{ LocalDate, LocalDateTime }
 class ChargeInfoResponseSpec extends AnyFreeSpec with MockFactory {
   object TestData {
     object WithOnlySomes {
-      def r1: ChargeInfoResponse = ChargeInfoResponseR1(
+      def chargeInfoResponseR1: ChargeInfoResponse = ChargeInfoResponseR1(
         processingDateTime = LocalDateTime.parse("2025-07-02T15:00:41.689"),
         identification = List(
           Identification(idType = IdType("ID_TYPE"), idValue = IdValue("ID_VALUE"))
@@ -74,13 +74,13 @@ class ChargeInfoResponseSpec extends AnyFreeSpec with MockFactory {
           )
         ),
         chargeTypeAssessment = List(
-          ChargeTypeAssessment(
+          ChargeTypeAssessmentR1(
             debtTotalAmount = BigInt(1000),
             chargeReference = ChargeReference("CHARGE REFERENCE"),
             parentChargeReference = Some(ChargeInfoParentChargeReference("PARENT CHARGE REF")),
             mainTrans = MainTrans("2000"),
             charges = List(
-              Charge(
+              ChargeR1(
                 taxPeriodFrom = TaxPeriodFrom(LocalDate.parse("2020-01-02")),
                 taxPeriodTo = TaxPeriodTo(LocalDate.parse("2020-12-31")),
                 chargeType = ChargeType("charge type"),
@@ -105,7 +105,7 @@ class ChargeInfoResponseSpec extends AnyFreeSpec with MockFactory {
         )
       )
 
-      def r2: ChargeInfoResponse = ChargeInfoResponseR2(
+      def chargeInfoResponseR2: ChargeInfoResponse = ChargeInfoResponseR2(
         processingDateTime = LocalDateTime.parse("2025-07-02T15:00:41.689"),
         identification = List(
           Identification(idType = IdType("ID_TYPE"), idValue = IdValue("ID_VALUE"))
@@ -146,13 +146,13 @@ class ChargeInfoResponseSpec extends AnyFreeSpec with MockFactory {
           )
         ),
         chargeTypeAssessment = List(
-          ChargeTypeAssessment(
+          ChargeTypeAssessmentR2(
             debtTotalAmount = BigInt(1000),
             chargeReference = ChargeReference("CHARGE REFERENCE"),
             parentChargeReference = Some(ChargeInfoParentChargeReference("PARENT CHARGE REF")),
             mainTrans = MainTrans("2000"),
             charges = List(
-              Charge(
+              ChargeR2(
                 taxPeriodFrom = TaxPeriodFrom(LocalDate.parse("2020-01-02")),
                 taxPeriodTo = TaxPeriodTo(LocalDate.parse("2020-12-31")),
                 chargeType = ChargeType("charge type"),
@@ -170,9 +170,15 @@ class ChargeInfoResponseSpec extends AnyFreeSpec with MockFactory {
                 originalTieBreaker = Some(OriginalTieBreaker("Original Tie Breaker")),
                 saTaxYearEnd = Some(SaTaxYearEnd(LocalDate.parse("2020-04-05"))),
                 creationDate = Some(CreationDate(LocalDate.parse("2025-07-02"))),
-                originalChargeType = Some(OriginalChargeType("Original Charge Type"))
+                originalChargeType = Some(OriginalChargeType("Original Charge Type")),
+                locks = Some(
+                  List(
+                    Lock(lockType = "Posting/Clearing", lockReason = "No Reallocation")
+                  )
+                )
               )
-            )
+            ),
+            isInsolvent = IsInsolvent(false)
           )
         ),
         customerSignals = Some(
@@ -183,7 +189,7 @@ class ChargeInfoResponseSpec extends AnyFreeSpec with MockFactory {
         )
       )
 
-      def r1Json: JsObject = Json
+      def chargeInfoResponseR1Json: JsObject = Json
         .parse(
           """{
             |  "addresses" : [
@@ -261,8 +267,45 @@ class ChargeInfoResponseSpec extends AnyFreeSpec with MockFactory {
         )
         .as[JsObject]
 
-      def r2Json: JsObject = r1Json ++ Json
+      def chargeInfoResponseR2Json: JsObject = chargeInfoResponseR1Json ++ Json
         .parse("""{
+                 |  "chargeTypeAssessment" : [
+                 |    {
+                 |      "chargeReference" : "CHARGE REFERENCE",
+                 |      "charges" : [
+                 |        {
+                 |          "accruedInterest" : 50,
+                 |          "chargeSource" : "Source",
+                 |          "chargeType" : "charge type",
+                 |          "creationDate" : "2025-07-02",
+                 |          "dueDate" : "2021-01-31",
+                 |          "interestStartDate" : "2020-01-03",
+                 |          "isInterestBearingCharge" : true,
+                 |          "mainType" : "main type",
+                 |          "originalChargeType" : "Original Charge Type",
+                 |          "originalCreationDate" : "2025-07-02",
+                 |          "originalTieBreaker" : "Original Tie Breaker",
+                 |          "outstandingAmount" : 500,
+                 |          "parentMainTrans" : "Parent Main Transaction",
+                 |          "saTaxYearEnd" : "2020-04-05",
+                 |          "subTrans" : "1000",
+                 |          "taxPeriodFrom" : "2020-01-02",
+                 |          "taxPeriodTo" : "2020-12-31",
+                 |          "tieBreaker" : "Tie Breaker",
+                 |          "locks": [
+                 |            {
+                 |              "lockType": "Posting/Clearing",
+                 |              "lockReason": "No Reallocation"
+                 |            }
+                 |          ]
+                 |        }
+                 |      ],
+                 |      "debtTotalAmount" : 1000,
+                 |      "mainTrans" : "2000",
+                 |      "parentChargeReference" : "PARENT CHARGE REF",
+                 |      "isInsolvent": false
+                 |    }
+                 |  ],
                  |  "customerSignals": [
                  |    {
                  |      "signalType": "Rls",
@@ -280,7 +323,7 @@ class ChargeInfoResponseSpec extends AnyFreeSpec with MockFactory {
     }
 
     object With1SomeOnEachPath {
-      def r1: ChargeInfoResponse = ChargeInfoResponseR1(
+      def chargeInfoResponseR1: ChargeInfoResponse = ChargeInfoResponseR1(
         processingDateTime = LocalDateTime.parse("2025-07-02T15:00:41.689"),
         identification = List(
           Identification(idType = IdType("ID_TYPE"), idValue = IdValue("ID_VALUE"))
@@ -321,13 +364,13 @@ class ChargeInfoResponseSpec extends AnyFreeSpec with MockFactory {
           )
         ),
         chargeTypeAssessment = List(
-          ChargeTypeAssessment(
+          ChargeTypeAssessmentR1(
             debtTotalAmount = BigInt(1000),
             chargeReference = ChargeReference("CHARGE REFERENCE"),
             parentChargeReference = Some(ChargeInfoParentChargeReference("PARENT CHARGE REF")),
             mainTrans = MainTrans("2000"),
             charges = List(
-              Charge(
+              ChargeR1(
                 taxPeriodFrom = TaxPeriodFrom(LocalDate.parse("2020-01-02")),
                 taxPeriodTo = TaxPeriodTo(LocalDate.parse("2020-12-31")),
                 chargeType = ChargeType("charge type"),
@@ -352,7 +395,7 @@ class ChargeInfoResponseSpec extends AnyFreeSpec with MockFactory {
         )
       )
 
-      def r2: ChargeInfoResponse = ChargeInfoResponseR2(
+      def chargeInfoResponseR2: ChargeInfoResponse = ChargeInfoResponseR2(
         processingDateTime = LocalDateTime.parse("2025-07-02T15:00:41.689"),
         identification = List(
           Identification(idType = IdType("ID_TYPE"), idValue = IdValue("ID_VALUE"))
@@ -393,13 +436,13 @@ class ChargeInfoResponseSpec extends AnyFreeSpec with MockFactory {
           )
         ),
         chargeTypeAssessment = List(
-          ChargeTypeAssessment(
+          ChargeTypeAssessmentR2(
             debtTotalAmount = BigInt(1000),
             chargeReference = ChargeReference("CHARGE REFERENCE"),
             parentChargeReference = Some(ChargeInfoParentChargeReference("PARENT CHARGE REF")),
             mainTrans = MainTrans("2000"),
             charges = List(
-              Charge(
+              ChargeR2(
                 taxPeriodFrom = TaxPeriodFrom(LocalDate.parse("2020-01-02")),
                 taxPeriodTo = TaxPeriodTo(LocalDate.parse("2020-12-31")),
                 chargeType = ChargeType("charge type"),
@@ -417,9 +460,15 @@ class ChargeInfoResponseSpec extends AnyFreeSpec with MockFactory {
                 originalTieBreaker = Some(OriginalTieBreaker("Original Tie Breaker")),
                 saTaxYearEnd = Some(SaTaxYearEnd(LocalDate.parse("2020-04-05"))),
                 creationDate = Some(CreationDate(LocalDate.parse("2025-07-02"))),
-                originalChargeType = Some(OriginalChargeType("Original Charge Type"))
+                originalChargeType = Some(OriginalChargeType("Original Charge Type")),
+                locks = Some(
+                  List(
+                    Lock(lockType = "Posting/Clearing", lockReason = "No Reallocation")
+                  )
+                )
               )
-            )
+            ),
+            isInsolvent = IsInsolvent(false)
           )
         ),
         customerSignals = Some(
@@ -429,7 +478,7 @@ class ChargeInfoResponseSpec extends AnyFreeSpec with MockFactory {
         )
       )
 
-      def r1Json: JsObject = Json
+      def chargeInfoResponseR1Json: JsObject = Json
         .parse(
           """{
             |  "addresses" : [
@@ -496,8 +545,45 @@ class ChargeInfoResponseSpec extends AnyFreeSpec with MockFactory {
         )
         .as[JsObject]
 
-      def r2Json: JsObject = r1Json ++ Json
+      def chargeInfoResponseR2Json: JsObject = chargeInfoResponseR1Json ++ Json
         .parse("""{
+                 |  "chargeTypeAssessment" : [
+                 |    {
+                 |      "chargeReference" : "CHARGE REFERENCE",
+                 |      "charges" : [
+                 |        {
+                 |          "accruedInterest" : 50,
+                 |          "chargeSource" : "Source",
+                 |          "chargeType" : "charge type",
+                 |          "creationDate" : "2025-07-02",
+                 |          "dueDate" : "2021-01-31",
+                 |          "interestStartDate" : "2020-01-03",
+                 |          "isInterestBearingCharge" : true,
+                 |          "mainType" : "main type",
+                 |          "originalChargeType" : "Original Charge Type",
+                 |          "originalCreationDate" : "2025-07-02",
+                 |          "originalTieBreaker" : "Original Tie Breaker",
+                 |          "outstandingAmount" : 500,
+                 |          "parentMainTrans" : "Parent Main Transaction",
+                 |          "saTaxYearEnd" : "2020-04-05",
+                 |          "subTrans" : "1000",
+                 |          "taxPeriodFrom" : "2020-01-02",
+                 |          "taxPeriodTo" : "2020-12-31",
+                 |          "tieBreaker" : "Tie Breaker",
+                            "locks": [
+                 |            {
+                 |              "lockType": "Posting/Clearing",
+                 |              "lockReason": "No Reallocation"
+                 |            }
+                 |          ]
+                 |        }
+                 |      ],
+                 |      "debtTotalAmount" : 1000,
+                 |      "mainTrans" : "2000",
+                 |      "parentChargeReference" : "PARENT CHARGE REF",
+                 |      "isInsolvent": false
+                 |    }
+                 |  ],
                  |  "customerSignals": [
                  |    {
                  |      "signalType": "Welsh Language Signal",
@@ -509,7 +595,7 @@ class ChargeInfoResponseSpec extends AnyFreeSpec with MockFactory {
     }
 
     object With0SomeOnEachPath {
-      def r1: ChargeInfoResponse = ChargeInfoResponseR1(
+      def chargeInfoResponseR1: ChargeInfoResponse = ChargeInfoResponseR1(
         processingDateTime = LocalDateTime.parse("2025-07-02T15:00:41.689"),
         identification = List(
           Identification(idType = IdType("ID_TYPE"), idValue = IdValue("ID_VALUE"))
@@ -542,13 +628,13 @@ class ChargeInfoResponseSpec extends AnyFreeSpec with MockFactory {
           )
         ),
         chargeTypeAssessment = List(
-          ChargeTypeAssessment(
+          ChargeTypeAssessmentR1(
             debtTotalAmount = BigInt(1000),
             chargeReference = ChargeReference("CHARGE REFERENCE"),
             parentChargeReference = None,
             mainTrans = MainTrans("2000"),
             charges = List(
-              Charge(
+              ChargeR1(
                 taxPeriodFrom = TaxPeriodFrom(LocalDate.parse("2020-01-02")),
                 taxPeriodTo = TaxPeriodTo(LocalDate.parse("2020-12-31")),
                 chargeType = ChargeType("charge type"),
@@ -573,7 +659,7 @@ class ChargeInfoResponseSpec extends AnyFreeSpec with MockFactory {
         )
       )
 
-      def r2: ChargeInfoResponse = ChargeInfoResponseR2(
+      def chargeInfoResponseR2: ChargeInfoResponse = ChargeInfoResponseR2(
         processingDateTime = LocalDateTime.parse("2025-07-02T15:00:41.689"),
         identification = List(
           Identification(idType = IdType("ID_TYPE"), idValue = IdValue("ID_VALUE"))
@@ -606,13 +692,13 @@ class ChargeInfoResponseSpec extends AnyFreeSpec with MockFactory {
           )
         ),
         chargeTypeAssessment = List(
-          ChargeTypeAssessment(
+          ChargeTypeAssessmentR2(
             debtTotalAmount = BigInt(1000),
             chargeReference = ChargeReference("CHARGE REFERENCE"),
             parentChargeReference = None,
             mainTrans = MainTrans("2000"),
             charges = List(
-              Charge(
+              ChargeR2(
                 taxPeriodFrom = TaxPeriodFrom(LocalDate.parse("2020-01-02")),
                 taxPeriodTo = TaxPeriodTo(LocalDate.parse("2020-12-31")),
                 chargeType = ChargeType("charge type"),
@@ -630,168 +716,200 @@ class ChargeInfoResponseSpec extends AnyFreeSpec with MockFactory {
                 originalTieBreaker = None,
                 saTaxYearEnd = None,
                 creationDate = None,
-                originalChargeType = None
+                originalChargeType = None,
+                locks = None
               )
-            )
+            ),
+            isInsolvent = IsInsolvent(false)
           )
         ),
         customerSignals = None
       )
 
-      val json: JsValue = Json.parse(
-        """{
-          |  "addresses" : [
-          |    {
-          |      "addressLine1" : "Address Line 1",
-          |      "addressType" : "Address Type",
-          |      "postcodeHistory" : [
-          |        {
-          |          "addressPostcode" : "AB12 3CD",
-          |          "postcodeDate" : "2020-01-01"
-          |        }
-          |      ]
-          |    }
-          |  ],
-          |  "chargeTypeAssessment" : [
-          |    {
-          |      "chargeReference" : "CHARGE REFERENCE",
-          |      "charges" : [
-          |        {
-          |          "accruedInterest" : 50,
-          |          "chargeSource" : "Source",
-          |          "chargeType" : "charge type",
-          |          "dueDate" : "2021-01-31",
-          |          "mainType" : "main type",
-          |          "outstandingAmount" : 500,
-          |          "subTrans" : "1000",
-          |          "taxPeriodFrom" : "2020-01-02",
-          |          "taxPeriodTo" : "2020-12-31"
-          |        }
-          |      ],
-          |      "debtTotalAmount" : 1000,
-          |      "mainTrans" : "2000"
-          |    }
-          |  ],
-          |  "identification" : [
-          |    {
-          |      "idType" : "ID_TYPE",
-          |      "idValue" : "ID_VALUE"
-          |    }
-          |  ],
-          |  "individualDetails" : {
-          |    "customerType" : "MTD(ITSA)",
-          |    "transitionToCDCS" : true
-          |  },
-          |  "processingDateTime" : "2025-07-02T15:00:41.689"
-          |}
-          |""".stripMargin
-      )
+      def chargeInfoResponseR1Json: JsObject = Json
+        .parse(
+          """{
+            |  "addresses" : [
+            |    {
+            |      "addressLine1" : "Address Line 1",
+            |      "addressType" : "Address Type",
+            |      "postcodeHistory" : [
+            |        {
+            |          "addressPostcode" : "AB12 3CD",
+            |          "postcodeDate" : "2020-01-01"
+            |        }
+            |      ]
+            |    }
+            |  ],
+            |  "chargeTypeAssessment" : [
+            |    {
+            |      "chargeReference" : "CHARGE REFERENCE",
+            |      "charges" : [
+            |        {
+            |          "accruedInterest" : 50,
+            |          "chargeSource" : "Source",
+            |          "chargeType" : "charge type",
+            |          "dueDate" : "2021-01-31",
+            |          "mainType" : "main type",
+            |          "outstandingAmount" : 500,
+            |          "subTrans" : "1000",
+            |          "taxPeriodFrom" : "2020-01-02",
+            |          "taxPeriodTo" : "2020-12-31"
+            |        }
+            |      ],
+            |      "debtTotalAmount" : 1000,
+            |      "mainTrans" : "2000"
+            |    }
+            |  ],
+            |  "identification" : [
+            |    {
+            |      "idType" : "ID_TYPE",
+            |      "idValue" : "ID_VALUE"
+            |    }
+            |  ],
+            |  "individualDetails" : {
+            |    "customerType" : "MTD(ITSA)",
+            |    "transitionToCDCS" : true
+            |  },
+            |  "processingDateTime" : "2025-07-02T15:00:41.689"
+            |}
+            |""".stripMargin
+        )
+        .as[JsObject]
+
+      def chargeInfoResponseR2Json: JsObject = chargeInfoResponseR1Json ++ Json
+        .parse("""{
+                 |  "chargeTypeAssessment" : [
+                 |    {
+                 |      "chargeReference" : "CHARGE REFERENCE",
+                 |      "charges" : [
+                 |        {
+                 |          "accruedInterest" : 50,
+                 |          "chargeSource" : "Source",
+                 |          "chargeType" : "charge type",
+                 |          "dueDate" : "2021-01-31",
+                 |          "mainType" : "main type",
+                 |          "outstandingAmount" : 500,
+                 |          "subTrans" : "1000",
+                 |          "taxPeriodFrom" : "2020-01-02",
+                 |          "taxPeriodTo" : "2020-12-31"
+                 |        }
+                 |      ],
+                 |      "debtTotalAmount" : 1000,
+                 |      "mainTrans" : "2000",
+                 |      "isInsolvent": false
+                 |    }
+                 |  ]
+                 |}""".stripMargin)
+        .as[JsObject]
     }
   }
 
   "ChargeInfoResponse" - {
     "Release 1 schema" - {
       "implicit JSON writer (data going to our clients)" - {
-        val schema = Validators.TimeToPayProxy.ChargeInfo.Live.openApiResponseSuccessfulSchema
+        val timeToPayProxyR1Schema = Validators.TimeToPayProxy.ChargeInfo.Live.openApiResponseSuccessfulSchema
 
         "when all the optional fields are fully populated" - {
-          val json: JsValue = TestData.WithOnlySomes.r1Json
-          val obj: ChargeInfoResponse = TestData.WithOnlySomes.r1
+          val allOptionsJson: JsValue = TestData.WithOnlySomes.chargeInfoResponseR1Json
+          val allOptionsObject: ChargeInfoResponse = TestData.WithOnlySomes.chargeInfoResponseR1
 
-          testSchemaWriter(schema, json, obj)
+          testSchemaWriter(timeToPayProxyR1Schema, allOptionsJson, allOptionsObject)
         }
 
         "when only one optional field on each path is populated" - {
-          val json: JsValue = TestData.With1SomeOnEachPath.r1Json
-          val obj: ChargeInfoResponse = TestData.With1SomeOnEachPath.r1
+          val someOptionsJson: JsValue = TestData.With1SomeOnEachPath.chargeInfoResponseR1Json
+          val someOptionsObject: ChargeInfoResponse = TestData.With1SomeOnEachPath.chargeInfoResponseR1
 
-          testSchemaWriter(schema, json, obj)
+          testSchemaWriter(timeToPayProxyR1Schema, someOptionsJson, someOptionsObject)
         }
 
         "when none of the optional fields are populated" - {
-          val json: JsValue = TestData.With0SomeOnEachPath.json
-          val obj: ChargeInfoResponse = TestData.With0SomeOnEachPath.r1
+          val noOptionsJson: JsValue = TestData.With0SomeOnEachPath.chargeInfoResponseR1Json
+          val noOptionsObject: ChargeInfoResponse = TestData.With0SomeOnEachPath.chargeInfoResponseR1
 
-          testSchemaWriter(schema, json, obj)
+          testSchemaWriter(timeToPayProxyR1Schema, noOptionsJson, noOptionsObject)
         }
       }
 
       "implicit JSON reader (data coming from time-to-pay-eligibility)" - {
-        val schema = Validators.TimeToPayEligibility.ChargeInfo.Live.openApiResponseSuccessfulSchema
+        val timeToPayEligibilityR2Schema =
+          Validators.TimeToPayEligibility.ChargeInfo.Live.openApiResponseSuccessfulSchema
         val saRelease2Disabled = SARelease2Enabled(false)
 
         "when all the optional fields are fully populated" - {
-          val json: JsValue = TestData.WithOnlySomes.r1Json
-          val obj: ChargeInfoResponse = TestData.WithOnlySomes.r1
+          val allOptionsJson: JsValue = TestData.WithOnlySomes.chargeInfoResponseR1Json
+          val allOptionsObject: ChargeInfoResponse = TestData.WithOnlySomes.chargeInfoResponseR1
 
-          testSchemaReader(schema, json, obj, saRelease2Disabled)
+          testSchemaReader(timeToPayEligibilityR2Schema, allOptionsJson, allOptionsObject, saRelease2Disabled)
         }
 
         "when only one optional field on each path is populated" - {
-          val json: JsValue = TestData.With1SomeOnEachPath.r1Json
-          val obj: ChargeInfoResponse = TestData.With1SomeOnEachPath.r1
+          val someOptionsJson: JsValue = TestData.With1SomeOnEachPath.chargeInfoResponseR1Json
+          val someOptionsObject: ChargeInfoResponse = TestData.With1SomeOnEachPath.chargeInfoResponseR1
 
-          testSchemaReader(schema, json, obj, saRelease2Disabled)
+          testSchemaReader(timeToPayEligibilityR2Schema, someOptionsJson, someOptionsObject, saRelease2Disabled)
         }
 
         "when none of the optional fields are populated" - {
-          val json: JsValue = TestData.With0SomeOnEachPath.json
-          val obj: ChargeInfoResponse = TestData.With0SomeOnEachPath.r1
+          val noOptionsJson: JsValue = TestData.With0SomeOnEachPath.chargeInfoResponseR1Json
+          val noOptionsObject: ChargeInfoResponse = TestData.With0SomeOnEachPath.chargeInfoResponseR1
 
-          testSchemaReader(schema, json, obj, saRelease2Disabled)
+          testSchemaReader(timeToPayEligibilityR2Schema, noOptionsJson, noOptionsObject, saRelease2Disabled)
         }
       }
     }
 
     "Release 2 schema" - {
       "implicit JSON writer (data going to our clients)" - {
-        val schema = Validators.TimeToPayProxy.ChargeInfo.Proposed.openApiResponseSuccessfulSchema
+        val timeToPayProxyRelease2Schema = Validators.TimeToPayProxy.ChargeInfo.Proposed.openApiResponseSuccessfulSchema
 
         "when all the optional fields are fully populated" - {
-          val json: JsValue = TestData.WithOnlySomes.r2Json
-          val obj: ChargeInfoResponse = TestData.WithOnlySomes.r2
+          val allOptionsJson: JsValue = TestData.WithOnlySomes.chargeInfoResponseR2Json
+          val allOptionsObject: ChargeInfoResponse = TestData.WithOnlySomes.chargeInfoResponseR2
 
-          testSchemaWriter(schema, json, obj)
+          testSchemaWriter(timeToPayProxyRelease2Schema, allOptionsJson, allOptionsObject)
         }
 
         "when only one optional field on each path is populated" - {
-          val json: JsValue = TestData.With1SomeOnEachPath.r2Json
-          val obj: ChargeInfoResponse = TestData.With1SomeOnEachPath.r2
+          val someOptionsJson: JsValue = TestData.With1SomeOnEachPath.chargeInfoResponseR2Json
+          val someOptionsObject: ChargeInfoResponse = TestData.With1SomeOnEachPath.chargeInfoResponseR2
 
-          testSchemaWriter(schema, json, obj)
+          testSchemaWriter(timeToPayProxyRelease2Schema, someOptionsJson, someOptionsObject)
         }
 
         "when none of the optional fields are populated" - {
-          val json: JsValue = TestData.With0SomeOnEachPath.json
-          val obj: ChargeInfoResponse = TestData.With0SomeOnEachPath.r2
+          val noOptionsJson: JsValue = TestData.With0SomeOnEachPath.chargeInfoResponseR2Json
+          val noOptionsObject: ChargeInfoResponse = TestData.With0SomeOnEachPath.chargeInfoResponseR2
 
-          testSchemaWriter(schema, json, obj)
+          testSchemaWriter(timeToPayProxyRelease2Schema, noOptionsJson, noOptionsObject)
         }
       }
 
       "implicit JSON reader (data coming from time-to-pay-eligibility)" - {
-        val schema = Validators.TimeToPayEligibility.ChargeInfo.Proposed.openApiResponseSuccessfulSchema
+        val timeToPayEligibilityR2Schema =
+          Validators.TimeToPayEligibility.ChargeInfo.Proposed.openApiResponseSuccessfulSchema
         val saRelease2Enabled = SARelease2Enabled(true)
 
         "when all the optional fields are fully populated" - {
-          val json: JsValue = TestData.WithOnlySomes.r2Json
-          val obj: ChargeInfoResponse = TestData.WithOnlySomes.r2
+          val allOptionsJson: JsValue = TestData.WithOnlySomes.chargeInfoResponseR2Json
+          val allOptionsObject: ChargeInfoResponse = TestData.WithOnlySomes.chargeInfoResponseR2
 
-          testSchemaReader(schema, json, obj, saRelease2Enabled)
+          testSchemaReader(timeToPayEligibilityR2Schema, allOptionsJson, allOptionsObject, saRelease2Enabled)
         }
 
         "when only one optional field on each path is populated" - {
-          val json: JsValue = TestData.With1SomeOnEachPath.r2Json
-          val obj: ChargeInfoResponse = TestData.With1SomeOnEachPath.r2
+          val someOptionsJson: JsValue = TestData.With1SomeOnEachPath.chargeInfoResponseR2Json
+          val someOptionsObject: ChargeInfoResponse = TestData.With1SomeOnEachPath.chargeInfoResponseR2
 
-          testSchemaReader(schema, json, obj, saRelease2Enabled)
+          testSchemaReader(timeToPayEligibilityR2Schema, someOptionsJson, someOptionsObject, saRelease2Enabled)
         }
 
         "when none of the optional fields are populated" - {
-          val json: JsValue = TestData.With0SomeOnEachPath.json
-          val obj: ChargeInfoResponse = TestData.With0SomeOnEachPath.r2
+          val noOptionsJson: JsValue = TestData.With0SomeOnEachPath.chargeInfoResponseR2Json
+          val noOptionsObject: ChargeInfoResponse = TestData.With0SomeOnEachPath.chargeInfoResponseR2
 
-          testSchemaReader(schema, json, obj, saRelease2Enabled)
+          testSchemaReader(timeToPayEligibilityR2Schema, noOptionsJson, noOptionsObject, saRelease2Enabled)
         }
       }
     }
