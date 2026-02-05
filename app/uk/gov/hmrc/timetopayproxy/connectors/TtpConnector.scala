@@ -97,20 +97,8 @@ class DefaultTtpConnector @Inject() (appConfig: AppConfig, httpClient: HttpClien
       .handleSuccess[AffordableQuoteResponse](200)
       .handleErrorTransformed[TimeToPayError](400, ttpError => ttpError.toConnectorError(status = 400))
 
-  val headers: String => Seq[(String, String)] = (guid: String) =>
-    if (appConfig.useIf) {
-      Seq(
-        "Authorization" -> s"Bearer ${appConfig.ttpToken}",
-        "CorrelationId" -> s"$guid"
-      )
-    } else {
-      Seq()
-    }
-
-  private def getOrGenerateCorrelationId(implicit hc: HeaderCarrier): String =
-    (hc.headers(Seq("CorrelationId")) ++ hc.extraHeaders)
-      .toMap[String, String]
-      .getOrElse("CorrelationId", UUID.randomUUID().toString)
+  private def generateCorrelationId: Seq[(String, String)] =
+    Seq(("CorrelationId", UUID.randomUUID().toString))
 
   def generateQuote(
     ttppRequest: GenerateQuoteRequest,
@@ -120,7 +108,7 @@ class DefaultTtpConnector @Inject() (appConfig: AppConfig, httpClient: HttpClien
     implicit def httpReads: HttpReads[Either[ProxyEnvelopeError, GenerateQuoteResponse]] =
       httpReadsBuilderForGenerateQuote.httpReads(logger, makeErrorSafeToLogInProd = _.toStringSafeToLogInProd)
 
-    val path = if (appConfig.useIf) "/individuals/debts/time-to-pay/quote" else "/debts/time-to-pay/quote"
+    val path = "/debts/time-to-pay/quote"
 
     val pathWithQueryParameters = path + makeQueryString(queryParams)
 
@@ -130,7 +118,7 @@ class DefaultTtpConnector @Inject() (appConfig: AppConfig, httpClient: HttpClien
       httpClient
         .post(url)
         .withBody(Json.toJson(ttppRequest))
-        .setHeader(headers(getOrGenerateCorrelationId): _*)
+        .setHeader(generateCorrelationId: _*)
         .execute[Either[ProxyEnvelopeError, GenerateQuoteResponse]]
     )
   }
@@ -143,11 +131,7 @@ class DefaultTtpConnector @Inject() (appConfig: AppConfig, httpClient: HttpClien
     implicit def httpReads: HttpReads[Either[ProxyEnvelopeError, ViewPlanResponse]] =
       httpReadsBuilderForViewPlan.httpReads(logger, makeErrorSafeToLogInProd = _.toStringSafeToLogInProd)
 
-    val path =
-      if (appConfig.useIf)
-        s"/individuals/time-to-pay/quote/${customerReference.value}/${planId.value}"
-      else
-        s"/debts/time-to-pay/quote/${customerReference.value}/${planId.value}"
+    val path = s"/debts/time-to-pay/quote/${customerReference.value}/${planId.value}"
 
     val url = url"${appConfig.ttpBaseUrl + path}"
 
@@ -165,7 +149,7 @@ class DefaultTtpConnector @Inject() (appConfig: AppConfig, httpClient: HttpClien
     implicit def httpReads: HttpReads[Either[ProxyEnvelopeError, UpdatePlanResponse]] =
       httpReadsBuilderForUpdatePlan.httpReads(logger, makeErrorSafeToLogInProd = _.toStringSafeToLogInProd)
 
-    val path = if (appConfig.useIf) "individuals/time-to-pay/quote" else "debts/time-to-pay/quote"
+    val path = "debts/time-to-pay/quote"
 
     val urlAsString = List(
       appConfig.ttpBaseUrl,
@@ -193,9 +177,7 @@ class DefaultTtpConnector @Inject() (appConfig: AppConfig, httpClient: HttpClien
     implicit def httpReads: HttpReads[Either[ProxyEnvelopeError, CreatePlanResponse]] =
       httpReadsBuilderForCreatePlan.httpReads(logger, makeErrorSafeToLogInProd = _.toStringSafeToLogInProd)
 
-    val path =
-      if (appConfig.useIf) "/individuals/debts/time-to-pay/quote/arrangement"
-      else "/debts/time-to-pay/quote/arrangement"
+    val path = "/debts/time-to-pay/quote/arrangement"
 
     val pathWithQueryParameters = path + makeQueryString(queryParams)
 
@@ -209,7 +191,7 @@ class DefaultTtpConnector @Inject() (appConfig: AppConfig, httpClient: HttpClien
       }
 
     val headers: Seq[(String, String)] =
-      Seq("CorrelationId" -> getOrGenerateCorrelationId) ++ authorizationHeader
+      generateCorrelationId ++ authorizationHeader
 
     EitherT(
       httpClient
@@ -227,9 +209,7 @@ class DefaultTtpConnector @Inject() (appConfig: AppConfig, httpClient: HttpClien
     implicit def httpReads: HttpReads[Either[ProxyEnvelopeError, AffordableQuoteResponse]] =
       httpReadsBuilderForAffordableQuotes.httpReads(logger, makeErrorSafeToLogInProd = _.toStringSafeToLogInProd)
 
-    val path =
-      if (appConfig.useIf) "/individuals/time-to-pay/affordability/affordable-quotes"
-      else "/debts/time-to-pay/affordability/affordable-quotes"
+    val path = "/debts/time-to-pay/affordability/affordable-quotes"
 
     val url = url"${appConfig.ttpBaseUrl + path}"
 
