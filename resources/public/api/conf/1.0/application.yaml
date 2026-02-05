@@ -52,7 +52,8 @@ info:
       | 1.0.18 | 28-10-2025 | Alex Olkhovskiy | Add 409 conflict response to PUT /quote endpoint for duplicate plan ID|
       | 1.0.19 | 30-10-2025 | Alex Olkhovskiy | R1 changes for udpate cancel, inform and full amend|
       | 1.0.20 | 06-11-2025 | Alex Olkhovskiy | Add 422 error response for charge reference mismatch |
-  version: 1.0.20
+      | 1.0.21 | 28-01-2026 | Alex Olkhovskiy | DTD-4248: Fix mismatches between spec and code |
+  version: 1.0.21
   contact: {}
 servers:
   - url: https://api.service.hmrc.gov.uk
@@ -343,7 +344,6 @@ paths:
                   totalInterest: 0
                   interestAccrued: 0
                   planInterest: 0.24
-                  frequency: annually
                 debtItemCharges:
                   - debtItemChargeId: debtItemChrgId1
                     mainTrans: '1546'
@@ -1324,7 +1324,7 @@ components:
         - weekly
         - 2Weekly
         - 4Weekly
-        - Monthly
+        - monthly
         - quarterly
         - 6Monthly
         - annually
@@ -1651,11 +1651,12 @@ components:
       enum:
         - directDebit
         - BACS
+        - Bank payments
         - cheque
         - cardPayment
         - Ongoing award
       type: string
-      description: Payment method (Direct debit, BACS, Cheque, Card)
+      description: Payment method (Direct debit, BACS, Bank payments, Cheque, Card)
     ArrangementPlan:
       title: ArrangementPlan
       required:
@@ -1791,11 +1792,12 @@ components:
       enum:
         - directDebit
         - BACS
+        - Bank payments
         - cheque
         - cardPayment
         - Ongoing award
       type: string
-      description: Payment method (Direct debit, BACS, Cheque, Card)
+      description: Payment method (Direct debit, BACS, Bank payments, Cheque, Card)
     PaymentRequest:
       title: PaymentRequest
       required:
@@ -1998,10 +2000,6 @@ components:
           type: integer
           description: Number of instalments
           format: int32
-        frequency:
-          allOf:
-            - $ref: '#/components/schemas/PaymentFrequency'
-            - description: payment frequency
         initialPaymentMethod:
           allOf:
             - $ref: '#/components/schemas/InitialPaymentMethodType'
@@ -2079,11 +2077,12 @@ components:
       enum:
         - directDebit
         - BACS
+        - Bank payments
         - cheque
         - cardPayment
         - Ongoing award
       type: string
-      description: Payment method (Direct debit, BACS, Cheque, Card)
+      description: Payment method (Direct debit, BACS, Bank payments, Cheque, Card)
     PaymentResponse:
       title: PaymentResponse
       required:
@@ -2179,11 +2178,12 @@ components:
       enum:
         - directDebit
         - BACS
+        - Bank payments
         - cheque
         - cardPayment
         - Ongoing award
       type: string
-      description: Payment method (Direct debit, BACS, Cheque, Card)
+      description: Payment method (Direct debit, BACS, Bank payments, Cheque, Card)
     PaymentUpdate:
       title: PaymentUpdate
       required:
@@ -2281,7 +2281,7 @@ components:
         - Monthly
         - Quarterly
         - 6Monthly
-        - annually
+        - Annually
     DebtItem:
       title: DebtItem
       required:
@@ -2341,6 +2341,11 @@ components:
         regimeType:
           type: string
           description: Regime type
+          enum:
+            - PAYE
+            - VATC
+            - SIMP
+            - SA
         channelIdentifier:
           type: string
         paymentPlanAffordableAmount:
