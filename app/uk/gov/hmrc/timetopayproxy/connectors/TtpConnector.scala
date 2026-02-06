@@ -97,8 +97,12 @@ class DefaultTtpConnector @Inject() (appConfig: AppConfig, httpClient: HttpClien
       .handleSuccess[AffordableQuoteResponse](200)
       .handleErrorTransformed[TimeToPayError](400, ttpError => ttpError.toConnectorError(status = 400))
 
-  private def generateCorrelationId: Seq[(String, String)] =
-    Seq(("CorrelationId", UUID.randomUUID().toString))
+  val headers: String => Seq[(String, String)] = (guid: String) => Seq("CorrelationId" -> s"$guid")
+
+  private def getOrGenerateCorrelationId(implicit hc: HeaderCarrier): String =
+    (hc.headers(Seq("CorrelationId")) ++ hc.extraHeaders)
+      .toMap[String, String]
+      .getOrElse("CorrelationId", UUID.randomUUID().toString)
 
   def generateQuote(
     ttppRequest: GenerateQuoteRequest,
@@ -118,7 +122,7 @@ class DefaultTtpConnector @Inject() (appConfig: AppConfig, httpClient: HttpClien
       httpClient
         .post(url)
         .withBody(Json.toJson(ttppRequest))
-        .setHeader(generateCorrelationId: _*)
+        .setHeader(headers(getOrGenerateCorrelationId): _*)
         .execute[Either[ProxyEnvelopeError, GenerateQuoteResponse]]
     )
   }
@@ -191,7 +195,7 @@ class DefaultTtpConnector @Inject() (appConfig: AppConfig, httpClient: HttpClien
       }
 
     val headers: Seq[(String, String)] =
-      generateCorrelationId ++ authorizationHeader
+      Seq("CorrelationId" -> getOrGenerateCorrelationId) ++ authorizationHeader
 
     EitherT(
       httpClient
