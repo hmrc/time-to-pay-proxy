@@ -47,88 +47,12 @@ class TTPEServiceSpec extends AnyFreeSpec with MockFactory {
     regimeType = SaOnlyRegimeType.SA
   )
 
-  private val chargeInfoResponseWithR2Fields: ChargeInfoResponseR2 = ChargeInfoResponseR2(
-    processingDateTime = LocalDateTime.parse("2025-07-02T15:00:41.689"),
-    identification = List(
-      Identification(idType = IdType("ID_TYPE"), idValue = IdValue("ID_VALUE"))
-    ),
-    individualDetails = IndividualDetails(
-      title = Some(Title("Mr")),
-      firstName = Some(FirstName("John")),
-      lastName = Some(LastName("Doe")),
-      dateOfBirth = Some(DateOfBirth(LocalDate.parse("1980-01-01"))),
-      districtNumber = Some(DistrictNumber("1234")),
-      customerType = CustomerType.ItsaMigtrated,
-      transitionToCDCS = TransitionToCdcs(value = true)
-    ),
-    addresses = List(
-      Address(
-        addressType = AddressType("Address Type"),
-        addressLine1 = AddressLine1("Address Line 1"),
-        addressLine2 = Some(AddressLine2("Address Line 2")),
-        addressLine3 = Some(AddressLine3("Address Line 3")),
-        addressLine4 = Some(AddressLine4("Address Line 4")),
-        rls = Some(Rls(true)),
-        contactDetails = Some(
-          ContactDetails(
-            telephoneNumber = Some(TelephoneNumber("telephone-number")),
-            fax = Some(Fax("fax-number")),
-            mobile = Some(Mobile("mobile-number")),
-            emailAddress = Some(Email("email address")),
-            emailSource = Some(EmailSource("email source"))
-          )
-        ),
-        postCode = Some(ChargeInfoPostCode("AB12 3CD")),
-        postcodeHistory = List(
-          PostCodeInfo(addressPostcode = ChargeInfoPostCode("AB12 3CD"), postcodeDate = LocalDate.parse("2020-01-01"))
-        )
-      )
-    ),
-    customerSignals = Some(
-      List(
-        Signal(SignalType("Rls"), SignalValue("signal value"), Some("description")),
-        Signal(SignalType("Welsh Language Signal"), SignalValue("signal value"), Some("description"))
-      )
-    ),
-    chargeTypeAssessment = List(
-      ChargeTypeAssessment(
-        debtTotalAmount = BigInt(1000),
-        chargeReference = ChargeReference("CHARGE REFERENCE"),
-        parentChargeReference = Some(ChargeInfoParentChargeReference("PARENT CHARGE REF")),
-        mainTrans = MainTrans("2000"),
-        charges = List(
-          Charge(
-            taxPeriodFrom = TaxPeriodFrom(LocalDate.parse("2020-01-02")),
-            taxPeriodTo = TaxPeriodTo(LocalDate.parse("2020-12-31")),
-            chargeType = ChargeType("charge type"),
-            mainType = MainType("main type"),
-            subTrans = SubTrans("1000"),
-            outstandingAmount = OutstandingAmount(BigInt(500)),
-            dueDate = DueDate(LocalDate.parse("2021-01-31")),
-            isInterestBearingCharge = Some(ChargeInfoIsInterestBearingCharge(true)),
-            interestStartDate = Some(InterestStartDate(LocalDate.parse("2020-01-03"))),
-            accruedInterest = AccruedInterest(BigInt(50)),
-            chargeSource = ChargeInfoChargeSource("Source"),
-            parentMainTrans = Some(ChargeInfoParentMainTrans("Parent Main Transaction")),
-            originalCreationDate = Some(OriginalCreationDate(LocalDate.parse("2025-07-02"))),
-            tieBreaker = Some(TieBreaker("Tie Breaker")),
-            originalTieBreaker = Some(OriginalTieBreaker("Original Tie Breaker")),
-            saTaxYearEnd = Some(SaTaxYearEnd(LocalDate.parse("2020-04-05"))),
-            creationDate = Some(CreationDate(LocalDate.parse("2025-07-02"))),
-            originalChargeType = Some(OriginalChargeType("Original Charge Type"))
-          )
-        )
-      )
-    ),
-    chargeTypesExcluded = Some(false)
-  )
+  private val commonProcessingDateTime = LocalDateTime.parse("2025-07-02T15:00:41.689")
 
-  private val chargeInfoResponseWithR1Fields: ChargeInfoResponseR1 = ChargeInfoResponseR1(
-    processingDateTime = LocalDateTime.parse("2025-07-02T15:00:41.689"),
-    identification = List(
-      Identification(idType = IdType("ID_TYPE"), idValue = IdValue("ID_VALUE"))
-    ),
-    individualDetails = IndividualDetails(
+  private val commonIdentification = List(Identification(IdType("ID_TYPE"), IdValue("ID_VALUE")))
+
+  private val commonIndividualDetails =
+    IndividualDetails(
       title = Some(Title("Mr")),
       firstName = Some(FirstName("John")),
       lastName = Some(LastName("Doe")),
@@ -136,8 +60,10 @@ class TTPEServiceSpec extends AnyFreeSpec with MockFactory {
       districtNumber = Some(DistrictNumber("1234")),
       customerType = CustomerType.ItsaMigtrated,
       transitionToCDCS = TransitionToCdcs(value = true)
-    ),
-    addresses = List(
+    )
+
+  private val commonAddresses =
+    List(
       Address(
         addressType = AddressType("Address Type"),
         addressLine1 = AddressLine1("Address Line 1"),
@@ -156,115 +82,81 @@ class TTPEServiceSpec extends AnyFreeSpec with MockFactory {
         ),
         postCode = Some(ChargeInfoPostCode("AB12 3CD")),
         postcodeHistory = List(
-          PostCodeInfo(addressPostcode = ChargeInfoPostCode("AB12 3CD"), postcodeDate = LocalDate.parse("2020-01-01"))
-        )
-      )
-    ),
-    chargeTypeAssessment = List(
-      ChargeTypeAssessment(
-        debtTotalAmount = BigInt(1000),
-        chargeReference = ChargeReference("CHARGE REFERENCE"),
-        parentChargeReference = Some(ChargeInfoParentChargeReference("PARENT CHARGE REF")),
-        mainTrans = MainTrans("2000"),
-        charges = List(
-          Charge(
-            taxPeriodFrom = TaxPeriodFrom(LocalDate.parse("2020-01-02")),
-            taxPeriodTo = TaxPeriodTo(LocalDate.parse("2020-12-31")),
-            chargeType = ChargeType("charge type"),
-            mainType = MainType("main type"),
-            subTrans = SubTrans("1000"),
-            outstandingAmount = OutstandingAmount(BigInt(500)),
-            dueDate = DueDate(LocalDate.parse("2021-01-31")),
-            isInterestBearingCharge = Some(ChargeInfoIsInterestBearingCharge(true)),
-            interestStartDate = Some(InterestStartDate(LocalDate.parse("2020-01-03"))),
-            accruedInterest = AccruedInterest(BigInt(50)),
-            chargeSource = ChargeInfoChargeSource("Source"),
-            parentMainTrans = Some(ChargeInfoParentMainTrans("Parent Main Transaction")),
-            originalCreationDate = Some(OriginalCreationDate(LocalDate.parse("2025-07-02"))),
-            tieBreaker = Some(TieBreaker("Tie Breaker")),
-            originalTieBreaker = Some(OriginalTieBreaker("Original Tie Breaker")),
-            saTaxYearEnd = Some(SaTaxYearEnd(LocalDate.parse("2020-04-05"))),
-            creationDate = Some(CreationDate(LocalDate.parse("2025-07-02"))),
-            originalChargeType = Some(OriginalChargeType("Original Charge Type"))
+          PostCodeInfo(
+            ChargeInfoPostCode("AB12 3CD"),
+            LocalDate.parse("2020-01-01")
           )
         )
       )
     )
-  )
 
-  private val chargeInfoResponseWithChargeTypesExcludedSetToTrue: ChargeInfoResponseR2 = ChargeInfoResponseR2(
-    processingDateTime = LocalDateTime.parse("2025-07-02T15:00:41.689"),
-    identification = List(
-      Identification(idType = IdType("ID_TYPE"), idValue = IdValue("ID_VALUE"))
-    ),
-    individualDetails = IndividualDetails(
-      title = Some(Title("Mr")),
-      firstName = Some(FirstName("John")),
-      lastName = Some(LastName("Doe")),
-      dateOfBirth = Some(DateOfBirth(LocalDate.parse("1980-01-01"))),
-      districtNumber = Some(DistrictNumber("1234")),
-      customerType = CustomerType.ItsaMigtrated,
-      transitionToCDCS = TransitionToCdcs(value = true)
-    ),
-    addresses = List(
-      Address(
-        addressType = AddressType("Address Type"),
-        addressLine1 = AddressLine1("Address Line 1"),
-        addressLine2 = Some(AddressLine2("Address Line 2")),
-        addressLine3 = Some(AddressLine3("Address Line 3")),
-        addressLine4 = Some(AddressLine4("Address Line 4")),
-        rls = Some(Rls(true)),
-        contactDetails = Some(
-          ContactDetails(
-            telephoneNumber = Some(TelephoneNumber("telephone-number")),
-            fax = Some(Fax("fax-number")),
-            mobile = Some(Mobile("mobile-number")),
-            emailAddress = Some(Email("email address")),
-            emailSource = Some(EmailSource("email source"))
-          )
-        ),
-        postCode = Some(ChargeInfoPostCode("AB12 3CD")),
-        postcodeHistory = List(
-          PostCodeInfo(addressPostcode = ChargeInfoPostCode("AB12 3CD"), postcodeDate = LocalDate.parse("2020-01-01"))
-        )
+  private val commonCharges =
+    List(
+      Charge(
+        taxPeriodFrom = TaxPeriodFrom(LocalDate.parse("2020-01-02")),
+        taxPeriodTo = TaxPeriodTo(LocalDate.parse("2020-12-31")),
+        chargeType = ChargeType("charge type"),
+        mainType = MainType("main type"),
+        subTrans = SubTrans("1000"),
+        outstandingAmount = OutstandingAmount(BigInt(500)),
+        dueDate = DueDate(LocalDate.parse("2021-01-31")),
+        isInterestBearingCharge = Some(ChargeInfoIsInterestBearingCharge(true)),
+        interestStartDate = Some(InterestStartDate(LocalDate.parse("2020-01-03"))),
+        accruedInterest = AccruedInterest(BigInt(50)),
+        chargeSource = ChargeInfoChargeSource("Source"),
+        parentMainTrans = Some(ChargeInfoParentMainTrans("Parent Main Transaction")),
+        originalCreationDate = Some(OriginalCreationDate(LocalDate.parse("2025-07-02"))),
+        tieBreaker = Some(TieBreaker("Tie Breaker")),
+        originalTieBreaker = Some(OriginalTieBreaker("Original Tie Breaker")),
+        saTaxYearEnd = Some(SaTaxYearEnd(LocalDate.parse("2020-04-05"))),
+        creationDate = Some(CreationDate(LocalDate.parse("2025-07-02"))),
+        originalChargeType = Some(OriginalChargeType("Original Charge Type"))
       )
-    ),
-    customerSignals = Some(
-      List(
-        Signal(SignalType("Rls"), SignalValue("signal value"), Some("description")),
-        Signal(SignalType("Welsh Language Signal"), SignalValue("signal value"), Some("description"))
-      )
-    ),
-    chargeTypeAssessment = List(
+    )
+
+  private val commonChargeTypeAssessment =
+    List(
       ChargeTypeAssessment(
         debtTotalAmount = BigInt(1000),
         chargeReference = ChargeReference("CHARGE REFERENCE"),
         parentChargeReference = Some(ChargeInfoParentChargeReference("PARENT CHARGE REF")),
         mainTrans = MainTrans("2000"),
-        charges = List(
-          Charge(
-            taxPeriodFrom = TaxPeriodFrom(LocalDate.parse("2020-01-02")),
-            taxPeriodTo = TaxPeriodTo(LocalDate.parse("2020-12-31")),
-            chargeType = ChargeType("charge type"),
-            mainType = MainType("main type"),
-            subTrans = SubTrans("1000"),
-            outstandingAmount = OutstandingAmount(BigInt(500)),
-            dueDate = DueDate(LocalDate.parse("2021-01-31")),
-            isInterestBearingCharge = Some(ChargeInfoIsInterestBearingCharge(true)),
-            interestStartDate = Some(InterestStartDate(LocalDate.parse("2020-01-03"))),
-            accruedInterest = AccruedInterest(BigInt(50)),
-            chargeSource = ChargeInfoChargeSource("Source"),
-            parentMainTrans = Some(ChargeInfoParentMainTrans("Parent Main Transaction")),
-            originalCreationDate = Some(OriginalCreationDate(LocalDate.parse("2025-07-02"))),
-            tieBreaker = Some(TieBreaker("Tie Breaker")),
-            originalTieBreaker = Some(OriginalTieBreaker("Original Tie Breaker")),
-            saTaxYearEnd = Some(SaTaxYearEnd(LocalDate.parse("2020-04-05"))),
-            creationDate = Some(CreationDate(LocalDate.parse("2025-07-02"))),
-            originalChargeType = Some(OriginalChargeType("Original Charge Type"))
-          )
-        )
+        charges = commonCharges
       )
-    ),
+    )
+
+  private val commonCustomerSignals = Some(
+    List(
+      Signal(SignalType("Rls"), SignalValue("signal value"), Some("description")),
+      Signal(SignalType("Welsh Language Signal"), SignalValue("signal value"), Some("description"))
+    )
+  )
+
+  private val chargeInfoResponseWithR1Fields: ChargeInfoResponseR1 = ChargeInfoResponseR1(
+    processingDateTime = commonProcessingDateTime,
+    identification = commonIdentification,
+    individualDetails = commonIndividualDetails,
+    addresses = commonAddresses,
+    chargeTypeAssessment = commonChargeTypeAssessment
+  )
+
+  private val chargeInfoResponseWithR2Fields: ChargeInfoResponseR2 = ChargeInfoResponseR2(
+    processingDateTime = commonProcessingDateTime,
+    identification = commonIdentification,
+    individualDetails = commonIndividualDetails,
+    addresses = commonAddresses,
+    customerSignals = commonCustomerSignals,
+    chargeTypeAssessment = commonChargeTypeAssessment,
+    chargeTypesExcluded = Some(false)
+  )
+
+  private val chargeInfoResponseR2WithChargeTypesExcludedSetToTrue: ChargeInfoResponseR2 = ChargeInfoResponseR2(
+    processingDateTime = commonProcessingDateTime,
+    identification = commonIdentification,
+    individualDetails = commonIndividualDetails,
+    addresses = commonAddresses,
+    customerSignals = commonCustomerSignals,
+    chargeTypeAssessment = commonChargeTypeAssessment,
     chargeTypesExcluded = Some(true)
   )
 
@@ -293,7 +185,7 @@ class TTPEServiceSpec extends AnyFreeSpec with MockFactory {
 
     "returns a ChargeInfoResponse from the connector, with chargeTypesExcluded set to true" in {
       val connectorStub = new TtpeConnectorStub(
-        Right(chargeInfoResponseWithChargeTypesExcludedSetToTrue)
+        Right(chargeInfoResponseR2WithChargeTypesExcludedSetToTrue)
       )
 
       val ttpeService = new DefaultTTPEService(connectorStub)
