@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 HM Revenue & Customs
+ * Copyright 2026 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,42 +14,26 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.timetopayproxy.models.saonly.ttpcancel
+package uk.gov.hmrc.timetopayproxy.models.saonly.ttpfullamend
 
 import cats.data.NonEmptyList
 import play.api.libs.json.{ Format, Json, OFormat }
 import uk.gov.hmrc.timetopayproxy.models.{ DebtItemChargeReference, FrequencyLowercase }
 import uk.gov.hmrc.timetopayproxy.models.currency.GbpPounds
-import uk.gov.hmrc.timetopayproxy.models.saonly.common.{ ArrangementAgreedDate, InitialPaymentDate, TtpEndDate }
+import uk.gov.hmrc.timetopayproxy.models.saonly.common.{ ArrangementAgreedDate, DdiReference, InitialPaymentDate, TtpEndDate }
 import uk.gov.hmrc.timetopayproxy.utils.json.CatsNonEmptyListJson
 
-final case class TtpCancelPaymentPlan(
+case class OriginalPaymentPlan(
   arrangementAgreedDate: ArrangementAgreedDate,
   ttpEndDate: TtpEndDate,
   frequency: FrequencyLowercase,
-  cancellationDate: CancellationDate,
-  initialPaymentDate: Option[InitialPaymentDate],
-  initialPaymentAmount: Option[GbpPounds]
-)
-
-object TtpCancelPaymentPlan {
-  implicit val format: OFormat[TtpCancelPaymentPlan] = Json.format[TtpCancelPaymentPlan]
-}
-
-final case class TtpCancelPaymentPlanR2(
-  arrangementAgreedDate: Option[ArrangementAgreedDate],
-  ttpEndDate: Option[TtpEndDate],
-  frequency: Option[FrequencyLowercase],
-  cancellationDate: CancellationDate,
   initialPaymentDate: Option[InitialPaymentDate],
   initialPaymentAmount: Option[GbpPounds],
+  ddiReference: Option[DdiReference],
   debtItemCharges: NonEmptyList[DebtItemChargeReference]
 )
 
-object TtpCancelPaymentPlanR2 {
-  implicit val format: OFormat[TtpCancelPaymentPlanR2] = {
-    implicit def nelFormat[T: Format]: Format[NonEmptyList[T]] = CatsNonEmptyListJson.nonEmptyListFormat[T]
-
-    Json.format[TtpCancelPaymentPlanR2]
-  }
+object OriginalPaymentPlan {
+  implicit val formats: OFormat[OriginalPaymentPlan] = Json.format[OriginalPaymentPlan]
+  implicit def nelFormat[T: Format]: Format[NonEmptyList[T]] = CatsNonEmptyListJson.nonEmptyListFormat[T]
 }

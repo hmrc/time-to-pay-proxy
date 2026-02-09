@@ -213,7 +213,7 @@ class TimeToPayProxyControllerSpec extends AnyWordSpec with MockFactory {
     )
   )
 
-  "POST /individuals/time-to-pay/quote" should {
+  "POST /individuals/time-to-pay-proxy/quote" should {
     "return 200" when {
       "service returns success" in {
 
@@ -268,7 +268,7 @@ class TimeToPayProxyControllerSpec extends AnyWordSpec with MockFactory {
           .returning(TtppEnvelope(responseFromTtp))
 
         val fakeRequest: FakeRequest[JsValue] =
-          FakeRequest("POST", "/individuals/time-to-pay/quote")
+          FakeRequest("POST", "/individuals/time-to-pay-proxy/quote")
             .withHeaders(CONTENT_TYPE -> MimeTypes.JSON)
             .withBody(Json.toJson[GenerateQuoteRequest](generateQuoteRequest))
         val response: Future[Result] = controller.generateQuote()(fakeRequest)
@@ -320,7 +320,7 @@ class TimeToPayProxyControllerSpec extends AnyWordSpec with MockFactory {
           .returning(Future.successful(()))
 
         val fakeRequest: FakeRequest[JsValue] =
-          FakeRequest("POST", "/individuals/time-to-pay/quote")
+          FakeRequest("POST", "/individuals/time-to-pay-proxy/quote")
             .withHeaders(CONTENT_TYPE -> MimeTypes.JSON)
             .withBody(Json.parse(wrongFormattedBody))
 
@@ -362,7 +362,7 @@ class TimeToPayProxyControllerSpec extends AnyWordSpec with MockFactory {
           )
 
         val fakeRequest: FakeRequest[JsValue] =
-          FakeRequest("POST", "/individuals/time-to-pay/quote")
+          FakeRequest("POST", "/individuals/time-to-pay-proxy/quote")
             .withHeaders(CONTENT_TYPE -> MimeTypes.JSON)
             .withBody(Json.toJson[GenerateQuoteRequest](generateQuoteRequest))
         val response: Future[Result] = controller.generateQuote()(fakeRequest)
@@ -375,7 +375,7 @@ class TimeToPayProxyControllerSpec extends AnyWordSpec with MockFactory {
     }
   }
 
-  "GET /individuals/time-to-pay/quote/:customerReference/:planId" should {
+  "GET /individuals/time-to-pay-proxy/quote/:customerReference/:planId" should {
     "return a 200 given a successful response" in {
 
       (() => featureSwitch.enrolmentAuthEnabled).expects().returning(EnrolmentAuthEnabled(true))
@@ -398,7 +398,7 @@ class TimeToPayProxyControllerSpec extends AnyWordSpec with MockFactory {
 
       val fakeRequest = FakeRequest(
         "GET",
-        "/individuals/time-to-pay/quote/customerReference/planId"
+        "/individuals/time-to-pay-proxy/quote/customerReference/planId"
       )
       val response: Future[Result] =
         controller.viewPlan("customerReference", "planId")(fakeRequest)
@@ -429,7 +429,7 @@ class TimeToPayProxyControllerSpec extends AnyWordSpec with MockFactory {
 
       val fakeRequest = FakeRequest(
         "GET",
-        "/individuals/time-to-pay/quote/customerReference/planId"
+        "/individuals/time-to-pay-proxy/quote/customerReference/planId"
       )
       val response: Future[Result] =
         controller.viewPlan("customerReference", "planId")(fakeRequest)
@@ -460,7 +460,7 @@ class TimeToPayProxyControllerSpec extends AnyWordSpec with MockFactory {
 
       val fakeRequest = FakeRequest(
         "GET",
-        "/individuals/time-to-pay/quote/customerReference/planId"
+        "/individuals/time-to-pay-proxy/quote/customerReference/planId"
       )
       val response: Future[Result] =
         controller.viewPlan("customerReference", "planId")(fakeRequest)
@@ -469,7 +469,7 @@ class TimeToPayProxyControllerSpec extends AnyWordSpec with MockFactory {
     }
   }
 
-  "PUT /individuals/time-to-pay/quote/:customerReference/:planId" should {
+  "PUT /individuals/time-to-pay-proxy/quote/:customerReference/:planId" should {
     val updatePlanRequest =
       UpdatePlanRequest(
         CustomerReference("customerReference"),
@@ -517,7 +517,7 @@ class TimeToPayProxyControllerSpec extends AnyWordSpec with MockFactory {
 
       val fakeRequest: FakeRequest[JsValue] = FakeRequest(
         "PUT",
-        s"/individuals/time-to-pay/quote/$customerReferenceQueryParameter/$planIdQueryParameter"
+        s"/individuals/time-to-pay-proxy/quote/$customerReferenceQueryParameter/$planIdQueryParameter"
       ).withHeaders(CONTENT_TYPE -> MimeTypes.JSON)
         .withBody(updatePlanRequestJson)
 
@@ -868,7 +868,7 @@ class TimeToPayProxyControllerSpec extends AnyWordSpec with MockFactory {
     }
   }
 
-  "POST /individuals/time-to-pay/quote/arrangement" should {
+  "POST /individuals/time-to-pay-proxy/quote/arrangement" should {
     "return 200" when {
       "service returns success" in {
 
@@ -901,7 +901,7 @@ class TimeToPayProxyControllerSpec extends AnyWordSpec with MockFactory {
           .returning(TtppEnvelope(createPlanResponse))
 
         val fakeRequest: FakeRequest[JsValue] =
-          FakeRequest("POST", "/individuals/time-to-pay/quote/arrangement")
+          FakeRequest("POST", "/individuals/time-to-pay-proxy/quote/arrangement")
             .withHeaders(CONTENT_TYPE -> MimeTypes.JSON)
             .withBody(Json.toJson[CreatePlanRequest](createPlanRequest))
         val response: Future[Result] = controller.createPlan()(fakeRequest)
@@ -941,7 +941,7 @@ class TimeToPayProxyControllerSpec extends AnyWordSpec with MockFactory {
           )
 
         val fakeRequest: FakeRequest[JsValue] =
-          FakeRequest("POST", "/individuals/time-to-pay/quote/arrangement")
+          FakeRequest("POST", "/individuals/time-to-pay-proxy/quote/arrangement")
             .withHeaders(CONTENT_TYPE -> MimeTypes.JSON)
             .withBody(Json.toJson[CreatePlanRequest](createPlanRequest))
         val response: Future[Result] = controller.createPlan()(fakeRequest)
@@ -951,7 +951,7 @@ class TimeToPayProxyControllerSpec extends AnyWordSpec with MockFactory {
     }
   }
 
-  "POST /individuals/time-to-pay/self-serve/affordable-quotes" should {
+  "POST /individuals/time-to-pay-proxy/self-serve/affordable-quotes" should {
     val affordableQuotesRequest = AffordableQuotesRequest(
       channelIdentifier = "eSSTTP",
       paymentPlanAffordableAmount = 500,
@@ -1148,13 +1148,13 @@ class TimeToPayProxyControllerSpec extends AnyWordSpec with MockFactory {
         )
       ),
       chargeTypeAssessment = List(
-        ChargeTypeAssessment(
+        ChargeTypeAssessmentR2(
           debtTotalAmount = BigInt(1000),
           chargeReference = ChargeReference("CHARGE REFERENCE"),
           parentChargeReference = Some(ChargeInfoParentChargeReference("PARENT CHARGE REF")),
           mainTrans = MainTrans("2000"),
           charges = List(
-            Charge(
+            ChargeR2(
               taxPeriodFrom = TaxPeriodFrom(LocalDate.parse("2020-01-02")),
               taxPeriodTo = TaxPeriodTo(LocalDate.parse("2020-12-31")),
               chargeType = ChargeType("charge type"),
@@ -1172,9 +1172,15 @@ class TimeToPayProxyControllerSpec extends AnyWordSpec with MockFactory {
               originalTieBreaker = Some(OriginalTieBreaker("Original Tie Breaker")),
               saTaxYearEnd = Some(SaTaxYearEnd(LocalDate.parse("2020-04-05"))),
               creationDate = Some(CreationDate(LocalDate.parse("2025-07-02"))),
-              originalChargeType = Some(OriginalChargeType("Original Charge Type"))
+              originalChargeType = Some(OriginalChargeType("Original Charge Type")),
+              locks = Some(
+                List(
+                  Lock(lockType = "Posting/Clearing", lockReason = "No Reallocation")
+                )
+              )
             )
-          )
+          ),
+          isInsolvent = IsInsolvent(false)
         )
       ),
       chargeTypesExcluded = Some(false)

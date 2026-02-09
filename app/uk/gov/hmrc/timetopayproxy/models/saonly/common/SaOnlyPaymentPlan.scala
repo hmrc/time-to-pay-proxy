@@ -19,7 +19,7 @@ package uk.gov.hmrc.timetopayproxy.models.saonly.common
 import cats.data.NonEmptyList
 import play.api.libs.json.{ Format, Json, OFormat }
 import uk.gov.hmrc.timetopayproxy.models.currency.GbpPounds
-import uk.gov.hmrc.timetopayproxy.models.{ FrequencyLowercase, InformDebtItemCharge }
+import uk.gov.hmrc.timetopayproxy.models.{ DebtItemChargeReference, FrequencyLowercase }
 
 final case class SaOnlyPaymentPlan(
   arrangementAgreedDate: ArrangementAgreedDate,
@@ -41,12 +41,12 @@ final case class SaOnlyPaymentPlanR2(
   initialPaymentDate: Option[InitialPaymentDate],
   initialPaymentAmount: Option[GbpPounds],
   ddiReference: Option[DdiReference],
-  debtItemCharges: NonEmptyList[InformDebtItemCharge]
+  debtItemCharges: NonEmptyList[DebtItemChargeReference]
 )
 
 object SaOnlyPaymentPlanR2 {
-  implicit val informDebtItemChargeNELFormat: Format[NonEmptyList[InformDebtItemCharge]] =
-    NonEmptyListFormat.nonEmptyListFormat[InformDebtItemCharge]
+  implicit val informDebtItemChargeNELFormat: Format[NonEmptyList[DebtItemChargeReference]] =
+    NonEmptyListFormat.nonEmptyListFormat[DebtItemChargeReference]
 
   implicit val format: OFormat[SaOnlyPaymentPlanR2] = Json.format[SaOnlyPaymentPlanR2]
 }

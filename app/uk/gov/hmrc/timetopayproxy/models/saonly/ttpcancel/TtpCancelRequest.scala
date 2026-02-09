@@ -17,7 +17,7 @@
 package uk.gov.hmrc.timetopayproxy.models.saonly.ttpcancel
 
 import cats.data.NonEmptyList
-import play.api.libs.json.{ Format, Json, OFormat }
+import play.api.libs.json.{ Format, Json, OFormat, Reads }
 import uk.gov.hmrc.timetopayproxy.models.saonly.common.{ SaOnlyInstalment, TransitionedIndicator }
 import uk.gov.hmrc.timetopayproxy.models.{ ChannelIdentifier, Identification }
 import uk.gov.hmrc.timetopayproxy.utils.json.CatsNonEmptyListJson
@@ -36,5 +36,23 @@ object TtpCancelRequest {
     implicit def nelFormat[T: Format]: Format[NonEmptyList[T]] = CatsNonEmptyListJson.nonEmptyListFormat[T]
 
     Json.format[TtpCancelRequest]
+  }
+}
+
+// TODO DTD-4258: These R2 classes should replace the non R2 classes when the feature switch is removed
+case class TtpCancelRequestR2(
+  identifications: NonEmptyList[Identification],
+  paymentPlan: TtpCancelPaymentPlanR2,
+  instalments: NonEmptyList[SaOnlyInstalment],
+  channelIdentifier: ChannelIdentifier,
+  // Unlike the FullAmend request, CDCS requested this field to be optional due to delivery constraints.
+  transitioned: Option[TransitionedIndicator]
+)
+
+object TtpCancelRequestR2 {
+  implicit val reads: Reads[TtpCancelRequestR2] = {
+    implicit def nelRead[T: Reads]: Reads[NonEmptyList[T]] = CatsNonEmptyListJson.nonEmptyListReader[T]
+
+    Json.reads[TtpCancelRequestR2]
   }
 }

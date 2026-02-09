@@ -88,35 +88,41 @@ class TTPEServiceSpec extends AnyFreeSpec with MockFactory {
           )
         )
       )
-    )
-
+)
+ 
   private val commonCharges =
     List(
-      Charge(
-        taxPeriodFrom = TaxPeriodFrom(LocalDate.parse("2020-01-02")),
-        taxPeriodTo = TaxPeriodTo(LocalDate.parse("2020-12-31")),
-        chargeType = ChargeType("charge type"),
-        mainType = MainType("main type"),
-        subTrans = SubTrans("1000"),
-        outstandingAmount = OutstandingAmount(BigInt(500)),
-        dueDate = DueDate(LocalDate.parse("2021-01-31")),
-        isInterestBearingCharge = Some(ChargeInfoIsInterestBearingCharge(true)),
-        interestStartDate = Some(InterestStartDate(LocalDate.parse("2020-01-03"))),
-        accruedInterest = AccruedInterest(BigInt(50)),
-        chargeSource = ChargeInfoChargeSource("Source"),
-        parentMainTrans = Some(ChargeInfoParentMainTrans("Parent Main Transaction")),
-        originalCreationDate = Some(OriginalCreationDate(LocalDate.parse("2025-07-02"))),
-        tieBreaker = Some(TieBreaker("Tie Breaker")),
-        originalTieBreaker = Some(OriginalTieBreaker("Original Tie Breaker")),
-        saTaxYearEnd = Some(SaTaxYearEnd(LocalDate.parse("2020-04-05"))),
-        creationDate = Some(CreationDate(LocalDate.parse("2025-07-02"))),
-        originalChargeType = Some(OriginalChargeType("Original Charge Type"))
-      )
+      ChargeR2(
+            taxPeriodFrom = TaxPeriodFrom(LocalDate.parse("2020-01-02")),
+            taxPeriodTo = TaxPeriodTo(LocalDate.parse("2020-12-31")),
+            chargeType = ChargeType("charge type"),
+            mainType = MainType("main type"),
+            subTrans = SubTrans("1000"),
+            outstandingAmount = OutstandingAmount(BigInt(500)),
+            dueDate = DueDate(LocalDate.parse("2021-01-31")),
+            isInterestBearingCharge = Some(ChargeInfoIsInterestBearingCharge(true)),
+            interestStartDate = Some(InterestStartDate(LocalDate.parse("2020-01-03"))),
+            accruedInterest = AccruedInterest(BigInt(50)),
+            chargeSource = ChargeInfoChargeSource("Source"),
+            parentMainTrans = Some(ChargeInfoParentMainTrans("Parent Main Transaction")),
+            originalCreationDate = Some(OriginalCreationDate(LocalDate.parse("2025-07-02"))),
+            tieBreaker = Some(TieBreaker("Tie Breaker")),
+            originalTieBreaker = Some(OriginalTieBreaker("Original Tie Breaker")),
+            saTaxYearEnd = Some(SaTaxYearEnd(LocalDate.parse("2020-04-05"))),
+            creationDate = Some(CreationDate(LocalDate.parse("2025-07-02"))),
+            originalChargeType = Some(OriginalChargeType("Original Charge Type")),
+            locks = Some(
+              List(
+                Lock(lockType = "Posting/Clearing", lockReason = "No Reallocation")
+              )
+            )
+          )
+        )
     )
 
   private val commonChargeTypeAssessment =
     List(
-      ChargeTypeAssessment(
+      ChargeTypeAssessmentR2(
         debtTotalAmount = BigInt(1000),
         chargeReference = ChargeReference("CHARGE REFERENCE"),
         parentChargeReference = Some(ChargeInfoParentChargeReference("PARENT CHARGE REF")),

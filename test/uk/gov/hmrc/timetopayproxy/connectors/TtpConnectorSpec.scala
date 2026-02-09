@@ -43,7 +43,7 @@ class TtpConnectorSpec extends PlaySpec with DefaultAwaitTimeout with FutureAwai
 
   val httpClient: HttpClientV2 = app.injector.instanceOf[HttpClientV2]
 
-  class Setup(ifImpl: Boolean, internalAuthEnabled: Boolean = false) {
+  class Setup(internalAuthEnabled: Boolean = false) {
     implicit val ec: ExecutionContext = ExecutionContext.global
     implicit val hc: HeaderCarrier = HeaderCarrier()
 
@@ -74,11 +74,6 @@ class TtpConnectorSpec extends PlaySpec with DefaultAwaitTimeout with FutureAwai
       .returns("TOKEN")
     (config
       .get(_: String)(_: ConfigLoader[Boolean]))
-      .expects("microservice.services.ttp.useIf", *)
-      .once()
-      .returns(ifImpl)
-    (config
-      .get(_: String)(_: ConfigLoader[Boolean]))
       .expects("auditing.enabled", *)
       .once()
       .returns(false)
@@ -97,223 +92,141 @@ class TtpConnectorSpec extends PlaySpec with DefaultAwaitTimeout with FutureAwai
       .expects("internal-auth.token", *)
       .returns("valid-auth-token")
 
-    val mockConfiguration: AppConfig = new MockAppConfig(config, servicesConfig, ifImpl, internalAuthEnabled)
+    val mockConfiguration: AppConfig = new MockAppConfig(config, servicesConfig, internalAuthEnabled)
 
     val connector: TtpConnector = new DefaultTtpConnector(mockConfiguration, httpClient, featureSwitch)
   }
 
   "Generate quote" when {
-    "using IF" must {
-      "parse an error response from an upstream service" in new Setup(ifImpl = true) {
-        stubPostWithResponseBody(
-          "/individuals/debts/time-to-pay/quote",
-          400,
-          errorResponse("BAD_REQUEST", "Invalid request body")
-        )
-        val result = connector.generateQuote(
-          GenerateQuoteRequest(
-            CustomerReference("CustRef1234"),
-            ChannelIdentifier.Advisor,
-            PlanToGenerateQuote(
-              QuoteType.Duration,
-              LocalDate.now(),
-              LocalDate.now(),
-              Some(5),
-              Some(FrequencyLowercase.TwoWeekly),
-              None,
-              Some(1),
-              None,
-              PaymentPlanType.TimeToPay
-            ),
-            List.empty,
-            List.empty,
-            regimeType = None
-          )
-        )
 
-        await(result.value) mustBe Left(ConnectorError(400, "Invalid request body"))
-      }
+    "return a InvalidMainAndOrSubTransTypes error that TTP-proxy passes upstream" in new Setup {
+      stubPostWithResponseBody(
+        "/debts/time-to-pay/quote",
+        400,
+        errorResponse(
+          "BAD_REQUEST",
+          "Invalid MainTransTypes and/or SubTransTypes. MainTransTypes: 1111 SubTransTypes:  values do not match stored charge types"
+        )
+      )
+      val result = connector.generateQuote(
+        GenerateQuoteRequest(
+          customerReference = CustomerReference("CustRef1234"),
+          channelIdentifier = ChannelIdentifier.Advisor,
+          plan = PlanToGenerateQuote(
+            quoteType = QuoteType.Duration,
+            quoteDate = LocalDate.now(),
+            instalmentStartDate = LocalDate.now(),
+            instalmentAmount = Some(5),
+            frequency = Some(FrequencyLowercase.TwoWeekly),
+            duration = None,
+            initialPaymentAmount = Some(1),
+            initialPaymentDate = None,
+            paymentPlanType = PaymentPlanType.TimeToPay
+          ),
+          customerPostCodes = List.empty,
+          debtItemCharges = List(
+            QuoteDebtItemCharge(
+              debtItemChargeId = DebtItemChargeId("id"),
+              mainTrans = "1111",
+              subTrans = "7010",
+              originalDebtAmount = 100,
+              interestStartDate = Some(LocalDate.now()),
+              paymentHistory = List(),
+              dueDate = None
+            )
+          ),
+          regimeType = None
+        )
+      )
+      await(result.value) mustBe Left(
+        ConnectorError(
+          400,
+          "Invalid MainTransTypes and/or SubTransTypes. MainTransTypes: 1111 SubTransTypes:  values do not match stored charge types"
+        )
+      )
     }
 
-    "using TTP" must {
-      "return a InvalidMainAndOrSubTransTypes error that TTP-proxy passes upstream" in new Setup(ifImpl = false) {
-        stubPostWithResponseBody(
-          "/debts/time-to-pay/quote",
-          400,
-          errorResponse(
-            "BAD_REQUEST",
-            "Invalid MainTransTypes and/or SubTransTypes. MainTransTypes: 1111 SubTransTypes:  values do not match stored charge types"
-          )
+    "parse an error response from an upstream service" in new Setup() {
+      stubPostWithResponseBody("/debts/time-to-pay/quote", 400, errorResponse("BAD_REQUEST", "Invalid request body"))
+      val result = connector.generateQuote(
+        GenerateQuoteRequest(
+          CustomerReference("CustRef1234"),
+          ChannelIdentifier.Advisor,
+          PlanToGenerateQuote(
+            QuoteType.Duration,
+            LocalDate.now(),
+            LocalDate.now(),
+            Some(5),
+            Some(FrequencyLowercase.TwoWeekly),
+            None,
+            Some(1),
+            None,
+            PaymentPlanType.TimeToPay
+          ),
+          List.empty,
+          List.empty,
+          regimeType = None
         )
-        val result = connector.generateQuote(
-          GenerateQuoteRequest(
-            customerReference = CustomerReference("CustRef1234"),
-            channelIdentifier = ChannelIdentifier.Advisor,
-            plan = PlanToGenerateQuote(
-              quoteType = QuoteType.Duration,
-              quoteDate = LocalDate.now(),
-              instalmentStartDate = LocalDate.now(),
-              instalmentAmount = Some(5),
-              frequency = Some(FrequencyLowercase.TwoWeekly),
-              duration = None,
-              initialPaymentAmount = Some(1),
-              initialPaymentDate = None,
-              paymentPlanType = PaymentPlanType.TimeToPay
-            ),
-            customerPostCodes = List.empty,
-            debtItemCharges = List(
-              QuoteDebtItemCharge(
-                debtItemChargeId = DebtItemChargeId("id"),
-                mainTrans = "1111",
-                subTrans = "7010",
-                originalDebtAmount = 100,
-                interestStartDate = Some(LocalDate.now()),
-                paymentHistory = List(),
-                dueDate = None
-              )
-            ),
-            regimeType = None
-          )
-        )
-        await(result.value) mustBe Left(
-          ConnectorError(
-            400,
-            "Invalid MainTransTypes and/or SubTransTypes. MainTransTypes: 1111 SubTransTypes:  values do not match stored charge types"
-          )
-        )
-      }
+      )
 
-      "parse an error response from an upstream service" in new Setup(ifImpl = false) {
-        stubPostWithResponseBody("/debts/time-to-pay/quote", 400, errorResponse("BAD_REQUEST", "Invalid request body"))
-        val result = connector.generateQuote(
-          GenerateQuoteRequest(
-            CustomerReference("CustRef1234"),
-            ChannelIdentifier.Advisor,
-            PlanToGenerateQuote(
-              QuoteType.Duration,
-              LocalDate.now(),
-              LocalDate.now(),
-              Some(5),
-              Some(FrequencyLowercase.TwoWeekly),
-              None,
-              Some(1),
-              None,
-              PaymentPlanType.TimeToPay
-            ),
-            List.empty,
-            List.empty,
-            regimeType = None
-          )
-        )
-
-        await(result.value) mustBe Left(ConnectorError(400, "Invalid request body"))
-      }
+      await(result.value) mustBe Left(ConnectorError(400, "Invalid request body"))
     }
+
   }
 
   "Create plan" when {
-    "using IF" must {
-      "parse an error response from an upstream service" in new Setup(ifImpl = true) {
-        (() => featureSwitch.internalAuthEnabled)
-          .expects()
-          .returning(InternalAuthEnabled(true))
+    "parse an error response from an upstream service" in new Setup() {
+      (() => featureSwitch.internalAuthEnabled)
+        .expects()
+        .returning(InternalAuthEnabled(true))
 
-        stubPostWithResponseBody(
-          "/individuals/debts/time-to-pay/quote/arrangement",
-          400,
-          errorResponse("BAD_REQUEST", "Invalid request body")
+      stubPostWithResponseBody(
+        "/debts/time-to-pay/quote/arrangement",
+        400,
+        errorResponse("BAD_REQUEST", "Invalid request body")
+      )
+      val result = connector.createPlan(
+        CreatePlanRequest(
+          CustomerReference("CustRef1234"),
+          QuoteReference("Quote1234"),
+          ChannelIdentifier.Advisor,
+          PlanToCreatePlan(
+            QuoteId("Quote1234"),
+            QuoteType.Duration,
+            LocalDate.now(),
+            LocalDate.now(),
+            Some(5),
+            PaymentPlanType.TimeToPay,
+            false,
+            1,
+            Some(FrequencyLowercase.TwoWeekly),
+            Some(Duration(1)),
+            Some(PaymentMethod.Bacs),
+            Some(PaymentReference("ref123")),
+            None,
+            None,
+            5,
+            2,
+            2,
+            4
+          ),
+          Seq.empty,
+          Seq.empty,
+          Seq.empty,
+          Seq.empty,
+          None
         )
-        val result = connector.createPlan(
-          CreatePlanRequest(
-            CustomerReference("CustRef1234"),
-            QuoteReference("Quote1234"),
-            ChannelIdentifier.Advisor,
-            PlanToCreatePlan(
-              QuoteId("Quote1234"),
-              QuoteType.Duration,
-              LocalDate.now(),
-              LocalDate.now(),
-              Some(5),
-              PaymentPlanType.TimeToPay,
-              false,
-              1,
-              Some(FrequencyLowercase.TwoWeekly),
-              Some(Duration(1)),
-              Some(PaymentMethod.Bacs),
-              Some(PaymentReference("ref123")),
-              None,
-              None,
-              5,
-              2,
-              2,
-              4
-            ),
-            Seq.empty,
-            Seq.empty,
-            Seq.empty,
-            Seq.empty,
-            None
-          )
-        )
+      )
 
-        await(result.value) mustBe Left(ConnectorError(400, "Invalid request body"))
-      }
-    }
-
-    "using TTP" must {
-      "parse an error response from an upstream service" in new Setup(ifImpl = false) {
-        (() => featureSwitch.internalAuthEnabled)
-          .expects()
-          .returning(InternalAuthEnabled(true))
-
-        stubPostWithResponseBody(
-          "/debts/time-to-pay/quote/arrangement",
-          400,
-          errorResponse("BAD_REQUEST", "Invalid request body")
-        )
-        val result = connector.createPlan(
-          CreatePlanRequest(
-            CustomerReference("CustRef1234"),
-            QuoteReference("Quote1234"),
-            ChannelIdentifier.Advisor,
-            PlanToCreatePlan(
-              QuoteId("Quote1234"),
-              QuoteType.Duration,
-              LocalDate.now(),
-              LocalDate.now(),
-              Some(5),
-              PaymentPlanType.TimeToPay,
-              false,
-              1,
-              Some(FrequencyLowercase.TwoWeekly),
-              Some(Duration(1)),
-              Some(PaymentMethod.Bacs),
-              Some(PaymentReference("ref123")),
-              None,
-              None,
-              5,
-              2,
-              2,
-              4
-            ),
-            Seq.empty,
-            Seq.empty,
-            Seq.empty,
-            Seq.empty,
-            None
-          )
-        )
-
-        await(result.value) mustBe Left(ConnectorError(400, "Invalid request body"))
-      }
+      await(result.value) mustBe Left(ConnectorError(400, "Invalid request body"))
     }
   }
 
   "Receiving an unrecognised body from an upstream" when {
     "The status code is 200" must {
-      "Return a TTP error" in new Setup(ifImpl = true) {
+      "Return a TTP error" in new Setup() {
         stubGetWithResponseBody(
-          "/individuals/time-to-pay/quote/CustRef1234/Plan1234",
+          "/debts/time-to-pay/quote/CustRef1234/Plan1234",
           200,
           """{ "unrecognised":"body" }"""
         )
@@ -323,15 +236,15 @@ class TtpConnectorSpec extends PlaySpec with DefaultAwaitTimeout with FutureAwai
           ConnectorError(
             statusCode = 503,
             message =
-              """For status code 200 for request to GET http://localhost:11111/individuals/time-to-pay/quote/CustRef1234/Plan1234: JSON structure is not valid in received HTTP response. Originally expected to turn response into a Right."""
+              """For status code 200 for request to GET http://localhost:11111/debts/time-to-pay/quote/CustRef1234/Plan1234: JSON structure is not valid in received HTTP response. Originally expected to turn response into a Right."""
           )
         )
       }
     }
     "The status code is 503" must {
-      "Return a TTP error" in new Setup(ifImpl = true) {
+      "Return a TTP error" in new Setup() {
         stubGetWithResponseBody(
-          "/individuals/time-to-pay/quote/CustRef1234/Plan1234",
+          "/debts/time-to-pay/quote/CustRef1234/Plan1234",
           503,
           """{ "unrecognised":"body" }"""
         )
@@ -341,7 +254,7 @@ class TtpConnectorSpec extends PlaySpec with DefaultAwaitTimeout with FutureAwai
           ConnectorError(
             statusCode = 503,
             message =
-              """For status code 503 for request to GET http://localhost:11111/individuals/time-to-pay/quote/CustRef1234/Plan1234: HTTP status is unexpected in received HTTP response. Originally expected to turn response into a Left."""
+              """For status code 503 for request to GET http://localhost:11111/debts/time-to-pay/quote/CustRef1234/Plan1234: HTTP status is unexpected in received HTTP response. Originally expected to turn response into a Left."""
           )
         )
       }
@@ -349,82 +262,40 @@ class TtpConnectorSpec extends PlaySpec with DefaultAwaitTimeout with FutureAwai
   }
 
   "Get plan" when {
-    "using IF" must {
-      "parse an error response from an upstream service" in new Setup(ifImpl = true) {
-        stubGetWithResponseBody(
-          "/individuals/time-to-pay/quote/CustRef1234/Plan1234",
-          400,
-          errorResponse("BAD_REQUEST", "Invalid request body")
-        )
-        val result = connector.getExistingQuote(CustomerReference("CustRef1234"), PlanId("Plan1234"))
+    "parse an error response from an upstream service" in new Setup() {
+      stubGetWithResponseBody(
+        "/debts/time-to-pay/quote/CustRef1234/Plan1234",
+        400,
+        errorResponse("BAD_REQUEST", "Invalid request body")
+      )
+      val result = connector.getExistingQuote(CustomerReference("CustRef1234"), PlanId("Plan1234"))
 
-        await(result.value) mustBe Left(ConnectorError(400, "Invalid request body"))
-      }
-    }
-
-    "using TTP" must {
-      "parse an error response from an upstream service" in new Setup(ifImpl = false) {
-        stubGetWithResponseBody(
-          "/debts/time-to-pay/quote/CustRef1234/Plan1234",
-          400,
-          errorResponse("BAD_REQUEST", "Invalid request body")
-        )
-        val result = connector.getExistingQuote(CustomerReference("CustRef1234"), PlanId("Plan1234"))
-
-        await(result.value) mustBe Left(ConnectorError(400, "Invalid request body"))
-      }
+      await(result.value) mustBe Left(ConnectorError(400, "Invalid request body"))
     }
   }
 
   "Update plan" when {
-    "using IF" must {
-      "parse an error response from an upstream service" in new Setup(ifImpl = true) {
-        stubPutWithResponseBody(
-          "/individuals/time-to-pay/quote/CustRef1234/PlanId1234",
-          400,
-          errorResponse("BAD_REQUEST", "Invalid request body")
+    "parse an error response from an upstream service" in new Setup() {
+      stubPutWithResponseBody(
+        "/debts/time-to-pay/quote/CustRef1234/PlanId1234",
+        400,
+        errorResponse("BAD_REQUEST", "Invalid request body")
+      )
+      val result = connector.updatePlan(
+        UpdatePlanRequest(
+          CustomerReference("CustRef1234"),
+          PlanId("PlanId1234"),
+          UpdateType("Cancel"),
+          None,
+          Some(PlanStatus.ResolvedCancelled),
+          None,
+          None,
+          Some(true),
+          None
         )
-        val result = connector.updatePlan(
-          UpdatePlanRequest(
-            CustomerReference("CustRef1234"),
-            PlanId("PlanId1234"),
-            UpdateType("Cancel"),
-            None,
-            Some(PlanStatus.ResolvedCancelled),
-            None,
-            None,
-            None,
-            None
-          )
-        )
+      )
 
-        await(result.value) mustBe Left(ConnectorError(400, "Invalid request body"))
-      }
-    }
-
-    "using TTP" must {
-      "parse an error response from an upstream service" in new Setup(ifImpl = false) {
-        stubPutWithResponseBody(
-          "/debts/time-to-pay/quote/CustRef1234/PlanId1234",
-          400,
-          errorResponse("BAD_REQUEST", "Invalid request body")
-        )
-        val result = connector.updatePlan(
-          UpdatePlanRequest(
-            CustomerReference("CustRef1234"),
-            PlanId("PlanId1234"),
-            UpdateType("Cancel"),
-            None,
-            Some(PlanStatus.ResolvedCancelled),
-            None,
-            None,
-            Some(true),
-            None
-          )
-        )
-
-        await(result.value) mustBe Left(ConnectorError(400, "Invalid request body"))
-      }
+      await(result.value) mustBe Left(ConnectorError(400, "Invalid request body"))
     }
   }
 
@@ -458,61 +329,32 @@ class TtpConnectorSpec extends PlaySpec with DefaultAwaitTimeout with FutureAwai
     val affordableQuoteResponse: AffordableQuoteResponse =
       AffordableQuoteResponse(LocalDateTime.parse("2025-01-13T10:15:30.975"), Nil)
 
-    "using IF" must {
-      "return an AffordableQuotesResponse" in new Setup(ifImpl = true) {
-        stubPostWithResponseBody(
-          "/individuals/time-to-pay/affordability/affordable-quotes",
-          200,
-          Json.toJson(affordableQuoteResponse).toString()
-        )
-        val result = connector.getAffordableQuotes(
-          affordableQuotesRequest = affordableQuotesRequest
-        )
+    "return an AffordableQuotesResponse" in new Setup() {
+      stubPostWithResponseBody(
+        "/debts/time-to-pay/affordability/affordable-quotes",
+        200,
+        Json.toJson(affordableQuoteResponse).toString()
+      )
+      val result = connector.getAffordableQuotes(
+        affordableQuotesRequest = affordableQuotesRequest
+      )
 
-        await(result.value) must matchPattern { case Right(_: AffordableQuoteResponse) => }
-      }
-
-      "parse an error response from an upstream service" in new Setup(ifImpl = true) {
-        stubPostWithResponseBody(
-          "/individuals/time-to-pay/affordability/affordable-quotes",
-          400,
-          errorResponse("BAD_REQUEST", "Invalid request body")
-        )
-        val result = connector.getAffordableQuotes(
-          affordableQuotesRequest = affordableQuotesRequest
-        )
-
-        await(result.value) mustBe Left(ConnectorError(400, "Invalid request body"))
-      }
+      await(result.value) must matchPattern { case Right(_: AffordableQuoteResponse) => }
     }
 
-    "using TTP" must {
-      "return an AffordableQuotesResponse" in new Setup(ifImpl = false) {
-        stubPostWithResponseBody(
-          "/debts/time-to-pay/affordability/affordable-quotes",
-          200,
-          Json.toJson(affordableQuoteResponse).toString()
-        )
-        val result = connector.getAffordableQuotes(
-          affordableQuotesRequest = affordableQuotesRequest
-        )
+    "parse an error response from an upstream service" in new Setup() {
+      stubPostWithResponseBody(
+        "/debts/time-to-pay/affordability/affordable-quotes",
+        400,
+        errorResponse("BAD_REQUEST", "Invalid request body")
+      )
+      val result = connector.getAffordableQuotes(
+        affordableQuotesRequest = affordableQuotesRequest
+      )
 
-        await(result.value) must matchPattern { case Right(_: AffordableQuoteResponse) => }
-      }
-
-      "parse an error response from an upstream service" in new Setup(ifImpl = false) {
-        stubPostWithResponseBody(
-          "/debts/time-to-pay/affordability/affordable-quotes",
-          400,
-          errorResponse("BAD_REQUEST", "Invalid request body")
-        )
-        val result = connector.getAffordableQuotes(
-          affordableQuotesRequest = affordableQuotesRequest
-        )
-
-        await(result.value) mustBe Left(ConnectorError(400, "Invalid request body"))
-      }
+      await(result.value) mustBe Left(ConnectorError(400, "Invalid request body"))
     }
+
   }
 
   private def errorResponse(code: String, reason: String): String =

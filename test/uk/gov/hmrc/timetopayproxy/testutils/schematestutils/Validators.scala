@@ -50,7 +50,8 @@ object Validators {
       }
 
       object Proposed {
-        private val proposedPath = "test/resources/schemas/apis/proposed/time-to-pay-proxy/time-to-pay-v1.0.21.yaml"
+        private val proposedPath =
+          "test/resources/schemas/apis/proposed/time-to-pay-proxy/time-to-pay-v1.0.22-proposedAll.yaml"
 
         def openApiRequestSchema: OpenApi3DerivedSchema =
           new OpenApi3DerivedSchema(
@@ -94,32 +95,78 @@ object Validators {
       //   https://jira.tools.tax.service.gov.uk/browse/DTD-2858
       // Official location:
       //   ???
-      def openApiRequestSchema: OpenApi3DerivedSchema =
-        new OpenApi3DerivedSchema(
-          path,
-          defaultJsonSubschemaName = "CancelRequest",
-          metaSchemaValidation = Some(Valid(())),
-          restrictAdditionalProperties = true
-        )
+      object Live {
+        private val path = "test/resources/schemas/apis/live/time-to-pay/CancelAPI-v0.0.1.yaml"
 
-      /** This is used for 200 statuses. */
-      def openApiCancelResponseSchema: OpenApi3DerivedSchema =
-        new OpenApi3DerivedSchema(
-          path,
-          defaultJsonSubschemaName = "CancelResponse",
-          metaSchemaValidation = Some(Valid(())),
-          restrictAdditionalProperties = true
-        )
+        def openApiRequestSchema: OpenApi3DerivedSchema =
+          new OpenApi3DerivedSchema(
+            path,
+            defaultJsonSubschemaName = "CancelRequest",
+            metaSchemaValidation = Some(Valid(())),
+            restrictAdditionalProperties = true
+          )
 
-      /** This is used for 500 statuses. */
-      def openApiCancelErrorResponseSchema: OpenApi3DerivedSchema =
-        new OpenApi3DerivedSchema(
-          path,
-          defaultJsonSubschemaName = "CancelErrorResponse",
-          metaSchemaValidation = Some(Valid(())),
-          restrictAdditionalProperties = true
-        )
+        def openApiCancelResponseSchema: OpenApi3DerivedSchema =
+          new OpenApi3DerivedSchema(
+            path,
+            defaultJsonSubschemaName = "CancelResponse",
+            metaSchemaValidation = Some(Valid(())),
+            restrictAdditionalProperties = true
+          )
 
+        def openApiCancelErrorResponseSchema: OpenApi3DerivedSchema =
+          new OpenApi3DerivedSchema(
+            path,
+            defaultJsonSubschemaName = "CancelErrorResponse",
+            metaSchemaValidation = Some(Valid(())),
+            restrictAdditionalProperties = true
+          )
+
+        def openApiResponseGeneralFailureSchema: OpenApi3DerivedSchema =
+          new OpenApi3DerivedSchema(
+            path,
+            defaultJsonSubschemaName = "ErrorResponse",
+            metaSchemaValidation = Some(Valid(())),
+            restrictAdditionalProperties = true
+          )
+
+      }
+
+      object Proposed {
+        private val pathForR2 = "test/resources/schemas/apis/proposed/time-to-pay/CancelAPI-v0.0.3-proposed.yaml"
+
+        def openApiRequestSchema: OpenApi3DerivedSchema =
+          new OpenApi3DerivedSchema(
+            pathForR2,
+            defaultJsonSubschemaName = "CancelRequest",
+            metaSchemaValidation = Some(Valid(())),
+            restrictAdditionalProperties = true
+          )
+
+        def openApiCancelResponseSchema: OpenApi3DerivedSchema =
+          new OpenApi3DerivedSchema(
+            pathForR2,
+            defaultJsonSubschemaName = "CancelResponse",
+            metaSchemaValidation = Some(Valid(())),
+            restrictAdditionalProperties = true
+          )
+
+        def openApiCancelErrorResponseSchema: OpenApi3DerivedSchema =
+          new OpenApi3DerivedSchema(
+            pathForR2,
+            defaultJsonSubschemaName = "CancelErrorResponse",
+            metaSchemaValidation = Some(Valid(())),
+            restrictAdditionalProperties = true
+          )
+
+        def openApiResponseGeneralFailureSchema: OpenApi3DerivedSchema =
+          new OpenApi3DerivedSchema(
+            pathForR2,
+            defaultJsonSubschemaName = "ErrorResponse",
+            metaSchemaValidation = Some(Valid(())),
+            restrictAdditionalProperties = true
+          )
+      }
     }
 
     object TtpInform {
@@ -156,7 +203,8 @@ object Validators {
       }
 
       object Proposed {
-        private val pathR2: String = "test/resources/schemas/apis/proposed/time-to-pay-proxy/time-to-pay-v1.0.21.yaml"
+        private val pathR2: String =
+          "test/resources/schemas/apis/proposed/time-to-pay-proxy/time-to-pay-v1.0.22-proposedAll.yaml"
         def openApiRequestSchema: OpenApi3DerivedSchema =
           new OpenApi3DerivedSchema(
             pathR2,
@@ -186,35 +234,76 @@ object Validators {
     }
 
     object TtpFullAmend {
-      // Downloaded from:
-      //   https://confluence.tools.tax.service.gov.uk/display/DTDT/TTP+API+%28Current+Version%29+Proxy?preview=/828113579/1168278271/time-to-pay-v1.0.19.yaml
-      // Official location:
-      //   https://confluence.tools.tax.service.gov.uk/display/DTDT/TTP+API+%28Current+Version%29+Proxy
-      def openApiRequestSchema: OpenApi3DerivedSchema =
-        new OpenApi3DerivedSchema(
-          path,
-          defaultJsonSubschemaName = "FullAmendRequest",
-          metaSchemaValidation = Some(Valid(())),
-          restrictAdditionalProperties = true
-        )
+      object Live {
+        // Downloaded from:
+        //   https://confluence.tools.tax.service.gov.uk/display/DTDT/TTP+API+%28Current+Version%29+Proxy?preview=/828113579/1168278271/time-to-pay-v1.0.19.yaml
+        // Official location:
+        //   https://confluence.tools.tax.service.gov.uk/display/DTDT/TTP+API+%28Current+Version%29+Proxy
+        def openApiRequestSchema: OpenApi3DerivedSchema =
+          new OpenApi3DerivedSchema(
+            path,
+            defaultJsonSubschemaName = "FullAmendRequest",
+            metaSchemaValidation = Some(Valid(())),
+            restrictAdditionalProperties = true
+          )
 
-      /** This is used for 200 statuses. */
-      def openApiFullAmendResponseSchema: OpenApi3DerivedSchema =
-        new OpenApi3DerivedSchema(
-          path,
-          defaultJsonSubschemaName = "FullAmendResponse",
-          metaSchemaValidation = Some(Valid(())),
-          restrictAdditionalProperties = true
-        )
+        /** This is used for 200 statuses. */
+        def openApiFullAmendResponseSchema: OpenApi3DerivedSchema =
+          new OpenApi3DerivedSchema(
+            path,
+            defaultJsonSubschemaName = "FullAmendResponse",
+            metaSchemaValidation = Some(Valid(())),
+            restrictAdditionalProperties = true
+          )
 
-      /** This is used for 500 statuses. */
-      def openApiFullAmendErrorResponseSchema: OpenApi3DerivedSchema =
-        new OpenApi3DerivedSchema(
-          path,
-          defaultJsonSubschemaName = "FullAmendErrorResponse",
-          metaSchemaValidation = Some(Valid(())),
-          restrictAdditionalProperties = true
-        )
+        /** This is used for 500 statuses. */
+        def openApiFullAmendErrorResponseSchema: OpenApi3DerivedSchema =
+          new OpenApi3DerivedSchema(
+            path,
+            defaultJsonSubschemaName = "FullAmendErrorResponse",
+            metaSchemaValidation = Some(Valid(())),
+            restrictAdditionalProperties = true
+          )
+      }
+
+      object Proposed {
+        // Downloaded from:
+        //  https://confluence.tools.tax.service.gov.uk/display/DTDT/TTP+API+%28Current+Version%29+Proxy?preview=/828113579/1214710809/time-to-pay-v1.0.22-proposedAll-2.yaml
+        private val pathForR2 =
+          "test/resources/schemas/apis/proposed/time-to-pay-proxy/time-to-pay-v1.0.22-proposedAll.yaml"
+
+        def openApiRequestSchema: OpenApi3DerivedSchema =
+          new OpenApi3DerivedSchema(
+            pathForR2,
+            defaultJsonSubschemaName = "FullAmendRequest",
+            metaSchemaValidation = Some(Valid(())),
+            restrictAdditionalProperties = true
+          )
+
+        def openApiInformErrorResponseSchema: OpenApi3DerivedSchema =
+          new OpenApi3DerivedSchema(
+            pathForR2,
+            defaultJsonSubschemaName = "FullAmendErrorResponse",
+            metaSchemaValidation = Some(Valid(())),
+            restrictAdditionalProperties = true
+          )
+
+        def openApiInformResponseSchema: OpenApi3DerivedSchema =
+          new OpenApi3DerivedSchema(
+            pathForR2,
+            defaultJsonSubschemaName = "FullAmendResponse",
+            metaSchemaValidation = Some(Valid(())),
+            restrictAdditionalProperties = true
+          )
+
+        def openApiResponseGeneralFailureSchema: OpenApi3DerivedSchema =
+          new OpenApi3DerivedSchema(
+            pathForR2,
+            defaultJsonSubschemaName = "ErrorResponse",
+            metaSchemaValidation = Some(Valid(())),
+            restrictAdditionalProperties = true
+          )
+      }
     }
 
     /** For now, this applies to all responses from the proxy */
@@ -302,164 +391,244 @@ object Validators {
     }
 
     object TtpCancel {
+      object Live {
+        private val path = "test/resources/schemas/apis/live/time-to-pay/CancelAPI-v0.0.1.yaml"
+
+        def openApiRequestSchema: OpenApi3DerivedSchema =
+          new OpenApi3DerivedSchema(
+            path,
+            defaultJsonSubschemaName = "CancelRequest",
+            metaSchemaValidation = Some(Valid(())),
+            restrictAdditionalProperties = true
+          )
+
+        def openApiCancelResponseSchema: OpenApi3DerivedSchema =
+          new OpenApi3DerivedSchema(
+            path,
+            defaultJsonSubschemaName = "CancelResponse",
+            metaSchemaValidation = Some(Valid(())),
+            restrictAdditionalProperties = true
+          )
+
+        def openApiCancelErrorResponseSchema: OpenApi3DerivedSchema =
+          new OpenApi3DerivedSchema(
+            path,
+            defaultJsonSubschemaName = "CancelErrorResponse",
+            metaSchemaValidation = Some(Valid(())),
+            restrictAdditionalProperties = true
+          )
+
+        def openApiResponseGeneralFailureSchema: OpenApi3DerivedSchema =
+          new OpenApi3DerivedSchema(
+            path,
+            defaultJsonSubschemaName = "ErrorResponse",
+            metaSchemaValidation = Some(Valid(())),
+            restrictAdditionalProperties = true
+          )
+
+      }
+
+      object Proposed {
+        private val pathForR2 = "test/resources/schemas/apis/proposed/time-to-pay/CancelAPI-v0.0.3.yaml"
+
+        def openApiRequestSchema: OpenApi3DerivedSchema =
+          new OpenApi3DerivedSchema(
+            pathForR2,
+            defaultJsonSubschemaName = "CancelRequest",
+            metaSchemaValidation = Some(Valid(())),
+            restrictAdditionalProperties = true
+          )
+
+        def openApiCancelResponseSchema: OpenApi3DerivedSchema =
+          new OpenApi3DerivedSchema(
+            pathForR2,
+            defaultJsonSubschemaName = "CancelResponse",
+            metaSchemaValidation = Some(Valid(())),
+            restrictAdditionalProperties = true
+          )
+
+        def openApiCancelErrorResponseSchema: OpenApi3DerivedSchema =
+          new OpenApi3DerivedSchema(
+            pathForR2,
+            defaultJsonSubschemaName = "CancelErrorResponse",
+            metaSchemaValidation = Some(Valid(())),
+            restrictAdditionalProperties = true
+          )
+
+        def openApiResponseGeneralFailureSchema: OpenApi3DerivedSchema =
+          new OpenApi3DerivedSchema(
+            pathForR2,
+            defaultJsonSubschemaName = "ErrorResponse",
+            metaSchemaValidation = Some(Valid(())),
+            restrictAdditionalProperties = true
+          )
+      }
       // Downloaded from:
       //   https://github.com/hmrc/time-to-pay/blob/7d0903506524411871930c3a3dc81899b58c7985/resources/public/api/conf/1.0/CancelAPI-v0.0.1.yaml
       // Official location:
       //   https://github.com/hmrc/time-to-pay/tree/main/resources/public/api/conf/1.0
-      private val path = "test/resources/schemas/apis/live/time-to-pay/CancelAPI-v0.0.1.yaml"
-
-      def openApiRequestSchema: OpenApi3DerivedSchema =
-        new OpenApi3DerivedSchema(
-          path,
-          defaultJsonSubschemaName = "CancelRequest",
-          metaSchemaValidation = Some(Valid(())),
-          restrictAdditionalProperties = true
-        )
-
-      def openApiCancelResponseSchema: OpenApi3DerivedSchema =
-        new OpenApi3DerivedSchema(
-          path,
-          defaultJsonSubschemaName = "CancelResponse",
-          metaSchemaValidation = Some(Valid(())),
-          restrictAdditionalProperties = true
-        )
-
-      def openApiCancelErrorResponseSchema: OpenApi3DerivedSchema =
-        new OpenApi3DerivedSchema(
-          path,
-          defaultJsonSubschemaName = "CancelErrorResponse",
-          metaSchemaValidation = Some(Valid(())),
-          restrictAdditionalProperties = true
-        )
-
-      def openApiResponseGeneralFailureSchema: OpenApi3DerivedSchema =
-        new OpenApi3DerivedSchema(
-          path,
-          defaultJsonSubschemaName = "ErrorResponse",
-          metaSchemaValidation = Some(Valid(())),
-          restrictAdditionalProperties = true
-        )
     }
 
     object TtpInform {
-      // Downloaded from:
-      //   https://github.com/hmrc/time-to-pay/blob/af176ffca7a0bb85bb6c180d9eff0d2d6755a37a/resources/public/api/conf/1.0/InformAPI-v0.0.1.yaml
-      // Official location:
-      //   https://github.com/hmrc/time-to-pay/blob/main/resources/public/api/conf/1.0
-      private val path = "test/resources/schemas/apis/live/time-to-pay/InformAPI-v0.0.1.yaml"
+      object Live {
+        private val path = "test/resources/schemas/apis/live/time-to-pay/InformAPI-v0.0.1.yaml"
 
-      def openApiRequestSchema: OpenApi3DerivedSchema =
-        new OpenApi3DerivedSchema(
-          path,
-          defaultJsonSubschemaName = "InformRequest",
-          metaSchemaValidation = Some(Valid(())),
-          restrictAdditionalProperties = true
-        )
+        def openApiRequestSchema: OpenApi3DerivedSchema =
+          new OpenApi3DerivedSchema(
+            path,
+            defaultJsonSubschemaName = "InformRequest",
+            metaSchemaValidation = Some(Valid(())),
+            restrictAdditionalProperties = true
+          )
 
-      def openApiInformErrorResponseSchema: OpenApi3DerivedSchema =
-        new OpenApi3DerivedSchema(
-          path,
-          defaultJsonSubschemaName = "InformErrorResponse",
-          metaSchemaValidation = Some(Valid(())),
-          restrictAdditionalProperties = true
-        )
+        def openApiInformErrorResponseSchema: OpenApi3DerivedSchema =
+          new OpenApi3DerivedSchema(
+            path,
+            defaultJsonSubschemaName = "InformErrorResponse",
+            metaSchemaValidation = Some(Valid(())),
+            restrictAdditionalProperties = true
+          )
 
-      def openApiInformResponseSchema: OpenApi3DerivedSchema =
-        new OpenApi3DerivedSchema(
-          path,
-          defaultJsonSubschemaName = "InformResponse",
-          metaSchemaValidation = Some(Valid(())),
-          restrictAdditionalProperties = true
-        )
+        def openApiInformResponseSchema: OpenApi3DerivedSchema =
+          new OpenApi3DerivedSchema(
+            path,
+            defaultJsonSubschemaName = "InformResponse",
+            metaSchemaValidation = Some(Valid(())),
+            restrictAdditionalProperties = true
+          )
 
-      def openApiResponseGeneralFailureSchema: OpenApi3DerivedSchema =
-        new OpenApi3DerivedSchema(
-          path,
-          defaultJsonSubschemaName = "ErrorResponse",
-          metaSchemaValidation = Some(Valid(())),
-          restrictAdditionalProperties = true
-        )
-    }
+        def openApiResponseGeneralFailureSchema: OpenApi3DerivedSchema =
+          new OpenApi3DerivedSchema(
+            path,
+            defaultJsonSubschemaName = "ErrorResponse",
+            metaSchemaValidation = Some(Valid(())),
+            restrictAdditionalProperties = true
+          )
+      }
 
-    object TtpInformR2 {
-      // Downloaded from:
-      //   https://github.com/hmrc/time-to-pay/blob/af176ffca7a0bb85bb6c180d9eff0d2d6755a37a/resources/public/api/conf/1.0/InformAPI-v0.0.1.yaml
-      // Official location:
-      //   https://github.com/hmrc/time-to-pay/blob/main/resources/public/api/conf/1.0
-      private val path = "test/resources/schemas/apis/proposed/time-to-pay/InformAPI-v0.0.3-proposed.yaml"
+      object Proposed {
+        // Downloaded from:
+        //   https://github.com/hmrc/time-to-pay/blob/af176ffca7a0bb85bb6c180d9eff0d2d6755a37a/resources/public/api/conf/1.0/InformAPI-v0.0.1.yaml
+        // Official location:
+        //   https://github.com/hmrc/time-to-pay/blob/main/resources/public/api/conf/1.0
+        private val pathForR2 = "test/resources/schemas/apis/proposed/time-to-pay/InformAPI-v0.0.3-proposed.yaml"
 
-      def openApiRequestSchema: OpenApi3DerivedSchema =
-        new OpenApi3DerivedSchema(
-          path,
-          defaultJsonSubschemaName = "InformRequest",
-          metaSchemaValidation = Some(Valid(())),
-          restrictAdditionalProperties = true
-        )
+        def openApiRequestSchema: OpenApi3DerivedSchema =
+          new OpenApi3DerivedSchema(
+            pathForR2,
+            defaultJsonSubschemaName = "InformRequest",
+            metaSchemaValidation = Some(Valid(())),
+            restrictAdditionalProperties = true
+          )
 
-      def openApiInformErrorResponseSchema: OpenApi3DerivedSchema =
-        new OpenApi3DerivedSchema(
-          path,
-          defaultJsonSubschemaName = "InformErrorResponse",
-          metaSchemaValidation = Some(Valid(())),
-          restrictAdditionalProperties = true
-        )
+        def openApiInformErrorResponseSchema: OpenApi3DerivedSchema =
+          new OpenApi3DerivedSchema(
+            pathForR2,
+            defaultJsonSubschemaName = "InformErrorResponse",
+            metaSchemaValidation = Some(Valid(())),
+            restrictAdditionalProperties = true
+          )
 
-      def openApiInformResponseSchema: OpenApi3DerivedSchema =
-        new OpenApi3DerivedSchema(
-          path,
-          defaultJsonSubschemaName = "InformResponse",
-          metaSchemaValidation = Some(Valid(())),
-          restrictAdditionalProperties = true
-        )
+        def openApiInformResponseSchema: OpenApi3DerivedSchema =
+          new OpenApi3DerivedSchema(
+            pathForR2,
+            defaultJsonSubschemaName = "InformResponse",
+            metaSchemaValidation = Some(Valid(())),
+            restrictAdditionalProperties = true
+          )
 
-      def openApiResponseGeneralFailureSchema: OpenApi3DerivedSchema =
-        new OpenApi3DerivedSchema(
-          path,
-          defaultJsonSubschemaName = "ErrorResponse",
-          metaSchemaValidation = Some(Valid(())),
-          restrictAdditionalProperties = true
-        )
+        def openApiResponseGeneralFailureSchema: OpenApi3DerivedSchema =
+          new OpenApi3DerivedSchema(
+            pathForR2,
+            defaultJsonSubschemaName = "ErrorResponse",
+            metaSchemaValidation = Some(Valid(())),
+            restrictAdditionalProperties = true
+          )
+      }
+
     }
 
     object TtpFullAmend {
-      // Downloaded from:
-      //   https://github.com/hmrc/time-to-pay/blob/fe8fee3d7dead5d6241d7d085cff4179ea5834ef/resources/public/api/conf/1.0/FullAmendAPI-v0.0.1.yaml
-      // Official location:
-      //   https://github.com/hmrc/time-to-pay/tree/main/resources/public/api/conf/1.0
-      private val path = "test/resources/schemas/apis/live/time-to-pay/FullAmendAPI-v0.0.1.yaml"
+      object Live {
 
-      def openApiRequestSchema: OpenApi3DerivedSchema =
-        new OpenApi3DerivedSchema(
-          path,
-          defaultJsonSubschemaName = "FullAmendRequest",
-          metaSchemaValidation = Some(Valid(())),
-          restrictAdditionalProperties = true
-        )
+        // Downloaded from:
+        //   https://github.com/hmrc/time-to-pay/blob/fe8fee3d7dead5d6241d7d085cff4179ea5834ef/resources/public/api/conf/1.0/FullAmendAPI-v0.0.1.yaml
+        // Official location:
+        //   https://github.com/hmrc/time-to-pay/tree/main/resources/public/api/conf/1.0
+        private val path = "test/resources/schemas/apis/live/time-to-pay/FullAmendAPI-v0.0.1.yaml"
 
-      def openApiFullAmendErrorResponseSchema: OpenApi3DerivedSchema =
-        new OpenApi3DerivedSchema(
-          path,
-          defaultJsonSubschemaName = "FullAmendErrorResponse",
-          metaSchemaValidation = Some(Valid(())),
-          restrictAdditionalProperties = true
-        )
+        def openApiRequestSchema: OpenApi3DerivedSchema =
+          new OpenApi3DerivedSchema(
+            path,
+            defaultJsonSubschemaName = "FullAmendRequest",
+            metaSchemaValidation = Some(Valid(())),
+            restrictAdditionalProperties = true
+          )
 
-      def openApiFullAmendResponseSchema: OpenApi3DerivedSchema =
-        new OpenApi3DerivedSchema(
-          path,
-          defaultJsonSubschemaName = "FullAmendResponse",
-          metaSchemaValidation = Some(Valid(())),
-          restrictAdditionalProperties = true
-        )
+        def openApiFullAmendErrorResponseSchema: OpenApi3DerivedSchema =
+          new OpenApi3DerivedSchema(
+            path,
+            defaultJsonSubschemaName = "FullAmendErrorResponse",
+            metaSchemaValidation = Some(Valid(())),
+            restrictAdditionalProperties = true
+          )
 
-      def openApiFullAmendResponseGeneralFailureSchema: OpenApi3DerivedSchema =
-        new OpenApi3DerivedSchema(
-          path,
-          defaultJsonSubschemaName = "ErrorResponse",
-          metaSchemaValidation = Some(Valid(())),
-          restrictAdditionalProperties = true
-        )
+        def openApiFullAmendResponseSchema: OpenApi3DerivedSchema =
+          new OpenApi3DerivedSchema(
+            path,
+            defaultJsonSubschemaName = "FullAmendResponse",
+            metaSchemaValidation = Some(Valid(())),
+            restrictAdditionalProperties = true
+          )
+
+        def openApiFullAmendResponseGeneralFailureSchema: OpenApi3DerivedSchema =
+          new OpenApi3DerivedSchema(
+            path,
+            defaultJsonSubschemaName = "ErrorResponse",
+            metaSchemaValidation = Some(Valid(())),
+            restrictAdditionalProperties = true
+          )
+      }
+
+      object Proposed {
+        // Downloaded from:
+        //  https://confluence.tools.tax.service.gov.uk/display/DTDT/TTP+API+%28Current+Version%29+Proxy?preview=/828113579/1214710809/time-to-pay-v1.0.22-proposedAll-2.yaml
+        private val pathForR2 = "test/resources/schemas/apis/proposed/time-to-pay/FullAmendAPI-v0.0.2-proposed.yaml"
+
+        def openApiRequestSchema: OpenApi3DerivedSchema =
+          new OpenApi3DerivedSchema(
+            pathForR2,
+            defaultJsonSubschemaName = "FullAmendRequest",
+            metaSchemaValidation = Some(Valid(())),
+            restrictAdditionalProperties = true
+          )
+
+        def openApiInformErrorResponseSchema: OpenApi3DerivedSchema =
+          new OpenApi3DerivedSchema(
+            pathForR2,
+            defaultJsonSubschemaName = "FullAmendErrorResponse",
+            metaSchemaValidation = Some(Valid(())),
+            restrictAdditionalProperties = true
+          )
+
+        def openApiInformResponseSchema: OpenApi3DerivedSchema =
+          new OpenApi3DerivedSchema(
+            pathForR2,
+            defaultJsonSubschemaName = "FullAmendResponse",
+            metaSchemaValidation = Some(Valid(())),
+            restrictAdditionalProperties = true
+          )
+
+        def openApiResponseGeneralFailureSchema: OpenApi3DerivedSchema =
+          new OpenApi3DerivedSchema(
+            pathForR2,
+            defaultJsonSubschemaName = "ErrorResponse",
+            metaSchemaValidation = Some(Valid(())),
+            restrictAdditionalProperties = true
+          )
+      }
     }
+
   }
 
 }
