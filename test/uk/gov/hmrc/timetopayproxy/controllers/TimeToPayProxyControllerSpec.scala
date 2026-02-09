@@ -21,14 +21,14 @@ import cats.syntax.either._
 import org.scalamock.scalatest.MockFactory
 import org.scalatest.matchers.should.Matchers._
 import org.scalatest.wordspec.AnyWordSpec
-import play.api.http.{ MimeTypes, Status }
-import play.api.libs.json.{ JsArray, JsValue, Json }
-import play.api.mvc.{ ControllerComponents, Result }
+import play.api.http.{MimeTypes, Status}
+import play.api.libs.json.{JsArray, JsValue, Json}
+import play.api.mvc.{ControllerComponents, Result}
 import play.api.test.Helpers._
-import play.api.test.{ FakeRequest, Helpers }
+import play.api.test.{FakeRequest, Helpers}
 import uk.gov.hmrc.auth.core.PlayAuthConnector
 import uk.gov.hmrc.auth.core.authorise.Predicate
-import uk.gov.hmrc.auth.core.retrieve.{ EmptyRetrieval, Retrieval }
+import uk.gov.hmrc.auth.core.retrieve.{EmptyRetrieval, Retrieval}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.timetopayproxy.actions.auth.ReadAuthoriseAction
 import uk.gov.hmrc.timetopayproxy.actions.auth.StoredEnrolmentScope.ReadTimeToPayProxy
@@ -37,19 +37,19 @@ import uk.gov.hmrc.timetopayproxy.models._
 import uk.gov.hmrc.timetopayproxy.models.affordablequotes._
 import uk.gov.hmrc.timetopayproxy.models.currency.GbpPounds
 import uk.gov.hmrc.timetopayproxy.models.error.TtppEnvelope.TtppEnvelope
-import uk.gov.hmrc.timetopayproxy.models.error.{ ConnectorError, TtppEnvelope, TtppErrorResponse }
+import uk.gov.hmrc.timetopayproxy.models.error.{ConnectorError, TtppEnvelope, TtppErrorResponse}
 import uk.gov.hmrc.timetopayproxy.models.featureSwitches.EnrolmentAuthEnabled
 import uk.gov.hmrc.timetopayproxy.models.saonly.chargeInfoApi._
 import uk.gov.hmrc.timetopayproxy.models.saonly.common._
-import uk.gov.hmrc.timetopayproxy.models.saonly.common.apistatus.{ ApiName, ApiStatus, ApiStatusCode }
-import uk.gov.hmrc.timetopayproxy.models.saonly.ttpcancel.{ CancellationDate, TtpCancelPaymentPlan, TtpCancelRequest, TtpCancelSuccessfulResponse }
-import uk.gov.hmrc.timetopayproxy.models.saonly.ttpfullamend.{ TtpFullAmendRequest, TtpFullAmendSuccessfulResponse }
-import uk.gov.hmrc.timetopayproxy.models.saonly.ttpinform.{ TtpInformRequest, TtpInformSuccessfulResponse }
-import uk.gov.hmrc.timetopayproxy.services.{ TTPEService, TTPQuoteService, TtpFeedbackLoopService }
+import uk.gov.hmrc.timetopayproxy.models.saonly.common.apistatus.{ApiName, ApiStatus, ApiStatusCode}
+import uk.gov.hmrc.timetopayproxy.models.saonly.ttpcancel.{CancellationDate, TtpCancelPaymentPlan, TtpCancelRequest, TtpCancelSuccessfulResponse}
+import uk.gov.hmrc.timetopayproxy.models.saonly.ttpfullamend.{TtpFullAmendRequest, TtpFullAmendSuccessfulResponse}
+import uk.gov.hmrc.timetopayproxy.models.saonly.ttpinform.{TtpInformRequest, TtpInformSuccessfulResponse}
+import uk.gov.hmrc.timetopayproxy.services.{TTPEService, TTPQuoteService, TtpFeedbackLoopService}
 
-import java.time.{ Instant, LocalDate, LocalDateTime }
+import java.time.{Instant, LocalDate, LocalDateTime}
 import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.{ ExecutionContext, Future }
+import scala.concurrent.{ExecutionContext, Future}
 
 class TimeToPayProxyControllerSpec extends AnyWordSpec with MockFactory {
 
@@ -1109,6 +1109,44 @@ class TimeToPayProxyControllerSpec extends AnyWordSpec with MockFactory {
       identification = List(
         Identification(idType = IdType("ID_TYPE"), idValue = IdValue("ID_VALUE"))
       ),
+      individualDetails = IndividualDetails(
+        title = Some(Title("Mr")),
+        firstName = Some(FirstName("John")),
+        lastName = Some(LastName("Doe")),
+        dateOfBirth = Some(DateOfBirth(LocalDate.parse("1980-01-01"))),
+        districtNumber = Some(DistrictNumber("1234")),
+        customerType = CustomerType.ItsaMigtrated,
+        transitionToCDCS = TransitionToCdcs(value = true)
+      ),
+      addresses = List(
+        Address(
+          addressType = AddressType("Address Type"),
+          addressLine1 = AddressLine1("Address Line 1"),
+          addressLine2 = Some(AddressLine2("Address Line 2")),
+          addressLine3 = Some(AddressLine3("Address Line 3")),
+          addressLine4 = Some(AddressLine4("Address Line 4")),
+          rls = Some(Rls(true)),
+          contactDetails = Some(
+            ContactDetails(
+              telephoneNumber = Some(TelephoneNumber("telephone-number")),
+              fax = Some(Fax("fax-number")),
+              mobile = Some(Mobile("mobile-number")),
+              emailAddress = Some(Email("email address")),
+              emailSource = Some(EmailSource("email source"))
+            )
+          ),
+          postCode = Some(ChargeInfoPostCode("AB12 3CD")),
+          postcodeHistory = List(
+            PostCodeInfo(addressPostcode = ChargeInfoPostCode("AB12 3CD"), postcodeDate = LocalDate.parse("2020-01-01"))
+          )
+        )
+      ),
+      customerSignals = Some(
+        List(
+          Signal(SignalType("Rls"), SignalValue("signal value"), Some("description")),
+          Signal(SignalType("Welsh Language Signal"), SignalValue("signal value"), Some("description"))
+        )
+      ),
       chargeTypeAssessment = List(
         ChargeTypeAssessment(
           debtTotalAmount = BigInt(1000),
@@ -1139,45 +1177,7 @@ class TimeToPayProxyControllerSpec extends AnyWordSpec with MockFactory {
           )
         )
       ),
-      addresses = List(
-        Address(
-          addressType = AddressType("Address Type"),
-          addressLine1 = AddressLine1("Address Line 1"),
-          addressLine2 = Some(AddressLine2("Address Line 2")),
-          addressLine3 = Some(AddressLine3("Address Line 3")),
-          addressLine4 = Some(AddressLine4("Address Line 4")),
-          rls = Some(Rls(true)),
-          contactDetails = Some(
-            ContactDetails(
-              telephoneNumber = Some(TelephoneNumber("telephone-number")),
-              fax = Some(Fax("fax-number")),
-              mobile = Some(Mobile("mobile-number")),
-              emailAddress = Some(Email("email address")),
-              emailSource = Some(EmailSource("email source"))
-            )
-          ),
-          postCode = Some(ChargeInfoPostCode("AB12 3CD")),
-          postcodeHistory = List(
-            PostCodeInfo(addressPostcode = ChargeInfoPostCode("AB12 3CD"), postcodeDate = LocalDate.parse("2020-01-01"))
-          )
-        )
-      ),
-      individualDetails = IndividualDetails(
-        title = Some(Title("Mr")),
-        firstName = Some(FirstName("John")),
-        lastName = Some(LastName("Doe")),
-        dateOfBirth = Some(DateOfBirth(LocalDate.parse("1980-01-01"))),
-        districtNumber = Some(DistrictNumber("1234")),
-        customerType = CustomerType.ItsaMigtrated,
-        transitionToCDCS = TransitionToCdcs(value = true)
-      ),
-      chargeTypesExcluded = Some(false),
-      customerSignals = Some(
-        List(
-          Signal(SignalType("Rls"), SignalValue("signal value"), Some("description")),
-          Signal(SignalType("Welsh Language Signal"), SignalValue("signal value"), Some("description"))
-        )
-      )
+      chargeTypesExcluded = Some(false)
     )
 
     "return 200" when {
