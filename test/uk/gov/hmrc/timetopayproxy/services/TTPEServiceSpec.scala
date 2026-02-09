@@ -22,18 +22,18 @@ import org.scalamock.scalatest.MockFactory
 import org.scalatest.Inside.inside
 import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.should.Matchers._
-import play.api.test.Helpers.{await, defaultAwaitTimeout}
+import play.api.test.Helpers.{ await, defaultAwaitTimeout }
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.timetopayproxy.connectors.TtpeConnector
 import uk.gov.hmrc.timetopayproxy.models.error.TtppEnvelope.TtppEnvelope
-import uk.gov.hmrc.timetopayproxy.models.error.{ConnectorError, ProxyEnvelopeError, TtppEnvelope}
+import uk.gov.hmrc.timetopayproxy.models.error.{ ConnectorError, ProxyEnvelopeError, TtppEnvelope }
 import uk.gov.hmrc.timetopayproxy.models.saonly.chargeInfoApi._
 import uk.gov.hmrc.timetopayproxy.models.saonly.common.SaOnlyRegimeType
-import uk.gov.hmrc.timetopayproxy.models.{IdType, IdValue, Identification}
+import uk.gov.hmrc.timetopayproxy.models.{ IdType, IdValue, Identification }
 
-import java.time.{LocalDate, LocalDateTime}
+import java.time.{ LocalDate, LocalDateTime }
 import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.{ ExecutionContext, Future }
 
 class TTPEServiceSpec extends AnyFreeSpec with MockFactory {
   implicit val hc: HeaderCarrier = HeaderCarrier()
