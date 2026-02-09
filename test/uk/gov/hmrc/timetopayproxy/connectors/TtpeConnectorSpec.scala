@@ -74,10 +74,6 @@ class TtpeConnectorSpec
       .returns("unused")
     (config
       .get(_: String)(_: ConfigLoader[Boolean]))
-      .expects("microservice.services.ttp.useIf", *)
-      .returns(false)
-    (config
-      .get(_: String)(_: ConfigLoader[Boolean]))
       .expects("auditing.enabled", *)
       .returns(false)
     (config
@@ -97,7 +93,7 @@ class TtpeConnectorSpec
       .returning(InternalAuthEnabled(true))
 
     val mockConfiguration: AppConfig =
-      new MockAppConfig(config, servicesConfig, ifImpl = false, internalAuthEnabled = false)
+      new MockAppConfig(config, servicesConfig, internalAuthEnabled = false)
 
     val connector: TtpeConnector = new DefaultTtpeConnector(mockConfiguration, httpClient, featureSwitch)
 

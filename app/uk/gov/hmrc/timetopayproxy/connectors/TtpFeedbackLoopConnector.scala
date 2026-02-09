@@ -79,7 +79,7 @@ class TtpFeedbackLoopConnector @Inject() (
     implicit def httpReads: HttpReads[Either[ProxyEnvelopeError, TtpCancelSuccessfulResponse]] =
       httpReadsBuilderForCancel.httpReads(logger, makeErrorSafeToLogInProd = _.toStringSafeToLogInProd)
 
-    val path = if (appConfig.useIf) "/individuals/debts/time-to-pay/cancel" else "/debts/time-to-pay/cancel"
+    val path = "/debts/time-to-pay/cancel"
 
     val url = url"${appConfig.ttpBaseUrl + path}"
 
@@ -99,7 +99,7 @@ class TtpFeedbackLoopConnector @Inject() (
     implicit def httpReads: HttpReads[Either[ProxyEnvelopeError, TtpFullAmendSuccessfulResponse]] =
       httpReadsBuilderForFullAmend.httpReads(logger, _.toStringSafeToLogInProd)
 
-    val path = if (appConfig.useIf) "/individuals/debts/time-to-pay/full-amend" else "/debts/time-to-pay/full-amend"
+    val path = "/debts/time-to-pay/full-amend"
 
     val url = url"${appConfig.ttpBaseUrl + path}"
 
@@ -119,7 +119,7 @@ class TtpFeedbackLoopConnector @Inject() (
     implicit def httpReads: HttpReads[Either[ProxyEnvelopeError, TtpInformSuccessfulResponse]] =
       httpReadsBuilderForInform.httpReads(logger, _.toStringSafeToLogInProd)
 
-    val path = if (appConfig.useIf) "/individuals/debts/time-to-pay/inform" else "/debts/time-to-pay/inform"
+    val path = "/debts/time-to-pay/inform"
 
     val url = url"${appConfig.ttpBaseUrl + path}"
 
@@ -138,11 +138,6 @@ class TtpFeedbackLoopConnector @Inject() (
     if (featureSwitch.internalAuthEnabled.enabled) {
       Seq(
         "Authorization" -> appConfig.internalAuthToken,
-        "CorrelationId" -> correlationId
-      )
-    } else if (appConfig.useIf) { // DTD-3927: Soon usage of 'useif' will be removed
-      Seq(
-        "Authorization" -> s"Bearer ${appConfig.ttpToken: String}",
         "CorrelationId" -> correlationId
       )
     } else {
