@@ -35,7 +35,9 @@ final case class ChargeR1(
   accruedInterest: AccruedInterest,
   chargeSource: ChargeInfoChargeSource,
   parentMainTrans: Option[ChargeInfoParentMainTrans],
+  originalCreationDate: Option[OriginalCreationDate],
   tieBreaker: Option[TieBreaker],
+  originalTieBreaker: Option[OriginalTieBreaker],
   saTaxYearEnd: Option[SaTaxYearEnd],
   creationDate: Option[CreationDate],
   originalChargeType: Option[OriginalChargeType]
