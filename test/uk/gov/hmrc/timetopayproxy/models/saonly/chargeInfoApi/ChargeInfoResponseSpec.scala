@@ -93,9 +93,7 @@ class ChargeInfoResponseSpec extends AnyFreeSpec with MockFactory {
                 accruedInterest = AccruedInterest(BigInt(50)),
                 chargeSource = ChargeInfoChargeSource("Source"),
                 parentMainTrans = Some(ChargeInfoParentMainTrans("Parent Main Transaction")),
-                originalCreationDate = Some(OriginalCreationDate(LocalDate.parse("2025-07-02"))),
                 tieBreaker = Some(TieBreaker("Tie Breaker")),
-                originalTieBreaker = Some(OriginalTieBreaker("Original Tie Breaker")),
                 saTaxYearEnd = Some(SaTaxYearEnd(LocalDate.parse("2020-04-05"))),
                 creationDate = Some(CreationDate(LocalDate.parse("2025-07-02"))),
                 originalChargeType = Some(OriginalChargeType("Original Charge Type"))
@@ -171,9 +169,7 @@ class ChargeInfoResponseSpec extends AnyFreeSpec with MockFactory {
                 accruedInterest = AccruedInterest(BigInt(50)),
                 chargeSource = ChargeInfoChargeSource("Source"),
                 parentMainTrans = Some(ChargeInfoParentMainTrans("Parent Main Transaction")),
-                originalCreationDate = Some(OriginalCreationDate(LocalDate.parse("2025-07-02"))),
                 tieBreaker = Some(TieBreaker("Tie Breaker")),
-                originalTieBreaker = Some(OriginalTieBreaker("Original Tie Breaker")),
                 saTaxYearEnd = Some(SaTaxYearEnd(LocalDate.parse("2020-04-05"))),
                 creationDate = Some(CreationDate(LocalDate.parse("2025-07-02"))),
                 originalChargeType = Some(OriginalChargeType("Original Charge Type")),
@@ -247,8 +243,6 @@ class ChargeInfoResponseSpec extends AnyFreeSpec with MockFactory {
             |          "isInterestBearingCharge" : true,
             |          "mainType" : "main type",
             |          "originalChargeType" : "Original Charge Type",
-            |          "originalCreationDate" : "2025-07-02",
-            |          "originalTieBreaker" : "Original Tie Breaker",
             |          "outstandingAmount" : 500,
             |          "parentMainTrans" : "Parent Main Transaction",
             |          "saTaxYearEnd" : "2020-04-05",
@@ -270,6 +264,18 @@ class ChargeInfoResponseSpec extends AnyFreeSpec with MockFactory {
 
       def chargeInfoResponseR2Json: JsObject = chargeInfoResponseR1Json ++ Json
         .parse("""{
+                 |  "customerSignals": [
+                 |    {
+                 |      "signalType": "Rls",
+                 |      "signalValue": "signal value",
+                 |      "signalDescription": "description"
+                 |    },
+                 |    {
+                 |      "signalType": "Welsh Language Signal",
+                 |      "signalValue": "signal value",
+                 |      "signalDescription": "description"
+                 |    }
+                 |  ],
                  |  "chargeTypeAssessment" : [
                  |    {
                  |      "chargeReference" : "CHARGE REFERENCE",
@@ -284,8 +290,6 @@ class ChargeInfoResponseSpec extends AnyFreeSpec with MockFactory {
                  |          "isInterestBearingCharge" : true,
                  |          "mainType" : "main type",
                  |          "originalChargeType" : "Original Charge Type",
-                 |          "originalCreationDate" : "2025-07-02",
-                 |          "originalTieBreaker" : "Original Tie Breaker",
                  |          "outstandingAmount" : 500,
                  |          "parentMainTrans" : "Parent Main Transaction",
                  |          "saTaxYearEnd" : "2020-04-05",
@@ -305,18 +309,6 @@ class ChargeInfoResponseSpec extends AnyFreeSpec with MockFactory {
                  |      "mainTrans" : "2000",
                  |      "parentChargeReference" : "PARENT CHARGE REF",
                  |      "isInsolvent": false
-                 |    }
-                 |  ],
-                 |  "customerSignals": [
-                 |    {
-                 |      "signalType": "Rls",
-                 |      "signalValue": "signal value",
-                 |      "signalDescription": "description"
-                 |    },
-                 |    {
-                 |      "signalType": "Welsh Language Signal",
-                 |      "signalValue": "signal value",
-                 |      "signalDescription": "description"
                  |    }
                  |  ],
                  |  "chargeTypesExcluded" : false
@@ -386,9 +378,7 @@ class ChargeInfoResponseSpec extends AnyFreeSpec with MockFactory {
                 accruedInterest = AccruedInterest(BigInt(50)),
                 chargeSource = ChargeInfoChargeSource("Source"),
                 parentMainTrans = Some(ChargeInfoParentMainTrans("Parent Main Transaction")),
-                originalCreationDate = Some(OriginalCreationDate(LocalDate.parse("2025-07-02"))),
                 tieBreaker = Some(TieBreaker("Tie Breaker")),
-                originalTieBreaker = Some(OriginalTieBreaker("Original Tie Breaker")),
                 saTaxYearEnd = Some(SaTaxYearEnd(LocalDate.parse("2020-04-05"))),
                 creationDate = Some(CreationDate(LocalDate.parse("2025-07-02"))),
                 originalChargeType = Some(OriginalChargeType("Original Charge Type"))
@@ -463,9 +453,7 @@ class ChargeInfoResponseSpec extends AnyFreeSpec with MockFactory {
                 accruedInterest = AccruedInterest(BigInt(50)),
                 chargeSource = ChargeInfoChargeSource("Source"),
                 parentMainTrans = Some(ChargeInfoParentMainTrans("Parent Main Transaction")),
-                originalCreationDate = Some(OriginalCreationDate(LocalDate.parse("2025-07-02"))),
                 tieBreaker = Some(TieBreaker("Tie Breaker")),
-                originalTieBreaker = Some(OriginalTieBreaker("Original Tie Breaker")),
                 saTaxYearEnd = Some(SaTaxYearEnd(LocalDate.parse("2020-04-05"))),
                 creationDate = Some(CreationDate(LocalDate.parse("2025-07-02"))),
                 originalChargeType = Some(OriginalChargeType("Original Charge Type")),
@@ -528,8 +516,6 @@ class ChargeInfoResponseSpec extends AnyFreeSpec with MockFactory {
             |          "isInterestBearingCharge" : true,
             |          "mainType" : "main type",
             |          "originalChargeType" : "Original Charge Type",
-            |          "originalCreationDate" : "2025-07-02",
-            |          "originalTieBreaker" : "Original Tie Breaker",
             |          "outstandingAmount" : 500,
             |          "parentMainTrans" : "Parent Main Transaction",
             |          "saTaxYearEnd" : "2020-04-05",
@@ -551,6 +537,12 @@ class ChargeInfoResponseSpec extends AnyFreeSpec with MockFactory {
 
       def chargeInfoResponseR2Json: JsObject = chargeInfoResponseR1Json ++ Json
         .parse("""{
+                 |  "customerSignals": [
+                 |    {
+                 |      "signalType": "Welsh Language Signal",
+                 |      "signalValue": "signal value"
+                 |    }
+                 |  ],
                  |  "chargeTypeAssessment" : [
                  |    {
                  |      "chargeReference" : "CHARGE REFERENCE",
@@ -565,8 +557,6 @@ class ChargeInfoResponseSpec extends AnyFreeSpec with MockFactory {
                  |          "isInterestBearingCharge" : true,
                  |          "mainType" : "main type",
                  |          "originalChargeType" : "Original Charge Type",
-                 |          "originalCreationDate" : "2025-07-02",
-                 |          "originalTieBreaker" : "Original Tie Breaker",
                  |          "outstandingAmount" : 500,
                  |          "parentMainTrans" : "Parent Main Transaction",
                  |          "saTaxYearEnd" : "2020-04-05",
@@ -586,12 +576,6 @@ class ChargeInfoResponseSpec extends AnyFreeSpec with MockFactory {
                  |      "mainTrans" : "2000",
                  |      "parentChargeReference" : "PARENT CHARGE REF",
                  |      "isInsolvent": false
-                 |    }
-                 |  ],
-                 |  "customerSignals": [
-                 |    {
-                 |      "signalType": "Welsh Language Signal",
-                 |      "signalValue": "signal value"
                  |    }
                  |  ],
                  |  "chargeTypesExcluded": false
@@ -652,9 +636,7 @@ class ChargeInfoResponseSpec extends AnyFreeSpec with MockFactory {
                 accruedInterest = AccruedInterest(BigInt(50)),
                 chargeSource = ChargeInfoChargeSource("Source"),
                 parentMainTrans = None,
-                originalCreationDate = None,
                 tieBreaker = None,
-                originalTieBreaker = None,
                 saTaxYearEnd = None,
                 creationDate = None,
                 originalChargeType = None
@@ -721,9 +703,7 @@ class ChargeInfoResponseSpec extends AnyFreeSpec with MockFactory {
                 accruedInterest = AccruedInterest(BigInt(50)),
                 chargeSource = ChargeInfoChargeSource("Source"),
                 parentMainTrans = None,
-                originalCreationDate = None,
                 tieBreaker = None,
-                originalTieBreaker = None,
                 saTaxYearEnd = None,
                 creationDate = None,
                 originalChargeType = None,
@@ -852,7 +832,7 @@ class ChargeInfoResponseSpec extends AnyFreeSpec with MockFactory {
       "implicit JSON reader (data coming from time-to-pay-eligibility)" - {
         val timeToPayEligibilityR2Schema =
           Validators.TimeToPayEligibility.ChargeInfo.Live.openApiResponseSuccessfulSchema
-        val saRelease2Disabled = SARelease2Enabled(false)
+        val saRelease2Disabled = SaRelease2Enabled(false)
 
         "when all the optional fields are fully populated" - {
           val allOptionsJson: JsValue = TestData.WithOnlySomes.chargeInfoResponseR1Json
@@ -906,7 +886,7 @@ class ChargeInfoResponseSpec extends AnyFreeSpec with MockFactory {
       "implicit JSON reader (data coming from time-to-pay-eligibility)" - {
         val timeToPayEligibilityR2Schema =
           Validators.TimeToPayEligibility.ChargeInfo.Proposed.openApiResponseSuccessfulSchema
-        val saRelease2Enabled = SARelease2Enabled(true)
+        val saRelease2Enabled = SaRelease2Enabled(true)
 
         "when all the optional fields are fully populated" - {
           val allOptionsJson: JsValue = TestData.WithOnlySomes.chargeInfoResponseR2Json

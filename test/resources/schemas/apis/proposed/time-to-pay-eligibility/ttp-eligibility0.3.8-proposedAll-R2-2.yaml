@@ -18,8 +18,9 @@ info:
       | 0.3.4 | 08-07-2025 | Alex Olkhovskiy | Update charge-info: removed R2 and returnFinancialAssessment, added isInterestBearingCharge, fixed ChargeTypeAssessment nesting, resolved 5xx errors |
       | 0.3.5 | 09-07-2025 | Alex Olkhovskiy | Fix a dash bug in customer type|
       | 0.3.6 | 21-07-2025 | Alex Olkhovskiy | remove country and altFormats and make individualDetails mandatory and indentations non-empty  for charge-info|
-      | 0.3.7 | 21-07-2025 | Alex Olkhovskiy | Added 422 error response to charge-info endpoint|
-      | 0.3.8 | 08-01-2026 | Alex Olkhovskiy | Added customerSignals, isInsolvent, locks to charge-info response to match proxy spec |
+       | 0.3.7 | 21-07-2025 | Alex Olkhovskiy | Added 422 error response to charge-info endpoint|
+       | 0.3.8-proposedAll-R2-1 | 06-01-2026 | Alex Olkhovskiy | DTD-3057: Remove originalCreationDate and originalTieBreaker from charge-info response |
+       | 0.3.8-proposedAll-R2-2 | 08-01-2026 | Alex Olkhovskiy | DTD-4168: Add customerSignals, isInsolvent, locks to charge-info response to match proxy spec |
   version: 0.3.8-proposedAll-R2-2
 servers:
   - url: https://time-to-pay-eligibility.protected.mdtp
@@ -214,17 +215,6 @@ components:
             required:
               - addressPostcode
               - postcodeDate
-        customerDetails:
-          type: array
-          items:
-            type: object
-            properties:
-              emailAddress:
-                type: string
-                description: Email address
-              emailSource:
-                type: string
-                description: Email source
         individualDetails:
           type: object
           properties:
@@ -403,9 +393,6 @@ components:
             cannotFindLockReason:
               type: boolean
               description: Lock reason not found
-            isAnMtdCustomer:
-              type: boolean
-              description: MTD customer flag
             hasCapacitor:
               type: boolean
               description: Has capacitor
@@ -507,12 +494,7 @@ components:
                       type: string
                     parentMainTrans:
                       type: string
-                    originalCreationDate:
-                      type: string
-                      format: date
                     tieBreaker:
-                      type: string
-                    originalTieBreaker:
                       type: string
                     saTaxYearEnd:
                       type: string
@@ -557,7 +539,6 @@ components:
         - identification
         - invalidSignals
         - customerPostcodes
-        - customerDetails
         - regimeDigitalCorrespondence
         - regimePaymentFrequency
         - paymentPlanFrequency
@@ -606,6 +587,8 @@ components:
         regimeType:
           type: string
           description: Regime Type
+          enum:
+            - SA
       required:
         - channelIdentifier
         - identifications
@@ -763,6 +746,9 @@ components:
           items:
             $ref: '#/components/schemas/CustomerSignal'
           description: Signal information to be considered by the operator. Not all signals will be returned. Examples of signals returned include ring-fenced signals, insolvency and Welsh Language signal.
+        chargeTypesExcluded:
+          type: boolean
+          description: Indicates whether any charge types have been excluded from the response
         chargeTypeAssessment:
           type: array
           items:
@@ -828,12 +814,7 @@ components:
                       type: string
                     parentMainTrans:
                       type: string
-                    originalCreationDate:
-                      type: string
-                      format: date
                     tieBreaker:
-                      type: string
-                    originalTieBreaker:
                       type: string
                     saTaxYearEnd:
                       type: string
@@ -864,6 +845,7 @@ components:
         - chargeTypeAssessment
         - addresses
         - individualDetails
+        - chargeTypesExcluded
     ErrorResponse:
       type: object
       description: A JSON Error Schema for ErrorResponse
@@ -900,9 +882,6 @@ components:
         customerPostcodes:
           - addressPostcode: BN127ER
             postcodeDate: '2022-05-22'
-        customerDetails:
-          - emailAddress: notmymail@yourmail.com
-            emailSource: ETMP
         individualDetails:
           title: Mr
           firstName: John
@@ -959,7 +938,6 @@ components:
           hasDisguisedRemuneration: false
           hasCapacitor: false
           chargesBeforeMaxAccountingDate: false
-          isAnMtdCustomer: false
         futureChargeLiabilitiesExcluded: false
         chargeTypesExcluded: false
         chargeTypeAssessment:
@@ -986,9 +964,7 @@ components:
                 chargeSource: CESA
                 parentChargeReference: XW006559808862
                 parentMainTrans: '4700'
-                originalCreationDate: '2022-08-01'
                 tieBreaker: xyz
-                originalTieBreaker: xyz
                 saTaxYearEnd: '2022-08-01'
                 creationDate: '2022-08-01'
                 originalChargeType: VAT Return Debit Charge
@@ -1051,6 +1027,7 @@ components:
             signalDescription: Description
           - signalType: ITSA Migrated
             signalValue: 'true'
+        chargeTypesExcluded: false
         chargeTypeAssessment:
           - debtTotalAmount: 148781
             chargeReference: XW006559808862
@@ -1070,9 +1047,7 @@ components:
                 accruedInterest: 3
                 chargeSource: CESA
                 parentMainTrans: '4700'
-                originalCreationDate: '2022-08-01'
                 tieBreaker: xyz
-                originalTieBreaker: xyz
                 saTaxYearEnd: '2022-08-01'
                 creationDate: '2022-08-01'
                 originalChargeType: VAT Return Debit Charge
