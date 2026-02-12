@@ -21,7 +21,7 @@ info:
       | 0.3.7 | 21-07-2025 | Alex Olkhovskiy | Added 422 error response to charge-info endpoint|
       | 0.3.8 | 08-01-2026 | Alex Olkhovskiy | Added customerSignals to charge-info response to match proxy spec |
       | 0.3.9 | 28-01-2026 | Alex Olkhovskiy | DTD-4248: Fix mismatches between spec and code |
-      | 0.3.10 | 30-01-2026 | Sunil Sen | DTD-4253: Amended TTPEligibilitySuccessResponseChargeInfo' schema -added a new mandatory field - chargeTypesExcluded of type boolean |
+      | 0.3.10 | 30-01-2026 | Sunil Sen | DTD-3509: Locks, isInsolvent, DTD-4253: Amended TTPEligibilitySuccessResponseChargeInfo' schema -added a new mandatory field - chargeTypesExcluded of type boolean |
   version: 0.3.10
 servers:
   - url: https://time-to-pay-eligibility.protected.mdtp
@@ -677,6 +677,20 @@ components:
           type: string
           description: Description of the signal
           example: Description
+    Lock:
+      type: object
+      required:
+        - lockType
+        - lockReason
+      properties:
+        lockType:
+          type: string
+          description: Type of lock applied to the charge
+          example: Payment
+        lockReason:
+          type: string
+          description: Reason for the lock
+          example: Insolvency
     TTPEligibilitySuccessResponseChargeInfo:
       type: object
       description: A JSON Schema for TTP Eligibility Service API success response.
@@ -809,6 +823,7 @@ components:
               - chargeReference
               - charges
               - mainTrans
+              - isInsolvent
             properties:
               debtTotalAmount:
                 type: integer
@@ -818,6 +833,11 @@ components:
                 description: Charge reference
               parentChargeReference:
                 type: string
+              isInsolvent:
+                type: boolean
+                description: |
+                  Debt level insolvency indicator. Indicates if this charge should be shown as insolvent and excluded from TTP.
+                  For ETMP (MTD ITSA): True only when BOTH conditions are met: (1) customer level insolvency signal exists AND (2) charge has 'no reallocation' lock applied. If customer signal exists but no lock, this field is false.
               mainTrans:
                 type: string
                 description: |
@@ -874,6 +894,11 @@ components:
                       format: date
                     originalChargeType:
                       type: string
+                    locks:
+                      type: array
+                      items:
+                        $ref: '#/components/schemas/Lock'
+                      description: Locks applied to this charge
                   required:
                     - taxPeriodFrom
                     - taxPeriodTo
@@ -1086,6 +1111,7 @@ components:
             chargeReference: XW006559808862
             mainTrans: '4700'
             parentChargeReference: XW006559808862
+            isInsolvent: false
             charges:
               - taxPeriodFrom: '2022-04-01'
                 taxPeriodTo: '2022-06-30'
@@ -1105,6 +1131,9 @@ components:
                 saTaxYearEnd: '2022-08-01'
                 creationDate: '2022-08-01'
                 originalChargeType: VAT Return Debit Charge
+                locks:
+                  - lockType: Payment
+                    lockReason: Insolvency
         chargeTypesExcluded: false
   headers:
     CorrelationId:
