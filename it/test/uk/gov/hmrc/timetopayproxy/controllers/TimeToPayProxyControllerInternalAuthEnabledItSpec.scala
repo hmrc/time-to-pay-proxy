@@ -126,7 +126,7 @@ class TimeToPayProxyControllerInternalAuthEnabledItSpec extends IntegrationBaseS
             isInsolvent = IsInsolvent(true)
           )
         ),
-        chargeTypesExcluded = Some(false),
+        chargeTypesExcluded = ChargeTypesExcluded(false),
         customerSignals = Some(
           List(
             Signal(SignalType("Rls"), SignalValue("signal value"), Some("description")),

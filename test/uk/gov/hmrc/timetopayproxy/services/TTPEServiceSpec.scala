@@ -29,7 +29,7 @@ import uk.gov.hmrc.timetopayproxy.models.error.TtppEnvelope.TtppEnvelope
 import uk.gov.hmrc.timetopayproxy.models.error.{ ConnectorError, ProxyEnvelopeError, TtppEnvelope }
 import uk.gov.hmrc.timetopayproxy.models.saonly.chargeInfoApi._
 import uk.gov.hmrc.timetopayproxy.models.saonly.common.SaOnlyRegimeType
-import uk.gov.hmrc.timetopayproxy.models.{ IdType, IdValue, Identification }
+import uk.gov.hmrc.timetopayproxy.models.{ ChargeTypesExcluded, IdType, IdValue, Identification }
 
 import java.time.{ LocalDate, LocalDateTime }
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -171,6 +171,8 @@ class TTPEServiceSpec extends AnyFreeSpec with MockFactory {
     )
   )
 
+  val commonChargeTypesExcluded = ChargeTypesExcluded(false)
+
   private val chargeInfoResponseWithR1Fields: ChargeInfoResponseR1 = ChargeInfoResponseR1(
     processingDateTime = commonProcessingDateTime,
     identification = commonIdentification,
@@ -186,7 +188,7 @@ class TTPEServiceSpec extends AnyFreeSpec with MockFactory {
     addresses = commonAddresses,
     customerSignals = commonCustomerSignals,
     chargeTypeAssessment = commonChargeTypeAssessmentR2,
-    chargeTypesExcluded = Some(false)
+    chargeTypesExcluded = commonChargeTypesExcluded
   )
 
   private val chargeInfoResponseR2WithChargeTypesExcludedSetToTrue: ChargeInfoResponseR2 = ChargeInfoResponseR2(
@@ -196,7 +198,7 @@ class TTPEServiceSpec extends AnyFreeSpec with MockFactory {
     addresses = commonAddresses,
     customerSignals = commonCustomerSignals,
     chargeTypeAssessment = commonChargeTypeAssessmentR2,
-    chargeTypesExcluded = Some(true)
+    chargeTypesExcluded = ChargeTypesExcluded(true)
   )
 
   ".checkChargeInfo" - {
@@ -222,7 +224,7 @@ class TTPEServiceSpec extends AnyFreeSpec with MockFactory {
         .asRight[ProxyEnvelopeError]
     }
 
-    "returns a ChargeInfoResponse from the connector, with chargeTypesExcluded set to true" in {
+    "returns a ChargeInfoResponse from the connector, with commonChargeTypesExcluded set to true" in {
       val connectorStub = new TtpeConnectorStub(
         Right(chargeInfoResponseR2WithChargeTypesExcludedSetToTrue)
       )
@@ -233,11 +235,11 @@ class TTPEServiceSpec extends AnyFreeSpec with MockFactory {
         await(ttpeService.checkChargeInfo(chargeInfoRequest).value)
 
       inside(result) { case Right(r2: ChargeInfoResponseR2) =>
-        r2.chargeTypesExcluded shouldBe Some(true)
+        r2.chargeTypesExcluded shouldBe ChargeTypesExcluded(true)
       }
     }
 
-    "returns a ChargeInfoResponse from the connector, with chargeTypesExcluded set to false" in {
+    "returns a ChargeInfoResponse from the connector, with commonChargeTypesExcluded set to false" in {
       val connectorStub = new TtpeConnectorStub(
         Right(chargeInfoResponseWithR1Fields)
       )
@@ -248,7 +250,7 @@ class TTPEServiceSpec extends AnyFreeSpec with MockFactory {
         await(ttpeService.checkChargeInfo(chargeInfoRequest).value)
 
       inside(result) { case Right(_: ChargeInfoResponseR1) =>
-        // R1 does not expose chargeTypesExcluded
+        // R1 does not expose commonChargeTypesExcluded
         succeed
       }
     }

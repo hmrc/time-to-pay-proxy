@@ -1920,7 +1920,7 @@ class TimeToPayProxyControllerItSpec extends IntegrationBaseSpec {
           isInsolvent = IsInsolvent(true)
         )
       ),
-      chargeTypesExcluded = None
+      chargeTypesExcluded = ChargeTypesExcluded(false)
     )
 
     val chargeInfoRequest: ChargeInfoRequest = ChargeInfoRequest(

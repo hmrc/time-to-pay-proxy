@@ -32,7 +32,7 @@ import uk.gov.hmrc.timetopayproxy.models.error.TtppEnvelope.TtppEnvelope
 import uk.gov.hmrc.timetopayproxy.models.featureSwitches.{ InternalAuthEnabled, SaRelease2Enabled }
 import uk.gov.hmrc.timetopayproxy.models.saonly.chargeInfoApi._
 import uk.gov.hmrc.timetopayproxy.models.saonly.common.SaOnlyRegimeType
-import uk.gov.hmrc.timetopayproxy.models.{ IdType, IdValue, Identification }
+import uk.gov.hmrc.timetopayproxy.models.{ ChargeTypesExcluded, IdType, IdValue, Identification }
 import uk.gov.hmrc.timetopayproxy.support.WireMockUtils
 
 import java.time.{ LocalDate, LocalDateTime }
@@ -255,7 +255,7 @@ class TtpeConnectorSpec
           isInsolvent = IsInsolvent(false)
         )
       ),
-      chargeTypesExcluded = Some(false)
+      chargeTypesExcluded = ChargeTypesExcluded(false)
     )
 
     ".checkChargeInfo" should {

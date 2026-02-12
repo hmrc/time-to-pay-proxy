@@ -321,7 +321,7 @@ object Validators {
     //   https://github.com/hmrc/time-to-pay-eligibility/blob/dfc3c970abfe7ee8bafbd32e2dc77d35b829a37b/test/resources/schemas/apis/time-to-pay-eligibility/ttp-eligibility0.3.6.yaml
     // Official location:
     //   https://confluence.tools.tax.service.gov.uk/display/DTDT/TTP+Eligibility+API
-    private val livePath = "test/resources/schemas/apis/live/time-to-pay-eligibility/ttp-eligibility0.3.6.yaml"
+    private val livePath = "test/resources/schemas/apis/live/time-to-pay-eligibility/ttp-eligibility0.3.10.yaml"
 
     object ChargeInfo {
       object Live {

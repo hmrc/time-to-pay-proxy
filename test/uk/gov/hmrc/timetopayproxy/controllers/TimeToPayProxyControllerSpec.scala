@@ -1181,7 +1181,7 @@ class TimeToPayProxyControllerSpec extends AnyWordSpec with MockFactory {
           isInsolvent = IsInsolvent(false)
         )
       ),
-      chargeTypesExcluded = Some(false)
+      chargeTypesExcluded = ChargeTypesExcluded(false)
     )
 
     "return 200" when {
