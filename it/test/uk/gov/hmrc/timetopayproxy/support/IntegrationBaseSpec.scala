@@ -51,6 +51,7 @@ trait IntegrationBaseSpec
       "auditing.enabled"                    -> false,
       "feature-switch.internalAuthEnabled"  -> internalAuthEnabled,
       "feature-switch.enrolmentAuthEnabled" -> enrolmentAuthEnabled,
+      "feature-switch.saRelease2Enabled"    -> saRelease2Enabled,
       "internal-auth.token"                 -> "configured-auth-token"
     )
 
@@ -82,4 +83,6 @@ trait IntegrationBaseSpec
   def internalAuthEnabled: Boolean
 
   def enrolmentAuthEnabled: Boolean
+
+  def saRelease2Enabled: Boolean
 }

@@ -18,8 +18,9 @@ package uk.gov.hmrc.timetopayproxy.models.saonly.chargeInfoApi
 
 import enumeratum.{ Enum, EnumEntry, PlayJsonEnum }
 import play.api.libs.json._
+import play.api.libs.functional.syntax._
 import uk.gov.hmrc.timetopayproxy.config.FeatureSwitch
-import uk.gov.hmrc.timetopayproxy.models.Identification
+import uk.gov.hmrc.timetopayproxy.models.{ ChargeTypesExcluded, Identification }
 
 import java.time.{ LocalDate, LocalDateTime }
 import scala.collection.immutable
@@ -49,7 +50,25 @@ final case class ChargeInfoResponseR1(
 ) extends ChargeInfoResponse
 
 object ChargeInfoResponseR1 {
-  implicit val format: OFormat[ChargeInfoResponseR1] = Json.format[ChargeInfoResponseR1]
+  private val reads: Reads[ChargeInfoResponseR1] = Json.reads[ChargeInfoResponseR1]
+  private val writes: OWrites[ChargeInfoResponseR1] =
+    (
+      (__ \ "processingDateTime").write[LocalDateTime] and
+        (__ \ "identification").write[List[Identification]] and
+        (__ \ "individualDetails").write[IndividualDetails] and
+        (__ \ "addresses").write[List[Address]] and
+        (__ \ "chargeTypeAssessment").write[List[ChargeTypeAssessmentR1]]
+    )(chargeInfoR1 =>
+      (
+        chargeInfoR1.processingDateTime,
+        chargeInfoR1.identification,
+        chargeInfoR1.individualDetails,
+        chargeInfoR1.addresses,
+        chargeInfoR1.chargeTypeAssessment
+      )
+    )
+
+  implicit val format: OFormat[ChargeInfoResponseR1] = OFormat[ChargeInfoResponseR1](reads, writes)
 }
 
 final case class ChargeInfoResponseR2(
@@ -57,8 +76,9 @@ final case class ChargeInfoResponseR2(
   identification: List[Identification],
   individualDetails: IndividualDetails,
   addresses: List[Address],
+  customerSignals: Option[List[Signal]],
   chargeTypeAssessment: List[ChargeTypeAssessmentR2],
-  customerSignals: Option[List[Signal]]
+  chargeTypesExcluded: ChargeTypesExcluded
 ) extends ChargeInfoResponse
 
 object ChargeInfoResponseR2 {

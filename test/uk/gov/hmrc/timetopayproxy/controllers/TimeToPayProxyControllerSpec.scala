@@ -1141,6 +1141,12 @@ class TimeToPayProxyControllerSpec extends AnyWordSpec with MockFactory {
           )
         )
       ),
+      customerSignals = Some(
+        List(
+          Signal(SignalType("Rls"), SignalValue("signal value"), Some("description")),
+          Signal(SignalType("Welsh Language Signal"), SignalValue("signal value"), Some("description"))
+        )
+      ),
       chargeTypeAssessment = List(
         ChargeTypeAssessmentR2(
           debtTotalAmount = BigInt(1000),
@@ -1161,9 +1167,7 @@ class TimeToPayProxyControllerSpec extends AnyWordSpec with MockFactory {
               accruedInterest = AccruedInterest(BigInt(50)),
               chargeSource = ChargeInfoChargeSource("Source"),
               parentMainTrans = Some(ChargeInfoParentMainTrans("Parent Main Transaction")),
-              originalCreationDate = Some(OriginalCreationDate(LocalDate.parse("2025-07-02"))),
               tieBreaker = Some(TieBreaker("Tie Breaker")),
-              originalTieBreaker = Some(OriginalTieBreaker("Original Tie Breaker")),
               saTaxYearEnd = Some(SaTaxYearEnd(LocalDate.parse("2020-04-05"))),
               creationDate = Some(CreationDate(LocalDate.parse("2025-07-02"))),
               originalChargeType = Some(OriginalChargeType("Original Charge Type")),
@@ -1177,12 +1181,7 @@ class TimeToPayProxyControllerSpec extends AnyWordSpec with MockFactory {
           isInsolvent = IsInsolvent(false)
         )
       ),
-      customerSignals = Some(
-        List(
-          Signal(SignalType("Rls"), SignalValue("signal value"), Some("description")),
-          Signal(SignalType("Welsh Language Signal"), SignalValue("signal value"), Some("description"))
-        )
-      )
+      chargeTypesExcluded = ChargeTypesExcluded(false)
     )
 
     "return 200" when {

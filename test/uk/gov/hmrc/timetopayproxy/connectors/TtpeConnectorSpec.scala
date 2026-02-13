@@ -29,10 +29,10 @@ import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 import uk.gov.hmrc.timetopayproxy.config.{ AppConfig, FeatureSwitch }
 import uk.gov.hmrc.timetopayproxy.models.error.{ ConnectorError, ProxyEnvelopeError }
 import uk.gov.hmrc.timetopayproxy.models.error.TtppEnvelope.TtppEnvelope
-import uk.gov.hmrc.timetopayproxy.models.featureSwitches.{ InternalAuthEnabled, SARelease2Enabled }
+import uk.gov.hmrc.timetopayproxy.models.featureSwitches.{ InternalAuthEnabled, SaRelease2Enabled }
 import uk.gov.hmrc.timetopayproxy.models.saonly.chargeInfoApi._
 import uk.gov.hmrc.timetopayproxy.models.saonly.common.SaOnlyRegimeType
-import uk.gov.hmrc.timetopayproxy.models.{ IdType, IdValue, Identification }
+import uk.gov.hmrc.timetopayproxy.models.{ ChargeTypesExcluded, IdType, IdValue, Identification }
 import uk.gov.hmrc.timetopayproxy.support.WireMockUtils
 
 import java.time.{ LocalDate, LocalDateTime }
@@ -216,6 +216,11 @@ class TtpeConnectorSpec
           )
         )
       ),
+      customerSignals = Some(
+        List(
+          Signal(SignalType("Welsh Language Signal"), SignalValue("signal value"), Some("description"))
+        )
+      ),
       chargeTypeAssessment = List(
         ChargeTypeAssessmentR2(
           debtTotalAmount = BigInt(1000),
@@ -236,9 +241,7 @@ class TtpeConnectorSpec
               accruedInterest = AccruedInterest(BigInt(50)),
               chargeSource = ChargeInfoChargeSource("Source"),
               parentMainTrans = Some(ChargeInfoParentMainTrans("Parent Main Transaction")),
-              originalCreationDate = Some(OriginalCreationDate(LocalDate.parse("2025-07-02"))),
               tieBreaker = Some(TieBreaker("Tie Breaker")),
-              originalTieBreaker = Some(OriginalTieBreaker("Original Tie Breaker")),
               saTaxYearEnd = Some(SaTaxYearEnd(LocalDate.parse("2020-04-05"))),
               creationDate = Some(CreationDate(LocalDate.parse("2025-07-02"))),
               originalChargeType = Some(OriginalChargeType("Original Charge Type")),
@@ -252,11 +255,7 @@ class TtpeConnectorSpec
           isInsolvent = IsInsolvent(false)
         )
       ),
-      customerSignals = Some(
-        List(
-          Signal(SignalType("Welsh Language Signal"), SignalValue("signal value"), Some("description"))
-        )
-      )
+      chargeTypesExcluded = ChargeTypesExcluded(false)
     )
 
     ".checkChargeInfo" should {
@@ -264,7 +263,7 @@ class TtpeConnectorSpec
         "the feature switch is false, parse a Release 1 response" in new Setup {
           (() => featureSwitch.saRelease2Enabled)
             .expects()
-            .returning(SARelease2Enabled(false))
+            .returning(SaRelease2Enabled(false))
 
           stubPostWithResponseBody(
             "/debts/time-to-pay/charge-info",
@@ -284,7 +283,7 @@ class TtpeConnectorSpec
         "the feature switch is true, parse a Release 2 response" in new Setup {
           (() => featureSwitch.saRelease2Enabled)
             .expects()
-            .returning(SARelease2Enabled(true))
+            .returning(SaRelease2Enabled(true))
 
           stubPostWithResponseBody(
             "/debts/time-to-pay/charge-info",
@@ -305,7 +304,7 @@ class TtpeConnectorSpec
       "parse an error response from an upstream service" in new Setup {
         (() => featureSwitch.saRelease2Enabled)
           .expects()
-          .returning(SARelease2Enabled(true))
+          .returning(SaRelease2Enabled(true))
 
         def errorResponse(code: String, reason: String): String =
           s"""
@@ -329,7 +328,7 @@ class TtpeConnectorSpec
       "parse a 422 error response from an upstream service" in new Setup {
         (() => featureSwitch.saRelease2Enabled)
           .expects()
-          .returning(SARelease2Enabled(true))
+          .returning(SaRelease2Enabled(true))
 
         stubPostWithResponseBody(
           "/debts/time-to-pay/charge-info",

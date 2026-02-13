@@ -42,6 +42,7 @@ import scala.concurrent.ExecutionContext
 class TimeToPayProxyControllerItSpec extends IntegrationBaseSpec {
   def internalAuthEnabled: Boolean = false
   def enrolmentAuthEnabled: Boolean = false
+  def saRelease2Enabled: Boolean = true
 
   "TimeToPayProxyController" - {
     ".getAffordableQuotes" - {
@@ -1879,6 +1880,12 @@ class TimeToPayProxyControllerItSpec extends IntegrationBaseSpec {
           )
         )
       ),
+      customerSignals = Some(
+        List(
+          Signal(SignalType("Rls"), SignalValue("signal value"), Some("description")),
+          Signal(SignalType("Welsh Language Signal"), SignalValue("signal value"), Some("description"))
+        )
+      ),
       chargeTypeAssessment = List(
         ChargeTypeAssessmentR2(
           debtTotalAmount = BigInt(1000),
@@ -1899,9 +1906,7 @@ class TimeToPayProxyControllerItSpec extends IntegrationBaseSpec {
               accruedInterest = AccruedInterest(BigInt(50)),
               chargeSource = ChargeInfoChargeSource("Source"),
               parentMainTrans = Some(ChargeInfoParentMainTrans("Parent Main Transaction")),
-              originalCreationDate = Some(OriginalCreationDate(LocalDate.parse("2025-07-02"))),
               tieBreaker = Some(TieBreaker("Tie Breaker")),
-              originalTieBreaker = Some(OriginalTieBreaker("Original Tie Breaker")),
               saTaxYearEnd = Some(SaTaxYearEnd(LocalDate.parse("2020-04-05"))),
               creationDate = Some(CreationDate(LocalDate.parse("2025-07-02"))),
               originalChargeType = Some(OriginalChargeType("Original Charge Type")),
@@ -1915,12 +1920,7 @@ class TimeToPayProxyControllerItSpec extends IntegrationBaseSpec {
           isInsolvent = IsInsolvent(true)
         )
       ),
-      customerSignals = Some(
-        List(
-          Signal(SignalType("Rls"), SignalValue("signal value"), Some("description")),
-          Signal(SignalType("Welsh Language Signal"), SignalValue("signal value"), Some("description"))
-        )
-      )
+      chargeTypesExcluded = ChargeTypesExcluded(false)
     )
 
     val chargeInfoRequest: ChargeInfoRequest = ChargeInfoRequest(

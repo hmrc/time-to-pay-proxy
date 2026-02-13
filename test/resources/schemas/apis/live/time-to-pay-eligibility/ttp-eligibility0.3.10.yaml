@@ -19,8 +19,10 @@ info:
       | 0.3.5 | 09-07-2025 | Alex Olkhovskiy | Fix a dash bug in customer type|
       | 0.3.6 | 21-07-2025 | Alex Olkhovskiy | remove country and altFormats and make individualDetails mandatory and indentations non-empty  for charge-info|
       | 0.3.7 | 21-07-2025 | Alex Olkhovskiy | Added 422 error response to charge-info endpoint|
-      | 0.3.8 | 08-01-2026 | Alex Olkhovskiy | Added customerSignals, isInsolvent, locks to charge-info response to match proxy spec |
-  version: 0.3.8-proposedAll-R2-2
+      | 0.3.8 | 08-01-2026 | Alex Olkhovskiy | Added customerSignals to charge-info response to match proxy spec |
+      | 0.3.9 | 28-01-2026 | Alex Olkhovskiy | DTD-4248: Fix mismatches between spec and code |
+      | 0.3.10 | 30-01-2026 | Sunil Sen | DTD-3509: Locks, isInsolvent, DTD-4253: Amended TTPEligibilitySuccessResponseChargeInfo' schema -added a new mandatory field - chargeTypesExcluded of type boolean |
+  version: 0.3.10
 servers:
   - url: https://time-to-pay-eligibility.protected.mdtp
     description: Production
@@ -153,6 +155,11 @@ components:
         regimeType:
           type: string
           description: Regime Type
+          enum:
+            - PAYE
+            - VATC
+            - SIMP
+            - SA
         returnFinancialAssessment:
           type: boolean
           description: Return Financials data flag
@@ -190,6 +197,20 @@ components:
               signalType:
                 type: string
                 description: Signal type
+                enum:
+                  - Year of Migration
+                  - Transitioned to CDCS
+                  - RLS
+                  - insolvent
+                  - Active TTP
+                  - Disguised Remuneration
+                  - Capacitor
+                  - Clerical Interest Indicator
+                  - Additional Security Check
+                  - Breathing Space
+                  - Deceased
+                  - CUSTOMER ACCOUNT GROUP
+                  - Welsh Language Signal
               signalValue:
                 type: string
                 description: Signal value
@@ -225,6 +246,9 @@ components:
               emailSource:
                 type: string
                 description: Email source
+                enum:
+                  - ETMP
+                  - CESA
         individualDetails:
           type: object
           properties:
@@ -295,6 +319,9 @@ components:
                   emailSource:
                     type: string
                     description: Email source
+                    enum:
+                      - ETMP
+                      - CESA
                   altFormat:
                     type: integer
                     description: Specifies alternative format for letters
@@ -328,9 +355,27 @@ components:
         regimePaymentFrequency:
           type: string
           description: Regime Payment Frequency
+          enum:
+            - Single
+            - Weekly
+            - 2Weekly
+            - 4Weekly
+            - Monthly
+            - Quarterly
+            - 6Monthly
+            - Annually
         paymentPlanFrequency:
           type: string
           description: Payment Plan Frequency
+          enum:
+            - Single
+            - Weekly
+            - 2Weekly
+            - 4Weekly
+            - Monthly
+            - Quarterly
+            - 6Monthly
+            - Annually
         paymentPlanMinLength:
           type: integer
           description: Payment plan minimum length
@@ -552,6 +597,7 @@ components:
                     - accruedInterest
                     - ineligibleChargeType
                     - dueDateNotReached
+                    - chargeSource
       required:
         - processingDateTime
         - identification
@@ -606,6 +652,8 @@ components:
         regimeType:
           type: string
           description: Regime Type
+          enum:
+            - SA
       required:
         - channelIdentifier
         - identifications
@@ -620,7 +668,7 @@ components:
         signalType:
           type: string
           description: Type of the signal
-          example: ITSA Migrated
+          example: Year of Migration
         signalValue:
           type: string
           description: Value of the signal
@@ -736,6 +784,9 @@ components:
                   emailSource:
                     type: string
                     description: Email source
+                    enum:
+                      - ETMP
+                      - CESA
               postCode:
                 type: string
                 description: Post code
@@ -858,12 +909,16 @@ components:
                     - outstandingAmount
                     - dueDate
                     - accruedInterest
+        chargeTypesExcluded:
+          type: boolean
+          description: Indicator to show that some charge types have been filtered out
       required:
         - processingDateTime
         - identification
         - chargeTypeAssessment
         - addresses
         - individualDetails
+        - chargeTypesExcluded
     ErrorResponse:
       type: object
       description: A JSON Error Schema for ErrorResponse
@@ -894,7 +949,7 @@ components:
           - idType: UTR
             idValue: '1234567890'
         invalidSignals:
-          - signalType: ITSA Migrated
+          - signalType: Year of Migration
             signalValue: 'true'
             signalDescription: Description
         customerPostcodes:
@@ -1046,10 +1101,10 @@ components:
               - addressPostcode: BN12 9ER
                 postcodeDate: '2022-04-30'
         customerSignals:
-          - signalType: Insolvency
+          - signalType: insolvent
             signalValue: 'true'
             signalDescription: Description
-          - signalType: ITSA Migrated
+          - signalType: Year of Migration
             signalValue: 'true'
         chargeTypeAssessment:
           - debtTotalAmount: 148781
@@ -1079,6 +1134,7 @@ components:
                 locks:
                   - lockType: Payment
                     lockReason: Insolvency
+        chargeTypesExcluded: false
   headers:
     CorrelationId:
       description: A UUID format string for the transaction used for traceability purposes.

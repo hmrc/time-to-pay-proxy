@@ -19,6 +19,7 @@ package uk.gov.hmrc.timetopayproxy.services
 import cats.data.NonEmptyList
 import cats.implicits.catsSyntaxEitherId
 import org.scalamock.scalatest.MockFactory
+import org.scalatest.Inside.inside
 import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.should.Matchers._
 import play.api.test.Helpers.{ await, defaultAwaitTimeout }
@@ -28,7 +29,7 @@ import uk.gov.hmrc.timetopayproxy.models.error.TtppEnvelope.TtppEnvelope
 import uk.gov.hmrc.timetopayproxy.models.error.{ ConnectorError, ProxyEnvelopeError, TtppEnvelope }
 import uk.gov.hmrc.timetopayproxy.models.saonly.chargeInfoApi._
 import uk.gov.hmrc.timetopayproxy.models.saonly.common.SaOnlyRegimeType
-import uk.gov.hmrc.timetopayproxy.models.{ IdType, IdValue, Identification }
+import uk.gov.hmrc.timetopayproxy.models.{ ChargeTypesExcluded, IdType, IdValue, Identification }
 
 import java.time.{ LocalDate, LocalDateTime }
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -46,12 +47,12 @@ class TTPEServiceSpec extends AnyFreeSpec with MockFactory {
     regimeType = SaOnlyRegimeType.SA
   )
 
-  private val chargeInfoResponseWithR2Fields: ChargeInfoResponseR2 = ChargeInfoResponseR2(
-    processingDateTime = LocalDateTime.parse("2025-07-02T15:00:41.689"),
-    identification = List(
-      Identification(idType = IdType("ID_TYPE"), idValue = IdValue("ID_VALUE"))
-    ),
-    individualDetails = IndividualDetails(
+  private val commonProcessingDateTime = LocalDateTime.parse("2025-07-02T15:00:41.689")
+
+  private val commonIdentification = List(Identification(IdType("ID_TYPE"), IdValue("ID_VALUE")))
+
+  private val commonIndividualDetails =
+    IndividualDetails(
       title = Some(Title("Mr")),
       firstName = Some(FirstName("John")),
       lastName = Some(LastName("Doe")),
@@ -59,8 +60,10 @@ class TTPEServiceSpec extends AnyFreeSpec with MockFactory {
       districtNumber = Some(DistrictNumber("1234")),
       customerType = CustomerType.ItsaMigtrated,
       transitionToCDCS = TransitionToCdcs(value = true)
-    ),
-    addresses = List(
+    )
+
+  private val commonAddresses =
+    List(
       Address(
         addressType = AddressType("Address Type"),
         addressLine1 = AddressLine1("Address Line 1"),
@@ -79,64 +82,134 @@ class TTPEServiceSpec extends AnyFreeSpec with MockFactory {
         ),
         postCode = Some(ChargeInfoPostCode("AB12 3CD")),
         postcodeHistory = List(
-          PostCodeInfo(addressPostcode = ChargeInfoPostCode("AB12 3CD"), postcodeDate = LocalDate.parse("2020-01-01"))
+          PostCodeInfo(
+            ChargeInfoPostCode("AB12 3CD"),
+            LocalDate.parse("2020-01-01")
+          )
         )
       )
-    ),
-    chargeTypeAssessment = List(
+    )
+
+  private val commonChargesR1 =
+    List(
+      ChargeR1(
+        taxPeriodFrom = TaxPeriodFrom(LocalDate.parse("2020-01-02")),
+        taxPeriodTo = TaxPeriodTo(LocalDate.parse("2020-12-31")),
+        chargeType = ChargeType("charge type"),
+        mainType = MainType("main type"),
+        subTrans = SubTrans("1000"),
+        outstandingAmount = OutstandingAmount(BigInt(500)),
+        dueDate = DueDate(LocalDate.parse("2021-01-31")),
+        isInterestBearingCharge = Some(ChargeInfoIsInterestBearingCharge(true)),
+        interestStartDate = Some(InterestStartDate(LocalDate.parse("2020-01-03"))),
+        accruedInterest = AccruedInterest(BigInt(50)),
+        chargeSource = ChargeInfoChargeSource("Source"),
+        parentMainTrans = Some(ChargeInfoParentMainTrans("Parent Main Transaction")),
+        originalCreationDate = Some(OriginalCreationDate(LocalDate.parse("2025-07-02"))),
+        tieBreaker = Some(TieBreaker("Tie Breaker")),
+        originalTieBreaker = Some(OriginalTieBreaker("Original Tie Breaker")),
+        saTaxYearEnd = Some(SaTaxYearEnd(LocalDate.parse("2020-04-05"))),
+        creationDate = Some(CreationDate(LocalDate.parse("2025-07-02"))),
+        originalChargeType = Some(OriginalChargeType("Original Charge Type"))
+      )
+    )
+
+  private val commonChargesR2 =
+    List(
+      ChargeR2(
+        taxPeriodFrom = TaxPeriodFrom(LocalDate.parse("2020-01-02")),
+        taxPeriodTo = TaxPeriodTo(LocalDate.parse("2020-12-31")),
+        chargeType = ChargeType("charge type"),
+        mainType = MainType("main type"),
+        subTrans = SubTrans("1000"),
+        outstandingAmount = OutstandingAmount(BigInt(500)),
+        dueDate = DueDate(LocalDate.parse("2021-01-31")),
+        isInterestBearingCharge = Some(ChargeInfoIsInterestBearingCharge(true)),
+        interestStartDate = Some(InterestStartDate(LocalDate.parse("2020-01-03"))),
+        accruedInterest = AccruedInterest(BigInt(50)),
+        chargeSource = ChargeInfoChargeSource("Source"),
+        parentMainTrans = Some(ChargeInfoParentMainTrans("Parent Main Transaction")),
+        tieBreaker = Some(TieBreaker("Tie Breaker")),
+        saTaxYearEnd = Some(SaTaxYearEnd(LocalDate.parse("2020-04-05"))),
+        creationDate = Some(CreationDate(LocalDate.parse("2025-07-02"))),
+        originalChargeType = Some(OriginalChargeType("Original Charge Type")),
+        locks = Some(
+          List(
+            Lock(lockType = "Posting/Clearing", lockReason = "No Reallocation")
+          )
+        )
+      )
+    )
+
+  private val commonChargeTypeAssessmentR1 =
+    List(
+      ChargeTypeAssessmentR1(
+        debtTotalAmount = BigInt(1000),
+        chargeReference = ChargeReference("CHARGE REFERENCE"),
+        parentChargeReference = Some(ChargeInfoParentChargeReference("PARENT CHARGE REF")),
+        mainTrans = MainTrans("2000"),
+        charges = commonChargesR1
+      )
+    )
+
+  private val commonChargeTypeAssessmentR2 =
+    List(
       ChargeTypeAssessmentR2(
         debtTotalAmount = BigInt(1000),
         chargeReference = ChargeReference("CHARGE REFERENCE"),
         parentChargeReference = Some(ChargeInfoParentChargeReference("PARENT CHARGE REF")),
         mainTrans = MainTrans("2000"),
-        charges = List(
-          ChargeR2(
-            taxPeriodFrom = TaxPeriodFrom(LocalDate.parse("2020-01-02")),
-            taxPeriodTo = TaxPeriodTo(LocalDate.parse("2020-12-31")),
-            chargeType = ChargeType("charge type"),
-            mainType = MainType("main type"),
-            subTrans = SubTrans("1000"),
-            outstandingAmount = OutstandingAmount(BigInt(500)),
-            dueDate = DueDate(LocalDate.parse("2021-01-31")),
-            isInterestBearingCharge = Some(ChargeInfoIsInterestBearingCharge(true)),
-            interestStartDate = Some(InterestStartDate(LocalDate.parse("2020-01-03"))),
-            accruedInterest = AccruedInterest(BigInt(50)),
-            chargeSource = ChargeInfoChargeSource("Source"),
-            parentMainTrans = Some(ChargeInfoParentMainTrans("Parent Main Transaction")),
-            originalCreationDate = Some(OriginalCreationDate(LocalDate.parse("2025-07-02"))),
-            tieBreaker = Some(TieBreaker("Tie Breaker")),
-            originalTieBreaker = Some(OriginalTieBreaker("Original Tie Breaker")),
-            saTaxYearEnd = Some(SaTaxYearEnd(LocalDate.parse("2020-04-05"))),
-            creationDate = Some(CreationDate(LocalDate.parse("2025-07-02"))),
-            originalChargeType = Some(OriginalChargeType("Original Charge Type")),
-            locks = Some(
-              List(
-                Lock(lockType = "Posting/Clearing", lockReason = "No Reallocation")
-              )
-            )
-          )
-        ),
+        charges = commonChargesR2,
         isInsolvent = IsInsolvent(false)
       )
-    ),
-    customerSignals = Some(
-      List(
-        Signal(SignalType("Rls"), SignalValue("signal value"), Some("description")),
-        Signal(SignalType("Welsh Language Signal"), SignalValue("signal value"), Some("description"))
-      )
     )
+
+  private val commonCustomerSignals = Some(
+    List(
+      Signal(SignalType("Rls"), SignalValue("signal value"), Some("description")),
+      Signal(SignalType("Welsh Language Signal"), SignalValue("signal value"), Some("description"))
+    )
+  )
+
+  val commonChargeTypesExcluded = ChargeTypesExcluded(false)
+
+  private val chargeInfoResponseWithR1Fields: ChargeInfoResponseR1 = ChargeInfoResponseR1(
+    processingDateTime = commonProcessingDateTime,
+    identification = commonIdentification,
+    individualDetails = commonIndividualDetails,
+    addresses = commonAddresses,
+    chargeTypeAssessment = commonChargeTypeAssessmentR1
+  )
+
+  private val chargeInfoResponseWithR2Fields: ChargeInfoResponseR2 = ChargeInfoResponseR2(
+    processingDateTime = commonProcessingDateTime,
+    identification = commonIdentification,
+    individualDetails = commonIndividualDetails,
+    addresses = commonAddresses,
+    customerSignals = commonCustomerSignals,
+    chargeTypeAssessment = commonChargeTypeAssessmentR2,
+    chargeTypesExcluded = commonChargeTypesExcluded
+  )
+
+  private val chargeInfoResponseR2WithChargeTypesExcludedSetToTrue: ChargeInfoResponseR2 = ChargeInfoResponseR2(
+    processingDateTime = commonProcessingDateTime,
+    identification = commonIdentification,
+    individualDetails = commonIndividualDetails,
+    addresses = commonAddresses,
+    customerSignals = commonCustomerSignals,
+    chargeTypeAssessment = commonChargeTypeAssessmentR2,
+    chargeTypesExcluded = ChargeTypesExcluded(true)
   )
 
   ".checkChargeInfo" - {
     "should return a ChargeInfoResponse from the connector, with only R1 fields" in {
-      val expectedResponse = chargeInfoResponseWithR2Fields.copy(customerSignals = None)
       val connectorStub = new TtpeConnectorStub(
-        Right(expectedResponse)
+        Right(chargeInfoResponseWithR1Fields)
       )
 
       val ttpeService = new DefaultTTPEService(connectorStub)
 
-      await(ttpeService.checkChargeInfo(chargeInfoRequest).value) shouldBe expectedResponse
+      await(ttpeService.checkChargeInfo(chargeInfoRequest).value) shouldBe chargeInfoResponseWithR1Fields
         .asRight[ProxyEnvelopeError]
     }
 
@@ -149,6 +222,37 @@ class TTPEServiceSpec extends AnyFreeSpec with MockFactory {
 
       await(ttpeService.checkChargeInfo(chargeInfoRequest).value) shouldBe chargeInfoResponseWithR2Fields
         .asRight[ProxyEnvelopeError]
+    }
+
+    "returns a ChargeInfoResponse from the connector, with commonChargeTypesExcluded set to true" in {
+      val connectorStub = new TtpeConnectorStub(
+        Right(chargeInfoResponseR2WithChargeTypesExcludedSetToTrue)
+      )
+
+      val ttpeService = new DefaultTTPEService(connectorStub)
+
+      val result =
+        await(ttpeService.checkChargeInfo(chargeInfoRequest).value)
+
+      inside(result) { case Right(r2: ChargeInfoResponseR2) =>
+        r2.chargeTypesExcluded shouldBe ChargeTypesExcluded(true)
+      }
+    }
+
+    "returns a ChargeInfoResponse from the connector, with commonChargeTypesExcluded set to false" in {
+      val connectorStub = new TtpeConnectorStub(
+        Right(chargeInfoResponseWithR1Fields)
+      )
+
+      val ttpeService = new DefaultTTPEService(connectorStub)
+
+      val result: Either[ProxyEnvelopeError, ChargeInfoResponse] =
+        await(ttpeService.checkChargeInfo(chargeInfoRequest).value)
+
+      inside(result) { case Right(_: ChargeInfoResponseR1) =>
+        // R1 does not expose commonChargeTypesExcluded
+        succeed
+      }
     }
 
     "returns an error from the connector" in {

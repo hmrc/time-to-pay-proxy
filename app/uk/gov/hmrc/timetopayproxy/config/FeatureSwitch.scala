@@ -17,7 +17,7 @@
 package uk.gov.hmrc.timetopayproxy.config
 
 import play.api.Configuration
-import uk.gov.hmrc.timetopayproxy.models.featureSwitches.{ EnrolmentAuthEnabled, InternalAuthEnabled, SARelease2Enabled }
+import uk.gov.hmrc.timetopayproxy.models.featureSwitches.{ EnrolmentAuthEnabled, InternalAuthEnabled, SaRelease2Enabled }
 
 case class FeatureSwitch(value: Option[Configuration]) {
   // Implement feature switch getter methods here.
@@ -31,5 +31,6 @@ case class FeatureSwitch(value: Option[Configuration]) {
   def enrolmentAuthEnabled: EnrolmentAuthEnabled = EnrolmentAuthEnabled(
     value.exists(_.get[Boolean]("enrolmentAuthEnabled"))
   )
-  def saRelease2Enabled: SARelease2Enabled = SARelease2Enabled(value.exists(_.get[Boolean]("saRelease2Enabled")))
+
+  def saRelease2Enabled: SaRelease2Enabled = SaRelease2Enabled(value.exists(_.get[Boolean]("saRelease2Enabled")))
 }

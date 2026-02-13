@@ -27,7 +27,7 @@ import uk.gov.hmrc.timetopayproxy.config.FeatureSwitch
 import uk.gov.hmrc.timetopayproxy.models._
 import uk.gov.hmrc.timetopayproxy.models.affordablequotes.{ AffordableQuoteResponse, AffordableQuotesRequest }
 import uk.gov.hmrc.timetopayproxy.models.currency.GbpPounds
-import uk.gov.hmrc.timetopayproxy.models.featureSwitches.SARelease2Enabled
+import uk.gov.hmrc.timetopayproxy.models.featureSwitches.SaRelease2Enabled
 import uk.gov.hmrc.timetopayproxy.models.saonly.chargeInfoApi._
 import uk.gov.hmrc.timetopayproxy.models.saonly.common._
 import uk.gov.hmrc.timetopayproxy.models.saonly.common.apistatus.{ ApiErrorResponse, ApiName, ApiStatus, ApiStatusCode }
@@ -42,6 +42,7 @@ import scala.concurrent.ExecutionContext
 class TimeToPayProxyControllerEnrolmentAuthEnabledItSpec extends IntegrationBaseSpec {
   def internalAuthEnabled: Boolean = false
   def enrolmentAuthEnabled: Boolean = true
+  def saRelease2Enabled: Boolean = true
 
   implicit def ec: ExecutionContext = app.injector.instanceOf[ExecutionContext]
   implicit val hc: HeaderCarrier = HeaderCarrier()
@@ -531,9 +532,7 @@ class TimeToPayProxyControllerEnrolmentAuthEnabledItSpec extends IntegrationBase
                 accruedInterest = AccruedInterest(BigInt(50)),
                 chargeSource = ChargeInfoChargeSource("Source"),
                 parentMainTrans = Some(ChargeInfoParentMainTrans("Parent Main Transaction")),
-                originalCreationDate = Some(OriginalCreationDate(LocalDate.parse("2025-07-02"))),
                 tieBreaker = Some(TieBreaker("Tie Breaker")),
-                originalTieBreaker = Some(OriginalTieBreaker("Original Tie Breaker")),
                 saTaxYearEnd = Some(SaTaxYearEnd(LocalDate.parse("2020-04-05"))),
                 creationDate = Some(CreationDate(LocalDate.parse("2025-07-02"))),
                 originalChargeType = Some(OriginalChargeType("Original Charge Type")),
@@ -547,6 +546,7 @@ class TimeToPayProxyControllerEnrolmentAuthEnabledItSpec extends IntegrationBase
             isInsolvent = IsInsolvent(true)
           )
         ),
+        chargeTypesExcluded = ChargeTypesExcluded(false),
         customerSignals = Some(
           List(
             Signal(SignalType("Rls"), SignalValue("signal value"), Some("description")),
@@ -562,7 +562,7 @@ class TimeToPayProxyControllerEnrolmentAuthEnabledItSpec extends IntegrationBase
 
           (() => mockFeatureSwitch.saRelease2Enabled)
             .expects()
-            .returning(SARelease2Enabled(true))
+            .returning(SaRelease2Enabled(true))
 
           stubRequest(
             httpMethod = POST,

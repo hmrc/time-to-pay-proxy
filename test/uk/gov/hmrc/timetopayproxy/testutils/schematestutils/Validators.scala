@@ -51,7 +51,7 @@ object Validators {
 
       object Proposed {
         private val proposedPath =
-          "test/resources/schemas/apis/proposed/time-to-pay-proxy/time-to-pay-v1.0.22-proposedAll.yaml"
+          "test/resources/schemas/apis/proposed/time-to-pay-proxy/time-to-pay-v1.0.22-proposedAll-2.yaml"
 
         def openApiRequestSchema: OpenApi3DerivedSchema =
           new OpenApi3DerivedSchema(
@@ -204,7 +204,7 @@ object Validators {
 
       object Proposed {
         private val pathR2: String =
-          "test/resources/schemas/apis/proposed/time-to-pay-proxy/time-to-pay-v1.0.22-proposedAll.yaml"
+          "test/resources/schemas/apis/proposed/time-to-pay-proxy/time-to-pay-v1.0.22-proposedAll-2.yaml"
         def openApiRequestSchema: OpenApi3DerivedSchema =
           new OpenApi3DerivedSchema(
             pathR2,
@@ -270,7 +270,7 @@ object Validators {
         // Downloaded from:
         //  https://confluence.tools.tax.service.gov.uk/display/DTDT/TTP+API+%28Current+Version%29+Proxy?preview=/828113579/1214710809/time-to-pay-v1.0.22-proposedAll-2.yaml
         private val pathForR2 =
-          "test/resources/schemas/apis/proposed/time-to-pay-proxy/time-to-pay-v1.0.22-proposedAll.yaml"
+          "test/resources/schemas/apis/proposed/time-to-pay-proxy/time-to-pay-v1.0.22-proposedAll-2.yaml"
 
         def openApiRequestSchema: OpenApi3DerivedSchema =
           new OpenApi3DerivedSchema(
@@ -321,7 +321,7 @@ object Validators {
     //   https://github.com/hmrc/time-to-pay-eligibility/blob/dfc3c970abfe7ee8bafbd32e2dc77d35b829a37b/test/resources/schemas/apis/time-to-pay-eligibility/ttp-eligibility0.3.6.yaml
     // Official location:
     //   https://confluence.tools.tax.service.gov.uk/display/DTDT/TTP+Eligibility+API
-    private val livePath = "test/resources/schemas/apis/live/time-to-pay-eligibility/ttp-eligibility0.3.6.yaml"
+    private val livePath = "test/resources/schemas/apis/live/time-to-pay-eligibility/ttp-eligibility0.3.10.yaml"
 
     object ChargeInfo {
       object Live {
@@ -352,7 +352,7 @@ object Validators {
 
       object Proposed {
         private val proposedPath =
-          "test/resources/schemas/apis/proposed/time-to-pay-eligibility/ttp-eligibility0.3.8-proposed.yaml"
+          "test/resources/schemas/apis/proposed/time-to-pay-eligibility/ttp-eligibility0.3.8-proposedAll-R2-2.yaml"
 
         def openApiResponseSuccessfulSchema =
           new OpenApi3DerivedSchema(
