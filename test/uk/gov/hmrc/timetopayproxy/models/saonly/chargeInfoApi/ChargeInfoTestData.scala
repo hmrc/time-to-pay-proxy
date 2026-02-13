@@ -16,10 +16,10 @@
 
 package uk.gov.hmrc.timetopayproxy.models.saonly.chargeInfoApi
 
-import play.api.libs.json.{JsObject, Json}
-import uk.gov.hmrc.timetopayproxy.models.{ChargeTypesExcluded, IdType, IdValue, Identification}
+import play.api.libs.json.{ JsObject, Json }
+import uk.gov.hmrc.timetopayproxy.models.{ ChargeTypesExcluded, IdType, IdValue, Identification }
 
-import java.time.{LocalDate, LocalDateTime}
+import java.time.{ LocalDate, LocalDateTime }
 
 object ChargeInfoTestData {
   object TestData {
