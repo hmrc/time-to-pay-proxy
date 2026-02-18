@@ -20,7 +20,7 @@ import cats.data.NonEmptyList
 import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.client.WireMock.{ postRequestedFor, urlPathEqualTo }
 import com.github.tomakehurst.wiremock.http.RequestMethod.{ POST, PUT }
-import play.api.libs.json.{ JsNull, JsObject, JsValue, Json }
+import play.api.libs.json.{ JsNull, JsObject, JsValue, Json, OFormat }
 import play.api.libs.ws.{ WSRequest, WSResponse }
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.timetopayproxy.models._
@@ -984,6 +984,8 @@ class TimeToPayProxyControllerItSpec extends IntegrationBaseSpec {
     }
 
     ".informTtp" - {
+      implicit val r2RequestFormat: OFormat[TtpInformRequestR2] = TtpInformRequestR2.r2Format
+
       "should return a 200 statusCode" - {
         "when given a valid json payload" - {
           "when TimeToPay returns a successful response" in new TimeToPayProxyControllerTestBase {
@@ -1093,7 +1095,7 @@ class TimeToPayProxyControllerItSpec extends IntegrationBaseSpec {
             val expectedTtppErrorResponse: TtppErrorResponse = TtppErrorResponse(
               statusCode = 400,
               errorMessage =
-                "Invalid TtpInformRequest payload: Payload has a missing field or an invalid format. Field name: identifications. "
+                "Invalid InformRequest payload: Payload has a missing field or an invalid format. Field name: identifications. "
             )
 
             response.json shouldBe Json.toJson(expectedTtppErrorResponse)
@@ -1111,7 +1113,11 @@ class TimeToPayProxyControllerItSpec extends IntegrationBaseSpec {
                   |    "planSelection": 1,
                   |    "paymentDay": 28,
                   |    "upfrontPaymentAmount": 123.45,
-                  |    "startDate": "2025-10-15"
+                  |    "startDate": "2025-10-15",
+                  |    "debtItemCharges": [{
+                  |      "debtItemChargeId": "some-charge-id",
+                  |      "chargeSource": "ETMP"
+                  |    }]
                   |  },
                   |  "channelIdentifier": "eSSTTP"
                   |}
@@ -1125,7 +1131,7 @@ class TimeToPayProxyControllerItSpec extends IntegrationBaseSpec {
               val expectedTtppErrorResponse: TtppErrorResponse = TtppErrorResponse(
                 statusCode = 400,
                 errorMessage =
-                  "Invalid TtpInformRequest payload: Payload has a missing field or an invalid format. Field name: identifications. "
+                  "Invalid InformRequest payload: Payload has a missing field or an invalid format. Field name: identifications. "
               )
 
               response.json shouldBe Json.toJson(expectedTtppErrorResponse)
@@ -1973,17 +1979,21 @@ class TimeToPayProxyControllerItSpec extends IntegrationBaseSpec {
       transitioned = Some(TransitionedIndicator(true))
     )
 
-    val informRequest: TtpInformRequest = TtpInformRequest(
+    val informRequest: TtpInformRequestR2 = TtpInformRequestR2(
       identifications = NonEmptyList.of(
         Identification(idType = IdType("NINO"), idValue = IdValue("AB123456C"))
       ),
-      paymentPlan = SaOnlyPaymentPlan(
+      paymentPlan = SaOnlyPaymentPlanR2(
         arrangementAgreedDate = ArrangementAgreedDate(LocalDate.parse("2025-01-01")),
         ttpEndDate = TtpEndDate(LocalDate.parse("2025-02-01")),
         frequency = FrequencyLowercase.Monthly,
         initialPaymentDate = Some(InitialPaymentDate(LocalDate.parse("2025-01-05"))),
         initialPaymentAmount = Some(GbpPounds.createOrThrow(100.00)),
-        ddiReference = Some(DdiReference("TestDDIReference"))
+        ddiReference = Some(DdiReference("TestDDIReference")),
+        debtItemCharges = NonEmptyList.of(
+          DebtItemChargeReference(DebtItemChargeId("some-cesa-id"), ChargeSourceSAOnly.CESA),
+          DebtItemChargeReference(DebtItemChargeId("some-etmp-id"), ChargeSourceSAOnly.ETMP)
+        )
       ),
       instalments = NonEmptyList.of(
         SaOnlyInstalment(

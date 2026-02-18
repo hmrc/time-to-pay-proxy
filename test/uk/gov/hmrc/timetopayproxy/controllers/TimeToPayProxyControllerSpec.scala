@@ -38,13 +38,13 @@ import uk.gov.hmrc.timetopayproxy.models.affordablequotes._
 import uk.gov.hmrc.timetopayproxy.models.currency.GbpPounds
 import uk.gov.hmrc.timetopayproxy.models.error.TtppEnvelope.TtppEnvelope
 import uk.gov.hmrc.timetopayproxy.models.error.{ ConnectorError, TtppEnvelope, TtppErrorResponse }
-import uk.gov.hmrc.timetopayproxy.models.featureSwitches.EnrolmentAuthEnabled
+import uk.gov.hmrc.timetopayproxy.models.featureSwitches.{ EnrolmentAuthEnabled, SaRelease2Enabled }
 import uk.gov.hmrc.timetopayproxy.models.saonly.chargeInfoApi._
 import uk.gov.hmrc.timetopayproxy.models.saonly.common._
 import uk.gov.hmrc.timetopayproxy.models.saonly.common.apistatus.{ ApiName, ApiStatus, ApiStatusCode }
 import uk.gov.hmrc.timetopayproxy.models.saonly.ttpcancel.{ CancellationDate, TtpCancelPaymentPlan, TtpCancelRequest, TtpCancelSuccessfulResponse }
 import uk.gov.hmrc.timetopayproxy.models.saonly.ttpfullamend.{ TtpFullAmendRequest, TtpFullAmendSuccessfulResponse }
-import uk.gov.hmrc.timetopayproxy.models.saonly.ttpinform.{ TtpInformRequest, TtpInformSuccessfulResponse }
+import uk.gov.hmrc.timetopayproxy.models.saonly.ttpinform.{ InformRequest, TtpInformRequest, TtpInformRequestR2, TtpInformSuccessfulResponse }
 import uk.gov.hmrc.timetopayproxy.services.{ TTPEService, TTPQuoteService, TtpFeedbackLoopService }
 
 import java.time.{ Instant, LocalDate, LocalDateTime }
@@ -1512,7 +1512,7 @@ class TimeToPayProxyControllerSpec extends AnyWordSpec with MockFactory {
 
   "POST /individuals/time-to-pay-proxy/inform" should {
 
-    val ttpInformRequest: TtpInformRequest = TtpInformRequest(
+    val r1ttpInformRequest: TtpInformRequest = TtpInformRequest(
       identifications = NonEmptyList.of(
         Identification(idType = IdType("NINO"), idValue = IdValue("AB123456C"))
       ),
@@ -1534,6 +1534,25 @@ class TimeToPayProxyControllerSpec extends AnyWordSpec with MockFactory {
       transitioned = Some(TransitionedIndicator(true))
     )
 
+    val cesaChargeRef = DebtItemChargeReference(DebtItemChargeId("some-cesa-id"), ChargeSourceSAOnly.CESA)
+    val etmpChargeRef = DebtItemChargeReference(DebtItemChargeId("some-etmp-id"), ChargeSourceSAOnly.ETMP)
+
+    val r2ttpInformRequest: TtpInformRequestR2 = TtpInformRequestR2(
+      r1ttpInformRequest.identifications,
+      SaOnlyPaymentPlanR2(
+        r1ttpInformRequest.paymentPlan.arrangementAgreedDate,
+        r1ttpInformRequest.paymentPlan.ttpEndDate,
+        r1ttpInformRequest.paymentPlan.frequency,
+        r1ttpInformRequest.paymentPlan.initialPaymentDate,
+        r1ttpInformRequest.paymentPlan.initialPaymentAmount,
+        r1ttpInformRequest.paymentPlan.ddiReference,
+        NonEmptyList.of(cesaChargeRef, etmpChargeRef)
+      ),
+      r1ttpInformRequest.instalments,
+      r1ttpInformRequest.channelIdentifier,
+      r1ttpInformRequest.transitioned
+    )
+
     val ttpInformResponse: TtpInformSuccessfulResponse = TtpInformSuccessfulResponse(
       apisCalled = List(
         ApiStatus(
@@ -1547,91 +1566,176 @@ class TimeToPayProxyControllerSpec extends AnyWordSpec with MockFactory {
     )
 
     "return 200" when {
-      "service returns success" in {
+      "service returns success" when {
+        "r2 is disabled" in {
+          (() => featureSwitch.saRelease2Enabled).expects().returning(SaRelease2Enabled(false))
 
-        (() => featureSwitch.enrolmentAuthEnabled).expects().returning(EnrolmentAuthEnabled(true))
+          (() => featureSwitch.enrolmentAuthEnabled).expects().returning(EnrolmentAuthEnabled(true))
 
-        (() => featureSwitch.informEndpointEnabled)
-          .expects()
-          .returning(true)
+          (() => featureSwitch.informEndpointEnabled)
+            .expects()
+            .returning(true)
 
-        (authConnector
-          .authorise[Unit](_: Predicate, _: Retrieval[Unit])(
-            _: HeaderCarrier,
-            _: ExecutionContext
-          ))
-          .expects(where { (e: Predicate, r: Retrieval[Unit], _: HeaderCarrier, _: ExecutionContext) =>
-            e shouldBe ReadTimeToPayProxy.toEnrolment
-            r shouldBe EmptyRetrieval
-            true
-          })
-          .returning(Future.successful(()))
+          (authConnector
+            .authorise[Unit](_: Predicate, _: Retrieval[Unit])(
+              _: HeaderCarrier,
+              _: ExecutionContext
+            ))
+            .expects(where { (e: Predicate, r: Retrieval[Unit], _: HeaderCarrier, _: ExecutionContext) =>
+              e shouldBe ReadTimeToPayProxy.toEnrolment
+              r shouldBe EmptyRetrieval
+              true
+            })
+            .returning(Future.successful(()))
 
-        (ttpFeedbackLoopService
-          .informTtp(_: TtpInformRequest)(
-            _: ExecutionContext,
-            _: HeaderCarrier
-          ))
-          .expects(ttpInformRequest, *, *)
-          .returning(TtppEnvelope(ttpInformResponse))
+          (ttpFeedbackLoopService
+            .informTtp(_: TtpInformRequest)(
+              _: ExecutionContext,
+              _: HeaderCarrier
+            ))
+            .expects(r1ttpInformRequest, *, *)
+            .returning(TtppEnvelope(ttpInformResponse))
 
-        val fakeRequest: FakeRequest[JsValue] =
-          FakeRequest("POST", "/individuals/time-to-pay-proxy/inform")
-            .withHeaders(CONTENT_TYPE -> MimeTypes.JSON)
-            .withBody(Json.toJson[TtpInformRequest](ttpInformRequest))
+          val fakeRequest: FakeRequest[JsValue] =
+            FakeRequest("POST", "/individuals/time-to-pay-proxy/inform")
+              .withHeaders(CONTENT_TYPE -> MimeTypes.JSON)
+              .withBody(
+                Json.toJson[TtpInformRequest](r1ttpInformRequest)(InformRequest.format(featureSwitch).writes(_))
+              )
 
-        val response: Future[Result] = controller.informTtp()(fakeRequest)
+          val response: Future[Result] = controller.informTtp()(fakeRequest)
 
-        status(response) shouldBe Status.OK
-        contentAsJson(response) shouldBe Json.toJson[TtpInformSuccessfulResponse](
-          ttpInformResponse
-        )
+          status(response) shouldBe Status.OK
+          contentAsJson(response) shouldBe Json.toJson[TtpInformSuccessfulResponse](
+            ttpInformResponse
+          )
+        }
+
+        "r2 is enabled" in {
+          (() => featureSwitch.saRelease2Enabled).expects().returning(SaRelease2Enabled(true))
+
+          (() => featureSwitch.enrolmentAuthEnabled).expects().returning(EnrolmentAuthEnabled(true))
+
+          (() => featureSwitch.informEndpointEnabled)
+            .expects()
+            .returning(true)
+
+          (authConnector
+            .authorise[Unit](_: Predicate, _: Retrieval[Unit])(
+              _: HeaderCarrier,
+              _: ExecutionContext
+            ))
+            .expects(where { (e: Predicate, r: Retrieval[Unit], _: HeaderCarrier, _: ExecutionContext) =>
+              e shouldBe ReadTimeToPayProxy.toEnrolment
+              r shouldBe EmptyRetrieval
+              true
+            })
+            .returning(Future.successful(()))
+
+          (ttpFeedbackLoopService
+            .informTtp(_: InformRequest)(
+              _: ExecutionContext,
+              _: HeaderCarrier
+            ))
+            .expects(r2ttpInformRequest, *, *)
+            .returning(TtppEnvelope(ttpInformResponse))
+
+          val fakeRequest: FakeRequest[JsValue] =
+            FakeRequest("POST", "/individuals/time-to-pay-proxy/inform")
+              .withHeaders(CONTENT_TYPE -> MimeTypes.JSON)
+              .withBody(Json.toJson(r2ttpInformRequest)(InformRequest.format(featureSwitch).writes(_)))
+
+          val response: Future[Result] = controller.informTtp()(fakeRequest)
+
+          status(response) shouldBe Status.OK
+          contentAsJson(response) shouldBe Json.toJson[TtpInformSuccessfulResponse](
+            ttpInformResponse
+          )
+        }
       }
     }
 
     "return 400" when {
-      "request body is in wrong format" in {
+      "request body is in wrong format" when {
+        "r2 is disabled" in {
+          (() => featureSwitch.saRelease2Enabled).expects().returning(SaRelease2Enabled(false))
 
-        (() => featureSwitch.enrolmentAuthEnabled).expects().returning(EnrolmentAuthEnabled(true))
+          (() => featureSwitch.enrolmentAuthEnabled).expects().returning(EnrolmentAuthEnabled(true))
 
-        (() => featureSwitch.informEndpointEnabled)
-          .expects()
-          .returning(true)
+          (() => featureSwitch.informEndpointEnabled)
+            .expects()
+            .returning(true)
 
-        (authConnector
-          .authorise[Unit](_: Predicate, _: Retrieval[Unit])(
-            _: HeaderCarrier,
-            _: ExecutionContext
-          ))
-          .expects(where { (e: Predicate, r: Retrieval[Unit], _: HeaderCarrier, _: ExecutionContext) =>
-            e shouldBe ReadTimeToPayProxy.toEnrolment
-            r shouldBe EmptyRetrieval
-            true
-          })
-          .returning(Future.successful(()))
+          (authConnector
+            .authorise[Unit](_: Predicate, _: Retrieval[Unit])(
+              _: HeaderCarrier,
+              _: ExecutionContext
+            ))
+            .expects(where { (e: Predicate, r: Retrieval[Unit], _: HeaderCarrier, _: ExecutionContext) =>
+              e shouldBe ReadTimeToPayProxy.toEnrolment
+              r shouldBe EmptyRetrieval
+              true
+            })
+            .returning(Future.successful(()))
 
-        val wrongFormattedBody = """{
-          "identifications": [],
-          "paymentPlan": {
-            "arrangementAgreedDate": "invalid-date",
-            "ttpEndDate": "2025-02-01",
-            "frequency": "monthly"
-          }
-        }"""
+          val wrongFormattedBody =
+            """{
+              "identifications": [],
+              "paymentPlan": {
+                "arrangementAgreedDate": "invalid-date",
+                "ttpEndDate": "2025-02-01",
+                "frequency": "monthly"
+              }
+            }"""
 
-        val fakeRequest: FakeRequest[JsValue] =
-          FakeRequest("POST", "/individuals/time-to-pay-proxy/inform")
-            .withHeaders(CONTENT_TYPE -> MimeTypes.JSON)
-            .withBody(Json.parse(wrongFormattedBody))
+          val fakeRequest: FakeRequest[JsValue] =
+            FakeRequest("POST", "/individuals/time-to-pay-proxy/inform")
+              .withHeaders(CONTENT_TYPE -> MimeTypes.JSON)
+              .withBody(Json.parse(wrongFormattedBody))
 
-        val response: Future[Result] = controller.informTtp()(fakeRequest)
+          val response: Future[Result] = controller.informTtp()(fakeRequest)
 
-        status(response) shouldBe Status.BAD_REQUEST
+          status(response) shouldBe Status.BAD_REQUEST
+        }
+
+        "r2 is enabled & required new fields are not provided" in {
+          (() => featureSwitch.saRelease2Enabled).expects().returning(SaRelease2Enabled(true))
+
+          (() => featureSwitch.enrolmentAuthEnabled).expects().returning(EnrolmentAuthEnabled(true))
+
+          (() => featureSwitch.informEndpointEnabled)
+            .expects()
+            .returning(true)
+
+          (authConnector
+            .authorise[Unit](_: Predicate, _: Retrieval[Unit])(
+              _: HeaderCarrier,
+              _: ExecutionContext
+            ))
+            .expects(where { (e: Predicate, r: Retrieval[Unit], _: HeaderCarrier, _: ExecutionContext) =>
+              e shouldBe ReadTimeToPayProxy.toEnrolment
+              r shouldBe EmptyRetrieval
+              true
+            })
+            .returning(Future.successful(()))
+
+          val missingR2FieldsJson = Json.toJson(r1ttpInformRequest)(InformRequest.format(featureSwitch).writes(_))
+
+          val fakeRequest: FakeRequest[JsValue] =
+            FakeRequest("POST", "/individuals/time-to-pay-proxy/inform")
+              .withHeaders(CONTENT_TYPE -> MimeTypes.JSON)
+              .withBody(missingR2FieldsJson)
+
+          val response: Future[Result] = controller.informTtp()(fakeRequest)
+
+          status(response) shouldBe Status.BAD_REQUEST
+        }
       }
     }
 
     "return 500" when {
       "service returns failure" in {
+        (() => featureSwitch.saRelease2Enabled).expects().returning(SaRelease2Enabled(false))
 
         (() => featureSwitch.enrolmentAuthEnabled).expects().returning(EnrolmentAuthEnabled(true))
 
@@ -1657,7 +1761,7 @@ class TimeToPayProxyControllerSpec extends AnyWordSpec with MockFactory {
             _: ExecutionContext,
             _: HeaderCarrier
           ))
-          .expects(ttpInformRequest, *, *)
+          .expects(r1ttpInformRequest, *, *)
           .returning(
             TtppEnvelope(errorFromTtpService.asLeft[TtpInformSuccessfulResponse])
           )
@@ -1665,7 +1769,7 @@ class TimeToPayProxyControllerSpec extends AnyWordSpec with MockFactory {
         val fakeRequest: FakeRequest[JsValue] =
           FakeRequest("POST", "/individuals/time-to-pay-proxy/inform")
             .withHeaders(CONTENT_TYPE -> MimeTypes.JSON)
-            .withBody(Json.toJson[TtpInformRequest](ttpInformRequest))
+            .withBody(Json.toJson[TtpInformRequest](r1ttpInformRequest)(InformRequest.format(featureSwitch).writes(_)))
 
         val response: Future[Result] = controller.informTtp()(fakeRequest)
 
@@ -1699,7 +1803,7 @@ class TimeToPayProxyControllerSpec extends AnyWordSpec with MockFactory {
         val fakeRequest: FakeRequest[JsValue] =
           FakeRequest("POST", "/individuals/time-to-pay-proxy/inform")
             .withHeaders(CONTENT_TYPE -> MimeTypes.JSON)
-            .withBody(Json.toJson[TtpInformRequest](ttpInformRequest))
+            .withBody(Json.toJson[TtpInformRequest](r1ttpInformRequest)(InformRequest.format(featureSwitch).writes(_)))
 
         val response: Future[Result] = controller.informTtp()(fakeRequest)
 

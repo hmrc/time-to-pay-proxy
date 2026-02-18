@@ -17,10 +17,13 @@
 package uk.gov.hmrc.timetopayproxy.models.saonly.ttpinform
 
 import cats.data.NonEmptyList
-import play.api.libs.json.{ Format, Json, OFormat }
+import play.api.libs.json.{ Format, Json, OFormat, OWrites, Reads }
+import uk.gov.hmrc.timetopayproxy.config.FeatureSwitch
 import uk.gov.hmrc.timetopayproxy.models.saonly.common.{ SaOnlyInstalment, SaOnlyPaymentPlan, SaOnlyPaymentPlanR2, TransitionedIndicator }
 import uk.gov.hmrc.timetopayproxy.models.{ ChannelIdentifier, Identification }
 import uk.gov.hmrc.timetopayproxy.utils.json.CatsNonEmptyListJson
+
+sealed trait InformRequest
 
 final case class TtpInformRequest(
   identifications: NonEmptyList[Identification],
@@ -29,7 +32,7 @@ final case class TtpInformRequest(
   channelIdentifier: ChannelIdentifier,
   // Unlike the FullAmend request, CDCS requested this field to be optional due to delivery constraints.
   transitioned: Option[TransitionedIndicator]
-)
+) extends InformRequest
 
 final case class TtpInformRequestR2(
   identifications: NonEmptyList[Identification],
@@ -38,20 +41,28 @@ final case class TtpInformRequestR2(
   channelIdentifier: ChannelIdentifier,
   // Unlike the FullAmend request, CDCS requested this field to be optional due to delivery constraints.
   transitioned: Option[TransitionedIndicator]
-)
+) extends InformRequest
+
+object InformRequest {
+  private def reads(featureSwitch: FeatureSwitch): Reads[InformRequest] = Reads { jsValue =>
+    if (featureSwitch.saRelease2Enabled.enabled) TtpInformRequestR2.r2Format.reads(jsValue)
+    else TtpInformRequest.r1Format.reads(jsValue)
+  }
+
+  private val writes: OWrites[InformRequest] = OWrites {
+    case r1: TtpInformRequest   => TtpInformRequest.r1Format.writes(r1)
+    case r2: TtpInformRequestR2 => TtpInformRequestR2.r2Format.writes(r2)
+  }
+
+  def format(featureSwitch: FeatureSwitch): OFormat[InformRequest] = OFormat(reads(featureSwitch), writes)
+}
 
 object TtpInformRequest {
-  implicit val format: OFormat[TtpInformRequest] = {
-    implicit def nelFormat[T: Format]: Format[NonEmptyList[T]] = CatsNonEmptyListJson.nonEmptyListFormat
-
-    Json.format[TtpInformRequest]
-  }
+  private implicit def nelFormat[T: Format]: Format[NonEmptyList[T]] = CatsNonEmptyListJson.nonEmptyListFormat
+  val r1Format: OFormat[TtpInformRequest] = Json.format[TtpInformRequest]
 }
 
 object TtpInformRequestR2 {
-  implicit val format: OFormat[TtpInformRequestR2] = {
-    implicit def nelFormat[T: Format]: Format[NonEmptyList[T]] = CatsNonEmptyListJson.nonEmptyListFormat
-
-    Json.format[TtpInformRequestR2]
-  }
+  private implicit def nelFormat[T: Format]: Format[NonEmptyList[T]] = CatsNonEmptyListJson.nonEmptyListFormat
+  val r2Format: OFormat[TtpInformRequestR2] = Json.format[TtpInformRequestR2]
 }

@@ -17,18 +17,21 @@
 package uk.gov.hmrc.timetopayproxy.models.saonly.ttpinform
 
 import cats.data.NonEmptyList
+import org.scalamock.scalatest.MockFactory
 import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.should.Matchers._
 import play.api.libs.json._
+import uk.gov.hmrc.timetopayproxy.config.FeatureSwitch
 import uk.gov.hmrc.timetopayproxy.models._
 import uk.gov.hmrc.timetopayproxy.models.currency.GbpPounds
+import uk.gov.hmrc.timetopayproxy.models.featureSwitches.SaRelease2Enabled
 import uk.gov.hmrc.timetopayproxy.models.saonly.common._
 import uk.gov.hmrc.timetopayproxy.testutils.JsonAssertionOps._
 import uk.gov.hmrc.timetopayproxy.testutils.schematestutils.Validators
 
 import java.time.LocalDate
 
-final class TtpInformRequestSpec extends AnyFreeSpec {
+final class TtpInformRequestSpec extends AnyFreeSpec with MockFactory {
 
   "TtpInformRequest" - {
     object TestData {
@@ -140,8 +143,14 @@ final class TtpInformRequestSpec extends AnyFreeSpec {
 
     }
 
+    def r2DisabledFs = {
+      val fs = mock[FeatureSwitch]
+      (() => fs.saRelease2Enabled).expects().returning(SaRelease2Enabled(false)).anyNumberOfTimes()
+      fs
+    }
+
     "implicit JSON writer (data going to time-to-pay)" - {
-      def writerToTtp: Writes[TtpInformRequest] = implicitly[Writes[TtpInformRequest]]
+      def writerToTtp: Writes[TtpInformRequest] = InformRequest.format(r2DisabledFs).writes(_)
 
       "when all the optional fields are fully populated" - {
         def json: JsValue = TestData.WithOnlySomes.json
@@ -177,7 +186,7 @@ final class TtpInformRequestSpec extends AnyFreeSpec {
     }
 
     "implicit JSON reader (data coming from our clients)" - {
-      def readerFromClients: Reads[TtpInformRequest] = implicitly[Reads[TtpInformRequest]]
+      def readerFromClients: Reads[InformRequest] = InformRequest.format(r2DisabledFs).reads(_)
 
       "when all the optional fields are fully populated" - {
         def json: JsValue = TestData.WithOnlySomes.json
@@ -364,8 +373,14 @@ final class TtpInformRequestSpec extends AnyFreeSpec {
       }
     }
 
+    def r2EnabledFs = {
+      val fs = mock[FeatureSwitch]
+      (() => fs.saRelease2Enabled).expects().returning(SaRelease2Enabled(true)).anyNumberOfTimes()
+      fs
+    }
+
     "implicit JSON writer (data going to time-to-pay)" - {
-      def writerToTtp: Writes[TtpInformRequestR2] = implicitly[Writes[TtpInformRequestR2]]
+      def writerToTtp: Writes[TtpInformRequestR2] = InformRequest.format(r2EnabledFs).writes(_)
 
       "when all the optional fields are fully populated" - {
         def json: JsValue = TestData.WithOnlySomes.json
@@ -401,7 +416,7 @@ final class TtpInformRequestSpec extends AnyFreeSpec {
     }
 
     "implicit JSON reader (data coming from our clients)" - {
-      def readerFromClients: Reads[TtpInformRequestR2] = implicitly[Reads[TtpInformRequestR2]]
+      def readerFromClients: Reads[InformRequest] = InformRequest.format(r2EnabledFs).reads(_)
 
       "when all the optional fields are fully populated" - {
         def json: JsValue = TestData.WithOnlySomes.json
@@ -438,7 +453,7 @@ final class TtpInformRequestSpec extends AnyFreeSpec {
         "fails to read the JSON" in {
           def json: JsValue = TestData.WithEmptyNel.json
 
-          assertThrows[JsResultException](json.as[TtpInformRequestR2])
+          assertThrows[JsResultException](json.as[TtpInformRequestR2](TtpInformRequestR2.r2Format.reads(_)))
         }
       }
     }
