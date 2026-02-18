@@ -33,7 +33,7 @@ import uk.gov.hmrc.timetopayproxy.models.saonly.common._
 import uk.gov.hmrc.timetopayproxy.models.saonly.common.apistatus.{ ApiErrorResponse, ApiName, ApiStatus, ApiStatusCode }
 import uk.gov.hmrc.timetopayproxy.models.saonly.ttpcancel.{ CancellationDate, TtpCancelPaymentPlan, TtpCancelRequest, TtpCancelSuccessfulResponse }
 import uk.gov.hmrc.timetopayproxy.models.saonly.ttpfullamend.{ TtpFullAmendRequest, TtpFullAmendSuccessfulResponse }
-import uk.gov.hmrc.timetopayproxy.models.saonly.ttpinform.{ TtpInformRequest, TtpInformSuccessfulResponse }
+import uk.gov.hmrc.timetopayproxy.models.saonly.ttpinform.{ TtpInformRequest, TtpInformRequestR2, TtpInformSuccessfulResponse }
 import uk.gov.hmrc.timetopayproxy.support.IntegrationBaseSpec
 
 import java.time.{ Instant, LocalDate, LocalDateTime }
@@ -677,21 +677,25 @@ class TimeToPayProxyControllerEnrolmentAuthEnabledItSpec extends IntegrationBase
     }
 
     ".informTtp" - {
-      val requestPayload: TtpInformRequest =
-        TtpInformRequest(
+      val requestPayload: TtpInformRequestR2 =
+        TtpInformRequestR2(
           identifications = NonEmptyList.of(
             Identification(
               idType = IdType("idtype"),
               idValue = IdValue("idvalue")
             )
           ),
-          paymentPlan = SaOnlyPaymentPlan(
+          paymentPlan = SaOnlyPaymentPlanR2(
             arrangementAgreedDate = ArrangementAgreedDate(LocalDate.parse("2020-01-02")),
             ttpEndDate = TtpEndDate(LocalDate.parse("2020-02-04")),
             frequency = FrequencyLowercase.Weekly,
             initialPaymentDate = Some(InitialPaymentDate(LocalDate.parse("2020-04-06"))),
             initialPaymentAmount = Some(GbpPounds.createOrThrow(100.12)),
-            ddiReference = Some(DdiReference("TestDDIReference"))
+            ddiReference = Some(DdiReference("TestDDIReference")),
+            debtItemCharges = NonEmptyList.of(
+              DebtItemChargeReference(DebtItemChargeId("cesa-charge"), ChargeSourceSAOnly.CESA),
+              DebtItemChargeReference(DebtItemChargeId("etmp-charge"), ChargeSourceSAOnly.ETMP)
+            )
           ),
           instalments = NonEmptyList.of(
             SaOnlyInstalment(
@@ -741,7 +745,7 @@ class TimeToPayProxyControllerEnrolmentAuthEnabledItSpec extends IntegrationBase
 
           val request: WSRequest = buildRequest("/inform")
           val response: WSResponse = await(
-            request.post(Json.toJson(requestPayload))
+            request.post(Json.toJson(requestPayload)(TtpInformRequestR2.r2Format))
           )
 
           WireMock.verify(1, postRequestedFor(urlPathEqualTo("/auth/authorise")))
