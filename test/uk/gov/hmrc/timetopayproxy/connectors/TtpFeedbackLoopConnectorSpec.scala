@@ -363,11 +363,7 @@ final class TtpFeedbackLoopConnectorSpec
 
       "r2 is disabled" should {
         (() => featureSwitch.saRelease2Enabled).expects().returns(SaRelease2Enabled(false)).anyNumberOfTimes()
-//        val r2DisabledInformRequestFormat: OFormat[InformRequest] = {
-//          val localFsMock = mock[FeatureSwitch]
-//
-//          InformRequest.format(localFsMock)
-//        }
+
         implicit val r1Writes: Writes[TtpInformRequest] = InformRequest.format(featureSwitch).writes(_)
 
         "return a successful response" in new Setup() {
@@ -484,11 +480,7 @@ final class TtpFeedbackLoopConnectorSpec
 
       "r2 is enabled" should {
         (() => featureSwitch.saRelease2Enabled).expects().returns(SaRelease2Enabled(false)).anyNumberOfTimes()
-//        val r2EnabledInformRequestFormat: OFormat[InformRequest] = {
-//          val localFsMock = mock[FeatureSwitch]
-//          (() => localFsMock.saRelease2Enabled).expects().returns(SaRelease2Enabled(true))
-//          InformRequest.format(localFsMock)
-//        }
+
         implicit val r2Writes: Writes[TtpInformRequestR2] = InformRequest.format(featureSwitch).writes(_)
 
         "return a successful response" in new Setup() {
