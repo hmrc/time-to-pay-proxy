@@ -18,18 +18,17 @@ package uk.gov.hmrc.timetopayproxy.controllers
 
 import cats.data.NonEmptyList
 import com.github.tomakehurst.wiremock.http.RequestMethod.POST
-import play.api.libs.json.{JsNull, JsObject, JsValue, Json}
-import play.api.libs.ws.{WSRequest, WSResponse}
+import play.api.libs.json.{ JsNull, JsObject, JsValue, Json }
+import play.api.libs.ws.{ WSRequest, WSResponse }
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.timetopayproxy.models.currency.GbpPounds
 import uk.gov.hmrc.timetopayproxy.models.error.TtppErrorResponse
-import uk.gov.hmrc.timetopayproxy.models.saonly.common.{ArrangementAgreedDate, InitialPaymentDate, ProcessingDateTimeInstant, SaOnlyInstalment, TransitionedIndicator, TtpEndDate}
-import uk.gov.hmrc.timetopayproxy.models.saonly.common.apistatus.{ApiErrorResponse, ApiName, ApiStatus, ApiStatusCode}
-import uk.gov.hmrc.timetopayproxy.models.saonly.ttpcancel.{CancellationDate, TtpCancelInformativeError, TtpCancelInternalError, TtpCancelPaymentPlan, TtpCancelRequest, TtpCancelSuccessfulResponse}
-import uk.gov.hmrc.timetopayproxy.models.{ChannelIdentifier, FrequencyLowercase, IdType, IdValue, Identification, InstalmentDueDate, TimeToPayError, TimeToPayInnerError}
+import uk.gov.hmrc.timetopayproxy.models.saonly.common.{ ArrangementAgreedDate, InitialPaymentDate, ProcessingDateTimeInstant, SaOnlyInstalment, TransitionedIndicator, TtpEndDate }
+import uk.gov.hmrc.timetopayproxy.models.saonly.common.apistatus.{ ApiErrorResponse, ApiName, ApiStatus, ApiStatusCode }
+import uk.gov.hmrc.timetopayproxy.models.saonly.ttpcancel.{ CancellationDate, TtpCancelInformativeError, TtpCancelInternalError, TtpCancelPaymentPlan, TtpCancelRequest, TtpCancelSuccessfulResponse }
+import uk.gov.hmrc.timetopayproxy.models.{ ChannelIdentifier, FrequencyLowercase, IdType, IdValue, Identification, InstalmentDueDate, TimeToPayError, TimeToPayInnerError }
 import uk.gov.hmrc.timetopayproxy.support.IntegrationBaseSpec
 import uk.gov.hmrc.timetopayproxy.testutils.TestOnlyJsonFormats._
-
 
 import java.time.LocalDate
 import scala.concurrent.ExecutionContext
@@ -354,7 +353,7 @@ class TimeToPayProxyControllerSaRelease2DisabledItSpec extends IntegrationBaseSp
       }
     }
   }
-  
+
   trait TimeToPayProxyControllerSaRelease2DisabledTestBase {
     implicit def ec: ExecutionContext = app.injector.instanceOf[ExecutionContext]
     implicit val hc: HeaderCarrier = HeaderCarrier()
@@ -399,7 +398,7 @@ class TimeToPayProxyControllerSaRelease2DisabledItSpec extends IntegrationBaseSp
       channelIdentifier = ChannelIdentifier.SelfService,
       transitioned = Some(TransitionedIndicator(true))
     )
-    
+
   }
 
 }
