@@ -19,19 +19,19 @@ package uk.gov.hmrc.timetopayproxy.connectors
 import cats.data.EitherT
 import play.api.libs.json.Json
 import uk.gov.hmrc.http.client.HttpClientV2
-import uk.gov.hmrc.http.{HeaderCarrier, HttpReads, StringContextOps}
-import uk.gov.hmrc.timetopayproxy.config.{AppConfig, FeatureSwitch}
+import uk.gov.hmrc.http.{ HeaderCarrier, HttpReads, StringContextOps }
+import uk.gov.hmrc.timetopayproxy.config.{ AppConfig, FeatureSwitch }
 import uk.gov.hmrc.timetopayproxy.connectors.util.httpreadsbuilder.HttpReadsBuilder
 import uk.gov.hmrc.timetopayproxy.logging.RequestAwareLogger
 import uk.gov.hmrc.timetopayproxy.models.TimeToPayError
 import uk.gov.hmrc.timetopayproxy.models.error.ProxyEnvelopeError
 import uk.gov.hmrc.timetopayproxy.models.error.TtppEnvelope.TtppEnvelope
-import uk.gov.hmrc.timetopayproxy.models.saonly.ttpcancel.{TtpCancelInformativeError, TtpCancelRequest, TtpCancelRequestR2, TtpCancelSuccessfulResponse}
-import uk.gov.hmrc.timetopayproxy.models.saonly.ttpfullamend.{TtpFullAmendInformativeError, TtpFullAmendRequest, TtpFullAmendSuccessfulResponse}
-import uk.gov.hmrc.timetopayproxy.models.saonly.ttpinform.{InformRequest, TtpInformInformativeError, TtpInformSuccessfulResponse}
+import uk.gov.hmrc.timetopayproxy.models.saonly.ttpcancel.{ TtpCancelInformativeError, TtpCancelRequest, TtpCancelRequestR2, TtpCancelSuccessfulResponse }
+import uk.gov.hmrc.timetopayproxy.models.saonly.ttpfullamend.{ TtpFullAmendInformativeError, TtpFullAmendRequest, TtpFullAmendSuccessfulResponse }
+import uk.gov.hmrc.timetopayproxy.models.saonly.ttpinform.{ InformRequest, TtpInformInformativeError, TtpInformSuccessfulResponse }
 
 import java.util.UUID
-import javax.inject.{Inject, Singleton}
+import javax.inject.{ Inject, Singleton }
 import scala.concurrent.ExecutionContext
 
 /** Feedback Loop Connector for CDCS -> TTP communication.
