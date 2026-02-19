@@ -26,14 +26,14 @@ import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.timetopayproxy.connectors.TtpFeedbackLoopConnector
 import uk.gov.hmrc.timetopayproxy.models._
 import uk.gov.hmrc.timetopayproxy.models.currency.GbpPounds
-import uk.gov.hmrc.timetopayproxy.models.error.{ ConnectorError, TtppEnvelope }
+import uk.gov.hmrc.timetopayproxy.models.error.{ConnectorError, TtppEnvelope}
 import uk.gov.hmrc.timetopayproxy.models.saonly.common._
-import uk.gov.hmrc.timetopayproxy.models.saonly.common.apistatus.{ ApiName, ApiStatus, ApiStatusCode }
-import uk.gov.hmrc.timetopayproxy.models.saonly.ttpcancel.{ CancellationDate, TtpCancelPaymentPlan, TtpCancelRequest, TtpCancelSuccessfulResponse }
-import uk.gov.hmrc.timetopayproxy.models.saonly.ttpfullamend.{ TtpFullAmendRequest, TtpFullAmendSuccessfulResponse }
-import uk.gov.hmrc.timetopayproxy.models.saonly.ttpinform.{ TtpInformRequest, TtpInformSuccessfulResponse }
+import uk.gov.hmrc.timetopayproxy.models.saonly.common.apistatus.{ApiName, ApiStatus, ApiStatusCode}
+import uk.gov.hmrc.timetopayproxy.models.saonly.ttpcancel.{CancellationDate, TtpCancelPaymentPlan, TtpCancelPaymentPlanR2, TtpCancelRequest, TtpCancelRequestR2, TtpCancelSuccessfulResponse}
+import uk.gov.hmrc.timetopayproxy.models.saonly.ttpfullamend.{TtpFullAmendRequest, TtpFullAmendSuccessfulResponse}
+import uk.gov.hmrc.timetopayproxy.models.saonly.ttpinform.{TtpInformRequest, TtpInformSuccessfulResponse}
 
-import java.time.{ Instant, LocalDate }
+import java.time.{Instant, LocalDate}
 import scala.concurrent.ExecutionContext
 import scala.concurrent.ExecutionContext.Implicits.global
 
@@ -106,6 +106,86 @@ class TtpFeedbackLoopServiceSpec extends AnyFreeSpec with MockFactory with Scala
           .returning(TtppEnvelope(error.asLeft[TtpCancelSuccessfulResponse]))
 
         val result = service.cancelTtp(ttpCancelRequest)
+
+        result.value.futureValue shouldBe error.asLeft
+      }
+    }
+
+    "cancelTtpR2" - {
+      val ttpCancelRequestR2 = TtpCancelRequestR2(
+        identifications = NonEmptyList.of(
+          Identification(idType = IdType("NINO"), idValue = IdValue("AB123456C"))
+        ),
+        paymentPlan = TtpCancelPaymentPlanR2(
+          arrangementAgreedDate = Some(ArrangementAgreedDate(LocalDate.of(2025, 1, 1))),
+          ttpEndDate = Some(TtpEndDate(LocalDate.of(2025, 2, 1))),
+          frequency = Some(FrequencyLowercase.Monthly),
+          cancellationDate = CancellationDate(LocalDate.of(2025, 1, 15)),
+          initialPaymentDate = Some(InitialPaymentDate(LocalDate.of(2025, 1, 5))),
+          initialPaymentAmount = Some(GbpPounds.createOrThrow(100.00)),
+          debtItemCharges = NonEmptyList.of(
+            DebtItemChargeReference(
+              debtItemChargeId = DebtItemChargeId("ETMP001"),
+              chargeSource = ChargeSourceSAOnly.ETMP
+            ),
+            DebtItemChargeReference(
+              debtItemChargeId = DebtItemChargeId("CESA001"),
+              chargeSource = ChargeSourceSAOnly.CESA
+            ),
+            DebtItemChargeReference(
+              debtItemChargeId = DebtItemChargeId("ETMP002"),
+              chargeSource = ChargeSourceSAOnly.ETMP
+            )
+          )
+        ),
+        instalments = NonEmptyList.of(
+          SaOnlyInstalment(
+            InstalmentDueDate(LocalDate.of(2024, 2, 1)),
+            GbpPounds.createOrThrow(500.25)
+          )
+        ),
+        channelIdentifier = ChannelIdentifier.Advisor,
+        transitioned = Some(TransitionedIndicator(true))
+      )
+
+      val ttpCancelResponse = TtpCancelSuccessfulResponse(
+        apisCalled = List(
+          ApiStatus(
+            name = ApiName("TTP_PROXY"),
+            statusCode = ApiStatusCode(200),
+            processingDateTime = ProcessingDateTimeInstant(Instant.parse("2024-01-15T10:30:00Z")),
+            errorResponse = None
+          )
+        ),
+        processingDateTime = ProcessingDateTimeInstant(Instant.parse("2024-01-15T10:30:00Z"))
+      )
+
+      "return success response when connector returns success" in {
+        (mockConnector
+          .cancelTtpR2(_: TtpCancelRequestR2)(
+            _: ExecutionContext,
+            _: HeaderCarrier
+          ))
+          .expects(ttpCancelRequestR2, *, *)
+          .returning(TtppEnvelope(ttpCancelResponse))
+
+        val result = service.cancelTtpR2(ttpCancelRequestR2)
+
+        result.value.futureValue shouldBe ttpCancelResponse.asRight
+      }
+
+      "return error when connector returns error" in {
+        val error = ConnectorError(500, "Internal Server Error")
+
+        (mockConnector
+          .cancelTtpR2(_: TtpCancelRequestR2)(
+            _: ExecutionContext,
+            _: HeaderCarrier
+          ))
+          .expects(ttpCancelRequestR2, *, *)
+          .returning(TtppEnvelope(error.asLeft[TtpCancelSuccessfulResponse]))
+
+        val result = service.cancelTtpR2(ttpCancelRequestR2)
 
         result.value.futureValue shouldBe error.asLeft
       }

@@ -19,24 +19,24 @@ package uk.gov.hmrc.timetopayproxy.controllers
 import cats.data.NonEmptyList
 import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.client.WireMock._
-import com.github.tomakehurst.wiremock.http.RequestMethod.{ GET, POST, PUT }
-import play.api.libs.json.{ Json, Reads }
-import play.api.libs.ws.{ WSRequest, WSResponse }
+import com.github.tomakehurst.wiremock.http.RequestMethod.{GET, POST, PUT}
+import play.api.libs.json.{Json, Reads}
+import play.api.libs.ws.{WSRequest, WSResponse}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.timetopayproxy.config.FeatureSwitch
 import uk.gov.hmrc.timetopayproxy.models._
-import uk.gov.hmrc.timetopayproxy.models.affordablequotes.{ AffordableQuoteResponse, AffordableQuotesRequest }
+import uk.gov.hmrc.timetopayproxy.models.affordablequotes.{AffordableQuoteResponse, AffordableQuotesRequest}
 import uk.gov.hmrc.timetopayproxy.models.currency.GbpPounds
 import uk.gov.hmrc.timetopayproxy.models.featureSwitches.SaRelease2Enabled
 import uk.gov.hmrc.timetopayproxy.models.saonly.chargeInfoApi._
 import uk.gov.hmrc.timetopayproxy.models.saonly.common._
-import uk.gov.hmrc.timetopayproxy.models.saonly.common.apistatus.{ ApiErrorResponse, ApiName, ApiStatus, ApiStatusCode }
-import uk.gov.hmrc.timetopayproxy.models.saonly.ttpcancel.{ CancellationDate, TtpCancelPaymentPlan, TtpCancelRequest, TtpCancelSuccessfulResponse }
-import uk.gov.hmrc.timetopayproxy.models.saonly.ttpfullamend.{ TtpFullAmendRequest, TtpFullAmendSuccessfulResponse }
-import uk.gov.hmrc.timetopayproxy.models.saonly.ttpinform.{ TtpInformRequest, TtpInformRequestR2, TtpInformSuccessfulResponse }
+import uk.gov.hmrc.timetopayproxy.models.saonly.common.apistatus.{ApiErrorResponse, ApiName, ApiStatus, ApiStatusCode}
+import uk.gov.hmrc.timetopayproxy.models.saonly.ttpcancel.{CancellationDate, TtpCancelPaymentPlanR2, TtpCancelRequestR2, TtpCancelSuccessfulResponse}
+import uk.gov.hmrc.timetopayproxy.models.saonly.ttpfullamend.{TtpFullAmendRequest, TtpFullAmendSuccessfulResponse}
+import uk.gov.hmrc.timetopayproxy.models.saonly.ttpinform.{TtpInformRequestR2, TtpInformSuccessfulResponse}
 import uk.gov.hmrc.timetopayproxy.support.IntegrationBaseSpec
 
-import java.time.{ Instant, LocalDate, LocalDateTime }
+import java.time.{Instant, LocalDate, LocalDateTime}
 import scala.concurrent.ExecutionContext
 
 class TimeToPayProxyControllerEnrolmentAuthEnabledItSpec extends IntegrationBaseSpec {
@@ -600,21 +600,35 @@ class TimeToPayProxyControllerEnrolmentAuthEnabledItSpec extends IntegrationBase
     }
 
     ".cancelTtp" - {
-      val requestPayload: TtpCancelRequest =
-        TtpCancelRequest(
+      val requestPayload: TtpCancelRequestR2 =
+        TtpCancelRequestR2(
           identifications = NonEmptyList.of(
             Identification(
               idType = IdType("idtype"),
               idValue = IdValue("idvalue")
             )
           ),
-          paymentPlan = TtpCancelPaymentPlan(
-            arrangementAgreedDate = ArrangementAgreedDate(LocalDate.parse("2020-01-02")),
-            ttpEndDate = TtpEndDate(LocalDate.parse("2020-02-04")),
-            frequency = FrequencyLowercase.Weekly,
+          paymentPlan = TtpCancelPaymentPlanR2(
+            arrangementAgreedDate = Some(ArrangementAgreedDate(LocalDate.parse("2020-01-02"))),
+            ttpEndDate = Some(TtpEndDate(LocalDate.parse("2020-02-04"))),
+            frequency = Some(FrequencyLowercase.Weekly),
             cancellationDate = CancellationDate(LocalDate.parse("2020-03-05")),
             initialPaymentDate = Some(InitialPaymentDate(LocalDate.parse("2020-04-06"))),
-            initialPaymentAmount = Some(GbpPounds.createOrThrow(100.12))
+            initialPaymentAmount = Some(GbpPounds.createOrThrow(100.12)),
+            debtItemCharges = NonEmptyList.of(
+              DebtItemChargeReference(
+                debtItemChargeId = DebtItemChargeId("ETMP001"),
+                chargeSource = ChargeSourceSAOnly.ETMP
+              ),
+              DebtItemChargeReference(
+                debtItemChargeId = DebtItemChargeId("CESA001"),
+                chargeSource = ChargeSourceSAOnly.CESA
+              ),
+              DebtItemChargeReference(
+                debtItemChargeId = DebtItemChargeId("ETMP002"),
+                chargeSource = ChargeSourceSAOnly.ETMP
+              )
+            )
           ),
           instalments = NonEmptyList.of(
             SaOnlyInstalment(
