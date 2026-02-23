@@ -667,7 +667,7 @@ class TimeToPayProxyControllerItSpec extends IntegrationBaseSpec {
       }
     }
 
-    ".cancelTtp" - {
+    ".cancelTtp (SaRelease2 CancelRequest)" - {
       "should return a 200 statusCode" - {
         "when given a valid json payload" - {
           "when TimeToPay returns a successful response" in new TimeToPayProxyControllerTestBase {
@@ -681,7 +681,7 @@ class TimeToPayProxyControllerItSpec extends IntegrationBaseSpec {
             val requestForCancelPlan: WSRequest = buildRequest("/cancel")
 
             val response: WSResponse = await(
-              requestForCancelPlan.post(Json.toJson(cancelRequest))
+              requestForCancelPlan.post(Json.toJson(cancelRequestR2))
             )
 
             response.json shouldBe Json.toJson(cancelResponse)
@@ -721,7 +721,7 @@ class TimeToPayProxyControllerItSpec extends IntegrationBaseSpec {
             val requestForCancelPlan: WSRequest = buildRequest("/cancel")
 
             val response: WSResponse = await(
-              requestForCancelPlan.post(Json.toJson(cancelRequest))
+              requestForCancelPlan.post(Json.toJson(cancelRequestR2))
             )
 
             response.json shouldBe Json.toJson(errorResponse)
@@ -757,7 +757,7 @@ class TimeToPayProxyControllerItSpec extends IntegrationBaseSpec {
             val requestForCancelPlan: WSRequest = buildRequest("/cancel")
 
             val response: WSResponse = await(
-              requestForCancelPlan.post(Json.toJson(cancelRequest))
+              requestForCancelPlan.post(Json.toJson(cancelRequestR2))
             )
 
             response.json shouldBe Json.toJson(expectedTtppErrorResponse)
@@ -777,7 +777,7 @@ class TimeToPayProxyControllerItSpec extends IntegrationBaseSpec {
             val expectedTtppErrorResponse: TtppErrorResponse = TtppErrorResponse(
               statusCode = 400,
               errorMessage =
-                "Invalid TtpCancelRequest payload: Payload has a missing field or an invalid format. Field name: identifications. "
+                "Invalid TtpCancelRequestR2 payload: Payload has a missing field or an invalid format. Field name: identifications. "
             )
 
             response.json shouldBe Json.toJson(expectedTtppErrorResponse)
@@ -806,7 +806,13 @@ class TimeToPayProxyControllerItSpec extends IntegrationBaseSpec {
                 |    "frequency": "monthly",
                 |    "cancellationDate": "invalid",
                 |    "initialPaymentDate": "2025-02-01",
-                |    "initialPaymentAmount": 123.45
+                |    "initialPaymentAmount": 123.45,
+                |    "debtItemCharges": [
+                |      {
+                |        "debtItemChargeId": "K0000000000001",
+                |        "chargeSource": "CESA"
+                |      }
+                |    ]
                 |  },
                 |  "instalments": [
                 |    {
@@ -827,7 +833,7 @@ class TimeToPayProxyControllerItSpec extends IntegrationBaseSpec {
             val expectedTtppErrorResponse: TtppErrorResponse = TtppErrorResponse(
               statusCode = 400,
               errorMessage =
-                "Invalid TtpCancelRequest payload: Payload has a missing field or an invalid format. Field name: cancellationDate. Date format should be correctly provided"
+                "Invalid TtpCancelRequestR2 payload: Payload has a missing field or an invalid format. Field name: cancellationDate. Date format should be correctly provided"
             )
 
             response.json shouldBe Json.toJson(expectedTtppErrorResponse)
@@ -845,7 +851,13 @@ class TimeToPayProxyControllerItSpec extends IntegrationBaseSpec {
                   |    "planSelection": 1,
                   |    "paymentDay": 28,
                   |    "upfrontPaymentAmount": 123.45,
-                  |    "startDate": "2025-10-15"
+                  |    "startDate": "2025-10-15",
+                  |    "debtItemCharges": [
+                  |      {
+                  |        "debtItemChargeId": "K0000000000001",
+                  |        "chargeSource": "CESA"
+                  |      }
+                  |    ]
                   |  },
                   |  "channelIdentifier": "eSSTTP"
                   |}
@@ -859,7 +871,7 @@ class TimeToPayProxyControllerItSpec extends IntegrationBaseSpec {
               val expectedTtppErrorResponse: TtppErrorResponse = TtppErrorResponse(
                 statusCode = 400,
                 errorMessage =
-                  "Invalid TtpCancelRequest payload: Payload has a missing field or an invalid format. Field name: cancellationDate. "
+                  "Invalid TtpCancelRequestR2 payload: Payload has a missing field or an invalid format. Field name: cancellationDate. "
               )
 
               response.json shouldBe Json.toJson(expectedTtppErrorResponse)
@@ -883,7 +895,7 @@ class TimeToPayProxyControllerItSpec extends IntegrationBaseSpec {
               val requestForCancelPlan: WSRequest = buildRequest("/cancel")
 
               val response: WSResponse = await(
-                requestForCancelPlan.post(Json.toJson(cancelRequest))
+                requestForCancelPlan.post(Json.toJson(cancelRequestR2))
               )
 
               val expectedTtppErrorResponse: TtppErrorResponse =
@@ -912,7 +924,7 @@ class TimeToPayProxyControllerItSpec extends IntegrationBaseSpec {
                   val requestForCancelPlan: WSRequest = buildRequest("/cancel")
 
                   val response: WSResponse = await(
-                    requestForCancelPlan.post(Json.toJson(cancelRequest))
+                    requestForCancelPlan.post(Json.toJson(cancelRequestR2))
                   )
 
                   val expectedTtppErrorResponse: TtppErrorResponse =
@@ -941,7 +953,7 @@ class TimeToPayProxyControllerItSpec extends IntegrationBaseSpec {
             val requestForCancelPlan: WSRequest = buildRequest("/cancel")
 
             val response: WSResponse = await(
-              requestForCancelPlan.post(Json.toJson(cancelRequest))
+              requestForCancelPlan.post(Json.toJson(cancelRequestR2))
             )
 
             val expectedTtppErrorResponse: TtppErrorResponse =
@@ -966,7 +978,7 @@ class TimeToPayProxyControllerItSpec extends IntegrationBaseSpec {
             val requestForCancelPlan: WSRequest = buildRequest("/cancel")
 
             val response: WSResponse = await(
-              requestForCancelPlan.post(Json.toJson(cancelRequest))
+              requestForCancelPlan.post(Json.toJson(cancelRequestR2))
             )
 
             val expectedTtppErrorResponse: TtppErrorResponse =
@@ -1815,7 +1827,6 @@ class TimeToPayProxyControllerItSpec extends IntegrationBaseSpec {
       }
     }
   }
-
   trait TimeToPayProxyControllerTestBase {
     implicit def ec: ExecutionContext = app.injector.instanceOf[ExecutionContext]
     implicit val hc: HeaderCarrier = HeaderCarrier()
@@ -1956,18 +1967,32 @@ class TimeToPayProxyControllerItSpec extends IntegrationBaseSpec {
       processingDateTime = ProcessingDateTimeInstant(java.time.Instant.parse("2025-10-15T10:31:00Z"))
     )
 
-    val cancelRequest: TtpCancelRequest = TtpCancelRequest(
+    val cancelRequestR2: TtpCancelRequestR2 = TtpCancelRequestR2(
       identifications = NonEmptyList.of(
         Identification(idType = IdType("NINO"), idValue = IdValue("AA000000A")),
         Identification(idType = IdType("MTDITID"), idValue = IdValue("XAIT00000000054"))
       ),
-      paymentPlan = TtpCancelPaymentPlan(
-        arrangementAgreedDate = ArrangementAgreedDate(LocalDate.parse("2025-01-01")),
-        ttpEndDate = TtpEndDate(LocalDate.parse("2025-12-31")),
-        frequency = FrequencyLowercase.Monthly,
+      paymentPlan = TtpCancelPaymentPlanR2(
+        arrangementAgreedDate = Some(ArrangementAgreedDate(LocalDate.parse("2025-01-01"))),
+        ttpEndDate = Some(TtpEndDate(LocalDate.parse("2025-12-31"))),
+        frequency = Some(FrequencyLowercase.Monthly),
         cancellationDate = CancellationDate(LocalDate.parse("2025-10-15")),
         initialPaymentDate = Some(InitialPaymentDate(LocalDate.parse("2025-02-01"))),
-        initialPaymentAmount = Some(GbpPounds.createOrThrow(BigDecimal("123.45")))
+        initialPaymentAmount = Some(GbpPounds.createOrThrow(BigDecimal("123.45"))),
+        debtItemCharges = NonEmptyList.of(
+          DebtItemChargeReference(
+            debtItemChargeId = DebtItemChargeId("ETMP001"),
+            chargeSource = ChargeSourceSAOnly.ETMP
+          ),
+          DebtItemChargeReference(
+            debtItemChargeId = DebtItemChargeId("CESA001"),
+            chargeSource = ChargeSourceSAOnly.CESA
+          ),
+          DebtItemChargeReference(
+            debtItemChargeId = DebtItemChargeId("ETMP002"),
+            chargeSource = ChargeSourceSAOnly.ETMP
+          )
+        )
       ),
       instalments = NonEmptyList.of(
         SaOnlyInstalment(
