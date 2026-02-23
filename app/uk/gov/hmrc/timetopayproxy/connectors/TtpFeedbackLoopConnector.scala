@@ -26,8 +26,8 @@ import uk.gov.hmrc.timetopayproxy.logging.RequestAwareLogger
 import uk.gov.hmrc.timetopayproxy.models.TimeToPayError
 import uk.gov.hmrc.timetopayproxy.models.error.ProxyEnvelopeError
 import uk.gov.hmrc.timetopayproxy.models.error.TtppEnvelope.TtppEnvelope
-import uk.gov.hmrc.timetopayproxy.models.saonly.ttpcancel.{ TtpCancelInformativeError, TtpCancelRequest, TtpCancelRequestR2, TtpCancelSuccessfulResponse }
 import uk.gov.hmrc.timetopayproxy.models.saonly.ttpfullamend.{ TtpFullAmendInformativeError, TtpFullAmendRequest, TtpFullAmendSuccessfulResponse }
+import uk.gov.hmrc.timetopayproxy.models.saonly.ttpcancel.{ TtpCancelInformativeError, TtpCancelRequest, TtpCancelSuccessfulResponse }
 import uk.gov.hmrc.timetopayproxy.models.saonly.ttpinform.{ InformRequest, TtpInformInformativeError, TtpInformSuccessfulResponse }
 
 import java.util.UUID
@@ -87,26 +87,6 @@ class TtpFeedbackLoopConnector @Inject() (
       httpClient
         .post(url)
         .withBody(Json.toJson(ttppRequest))
-        .setHeader(requestHeaders: _*)
-        .execute[Either[ProxyEnvelopeError, TtpCancelSuccessfulResponse]]
-    )
-  }
-
-  def cancelTtpR2(
-    ttppRequestR2: TtpCancelRequestR2
-  )(implicit ec: ExecutionContext, hc: HeaderCarrier): TtppEnvelope[TtpCancelSuccessfulResponse] = {
-
-    implicit def httpReads: HttpReads[Either[ProxyEnvelopeError, TtpCancelSuccessfulResponse]] =
-      httpReadsBuilderForCancel.httpReads(logger, makeErrorSafeToLogInProd = _.toStringSafeToLogInProd)
-
-    val path = "/debts/time-to-pay/cancel"
-
-    val url = url"${appConfig.ttpBaseUrl + path}"
-
-    EitherT(
-      httpClient
-        .post(url)
-        .withBody(Json.toJson(ttppRequestR2))
         .setHeader(requestHeaders: _*)
         .execute[Either[ProxyEnvelopeError, TtpCancelSuccessfulResponse]]
     )

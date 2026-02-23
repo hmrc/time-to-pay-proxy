@@ -42,7 +42,7 @@ import uk.gov.hmrc.timetopayproxy.models.featureSwitches.{ EnrolmentAuthEnabled,
 import uk.gov.hmrc.timetopayproxy.models.saonly.chargeInfoApi._
 import uk.gov.hmrc.timetopayproxy.models.saonly.common._
 import uk.gov.hmrc.timetopayproxy.models.saonly.common.apistatus.{ ApiName, ApiStatus, ApiStatusCode }
-import uk.gov.hmrc.timetopayproxy.models.saonly.ttpcancel._
+import uk.gov.hmrc.timetopayproxy.models.saonly.ttpcancel.{ CancellationDate, TtpCancelPaymentPlan, TtpCancelRequest, TtpCancelSuccessfulResponse }
 import uk.gov.hmrc.timetopayproxy.models.saonly.ttpfullamend.{ TtpFullAmendRequest, TtpFullAmendSuccessfulResponse }
 import uk.gov.hmrc.timetopayproxy.models.saonly.ttpinform.{ InformRequest, TtpInformRequest, TtpInformRequestR2, TtpInformSuccessfulResponse }
 import uk.gov.hmrc.timetopayproxy.services.{ TTPEService, TTPQuoteService, TtpFeedbackLoopService }
@@ -1334,42 +1334,6 @@ class TimeToPayProxyControllerSpec extends AnyWordSpec with MockFactory {
       transitioned = Some(TransitionedIndicator(true))
     )
 
-    val ttpCancelRequestR2 = TtpCancelRequestR2(
-      identifications = NonEmptyList.of(
-        Identification(idType = IdType("NINO"), idValue = IdValue("AB123456C"))
-      ),
-      paymentPlan = TtpCancelPaymentPlanR2(
-        arrangementAgreedDate = Some(ArrangementAgreedDate(LocalDate.parse("2025-01-01"))),
-        ttpEndDate = Some(TtpEndDate(LocalDate.parse("2025-02-01"))),
-        frequency = Some(FrequencyLowercase.Monthly),
-        cancellationDate = CancellationDate(LocalDate.parse("2025-01-15")),
-        initialPaymentDate = Some(InitialPaymentDate(LocalDate.parse("2025-01-05"))),
-        initialPaymentAmount = Some(GbpPounds.createOrThrow(100.00)),
-        debtItemCharges = NonEmptyList.of(
-          DebtItemChargeReference(
-            debtItemChargeId = DebtItemChargeId("ETMP001"),
-            chargeSource = ChargeSourceSAOnly.ETMP
-          ),
-          DebtItemChargeReference(
-            debtItemChargeId = DebtItemChargeId("CESA001"),
-            chargeSource = ChargeSourceSAOnly.CESA
-          ),
-          DebtItemChargeReference(
-            debtItemChargeId = DebtItemChargeId("ETMP002"),
-            chargeSource = ChargeSourceSAOnly.ETMP
-          )
-        )
-      ),
-      instalments = NonEmptyList.of(
-        SaOnlyInstalment(
-          dueDate = InstalmentDueDate(LocalDate.parse("2025-01-31")),
-          amountDue = GbpPounds.createOrThrow(500.00)
-        )
-      ),
-      channelIdentifier = ChannelIdentifier.Advisor,
-      transitioned = Some(TransitionedIndicator(true))
-    )
-
     val ttpCancelResponse = TtpCancelSuccessfulResponse(
       apisCalled = List(
         ApiStatus(
@@ -1383,122 +1347,70 @@ class TimeToPayProxyControllerSpec extends AnyWordSpec with MockFactory {
     )
 
     "return 200" when {
-      "service returns success" when {
-        "r2 is disabled" in {
+      "service returns success" in {
 
-          (() => featureSwitch.enrolmentAuthEnabled).expects().returning(EnrolmentAuthEnabled(true))
+        (() => featureSwitch.enrolmentAuthEnabled).expects().returning(EnrolmentAuthEnabled(true))
 
-          (() => featureSwitch.saRelease2Enabled).expects().returning(SaRelease2Enabled(false))
+        (() => featureSwitch.cancelEndpointEnabled)
+          .expects()
+          .returning(true)
 
-          (() => featureSwitch.cancelEndpointEnabled)
-            .expects()
-            .returning(true)
+        (authConnector
+          .authorise[Unit](_: Predicate, _: Retrieval[Unit])(
+            _: HeaderCarrier,
+            _: ExecutionContext
+          ))
+          .expects(where { (e: Predicate, r: Retrieval[Unit], _: HeaderCarrier, _: ExecutionContext) =>
+            e shouldBe ReadTimeToPayProxy.toEnrolment
+            r shouldBe EmptyRetrieval
+            true
+          })
+          .returning(Future.successful(()))
 
-          (authConnector
-            .authorise[Unit](_: Predicate, _: Retrieval[Unit])(
-              _: HeaderCarrier,
-              _: ExecutionContext
-            ))
-            .expects(where { (e: Predicate, r: Retrieval[Unit], _: HeaderCarrier, _: ExecutionContext) =>
-              e shouldBe ReadTimeToPayProxy.toEnrolment
-              r shouldBe EmptyRetrieval
-              true
-            })
-            .returning(Future.successful(()))
+        (ttpFeedbackLoopService
+          .cancelTtp(_: TtpCancelRequest)(
+            _: ExecutionContext,
+            _: HeaderCarrier
+          ))
+          .expects(ttpCancelRequest, *, *)
+          .returning(TtppEnvelope(ttpCancelResponse))
 
-          (ttpFeedbackLoopService
-            .cancelTtp(_: TtpCancelRequest)(
-              _: ExecutionContext,
-              _: HeaderCarrier
-            ))
-            .expects(ttpCancelRequest, *, *)
-            .returning(TtppEnvelope(ttpCancelResponse))
+        val fakeRequest: FakeRequest[JsValue] =
+          FakeRequest("POST", "/individuals/time-to-pay-proxy/cancel")
+            .withHeaders(CONTENT_TYPE -> MimeTypes.JSON)
+            .withBody(Json.toJson[TtpCancelRequest](ttpCancelRequest))
 
-          val fakeRequest: FakeRequest[JsValue] =
-            FakeRequest("POST", "/individuals/time-to-pay-proxy/cancel")
-              .withHeaders(CONTENT_TYPE -> MimeTypes.JSON)
-              .withBody(Json.toJson[TtpCancelRequest](ttpCancelRequest))
+        val response: Future[Result] = controller.cancelTtp()(fakeRequest)
 
-          val response: Future[Result] = controller.cancelTtp()(fakeRequest)
-
-          status(response) shouldBe Status.OK
-          contentAsJson(response) shouldBe Json.toJson[TtpCancelSuccessfulResponse](
-            ttpCancelResponse
-          )
-
-        }
-
-        "r2 is enabled" in {
-
-          (() => featureSwitch.enrolmentAuthEnabled).expects().returning(EnrolmentAuthEnabled(true))
-
-          (() => featureSwitch.saRelease2Enabled).expects().returning(SaRelease2Enabled(true))
-
-          (() => featureSwitch.cancelEndpointEnabled)
-            .expects()
-            .returning(true)
-
-          (authConnector
-            .authorise[Unit](_: Predicate, _: Retrieval[Unit])(
-              _: HeaderCarrier,
-              _: ExecutionContext
-            ))
-            .expects(where { (e: Predicate, r: Retrieval[Unit], _: HeaderCarrier, _: ExecutionContext) =>
-              e shouldBe ReadTimeToPayProxy.toEnrolment
-              r shouldBe EmptyRetrieval
-              true
-            })
-            .returning(Future.successful(()))
-
-          (ttpFeedbackLoopService
-            .cancelTtpR2(_: TtpCancelRequestR2)(
-              _: ExecutionContext,
-              _: HeaderCarrier
-            ))
-            .expects(ttpCancelRequestR2, *, *)
-            .returning(TtppEnvelope(ttpCancelResponse))
-
-          val fakeRequest: FakeRequest[JsValue] =
-            FakeRequest("POST", "/individuals/time-to-pay-proxy/cancel")
-              .withHeaders(CONTENT_TYPE -> MimeTypes.JSON)
-              .withBody(Json.toJson[TtpCancelRequestR2](ttpCancelRequestR2))
-
-          val response: Future[Result] = controller.cancelTtp()(fakeRequest)
-
-          status(response) shouldBe Status.OK
-          contentAsJson(response) shouldBe Json.toJson[TtpCancelSuccessfulResponse](
-            ttpCancelResponse
-          )
-
-        }
+        status(response) shouldBe Status.OK
+        contentAsJson(response) shouldBe Json.toJson[TtpCancelSuccessfulResponse](
+          ttpCancelResponse
+        )
       }
     }
 
     "return 400" when {
-      "request body is in wrong format" when {
-        "r2 is disabled" in {
+      "request body is in wrong format" in {
 
-          (() => featureSwitch.enrolmentAuthEnabled).expects().returning(EnrolmentAuthEnabled(true))
+        (() => featureSwitch.enrolmentAuthEnabled).expects().returning(EnrolmentAuthEnabled(true))
 
-          (() => featureSwitch.saRelease2Enabled).expects().returning(SaRelease2Enabled(false))
+        (() => featureSwitch.cancelEndpointEnabled)
+          .expects()
+          .returning(true)
 
-          (() => featureSwitch.cancelEndpointEnabled)
-            .expects()
-            .returning(true)
+        (authConnector
+          .authorise[Unit](_: Predicate, _: Retrieval[Unit])(
+            _: HeaderCarrier,
+            _: ExecutionContext
+          ))
+          .expects(where { (e: Predicate, r: Retrieval[Unit], _: HeaderCarrier, _: ExecutionContext) =>
+            e shouldBe ReadTimeToPayProxy.toEnrolment
+            r shouldBe EmptyRetrieval
+            true
+          })
+          .returning(Future.successful(()))
 
-          (authConnector
-            .authorise[Unit](_: Predicate, _: Retrieval[Unit])(
-              _: HeaderCarrier,
-              _: ExecutionContext
-            ))
-            .expects(where { (e: Predicate, r: Retrieval[Unit], _: HeaderCarrier, _: ExecutionContext) =>
-              e shouldBe ReadTimeToPayProxy.toEnrolment
-              r shouldBe EmptyRetrieval
-              true
-            })
-            .returning(Future.successful(()))
-
-          val wrongFormattedBody = """{
+        val wrongFormattedBody = """{
           "identifications": [],
           "paymentPlan": {
             "arrangementAgreedDate": "invalid-date",
@@ -1507,151 +1419,59 @@ class TimeToPayProxyControllerSpec extends AnyWordSpec with MockFactory {
           }
         }"""
 
-          val fakeRequest: FakeRequest[JsValue] =
-            FakeRequest("POST", "/individuals/time-to-pay-proxy/cancel")
-              .withHeaders(CONTENT_TYPE -> MimeTypes.JSON)
-              .withBody(Json.parse(wrongFormattedBody))
+        val fakeRequest: FakeRequest[JsValue] =
+          FakeRequest("POST", "/individuals/time-to-pay-proxy/cancel")
+            .withHeaders(CONTENT_TYPE -> MimeTypes.JSON)
+            .withBody(Json.parse(wrongFormattedBody))
 
-          val response: Future[Result] = controller.cancelTtp()(fakeRequest)
+        val response: Future[Result] = controller.cancelTtp()(fakeRequest)
 
-          status(response) shouldBe Status.BAD_REQUEST
-        }
-
-        "r2 is enabled" in {
-
-          (() => featureSwitch.enrolmentAuthEnabled).expects().returning(EnrolmentAuthEnabled(true))
-
-          (() => featureSwitch.saRelease2Enabled).expects().returning(SaRelease2Enabled(true))
-
-          (() => featureSwitch.cancelEndpointEnabled)
-            .expects()
-            .returning(true)
-
-          (authConnector
-            .authorise[Unit](_: Predicate, _: Retrieval[Unit])(
-              _: HeaderCarrier,
-              _: ExecutionContext
-            ))
-            .expects(where { (e: Predicate, r: Retrieval[Unit], _: HeaderCarrier, _: ExecutionContext) =>
-              e shouldBe ReadTimeToPayProxy.toEnrolment
-              r shouldBe EmptyRetrieval
-              true
-            })
-            .returning(Future.successful(()))
-
-          val wrongFormattedBody = """{
-          "identifications": [],
-          "paymentPlan": {
-            "arrangementAgreedDate": "invalid-date",
-            "ttpEndDate": "2025-02-01",
-            "frequency": "monthly"
-          }
-        }"""
-
-          val fakeRequest: FakeRequest[JsValue] =
-            FakeRequest("POST", "/individuals/time-to-pay-proxy/cancel")
-              .withHeaders(CONTENT_TYPE -> MimeTypes.JSON)
-              .withBody(Json.parse(wrongFormattedBody))
-
-          val response: Future[Result] = controller.cancelTtp()(fakeRequest)
-
-          status(response) shouldBe Status.BAD_REQUEST
-
-        }
+        status(response) shouldBe Status.BAD_REQUEST
       }
     }
 
     "return 500" when {
-      "service returns failure" when {
-        "r2 is disabled" in {
-          (() => featureSwitch.enrolmentAuthEnabled).expects().returning(EnrolmentAuthEnabled(true))
+      "service returns failure" in {
 
-          (() => featureSwitch.saRelease2Enabled).expects().returning(SaRelease2Enabled(false))
+        (() => featureSwitch.enrolmentAuthEnabled).expects().returning(EnrolmentAuthEnabled(true))
 
-          (() => featureSwitch.cancelEndpointEnabled)
-            .expects()
-            .returning(true)
+        (() => featureSwitch.cancelEndpointEnabled)
+          .expects()
+          .returning(true)
 
-          (authConnector
-            .authorise[Unit](_: Predicate, _: Retrieval[Unit])(
-              _: HeaderCarrier,
-              _: ExecutionContext
-            ))
-            .expects(where { (e: Predicate, r: Retrieval[Unit], _: HeaderCarrier, _: ExecutionContext) =>
-              e shouldBe ReadTimeToPayProxy.toEnrolment
-              r shouldBe EmptyRetrieval
-              true
-            })
-            .returning(Future.successful(()))
+        (authConnector
+          .authorise[Unit](_: Predicate, _: Retrieval[Unit])(
+            _: HeaderCarrier,
+            _: ExecutionContext
+          ))
+          .expects(where { (e: Predicate, r: Retrieval[Unit], _: HeaderCarrier, _: ExecutionContext) =>
+            e shouldBe ReadTimeToPayProxy.toEnrolment
+            r shouldBe EmptyRetrieval
+            true
+          })
+          .returning(Future.successful(()))
 
-          val errorFromTtpService = ConnectorError(500, "Internal Service Error")
-          (ttpFeedbackLoopService
-            .cancelTtp(_: TtpCancelRequest)(
-              _: ExecutionContext,
-              _: HeaderCarrier
-            ))
-            .expects(ttpCancelRequest, *, *)
-            .returning(
-              TtppEnvelope(errorFromTtpService.asLeft[TtpCancelSuccessfulResponse])
-            )
+        val errorFromTtpService = ConnectorError(500, "Internal Service Error")
+        (ttpFeedbackLoopService
+          .cancelTtp(_: TtpCancelRequest)(
+            _: ExecutionContext,
+            _: HeaderCarrier
+          ))
+          .expects(ttpCancelRequest, *, *)
+          .returning(
+            TtppEnvelope(errorFromTtpService.asLeft[TtpCancelSuccessfulResponse])
+          )
 
-          val fakeRequest: FakeRequest[JsValue] =
-            FakeRequest("POST", "/individuals/time-to-pay-proxy/cancel")
-              .withHeaders(CONTENT_TYPE -> MimeTypes.JSON)
-              .withBody(Json.toJson[TtpCancelRequest](ttpCancelRequest))
+        val fakeRequest: FakeRequest[JsValue] =
+          FakeRequest("POST", "/individuals/time-to-pay-proxy/cancel")
+            .withHeaders(CONTENT_TYPE -> MimeTypes.JSON)
+            .withBody(Json.toJson[TtpCancelRequest](ttpCancelRequest))
 
-          val response: Future[Result] = controller.cancelTtp()(fakeRequest)
+        val response: Future[Result] = controller.cancelTtp()(fakeRequest)
 
-          status(response) shouldBe Status.INTERNAL_SERVER_ERROR
-          (contentAsJson(response) \ "errorMessage")
-            .as[String] shouldBe "Internal Service Error"
-        }
-
-        "r2 is enabled" in {
-
-          (() => featureSwitch.enrolmentAuthEnabled).expects().returning(EnrolmentAuthEnabled(true))
-
-          (() => featureSwitch.saRelease2Enabled).expects().returning(SaRelease2Enabled(true))
-
-          (() => featureSwitch.cancelEndpointEnabled)
-            .expects()
-            .returning(true)
-
-          (authConnector
-            .authorise[Unit](_: Predicate, _: Retrieval[Unit])(
-              _: HeaderCarrier,
-              _: ExecutionContext
-            ))
-            .expects(where { (e: Predicate, r: Retrieval[Unit], _: HeaderCarrier, _: ExecutionContext) =>
-              e shouldBe ReadTimeToPayProxy.toEnrolment
-              r shouldBe EmptyRetrieval
-              true
-            })
-            .returning(Future.successful(()))
-
-          val errorFromTtpService = ConnectorError(500, "Internal Service Error")
-          (ttpFeedbackLoopService
-            .cancelTtpR2(_: TtpCancelRequestR2)(
-              _: ExecutionContext,
-              _: HeaderCarrier
-            ))
-            .expects(ttpCancelRequestR2, *, *)
-            .returning(
-              TtppEnvelope(errorFromTtpService.asLeft[TtpCancelSuccessfulResponse])
-            )
-
-          val fakeRequest: FakeRequest[JsValue] =
-            FakeRequest("POST", "/individuals/time-to-pay-proxy/cancel")
-              .withHeaders(CONTENT_TYPE -> MimeTypes.JSON)
-              .withBody(Json.toJson[TtpCancelRequestR2](ttpCancelRequestR2))
-
-          val response: Future[Result] = controller.cancelTtp()(fakeRequest)
-
-          status(response) shouldBe Status.INTERNAL_SERVER_ERROR
-          (contentAsJson(response) \ "errorMessage")
-            .as[String] shouldBe "Internal Service Error"
-
-        }
+        status(response) shouldBe Status.INTERNAL_SERVER_ERROR
+        (contentAsJson(response) \ "errorMessage")
+          .as[String] shouldBe "Internal Service Error"
       }
     }
 

@@ -27,7 +27,7 @@ import uk.gov.hmrc.timetopayproxy.models.affordablequotes.AffordableQuotesReques
 import uk.gov.hmrc.timetopayproxy.models.error.TtppEnvelope.TtppEnvelope
 import uk.gov.hmrc.timetopayproxy.models.error.{ TtppEnvelope, TtppErrorResponse, ValidationError }
 import uk.gov.hmrc.timetopayproxy.models.saonly.chargeInfoApi.{ ChargeInfoRequest, ChargeInfoResponse }
-import uk.gov.hmrc.timetopayproxy.models.saonly.ttpcancel.{ TtpCancelRequest, TtpCancelRequestR2 }
+import uk.gov.hmrc.timetopayproxy.models.saonly.ttpcancel.TtpCancelRequest
 import uk.gov.hmrc.timetopayproxy.models.saonly.ttpfullamend.TtpFullAmendRequest
 import uk.gov.hmrc.timetopayproxy.models.saonly.ttpinform.InformRequest
 import uk.gov.hmrc.timetopayproxy.services.{ TTPEService, TTPQuoteService, TtpFeedbackLoopService }
@@ -120,20 +120,11 @@ class TimeToPayProxyController @Inject() (
 
   def cancelTtp: Action[JsValue] = readAuthoriseAction.async(parse.json) { implicit request =>
     if (featureSwitch.cancelEndpointEnabled) {
-      if (featureSwitch.saRelease2Enabled.enabled) {
-        withJsonBody[TtpCancelRequestR2] { deserialisedRequest: TtpCancelRequestR2 =>
-          ttpFeedbackLoopService
-            .cancelTtpR2(deserialisedRequest)
-            .leftMap(ttppError => ttppError.toWriteableProxyError)
-            .fold(e => e.toErrorResult, r => Results.Ok(Json.toJson(r)))
-        }
-      } else {
-        withJsonBody[TtpCancelRequest] { deserialisedRequest: TtpCancelRequest =>
-          ttpFeedbackLoopService
-            .cancelTtp(deserialisedRequest)
-            .leftMap(ttppError => ttppError.toWriteableProxyError)
-            .fold(e => e.toErrorResult, r => Results.Ok(Json.toJson(r)))
-        }
+      withJsonBody[TtpCancelRequest] { deserialisedRequest: TtpCancelRequest =>
+        ttpFeedbackLoopService
+          .cancelTtp(deserialisedRequest)
+          .leftMap(ttppError => ttppError.toWriteableProxyError)
+          .fold(e => e.toErrorResult, r => Results.Ok(Json.toJson(r)))
       }
     } else {
       Future.successful(
