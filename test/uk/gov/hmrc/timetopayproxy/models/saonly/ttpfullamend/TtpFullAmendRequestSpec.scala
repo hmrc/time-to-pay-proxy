@@ -32,6 +32,7 @@ import uk.gov.hmrc.timetopayproxy.testutils.schematestutils.Validators
 import java.time.LocalDate
 
 final class TtpFullAmendRequestSpec extends AnyFreeSpec with MockFactory {
+  val featureSwitch: FeatureSwitch = mock[FeatureSwitch]
 
   "FullAmendRequestR1" - {
     object TestData {
@@ -144,14 +145,8 @@ final class TtpFullAmendRequestSpec extends AnyFreeSpec with MockFactory {
 
     }
 
-    def r2DisabledFs = {
-      val fs = mock[FeatureSwitch]
-      (() => fs.saRelease2Enabled).expects().returning(SaRelease2Enabled(false)).anyNumberOfTimes()
-      fs
-    }
-
     "implicit JSON writer (data going to time-to-pay)" - {
-      def writerToTtp: Writes[FullAmendRequest] = FullAmendRequest.format(r2DisabledFs).writes(_)
+      def writerToTtp: Writes[FullAmendRequest] = FullAmendRequest.format(featureSwitch).writes(_)
 
       "when all the optional fields are fully populated" - {
         def json: JsValue = TestData.WithOnlySomes.json
@@ -187,13 +182,15 @@ final class TtpFullAmendRequestSpec extends AnyFreeSpec with MockFactory {
     }
 
     "implicit JSON reader (data coming from our clients)" - {
-      def readerFromClients: Reads[FullAmendRequest] = FullAmendRequest.format(r2DisabledFs).reads(_)
+      def readerFromClients: Reads[FullAmendRequest] = FullAmendRequest.format(featureSwitch).reads(_)
 
       "when all the optional fields are fully populated" - {
         def json: JsValue = TestData.WithOnlySomes.json
         def obj: TtpFullAmendRequest = TestData.WithOnlySomes.obj
 
         "reads the JSON correctly" in {
+          (() => featureSwitch.saRelease2Enabled).expects().returning(SaRelease2Enabled(false)).once()
+
           readerFromClients.reads(json) shouldBe JsSuccess(obj)
         }
 
@@ -209,6 +206,8 @@ final class TtpFullAmendRequestSpec extends AnyFreeSpec with MockFactory {
         def obj: TtpFullAmendRequest = TestData.With0SomeOnEachPath.obj
 
         "reads the JSON correctly" in {
+          (() => featureSwitch.saRelease2Enabled).expects().returning(SaRelease2Enabled(false)).once()
+
           readerFromClients.reads(json) shouldBe JsSuccess(obj)
         }
 
@@ -413,14 +412,8 @@ final class TtpFullAmendRequestSpec extends AnyFreeSpec with MockFactory {
 
     }
 
-    def r2EnabledFs = {
-      val fs = mock[FeatureSwitch]
-      (() => fs.saRelease2Enabled).expects().returning(SaRelease2Enabled(true)).anyNumberOfTimes()
-      fs
-    }
-
     "implicit JSON writer (data going to time-to-pay)" - {
-      def writerToTtp: Writes[FullAmendRequest] = FullAmendRequest.format(r2EnabledFs).writes(_)
+      def writerToTtp: Writes[FullAmendRequest] = FullAmendRequest.format(featureSwitch).writes(_)
 
       "when all the optional fields are fully populated" - {
         def json: JsValue = TestData.WithOnlySomes.json
@@ -456,13 +449,15 @@ final class TtpFullAmendRequestSpec extends AnyFreeSpec with MockFactory {
     }
 
     "implicit JSON reader (data coming from our clients)" - {
-      def readerFromClients: Reads[FullAmendRequest] = FullAmendRequest.format(r2EnabledFs).reads(_)
+      def readerFromClients: Reads[FullAmendRequest] = FullAmendRequest.format(featureSwitch).reads(_)
 
       "when all the optional fields are fully populated" - {
         def json: JsValue = TestData.WithOnlySomes.json
         def obj: TtpFullAmendRequestR2 = TestData.WithOnlySomes.obj
 
         "reads the JSON correctly" in {
+          (() => featureSwitch.saRelease2Enabled).expects().returning(SaRelease2Enabled(true)).once()
+
           readerFromClients.reads(json) shouldBe JsSuccess(obj)
         }
 
@@ -478,6 +473,8 @@ final class TtpFullAmendRequestSpec extends AnyFreeSpec with MockFactory {
         def obj: TtpFullAmendRequestR2 = TestData.With0SomeOnEachPath.obj
 
         "reads the JSON correctly" in {
+          (() => featureSwitch.saRelease2Enabled).expects().returning(SaRelease2Enabled(true)).once()
+
           readerFromClients.reads(json) shouldBe JsSuccess(obj)
         }
 
