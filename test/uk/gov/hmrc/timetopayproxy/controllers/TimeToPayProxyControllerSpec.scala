@@ -2199,7 +2199,7 @@ class TimeToPayProxyControllerSpec extends AnyWordSpec with MockFactory {
           status(response) shouldBe Status.BAD_REQUEST
         }
 
-        "saRelease2Enabled is true & required new fields are not provided" in {
+        "saRelease2Enabled is true & an R1 request is provided" in {
           (() => featureSwitch.enrolmentAuthEnabled).expects().returning(EnrolmentAuthEnabled(true))
 
           (() => featureSwitch.saRelease2Enabled).expects().returning(SaRelease2Enabled(true))
@@ -2226,8 +2226,7 @@ class TimeToPayProxyControllerSpec extends AnyWordSpec with MockFactory {
                |  "paymentPlan": {
                |    "arrangementAgreedDate": "invalid-date",
                |    "ttpEndDate": "2025-02-01",
-               |    "frequency": "monthly",
-               |    "newPaymentPlan": []
+               |    "frequency": "monthly"
                |  }
                |}""".stripMargin
 
