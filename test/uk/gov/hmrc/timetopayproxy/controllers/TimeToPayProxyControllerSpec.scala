@@ -2144,7 +2144,7 @@ class TimeToPayProxyControllerSpec extends AnyWordSpec with MockFactory {
           val fakeRequest: FakeRequest[JsValue] =
             FakeRequest("POST", "/individuals/time-to-pay-proxy/full-amend")
               .withHeaders(CONTENT_TYPE -> MimeTypes.JSON)
-              .withBody(Json.toJson(ttpFullAmendRequestR2)(FullAmendRequest.format(featureSwitch).writes(_)))
+              .withBody(Json.toJson[TtpFullAmendRequestR2](ttpFullAmendRequestR2))
 
           val response: Future[Result] = controller.fullAmendTtp()(fakeRequest)
 
@@ -2220,20 +2220,10 @@ class TimeToPayProxyControllerSpec extends AnyWordSpec with MockFactory {
             })
             .returning(Future.successful(()))
 
-          val wrongFormattedBody =
-            """|{
-               |  "identifications": [],
-               |  "paymentPlan": {
-               |    "arrangementAgreedDate": "invalid-date",
-               |    "ttpEndDate": "2025-02-01",
-               |    "frequency": "monthly"
-               |  }
-               |}""".stripMargin
-
           val fakeRequest: FakeRequest[JsValue] =
             FakeRequest("POST", "/individuals/time-to-pay-proxy/full-amend")
               .withHeaders(CONTENT_TYPE -> MimeTypes.JSON)
-              .withBody(Json.parse(wrongFormattedBody))
+              .withBody(Json.toJson[TtpFullAmendRequest](ttpFullAmendRequest))
 
           val response: Future[Result] = controller.fullAmendTtp()(fakeRequest)
 
