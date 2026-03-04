@@ -628,7 +628,7 @@ final class TtpFeedbackLoopConnectorSpec
         processingDateTime = ProcessingDateTimeInstant(Instant.parse("2025-01-01T12:00:00Z"))
       )
 
-      "saRelease2Enabled is false" should {
+      "R2 is disabled, using the R1 request" should {
         val fullAmendRequest: TtpFullAmendRequest = TtpFullAmendRequest(
           identifications = NonEmptyList.of(
             Identification(idType = IdType("NINO"), idValue = IdValue("AB123456C"))
@@ -650,8 +650,6 @@ final class TtpFeedbackLoopConnectorSpec
           channelIdentifier = ChannelIdentifier.Advisor,
           transitioned = TransitionedIndicator(true)
         )
-
-        (() => featureSwitch.saRelease2Enabled).expects().returns(SaRelease2Enabled(false)).anyNumberOfTimes()
 
         "return a successful response" in new Setup() {
           stubPostWithResponseBodyEnsuringRequest(
@@ -747,7 +745,7 @@ final class TtpFeedbackLoopConnectorSpec
         }
       }
 
-      "saRelease2Enabled is true" should {
+      "R2 is enabled, using the R2 request" should {
         val fullAmendRequestR2: TtpFullAmendRequestR2 = TtpFullAmendRequestR2(
           identifications = NonEmptyList.of(
             Identification(idType = IdType("NINO"), idValue = IdValue("AB123456C"))
@@ -790,8 +788,6 @@ final class TtpFeedbackLoopConnectorSpec
           channelIdentifier = ChannelIdentifier.SelfService,
           transitioned = TransitionedIndicator(true)
         )
-
-        (() => featureSwitch.saRelease2Enabled).expects().returns(SaRelease2Enabled(true)).anyNumberOfTimes()
 
         "return a successful response" in new Setup() {
           stubPostWithResponseBodyEnsuringRequest(
