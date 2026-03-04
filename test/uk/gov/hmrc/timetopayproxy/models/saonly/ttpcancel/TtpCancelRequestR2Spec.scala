@@ -270,6 +270,55 @@ class TtpCancelRequestR2Spec extends AnyFreeSpec {
 
     }
 
+    "implicit JSON writer (data forwarded to TTP)" - {
+      def writerForClients: Writes[TtpCancelRequestR2] = implicitly[Writes[TtpCancelRequestR2]]
+
+      "when all the optional fields are fully populated" - {
+        def json: JsValue = TestData.WithAllFieldsPopulated.json
+        def obj: TtpCancelRequestR2 = TestData.WithAllFieldsPopulated.obj
+
+        "writes the json correctly" in {
+          writerForClients.writes(obj) shouldBe json
+        }
+
+        "was tested against JSON compatible with our schema" in {
+          val schema = Proposed.openApiRequestSchema
+
+          schema.validateAndGetErrors(json) shouldBe Nil
+        }
+      }
+
+      "when none of the optional fields are populated" - {
+        def json: JsValue = TestData.WithAllOptionalFieldsAsNone.json
+        def obj: TtpCancelRequestR2 = TestData.WithAllOptionalFieldsAsNone.obj
+
+        "writes the object correctly" in {
+          writerForClients.writes(obj) shouldBe json
+        }
+
+        "was tested against JSON compatible with our schema" in {
+          val schema = Proposed.openApiRequestSchema
+
+          schema.validateAndGetErrors(json) shouldBe Nil
+        }
+      }
+
+      "when all the optional fields are fully populated AND all the currency amounts are invalid" - {
+        def json: JsValue = TestData.WithOnlySomesAndAllCurrencyAmountsInvalid.json
+        "was tested against JSON incompatible with our schema" in {
+          val schema = Proposed.openApiRequestSchema
+
+          schema.validateAndGetErrors(json) shouldBe List(
+            """instalments.0.amountDue: Value '200.349' is not a multiple of '0.01'. (code: 1019)
+              |From: instalments.0.<items>.<#/components/schemas/CancelInstalment>.amountDue.<multipleOf>""".stripMargin,
+            """paymentPlan.initialPaymentAmount: Value '100.129' is not a multiple of '0.01'. (code: 1019)
+              |From: paymentPlan.<#/components/schemas/CancelPaymentPlan>.initialPaymentAmount.<multipleOf>""".stripMargin
+          )
+        }
+      }
+
+    }
+
   }
 
 }
