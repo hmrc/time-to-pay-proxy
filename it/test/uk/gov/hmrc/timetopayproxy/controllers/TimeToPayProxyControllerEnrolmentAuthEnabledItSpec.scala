@@ -32,7 +32,7 @@ import uk.gov.hmrc.timetopayproxy.models.saonly.chargeInfoApi._
 import uk.gov.hmrc.timetopayproxy.models.saonly.common._
 import uk.gov.hmrc.timetopayproxy.models.saonly.common.apistatus.{ ApiErrorResponse, ApiName, ApiStatus, ApiStatusCode }
 import uk.gov.hmrc.timetopayproxy.models.saonly.ttpcancel.{ CancellationDate, TtpCancelPaymentPlanR2, TtpCancelRequestR2, TtpCancelSuccessfulResponse }
-import uk.gov.hmrc.timetopayproxy.models.saonly.ttpfullamend.{ TtpFullAmendRequest, TtpFullAmendSuccessfulResponse }
+import uk.gov.hmrc.timetopayproxy.models.saonly.ttpfullamend._
 import uk.gov.hmrc.timetopayproxy.models.saonly.ttpinform.{ TtpInformRequestR2, TtpInformSuccessfulResponse }
 import uk.gov.hmrc.timetopayproxy.support.IntegrationBaseSpec
 
@@ -772,21 +772,42 @@ class TimeToPayProxyControllerEnrolmentAuthEnabledItSpec extends IntegrationBase
     }
 
     ".fullAmendTtp" - {
-      val requestPayload: TtpFullAmendRequest =
-        TtpFullAmendRequest(
+      val requestPayload: TtpFullAmendRequestR2 =
+        TtpFullAmendRequestR2(
           identifications = NonEmptyList.of(
             Identification(
               idType = IdType("idtype"),
               idValue = IdValue("idvalue")
             )
           ),
-          paymentPlan = SaOnlyPaymentPlan(
+          originalPaymentPlan = OriginalPaymentPlan(
             arrangementAgreedDate = ArrangementAgreedDate(LocalDate.parse("2020-01-02")),
             ttpEndDate = TtpEndDate(LocalDate.parse("2020-02-04")),
             frequency = FrequencyLowercase.Weekly,
             initialPaymentDate = Some(InitialPaymentDate(LocalDate.parse("2020-04-06"))),
             initialPaymentAmount = Some(GbpPounds.createOrThrow(100.12)),
-            ddiReference = Some(DdiReference("TestDDIReference"))
+            ddiReference = Some(DdiReference("TestDDIReference")),
+            debtItemCharges = NonEmptyList.of(
+              DebtItemChargeReference(
+                DebtItemChargeId("One"),
+                ChargeSourceSAOnly.CESA
+              )
+            )
+          ),
+          newPaymentPlan = NewPaymentPlan(
+            arrangementAgreedDate = ArrangementAgreedDate(LocalDate.parse("2020-01-02")),
+            ttpEndDate = TtpEndDate(LocalDate.parse("2020-02-04")),
+            frequency = FrequencyLowercase.Weekly,
+            ddiReference = Some(DdiReference("TestDDIReference")),
+            initialPaymentDate = Some(InitialPaymentDate(LocalDate.parse("2020-04-06"))),
+            initialPaymentAmount = Some(GbpPounds.createOrThrow(100.12)),
+            debtItemCharges = NonEmptyList.of(
+              NewDebtItemChargeReference(
+                DebtItemChargeId("One"),
+                ChargeSourceSAOnly.CESA,
+                ChargeAmendment.Removed
+              )
+            )
           ),
           instalments = NonEmptyList.of(
             SaOnlyInstalment(

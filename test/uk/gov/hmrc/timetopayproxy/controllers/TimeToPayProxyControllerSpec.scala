@@ -43,7 +43,7 @@ import uk.gov.hmrc.timetopayproxy.models.saonly.chargeInfoApi._
 import uk.gov.hmrc.timetopayproxy.models.saonly.common._
 import uk.gov.hmrc.timetopayproxy.models.saonly.common.apistatus.{ ApiName, ApiStatus, ApiStatusCode }
 import uk.gov.hmrc.timetopayproxy.models.saonly.ttpcancel._
-import uk.gov.hmrc.timetopayproxy.models.saonly.ttpfullamend.{ TtpFullAmendRequest, TtpFullAmendSuccessfulResponse }
+import uk.gov.hmrc.timetopayproxy.models.saonly.ttpfullamend._
 import uk.gov.hmrc.timetopayproxy.models.saonly.ttpinform.{ InformRequest, TtpInformRequest, TtpInformRequestR2, TtpInformSuccessfulResponse }
 import uk.gov.hmrc.timetopayproxy.services.{ TTPEService, TTPQuoteService, TtpFeedbackLoopService }
 
@@ -2020,6 +2020,42 @@ class TimeToPayProxyControllerSpec extends AnyWordSpec with MockFactory {
       transitioned = TransitionedIndicator(true)
     )
 
+    val ttpFullAmendRequestR2: TtpFullAmendRequestR2 = TtpFullAmendRequestR2(
+      ttpFullAmendRequest.identifications,
+      OriginalPaymentPlan(
+        ttpFullAmendRequest.paymentPlan.arrangementAgreedDate,
+        ttpFullAmendRequest.paymentPlan.ttpEndDate,
+        ttpFullAmendRequest.paymentPlan.frequency,
+        ttpFullAmendRequest.paymentPlan.initialPaymentDate,
+        ttpFullAmendRequest.paymentPlan.initialPaymentAmount,
+        ttpFullAmendRequest.paymentPlan.ddiReference,
+        debtItemCharges = NonEmptyList.of(
+          DebtItemChargeReference(
+            DebtItemChargeId("One"),
+            ChargeSourceSAOnly.CESA
+          )
+        )
+      ),
+      newPaymentPlan = NewPaymentPlan(
+        ttpFullAmendRequest.paymentPlan.arrangementAgreedDate,
+        ttpFullAmendRequest.paymentPlan.ttpEndDate,
+        ttpFullAmendRequest.paymentPlan.frequency,
+        ttpFullAmendRequest.paymentPlan.ddiReference,
+        ttpFullAmendRequest.paymentPlan.initialPaymentDate,
+        ttpFullAmendRequest.paymentPlan.initialPaymentAmount,
+        debtItemCharges = NonEmptyList.of(
+          NewDebtItemChargeReference(
+            DebtItemChargeId("One"),
+            ChargeSourceSAOnly.CESA,
+            ChargeAmendment.Removed
+          )
+        )
+      ),
+      ttpFullAmendRequest.instalments,
+      ttpFullAmendRequest.channelIdentifier,
+      ttpFullAmendRequest.transitioned
+    )
+
     val ttpFullAmendResponse: TtpFullAmendSuccessfulResponse = TtpFullAmendSuccessfulResponse(
       apisCalled = List(
         ApiStatus(
@@ -2033,91 +2069,172 @@ class TimeToPayProxyControllerSpec extends AnyWordSpec with MockFactory {
     )
 
     "return 200" when {
-      "service returns success" in {
+      "service returns success" when {
+        "saRelease2Enabled is false" in {
+          (() => featureSwitch.enrolmentAuthEnabled).expects().returning(EnrolmentAuthEnabled(true))
 
-        (() => featureSwitch.enrolmentAuthEnabled).expects().returning(EnrolmentAuthEnabled(true))
+          (() => featureSwitch.saRelease2Enabled).expects().returning(SaRelease2Enabled(false))
 
-        (() => featureSwitch.fullAmendEndpointEnabled)
-          .expects()
-          .returning(true)
+          (() => featureSwitch.fullAmendEndpointEnabled)
+            .expects()
+            .returning(true)
 
-        (authConnector
-          .authorise[Unit](_: Predicate, _: Retrieval[Unit])(
-            _: HeaderCarrier,
-            _: ExecutionContext
-          ))
-          .expects(where { (e: Predicate, r: Retrieval[Unit], _: HeaderCarrier, _: ExecutionContext) =>
-            e shouldBe ReadTimeToPayProxy.toEnrolment
-            r shouldBe EmptyRetrieval
-            true
-          })
-          .returning(Future.successful(()))
+          (authConnector
+            .authorise[Unit](_: Predicate, _: Retrieval[Unit])(
+              _: HeaderCarrier,
+              _: ExecutionContext
+            ))
+            .expects(where { (e: Predicate, r: Retrieval[Unit], _: HeaderCarrier, _: ExecutionContext) =>
+              e shouldBe ReadTimeToPayProxy.toEnrolment
+              r shouldBe EmptyRetrieval
+              true
+            })
+            .returning(Future.successful(()))
 
-        (ttpFeedbackLoopService
-          .fullAmendTtp(_: TtpFullAmendRequest)(
-            _: ExecutionContext,
-            _: HeaderCarrier
-          ))
-          .expects(ttpFullAmendRequest, *, *)
-          .returning(TtppEnvelope(ttpFullAmendResponse))
+          (ttpFeedbackLoopService
+            .fullAmendTtp(_: TtpFullAmendRequest)(
+              _: ExecutionContext,
+              _: HeaderCarrier
+            ))
+            .expects(ttpFullAmendRequest, *, *)
+            .returning(TtppEnvelope(ttpFullAmendResponse))
 
-        val fakeRequest: FakeRequest[JsValue] =
-          FakeRequest("POST", "/individuals/time-to-pay-proxy/full-amend")
-            .withHeaders(CONTENT_TYPE -> MimeTypes.JSON)
-            .withBody(Json.toJson[TtpFullAmendRequest](ttpFullAmendRequest))
+          val fakeRequest: FakeRequest[JsValue] =
+            FakeRequest("POST", "/individuals/time-to-pay-proxy/full-amend")
+              .withHeaders(CONTENT_TYPE -> MimeTypes.JSON)
+              .withBody(Json.toJson[TtpFullAmendRequest](ttpFullAmendRequest))
 
-        val response: Future[Result] = controller.fullAmendTtp()(fakeRequest)
+          val response: Future[Result] = controller.fullAmendTtp()(fakeRequest)
 
-        status(response) shouldBe Status.OK
-        contentAsJson(response) shouldBe Json.toJson[TtpFullAmendSuccessfulResponse](
-          ttpFullAmendResponse
-        )
+          status(response) shouldBe Status.OK
+          contentAsJson(response) shouldBe Json.toJson[TtpFullAmendSuccessfulResponse](
+            ttpFullAmendResponse
+          )
+        }
+
+        "saRelease2Enabled is true" in {
+          (() => featureSwitch.enrolmentAuthEnabled).expects().returning(EnrolmentAuthEnabled(true))
+
+          (() => featureSwitch.saRelease2Enabled).expects().returning(SaRelease2Enabled(true))
+
+          (() => featureSwitch.fullAmendEndpointEnabled)
+            .expects()
+            .returning(true)
+
+          (authConnector
+            .authorise[Unit](_: Predicate, _: Retrieval[Unit])(
+              _: HeaderCarrier,
+              _: ExecutionContext
+            ))
+            .expects(where { (e: Predicate, r: Retrieval[Unit], _: HeaderCarrier, _: ExecutionContext) =>
+              e shouldBe ReadTimeToPayProxy.toEnrolment
+              r shouldBe EmptyRetrieval
+              true
+            })
+            .returning(Future.successful(()))
+
+          (ttpFeedbackLoopService
+            .fullAmendTtp(_: FullAmendRequest)(
+              _: ExecutionContext,
+              _: HeaderCarrier
+            ))
+            .expects(ttpFullAmendRequestR2, *, *)
+            .returning(TtppEnvelope(ttpFullAmendResponse))
+
+          val fakeRequest: FakeRequest[JsValue] =
+            FakeRequest("POST", "/individuals/time-to-pay-proxy/full-amend")
+              .withHeaders(CONTENT_TYPE -> MimeTypes.JSON)
+              .withBody(Json.toJson[TtpFullAmendRequestR2](ttpFullAmendRequestR2))
+
+          val response: Future[Result] = controller.fullAmendTtp()(fakeRequest)
+
+          status(response) shouldBe Status.OK
+          contentAsJson(response) shouldBe Json.toJson[TtpFullAmendSuccessfulResponse](
+            ttpFullAmendResponse
+          )
+        }
       }
     }
 
     "return 400" when {
-      "request body is in wrong format" in {
+      "request body is in wrong format" when {
+        "saRelease2Enabled is false" in {
+          (() => featureSwitch.enrolmentAuthEnabled).expects().returning(EnrolmentAuthEnabled(true))
 
-        (() => featureSwitch.enrolmentAuthEnabled).expects().returning(EnrolmentAuthEnabled(true))
+          (() => featureSwitch.saRelease2Enabled).expects().returning(SaRelease2Enabled(false))
 
-        (() => featureSwitch.fullAmendEndpointEnabled)
-          .expects()
-          .returning(true)
+          (() => featureSwitch.fullAmendEndpointEnabled)
+            .expects()
+            .returning(true)
 
-        (authConnector
-          .authorise[Unit](_: Predicate, _: Retrieval[Unit])(
-            _: HeaderCarrier,
-            _: ExecutionContext
-          ))
-          .expects(where { (e: Predicate, r: Retrieval[Unit], _: HeaderCarrier, _: ExecutionContext) =>
-            e shouldBe ReadTimeToPayProxy.toEnrolment
-            r shouldBe EmptyRetrieval
-            true
-          })
-          .returning(Future.successful(()))
+          (authConnector
+            .authorise[Unit](_: Predicate, _: Retrieval[Unit])(
+              _: HeaderCarrier,
+              _: ExecutionContext
+            ))
+            .expects(where { (e: Predicate, r: Retrieval[Unit], _: HeaderCarrier, _: ExecutionContext) =>
+              e shouldBe ReadTimeToPayProxy.toEnrolment
+              r shouldBe EmptyRetrieval
+              true
+            })
+            .returning(Future.successful(()))
 
-        val wrongFormattedBody = """{
-          "identifications": [],
-          "paymentPlan": {
-            "arrangementAgreedDate": "invalid-date",
-            "ttpEndDate": "2025-02-01",
-            "frequency": "monthly"
-          }
-        }"""
+          val wrongFormattedBody =
+            """|{
+               |  "identifications": [],
+               |  "paymentPlan": {
+               |    "arrangementAgreedDate": "invalid-date",
+               |    "ttpEndDate": "2025-02-01",
+               |    "frequency": "monthly"
+               |  }
+               |}""".stripMargin
 
-        val fakeRequest: FakeRequest[JsValue] =
-          FakeRequest("POST", "/individuals/time-to-pay-proxy/full-amend") // PLay
-            .withHeaders(CONTENT_TYPE -> MimeTypes.JSON)
-            .withBody(Json.parse(wrongFormattedBody))
+          val fakeRequest: FakeRequest[JsValue] =
+            FakeRequest("POST", "/individuals/time-to-pay-proxy/full-amend")
+              .withHeaders(CONTENT_TYPE -> MimeTypes.JSON)
+              .withBody(Json.parse(wrongFormattedBody))
 
-        val response: Future[Result] = controller.fullAmendTtp()(fakeRequest)
+          val response: Future[Result] = controller.fullAmendTtp()(fakeRequest)
 
-        status(response) shouldBe Status.BAD_REQUEST
+          status(response) shouldBe Status.BAD_REQUEST
+        }
+
+        "saRelease2Enabled is true & an R1 request is provided" in {
+          (() => featureSwitch.enrolmentAuthEnabled).expects().returning(EnrolmentAuthEnabled(true))
+
+          (() => featureSwitch.saRelease2Enabled).expects().returning(SaRelease2Enabled(true))
+
+          (() => featureSwitch.fullAmendEndpointEnabled)
+            .expects()
+            .returning(true)
+
+          (authConnector
+            .authorise[Unit](_: Predicate, _: Retrieval[Unit])(
+              _: HeaderCarrier,
+              _: ExecutionContext
+            ))
+            .expects(where { (e: Predicate, r: Retrieval[Unit], _: HeaderCarrier, _: ExecutionContext) =>
+              e shouldBe ReadTimeToPayProxy.toEnrolment
+              r shouldBe EmptyRetrieval
+              true
+            })
+            .returning(Future.successful(()))
+
+          val fakeRequest: FakeRequest[JsValue] =
+            FakeRequest("POST", "/individuals/time-to-pay-proxy/full-amend")
+              .withHeaders(CONTENT_TYPE -> MimeTypes.JSON)
+              .withBody(Json.toJson[TtpFullAmendRequest](ttpFullAmendRequest))
+
+          val response: Future[Result] = controller.fullAmendTtp()(fakeRequest)
+
+          status(response) shouldBe Status.BAD_REQUEST
+        }
       }
     }
 
     "return 500" when {
       "service returns failure" in {
+        (() => featureSwitch.saRelease2Enabled).expects().returning(SaRelease2Enabled(false))
 
         (() => featureSwitch.enrolmentAuthEnabled).expects().returning(EnrolmentAuthEnabled(true))
 

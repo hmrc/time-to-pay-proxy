@@ -36,7 +36,7 @@ import uk.gov.hmrc.timetopayproxy.models.featureSwitches.{ InternalAuthEnabled, 
 import uk.gov.hmrc.timetopayproxy.models.saonly.common._
 import uk.gov.hmrc.timetopayproxy.models.saonly.common.apistatus.{ ApiName, ApiStatus, ApiStatusCode }
 import uk.gov.hmrc.timetopayproxy.models.saonly.ttpcancel._
-import uk.gov.hmrc.timetopayproxy.models.saonly.ttpfullamend.{ TtpFullAmendInformativeError, TtpFullAmendInternalError, TtpFullAmendRequest, TtpFullAmendSuccessfulResponse }
+import uk.gov.hmrc.timetopayproxy.models.saonly.ttpfullamend.{ ChargeAmendment, NewDebtItemChargeReference, NewPaymentPlan, OriginalPaymentPlan, TtpFullAmendInformativeError, TtpFullAmendInternalError, TtpFullAmendRequest, TtpFullAmendRequestR2, TtpFullAmendSuccessfulResponse }
 import uk.gov.hmrc.timetopayproxy.models.saonly.ttpinform._
 import uk.gov.hmrc.timetopayproxy.support.WireMockUtils
 
@@ -597,29 +597,7 @@ final class TtpFeedbackLoopConnectorSpec
       }
     }
 
-    ".fullAmendTtp" should {
-      val fullAmendRequest: TtpFullAmendRequest = TtpFullAmendRequest(
-        identifications = NonEmptyList.of(
-          Identification(idType = IdType("NINO"), idValue = IdValue("AB123456C"))
-        ),
-        paymentPlan = SaOnlyPaymentPlan(
-          arrangementAgreedDate = ArrangementAgreedDate(LocalDate.parse("2025-01-01")),
-          ttpEndDate = TtpEndDate(LocalDate.parse("2025-02-01")),
-          frequency = FrequencyLowercase.Monthly,
-          initialPaymentDate = Some(InitialPaymentDate(LocalDate.parse("2025-01-05"))),
-          initialPaymentAmount = Some(GbpPounds.createOrThrow(100.00)),
-          ddiReference = Some(DdiReference("TestDDIReference"))
-        ),
-        instalments = NonEmptyList.of(
-          SaOnlyInstalment(
-            dueDate = InstalmentDueDate(LocalDate.parse("2025-01-31")),
-            amountDue = GbpPounds.createOrThrow(500.00)
-          )
-        ),
-        channelIdentifier = ChannelIdentifier.Advisor,
-        transitioned = TransitionedIndicator(true)
-      )
-
+    ".fullAmendTtp" when {
       val fullAmendResponse: TtpFullAmendSuccessfulResponse = TtpFullAmendSuccessfulResponse(
         apisCalled = List(
           ApiStatus(
@@ -650,47 +628,30 @@ final class TtpFeedbackLoopConnectorSpec
         processingDateTime = ProcessingDateTimeInstant(Instant.parse("2025-01-01T12:00:00Z"))
       )
 
-      "return a successful response" in new Setup() {
-        stubPostWithResponseBodyEnsuringRequest(
-          "/debts/time-to-pay/full-amend",
-          Json.toJson(fullAmendRequest).toString(),
-          200,
-          Json.toJson(fullAmendResponse).toString()
+      "R2 is disabled, using the R1 request" should {
+        val fullAmendRequest: TtpFullAmendRequest = TtpFullAmendRequest(
+          identifications = NonEmptyList.of(
+            Identification(idType = IdType("NINO"), idValue = IdValue("AB123456C"))
+          ),
+          paymentPlan = SaOnlyPaymentPlan(
+            arrangementAgreedDate = ArrangementAgreedDate(LocalDate.parse("2025-01-01")),
+            ttpEndDate = TtpEndDate(LocalDate.parse("2025-02-01")),
+            frequency = FrequencyLowercase.Monthly,
+            initialPaymentDate = Some(InitialPaymentDate(LocalDate.parse("2025-01-05"))),
+            initialPaymentAmount = Some(GbpPounds.createOrThrow(100.00)),
+            ddiReference = Some(DdiReference("TestDDIReference"))
+          ),
+          instalments = NonEmptyList.of(
+            SaOnlyInstalment(
+              dueDate = InstalmentDueDate(LocalDate.parse("2025-01-31")),
+              amountDue = GbpPounds.createOrThrow(500.00)
+            )
+          ),
+          channelIdentifier = ChannelIdentifier.Advisor,
+          transitioned = TransitionedIndicator(true)
         )
 
-        val result: TtppEnvelope[TtpFullAmendSuccessfulResponse] = connector.fullAmendTtp(fullAmendRequest)
-
-        result.value.futureValue shouldBe Right(fullAmendResponse)
-      }
-
-      "parse an error response from an upstream service" in new Setup() {
-        stubPostWithResponseBodyEnsuringRequest(
-          "/debts/time-to-pay/full-amend",
-          Json.toJson(fullAmendRequest).toString(),
-          400,
-          """{"failures": [{"code": "400", "reason": "Invalid request body"}]}"""
-        )
-
-        val result: TtppEnvelope[TtpFullAmendSuccessfulResponse] = connector.fullAmendTtp(fullAmendRequest)
-
-        result.value.futureValue shouldBe Left(ConnectorError(400, "Invalid request body"))
-      }
-
-      "handle 500 responses" in new Setup() {
-        stubPostWithResponseBodyEnsuringRequest(
-          "/debts/time-to-pay/full-amend",
-          Json.toJson(fullAmendRequest).toString(),
-          500,
-          Json.toJson(fullAmendInformativeError).toString()
-        )
-
-        val result: TtppEnvelope[TtpFullAmendSuccessfulResponse] = connector.fullAmendTtp(fullAmendRequest)
-
-        result.value.futureValue shouldBe Left(fullAmendInformativeError)
-      }
-
-      "using Internal Auth" should {
-        "return a successful response" in new Setup(internalAuthEnabled = true) {
+        "return a successful response" in new Setup() {
           stubPostWithResponseBodyEnsuringRequest(
             "/debts/time-to-pay/full-amend",
             Json.toJson(fullAmendRequest).toString(),
@@ -703,20 +664,7 @@ final class TtpFeedbackLoopConnectorSpec
           result.value.futureValue shouldBe Right(fullAmendResponse)
         }
 
-        "return an unauthorized response from an upstream service" in new Setup(internalAuthEnabled = true) {
-          stubPostWithResponseBodyEnsuringRequest(
-            "/debts/time-to-pay/full-amend",
-            Json.toJson(fullAmendRequest).toString(),
-            401,
-            """{"failures": [{"code": "401", "reason": "Unauthorized"}]}"""
-          )
-
-          val result: TtppEnvelope[TtpFullAmendSuccessfulResponse] = connector.fullAmendTtp(fullAmendRequest)
-
-          result.value.futureValue shouldBe Left(ConnectorError(401, "Unauthorized"))
-        }
-
-        "parse an error response from an upstream service" in new Setup(internalAuthEnabled = true) {
+        "parse an error response from an upstream service" in new Setup() {
           stubPostWithResponseBodyEnsuringRequest(
             "/debts/time-to-pay/full-amend",
             Json.toJson(fullAmendRequest).toString(),
@@ -729,7 +677,7 @@ final class TtpFeedbackLoopConnectorSpec
           result.value.futureValue shouldBe Left(ConnectorError(400, "Invalid request body"))
         }
 
-        "handle 500 responses" in new Setup(internalAuthEnabled = true) {
+        "handle 500 responses" in new Setup() {
           stubPostWithResponseBodyEnsuringRequest(
             "/debts/time-to-pay/full-amend",
             Json.toJson(fullAmendRequest).toString(),
@@ -740,6 +688,198 @@ final class TtpFeedbackLoopConnectorSpec
           val result: TtppEnvelope[TtpFullAmendSuccessfulResponse] = connector.fullAmendTtp(fullAmendRequest)
 
           result.value.futureValue shouldBe Left(fullAmendInformativeError)
+        }
+
+        "using Internal Auth" should {
+          "return a successful response" in new Setup(internalAuthEnabled = true) {
+            stubPostWithResponseBodyEnsuringRequest(
+              "/debts/time-to-pay/full-amend",
+              Json.toJson(fullAmendRequest).toString(),
+              200,
+              Json.toJson(fullAmendResponse).toString()
+            )
+
+            val result: TtppEnvelope[TtpFullAmendSuccessfulResponse] = connector.fullAmendTtp(fullAmendRequest)
+
+            result.value.futureValue shouldBe Right(fullAmendResponse)
+          }
+
+          "return an unauthorized response from an upstream service" in new Setup(internalAuthEnabled = true) {
+            stubPostWithResponseBodyEnsuringRequest(
+              "/debts/time-to-pay/full-amend",
+              Json.toJson(fullAmendRequest).toString(),
+              401,
+              """{"failures": [{"code": "401", "reason": "Unauthorized"}]}"""
+            )
+
+            val result: TtppEnvelope[TtpFullAmendSuccessfulResponse] = connector.fullAmendTtp(fullAmendRequest)
+
+            result.value.futureValue shouldBe Left(ConnectorError(401, "Unauthorized"))
+          }
+
+          "parse an error response from an upstream service" in new Setup(internalAuthEnabled = true) {
+            stubPostWithResponseBodyEnsuringRequest(
+              "/debts/time-to-pay/full-amend",
+              Json.toJson(fullAmendRequest).toString(),
+              400,
+              """{"failures": [{"code": "400", "reason": "Invalid request body"}]}"""
+            )
+
+            val result: TtppEnvelope[TtpFullAmendSuccessfulResponse] = connector.fullAmendTtp(fullAmendRequest)
+
+            result.value.futureValue shouldBe Left(ConnectorError(400, "Invalid request body"))
+          }
+
+          "handle 500 responses" in new Setup(internalAuthEnabled = true) {
+            stubPostWithResponseBodyEnsuringRequest(
+              "/debts/time-to-pay/full-amend",
+              Json.toJson(fullAmendRequest).toString(),
+              500,
+              Json.toJson(fullAmendInformativeError).toString()
+            )
+
+            val result: TtppEnvelope[TtpFullAmendSuccessfulResponse] = connector.fullAmendTtp(fullAmendRequest)
+
+            result.value.futureValue shouldBe Left(fullAmendInformativeError)
+          }
+        }
+      }
+
+      "R2 is enabled, using the R2 request" should {
+        val fullAmendRequestR2: TtpFullAmendRequestR2 = TtpFullAmendRequestR2(
+          identifications = NonEmptyList.of(
+            Identification(idType = IdType("NINO"), idValue = IdValue("AB123456C"))
+          ),
+          originalPaymentPlan = OriginalPaymentPlan(
+            ArrangementAgreedDate(LocalDate.parse("2025-01-01")),
+            TtpEndDate(LocalDate.parse("2025-02-01")),
+            FrequencyLowercase.Monthly,
+            Some(InitialPaymentDate(LocalDate.parse("2025-01-05"))),
+            Some(GbpPounds.createOrThrow(100.00)),
+            Some(DdiReference("TestDDIReference")),
+            debtItemCharges = NonEmptyList.of(
+              DebtItemChargeReference(
+                DebtItemChargeId("One"),
+                ChargeSourceSAOnly.CESA
+              )
+            )
+          ),
+          newPaymentPlan = NewPaymentPlan(
+            ArrangementAgreedDate(LocalDate.parse("2025-01-01")),
+            TtpEndDate(LocalDate.parse("2025-02-01")),
+            FrequencyLowercase.Monthly,
+            Some(DdiReference("TestDDIReference")),
+            Some(InitialPaymentDate(LocalDate.parse("2025-01-05"))),
+            Some(GbpPounds.createOrThrow(100.00)),
+            debtItemCharges = NonEmptyList.of(
+              NewDebtItemChargeReference(
+                DebtItemChargeId("One"),
+                ChargeSourceSAOnly.CESA,
+                ChargeAmendment.Removed
+              )
+            )
+          ),
+          instalments = NonEmptyList.of(
+            SaOnlyInstalment(
+              dueDate = InstalmentDueDate(LocalDate.parse("2020-05-07")),
+              amountDue = GbpPounds.createOrThrow(200.34)
+            )
+          ),
+          channelIdentifier = ChannelIdentifier.SelfService,
+          transitioned = TransitionedIndicator(true)
+        )
+
+        "return a successful response" in new Setup() {
+          stubPostWithResponseBodyEnsuringRequest(
+            "/debts/time-to-pay/full-amend",
+            Json.toJson(fullAmendRequestR2).toString(),
+            200,
+            Json.toJson(fullAmendResponse).toString()
+          )
+
+          val result: TtppEnvelope[TtpFullAmendSuccessfulResponse] = connector.fullAmendTtp(fullAmendRequestR2)
+
+          result.value.futureValue shouldBe Right(fullAmendResponse)
+        }
+
+        "parse an error response from an upstream service" in new Setup() {
+          stubPostWithResponseBodyEnsuringRequest(
+            "/debts/time-to-pay/full-amend",
+            Json.toJson(fullAmendRequestR2).toString(),
+            400,
+            """{"failures": [{"code": "400", "reason": "Invalid request body"}]}"""
+          )
+
+          val result: TtppEnvelope[TtpFullAmendSuccessfulResponse] = connector.fullAmendTtp(fullAmendRequestR2)
+
+          result.value.futureValue shouldBe Left(ConnectorError(400, "Invalid request body"))
+        }
+
+        "handle 500 responses" in new Setup() {
+          stubPostWithResponseBodyEnsuringRequest(
+            "/debts/time-to-pay/full-amend",
+            Json.toJson(fullAmendRequestR2).toString(),
+            500,
+            Json.toJson(fullAmendInformativeError).toString()
+          )
+
+          val result: TtppEnvelope[TtpFullAmendSuccessfulResponse] = connector.fullAmendTtp(fullAmendRequestR2)
+
+          result.value.futureValue shouldBe Left(fullAmendInformativeError)
+        }
+
+        "using Internal Auth" should {
+          "return a successful response" in new Setup(internalAuthEnabled = true) {
+            stubPostWithResponseBodyEnsuringRequest(
+              "/debts/time-to-pay/full-amend",
+              Json.toJson(fullAmendRequestR2).toString(),
+              200,
+              Json.toJson(fullAmendResponse).toString()
+            )
+
+            val result: TtppEnvelope[TtpFullAmendSuccessfulResponse] = connector.fullAmendTtp(fullAmendRequestR2)
+
+            result.value.futureValue shouldBe Right(fullAmendResponse)
+          }
+
+          "return an unauthorized response from an upstream service" in new Setup(internalAuthEnabled = true) {
+            stubPostWithResponseBodyEnsuringRequest(
+              "/debts/time-to-pay/full-amend",
+              Json.toJson(fullAmendRequestR2).toString(),
+              401,
+              """{"failures": [{"code": "401", "reason": "Unauthorized"}]}"""
+            )
+
+            val result: TtppEnvelope[TtpFullAmendSuccessfulResponse] = connector.fullAmendTtp(fullAmendRequestR2)
+
+            result.value.futureValue shouldBe Left(ConnectorError(401, "Unauthorized"))
+          }
+
+          "parse an error response from an upstream service" in new Setup(internalAuthEnabled = true) {
+            stubPostWithResponseBodyEnsuringRequest(
+              "/debts/time-to-pay/full-amend",
+              Json.toJson(fullAmendRequestR2).toString(),
+              400,
+              """{"failures": [{"code": "400", "reason": "Invalid request body"}]}"""
+            )
+
+            val result: TtppEnvelope[TtpFullAmendSuccessfulResponse] = connector.fullAmendTtp(fullAmendRequestR2)
+
+            result.value.futureValue shouldBe Left(ConnectorError(400, "Invalid request body"))
+          }
+
+          "handle 500 responses" in new Setup(internalAuthEnabled = true) {
+            stubPostWithResponseBodyEnsuringRequest(
+              "/debts/time-to-pay/full-amend",
+              Json.toJson(fullAmendRequestR2).toString(),
+              500,
+              Json.toJson(fullAmendInformativeError).toString()
+            )
+
+            val result: TtppEnvelope[TtpFullAmendSuccessfulResponse] = connector.fullAmendTtp(fullAmendRequestR2)
+
+            result.value.futureValue shouldBe Left(fullAmendInformativeError)
+          }
         }
       }
     }

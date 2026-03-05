@@ -31,7 +31,7 @@ import uk.gov.hmrc.timetopayproxy.models.saonly.chargeInfoApi._
 import uk.gov.hmrc.timetopayproxy.models.saonly.common._
 import uk.gov.hmrc.timetopayproxy.models.saonly.common.apistatus._
 import uk.gov.hmrc.timetopayproxy.models.saonly.ttpcancel._
-import uk.gov.hmrc.timetopayproxy.models.saonly.ttpfullamend.{ TtpFullAmendInformativeError, TtpFullAmendInternalError, TtpFullAmendRequest, TtpFullAmendSuccessfulResponse }
+import uk.gov.hmrc.timetopayproxy.models.saonly.ttpfullamend.{ ChargeAmendment, NewDebtItemChargeReference, NewPaymentPlan, OriginalPaymentPlan, TtpFullAmendInformativeError, TtpFullAmendInternalError, TtpFullAmendRequest, TtpFullAmendRequestR2, TtpFullAmendSuccessfulResponse }
 import uk.gov.hmrc.timetopayproxy.models.saonly.ttpinform._
 import uk.gov.hmrc.timetopayproxy.support.IntegrationBaseSpec
 import uk.gov.hmrc.timetopayproxy.testutils.TestOnlyJsonFormats._
@@ -1268,6 +1268,7 @@ class TimeToPayProxyControllerItSpec extends IntegrationBaseSpec {
     }
 
     ".fullAmendTtp" - {
+      implicit val r2RequestFormat: OFormat[TtpFullAmendRequest] = TtpFullAmendRequest.format
       "should return a 200 statusCode" - {
         "when given a valid json payload" - {
           "when TimeToPay returns a successful response" in new TimeToPayProxyControllerTestBase {
@@ -1376,7 +1377,7 @@ class TimeToPayProxyControllerItSpec extends IntegrationBaseSpec {
             val expectedTtppErrorResponse: TtppErrorResponse = TtppErrorResponse(
               statusCode = 400,
               errorMessage =
-                "Invalid TtpFullAmendRequest payload: Payload has a missing field or an invalid format. Field name: identifications. "
+                "Invalid FullAmendRequest payload: Payload has a missing field or an invalid format. Field name: identifications. "
             )
 
             response.json shouldBe Json.toJson(expectedTtppErrorResponse)
@@ -1388,33 +1389,63 @@ class TimeToPayProxyControllerItSpec extends IntegrationBaseSpec {
             val requestForFullAmend: WSRequest = buildRequest("/full-amend")
 
             val invalidRequestBody: JsValue = Json.parse(
-              """{
+              """
+                |{
                 |  "identifications": [
                 |    {
-                |      "idType": "UTR",
-                |      "idValue": "id value 1"
+                |      "idType": "NINO",
+                |      "idValue": "AA000000A"
                 |    },
                 |    {
-                |      "idType": "NINO",
-                |      "idValue": "id value 2"
+                |      "idType": "MTDITID",
+                |      "idValue": "XAIT00000000054"
+                |    },
+                |    {
+                |      "idType": "UTR",
+                |      "idValue": "1234567890"
                 |    }
                 |  ],
+                |  "originalPaymentPlan": {
+                |    "arrangementAgreedDate": "invalid date",
+                |    "ttpEndDate": "2025-02-01",
+                |    "frequency": "monthly",
+                |    "initialPaymentDate": "2025-05-05",
+                |    "initialPaymentAmount": 150,
+                |    "ddiReference": "DD123456789",
+                |    "debtItemCharges": [
+                |      {
+                |        "debtItemChargeId": "One",
+                |        "chargeSource":"CESA"
+                |      }
+                |    ]
+                |  },
+                |  "newPaymentPlan": {
+                |   "arrangementAgreedDate": "2090-06-08",
+                |   "ttpEndDate": "2025-02-01",
+                |   "frequency": "monthly",
+                |   "ddiReference": "DD123456789",
+                |   "initialPaymentDate": "2025-05-05",
+                |   "initialPaymentAmount": 150,
+                |   "debtItemCharges": [
+                |     {
+                |       "debtItemChargeId": "One",
+                |       "chargeSource": "CESA",
+                |       "chargeAmendment": "removed"
+                |     }
+                |   ]
+                |  },
                 |  "instalments": [
                 |    {
-                |      "dueDate": "2025-05-01",
-                |      "amountDue": 840.72
+                |      "dueDate": "2025-06-01",
+                |      "amountDue": 300
+                |    },
+                |    {
+                |      "dueDate": "2025-06-01",
+                |      "amountDue": 300
                 |    }
                 |  ],
-                |  "paymentPlan": {
-                |    "arrangementAgreedDate": "date invalid",
-                |    "ttpEndDate": "2025-03-22",
-                |    "initialPaymentDate": "2025-05-22",
-                |    "initialPaymentAmount": 40.7,
-                |    "frequency": "monthly",
-                |    "ddiReference": "ddi ref"
-                |  },
-                |  "channelIdentifier": "selfService",
-                |  "transitioned": false
+                |  "channelIdentifier": "advisor",
+                |  "transitioned":true
                 |}
                 |""".stripMargin
             )
@@ -1426,7 +1457,7 @@ class TimeToPayProxyControllerItSpec extends IntegrationBaseSpec {
             val expectedTtppErrorResponse: TtppErrorResponse = TtppErrorResponse(
               statusCode = 400,
               errorMessage =
-                "Invalid TtpFullAmendRequest payload: Payload has a missing field or an invalid format. Field name: arrangementAgreedDate. Date format should be correctly provided"
+                "Invalid FullAmendRequest payload: Payload has a missing field or an invalid format. Field name: arrangementAgreedDate. Date format should be correctly provided"
             )
 
             response.json shouldBe Json.toJson(expectedTtppErrorResponse)
@@ -1439,17 +1470,49 @@ class TimeToPayProxyControllerItSpec extends IntegrationBaseSpec {
               val requestForFullAmend: WSRequest = buildRequest("/full-amend")
 
               val invalidRequestBody: JsValue = Json.parse(
-                """{
-                  |  "paymentPlan": {
-                  |    "arrangementAgreedDate": "2025-05-01",
-                  |    "ttpEndDate": "2025-03-22",
-                  |    "initialPaymentDate": "2025-05-22",
-                  |    "initialPaymentAmount": 40.7,
+                """
+                  |{
+                  |  "originalPaymentPlan": {
+                  |    "arrangementAgreedDate": "invalid date",
+                  |    "ttpEndDate": "2025-02-01",
                   |    "frequency": "monthly",
-                  |    "ddiReference": "ddi ref"
+                  |    "initialPaymentDate": "2025-05-05",
+                  |    "initialPaymentAmount": 150,
+                  |    "ddiReference": "DD123456789",
+                  |    "debtItemCharges": [
+                  |      {
+                  |        "debtItemChargeId": "One",
+                  |        "chargeSource":"CESA"
+                  |      }
+                  |    ]
                   |  },
-                  |  "channelIdentifier": "selfService",
-                  |  "transitioned": false
+                  |  "newPaymentPlan": {
+                  |   "arrangementAgreedDate": "2090-06-08",
+                  |   "ttpEndDate": "2025-02-01",
+                  |   "frequency": "monthly",
+                  |   "ddiReference": "DD123456789",
+                  |   "initialPaymentDate": "2025-05-05",
+                  |   "initialPaymentAmount": 150,
+                  |   "debtItemCharges": [
+                  |     {
+                  |       "debtItemChargeId": "One",
+                  |       "chargeSource": "CESA",
+                  |       "chargeAmendment": "removed"
+                  |     }
+                  |   ]
+                  |  },
+                  |  "instalments": [
+                  |    {
+                  |      "dueDate": "2025-06-01",
+                  |      "amountDue": 300
+                  |    },
+                  |    {
+                  |      "dueDate": "2025-06-01",
+                  |      "amountDue": 300
+                  |    }
+                  |  ],
+                  |  "channelIdentifier": "advisor",
+                  |  "transitioned":true
                   |}
                   |""".stripMargin
               )
@@ -1461,39 +1524,60 @@ class TimeToPayProxyControllerItSpec extends IntegrationBaseSpec {
               val expectedTtppErrorResponse: TtppErrorResponse = TtppErrorResponse(
                 statusCode = 400,
                 errorMessage =
-                  "Invalid TtpFullAmendRequest payload: Payload has a missing field or an invalid format. Field name: identifications. "
+                  "Invalid FullAmendRequest payload: Payload has a missing field or an invalid format. Field name: identifications. "
               )
 
               response.json shouldBe Json.toJson(expectedTtppErrorResponse)
               response.status shouldBe 400
             }
 
-            "when 'instalments' is missing" in new TimeToPayProxyControllerTestBase {
-
+            "when 'originalPaymentPlan' is missing" in new TimeToPayProxyControllerTestBase {
               val requestForFullAmend: WSRequest = buildRequest("/full-amend")
 
               val invalidRequestBody: JsValue = Json.parse(
-                """{
+                """
+                  |{
                   |  "identifications": [
                   |    {
-                  |      "idType": "id type 1",
-                  |      "idValue": "id value 1"
+                  |      "idType": "NINO",
+                  |      "idValue": "AA000000A"
                   |    },
                   |    {
-                  |      "idType": "id type 2",
-                  |      "idValue": "id value 2"
+                  |      "idType": "MTDITID",
+                  |      "idValue": "XAIT00000000054"
+                  |    },
+                  |    {
+                  |      "idType": "UTR",
+                  |      "idValue": "1234567890"
                   |    }
                   |  ],
-                  |  "paymentPlan": {
-                  |    "arrangementAgreedDate": "2025-05-01",
-                  |    "ttpEndDate": "2025-03-22",
-                  |    "initialPaymentDate": "2025-05-22",
-                  |    "initialPaymentAmount": 40.7,
-                  |    "frequency": "monthly",
-                  |    "ddiReference": "ddi ref"
+                  |  "newPaymentPlan": {
+                  |   "arrangementAgreedDate": "2090-06-08",
+                  |   "ttpEndDate": "2025-02-01",
+                  |   "frequency": "monthly",
+                  |   "ddiReference": "DD123456789",
+                  |   "initialPaymentDate": "2025-05-05",
+                  |   "initialPaymentAmount": 150,
+                  |   "debtItemCharges": [
+                  |     {
+                  |       "debtItemChargeId": "One",
+                  |       "chargeSource": "CESA",
+                  |       "chargeAmendment": "removed"
+                  |     }
+                  |   ]
                   |  },
-                  |  "channelIdentifier": "selfService",
-                  |  "transitioned": false
+                  |  "instalments": [
+                  |    {
+                  |      "dueDate": "2025-06-01",
+                  |      "amountDue": 300
+                  |    },
+                  |    {
+                  |      "dueDate": "2025-06-01",
+                  |      "amountDue": 300
+                  |    }
+                  |  ],
+                  |  "channelIdentifier": "advisor",
+                  |  "transitioned":true
                   |}
                   |""".stripMargin
               )
@@ -1505,7 +1589,71 @@ class TimeToPayProxyControllerItSpec extends IntegrationBaseSpec {
               val expectedTtppErrorResponse: TtppErrorResponse = TtppErrorResponse(
                 statusCode = 400,
                 errorMessage =
-                  "Invalid TtpFullAmendRequest payload: Payload has a missing field or an invalid format. Field name: instalments. "
+                  "Invalid FullAmendRequest payload: Payload has a missing field or an invalid format. Field name: originalPaymentPlan. "
+              )
+
+              response.json shouldBe Json.toJson(expectedTtppErrorResponse)
+              response.status shouldBe 400
+            }
+
+            "when 'newPaymentPlan' is missing" in new TimeToPayProxyControllerTestBase {
+              val requestForFullAmend: WSRequest = buildRequest("/full-amend")
+
+              val invalidRequestBody: JsValue = Json.parse(
+                """
+                  |{
+                  |  "identifications": [
+                  |    {
+                  |      "idType": "NINO",
+                  |      "idValue": "AA000000A"
+                  |    },
+                  |    {
+                  |      "idType": "MTDITID",
+                  |      "idValue": "XAIT00000000054"
+                  |    },
+                  |    {
+                  |      "idType": "UTR",
+                  |      "idValue": "1234567890"
+                  |    }
+                  |  ],
+                  |  "originalPaymentPlan": {
+                  |    "arrangementAgreedDate": "invalid date",
+                  |    "ttpEndDate": "2025-02-01",
+                  |    "frequency": "monthly",
+                  |    "initialPaymentDate": "2025-05-05",
+                  |    "initialPaymentAmount": 150,
+                  |    "ddiReference": "DD123456789",
+                  |    "debtItemCharges": [
+                  |      {
+                  |        "debtItemChargeId": "One",
+                  |        "chargeSource":"CESA"
+                  |      }
+                  |    ]
+                  |  },
+                  |  "instalments": [
+                  |    {
+                  |      "dueDate": "2025-06-01",
+                  |      "amountDue": 300
+                  |    },
+                  |    {
+                  |      "dueDate": "2025-06-01",
+                  |      "amountDue": 300
+                  |    }
+                  |  ],
+                  |  "channelIdentifier": "advisor",
+                  |  "transitioned":true
+                  |}
+                  |""".stripMargin
+              )
+
+              val response: WSResponse = await(
+                requestForFullAmend.post(invalidRequestBody)
+              )
+
+              val expectedTtppErrorResponse: TtppErrorResponse = TtppErrorResponse(
+                statusCode = 400,
+                errorMessage =
+                  "Invalid FullAmendRequest payload: Payload has a missing field or an invalid format. Field name: newPaymentPlan. "
               )
 
               response.json shouldBe Json.toJson(expectedTtppErrorResponse)
@@ -2048,19 +2196,40 @@ class TimeToPayProxyControllerItSpec extends IntegrationBaseSpec {
       processingDateTime = ProcessingDateTimeInstant(java.time.Instant.parse("2025-10-15T10:31:00Z"))
     )
 
-    val fullAmendRequest: TtpFullAmendRequest = TtpFullAmendRequest(
+    val fullAmendRequest: TtpFullAmendRequestR2 = TtpFullAmendRequestR2(
       identifications = NonEmptyList.of(
         Identification(idType = IdType("NINO"), idValue = IdValue("AA000000A")),
         Identification(idType = IdType("MTDITID"), idValue = IdValue("XAIT00000000054")),
         Identification(idType = IdType("UTR"), idValue = IdValue("1234567890"))
       ),
-      paymentPlan = SaOnlyPaymentPlan(
+      originalPaymentPlan = OriginalPaymentPlan(
         arrangementAgreedDate = ArrangementAgreedDate(LocalDate.parse("2090-06-08")),
         ttpEndDate = TtpEndDate(LocalDate.parse("2025-02-01")),
         frequency = FrequencyLowercase.Monthly,
         initialPaymentDate = Some(InitialPaymentDate(LocalDate.parse("2025-05-05"))),
         initialPaymentAmount = Some(GbpPounds.createOrThrow(BigDecimal("150.00"))),
-        ddiReference = Some(DdiReference("DD123456789"))
+        ddiReference = Some(DdiReference("DD123456789")),
+        debtItemCharges = NonEmptyList.of(
+          DebtItemChargeReference(
+            DebtItemChargeId("One"),
+            ChargeSourceSAOnly.CESA
+          )
+        )
+      ),
+      newPaymentPlan = NewPaymentPlan(
+        arrangementAgreedDate = ArrangementAgreedDate(LocalDate.parse("2090-06-08")),
+        ttpEndDate = TtpEndDate(LocalDate.parse("2025-02-01")),
+        frequency = FrequencyLowercase.Monthly,
+        initialPaymentDate = Some(InitialPaymentDate(LocalDate.parse("2025-05-05"))),
+        initialPaymentAmount = Some(GbpPounds.createOrThrow(BigDecimal("150.00"))),
+        ddiReference = Some(DdiReference("DD123456789")),
+        debtItemCharges = NonEmptyList.of(
+          NewDebtItemChargeReference(
+            DebtItemChargeId("One"),
+            ChargeSourceSAOnly.CESA,
+            ChargeAmendment.Removed
+          )
+        )
       ),
       instalments = NonEmptyList.of(
         SaOnlyInstalment(
