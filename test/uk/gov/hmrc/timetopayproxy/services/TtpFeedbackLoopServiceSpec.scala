@@ -202,7 +202,11 @@ class TtpFeedbackLoopServiceSpec extends AnyFreeSpec with MockFactory with Scala
           frequency = FrequencyLowercase.Monthly,
           initialPaymentDate = Some(InitialPaymentDate(LocalDate.of(2025, 1, 5))),
           initialPaymentAmount = Some(GbpPounds.createOrThrow(100.00)),
-          ddiReference = Some(DdiReference("Test DDI Reference"))
+          ddiReference = Some(DdiReference("Test DDI Reference")),
+          debtItemCharges = NonEmptyList.of(
+            DebtItemChargeReference(DebtItemChargeId("some-cesa-id"), ChargeSourceSAOnly.CESA),
+            DebtItemChargeReference(DebtItemChargeId("some-etmp-id"), ChargeSourceSAOnly.ETMP)
+          )
         ),
         instalments = NonEmptyList.of(
           SaOnlyInstalment(
@@ -268,7 +272,11 @@ class TtpFeedbackLoopServiceSpec extends AnyFreeSpec with MockFactory with Scala
           frequency = FrequencyLowercase.Monthly,
           initialPaymentDate = Some(InitialPaymentDate(LocalDate.of(2025, 1, 5))),
           initialPaymentAmount = Some(GbpPounds.createOrThrow(100.00)),
-          ddiReference = Some(DdiReference("Test DDI Reference"))
+          ddiReference = Some(DdiReference("Test DDI Reference")),
+          debtItemCharges = NonEmptyList.of(
+            DebtItemChargeReference(DebtItemChargeId("some-cesa-id"), ChargeSourceSAOnly.CESA),
+            DebtItemChargeReference(DebtItemChargeId("some-etmp-id"), ChargeSourceSAOnly.ETMP)
+          )
         ),
         instalments = NonEmptyList.of(
           SaOnlyInstalment(

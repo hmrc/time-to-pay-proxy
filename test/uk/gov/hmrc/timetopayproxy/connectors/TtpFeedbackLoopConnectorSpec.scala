@@ -32,11 +32,11 @@ import uk.gov.hmrc.timetopayproxy.models._
 import uk.gov.hmrc.timetopayproxy.models.currency.GbpPounds
 import uk.gov.hmrc.timetopayproxy.models.error.ConnectorError
 import uk.gov.hmrc.timetopayproxy.models.error.TtppEnvelope.TtppEnvelope
-import uk.gov.hmrc.timetopayproxy.models.featureSwitches.{ InternalAuthEnabled, SaRelease2Enabled }
+import uk.gov.hmrc.timetopayproxy.models.featureSwitches.InternalAuthEnabled
 import uk.gov.hmrc.timetopayproxy.models.saonly.common._
 import uk.gov.hmrc.timetopayproxy.models.saonly.common.apistatus.{ ApiName, ApiStatus, ApiStatusCode }
 import uk.gov.hmrc.timetopayproxy.models.saonly.ttpcancel._
-import uk.gov.hmrc.timetopayproxy.models.saonly.ttpfullamend.{ ChargeAmendment, NewDebtItemChargeReference, NewPaymentPlan, OriginalPaymentPlan, TtpFullAmendInformativeError, TtpFullAmendInternalError, TtpFullAmendRequest, TtpFullAmendRequestR2, TtpFullAmendSuccessfulResponse }
+import uk.gov.hmrc.timetopayproxy.models.saonly.ttpfullamend._
 import uk.gov.hmrc.timetopayproxy.models.saonly.ttpinform._
 import uk.gov.hmrc.timetopayproxy.support.WireMockUtils
 
@@ -320,7 +320,10 @@ final class TtpFeedbackLoopConnectorSpec
         processingDateTime = ProcessingDateTimeInstant(Instant.parse("2025-01-01T12:00:00Z"))
       )
 
-      val r1ttpInformRequest: TtpInformRequest = TtpInformRequest(
+      val etmpChargeRef = DebtItemChargeReference(DebtItemChargeId("etmp-id"), ChargeSourceSAOnly.ETMP)
+      val cesaChargeRef = DebtItemChargeReference(DebtItemChargeId("cesa-id"), ChargeSourceSAOnly.CESA)
+
+      val ttpInformRequest: TtpInformRequest = TtpInformRequest(
         identifications = NonEmptyList.of(
           Identification(idType = IdType("NINO"), idValue = IdValue("AB123456C"))
         ),
@@ -330,7 +333,8 @@ final class TtpFeedbackLoopConnectorSpec
           frequency = FrequencyLowercase.Monthly,
           initialPaymentDate = Some(InitialPaymentDate(LocalDate.parse("2025-01-05"))),
           initialPaymentAmount = Some(GbpPounds.createOrThrow(100.00)),
-          ddiReference = Some(DdiReference("TestDDIReference"))
+          ddiReference = Some(DdiReference("TestDDIReference")),
+          NonEmptyList.of(etmpChargeRef, cesaChargeRef)
         ),
         instalments = NonEmptyList.of(
           SaOnlyInstalment(
@@ -342,65 +346,106 @@ final class TtpFeedbackLoopConnectorSpec
         transitioned = Some(TransitionedIndicator(true))
       )
 
-      val etmpChargeRef = DebtItemChargeReference(DebtItemChargeId("etmp-id"), ChargeSourceSAOnly.ETMP)
-      val cesaChargeRef = DebtItemChargeReference(DebtItemChargeId("cesa-id"), ChargeSourceSAOnly.CESA)
+      implicit val writes: Writes[TtpInformRequest] = TtpInformRequest.format.writes(_)
 
-      val r2ttpInformRequest: TtpInformRequestR2 = TtpInformRequestR2(
-        r1ttpInformRequest.identifications,
-        SaOnlyPaymentPlanR2(
-          r1ttpInformRequest.paymentPlan.arrangementAgreedDate,
-          r1ttpInformRequest.paymentPlan.ttpEndDate,
-          r1ttpInformRequest.paymentPlan.frequency,
-          r1ttpInformRequest.paymentPlan.initialPaymentDate,
-          r1ttpInformRequest.paymentPlan.initialPaymentAmount,
-          r1ttpInformRequest.paymentPlan.ddiReference,
-          NonEmptyList.of(etmpChargeRef, cesaChargeRef)
-        ),
-        r1ttpInformRequest.instalments,
-        r1ttpInformRequest.channelIdentifier,
-        r1ttpInformRequest.transitioned
-      )
+      "return a successful response" in new Setup() {
+        stubPostWithResponseBodyEnsuringRequest(
+          "/debts/time-to-pay/inform",
+          Json.toJson(ttpInformRequest).toString(),
+          200,
+          Json.toJson(ttpInformResponse).toString()
+        )
 
-      "r2 is disabled" should {
-        (() => featureSwitch.saRelease2Enabled).expects().returns(SaRelease2Enabled(false)).anyNumberOfTimes()
+        val result: TtppEnvelope[TtpInformSuccessfulResponse] = connector.informTtp(ttpInformRequest)
 
-        implicit val r1Writes: Writes[TtpInformRequest] = InformRequest.format(featureSwitch).writes(_)
+        result.value.futureValue shouldBe Right(ttpInformResponse)
+      }
 
-        "return a successful response" in new Setup() {
+      "parse an error response from an upstream service" in new Setup() {
+        stubPostWithResponseBodyEnsuringRequest(
+          "/debts/time-to-pay/inform",
+          Json.toJson(ttpInformRequest).toString(),
+          400,
+          """{"failures": [{"code": "400", "reason": "Invalid request body"}]}"""
+        )
+
+        val result: TtppEnvelope[TtpInformSuccessfulResponse] = connector.informTtp(ttpInformRequest)
+
+        result.value.futureValue shouldBe Left(ConnectorError(400, "Invalid request body"))
+      }
+
+      "handle 500 responses" in new Setup() {
+        stubPostWithResponseBodyEnsuringRequest(
+          "/debts/time-to-pay/inform",
+          Json.toJson(ttpInformRequest).toString(),
+          500,
+          Json.toJson(ttpInformErrorResponse).toString()
+        )
+
+        val result: TtppEnvelope[TtpInformSuccessfulResponse] = connector.informTtp(ttpInformRequest)
+
+        val informativeError = TtpInformInformativeError(
+          apisCalled = Some(ttpInformResponse.apisCalled),
+          internalErrors = List(
+            TtpInformInternalError("some error that ttp is responsible for"),
+            TtpInformInternalError("another error that ttp is responsible for")
+          ),
+          processingDateTime = ttpInformResponse.processingDateTime
+        )
+
+        result.value.futureValue shouldBe Left(informativeError)
+      }
+
+      "using Internal Auth" should {
+        "return a successful response" in new Setup(internalAuthEnabled = true) {
           stubPostWithResponseBodyEnsuringRequest(
             "/debts/time-to-pay/inform",
-            Json.toJson(r1ttpInformRequest).toString(),
+            Json.toJson(ttpInformRequest).toString(),
             200,
             Json.toJson(ttpInformResponse).toString()
           )
 
-          val result: TtppEnvelope[TtpInformSuccessfulResponse] = connector.informTtp(r1ttpInformRequest)
+          val result: TtppEnvelope[TtpInformSuccessfulResponse] = connector.informTtp(ttpInformRequest)
 
           result.value.futureValue shouldBe Right(ttpInformResponse)
         }
 
-        "parse an error response from an upstream service" in new Setup() {
+        "return an unauthorized response from an upstream service" in new Setup(internalAuthEnabled = true) {
           stubPostWithResponseBodyEnsuringRequest(
             "/debts/time-to-pay/inform",
-            Json.toJson(r1ttpInformRequest).toString(),
+            Json.toJson(ttpInformRequest).toString(),
+            401,
+            """{"failures": [{"code": "401", "reason": "Unauthorized"}]}"""
+          )
+
+          val result: TtppEnvelope[TtpInformSuccessfulResponse] = connector.informTtp(ttpInformRequest)
+
+          result.value.futureValue shouldBe Left(ConnectorError(401, "Unauthorized"))
+        }
+
+        "parse an error response from an upstream service" in new Setup(internalAuthEnabled = true) {
+          stubPostWithResponseBodyEnsuringRequest(
+            "/debts/time-to-pay/inform",
+            Json.toJson(ttpInformRequest).toString(),
             400,
             """{"failures": [{"code": "400", "reason": "Invalid request body"}]}"""
           )
 
-          val result: TtppEnvelope[TtpInformSuccessfulResponse] = connector.informTtp(r1ttpInformRequest)
+          val result: TtppEnvelope[TtpInformSuccessfulResponse] = connector.informTtp(ttpInformRequest)
 
           result.value.futureValue shouldBe Left(ConnectorError(400, "Invalid request body"))
         }
 
-        "handle 500 responses" in new Setup() {
+        "handle 500 responses" in new Setup(internalAuthEnabled = true) {
+
           stubPostWithResponseBodyEnsuringRequest(
             "/debts/time-to-pay/inform",
-            Json.toJson(r1ttpInformRequest).toString(),
+            Json.toJson(ttpInformRequest).toString(),
             500,
             Json.toJson(ttpInformErrorResponse).toString()
           )
 
-          val result: TtppEnvelope[TtpInformSuccessfulResponse] = connector.informTtp(r1ttpInformRequest)
+          val result: TtppEnvelope[TtpInformSuccessfulResponse] = connector.informTtp(ttpInformRequest)
 
           val informativeError = TtpInformInformativeError(
             apisCalled = Some(ttpInformResponse.apisCalled),
@@ -413,188 +458,8 @@ final class TtpFeedbackLoopConnectorSpec
 
           result.value.futureValue shouldBe Left(informativeError)
         }
-
-        "using Internal Auth" should {
-          "return a successful response" in new Setup(internalAuthEnabled = true) {
-            stubPostWithResponseBodyEnsuringRequest(
-              "/debts/time-to-pay/inform",
-              Json.toJson(r1ttpInformRequest).toString(),
-              200,
-              Json.toJson(ttpInformResponse).toString()
-            )
-
-            val result: TtppEnvelope[TtpInformSuccessfulResponse] = connector.informTtp(r1ttpInformRequest)
-
-            result.value.futureValue shouldBe Right(ttpInformResponse)
-          }
-
-          "return an unauthorized response from an upstream service" in new Setup(internalAuthEnabled = true) {
-            stubPostWithResponseBodyEnsuringRequest(
-              "/debts/time-to-pay/inform",
-              Json.toJson(r1ttpInformRequest).toString(),
-              401,
-              """{"failures": [{"code": "401", "reason": "Unauthorized"}]}"""
-            )
-
-            val result: TtppEnvelope[TtpInformSuccessfulResponse] = connector.informTtp(r1ttpInformRequest)
-
-            result.value.futureValue shouldBe Left(ConnectorError(401, "Unauthorized"))
-          }
-
-          "parse an error response from an upstream service" in new Setup(internalAuthEnabled = true) {
-            stubPostWithResponseBodyEnsuringRequest(
-              "/debts/time-to-pay/inform",
-              Json.toJson(r1ttpInformRequest).toString(),
-              400,
-              """{"failures": [{"code": "400", "reason": "Invalid request body"}]}"""
-            )
-
-            val result: TtppEnvelope[TtpInformSuccessfulResponse] = connector.informTtp(r1ttpInformRequest)
-
-            result.value.futureValue shouldBe Left(ConnectorError(400, "Invalid request body"))
-          }
-
-          "handle 500 responses" in new Setup(internalAuthEnabled = true) {
-            stubPostWithResponseBodyEnsuringRequest(
-              "/debts/time-to-pay/inform",
-              Json.toJson(r1ttpInformRequest).toString(),
-              500,
-              Json.toJson(ttpInformErrorResponse).toString()
-            )
-
-            val result: TtppEnvelope[TtpInformSuccessfulResponse] = connector.informTtp(r1ttpInformRequest)
-
-            val informativeError = TtpInformInformativeError(
-              apisCalled = Some(ttpInformResponse.apisCalled),
-              internalErrors = List(
-                TtpInformInternalError("some error that ttp is responsible for"),
-                TtpInformInternalError("another error that ttp is responsible for")
-              ),
-              processingDateTime = ttpInformResponse.processingDateTime
-            )
-
-            result.value.futureValue shouldBe Left(informativeError)
-          }
-        }
       }
 
-      "r2 is enabled" should {
-        (() => featureSwitch.saRelease2Enabled).expects().returns(SaRelease2Enabled(false)).anyNumberOfTimes()
-
-        implicit val r2Writes: Writes[TtpInformRequestR2] = InformRequest.format(featureSwitch).writes(_)
-
-        "return a successful response" in new Setup() {
-          stubPostWithResponseBodyEnsuringRequest(
-            "/debts/time-to-pay/inform",
-            Json.toJson(r2ttpInformRequest).toString(),
-            200,
-            Json.toJson(ttpInformResponse).toString()
-          )
-
-          val result: TtppEnvelope[TtpInformSuccessfulResponse] = connector.informTtp(r2ttpInformRequest)
-
-          result.value.futureValue shouldBe Right(ttpInformResponse)
-        }
-
-        "parse an error response from an upstream service" in new Setup() {
-          stubPostWithResponseBodyEnsuringRequest(
-            "/debts/time-to-pay/inform",
-            Json.toJson(r2ttpInformRequest).toString(),
-            400,
-            """{"failures": [{"code": "400", "reason": "Invalid request body"}]}"""
-          )
-
-          val result: TtppEnvelope[TtpInformSuccessfulResponse] = connector.informTtp(r2ttpInformRequest)
-
-          result.value.futureValue shouldBe Left(ConnectorError(400, "Invalid request body"))
-        }
-
-        "handle 500 responses" in new Setup() {
-          stubPostWithResponseBodyEnsuringRequest(
-            "/debts/time-to-pay/inform",
-            Json.toJson(r2ttpInformRequest).toString(),
-            500,
-            Json.toJson(ttpInformErrorResponse).toString()
-          )
-
-          val result: TtppEnvelope[TtpInformSuccessfulResponse] = connector.informTtp(r2ttpInformRequest)
-
-          val informativeError = TtpInformInformativeError(
-            apisCalled = Some(ttpInformResponse.apisCalled),
-            internalErrors = List(
-              TtpInformInternalError("some error that ttp is responsible for"),
-              TtpInformInternalError("another error that ttp is responsible for")
-            ),
-            processingDateTime = ttpInformResponse.processingDateTime
-          )
-
-          result.value.futureValue shouldBe Left(informativeError)
-        }
-
-        "using Internal Auth" should {
-          "return a successful response" in new Setup(internalAuthEnabled = true) {
-            stubPostWithResponseBodyEnsuringRequest(
-              "/debts/time-to-pay/inform",
-              Json.toJson(r2ttpInformRequest).toString(),
-              200,
-              Json.toJson(ttpInformResponse).toString()
-            )
-
-            val result: TtppEnvelope[TtpInformSuccessfulResponse] = connector.informTtp(r2ttpInformRequest)
-
-            result.value.futureValue shouldBe Right(ttpInformResponse)
-          }
-
-          "return an unauthorized response from an upstream service" in new Setup(internalAuthEnabled = true) {
-            stubPostWithResponseBodyEnsuringRequest(
-              "/debts/time-to-pay/inform",
-              Json.toJson(r2ttpInformRequest).toString(),
-              401,
-              """{"failures": [{"code": "401", "reason": "Unauthorized"}]}"""
-            )
-
-            val result: TtppEnvelope[TtpInformSuccessfulResponse] = connector.informTtp(r2ttpInformRequest)
-
-            result.value.futureValue shouldBe Left(ConnectorError(401, "Unauthorized"))
-          }
-
-          "parse an error response from an upstream service" in new Setup(internalAuthEnabled = true) {
-            stubPostWithResponseBodyEnsuringRequest(
-              "/debts/time-to-pay/inform",
-              Json.toJson(r2ttpInformRequest).toString(),
-              400,
-              """{"failures": [{"code": "400", "reason": "Invalid request body"}]}"""
-            )
-
-            val result: TtppEnvelope[TtpInformSuccessfulResponse] = connector.informTtp(r2ttpInformRequest)
-
-            result.value.futureValue shouldBe Left(ConnectorError(400, "Invalid request body"))
-          }
-
-          "handle 500 responses" in new Setup(internalAuthEnabled = true) {
-
-            stubPostWithResponseBodyEnsuringRequest(
-              "/debts/time-to-pay/inform",
-              Json.toJson(r2ttpInformRequest).toString(),
-              500,
-              Json.toJson(ttpInformErrorResponse).toString()
-            )
-
-            val result: TtppEnvelope[TtpInformSuccessfulResponse] = connector.informTtp(r2ttpInformRequest)
-
-            val informativeError = TtpInformInformativeError(
-              apisCalled = Some(ttpInformResponse.apisCalled),
-              internalErrors = List(
-                TtpInformInternalError("some error that ttp is responsible for"),
-                TtpInformInternalError("another error that ttp is responsible for")
-              ),
-              processingDateTime = ttpInformResponse.processingDateTime
-            )
-
-            result.value.futureValue shouldBe Left(informativeError)
-          }
-        }
-      }
     }
 
     ".fullAmendTtp" when {
@@ -639,7 +504,17 @@ final class TtpFeedbackLoopConnectorSpec
             frequency = FrequencyLowercase.Monthly,
             initialPaymentDate = Some(InitialPaymentDate(LocalDate.parse("2025-01-05"))),
             initialPaymentAmount = Some(GbpPounds.createOrThrow(100.00)),
-            ddiReference = Some(DdiReference("TestDDIReference"))
+            ddiReference = Some(DdiReference("TestDDIReference")),
+            NonEmptyList.of(
+              DebtItemChargeReference(
+                DebtItemChargeId("1 CESA"),
+                ChargeSourceSAOnly.CESA
+              ),
+              DebtItemChargeReference(
+                DebtItemChargeId("1 ETMP"),
+                ChargeSourceSAOnly.ETMP
+              )
+            )
           ),
           instalments = NonEmptyList.of(
             SaOnlyInstalment(

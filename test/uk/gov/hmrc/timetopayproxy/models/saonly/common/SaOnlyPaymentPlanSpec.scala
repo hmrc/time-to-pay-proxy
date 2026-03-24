@@ -16,10 +16,11 @@
 
 package uk.gov.hmrc.timetopayproxy.models.saonly.common
 
+import cats.data.NonEmptyList
 import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.should.Matchers._
 import play.api.libs.json.{ JsNumber, JsResultException, Json }
-import uk.gov.hmrc.timetopayproxy.models.FrequencyLowercase
+import uk.gov.hmrc.timetopayproxy.models.{ DebtItemChargeId, FrequencyLowercase }
 import uk.gov.hmrc.timetopayproxy.models.currency.GbpPounds
 
 import java.time.LocalDate
@@ -35,7 +36,11 @@ class SaOnlyPaymentPlanSpec extends AnyFreeSpec {
           frequency = FrequencyLowercase.Monthly,
           initialPaymentDate = None,
           initialPaymentAmount = None,
-          ddiReference = None
+          ddiReference = None,
+          debtItemCharges = NonEmptyList.of(
+            DebtItemChargeReference(DebtItemChargeId("some-cesa-id"), ChargeSourceSAOnly.CESA),
+            DebtItemChargeReference(DebtItemChargeId("some-etmp-id"), ChargeSourceSAOnly.ETMP)
+          )
         )
 
         val jsonPlanWithNoOptionalFields = Json.parse(
@@ -43,7 +48,17 @@ class SaOnlyPaymentPlanSpec extends AnyFreeSpec {
             |{
             |  "arrangementAgreedDate": "2025-05-05",
             |  "ttpEndDate": "2026-05-05",
-            |  "frequency": "monthly"
+            |  "frequency": "monthly",
+            |  "debtItemCharges": [
+            |     {
+            |        "debtItemChargeId": "some-cesa-id",
+            |        "chargeSource": "CESA"
+            |     },
+            |     {
+            |        "debtItemChargeId": "some-etmp-id",
+            |        "chargeSource": "ETMP"
+            |     }
+            |  ]
             |}
             |""".stripMargin
         )
@@ -59,7 +74,11 @@ class SaOnlyPaymentPlanSpec extends AnyFreeSpec {
           frequency = FrequencyLowercase.Monthly,
           initialPaymentDate = Some(InitialPaymentDate(LocalDate.parse("2025-05-05"))),
           initialPaymentAmount = Some(GbpPounds.createOrThrow(BigDecimal(123.45))),
-          ddiReference = Some(DdiReference("Test DDI Reference"))
+          ddiReference = Some(DdiReference("Test DDI Reference")),
+          debtItemCharges = NonEmptyList.of(
+            DebtItemChargeReference(DebtItemChargeId("some-cesa-id"), ChargeSourceSAOnly.CESA),
+            DebtItemChargeReference(DebtItemChargeId("some-etmp-id"), ChargeSourceSAOnly.ETMP)
+          )
         )
 
         val jsonPlanWithAllOptionalFields = Json.parse(
@@ -70,7 +89,17 @@ class SaOnlyPaymentPlanSpec extends AnyFreeSpec {
             |  "frequency": "monthly",
             |  "initialPaymentDate": "2025-05-05",
             |  "initialPaymentAmount": 123.45,
-            |  "ddiReference": "Test DDI Reference"
+            |  "ddiReference": "Test DDI Reference",
+            |  "debtItemCharges": [
+            |     {
+            |        "debtItemChargeId": "some-cesa-id",
+            |        "chargeSource": "CESA"
+            |     },
+            |     {
+            |        "debtItemChargeId": "some-etmp-id",
+            |        "chargeSource": "ETMP"
+            |     }
+            |  ]
             |}
             |""".stripMargin
         )

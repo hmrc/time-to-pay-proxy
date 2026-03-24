@@ -50,7 +50,11 @@ final class TtpFullAmendRequestSpec extends AnyFreeSpec with MockFactory {
             frequency = FrequencyLowercase.Weekly,
             initialPaymentDate = Some(InitialPaymentDate(LocalDate.parse("2020-04-06"))),
             initialPaymentAmount = Some(GbpPounds.createOrThrow(100.12)),
-            ddiReference = Some(DdiReference("TestDDIReference"))
+            ddiReference = Some(DdiReference("TestDDIReference")),
+            debtItemCharges = NonEmptyList.of(
+              DebtItemChargeReference(DebtItemChargeId("some-cesa-id"), ChargeSourceSAOnly.CESA),
+              DebtItemChargeReference(DebtItemChargeId("some-etmp-id"), ChargeSourceSAOnly.ETMP)
+            )
           ),
           instalments = NonEmptyList.of(
             SaOnlyInstalment(
@@ -83,7 +87,17 @@ final class TtpFullAmendRequestSpec extends AnyFreeSpec with MockFactory {
             |    "initialPaymentAmount" : 100.12,
             |    "initialPaymentDate" : "2020-04-06",
             |    "ttpEndDate" : "2020-02-04",
-            |    "ddiReference" : "TestDDIReference"
+            |    "ddiReference" : "TestDDIReference",
+            |    "debtItemCharges": [
+            |       {
+            |          "debtItemChargeId": "some-cesa-id",
+            |          "chargeSource": "CESA"
+            |       },
+            |       {
+            |          "debtItemChargeId": "some-etmp-id",
+            |          "chargeSource": "ETMP"
+            |       }
+            |    ]
             |  },
             |  "transitioned" : true
             |}
@@ -105,7 +119,11 @@ final class TtpFullAmendRequestSpec extends AnyFreeSpec with MockFactory {
             frequency = FrequencyLowercase.Weekly,
             initialPaymentDate = None,
             initialPaymentAmount = None,
-            ddiReference = None
+            ddiReference = None,
+            debtItemCharges = NonEmptyList.of(
+              DebtItemChargeReference(DebtItemChargeId("some-cesa-id"), ChargeSourceSAOnly.CESA),
+              DebtItemChargeReference(DebtItemChargeId("some-etmp-id"), ChargeSourceSAOnly.ETMP)
+            )
           ),
           instalments = NonEmptyList.of(
             SaOnlyInstalment(
@@ -135,8 +153,18 @@ final class TtpFullAmendRequestSpec extends AnyFreeSpec with MockFactory {
             |  "paymentPlan" : {
             |    "arrangementAgreedDate" : "2020-01-02",
             |    "frequency" : "weekly",
-            |    "ttpEndDate" : "2020-02-04"
-            |  },
+            |    "ttpEndDate" : "2020-02-04",
+            |    "debtItemCharges": [
+            |       {
+            |          "debtItemChargeId": "some-cesa-id",
+            |          "chargeSource": "CESA"
+            |       },
+            |       {
+            |          "debtItemChargeId": "some-etmp-id",
+            |          "chargeSource": "ETMP"
+            |       }
+            |    ]
+            |    },
             |  "transitioned" : true
             |}
             |""".stripMargin

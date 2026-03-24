@@ -18,9 +18,9 @@ package uk.gov.hmrc.timetopayproxy.models.saonly.ttpcancel
 
 import cats.data.NonEmptyList
 import play.api.libs.json.{ Format, Json, OFormat }
-import uk.gov.hmrc.timetopayproxy.models.{ DebtItemChargeReference, FrequencyLowercase }
+import uk.gov.hmrc.timetopayproxy.models.FrequencyLowercase
 import uk.gov.hmrc.timetopayproxy.models.currency.GbpPounds
-import uk.gov.hmrc.timetopayproxy.models.saonly.common.{ ArrangementAgreedDate, InitialPaymentDate, TtpEndDate }
+import uk.gov.hmrc.timetopayproxy.models.saonly.common.{ ArrangementAgreedDate, DebtItemChargeReference, InitialPaymentDate, TtpEndDate }
 import uk.gov.hmrc.timetopayproxy.utils.json.CatsNonEmptyListJson
 
 final case class TtpCancelPaymentPlan(
