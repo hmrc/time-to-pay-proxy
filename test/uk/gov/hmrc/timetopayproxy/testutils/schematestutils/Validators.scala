@@ -201,36 +201,6 @@ object Validators {
             restrictAdditionalProperties = true
           )
       }
-
-      object Proposed {
-        private val pathR2: String =
-          "test/resources/schemas/apis/proposed/time-to-pay-proxy/time-to-pay-v1.0.22-proposedAll-2.yaml"
-        def openApiRequestSchema: OpenApi3DerivedSchema =
-          new OpenApi3DerivedSchema(
-            pathR2,
-            defaultJsonSubschemaName = "InformRequest",
-            metaSchemaValidation = Some(Valid(())),
-            restrictAdditionalProperties = true
-          )
-
-        /** This is used for 200 statuses. */
-        def openApiInformResponseSchema: OpenApi3DerivedSchema =
-          new OpenApi3DerivedSchema(
-            pathR2,
-            defaultJsonSubschemaName = "InformResponse",
-            metaSchemaValidation = Some(Valid(())),
-            restrictAdditionalProperties = true
-          )
-
-        /** This is used for 500 statuses. */
-        def openApiInformErrorResponseSchema: OpenApi3DerivedSchema =
-          new OpenApi3DerivedSchema(
-            pathR2,
-            defaultJsonSubschemaName = "InformErrorResponse",
-            metaSchemaValidation = Some(Valid(())),
-            restrictAdditionalProperties = true
-          )
-      }
     }
 
     object TtpFullAmend {
@@ -270,7 +240,7 @@ object Validators {
         // Downloaded from:
         //  https://confluence.tools.tax.service.gov.uk/display/DTDT/TTP+API+%28Current+Version%29+Proxy?preview=/828113579/1214710809/time-to-pay-v1.0.22-proposedAll-2.yaml
         private val pathForR2 =
-          "test/resources/schemas/apis/proposed/time-to-pay-proxy/time-to-pay-v1.0.22-proposedAll-2.yaml"
+          "test/resources/schemas/apis/proposed/time-to-pay/FullAmendAPI-v0.0.2-proposed.yaml"
 
         def openApiRequestSchema: OpenApi3DerivedSchema =
           new OpenApi3DerivedSchema(
@@ -471,8 +441,7 @@ object Validators {
 
     object TtpInform {
       object Live {
-        private val path = "test/resources/schemas/apis/live/time-to-pay/InformAPI-v0.0.1.yaml"
-
+        private val path: String = "resources/public/api/conf/1.0/application.yaml"
         def openApiRequestSchema: OpenApi3DerivedSchema =
           new OpenApi3DerivedSchema(
             path,
@@ -505,47 +474,6 @@ object Validators {
             restrictAdditionalProperties = true
           )
       }
-
-      object Proposed {
-        // Downloaded from:
-        //   https://github.com/hmrc/time-to-pay/blob/af176ffca7a0bb85bb6c180d9eff0d2d6755a37a/resources/public/api/conf/1.0/InformAPI-v0.0.1.yaml
-        // Official location:
-        //   https://github.com/hmrc/time-to-pay/blob/main/resources/public/api/conf/1.0
-        private val pathForR2 = "test/resources/schemas/apis/proposed/time-to-pay/InformAPI-v0.0.3-proposed.yaml"
-
-        def openApiRequestSchema: OpenApi3DerivedSchema =
-          new OpenApi3DerivedSchema(
-            pathForR2,
-            defaultJsonSubschemaName = "InformRequest",
-            metaSchemaValidation = Some(Valid(())),
-            restrictAdditionalProperties = true
-          )
-
-        def openApiInformErrorResponseSchema: OpenApi3DerivedSchema =
-          new OpenApi3DerivedSchema(
-            pathForR2,
-            defaultJsonSubschemaName = "InformErrorResponse",
-            metaSchemaValidation = Some(Valid(())),
-            restrictAdditionalProperties = true
-          )
-
-        def openApiInformResponseSchema: OpenApi3DerivedSchema =
-          new OpenApi3DerivedSchema(
-            pathForR2,
-            defaultJsonSubschemaName = "InformResponse",
-            metaSchemaValidation = Some(Valid(())),
-            restrictAdditionalProperties = true
-          )
-
-        def openApiResponseGeneralFailureSchema: OpenApi3DerivedSchema =
-          new OpenApi3DerivedSchema(
-            pathForR2,
-            defaultJsonSubschemaName = "ErrorResponse",
-            metaSchemaValidation = Some(Valid(())),
-            restrictAdditionalProperties = true
-          )
-      }
-
     }
 
     object TtpFullAmend {
@@ -555,7 +483,7 @@ object Validators {
         //   https://github.com/hmrc/time-to-pay/blob/fe8fee3d7dead5d6241d7d085cff4179ea5834ef/resources/public/api/conf/1.0/FullAmendAPI-v0.0.1.yaml
         // Official location:
         //   https://github.com/hmrc/time-to-pay/tree/main/resources/public/api/conf/1.0
-        private val path = "test/resources/schemas/apis/live/time-to-pay/FullAmendAPI-v0.0.1.yaml"
+        private val path: String = "resources/public/api/conf/1.0/application.yaml"
 
         def openApiRequestSchema: OpenApi3DerivedSchema =
           new OpenApi3DerivedSchema(

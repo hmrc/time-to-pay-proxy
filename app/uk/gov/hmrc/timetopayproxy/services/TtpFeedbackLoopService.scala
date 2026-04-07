@@ -21,7 +21,7 @@ import uk.gov.hmrc.timetopayproxy.connectors.TtpFeedbackLoopConnector
 import uk.gov.hmrc.timetopayproxy.models.error.TtppEnvelope.TtppEnvelope
 import uk.gov.hmrc.timetopayproxy.models.saonly.ttpcancel.{ TtpCancelRequest, TtpCancelRequestR2, TtpCancelSuccessfulResponse }
 import uk.gov.hmrc.timetopayproxy.models.saonly.ttpfullamend.{ FullAmendRequest, TtpFullAmendSuccessfulResponse }
-import uk.gov.hmrc.timetopayproxy.models.saonly.ttpinform.{ InformRequest, TtpInformSuccessfulResponse }
+import uk.gov.hmrc.timetopayproxy.models.saonly.ttpinform.{ TtpInformRequest, TtpInformSuccessfulResponse }
 
 import javax.inject.{ Inject, Singleton }
 import scala.concurrent.ExecutionContext
@@ -39,7 +39,7 @@ class TtpFeedbackLoopService @Inject() (ttppConnector: TtpFeedbackLoopConnector)
     ttppConnector.cancelTtpR2(ttppRequestR2)
 
   def informTtp(
-    ttppInformRequest: InformRequest
+    ttppInformRequest: TtpInformRequest
   )(implicit ec: ExecutionContext, hc: HeaderCarrier): TtppEnvelope[TtpInformSuccessfulResponse] =
     ttppConnector.informTtp(ttppInformRequest)
 

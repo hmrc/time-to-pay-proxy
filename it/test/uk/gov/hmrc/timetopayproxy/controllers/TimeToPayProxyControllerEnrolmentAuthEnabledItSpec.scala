@@ -33,7 +33,7 @@ import uk.gov.hmrc.timetopayproxy.models.saonly.common._
 import uk.gov.hmrc.timetopayproxy.models.saonly.common.apistatus.{ ApiErrorResponse, ApiName, ApiStatus, ApiStatusCode }
 import uk.gov.hmrc.timetopayproxy.models.saonly.ttpcancel.{ CancellationDate, TtpCancelPaymentPlanR2, TtpCancelRequestR2, TtpCancelSuccessfulResponse }
 import uk.gov.hmrc.timetopayproxy.models.saonly.ttpfullamend._
-import uk.gov.hmrc.timetopayproxy.models.saonly.ttpinform.{ TtpInformRequestR2, TtpInformSuccessfulResponse }
+import uk.gov.hmrc.timetopayproxy.models.saonly.ttpinform.{ TtpInformRequest, TtpInformSuccessfulResponse }
 import uk.gov.hmrc.timetopayproxy.support.IntegrationBaseSpec
 
 import java.time.{ Instant, LocalDate, LocalDateTime }
@@ -691,15 +691,15 @@ class TimeToPayProxyControllerEnrolmentAuthEnabledItSpec extends IntegrationBase
     }
 
     ".informTtp" - {
-      val requestPayload: TtpInformRequestR2 =
-        TtpInformRequestR2(
+      val requestPayload: TtpInformRequest =
+        TtpInformRequest(
           identifications = NonEmptyList.of(
             Identification(
               idType = IdType("idtype"),
               idValue = IdValue("idvalue")
             )
           ),
-          paymentPlan = SaOnlyPaymentPlanR2(
+          paymentPlan = SaOnlyPaymentPlan(
             arrangementAgreedDate = ArrangementAgreedDate(LocalDate.parse("2020-01-02")),
             ttpEndDate = TtpEndDate(LocalDate.parse("2020-02-04")),
             frequency = FrequencyLowercase.Weekly,
@@ -759,7 +759,7 @@ class TimeToPayProxyControllerEnrolmentAuthEnabledItSpec extends IntegrationBase
 
           val request: WSRequest = buildRequest("/inform")
           val response: WSResponse = await(
-            request.post(Json.toJson(requestPayload)(TtpInformRequestR2.r2Format))
+            request.post(Json.toJson(requestPayload))
           )
 
           WireMock.verify(1, postRequestedFor(urlPathEqualTo("/auth/authorise")))

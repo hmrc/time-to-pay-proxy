@@ -29,7 +29,7 @@ import uk.gov.hmrc.timetopayproxy.models.error.{ TtppEnvelope, TtppErrorResponse
 import uk.gov.hmrc.timetopayproxy.models.saonly.chargeInfoApi.{ ChargeInfoRequest, ChargeInfoResponse }
 import uk.gov.hmrc.timetopayproxy.models.saonly.ttpcancel.{ TtpCancelRequest, TtpCancelRequestR2 }
 import uk.gov.hmrc.timetopayproxy.models.saonly.ttpfullamend.FullAmendRequest
-import uk.gov.hmrc.timetopayproxy.models.saonly.ttpinform.InformRequest
+import uk.gov.hmrc.timetopayproxy.models.saonly.ttpinform.TtpInformRequest
 import uk.gov.hmrc.timetopayproxy.services.{ TTPEService, TTPQuoteService, TtpFeedbackLoopService }
 
 import javax.inject.{ Inject, Singleton }
@@ -144,8 +144,7 @@ class TimeToPayProxyController @Inject() (
 
   def informTtp: Action[JsValue] = readAuthoriseAction.async(parse.json) { implicit request =>
     if (featureSwitch.informEndpointEnabled) {
-      implicit val requestFormat = InformRequest.format(featureSwitch)
-      withJsonBody[InformRequest] { deserialisedRequest: InformRequest =>
+      withJsonBody[TtpInformRequest] { deserialisedRequest: TtpInformRequest =>
         ttpFeedbackLoopService
           .informTtp(deserialisedRequest)
           .leftMap(ttppError => ttppError.toWriteableProxyError)

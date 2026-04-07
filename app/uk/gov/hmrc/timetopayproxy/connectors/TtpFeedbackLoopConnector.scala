@@ -28,7 +28,7 @@ import uk.gov.hmrc.timetopayproxy.models.error.ProxyEnvelopeError
 import uk.gov.hmrc.timetopayproxy.models.error.TtppEnvelope.TtppEnvelope
 import uk.gov.hmrc.timetopayproxy.models.saonly.ttpcancel.{ TtpCancelInformativeError, TtpCancelRequest, TtpCancelRequestR2, TtpCancelSuccessfulResponse }
 import uk.gov.hmrc.timetopayproxy.models.saonly.ttpfullamend.{ FullAmendRequest, TtpFullAmendInformativeError, TtpFullAmendSuccessfulResponse }
-import uk.gov.hmrc.timetopayproxy.models.saonly.ttpinform.{ InformRequest, TtpInformInformativeError, TtpInformSuccessfulResponse }
+import uk.gov.hmrc.timetopayproxy.models.saonly.ttpinform.{ TtpInformInformativeError, TtpInformRequest, TtpInformSuccessfulResponse }
 
 import java.util.UUID
 import javax.inject.{ Inject, Singleton }
@@ -133,7 +133,7 @@ class TtpFeedbackLoopConnector @Inject() (
   }
 
   def informTtp(
-    ttppInformRequest: InformRequest
+    ttppInformRequest: TtpInformRequest
   )(implicit ec: ExecutionContext, hc: HeaderCarrier): TtppEnvelope[TtpInformSuccessfulResponse] = {
 
     implicit def httpReads: HttpReads[Either[ProxyEnvelopeError, TtpInformSuccessfulResponse]] =
@@ -146,7 +146,7 @@ class TtpFeedbackLoopConnector @Inject() (
     EitherT(
       httpClient
         .post(url)
-        .withBody(Json.toJson(ttppInformRequest)(InformRequest.format(featureSwitch)))
+        .withBody(Json.toJson(ttppInformRequest))
         .setHeader(requestHeaders: _*)
         .execute[Either[ProxyEnvelopeError, TtpInformSuccessfulResponse]]
     )

@@ -1,4 +1,3 @@
-
 openapi: 3.0.0
 info:
   title: Time To Pay Proxy
@@ -54,7 +53,8 @@ info:
       | 1.0.19 | 30-10-2025 | Alex Olkhovskiy | R1 changes for udpate cancel, inform and full amend|
       | 1.0.20 | 06-11-2025 | Alex Olkhovskiy | Add 422 error response for charge reference mismatch |
       | 1.0.21 | 28-01-2026 | Alex Olkhovskiy | DTD-4248: Fix mismatches between spec and code |
-  version: 1.0.21
+      | 1.0.21_A | 17-03-2026 | Sunil Sen | DTD-4295: Send charge references to CESA |
+  version: 1.0.21_A
   contact: {}
 servers:
   - url: https://api.service.hmrc.gov.uk
@@ -990,6 +990,9 @@ paths:
                     initialPaymentAmount: 150
                     frequency: monthly
                     ddiReference: DD123456789
+                    debtItemCharges:
+                      - debtItemChargeId: XW006559808862
+                        chargeSource: CESA
                   instalments:
                     - dueDate: '2025-06-01'
                       amountDue: 300
@@ -1147,6 +1150,11 @@ paths:
                     initialPaymentAmount: 150
                     frequency: monthly
                     ddiReference: DD123456789
+                    debtItemCharges:
+                      - debtItemChargeId: XW006559808862
+                        chargeSource: CESA
+                      - debtItemChargeId: XW006559808863
+                        chargeSource: ETMP
                   instalments:
                     - dueDate: '2025-06-01'
                       amountDue: 300
@@ -1167,6 +1175,9 @@ paths:
                     initialPaymentAmount: 200
                     frequency: weekly
                     ddiReference: DD987654321
+                    debtItemCharges:
+                      - debtItemChargeId: XW006559808863
+                        chargeSource: ETMP
                   instalments:
                     - dueDate: '2025-06-01'
                       amountDue: 100
@@ -2889,6 +2900,23 @@ components:
           format: date-time
           description: Timestamp for processing the cancel request
           example: '2025-10-15T10:31:00Z'
+    DebtItemChargeReference:
+      type: object
+      required:
+        - debtItemChargeId
+        - chargeSource
+      properties:
+        debtItemChargeId:
+          type: string
+          description: An ID which uniquely identifies a particular charge. Required for ETMP but not CESA. Needed to know which charge relates to the charge source to know which HoD to call.
+          example: XW006559808862
+        chargeSource:
+          type: string
+          description: Source system of the charge. So we know when to call CESA or ETMP.
+          enum:
+            - CESA
+            - ETMP
+          example: CESA
     InformIdentification:
       type: object
       required:
@@ -2911,6 +2939,7 @@ components:
         - arrangementAgreedDate
         - ttpEndDate
         - frequency
+        - debtItemCharges
       properties:
         arrangementAgreedDate:
           type: string
@@ -2949,6 +2978,12 @@ components:
           type: string
           description: Direct Debit Instruction reference number, if applicable
           example: DD123456789
+        debtItemCharges:
+          type: array
+          minItems: 1
+          items:
+            $ref: '#/components/schemas/DebtItemChargeReference'
+          description: Array of debt item charges required to know which HoD to call
     InformInstalment:
       type: object
       required:
@@ -3090,6 +3125,7 @@ components:
         - arrangementAgreedDate
         - ttpEndDate
         - frequency
+        - debtItemCharges
       properties:
         arrangementAgreedDate:
           type: string
@@ -3128,6 +3164,12 @@ components:
           type: string
           description: Direct Debit reference (may be blank if not applicable, especially for SSTTP plans)
           example: DD123456789
+        debtItemCharges:
+          type: array
+          minItems: 1
+          items:
+            $ref: '#/components/schemas/DebtItemChargeReference'
+          description: Array of debt item charges required to know which HoD to call
     FullAmendInstalment:
       type: object
       required:

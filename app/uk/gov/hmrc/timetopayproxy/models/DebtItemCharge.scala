@@ -17,7 +17,6 @@
 package uk.gov.hmrc.timetopayproxy.models
 
 import play.api.libs.json.{ Format, Json, OFormat }
-import uk.gov.hmrc.timetopayproxy.models.saonly.common.ChargeSourceSAOnly
 
 import java.time.LocalDate
 
@@ -59,13 +58,4 @@ final case class QuoteDebtItemCharge(
 
 object QuoteDebtItemCharge {
   implicit val format: OFormat[QuoteDebtItemCharge] = Json.format[QuoteDebtItemCharge]
-}
-
-final case class DebtItemChargeReference(
-  debtItemChargeId: DebtItemChargeId,
-  chargeSource: ChargeSourceSAOnly
-)
-
-object DebtItemChargeReference {
-  implicit val format: OFormat[DebtItemChargeReference] = Json.format[DebtItemChargeReference]
 }

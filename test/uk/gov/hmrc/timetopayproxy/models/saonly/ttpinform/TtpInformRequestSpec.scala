@@ -21,10 +21,8 @@ import org.scalamock.scalatest.MockFactory
 import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.should.Matchers._
 import play.api.libs.json._
-import uk.gov.hmrc.timetopayproxy.config.FeatureSwitch
 import uk.gov.hmrc.timetopayproxy.models._
 import uk.gov.hmrc.timetopayproxy.models.currency.GbpPounds
-import uk.gov.hmrc.timetopayproxy.models.featureSwitches.SaRelease2Enabled
 import uk.gov.hmrc.timetopayproxy.models.saonly.common._
 import uk.gov.hmrc.timetopayproxy.testutils.JsonAssertionOps._
 import uk.gov.hmrc.timetopayproxy.testutils.schematestutils.Validators
@@ -44,194 +42,6 @@ final class TtpInformRequestSpec extends AnyFreeSpec with MockFactory {
             )
           ),
           paymentPlan = SaOnlyPaymentPlan(
-            arrangementAgreedDate = ArrangementAgreedDate(LocalDate.parse("2020-01-02")),
-            ttpEndDate = TtpEndDate(LocalDate.parse("2020-02-04")),
-            frequency = FrequencyLowercase.Weekly,
-            initialPaymentDate = Some(InitialPaymentDate(LocalDate.parse("2020-04-06"))),
-            initialPaymentAmount = Some(GbpPounds.createOrThrow(100.12)),
-            ddiReference = Some(DdiReference("TestDDIReference"))
-          ),
-          instalments = NonEmptyList.of(
-            SaOnlyInstalment(
-              dueDate = InstalmentDueDate(LocalDate.parse("2020-05-07")),
-              amountDue = GbpPounds.createOrThrow(200.34)
-            )
-          ),
-          channelIdentifier = ChannelIdentifier.SelfService,
-          transitioned = Some(TransitionedIndicator(true))
-        )
-
-        def json: JsValue = Json.parse(
-          """{
-            |  "channelIdentifier" : "selfService",
-            |  "identifications" : [
-            |    {
-            |      "idType" : "idtype",
-            |      "idValue" : "idvalue"
-            |    }
-            |  ],
-            |  "instalments" : [
-            |    {
-            |      "amountDue" : 200.34,
-            |      "dueDate" : "2020-05-07"
-            |    }
-            |  ],
-            |  "paymentPlan" : {
-            |    "arrangementAgreedDate" : "2020-01-02",
-            |    "frequency" : "weekly",
-            |    "initialPaymentAmount" : 100.12,
-            |    "initialPaymentDate" : "2020-04-06",
-            |    "ttpEndDate" : "2020-02-04",
-            |    "ddiReference" : "TestDDIReference"
-            |  },
-            |  "transitioned" : true
-            |}
-            |""".stripMargin
-        )
-      }
-
-      object With0SomeOnEachPath {
-        def obj: TtpInformRequest = TtpInformRequest(
-          identifications = NonEmptyList.of(
-            Identification(
-              idType = IdType("idtype"),
-              idValue = IdValue("idvalue")
-            )
-          ),
-          paymentPlan = SaOnlyPaymentPlan(
-            arrangementAgreedDate = ArrangementAgreedDate(LocalDate.parse("2020-01-02")),
-            ttpEndDate = TtpEndDate(LocalDate.parse("2020-02-04")),
-            frequency = FrequencyLowercase.Weekly,
-            initialPaymentDate = None,
-            initialPaymentAmount = None,
-            ddiReference = None
-          ),
-          instalments = NonEmptyList.of(
-            SaOnlyInstalment(
-              dueDate = InstalmentDueDate(LocalDate.parse("2020-05-07")),
-              amountDue = GbpPounds.createOrThrow(200.34)
-            )
-          ),
-          channelIdentifier = ChannelIdentifier.SelfService,
-          transitioned = None
-        )
-
-        def json: JsValue = Json.parse(
-          """{
-            |  "channelIdentifier" : "selfService",
-            |  "identifications" : [
-            |    {
-            |      "idType" : "idtype",
-            |      "idValue" : "idvalue"
-            |    }
-            |  ],
-            |  "instalments" : [
-            |    {
-            |      "amountDue" : 200.34,
-            |      "dueDate" : "2020-05-07"
-            |    }
-            |  ],
-            |  "paymentPlan" : {
-            |    "arrangementAgreedDate" : "2020-01-02",
-            |    "frequency" : "weekly",
-            |    "ttpEndDate" : "2020-02-04"
-            |  }
-            |}
-            |""".stripMargin
-        )
-      }
-
-    }
-
-    def r2DisabledFs = {
-      val fs = mock[FeatureSwitch]
-      (() => fs.saRelease2Enabled).expects().returning(SaRelease2Enabled(false)).anyNumberOfTimes()
-      fs
-    }
-
-    "implicit JSON writer (data going to time-to-pay)" - {
-      def writerToTtp: Writes[TtpInformRequest] = InformRequest.format(r2DisabledFs).writes(_)
-
-      "when all the optional fields are fully populated" - {
-        def json: JsValue = TestData.WithOnlySomes.json
-        def obj: TtpInformRequest = TestData.WithOnlySomes.obj
-
-        "writes the correct JSON" in {
-          writerToTtp.writes(obj) shouldBeEquivalentTo json
-        }
-
-        "writes JSON compatible with the time-to-pay schema" in {
-          val schema = Validators.TimeToPay.TtpInform.Live.openApiRequestSchema
-          val writtenJson: JsValue = writerToTtp.writes(obj)
-
-          schema.validateAndGetErrors(writtenJson) shouldBe Nil
-        }
-      }
-
-      "when none of the optional fields are populated" - {
-        def json: JsValue = TestData.With0SomeOnEachPath.json
-        def obj: TtpInformRequest = TestData.With0SomeOnEachPath.obj
-
-        "writes the correct JSON" in {
-          writerToTtp.writes(obj) shouldBeEquivalentTo json
-        }
-
-        "writes JSON compatible with the time-to-pay schema" in {
-          val schema = Validators.TimeToPay.TtpInform.Live.openApiRequestSchema
-          val writtenJson: JsValue = writerToTtp.writes(obj)
-
-          schema.validateAndGetErrors(writtenJson) shouldBe Nil
-        }
-      }
-    }
-
-    "implicit JSON reader (data coming from our clients)" - {
-      def readerFromClients: Reads[InformRequest] = InformRequest.format(r2DisabledFs).reads(_)
-
-      "when all the optional fields are fully populated" - {
-        def json: JsValue = TestData.WithOnlySomes.json
-        def obj: TtpInformRequest = TestData.WithOnlySomes.obj
-
-        "reads the JSON correctly" in {
-          readerFromClients.reads(json) shouldBe JsSuccess(obj)
-        }
-
-        "was tested against JSON compatible with our schema" in {
-          val schema = Validators.TimeToPayProxy.TtpInform.Live.openApiRequestSchema
-
-          schema.validateAndGetErrors(json) shouldBe Nil
-        }
-      }
-
-      "when none of the optional fields are populated" - {
-        def json: JsValue = TestData.With0SomeOnEachPath.json
-        def obj: TtpInformRequest = TestData.With0SomeOnEachPath.obj
-
-        "reads the JSON correctly" in {
-          readerFromClients.reads(json) shouldBe JsSuccess(obj)
-        }
-
-        "was tested against JSON compatible with our schema" in {
-          val schema = Validators.TimeToPayProxy.TtpInform.Live.openApiRequestSchema
-
-          schema.validateAndGetErrors(json) shouldBe Nil
-        }
-      }
-    }
-
-  }
-
-  "TtpInformRequestR2" - {
-    object TestData {
-      object WithOnlySomes {
-        def obj: TtpInformRequestR2 = TtpInformRequestR2(
-          identifications = NonEmptyList.of(
-            Identification(
-              idType = IdType("idtype"),
-              idValue = IdValue("idvalue")
-            )
-          ),
-          paymentPlan = SaOnlyPaymentPlanR2(
             arrangementAgreedDate = ArrangementAgreedDate(LocalDate.parse("2020-01-02")),
             ttpEndDate = TtpEndDate(LocalDate.parse("2020-02-04")),
             frequency = FrequencyLowercase.Weekly,
@@ -287,14 +97,14 @@ final class TtpInformRequestSpec extends AnyFreeSpec with MockFactory {
       }
 
       object With0SomeOnEachPath {
-        def obj: TtpInformRequestR2 = TtpInformRequestR2(
+        def obj: TtpInformRequest = TtpInformRequest(
           identifications = NonEmptyList.of(
             Identification(
               idType = IdType("idtype"),
               idValue = IdValue("idvalue")
             )
           ),
-          paymentPlan = SaOnlyPaymentPlanR2(
+          paymentPlan = SaOnlyPaymentPlan(
             arrangementAgreedDate = ArrangementAgreedDate(LocalDate.parse("2020-01-02")),
             ttpEndDate = TtpEndDate(LocalDate.parse("2020-02-04")),
             frequency = FrequencyLowercase.Weekly,
@@ -373,25 +183,19 @@ final class TtpInformRequestSpec extends AnyFreeSpec with MockFactory {
       }
     }
 
-    def r2EnabledFs = {
-      val fs = mock[FeatureSwitch]
-      (() => fs.saRelease2Enabled).expects().returning(SaRelease2Enabled(true)).anyNumberOfTimes()
-      fs
-    }
-
     "implicit JSON writer (data going to time-to-pay)" - {
-      def writerToTtp: Writes[TtpInformRequestR2] = InformRequest.format(r2EnabledFs).writes(_)
+      def writerToTtp: Writes[TtpInformRequest] = TtpInformRequest.format.writes(_)
 
       "when all the optional fields are fully populated" - {
         def json: JsValue = TestData.WithOnlySomes.json
-        def obj: TtpInformRequestR2 = TestData.WithOnlySomes.obj
+        def obj: TtpInformRequest = TestData.WithOnlySomes.obj
 
         "writes the correct JSON" in {
           writerToTtp.writes(obj) shouldBeEquivalentTo json
         }
 
         "writes JSON compatible with the time-to-pay schema" in {
-          val schema = Validators.TimeToPay.TtpInform.Proposed.openApiRequestSchema
+          val schema = Validators.TimeToPay.TtpInform.Live.openApiRequestSchema
           val writtenJson: JsValue = writerToTtp.writes(obj)
 
           schema.validateAndGetErrors(writtenJson) shouldBe Nil
@@ -400,14 +204,14 @@ final class TtpInformRequestSpec extends AnyFreeSpec with MockFactory {
 
       "when none of the optional fields are populated" - {
         def json: JsValue = TestData.With0SomeOnEachPath.json
-        def obj: TtpInformRequestR2 = TestData.With0SomeOnEachPath.obj
+        def obj: TtpInformRequest = TestData.With0SomeOnEachPath.obj
 
         "writes the correct JSON" in {
           writerToTtp.writes(obj) shouldBeEquivalentTo json
         }
 
         "writes JSON compatible with the time-to-pay schema" in {
-          val schema = Validators.TimeToPay.TtpInform.Proposed.openApiRequestSchema
+          val schema = Validators.TimeToPay.TtpInform.Live.openApiRequestSchema
           val writtenJson: JsValue = writerToTtp.writes(obj)
 
           schema.validateAndGetErrors(writtenJson) shouldBe Nil
@@ -416,18 +220,18 @@ final class TtpInformRequestSpec extends AnyFreeSpec with MockFactory {
     }
 
     "implicit JSON reader (data coming from our clients)" - {
-      def readerFromClients: Reads[InformRequest] = InformRequest.format(r2EnabledFs).reads(_)
+      def readerFromClients: Reads[TtpInformRequest] = TtpInformRequest.format.reads(_)
 
       "when all the optional fields are fully populated" - {
         def json: JsValue = TestData.WithOnlySomes.json
-        def obj: TtpInformRequestR2 = TestData.WithOnlySomes.obj
+        def obj: TtpInformRequest = TestData.WithOnlySomes.obj
 
         "reads the JSON correctly" in {
           readerFromClients.reads(json) shouldBe JsSuccess(obj)
         }
 
         "was tested against JSON compatible with our schema" in {
-          val schema = Validators.TimeToPayProxy.TtpInform.Proposed.openApiRequestSchema
+          val schema = Validators.TimeToPayProxy.TtpInform.Live.openApiRequestSchema
 
           schema.validateAndGetErrors(json) shouldBe Nil
         }
@@ -435,14 +239,14 @@ final class TtpInformRequestSpec extends AnyFreeSpec with MockFactory {
 
       "when none of the optional fields are populated" - {
         def json: JsValue = TestData.With0SomeOnEachPath.json
-        def obj: TtpInformRequestR2 = TestData.With0SomeOnEachPath.obj
+        def obj: TtpInformRequest = TestData.With0SomeOnEachPath.obj
 
         "reads the JSON correctly" in {
           readerFromClients.reads(json) shouldBe JsSuccess(obj)
         }
 
         "was tested against JSON compatible with our schema" in {
-          val schema = Validators.TimeToPayProxy.TtpInform.Proposed.openApiRequestSchema
+          val schema = Validators.TimeToPayProxy.TtpInform.Live.openApiRequestSchema
 
           schema.validateAndGetErrors(json) shouldBe Nil
         }
@@ -453,7 +257,7 @@ final class TtpInformRequestSpec extends AnyFreeSpec with MockFactory {
         "fails to read the JSON" in {
           def json: JsValue = TestData.WithEmptyNel.json
 
-          assertThrows[JsResultException](json.as[TtpInformRequestR2](TtpInformRequestR2.r2Format.reads(_)))
+          assertThrows[JsResultException](json.as[TtpInformRequest])
         }
       }
     }
