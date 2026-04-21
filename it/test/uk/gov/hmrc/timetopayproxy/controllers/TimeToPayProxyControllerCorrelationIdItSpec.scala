@@ -18,7 +18,7 @@ package uk.gov.hmrc.timetopayproxy.controllers
 
 import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.client.WireMock._
-import com.github.tomakehurst.wiremock.http.RequestMethod.POST
+import com.github.tomakehurst.wiremock.http.RequestMethod.{GET,POST}
 import play.api.libs.json.Json
 import play.api.libs.ws.WSRequest
 import uk.gov.hmrc.timetopayproxy.models._
@@ -96,6 +96,62 @@ class TimeToPayProxyControllerCorrelationIdItSpec extends IntegrationBaseSpec {
           .withHeader("correlationId", matching(uuidRegex))
           .withHeader("correlationId", WireMock.not(equalTo(testCorrelationId)))
       )
+    }
+  }
+
+  ".viewPlan" - {
+    val customerReference = "testCustomerReference"
+    val planId = "testPlanId"
+
+    "should propagate a correlationId to TTP when it's provided one in the request" in {
+      stubRequest(
+        httpMethod = GET,
+        url = s"/debts/time-to-pay/quote/$customerReference/$planId",
+        status = 200,
+        responseBody = ""
+      )
+
+      val request: WSRequest =
+        buildRequest(s"/quote/$customerReference/$planId")
+          .withHttpHeaders("correlationId" -> testCorrelationId)
+
+      await(request.get())
+
+      verify(
+        getRequestedFor(urlEqualTo(s"/debts/time-to-pay/quote/$customerReference/$planId"))
+          .withHeader("correlationId", equalTo(testCorrelationId))
+      )
+    }
+
+    "should generate a new correlationId to send to TTP when it's not provided in the request" in {
+      stubRequest(
+        httpMethod = GET,
+        url = s"/debts/time-to-pay/quote/$customerReference/$planId",
+        status = 200,
+        responseBody = ""
+      )
+
+      val request: WSRequest = buildRequest(s"/quote/$customerReference/$planId")
+
+      request.header("correlationId") shouldBe None
+
+      await(request.get())
+
+      verify(
+        getRequestedFor(urlEqualTo(s"/debts/time-to-pay/quote/$customerReference/$planId"))
+          .withHeader("correlationId", matching(uuidRegex))
+          .withHeader("correlationId", WireMock.not(equalTo(testCorrelationId)))
+      )
+    }
+  }
+
+  ".AAAAAAA" - {
+    "should propagate a correlationId to TTP when it's provided one in the request" in {
+
+    }
+
+    "should generate a new correlationId to send to TTP when it's not provided in the request" in {
+
     }
   }
 }

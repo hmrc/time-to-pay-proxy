@@ -64,7 +64,7 @@ class TimeToPayProxyController @Inject() (
   }
 
   def viewPlan(customerReference: String, planId: String) =
-    readAuthoriseAction.async { implicit request =>
+    authThenCorrelationIdActions.async { implicit request =>
       timeToPayQuoteService
         .getExistingPlan(CustomerReference(customerReference), PlanId(planId))
         .leftMap(ttppError => ttppError.toWriteableProxyError)

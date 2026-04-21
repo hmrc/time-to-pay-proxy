@@ -136,6 +136,7 @@ class DefaultTtpConnector @Inject() (appConfig: AppConfig, httpClient: HttpClien
     EitherT(
       httpClient
         .get(url)
+        .setHeader(combinedHeaders: _*)
         .execute[Either[ProxyEnvelopeError, ViewPlanResponse]]
     )
   }
