@@ -20,9 +20,9 @@ import cats.data.EitherT
 import com.google.inject.ImplementedBy
 import play.api.libs.json.Json
 import uk.gov.hmrc.http.client.HttpClientV2
-import uk.gov.hmrc.timetopayproxy.connectors.util.httpreadsbuilder.HttpReadsBuilder
 import uk.gov.hmrc.http.{ HeaderCarrier, HttpReads, StringContextOps }
 import uk.gov.hmrc.timetopayproxy.config.{ AppConfig, FeatureSwitch }
+import uk.gov.hmrc.timetopayproxy.connectors.util.httpreadsbuilder.HttpReadsBuilder
 import uk.gov.hmrc.timetopayproxy.logging.RequestAwareLogger
 import uk.gov.hmrc.timetopayproxy.models._
 import uk.gov.hmrc.timetopayproxy.models.affordablequotes.{ AffordableQuoteResponse, AffordableQuotesRequest }
@@ -30,7 +30,6 @@ import uk.gov.hmrc.timetopayproxy.models.error.ProxyEnvelopeError
 import uk.gov.hmrc.timetopayproxy.models.error.TtppEnvelope.TtppEnvelope
 
 import java.net.URLEncoder
-import java.util.UUID
 import javax.inject.{ Inject, Singleton }
 import scala.concurrent.ExecutionContext
 
@@ -99,11 +98,6 @@ class DefaultTtpConnector @Inject() (appConfig: AppConfig, httpClient: HttpClien
 
   val headers: String => Seq[(String, String)] = (guid: String) => Seq("CorrelationId" -> s"$guid")
 
-  private def getOrGenerateCorrelationId(implicit hc: HeaderCarrier): String =
-    (hc.headers(Seq("CorrelationId")) ++ hc.extraHeaders)
-      .toMap[String, String]
-      .getOrElse("CorrelationId", UUID.randomUUID().toString)
-
   def generateQuote(
     ttppRequest: GenerateQuoteRequest,
     queryParams: Seq[(String, String)] = Seq.empty
@@ -122,7 +116,7 @@ class DefaultTtpConnector @Inject() (appConfig: AppConfig, httpClient: HttpClien
       httpClient
         .post(url)
         .withBody(Json.toJson(ttppRequest))
-        .setHeader(headers(getOrGenerateCorrelationId): _*)
+        .setHeader(combinedHeaders: _*)
         .execute[Either[ProxyEnvelopeError, GenerateQuoteResponse]]
     )
   }
@@ -194,8 +188,7 @@ class DefaultTtpConnector @Inject() (appConfig: AppConfig, httpClient: HttpClien
         Seq.empty
       }
 
-    val headers: Seq[(String, String)] =
-      Seq("CorrelationId" -> getOrGenerateCorrelationId) ++ authorizationHeader
+    val headers: Seq[(String, String)] = combinedHeaders ++ authorizationHeader
 
     EitherT(
       httpClient
@@ -229,4 +222,7 @@ class DefaultTtpConnector @Inject() (appConfig: AppConfig, httpClient: HttpClien
     val paramPairs = queryParams.map { case (k, v) => s"$k=${URLEncoder.encode(v, "utf-8")}" }
     if (paramPairs.isEmpty) "" else paramPairs.mkString("?", "&", "")
   }
+
+  private def combinedHeaders(implicit hc: HeaderCarrier): Seq[(String, String)] =
+    hc.headers(List("correlationId")) ++ hc.extraHeaders
 }

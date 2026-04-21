@@ -32,6 +32,7 @@ import uk.gov.hmrc.auth.core.retrieve.{ EmptyRetrieval, Retrieval }
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.timetopayproxy.actions.auth.ReadAuthoriseAction
 import uk.gov.hmrc.timetopayproxy.actions.auth.StoredEnrolmentScope.ReadTimeToPayProxy
+import uk.gov.hmrc.timetopayproxy.actions.correlationid.CorrelationIdPopulationAction
 import uk.gov.hmrc.timetopayproxy.config.FeatureSwitch
 import uk.gov.hmrc.timetopayproxy.models._
 import uk.gov.hmrc.timetopayproxy.models.affordablequotes._
@@ -57,6 +58,7 @@ class TimeToPayProxyControllerSpec extends AnyWordSpec with MockFactory {
   private val cc: ControllerComponents = Helpers.stubControllerComponents()
   private val featureSwitch: FeatureSwitch = mock[FeatureSwitch]
 
+  private val correlationIdPopulationAction: CorrelationIdPopulationAction = new CorrelationIdPopulationAction()
   private val readAuthoriseAction: ReadAuthoriseAction =
     new ReadAuthoriseAction(authConnector, cc, featureSwitch)
 
@@ -65,6 +67,7 @@ class TimeToPayProxyControllerSpec extends AnyWordSpec with MockFactory {
   private val ttpFeedbackLoopService = mock[TtpFeedbackLoopService]
   private val controller =
     new TimeToPayProxyController(
+      correlationIdPopulationAction,
       readAuthoriseAction,
       cc,
       ttpQuoteService,

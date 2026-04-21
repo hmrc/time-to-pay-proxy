@@ -21,6 +21,7 @@ import play.api.libs.json._
 import play.api.mvc._
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
 import uk.gov.hmrc.timetopayproxy.actions.auth.ReadAuthoriseAction
+import uk.gov.hmrc.timetopayproxy.actions.correlationid.CorrelationIdPopulationAction
 import uk.gov.hmrc.timetopayproxy.config.FeatureSwitch
 import uk.gov.hmrc.timetopayproxy.models._
 import uk.gov.hmrc.timetopayproxy.models.affordablequotes.AffordableQuotesRequest
@@ -38,6 +39,7 @@ import scala.util.{ Failure, Success, Try }
 
 @Singleton()
 class TimeToPayProxyController @Inject() (
+  correlationIdPopulationAction: CorrelationIdPopulationAction,
   readAuthoriseAction: ReadAuthoriseAction,
   cc: ControllerComponents,
   timeToPayQuoteService: TTPQuoteService,
@@ -50,7 +52,9 @@ class TimeToPayProxyController @Inject() (
   private val queryParameterNotMatchingPayload =
     "customerReference and planId in the query parameters should match the ones in the request payload"
 
-  def generateQuote: Action[JsValue] = readAuthoriseAction.async(parse.json) { implicit request =>
+  private val authThenCorrelationIdActions = readAuthoriseAction andThen correlationIdPopulationAction
+
+  def generateQuote: Action[JsValue] = authThenCorrelationIdActions.async(parse.json) { implicit request =>
     withJsonBody[GenerateQuoteRequest] { timeToPayRequest: GenerateQuoteRequest =>
       timeToPayQuoteService
         .generateQuote(timeToPayRequest, request.queryString)
