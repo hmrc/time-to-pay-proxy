@@ -72,7 +72,7 @@ class TimeToPayProxyController @Inject() (
     }
 
   def updatePlan(customerReference: String, planId: String): Action[JsValue] =
-    readAuthoriseAction.async(parse.json) { implicit request =>
+    authThenCorrelationIdActions.async(parse.json) { implicit request =>
       withJsonBody[UpdatePlanRequest] { updatePlanRequest: UpdatePlanRequest =>
         val result = for {
           validatedUpdatePlanRequest <-

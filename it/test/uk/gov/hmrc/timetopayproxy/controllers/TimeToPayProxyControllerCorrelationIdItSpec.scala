@@ -18,7 +18,7 @@ package uk.gov.hmrc.timetopayproxy.controllers
 
 import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.client.WireMock._
-import com.github.tomakehurst.wiremock.http.RequestMethod.{GET,POST}
+import com.github.tomakehurst.wiremock.http.RequestMethod.{GET, POST, PUT}
 import play.api.libs.json.Json
 import play.api.libs.ws.WSRequest
 import uk.gov.hmrc.timetopayproxy.models._
@@ -139,6 +139,73 @@ class TimeToPayProxyControllerCorrelationIdItSpec extends IntegrationBaseSpec {
 
       verify(
         getRequestedFor(urlEqualTo(s"/debts/time-to-pay/quote/$customerReference/$planId"))
+          .withHeader("correlationId", matching(uuidRegex))
+          .withHeader("correlationId", WireMock.not(equalTo(testCorrelationId)))
+      )
+    }
+  }
+
+  ".updatePlan" - {
+    val customerReference = "testCustomerReference"
+    val planId = "testPlanId"
+
+    val updatePlanRequest: UpdatePlanRequest =
+      UpdatePlanRequest(
+        CustomerReference(customerReference),
+        PlanId(planId),
+        UpdateType("updateType"),
+        channelIdentifier = None,
+        Some(PlanStatus.Success),
+        completeReason = None,
+        Some(CancellationReason("reason")),
+        thirdPartyBank = Some(true),
+        payments = Some(
+          List(
+            PaymentInformation(PaymentMethod.Bacs, Some(PaymentReference("reference")))
+          )
+        )
+      )
+
+    "should propagate a correlationId to TTP when it's provided one in the request" in {
+      stubRequest(
+        httpMethod = PUT,
+        url = s"/debts/time-to-pay/quote/$customerReference/$planId",
+        status = 200,
+        responseBody = ""
+      )
+
+      val request: WSRequest =
+        buildRequest(s"/quote/$customerReference/$planId")
+          .withHttpHeaders("correlationId" -> testCorrelationId)
+
+      await(
+        request.put(Json.toJson(updatePlanRequest))
+      )
+
+      verify(
+        putRequestedFor(urlEqualTo(s"/debts/time-to-pay/quote/$customerReference/$planId"))
+          .withHeader("correlationId", equalTo(testCorrelationId))
+      )
+    }
+
+    "should generate a new correlationId to send to TTP when it's not provided in the request" in {
+      stubRequest(
+        httpMethod = PUT,
+        url = s"/debts/time-to-pay/quote/$customerReference/$planId",
+        status = 200,
+        responseBody = ""
+      )
+
+      val request: WSRequest = buildRequest(s"/quote/$customerReference/$planId")
+
+      request.header("correlationId") shouldBe None
+
+      await(
+        request.put(Json.toJson(updatePlanRequest))
+      )
+
+      verify(
+        putRequestedFor(urlEqualTo(s"/debts/time-to-pay/quote/$customerReference/$planId"))
           .withHeader("correlationId", matching(uuidRegex))
           .withHeader("correlationId", WireMock.not(equalTo(testCorrelationId)))
       )

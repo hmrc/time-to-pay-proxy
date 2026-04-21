@@ -163,6 +163,7 @@ class DefaultTtpConnector @Inject() (appConfig: AppConfig, httpClient: HttpClien
       httpClient
         .put(url)
         .withBody(Json.toJson(updatePlanRequest))
+        .setHeader(combinedHeaders: _*)
         .execute[Either[ProxyEnvelopeError, UpdatePlanResponse]]
     )
   }
