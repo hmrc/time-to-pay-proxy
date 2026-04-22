@@ -212,6 +212,108 @@ class TimeToPayProxyControllerCorrelationIdItSpec extends IntegrationBaseSpec {
     }
   }
 
+  ".createPlan" - {
+    val createPlanRequest: CreatePlanRequest = CreatePlanRequest(
+      CustomerReference("customerReference"),
+      QuoteReference("quoteReference"),
+      ChannelIdentifier.Advisor,
+      PlanToCreatePlan(
+        QuoteId("quoteId"),
+        QuoteType.Duration,
+        quoteDate = LocalDate.parse("2010-02-02"),
+        instalmentStartDate = LocalDate.parse("2010-02-02"),
+        instalmentAmount = Some(100),
+        PaymentPlanType.TimeToPay,
+        thirdPartyBank = false,
+        numberOfInstalments = 2,
+        Some(FrequencyLowercase.Single),
+        Some(Duration(2)),
+        Some(PaymentMethod.Bacs),
+        Some(PaymentReference("ref123")),
+        initialPaymentDate = Some(LocalDate.parse("2010-02-02")),
+        initialPaymentAmount = Some(100),
+        totalDebtIncInt = 100,
+        totalInterest = 10,
+        interestAccrued = 10,
+        planInterest = 10
+      ),
+      List(
+        CreatePlanDebtItemCharge(
+          DebtItemChargeId("debtItemChargeId"),
+          mainTrans = "1525",
+          subTrans = "1000",
+          originalDebtAmount = 100,
+          interestStartDate = Some(LocalDate.parse("2010-02-02")),
+          List(Payment(LocalDate.parse("2020-01-01"), 100)),
+          dueDate = None,
+          chargeSource = None,
+          parentChargeReference = None,
+          parentMainTrans = None
+        )
+      ),
+      List(PaymentInformation(PaymentMethod.Bacs, Some(PaymentReference("ref123")))),
+      List(CustomerPostCode(PostCode("NW1 AB1"), postcodeDate = LocalDate.parse("2010-02-02"))),
+      List(
+        Instalment(
+          DebtItemChargeId("id1"),
+          dueDate = LocalDate.parse("2010-02-02"),
+          amountDue = 100,
+          expectedPayment = 100,
+          interestRate = 0.24,
+          instalmentNumber = 1,
+          instalmentInterestAccrued = 10,
+          instalmentBalance = 90
+        )
+      ),
+      regimeType = None
+    )
+
+    "should propagate a correlationId to TTP when it's provided one in the request" in {
+      stubRequest(
+        httpMethod = POST,
+        url = "/debts/time-to-pay/quote/arrangement",
+        status = 200,
+        responseBody = ""
+      )
+
+      val request: WSRequest =
+        buildRequest("/quote/arrangement")
+          .withHttpHeaders("correlationId" -> testCorrelationId)
+
+      await(
+        request.post(Json.toJson(createPlanRequest))
+      )
+
+      verify(
+        postRequestedFor(urlEqualTo("/debts/time-to-pay/quote/arrangement"))
+          .withHeader("correlationId", equalTo(testCorrelationId))
+      )
+    }
+
+    "should generate a new correlationId to send to TTP when it's not provided in the request" in {
+      stubRequest(
+        httpMethod = POST,
+        url = "/debts/time-to-pay/quote/arrangement",
+        status = 200,
+        responseBody = ""
+      )
+
+      val request: WSRequest = buildRequest("/quote/arrangement")
+
+      request.header("correlationId") shouldBe None
+
+      await(
+        request.post(Json.toJson(createPlanRequest))
+      )
+
+      verify(
+        postRequestedFor(urlEqualTo("/debts/time-to-pay/quote/arrangement"))
+          .withHeader("correlationId", matching(uuidRegex))
+          .withHeader("correlationId", WireMock.not(equalTo(testCorrelationId)))
+      )
+    }
+  }
+
   ".AAAAAAA" - {
     "should propagate a correlationId to TTP when it's provided one in the request" in {
 

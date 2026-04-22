@@ -86,7 +86,7 @@ class TimeToPayProxyController @Inject() (
       }
     }
 
-  def createPlan = readAuthoriseAction.async(parse.json) { implicit request =>
+  def createPlan = authThenCorrelationIdActions.async(parse.json) { implicit request =>
     withJsonBody[CreatePlanRequest] { createPlanRequest: CreatePlanRequest =>
       timeToPayQuoteService
         .createPlan(createPlanRequest, request.queryString)
