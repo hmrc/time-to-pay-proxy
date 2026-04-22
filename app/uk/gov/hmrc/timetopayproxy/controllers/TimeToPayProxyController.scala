@@ -122,7 +122,7 @@ class TimeToPayProxyController @Inject() (
     }
   }
 
-  def cancelTtp: Action[JsValue] = readAuthoriseAction.async(parse.json) { implicit request =>
+  def cancelTtp: Action[JsValue] = authThenCorrelationIdActions.async(parse.json) { implicit request =>
     if (featureSwitch.cancelEndpointEnabled) {
       if (featureSwitch.saRelease2Enabled.enabled) {
         withJsonBody[TtpCancelRequestR2] { deserialisedRequest: TtpCancelRequestR2 =>

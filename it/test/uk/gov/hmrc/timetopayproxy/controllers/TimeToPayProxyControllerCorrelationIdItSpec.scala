@@ -24,15 +24,17 @@ import play.api.libs.json.Json
 import play.api.libs.ws.WSRequest
 import uk.gov.hmrc.timetopayproxy.models._
 import uk.gov.hmrc.timetopayproxy.models.affordablequotes.AffordableQuotesRequest
+import uk.gov.hmrc.timetopayproxy.models.currency.GbpPounds
 import uk.gov.hmrc.timetopayproxy.models.saonly.chargeInfoApi.{ChargeInfoChannelIdentifier, ChargeInfoRequest}
-import uk.gov.hmrc.timetopayproxy.models.saonly.common.SaOnlyRegimeType
+import uk.gov.hmrc.timetopayproxy.models.saonly.common.{ArrangementAgreedDate, ChargeSourceSAOnly, DebtItemChargeReference, InitialPaymentDate, SaOnlyInstalment, SaOnlyRegimeType, TransitionedIndicator, TtpEndDate}
+import uk.gov.hmrc.timetopayproxy.models.saonly.ttpcancel.{CancellationDate, TtpCancelPaymentPlanR2, TtpCancelRequestR2}
 import uk.gov.hmrc.timetopayproxy.support.IntegrationBaseSpec
 
 import java.time.LocalDate
 import java.util.UUID
 
 class TimeToPayProxyControllerCorrelationIdItSpec extends IntegrationBaseSpec {
-  def internalAuthEnabled: Boolean = false
+  def internalAuthEnabled: Boolean = true
   def enrolmentAuthEnabled: Boolean = false
   def saRelease2Enabled: Boolean = true
 
@@ -446,6 +448,93 @@ class TimeToPayProxyControllerCorrelationIdItSpec extends IntegrationBaseSpec {
 
       verify(
         postRequestedFor(urlEqualTo("/debts/time-to-pay/charge-info"))
+          .withHeader("correlationId", matching(uuidRegex))
+          .withHeader("correlationId", WireMock.not(equalTo(testCorrelationId)))
+      )
+    }
+  }
+
+  ".cancelTtp" - {
+    val cancelRequest: TtpCancelRequestR2 =
+      TtpCancelRequestR2(
+        identifications = NonEmptyList.of(
+          Identification(
+            idType = IdType("idtype"),
+            idValue = IdValue("idvalue")
+          )
+        ),
+        paymentPlan = TtpCancelPaymentPlanR2(
+          arrangementAgreedDate = Some(ArrangementAgreedDate(LocalDate.parse("2020-01-02"))),
+          ttpEndDate = Some(TtpEndDate(LocalDate.parse("2020-02-04"))),
+          frequency = Some(FrequencyLowercase.Weekly),
+          cancellationDate = CancellationDate(LocalDate.parse("2020-03-05")),
+          initialPaymentDate = Some(InitialPaymentDate(LocalDate.parse("2020-04-06"))),
+          initialPaymentAmount = Some(GbpPounds.createOrThrow(100.12)),
+          debtItemCharges = NonEmptyList.of(
+            DebtItemChargeReference(
+              debtItemChargeId = DebtItemChargeId("ETMP001"),
+              chargeSource = ChargeSourceSAOnly.ETMP
+            ),
+            DebtItemChargeReference(
+              debtItemChargeId = DebtItemChargeId("CESA001"),
+              chargeSource = ChargeSourceSAOnly.CESA
+            ),
+            DebtItemChargeReference(
+              debtItemChargeId = DebtItemChargeId("ETMP002"),
+              chargeSource = ChargeSourceSAOnly.ETMP
+            )
+          )
+        ),
+        instalments = NonEmptyList.of(
+          SaOnlyInstalment(
+            dueDate = InstalmentDueDate(LocalDate.parse("2020-05-07")),
+            amountDue = GbpPounds.createOrThrow(200.34)
+          )
+        ),
+        channelIdentifier = ChannelIdentifier.SelfService,
+        transitioned = Some(TransitionedIndicator(true))
+      )
+
+    "should propagate a correlationId to TTP when it's provided one in the request" in {
+      stubRequest(
+        httpMethod = POST,
+        url = "/debts/time-to-pay/cancel",
+        status = 200,
+        responseBody = ""
+      )
+
+      val request: WSRequest =
+        buildRequest("/cancel")
+          .withHttpHeaders("correlationId" -> testCorrelationId)
+
+      await(
+        request.post(Json.toJson(cancelRequest))
+      )
+
+      verify(
+        postRequestedFor(urlEqualTo("/debts/time-to-pay/cancel"))
+          .withHeader("correlationId", equalTo(testCorrelationId))
+      )
+    }
+
+    "should generate a new correlationId to send to TTP when it's not provided in the request" in {
+      stubRequest(
+        httpMethod = POST,
+        url = "/debts/time-to-pay/cancel",
+        status = 200,
+        responseBody = ""
+      )
+
+      val request: WSRequest = buildRequest("/cancel")
+
+      request.header("correlationId") shouldBe None
+
+      await(
+        request.post(Json.toJson(cancelRequest))
+      )
+
+      verify(
+        postRequestedFor(urlEqualTo("/debts/time-to-pay/cancel"))
           .withHeader("correlationId", matching(uuidRegex))
           .withHeader("correlationId", WireMock.not(equalTo(testCorrelationId)))
       )
