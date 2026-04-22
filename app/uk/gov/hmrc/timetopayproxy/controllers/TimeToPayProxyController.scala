@@ -95,7 +95,7 @@ class TimeToPayProxyController @Inject() (
     }
   }
 
-  def getAffordableQuotes = readAuthoriseAction.async(parse.json) { implicit request =>
+  def getAffordableQuotes = authThenCorrelationIdActions.async(parse.json) { implicit request =>
     withJsonBody[AffordableQuotesRequest] { affordableQuoteRequest: AffordableQuotesRequest =>
       timeToPayQuoteService
         .getAffordableQuotes(affordableQuoteRequest)

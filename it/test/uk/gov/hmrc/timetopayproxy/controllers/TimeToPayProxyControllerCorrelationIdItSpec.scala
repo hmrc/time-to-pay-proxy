@@ -22,6 +22,7 @@ import com.github.tomakehurst.wiremock.http.RequestMethod.{GET, POST, PUT}
 import play.api.libs.json.Json
 import play.api.libs.ws.WSRequest
 import uk.gov.hmrc.timetopayproxy.models._
+import uk.gov.hmrc.timetopayproxy.models.affordablequotes.AffordableQuotesRequest
 import uk.gov.hmrc.timetopayproxy.support.IntegrationBaseSpec
 
 import java.time.LocalDate
@@ -308,6 +309,84 @@ class TimeToPayProxyControllerCorrelationIdItSpec extends IntegrationBaseSpec {
 
       verify(
         postRequestedFor(urlEqualTo("/debts/time-to-pay/quote/arrangement"))
+          .withHeader("correlationId", matching(uuidRegex))
+          .withHeader("correlationId", WireMock.not(equalTo(testCorrelationId)))
+      )
+    }
+  }
+
+  ".getAffordableQuotes" - {
+    val affordableQuotesRequest: AffordableQuotesRequest = AffordableQuotesRequest(
+      channelIdentifier = "eSSTTP",
+      paymentPlanAffordableAmount = 500,
+      paymentPlanFrequency = FrequencyCapitalised.Monthly,
+      paymentPlanMaxLength = Duration(6),
+      paymentPlanMinLength = Duration(1),
+      accruedDebtInterest = 500,
+      paymentPlanStartDate = LocalDate.parse("2022-02-02"),
+      initialPaymentDate = Some(LocalDate.parse("2022-02-02")),
+      initialPaymentAmount = Some(500),
+      debtItemCharges = List(
+        DebtItemChargeSelfServe(
+          outstandingDebtAmount = 100000,
+          mainTrans = "1525",
+          subTrans = "1000",
+          DebtItemChargeId("ChargeRef 0903_2"),
+          interestStartDate = Some(LocalDate.parse("2021-09-03")),
+          debtItemOriginalDueDate = LocalDate.parse("2010-02-02"),
+          IsInterestBearingCharge(true),
+          UseChargeReference(false)
+        )
+      ),
+      customerPostcodes = List(
+        CustomerPostCode(
+          PostCode("some postcode"),
+          LocalDate.parse("2022-03-09")
+        )
+      ),
+      regimeType = Some(SsttpRegimeType.SA)
+    )
+
+    "should propagate a correlationId to TTP when it's provided one in the request" in {
+      stubRequest(
+        httpMethod = POST,
+        url = "/debts/time-to-pay/affordability/affordable-quotes",
+        status = 200,
+        responseBody = ""
+      )
+
+      val request: WSRequest =
+        buildRequest("/self-serve/affordable-quotes")
+          .withHttpHeaders("correlationId" -> testCorrelationId)
+
+      await(
+        request.post(Json.toJson(affordableQuotesRequest))
+      )
+
+      verify(
+        postRequestedFor(urlEqualTo("/debts/time-to-pay/affordability/affordable-quotes"))
+          .withHeader("correlationId", equalTo(testCorrelationId))
+      )
+    }
+
+    "should generate a new correlationId to send to TTP when it's not provided in the request" in {
+      stubRequest(
+        httpMethod = POST,
+        url = "/debts/time-to-pay/affordability/affordable-quotes",
+        status = 200,
+        responseBody = ""
+      )
+
+      val request: WSRequest = buildRequest("/self-serve/affordable-quotes")
+
+      request.header("correlationId") shouldBe None
+
+      await(
+        request.post(Json.toJson(affordableQuotesRequest))
+      )
+
+      verify(
+        postRequestedFor(urlEqualTo("/debts/time-to-pay/affordability/affordable-quotes"))
           .withHeader("correlationId", matching(uuidRegex))
           .withHeader("correlationId", WireMock.not(equalTo(testCorrelationId)))
       )

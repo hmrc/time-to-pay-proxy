@@ -216,6 +216,7 @@ class DefaultTtpConnector @Inject() (appConfig: AppConfig, httpClient: HttpClien
       httpClient
         .post(url)
         .withBody(Json.toJson(affordableQuotesRequest))
+        .setHeader(combinedHeaders: _*)
         .execute[Either[ProxyEnvelopeError, AffordableQuoteResponse]]
     )
   }
