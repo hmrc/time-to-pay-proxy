@@ -32,11 +32,12 @@ class CorrelationIdPopulationAction @Inject() ()(implicit ec: ExecutionContext) 
     val baseHeaderCarrier: HeaderCarrier = HeaderCarrierConverter.fromRequest(request)
 
     request.headers.get("correlationId") match {
-      case Some(_) =>
-        Future.successful(request)
+      case Some(correlationId) =>
+        // The .remove then .add will handle case insensitivity and keep it consistent when propagating
+        Future.successful(request.withHeaders(request.headers.remove("correlationId").add("correlationId" -> correlationId)))
       case None =>
         val generatedCorrelationId = UUID.randomUUID().toString
-        logger.warn(s"No correlationId found in request header for ${request.uri}, generated: $generatedCorrelationId")(
+        logger.warn(s"[CORRELATION ID] Not found in request header for ${request.uri}, generated new correlationId: $generatedCorrelationId")(
           baseHeaderCarrier
         )
         Future.successful(request.withHeaders(request.headers.add("correlationId" -> generatedCorrelationId)))
