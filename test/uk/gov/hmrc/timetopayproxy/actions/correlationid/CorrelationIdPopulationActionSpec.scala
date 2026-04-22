@@ -17,7 +17,7 @@
 package uk.gov.hmrc.timetopayproxy.actions.correlationid
 
 import ch.qos.logback.classic.spi.ILoggingEvent
-import ch.qos.logback.classic.{Level, Logger}
+import ch.qos.logback.classic.{ Level, Logger }
 import ch.qos.logback.core.read.ListAppender
 import org.scalatest.concurrent.ScalaFutures.convertScalaFuture
 import org.scalatest.freespec.AnyFreeSpec
@@ -44,11 +44,10 @@ class CorrelationIdPopulationActionSpec extends AnyFreeSpec {
     appender.start()
     logger.addAppender(appender)
 
-    try {
+    try
       body(appender)
-    } finally {
+    finally
       logger.detachAppender(appender)
-    }
   }
 
   val testCorrelationIdPopulationAction = new TestCorrelationIdPopulationAction()
@@ -86,18 +85,20 @@ class CorrelationIdPopulationActionSpec extends AnyFreeSpec {
           maybeGeneratedCorrelationId should not be None
           maybeGeneratedCorrelationId.get should fullyMatch regex "[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}"
 
-          val generatedCorrelationId = maybeGeneratedCorrelationId.getOrElse(fail("Generated correlationId was somehow None after assertion"))
+          val generatedCorrelationId =
+            maybeGeneratedCorrelationId.getOrElse(fail("Generated correlationId was somehow None after assertion"))
 
           val logs = appender.list.asScala
-          logs.exists(event => {
-
+          logs.exists { event =>
             // Duplicate assertions here because the shouldBe true at the bottom doesn't point to what exactly failed
             event.getLevel shouldBe Level.WARN
             event.getFormattedMessage shouldBe s"[CORRELATION ID] Not found in request header for $requestUri, generated new correlationId: $generatedCorrelationId"
 
             event.getLevel == Level.WARN &&
-              event.getFormattedMessage.contains(s"[CORRELATION ID] Not found in request header for $requestUri, generated new correlationId: $generatedCorrelationId")
-          }) shouldBe true
+            event.getFormattedMessage.contains(
+              s"[CORRELATION ID] Not found in request header for $requestUri, generated new correlationId: $generatedCorrelationId"
+            )
+          } shouldBe true
           // This assertion of shouldBe true makes sure that the log actually happened
         }
       }

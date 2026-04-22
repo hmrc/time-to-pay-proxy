@@ -25,7 +25,8 @@ import java.util.UUID
 import javax.inject.Inject
 import scala.concurrent.{ ExecutionContext, Future }
 
-class CorrelationIdPopulationAction @Inject() ()(implicit ec: ExecutionContext) extends ActionTransformer[Request, Request] {
+class CorrelationIdPopulationAction @Inject() ()(implicit ec: ExecutionContext)
+    extends ActionTransformer[Request, Request] {
   private val logger = new RequestAwareLogger(this.getClass)
 
   override protected def transform[A](request: Request[A]): Future[Request[A]] = {
@@ -34,10 +35,14 @@ class CorrelationIdPopulationAction @Inject() ()(implicit ec: ExecutionContext) 
     request.headers.get("correlationId") match {
       case Some(correlationId) =>
         // The .remove then .add will handle case insensitivity and keep it consistent when propagating
-        Future.successful(request.withHeaders(request.headers.remove("correlationId").add("correlationId" -> correlationId)))
+        Future.successful(
+          request.withHeaders(request.headers.remove("correlationId").add("correlationId" -> correlationId))
+        )
       case None =>
         val generatedCorrelationId = UUID.randomUUID().toString
-        logger.warn(s"[CORRELATION ID] Not found in request header for ${request.uri}, generated new correlationId: $generatedCorrelationId")(
+        logger.warn(
+          s"[CORRELATION ID] Not found in request header for ${request.uri}, generated new correlationId: $generatedCorrelationId"
+        )(
           baseHeaderCarrier
         )
         Future.successful(request.withHeaders(request.headers.add("correlationId" -> generatedCorrelationId)))

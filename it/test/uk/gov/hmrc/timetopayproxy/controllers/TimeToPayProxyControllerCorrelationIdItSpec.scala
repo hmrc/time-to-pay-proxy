@@ -19,16 +19,16 @@ package uk.gov.hmrc.timetopayproxy.controllers
 import cats.data.NonEmptyList
 import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.client.WireMock._
-import com.github.tomakehurst.wiremock.http.RequestMethod.{GET, POST, PUT}
+import com.github.tomakehurst.wiremock.http.RequestMethod.{ GET, POST, PUT }
 import play.api.libs.json.Json
 import play.api.libs.ws.WSRequest
 import uk.gov.hmrc.timetopayproxy.models._
 import uk.gov.hmrc.timetopayproxy.models.affordablequotes.AffordableQuotesRequest
 import uk.gov.hmrc.timetopayproxy.models.currency.GbpPounds
-import uk.gov.hmrc.timetopayproxy.models.saonly.chargeInfoApi.{ChargeInfoChannelIdentifier, ChargeInfoRequest}
-import uk.gov.hmrc.timetopayproxy.models.saonly.common.{ArrangementAgreedDate, ChargeSourceSAOnly, DdiReference, DebtItemChargeReference, InitialPaymentDate, SaOnlyInstalment, SaOnlyPaymentPlan, SaOnlyRegimeType, TransitionedIndicator, TtpEndDate}
-import uk.gov.hmrc.timetopayproxy.models.saonly.ttpcancel.{CancellationDate, TtpCancelPaymentPlanR2, TtpCancelRequestR2}
-import uk.gov.hmrc.timetopayproxy.models.saonly.ttpfullamend.{ChargeAmendment, NewDebtItemChargeReference, NewPaymentPlan, OriginalPaymentPlan, TtpFullAmendRequestR2}
+import uk.gov.hmrc.timetopayproxy.models.saonly.chargeInfoApi.{ ChargeInfoChannelIdentifier, ChargeInfoRequest }
+import uk.gov.hmrc.timetopayproxy.models.saonly.common.{ ArrangementAgreedDate, ChargeSourceSAOnly, DdiReference, DebtItemChargeReference, InitialPaymentDate, SaOnlyInstalment, SaOnlyPaymentPlan, SaOnlyRegimeType, TransitionedIndicator, TtpEndDate }
+import uk.gov.hmrc.timetopayproxy.models.saonly.ttpcancel.{ CancellationDate, TtpCancelPaymentPlanR2, TtpCancelRequestR2 }
+import uk.gov.hmrc.timetopayproxy.models.saonly.ttpfullamend.{ ChargeAmendment, NewDebtItemChargeReference, NewPaymentPlan, OriginalPaymentPlan, TtpFullAmendRequestR2 }
 import uk.gov.hmrc.timetopayproxy.models.saonly.ttpinform.TtpInformRequest
 import uk.gov.hmrc.timetopayproxy.support.IntegrationBaseSpec
 
