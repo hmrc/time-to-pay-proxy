@@ -26,8 +26,9 @@ import uk.gov.hmrc.timetopayproxy.models._
 import uk.gov.hmrc.timetopayproxy.models.affordablequotes.AffordableQuotesRequest
 import uk.gov.hmrc.timetopayproxy.models.currency.GbpPounds
 import uk.gov.hmrc.timetopayproxy.models.saonly.chargeInfoApi.{ChargeInfoChannelIdentifier, ChargeInfoRequest}
-import uk.gov.hmrc.timetopayproxy.models.saonly.common.{ArrangementAgreedDate, ChargeSourceSAOnly, DebtItemChargeReference, InitialPaymentDate, SaOnlyInstalment, SaOnlyRegimeType, TransitionedIndicator, TtpEndDate}
+import uk.gov.hmrc.timetopayproxy.models.saonly.common.{ArrangementAgreedDate, ChargeSourceSAOnly, DdiReference, DebtItemChargeReference, InitialPaymentDate, SaOnlyInstalment, SaOnlyPaymentPlan, SaOnlyRegimeType, TransitionedIndicator, TtpEndDate}
 import uk.gov.hmrc.timetopayproxy.models.saonly.ttpcancel.{CancellationDate, TtpCancelPaymentPlanR2, TtpCancelRequestR2}
+import uk.gov.hmrc.timetopayproxy.models.saonly.ttpinform.TtpInformRequest
 import uk.gov.hmrc.timetopayproxy.support.IntegrationBaseSpec
 
 import java.time.LocalDate
@@ -535,6 +536,83 @@ class TimeToPayProxyControllerCorrelationIdItSpec extends IntegrationBaseSpec {
 
       verify(
         postRequestedFor(urlEqualTo("/debts/time-to-pay/cancel"))
+          .withHeader("correlationId", matching(uuidRegex))
+          .withHeader("correlationId", WireMock.not(equalTo(testCorrelationId)))
+      )
+    }
+  }
+
+  ".informTtp" - {
+    val informRequest: TtpInformRequest =
+      TtpInformRequest(
+        identifications = NonEmptyList.of(
+          Identification(
+            idType = IdType("idtype"),
+            idValue = IdValue("idvalue")
+          )
+        ),
+        paymentPlan = SaOnlyPaymentPlan(
+          arrangementAgreedDate = ArrangementAgreedDate(LocalDate.parse("2020-01-02")),
+          ttpEndDate = TtpEndDate(LocalDate.parse("2020-02-04")),
+          frequency = FrequencyLowercase.Weekly,
+          initialPaymentDate = Some(InitialPaymentDate(LocalDate.parse("2020-04-06"))),
+          initialPaymentAmount = Some(GbpPounds.createOrThrow(100.12)),
+          ddiReference = Some(DdiReference("TestDDIReference")),
+          debtItemCharges = NonEmptyList.of(
+            DebtItemChargeReference(DebtItemChargeId("cesa-charge"), ChargeSourceSAOnly.CESA),
+            DebtItemChargeReference(DebtItemChargeId("etmp-charge"), ChargeSourceSAOnly.ETMP)
+          )
+        ),
+        instalments = NonEmptyList.of(
+          SaOnlyInstalment(
+            dueDate = InstalmentDueDate(LocalDate.parse("2020-05-07")),
+            amountDue = GbpPounds.createOrThrow(200.34)
+          )
+        ),
+        channelIdentifier = ChannelIdentifier.SelfService,
+        transitioned = Some(TransitionedIndicator(true))
+      )
+
+    "should propagate a correlationId to TTP when it's provided one in the request" in {
+      stubRequest(
+        httpMethod = POST,
+        url = "/debts/time-to-pay/inform",
+        status = 200,
+        responseBody = ""
+      )
+
+      val request: WSRequest =
+        buildRequest("/inform")
+          .withHttpHeaders("correlationId" -> testCorrelationId)
+
+      await(
+        request.post(Json.toJson(informRequest))
+      )
+
+      verify(
+        postRequestedFor(urlEqualTo("/debts/time-to-pay/inform"))
+          .withHeader("correlationId", equalTo(testCorrelationId))
+      )
+    }
+
+    "should generate a new correlationId to send to TTP when it's not provided in the request" in {
+      stubRequest(
+        httpMethod = POST,
+        url = "/debts/time-to-pay/inform",
+        status = 200,
+        responseBody = ""
+      )
+
+      val request: WSRequest = buildRequest("/inform")
+
+      request.header("correlationId") shouldBe None
+
+      await(
+        request.post(Json.toJson(informRequest))
+      )
+
+      verify(
+        postRequestedFor(urlEqualTo("/debts/time-to-pay/inform"))
           .withHeader("correlationId", matching(uuidRegex))
           .withHeader("correlationId", WireMock.not(equalTo(testCorrelationId)))
       )

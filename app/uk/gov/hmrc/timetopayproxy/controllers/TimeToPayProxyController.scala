@@ -146,7 +146,7 @@ class TimeToPayProxyController @Inject() (
     }
   }
 
-  def informTtp: Action[JsValue] = readAuthoriseAction.async(parse.json) { implicit request =>
+  def informTtp: Action[JsValue] = authThenCorrelationIdActions.async(parse.json) { implicit request =>
     if (featureSwitch.informEndpointEnabled) {
       withJsonBody[TtpInformRequest] { deserialisedRequest: TtpInformRequest =>
         ttpFeedbackLoopService
