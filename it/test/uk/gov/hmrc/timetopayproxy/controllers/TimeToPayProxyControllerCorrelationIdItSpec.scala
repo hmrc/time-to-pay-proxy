@@ -16,6 +16,7 @@
 
 package uk.gov.hmrc.timetopayproxy.controllers
 
+import cats.data.NonEmptyList
 import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.client.WireMock._
 import com.github.tomakehurst.wiremock.http.RequestMethod.{GET, POST, PUT}
@@ -23,6 +24,8 @@ import play.api.libs.json.Json
 import play.api.libs.ws.WSRequest
 import uk.gov.hmrc.timetopayproxy.models._
 import uk.gov.hmrc.timetopayproxy.models.affordablequotes.AffordableQuotesRequest
+import uk.gov.hmrc.timetopayproxy.models.saonly.chargeInfoApi.{ChargeInfoChannelIdentifier, ChargeInfoRequest}
+import uk.gov.hmrc.timetopayproxy.models.saonly.common.SaOnlyRegimeType
 import uk.gov.hmrc.timetopayproxy.support.IntegrationBaseSpec
 
 import java.time.LocalDate
@@ -387,6 +390,62 @@ class TimeToPayProxyControllerCorrelationIdItSpec extends IntegrationBaseSpec {
 
       verify(
         postRequestedFor(urlEqualTo("/debts/time-to-pay/affordability/affordable-quotes"))
+          .withHeader("correlationId", matching(uuidRegex))
+          .withHeader("correlationId", WireMock.not(equalTo(testCorrelationId)))
+      )
+    }
+  }
+
+  ".checkChargeInfo" - {
+    val chargeInfoRequest: ChargeInfoRequest = ChargeInfoRequest(
+      channelIdentifier = ChargeInfoChannelIdentifier("Channel Identifier"),
+      identifications = NonEmptyList.of(
+        Identification(idType = IdType("id type 1"), idValue = IdValue("id value 1")),
+        Identification(idType = IdType("id type 2"), idValue = IdValue("id value 2"))
+      ),
+      regimeType = SaOnlyRegimeType.SA
+    )
+
+    "should propagate a correlationId to TTP when it's provided one in the request" in {
+      stubRequest(
+        httpMethod = POST,
+        url = "/debts/time-to-pay/charge-info",
+        status = 200,
+        responseBody = ""
+      )
+
+      val request: WSRequest =
+        buildRequest("/charge-info")
+          .withHttpHeaders("correlationId" -> testCorrelationId)
+
+      await(
+        request.post(Json.toJson(chargeInfoRequest))
+      )
+
+      verify(
+        postRequestedFor(urlEqualTo("/debts/time-to-pay/charge-info"))
+          .withHeader("correlationId", equalTo(testCorrelationId))
+      )
+    }
+
+    "should generate a new correlationId to send to TTP when it's not provided in the request" in {
+      stubRequest(
+        httpMethod = POST,
+        url = "/debts/time-to-pay/charge-info",
+        status = 200,
+        responseBody = ""
+      )
+
+      val request: WSRequest = buildRequest("/charge-info")
+
+      request.header("correlationId") shouldBe None
+
+      await(
+        request.post(Json.toJson(chargeInfoRequest))
+      )
+
+      verify(
+        postRequestedFor(urlEqualTo("/debts/time-to-pay/charge-info"))
           .withHeader("correlationId", matching(uuidRegex))
           .withHeader("correlationId", WireMock.not(equalTo(testCorrelationId)))
       )

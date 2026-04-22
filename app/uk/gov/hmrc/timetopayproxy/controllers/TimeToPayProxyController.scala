@@ -104,7 +104,7 @@ class TimeToPayProxyController @Inject() (
     }
   }
 
-  def checkChargeInfo: Action[JsValue] = readAuthoriseAction.async(parse.json) { implicit request =>
+  def checkChargeInfo: Action[JsValue] = authThenCorrelationIdActions.async(parse.json) { implicit request =>
     if (featureSwitch.chargeInfoEndpointEnabled) {
       withJsonBody[ChargeInfoRequest] { chargeInfoRequest: ChargeInfoRequest =>
         timeToPayEligibilityService
