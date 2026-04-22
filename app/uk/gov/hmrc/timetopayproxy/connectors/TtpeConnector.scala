@@ -59,14 +59,6 @@ class DefaultTtpeConnector @Inject() (appConfig: AppConfig, httpClient: HttpClie
       .handleErrorTransformed[TimeToPayEligibilityError](400, ttpeError => ttpeError.toConnectorError(status = 400))
       .handleErrorTransformed[TimeToPayEligibilityError](422, ttpeError => ttpeError.toConnectorError(status = 422))
 
-  private val authorizationHeader: Seq[(String, String)] =
-    if (featureSwitch.internalAuthEnabled.enabled)
-      Seq("Authorization" -> appConfig.internalAuthToken)
-    else Seq.empty
-
-  val headers: String => Seq[(String, String)] = (guid: String) =>
-    Seq("CorrelationId" -> s"$guid") ++ authorizationHeader
-
   def checkChargeInfo(chargeInfoRequest: ChargeInfoRequest)(implicit
     ec: ExecutionContext,
     hc: HeaderCarrier
@@ -85,11 +77,18 @@ class DefaultTtpeConnector @Inject() (appConfig: AppConfig, httpClient: HttpClie
       httpClient
         .post(url)
         .withBody(Json.toJson(chargeInfoRequest))
-        .setHeader(combinedHeaders: _*)
+        .setHeader(requestHeaders: _*)
         .execute[Either[ProxyEnvelopeError, ChargeInfoResponse]]
     )
   }
 
-  private def combinedHeaders(implicit hc: HeaderCarrier): Seq[(String, String)] =
-    hc.headers(List("correlationId")) ++ hc.extraHeaders
+  private def requestHeaders(implicit hc: HeaderCarrier): Seq[(String, String)] = {
+    val combinedPreviousHeaders: Seq[(String, String)] = hc.headers(List("correlationId")) ++ hc.extraHeaders
+
+    if (featureSwitch.internalAuthEnabled.enabled) {
+      ("Authorization" -> appConfig.internalAuthToken) +: combinedPreviousHeaders
+    } else {
+      combinedPreviousHeaders
+    }
+  }
 }
