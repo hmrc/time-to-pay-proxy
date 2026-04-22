@@ -29,7 +29,6 @@ import uk.gov.hmrc.timetopayproxy.models.error.ProxyEnvelopeError
 import uk.gov.hmrc.timetopayproxy.models.error.TtppEnvelope.TtppEnvelope
 import uk.gov.hmrc.timetopayproxy.models.saonly.chargeInfoApi.{ ChargeInfoRequest, ChargeInfoResponse, ChargeInfoResponseR1, ChargeInfoResponseR2 }
 
-import java.util.UUID
 import javax.inject.{ Inject, Singleton }
 import scala.concurrent.ExecutionContext
 
@@ -44,7 +43,7 @@ trait TtpeConnector {
 class DefaultTtpeConnector @Inject() (appConfig: AppConfig, httpClient: HttpClientV2, featureSwitch: FeatureSwitch)
     extends TtpeConnector {
 
-  private val logger: RequestAwareLogger = new RequestAwareLogger(classOf[DefaultTtpConnector])
+  private val logger: RequestAwareLogger = new RequestAwareLogger(classOf[DefaultTtpeConnector])
 
   private val httpReadsBuilderForChargeInfoR1: HttpReadsBuilder[ProxyEnvelopeError, ChargeInfoResponse] =
     HttpReadsBuilder
@@ -68,11 +67,6 @@ class DefaultTtpeConnector @Inject() (appConfig: AppConfig, httpClient: HttpClie
   val headers: String => Seq[(String, String)] = (guid: String) =>
     Seq("CorrelationId" -> s"$guid") ++ authorizationHeader
 
-  private def getOrGenerateCorrelationId(implicit hc: HeaderCarrier): String =
-    (hc.headers(Seq("CorrelationId")) ++ hc.extraHeaders)
-      .toMap[String, String]
-      .getOrElse("CorrelationId", UUID.randomUUID().toString)
-
   def checkChargeInfo(chargeInfoRequest: ChargeInfoRequest)(implicit
     ec: ExecutionContext,
     hc: HeaderCarrier
@@ -91,8 +85,11 @@ class DefaultTtpeConnector @Inject() (appConfig: AppConfig, httpClient: HttpClie
       httpClient
         .post(url)
         .withBody(Json.toJson(chargeInfoRequest))
-        .setHeader(headers(getOrGenerateCorrelationId): _*)
+        .setHeader(combinedHeaders: _*)
         .execute[Either[ProxyEnvelopeError, ChargeInfoResponse]]
     )
   }
+
+  private def combinedHeaders(implicit hc: HeaderCarrier): Seq[(String, String)] =
+    hc.headers(List("correlationId")) ++ hc.extraHeaders
 }
