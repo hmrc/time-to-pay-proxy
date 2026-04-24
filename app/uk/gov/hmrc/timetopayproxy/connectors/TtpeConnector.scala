@@ -23,7 +23,7 @@ import uk.gov.hmrc.http.client.HttpClientV2
 import uk.gov.hmrc.http.{ HeaderCarrier, HttpReads, StringContextOps }
 import uk.gov.hmrc.timetopayproxy.config.{ AppConfig, FeatureSwitch }
 import uk.gov.hmrc.timetopayproxy.connectors.util.httpreadsbuilder.HttpReadsBuilder
-import uk.gov.hmrc.timetopayproxy.logging.RequestAwareLogger
+import uk.gov.hmrc.timetopayproxy.logging.{ RequestAwareLogger, StatusLogger }
 import uk.gov.hmrc.timetopayproxy.models.TimeToPayEligibilityError
 import uk.gov.hmrc.timetopayproxy.models.error.ProxyEnvelopeError
 import uk.gov.hmrc.timetopayproxy.models.error.TtppEnvelope.TtppEnvelope
@@ -73,13 +73,15 @@ class DefaultTtpeConnector @Inject() (appConfig: AppConfig, httpClient: HttpClie
 
     val url = url"${appConfig.ttpeBaseUrl + path}"
 
-    EitherT(
-      httpClient
-        .post(url)
-        .withBody(Json.toJson(chargeInfoRequest))
-        .setHeader(requestHeaders: _*)
-        .execute[Either[ProxyEnvelopeError, ChargeInfoResponse]]
-    )
+    StatusLogger(
+      EitherT(
+        httpClient
+          .post(url)
+          .withBody(Json.toJson(chargeInfoRequest))
+          .setHeader(requestHeaders: _*)
+          .execute[Either[ProxyEnvelopeError, ChargeInfoResponse]]
+      )
+    ).logBasedOnStatusCode(logger)
   }
 
   private def requestHeaders(implicit hc: HeaderCarrier): Seq[(String, String)] = {
