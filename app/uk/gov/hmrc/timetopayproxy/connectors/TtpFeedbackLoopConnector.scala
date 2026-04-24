@@ -30,7 +30,6 @@ import uk.gov.hmrc.timetopayproxy.models.saonly.ttpcancel.{ TtpCancelInformative
 import uk.gov.hmrc.timetopayproxy.models.saonly.ttpfullamend.{ FullAmendRequest, TtpFullAmendInformativeError, TtpFullAmendSuccessfulResponse }
 import uk.gov.hmrc.timetopayproxy.models.saonly.ttpinform.{ TtpInformInformativeError, TtpInformRequest, TtpInformSuccessfulResponse }
 
-import java.util.UUID
 import javax.inject.{ Inject, Singleton }
 import scala.concurrent.ExecutionContext
 
@@ -153,23 +152,13 @@ class TtpFeedbackLoopConnector @Inject() (
   }
 
   private def requestHeaders(implicit hc: HeaderCarrier): Seq[(String, String)] = {
-    val correlationId: String = getOrGenerateCorrelationId
+    val combinedPreviousHeaders: Seq[(String, String)] = hc.headers(List("correlationId")) ++ hc.extraHeaders
 
     if (featureSwitch.internalAuthEnabled.enabled) {
-      Seq(
-        "Authorization" -> appConfig.internalAuthToken,
-        "CorrelationId" -> correlationId
-      )
+      ("Authorization" -> appConfig.internalAuthToken) +: combinedPreviousHeaders
     } else {
-      Seq(
-        "CorrelationId" -> correlationId
-      )
+      combinedPreviousHeaders
     }
   }
-
-  private def getOrGenerateCorrelationId(implicit hc: HeaderCarrier): String =
-    (hc.headers(Seq("CorrelationId")) ++ hc.extraHeaders)
-      .toMap[String, String]
-      .getOrElse("CorrelationId", UUID.randomUUID().toString)
 
 }

@@ -29,7 +29,6 @@ import uk.gov.hmrc.timetopayproxy.models.error.ProxyEnvelopeError
 import uk.gov.hmrc.timetopayproxy.models.error.TtppEnvelope.TtppEnvelope
 import uk.gov.hmrc.timetopayproxy.models.saonly.chargeInfoApi.{ ChargeInfoRequest, ChargeInfoResponse, ChargeInfoResponseR1, ChargeInfoResponseR2 }
 
-import java.util.UUID
 import javax.inject.{ Inject, Singleton }
 import scala.concurrent.ExecutionContext
 
@@ -44,7 +43,7 @@ trait TtpeConnector {
 class DefaultTtpeConnector @Inject() (appConfig: AppConfig, httpClient: HttpClientV2, featureSwitch: FeatureSwitch)
     extends TtpeConnector {
 
-  private val logger: RequestAwareLogger = new RequestAwareLogger(classOf[DefaultTtpConnector])
+  private val logger: RequestAwareLogger = new RequestAwareLogger(classOf[DefaultTtpeConnector])
 
   private val httpReadsBuilderForChargeInfoR1: HttpReadsBuilder[ProxyEnvelopeError, ChargeInfoResponse] =
     HttpReadsBuilder
@@ -59,19 +58,6 @@ class DefaultTtpeConnector @Inject() (appConfig: AppConfig, httpClient: HttpClie
       .handleSuccess[ChargeInfoResponseR2](200)
       .handleErrorTransformed[TimeToPayEligibilityError](400, ttpeError => ttpeError.toConnectorError(status = 400))
       .handleErrorTransformed[TimeToPayEligibilityError](422, ttpeError => ttpeError.toConnectorError(status = 422))
-
-  private val authorizationHeader: Seq[(String, String)] =
-    if (featureSwitch.internalAuthEnabled.enabled)
-      Seq("Authorization" -> appConfig.internalAuthToken)
-    else Seq.empty
-
-  val headers: String => Seq[(String, String)] = (guid: String) =>
-    Seq("CorrelationId" -> s"$guid") ++ authorizationHeader
-
-  private def getOrGenerateCorrelationId(implicit hc: HeaderCarrier): String =
-    (hc.headers(Seq("CorrelationId")) ++ hc.extraHeaders)
-      .toMap[String, String]
-      .getOrElse("CorrelationId", UUID.randomUUID().toString)
 
   def checkChargeInfo(chargeInfoRequest: ChargeInfoRequest)(implicit
     ec: ExecutionContext,
@@ -91,8 +77,18 @@ class DefaultTtpeConnector @Inject() (appConfig: AppConfig, httpClient: HttpClie
       httpClient
         .post(url)
         .withBody(Json.toJson(chargeInfoRequest))
-        .setHeader(headers(getOrGenerateCorrelationId): _*)
+        .setHeader(requestHeaders: _*)
         .execute[Either[ProxyEnvelopeError, ChargeInfoResponse]]
     )
+  }
+
+  private def requestHeaders(implicit hc: HeaderCarrier): Seq[(String, String)] = {
+    val combinedPreviousHeaders: Seq[(String, String)] = hc.headers(List("correlationId")) ++ hc.extraHeaders
+
+    if (featureSwitch.internalAuthEnabled.enabled) {
+      ("Authorization" -> appConfig.internalAuthToken) +: combinedPreviousHeaders
+    } else {
+      combinedPreviousHeaders
+    }
   }
 }

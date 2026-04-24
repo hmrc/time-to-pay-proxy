@@ -21,6 +21,7 @@ import play.api.libs.json._
 import play.api.mvc._
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
 import uk.gov.hmrc.timetopayproxy.actions.auth.ReadAuthoriseAction
+import uk.gov.hmrc.timetopayproxy.actions.correlationid.CorrelationIdPopulationAction
 import uk.gov.hmrc.timetopayproxy.config.FeatureSwitch
 import uk.gov.hmrc.timetopayproxy.models._
 import uk.gov.hmrc.timetopayproxy.models.affordablequotes.AffordableQuotesRequest
@@ -38,6 +39,7 @@ import scala.util.{ Failure, Success, Try }
 
 @Singleton()
 class TimeToPayProxyController @Inject() (
+  correlationIdPopulationAction: CorrelationIdPopulationAction,
   readAuthoriseAction: ReadAuthoriseAction,
   cc: ControllerComponents,
   timeToPayQuoteService: TTPQuoteService,
@@ -50,7 +52,9 @@ class TimeToPayProxyController @Inject() (
   private val queryParameterNotMatchingPayload =
     "customerReference and planId in the query parameters should match the ones in the request payload"
 
-  def generateQuote: Action[JsValue] = readAuthoriseAction.async(parse.json) { implicit request =>
+  private val authThenCorrelationIdActions = readAuthoriseAction andThen correlationIdPopulationAction
+
+  def generateQuote: Action[JsValue] = authThenCorrelationIdActions.async(parse.json) { implicit request =>
     withJsonBody[GenerateQuoteRequest] { timeToPayRequest: GenerateQuoteRequest =>
       timeToPayQuoteService
         .generateQuote(timeToPayRequest, request.queryString)
@@ -60,7 +64,7 @@ class TimeToPayProxyController @Inject() (
   }
 
   def viewPlan(customerReference: String, planId: String) =
-    readAuthoriseAction.async { implicit request =>
+    authThenCorrelationIdActions.async { implicit request =>
       timeToPayQuoteService
         .getExistingPlan(CustomerReference(customerReference), PlanId(planId))
         .leftMap(ttppError => ttppError.toWriteableProxyError)
@@ -68,7 +72,7 @@ class TimeToPayProxyController @Inject() (
     }
 
   def updatePlan(customerReference: String, planId: String): Action[JsValue] =
-    readAuthoriseAction.async(parse.json) { implicit request =>
+    authThenCorrelationIdActions.async(parse.json) { implicit request =>
       withJsonBody[UpdatePlanRequest] { updatePlanRequest: UpdatePlanRequest =>
         val result = for {
           validatedUpdatePlanRequest <-
@@ -82,7 +86,7 @@ class TimeToPayProxyController @Inject() (
       }
     }
 
-  def createPlan = readAuthoriseAction.async(parse.json) { implicit request =>
+  def createPlan = authThenCorrelationIdActions.async(parse.json) { implicit request =>
     withJsonBody[CreatePlanRequest] { createPlanRequest: CreatePlanRequest =>
       timeToPayQuoteService
         .createPlan(createPlanRequest, request.queryString)
@@ -91,7 +95,7 @@ class TimeToPayProxyController @Inject() (
     }
   }
 
-  def getAffordableQuotes = readAuthoriseAction.async(parse.json) { implicit request =>
+  def getAffordableQuotes = authThenCorrelationIdActions.async(parse.json) { implicit request =>
     withJsonBody[AffordableQuotesRequest] { affordableQuoteRequest: AffordableQuotesRequest =>
       timeToPayQuoteService
         .getAffordableQuotes(affordableQuoteRequest)
@@ -100,7 +104,7 @@ class TimeToPayProxyController @Inject() (
     }
   }
 
-  def checkChargeInfo: Action[JsValue] = readAuthoriseAction.async(parse.json) { implicit request =>
+  def checkChargeInfo: Action[JsValue] = authThenCorrelationIdActions.async(parse.json) { implicit request =>
     if (featureSwitch.chargeInfoEndpointEnabled) {
       withJsonBody[ChargeInfoRequest] { chargeInfoRequest: ChargeInfoRequest =>
         timeToPayEligibilityService
@@ -118,7 +122,7 @@ class TimeToPayProxyController @Inject() (
     }
   }
 
-  def cancelTtp: Action[JsValue] = readAuthoriseAction.async(parse.json) { implicit request =>
+  def cancelTtp: Action[JsValue] = authThenCorrelationIdActions.async(parse.json) { implicit request =>
     if (featureSwitch.cancelEndpointEnabled) {
       if (featureSwitch.saRelease2Enabled.enabled) {
         withJsonBody[TtpCancelRequestR2] { deserialisedRequest: TtpCancelRequestR2 =>
@@ -142,7 +146,7 @@ class TimeToPayProxyController @Inject() (
     }
   }
 
-  def informTtp: Action[JsValue] = readAuthoriseAction.async(parse.json) { implicit request =>
+  def informTtp: Action[JsValue] = authThenCorrelationIdActions.async(parse.json) { implicit request =>
     if (featureSwitch.informEndpointEnabled) {
       withJsonBody[TtpInformRequest] { deserialisedRequest: TtpInformRequest =>
         ttpFeedbackLoopService
@@ -157,7 +161,7 @@ class TimeToPayProxyController @Inject() (
     }
   }
 
-  def fullAmendTtp: Action[JsValue] = readAuthoriseAction.async(parse.json) { implicit request =>
+  def fullAmendTtp: Action[JsValue] = authThenCorrelationIdActions.async(parse.json) { implicit request =>
     if (featureSwitch.fullAmendEndpointEnabled) {
       implicit val requestFormat: OFormat[FullAmendRequest] = FullAmendRequest.format(featureSwitch)
       withJsonBody[FullAmendRequest] { deserialisedRequest: FullAmendRequest =>

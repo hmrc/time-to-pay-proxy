@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.timetopayproxy.auth
+package uk.gov.hmrc.timetopayproxy.actions.auth
 
 import org.scalamock.scalatest.MockFactory
 import org.scalatest.freespec.AnyFreeSpec
