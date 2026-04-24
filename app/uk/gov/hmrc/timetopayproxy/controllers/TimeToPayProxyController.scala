@@ -19,10 +19,12 @@ package uk.gov.hmrc.timetopayproxy.controllers
 import cats.syntax.either._
 import play.api.libs.json._
 import play.api.mvc._
+import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
 import uk.gov.hmrc.timetopayproxy.actions.auth.ReadAuthoriseAction
 import uk.gov.hmrc.timetopayproxy.actions.correlationid.CorrelationIdPopulationAction
 import uk.gov.hmrc.timetopayproxy.config.FeatureSwitch
+import uk.gov.hmrc.timetopayproxy.logging.{ PagerAlert, RequestAwareLogger }
 import uk.gov.hmrc.timetopayproxy.models._
 import uk.gov.hmrc.timetopayproxy.models.affordablequotes.AffordableQuotesRequest
 import uk.gov.hmrc.timetopayproxy.models.error.TtppEnvelope.TtppEnvelope
@@ -48,6 +50,8 @@ class TimeToPayProxyController @Inject() (
   featureSwitch: FeatureSwitch
 ) extends BackendController(cc) with BaseController {
   implicit val ec: ExecutionContext = cc.executionContext
+
+  protected lazy val logger = new RequestAwareLogger(this.getClass)
 
   private val queryParameterNotMatchingPayload =
     "customerReference and planId in the query parameters should match the ones in the request payload"
@@ -184,11 +188,16 @@ class TimeToPayProxyController @Inject() (
     customerReference: String,
     planId: String,
     updatePlanRequest: UpdatePlanRequest
-  ): TtppEnvelope[UpdatePlanRequest] =
+  )(implicit hc: HeaderCarrier): TtppEnvelope[UpdatePlanRequest] =
     (updatePlanRequest.customerReference, updatePlanRequest.planId) match {
       case (CustomerReference(cr), PlanId(pid)) if (cr.trim == customerReference) && (pid.trim == planId) =>
         TtppEnvelope(updatePlanRequest)
-      case _ => TtppEnvelope(ValidationError(queryParameterNotMatchingPayload).asLeft[UpdatePlanRequest])
+      case _ =>
+        logger.alert(
+          pagerAlert = PagerAlert.ProxyValidationIssueAlert,
+          additionalDetail = queryParameterNotMatchingPayload
+        )
+        TtppEnvelope(ValidationError(queryParameterNotMatchingPayload).asLeft[UpdatePlanRequest])
     }
   private def extractFieldFromJsPath(jsPath: JsPath): String =
     s"${jsPath.path.reverse.headOption.fold("-")(_.toString.replace("/", ""))}"
@@ -221,19 +230,33 @@ class TimeToPayProxyController @Inject() (
       case Success(JsSuccess(payload, _)) => f(payload)
 
       case Success(JsError(errs)) =>
+        val validJsonErrorMessage =
+          s"Invalid ${m.runtimeClass.getSimpleName} payload: Payload has a missing field or an invalid format. ${generateReadableMessageFromError(
+              errs.toSeq.map(err => (err._1, err._2.toSeq))
+            )}"
+        logger.alert(
+          pagerAlert = PagerAlert.ProxyValidationIssueAlert,
+          additionalDetail = validJsonErrorMessage
+        )
+
         Future.successful(
           TtppErrorResponse(
             BAD_REQUEST.intValue(),
-            s"Invalid ${m.runtimeClass.getSimpleName} payload: Payload has a missing field or an invalid format. ${generateReadableMessageFromError(
-                errs.toSeq.map(err => (err._1, err._2.toSeq))
-              )}"
+            validJsonErrorMessage
           ).toErrorResult
         )
       case Failure(e) =>
+        val invalidJsonErrorMessage: String = s"Could not parse body due to ${e.getMessage}"
+        logger.alert(
+          pagerAlert = PagerAlert.ProxyJsonIssueAlert,
+          additionalDetail = invalidJsonErrorMessage,
+          throwable = e
+        )
+
         Future.successful(
           TtppErrorResponse(
             BAD_REQUEST.intValue(),
-            s"Could not parse body due to ${e.getMessage}"
+            invalidJsonErrorMessage
           ).toErrorResult
         )
     }
