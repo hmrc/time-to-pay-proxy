@@ -23,7 +23,7 @@ import uk.gov.hmrc.http.client.HttpClientV2
 import uk.gov.hmrc.http.{ HeaderCarrier, HttpReads, StringContextOps }
 import uk.gov.hmrc.timetopayproxy.config.{ AppConfig, FeatureSwitch }
 import uk.gov.hmrc.timetopayproxy.connectors.util.httpreadsbuilder.HttpReadsBuilder
-import uk.gov.hmrc.timetopayproxy.logging.RequestAwareLogger
+import uk.gov.hmrc.timetopayproxy.logging.{ RequestAwareLogger, StatusLogger }
 import uk.gov.hmrc.timetopayproxy.models._
 import uk.gov.hmrc.timetopayproxy.models.affordablequotes.{ AffordableQuoteResponse, AffordableQuotesRequest }
 import uk.gov.hmrc.timetopayproxy.models.error.ProxyEnvelopeError
@@ -112,13 +112,15 @@ class DefaultTtpConnector @Inject() (appConfig: AppConfig, httpClient: HttpClien
 
     val url = url"${appConfig.ttpBaseUrl + pathWithQueryParameters}"
 
-    EitherT(
-      httpClient
-        .post(url)
-        .withBody(Json.toJson(ttppRequest))
-        .setHeader(combinedHeaders: _*)
-        .execute[Either[ProxyEnvelopeError, GenerateQuoteResponse]]
-    )
+    StatusLogger(
+      EitherT(
+        httpClient
+          .post(url)
+          .withBody(Json.toJson(ttppRequest))
+          .setHeader(combinedHeaders: _*)
+          .execute[Either[ProxyEnvelopeError, GenerateQuoteResponse]]
+      )
+    ).logBasedOnStatusCode(logger)
   }
 
   override def getExistingQuote(customerReference: CustomerReference, planId: PlanId)(implicit
@@ -133,12 +135,14 @@ class DefaultTtpConnector @Inject() (appConfig: AppConfig, httpClient: HttpClien
 
     val url = url"${appConfig.ttpBaseUrl + path}"
 
-    EitherT(
-      httpClient
-        .get(url)
-        .setHeader(combinedHeaders: _*)
-        .execute[Either[ProxyEnvelopeError, ViewPlanResponse]]
-    )
+    StatusLogger(
+      EitherT(
+        httpClient
+          .get(url)
+          .setHeader(combinedHeaders: _*)
+          .execute[Either[ProxyEnvelopeError, ViewPlanResponse]]
+      )
+    ).logBasedOnStatusCode(logger)
   }
 
   def updatePlan(
@@ -159,13 +163,15 @@ class DefaultTtpConnector @Inject() (appConfig: AppConfig, httpClient: HttpClien
 
     val url = url"$urlAsString"
 
-    EitherT(
-      httpClient
-        .put(url)
-        .withBody(Json.toJson(updatePlanRequest))
-        .setHeader(combinedHeaders: _*)
-        .execute[Either[ProxyEnvelopeError, UpdatePlanResponse]]
-    )
+    StatusLogger(
+      EitherT(
+        httpClient
+          .put(url)
+          .withBody(Json.toJson(updatePlanRequest))
+          .setHeader(combinedHeaders: _*)
+          .execute[Either[ProxyEnvelopeError, UpdatePlanResponse]]
+      )
+    ).logBasedOnStatusCode(logger)
   }
 
   override def createPlan(
@@ -192,13 +198,15 @@ class DefaultTtpConnector @Inject() (appConfig: AppConfig, httpClient: HttpClien
 
     val headers: Seq[(String, String)] = combinedHeaders ++ authorizationHeader
 
-    EitherT(
-      httpClient
-        .post(url)
-        .withBody(Json.toJson(createPlanRequest))
-        .setHeader(headers: _*)
-        .execute[Either[ProxyEnvelopeError, CreatePlanResponse]]
-    )
+    StatusLogger(
+      EitherT(
+        httpClient
+          .post(url)
+          .withBody(Json.toJson(createPlanRequest))
+          .setHeader(headers: _*)
+          .execute[Either[ProxyEnvelopeError, CreatePlanResponse]]
+      )
+    ).logBasedOnStatusCode(logger)
   }
 
   def getAffordableQuotes(
@@ -212,13 +220,15 @@ class DefaultTtpConnector @Inject() (appConfig: AppConfig, httpClient: HttpClien
 
     val url = url"${appConfig.ttpBaseUrl + path}"
 
-    EitherT(
-      httpClient
-        .post(url)
-        .withBody(Json.toJson(affordableQuotesRequest))
-        .setHeader(combinedHeaders: _*)
-        .execute[Either[ProxyEnvelopeError, AffordableQuoteResponse]]
-    )
+    StatusLogger(
+      EitherT(
+        httpClient
+          .post(url)
+          .withBody(Json.toJson(affordableQuotesRequest))
+          .setHeader(combinedHeaders: _*)
+          .execute[Either[ProxyEnvelopeError, AffordableQuoteResponse]]
+      )
+    ).logBasedOnStatusCode(logger)
   }
 
   private def makeQueryString(queryParams: Seq[(String, String)]): String = {

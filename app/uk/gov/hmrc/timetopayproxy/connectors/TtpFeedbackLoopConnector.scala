@@ -22,7 +22,7 @@ import uk.gov.hmrc.http.client.HttpClientV2
 import uk.gov.hmrc.http.{ HeaderCarrier, HttpReads, StringContextOps }
 import uk.gov.hmrc.timetopayproxy.config.{ AppConfig, FeatureSwitch }
 import uk.gov.hmrc.timetopayproxy.connectors.util.httpreadsbuilder.HttpReadsBuilder
-import uk.gov.hmrc.timetopayproxy.logging.RequestAwareLogger
+import uk.gov.hmrc.timetopayproxy.logging.{ RequestAwareLogger, StatusLogger }
 import uk.gov.hmrc.timetopayproxy.models.TimeToPayError
 import uk.gov.hmrc.timetopayproxy.models.error.ProxyEnvelopeError
 import uk.gov.hmrc.timetopayproxy.models.error.TtppEnvelope.TtppEnvelope
@@ -82,13 +82,15 @@ class TtpFeedbackLoopConnector @Inject() (
 
     val url = url"${appConfig.ttpBaseUrl + path}"
 
-    EitherT(
-      httpClient
-        .post(url)
-        .withBody(Json.toJson(ttppRequest))
-        .setHeader(requestHeaders: _*)
-        .execute[Either[ProxyEnvelopeError, TtpCancelSuccessfulResponse]]
-    )
+    StatusLogger(
+      EitherT(
+        httpClient
+          .post(url)
+          .withBody(Json.toJson(ttppRequest))
+          .setHeader(requestHeaders: _*)
+          .execute[Either[ProxyEnvelopeError, TtpCancelSuccessfulResponse]]
+      )
+    ).logBasedOnStatusCode(logger)
   }
 
   def cancelTtpR2(
@@ -102,13 +104,15 @@ class TtpFeedbackLoopConnector @Inject() (
 
     val url = url"${appConfig.ttpBaseUrl + path}"
 
-    EitherT(
-      httpClient
-        .post(url)
-        .withBody(Json.toJson(ttppRequestR2))
-        .setHeader(requestHeaders: _*)
-        .execute[Either[ProxyEnvelopeError, TtpCancelSuccessfulResponse]]
-    )
+    StatusLogger(
+      EitherT(
+        httpClient
+          .post(url)
+          .withBody(Json.toJson(ttppRequestR2))
+          .setHeader(requestHeaders: _*)
+          .execute[Either[ProxyEnvelopeError, TtpCancelSuccessfulResponse]]
+      )
+    ).logBasedOnStatusCode(logger)
   }
 
   def fullAmendTtp(
@@ -122,13 +126,15 @@ class TtpFeedbackLoopConnector @Inject() (
 
     val url = url"${appConfig.ttpBaseUrl + path}"
 
-    EitherT(
-      httpClient
-        .post(url)
-        .withBody(Json.toJson(request)(FullAmendRequest.format(featureSwitch)))
-        .setHeader(requestHeaders: _*)
-        .execute[Either[ProxyEnvelopeError, TtpFullAmendSuccessfulResponse]]
-    )
+    StatusLogger(
+      EitherT(
+        httpClient
+          .post(url)
+          .withBody(Json.toJson(request)(FullAmendRequest.format(featureSwitch)))
+          .setHeader(requestHeaders: _*)
+          .execute[Either[ProxyEnvelopeError, TtpFullAmendSuccessfulResponse]]
+      )
+    ).logBasedOnStatusCode(logger)
   }
 
   def informTtp(
@@ -142,13 +148,15 @@ class TtpFeedbackLoopConnector @Inject() (
 
     val url = url"${appConfig.ttpBaseUrl + path}"
 
-    EitherT(
-      httpClient
-        .post(url)
-        .withBody(Json.toJson(ttppInformRequest))
-        .setHeader(requestHeaders: _*)
-        .execute[Either[ProxyEnvelopeError, TtpInformSuccessfulResponse]]
-    )
+    StatusLogger(
+      EitherT(
+        httpClient
+          .post(url)
+          .withBody(Json.toJson(ttppInformRequest))
+          .setHeader(requestHeaders: _*)
+          .execute[Either[ProxyEnvelopeError, TtpInformSuccessfulResponse]]
+      )
+    ).logBasedOnStatusCode(logger)
   }
 
   private def requestHeaders(implicit hc: HeaderCarrier): Seq[(String, String)] = {
