@@ -134,11 +134,14 @@ sealed abstract class PagerAlert(val summary: String, val level: Level)
 object PagerAlert {
 
   case object ProxyJsonIssueAlert
-      extends PagerAlert(summary = "CRITICAL A request in time-to-pay-proxy has JSON issues", level = Level.ERROR)
+      extends PagerAlert(summary = "CRITICAL: A request in time-to-pay-proxy has JSON issues", level = Level.ERROR)
 
   case object ProxyValidationIssueAlert
-      extends PagerAlert(summary = "CRITICAL A request in time-to-pay-proxy has validation issues", level = Level.ERROR)
+      extends PagerAlert(
+        summary = "CRITICAL: A request in time-to-pay-proxy has validation issues",
+        level = Level.ERROR
+      )
 
   case object ProxyOtherIssueAlert
-      extends PagerAlert(summary = "WARNING An issue in time-to-pay-proxy has occurred", level = Level.WARN)
+      extends PagerAlert(summary = "WARNING: An issue in time-to-pay-proxy has occurred", level = Level.WARN)
 }
