@@ -10,12 +10,12 @@ object AppDependencies {
     "com.fasterxml.jackson.core" % "jackson-core"              % "2.20.2",
     "uk.gov.hmrc"               %% "bootstrap-backend-play-30" % BootstrapPlayVersion,
     "org.typelevel"             %% "cats-core"                 % "2.13.0",
-    "com.beachape"              %% "enumeratum-play-json"      % "1.9.6"
+    "com.beachape"              %% "enumeratum-play-json"      % "1.9.7"
   )
 
   val test = Seq(
     "uk.gov.hmrc"                  %% "bootstrap-test-play-30"      % BootstrapPlayVersion % Test,
-    "org.scalatest"                %% "scalatest"                   % "3.2.19"             % Test,
+    "org.scalatest"                %% "scalatest"                   % "3.2.20"             % Test,
     "org.scalamock"                %% "scalamock"                   % "7.5.5"              % Test,
     "org.playframework"            %% "play-test"                   % PlayVersion.current  % Test,
     "com.fasterxml.jackson.module" %% "jackson-module-scala"        % "2.20.2"             % Test,
