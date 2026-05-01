@@ -19,6 +19,7 @@ lazy val microservice = Project(appName, file("."))
   .enablePlugins(play.sbt.PlayScala, SbtDistributablesPlugin)
   .settings(
     libraryDependencies ++= AppDependencies.compile ++ AppDependencies.test,
+    dependencyOverrides ++= AppDependencies.dependencyOverrides,
     scalacOptions ++= Seq(
       "-Wconf:src=routes/.*:s",
       "-Ywarn-dead-code",

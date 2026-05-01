@@ -33,4 +33,11 @@ object AppDependencies {
     "org.openapi4j"                 % "openapi-parser"              % "1.0.7"              % Test,
     "com.softwaremill.quicklens"   %% "quicklens"                   % "1.9.12"             % Test
   )
+
+  val dependencyOverrides = Seq(
+    "com.fasterxml.jackson.module"  % "jackson-module-scala_2.13" % "2.15.3",
+    "uk.gov.hmrc"                   % "http-verbs-play-30_2.13"   % "15.8.0",
+    "org.slf4j"                     % "slf4j-api"                 % "2.0.17",
+    "com.google.guava"              % "guava"                     % "32.1.3-jre"
+  )
 }
