@@ -102,6 +102,7 @@ class GenerateQuoteRequestSpec extends AnyWordSpec with Matchers {
     addressPostcode: String = "NW9 5XW",
     debtItemChargeId: String = "debtItemChargeId1",
     quoteType: String = "instalmentAmount",
+    regimeType: String = "SA"
   ) = s"""{
          |  "customerReference": "$customerReference",
          |  "channelIdentifier": "selfService",
@@ -138,7 +139,7 @@ class GenerateQuoteRequestSpec extends AnyWordSpec with Matchers {
          |      "dueDate": "2021-05-13"
          |    }
          |  ],
-         |  "regimeType": "SA"
+         |  "regimeType": "$regimeType"
          |}
              """.stripMargin
 
@@ -237,6 +238,22 @@ class GenerateQuoteRequestSpec extends AnyWordSpec with Matchers {
       ).toString shouldBe Failure(
         new IllegalArgumentException("requirement failed: quoteType should not be empty")
       ).toString
+    }
+
+    "fail decoding if regimeType is anything but an OpLed regime type" in {
+      val nonOpLedRegimeTypes = List("PAYE", "VATC", "SIMP")
+
+      nonOpLedRegimeTypes.map { regimeType =>
+        val result = Json
+          .parse(getJsonWithInvalidReference(regimeType = regimeType))
+          .validate[GenerateQuoteRequest]
+
+        result shouldBe
+          JsError(
+            JsPath \ "regimeType",
+            "error.expected.validenumvalue"
+          )
+      }
     }
 
   }
