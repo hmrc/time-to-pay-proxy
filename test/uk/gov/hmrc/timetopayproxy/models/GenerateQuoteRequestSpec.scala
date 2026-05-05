@@ -99,7 +99,8 @@ class GenerateQuoteRequestSpec extends AnyWordSpec with Matchers {
     initialPaymentAmount: BigDecimal = 100,
     originalDebtAmount: BigDecimal = 100,
     paymentAmount: BigDecimal = 100,
-    addressPostcode: String = "NW9 5XW"
+    addressPostcode: String = "NW9 5XW",
+    debtItemChargeId: String = "debtItemChargeId1"
   ) = s"""{
          |  "customerReference": "$customerReference",
          |  "channelIdentifier": "selfService",
@@ -122,7 +123,7 @@ class GenerateQuoteRequestSpec extends AnyWordSpec with Matchers {
          |  ],
          |  "debtItemCharges": [
          |    {
-         |      "debtItemChargeId": "debtItemChargeId1",
+         |      "debtItemChargeId": "$debtItemChargeId",
          |      "mainTrans": "5330",
          |      "subTrans": "1180",
          |      "originalDebtAmount": $originalDebtAmount,
@@ -153,6 +154,18 @@ class GenerateQuoteRequestSpec extends AnyWordSpec with Matchers {
       ) match {
         case Failure(t) =>
           t.toString shouldBe "java.lang.IllegalArgumentException: requirement failed: customerReference should not be empty"
+        case _ => fail()
+      }
+    }
+
+    "fail decoding if debtItemCharge is empty" in {
+      Try(
+        Json
+          .parse(getJsonWithInvalidReference(debtItemChargeId = ""))
+          .validate[GenerateQuoteRequest]
+      ) match {
+        case Failure(t) =>
+          t.toString shouldBe "java.lang.IllegalArgumentException: requirement failed: debtItemChargeId should not be empty"
         case _ => fail()
       }
     }
