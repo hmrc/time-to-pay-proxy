@@ -100,12 +100,13 @@ class GenerateQuoteRequestSpec extends AnyWordSpec with Matchers {
     originalDebtAmount: BigDecimal = 100,
     paymentAmount: BigDecimal = 100,
     addressPostcode: String = "NW9 5XW",
-    debtItemChargeId: String = "debtItemChargeId1"
+    debtItemChargeId: String = "debtItemChargeId1",
+    quoteType: String = "instalmentAmount",
   ) = s"""{
          |  "customerReference": "$customerReference",
          |  "channelIdentifier": "selfService",
          |  "plan": {
-         |    "quoteType": "instalmentAmount",
+         |    "quoteType": "$quoteType",
          |    "quoteDate": "2021-05-13",
          |    "instalmentStartDate": "2021-05-13",
          |    "instalmentAmount": $instalmentAmount,
@@ -225,6 +226,16 @@ class GenerateQuoteRequestSpec extends AnyWordSpec with Matchers {
           .validate[GenerateQuoteRequest]
       ).toString shouldBe Failure(
         new IllegalArgumentException("requirement failed: addressPostcode should not be empty")
+      ).toString
+    }
+
+    "fail decoding if quoteType is empty" in {
+      Try(
+        Json
+          .parse(getJsonWithInvalidReference(quoteType = ""))
+          .validate[GenerateQuoteRequest]
+      ).toString shouldBe Failure(
+        new IllegalArgumentException("requirement failed: quoteType should not be empty")
       ).toString
     }
 
