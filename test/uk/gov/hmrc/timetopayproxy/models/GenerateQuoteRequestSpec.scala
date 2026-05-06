@@ -231,13 +231,14 @@ class GenerateQuoteRequestSpec extends AnyWordSpec with Matchers {
     }
 
     "fail decoding if quoteType is empty" in {
-      Try(
-        Json
-          .parse(getJsonWithInvalidReference(quoteType = ""))
-          .validate[GenerateQuoteRequest]
-      ).toString shouldBe Failure(
-        new IllegalArgumentException("requirement failed: quoteType should not be empty")
-      ).toString
+      val result = Json
+        .parse(getJsonWithInvalidReference(quoteType = ""))
+        .validate[GenerateQuoteRequest]
+
+      result shouldBe JsError(
+        JsPath \ "plan" \ "quoteType",
+        "error.expected.validenumvalue"
+      )
     }
 
     "fail decoding if regimeType is anything but an OpLed regime type" in {
