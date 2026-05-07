@@ -351,6 +351,28 @@ class TTPQuoteServiceSpec extends UnitSpec {
         .asLeft[ViewPlanResponse]
 
     }
+
+    "return a 400 error if the plan is not found" in {
+      val connectorStub = new TtpConnectorStub(
+        Right(generateQuoteResponse),
+        Left(ConnectorError(400, "No records found")),
+        Right(updatePlanResponse),
+        Right(createPlanResponse),
+        Right(affordableQuoteResponse)
+      )
+      val quoteService = new DefaultTTPQuoteService(connectorStub)
+
+      await(
+        quoteService
+          .getExistingPlan(
+            CustomerReference("someCustomer"),
+            PlanId("somePlanId")
+          )
+          .value
+      ) shouldBe ConnectorError(400, "No records found")
+        .asLeft[ViewPlanResponse]
+
+    }
   }
 
   "Update Quote endpoint" should {
