@@ -99,12 +99,15 @@ class GenerateQuoteRequestSpec extends AnyWordSpec with Matchers {
     initialPaymentAmount: BigDecimal = 100,
     originalDebtAmount: BigDecimal = 100,
     paymentAmount: BigDecimal = 100,
-    addressPostcode: String = "NW9 5XW"
+    addressPostcode: String = "NW9 5XW",
+    debtItemChargeId: String = "debtItemChargeId1",
+    quoteType: String = "instalmentAmount",
+    regimeType: String = "SA"
   ) = s"""{
          |  "customerReference": "$customerReference",
          |  "channelIdentifier": "selfService",
          |  "plan": {
-         |    "quoteType": "instalmentAmount",
+         |    "quoteType": "$quoteType",
          |    "quoteDate": "2021-05-13",
          |    "instalmentStartDate": "2021-05-13",
          |    "instalmentAmount": $instalmentAmount,
@@ -122,7 +125,7 @@ class GenerateQuoteRequestSpec extends AnyWordSpec with Matchers {
          |  ],
          |  "debtItemCharges": [
          |    {
-         |      "debtItemChargeId": "debtItemChargeId1",
+         |      "debtItemChargeId": "$debtItemChargeId",
          |      "mainTrans": "5330",
          |      "subTrans": "1180",
          |      "originalDebtAmount": $originalDebtAmount,
@@ -136,7 +139,7 @@ class GenerateQuoteRequestSpec extends AnyWordSpec with Matchers {
          |      "dueDate": "2021-05-13"
          |    }
          |  ],
-         |  "regimeType": "SA"
+         |  "regimeType": "$regimeType"
          |}
              """.stripMargin
 
@@ -153,6 +156,18 @@ class GenerateQuoteRequestSpec extends AnyWordSpec with Matchers {
       ) match {
         case Failure(t) =>
           t.toString shouldBe "java.lang.IllegalArgumentException: requirement failed: customerReference should not be empty"
+        case _ => fail()
+      }
+    }
+
+    "fail decoding if debtItemCharge is empty" in {
+      Try(
+        Json
+          .parse(getJsonWithInvalidReference(debtItemChargeId = ""))
+          .validate[GenerateQuoteRequest]
+      ) match {
+        case Failure(t) =>
+          t.toString shouldBe "java.lang.IllegalArgumentException: requirement failed: debtItemChargeId should not be empty"
         case _ => fail()
       }
     }
@@ -213,6 +228,33 @@ class GenerateQuoteRequestSpec extends AnyWordSpec with Matchers {
       ).toString shouldBe Failure(
         new IllegalArgumentException("requirement failed: addressPostcode should not be empty")
       ).toString
+    }
+
+    "fail decoding if quoteType is empty" in {
+      val result = Json
+        .parse(getJsonWithInvalidReference(quoteType = ""))
+        .validate[GenerateQuoteRequest]
+
+      result shouldBe JsError(
+        JsPath \ "plan" \ "quoteType",
+        "error.expected.validenumvalue"
+      )
+    }
+
+    "fail decoding if regimeType is anything but an OpLed regime type" in {
+      val nonOpLedRegimeTypes = List("PAYE", "VATC", "SIMP")
+
+      nonOpLedRegimeTypes.map { regimeType =>
+        val result = Json
+          .parse(getJsonWithInvalidReference(regimeType = regimeType))
+          .validate[GenerateQuoteRequest]
+
+        result shouldBe
+          JsError(
+            JsPath \ "regimeType",
+            "error.expected.validenumvalue"
+          )
+      }
     }
 
   }
