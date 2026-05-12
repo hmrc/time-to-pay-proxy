@@ -534,6 +534,32 @@ class TimeToPayProxyControllerSpec extends AnyWordSpec with MockFactory {
       contentAsJson(response) shouldBe expectedResponseJson
     }
 
+    def runUpdatePlanTest(paymentMethod: PaymentMethod): Unit = {
+      val request = updatePlanRequest.copy(
+        payments = Some(
+          List(
+            PaymentInformation(paymentMethod, Some(PaymentReference("reference")))
+          )
+        )
+      )
+
+      val updatePlanResponse = UpdatePlanResponse(
+        CustomerReference("customerReference"),
+        PlanId("pageId"),
+        PlanStatus.Success,
+        LocalDate.now()
+      )
+
+      testControllerForPUT(
+        Json.toJson(request),
+        Status.OK,
+        Json.toJson(updatePlanResponse),
+        updatePlanRequest.customerReference.value,
+        updatePlanRequest.planId.value,
+        Some(TtppEnvelope(updatePlanResponse))
+      )
+    }
+
     "return 200" when {
       "service returns success" in {
         val updatePlanResponse: UpdatePlanResponse = UpdatePlanResponse(
@@ -554,6 +580,18 @@ class TimeToPayProxyControllerSpec extends AnyWordSpec with MockFactory {
           Some(ttpServiceResponse)
         )
       }
+
+      "when payment method is one of the supported values" in {
+        List(
+          PaymentMethod.Bacs,
+          PaymentMethod.BankPayments,
+          PaymentMethod.CardPayment,
+          PaymentMethod.Cheque,
+          PaymentMethod.DirectDebit,
+          PaymentMethod.OnGoingAward
+        ).foreach(runUpdatePlanTest)
+      }
+
       "when paymentMethod is not directDebit and paymentReference is missing" in {
         val updatePlanRequestMissingPaymentReference: UpdatePlanRequest =
           Json
@@ -834,6 +872,42 @@ class TimeToPayProxyControllerSpec extends AnyWordSpec with MockFactory {
             TtppErrorResponse(
               errorStatus,
               "Could not parse body due to requirement failed: Invalid UpdatePlanRequest payload: Payload has a missing field or an invalid format. Field name: planStatus."
+            )
+          ),
+          "custReference1234",
+          "planId1234",
+          ttpServiceResponse = None
+        )
+      }
+
+      "missing field paymentMethod when the updateType is paymentDetails" in {
+
+        val updatePlanRequestPaymentMethodMissing: JsValue =
+          Json.obj(
+            "customerReference" -> "custReference1234",
+            "planId"            -> "planId1234",
+            "updateType"        -> "paymentDetails",
+            "thirdPartyBank"    -> false,
+            "payments" ->
+              JsArray(
+                List(
+                  Json.obj(
+                    "paymentMethod"    -> "",
+                    "paymentReference" -> "paymentRef123"
+                  )
+                )
+              )
+          )
+
+        val errorStatus = Status.BAD_REQUEST
+
+        testControllerForPUT(
+          updatePlanRequestPaymentMethodMissing,
+          errorStatus,
+          Json.toJson(
+            TtppErrorResponse(
+              errorStatus,
+              "Invalid UpdatePlanRequest payload: Payload has a missing field or an invalid format. Field name: paymentMethod. Valid enum value should be provided"
             )
           ),
           "custReference1234",

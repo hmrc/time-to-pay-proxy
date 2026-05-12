@@ -267,6 +267,25 @@ class TTPEServiceSpec extends AnyFreeSpec with MockFactory {
         message = "Internal server error"
       ).asLeft[ChargeInfoResponse]
     }
+
+    "returns an error 400 from the connector" in {
+      val connectorStub = new TtpeConnectorStub(
+        Left(
+          ConnectorError(
+            400,
+            "Dependent systems from interest-forecasting are currently not responding; statusCode: 400, description: An error was returned from upstream when calling IFS"
+          )
+        )
+      )
+
+      val ttpeService = new DefaultTTPEService(connectorStub)
+
+      await(ttpeService.checkChargeInfo(chargeInfoRequest).value) shouldBe ConnectorError(
+        statusCode = 400,
+        message =
+          "Dependent systems from interest-forecasting are currently not responding; statusCode: 400, description: An error was returned from upstream when calling IFS"
+      ).asLeft[ChargeInfoResponse]
+    }
   }
 }
 
