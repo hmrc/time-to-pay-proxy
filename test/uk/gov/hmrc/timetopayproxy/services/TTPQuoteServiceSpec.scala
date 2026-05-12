@@ -330,6 +330,43 @@ class TTPQuoteServiceSpec extends UnitSpec {
         .asRight[ProxyEnvelopeError]
     }
 
+    "return a quote when the service returns a successful response with different payment methods" in {
+
+      val paymentReference = PaymentReference("PaymentRef123")
+      val paymentMethods = Seq(
+        PaymentMethod.Bacs,
+        PaymentMethod.BankPayments,
+        PaymentMethod.CardPayment,
+        PaymentMethod.Cheque,
+        PaymentMethod.DirectDebit,
+        PaymentMethod.OnGoingAward
+      )
+
+      paymentMethods.foreach { paymentMethod: PaymentMethod =>
+        val retrievePlanWithPaymentInfo =
+          retrievePlanResponse.copy(payments = List(PaymentInformation(paymentMethod, Some(paymentReference))))
+
+        val connectorStub = new TtpConnectorStub(
+          Right(generateQuoteResponse),
+          Right(retrievePlanWithPaymentInfo),
+          Right(updatePlanResponse),
+          Right(createPlanResponse),
+          Right(affordableQuoteResponse)
+        )
+        val quoteService = new DefaultTTPQuoteService(connectorStub)
+
+        await(
+          quoteService
+            .getExistingPlan(
+              CustomerReference("someCustomer"),
+              PlanId("somePlanId")
+            )
+            .value
+        ) shouldBe retrievePlanWithPaymentInfo
+          .asRight[ProxyEnvelopeError]
+      }
+    }
+
     "return a error if the service does not return a successful response" in {
       val connectorStub = new TtpConnectorStub(
         Right(generateQuoteResponse),
