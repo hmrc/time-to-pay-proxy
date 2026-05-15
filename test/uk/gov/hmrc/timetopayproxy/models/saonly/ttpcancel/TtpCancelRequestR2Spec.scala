@@ -268,6 +268,121 @@ class TtpCancelRequestR2Spec extends AnyFreeSpec {
         }
       }
 
+      "should throw an error" - {
+        "when trying to parse an invalid frequency and channelIdentifier" in {
+          val cancelRequestJson = Json.parse("""
+                                               |{
+                                               |  "identifications": [
+                                               |    {
+                                               |      "idType": "UTR",
+                                               |      "idValue": "1234567890"
+                                               |    }
+                                               |  ],
+                                               |  "paymentPlan": {
+                                               |    "arrangementAgreedDate": "2025-05-01",
+                                               |    "ttpEndDate": "2025-11-01",
+                                               |    "initialPaymentDate": "2025-05-05",
+                                               |    "initialPaymentAmount": 150,
+                                               |    "frequency": "TEST",
+                                               |    "cancellationDate": "2025-10-15",
+                                               |    "debtItemCharges": [
+                                               |      {
+                                               |        "debtItemChargeId": "K0000000000001",
+                                               |        "chargeSource": "CESA"
+                                               |      }
+                                               |    ]
+                                               |  },
+                                               |  "instalments": [
+                                               |    {
+                                               |      "dueDate": "2025-06-01",
+                                               |      "amountDue": 300
+                                               |    },
+                                               |    {
+                                               |      "dueDate": "2025-07-01",
+                                               |      "amountDue": 300
+                                               |    },
+                                               |    {
+                                               |      "dueDate": "2025-08-01",
+                                               |      "amountDue": 300
+                                               |    }
+                                               |  ],
+                                               |  "channelIdentifier": "TEST",
+                                               |  "transitioned": true
+                                               |}
+                                               |""".stripMargin)
+
+          readerFromClients.reads(cancelRequestJson) shouldBe JsError(
+            List(
+              (
+                JsPath \ "paymentPlan" \ "frequency",
+                List(
+                  JsonValidationError(
+                    List("error.expected.validenumvalue")
+                  )
+                )
+              ),
+              (
+                JsPath \ "channelIdentifier",
+                List(
+                  JsonValidationError(
+                    List("error.expected.validenumvalue")
+                  )
+                )
+              )
+            )
+          )
+        }
+
+        "when a mandatory field, debtItemCharges, is missing " in {
+          val cancelRequestJson = Json.parse("""
+                                               |{
+                                               |  "identifications": [
+                                               |    {
+                                               |      "idType": "UTR",
+                                               |      "idValue": "1234567890"
+                                               |    }
+                                               |  ],
+                                               |  "paymentPlan": {
+                                               |    "arrangementAgreedDate": "2025-05-01",
+                                               |    "ttpEndDate": "2025-11-01",
+                                               |    "initialPaymentDate": "2025-05-05",
+                                               |    "initialPaymentAmount": 150,
+                                               |    "frequency": "monthly",
+                                               |    "cancellationDate": "2025-10-15"
+                                               |  },
+                                               |  "instalments": [
+                                               |    {
+                                               |      "dueDate": "2025-06-01",
+                                               |      "amountDue": 300
+                                               |    },
+                                               |    {
+                                               |      "dueDate": "2025-07-01",
+                                               |      "amountDue": 300
+                                               |    },
+                                               |    {
+                                               |      "dueDate": "2025-08-01",
+                                               |      "amountDue": 300
+                                               |    }
+                                               |  ],
+                                               |  "channelIdentifier": "advisor",
+                                               |  "transitioned": true
+                                               |}
+                                               |""".stripMargin)
+
+          readerFromClients.reads(cancelRequestJson) shouldBe JsError(
+            List(
+              (
+                JsPath \ "paymentPlan" \ "debtItemCharges",
+                List(
+                  JsonValidationError(
+                    List("error.path.missing")
+                  )
+                )
+              )
+            )
+          )
+        }
+      }
     }
 
     "implicit JSON writer (data forwarded to TTP)" - {
