@@ -1020,18 +1020,6 @@ class TimeToPayProxyControllerItSpec extends IntegrationBaseSpec {
             }
 
             "when only ETMP is called, successfully" in new TimeToPayProxyControllerTestBase {
-              val informResponseSuccessfulEtmpCall: TtpInformSuccessfulResponse = TtpInformSuccessfulResponse(
-                apisCalled = List(
-                  ApiStatus(
-                    name = ApiName("ETMP API 1853"),
-                    statusCode = ApiStatusCode(200),
-                    processingDateTime = ProcessingDateTimeInstant(java.time.Instant.parse("2025-05-01T14:30:00Z")),
-                    errorResponse = None
-                  )
-                ),
-                processingDateTime = ProcessingDateTimeInstant(java.time.Instant.parse("2025-10-15T10:31:00Z"))
-              )
-
               stubRequest(
                 httpMethod = POST,
                 url = "/debts/time-to-pay/inform",
@@ -1050,18 +1038,6 @@ class TimeToPayProxyControllerItSpec extends IntegrationBaseSpec {
             }
 
             "when only CESA is called, unsuccessfully" in new TimeToPayProxyControllerTestBase {
-              val informResponseUnsuccessfulCesaCall: TtpInformSuccessfulResponse = TtpInformSuccessfulResponse(
-                apisCalled = List(
-                  ApiStatus(
-                    name = ApiName("CESA"),
-                    statusCode = ApiStatusCode(400),
-                    processingDateTime = ProcessingDateTimeInstant(java.time.Instant.parse("2025-05-01T14:30:00Z")),
-                    errorResponse = None
-                  )
-                ),
-                processingDateTime = ProcessingDateTimeInstant(java.time.Instant.parse("2025-10-15T10:31:00Z"))
-              )
-
               stubRequest(
                 httpMethod = POST,
                 url = "/debts/time-to-pay/inform",
@@ -2252,6 +2228,30 @@ class TimeToPayProxyControllerItSpec extends IntegrationBaseSpec {
           name = ApiName("ETMP"),
           statusCode = ApiStatusCode(201),
           processingDateTime = ProcessingDateTimeInstant(java.time.Instant.parse("2025-05-01T14:31:00Z")),
+          errorResponse = None
+        )
+      ),
+      processingDateTime = ProcessingDateTimeInstant(java.time.Instant.parse("2025-10-15T10:31:00Z"))
+    )
+
+    val informResponseSuccessfulEtmpCall: TtpInformSuccessfulResponse = TtpInformSuccessfulResponse(
+      apisCalled = List(
+        ApiStatus(
+          name = ApiName("ETMP API 1853"),
+          statusCode = ApiStatusCode(200),
+          processingDateTime = ProcessingDateTimeInstant(java.time.Instant.parse("2025-05-01T14:30:00Z")),
+          errorResponse = None
+        )
+      ),
+      processingDateTime = ProcessingDateTimeInstant(java.time.Instant.parse("2025-10-15T10:31:00Z"))
+    )
+
+    val informResponseUnsuccessfulCesaCall: TtpInformSuccessfulResponse = TtpInformSuccessfulResponse(
+      apisCalled = List(
+        ApiStatus(
+          name = ApiName("CESA"),
+          statusCode = ApiStatusCode(400),
+          processingDateTime = ProcessingDateTimeInstant(java.time.Instant.parse("2025-05-01T14:30:00Z")),
           errorResponse = None
         )
       ),
