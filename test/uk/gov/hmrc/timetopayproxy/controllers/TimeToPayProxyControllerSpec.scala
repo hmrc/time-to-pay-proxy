@@ -1850,7 +1850,7 @@ class TimeToPayProxyControllerSpec extends AnyWordSpec with MockFactory {
 
     "return 400" when {
       "request body is in wrong format" when {
-        "required field is not provided" in {
+        "a required field, channelIdentifier, is not provided" in {
           (() => featureSwitch.enrolmentAuthEnabled).expects().returning(EnrolmentAuthEnabled(true))
 
           (() => featureSwitch.informEndpointEnabled)
@@ -1879,6 +1879,159 @@ class TimeToPayProxyControllerSpec extends AnyWordSpec with MockFactory {
           val response: Future[Result] = controller.informTtp()(fakeRequest)
 
           status(response) shouldBe Status.BAD_REQUEST
+          contentAsJson(response) shouldBe Json.parse(
+            """{
+              |  "statusCode": 400,
+              |  "errorMessage": "Invalid TtpInformRequest payload: Payload has a missing field or an invalid format. Field name: channelIdentifier. "
+              |}
+              |""".stripMargin
+          )
+        }
+
+        "a required field that's an enum, chargeSource, is not provided" in {
+          (() => featureSwitch.enrolmentAuthEnabled).expects().returning(EnrolmentAuthEnabled(true))
+
+          (() => featureSwitch.informEndpointEnabled)
+            .expects()
+            .returning(true)
+
+          (authConnector
+            .authorise[Unit](_: Predicate, _: Retrieval[Unit])(
+              _: HeaderCarrier,
+              _: ExecutionContext
+            ))
+            .expects(where { (e: Predicate, r: Retrieval[Unit], _: HeaderCarrier, _: ExecutionContext) =>
+              e shouldBe ReadTimeToPayProxy.toEnrolment
+              r shouldBe EmptyRetrieval
+              true
+            })
+            .returning(Future.successful(()))
+
+          val missingFieldsJson =
+            Json.parse(
+              """{
+                |  "identifications": [
+                |    {
+                |      "idType": "NINO",
+                |      "idValue": "AB123456C"
+                |    }
+                |  ],
+                |  "paymentPlan": {
+                |    "arrangementAgreedDate": "2025-05-01",
+                |    "ttpEndDate": "2025-02-01",
+                |    "frequency": "monthly",
+                |    "initialPaymentDate": "2025-01-05",
+                |    "initialPaymentAmount": 100,
+                |    "ddiReference": "TestDDIReference",
+                |    "debtItemCharges": [
+                |      {
+                |        "debtItemChargeId": "XW006559808862",
+                |        "chargeSource": ""
+                |      }
+                |    ]
+                |  },
+                |  "instalments": [
+                |    {
+                |      "dueDate": "2025-01-31",
+                |      "amountDue": 500
+                |    }
+                |  ],
+                |  "channelIdentifier": "advisor",
+                |  "transitioned": true
+                |}
+                |""".stripMargin
+            )
+
+          val fakeRequest: FakeRequest[JsValue] =
+            FakeRequest("POST", "/individuals/time-to-pay-proxy/inform")
+              .withHeaders(CONTENT_TYPE -> MimeTypes.JSON)
+              .withBody(missingFieldsJson)
+
+          val response: Future[Result] = controller.informTtp()(fakeRequest)
+
+          status(response) shouldBe Status.BAD_REQUEST
+          contentAsJson(response) shouldBe Json.parse(
+            """{
+              |  "statusCode": 400,
+              |  "errorMessage": "Invalid TtpInformRequest payload: Payload has a missing field or an invalid format. Field name: chargeSource. Valid enum value should be provided"
+              |}
+              |""".stripMargin
+          )
+        }
+
+        "a field, arrangementAgreedDate, is in an incorrect format" in {
+          (() => featureSwitch.enrolmentAuthEnabled).expects().returning(EnrolmentAuthEnabled(true))
+
+          (() => featureSwitch.informEndpointEnabled)
+            .expects()
+            .returning(true)
+
+          (authConnector
+            .authorise[Unit](_: Predicate, _: Retrieval[Unit])(
+              _: HeaderCarrier,
+              _: ExecutionContext
+            ))
+            .expects(where { (e: Predicate, r: Retrieval[Unit], _: HeaderCarrier, _: ExecutionContext) =>
+              e shouldBe ReadTimeToPayProxy.toEnrolment
+              r shouldBe EmptyRetrieval
+              true
+            })
+            .returning(Future.successful(()))
+
+          val requestWithInvalidArrangementDate: JsValue =
+            Json.parse(
+              """{
+                |  "identifications": [
+                |    {
+                |      "idType": "NINO",
+                |      "idValue": "AB123456C"
+                |    }
+                |  ],
+                |  "paymentPlan": {
+                |    "arrangementAgreedDate": "invalidDate",
+                |    "ttpEndDate": "2025-02-01",
+                |    "frequency": "monthly",
+                |    "initialPaymentDate": "2025-01-05",
+                |    "initialPaymentAmount": 100,
+                |    "ddiReference": "TestDDIReference",
+                |    "debtItemCharges": [
+                |      {
+                |        "debtItemChargeId": "some-cesa-id",
+                |        "chargeSource": "CESA"
+                |      },
+                |      {
+                |        "debtItemChargeId": "some-etmp-id",
+                |        "chargeSource": "ETMP"
+                |      }
+                |    ]
+                |  },
+                |  "instalments": [
+                |    {
+                |      "dueDate": "2025-01-31",
+                |      "amountDue": 500
+                |    }
+                |  ],
+                |  "channelIdentifier": "advisor",
+                |  "transitioned": true
+                |}
+                |""".stripMargin
+            )
+
+          val fakeRequest: FakeRequest[JsValue] =
+            FakeRequest("POST", "/individuals/time-to-pay-proxy/inform")
+              .withHeaders(CONTENT_TYPE -> MimeTypes.JSON)
+              .withBody(requestWithInvalidArrangementDate)
+
+          val response: Future[Result] = controller.informTtp()(fakeRequest)
+
+          status(response) shouldBe Status.BAD_REQUEST
+          contentAsJson(response) shouldBe Json.parse(
+            """{
+              |  "statusCode": 400,
+              |  "errorMessage": "Invalid TtpInformRequest payload: Payload has a missing field or an invalid format. Field name: arrangementAgreedDate. Date format should be correctly provided"
+              |}
+              |""".stripMargin
+          )
         }
       }
     }

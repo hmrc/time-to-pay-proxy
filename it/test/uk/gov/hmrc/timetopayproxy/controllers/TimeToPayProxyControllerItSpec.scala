@@ -20,7 +20,7 @@ import cats.data.NonEmptyList
 import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.client.WireMock.{ postRequestedFor, urlPathEqualTo }
 import com.github.tomakehurst.wiremock.http.RequestMethod.{ POST, PUT }
-import play.api.libs.json.{ JsNull, JsObject, JsValue, Json, OFormat }
+import play.api.libs.json._
 import play.api.libs.ws.{ WSRequest, WSResponse }
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.timetopayproxy.models._
@@ -31,7 +31,7 @@ import uk.gov.hmrc.timetopayproxy.models.saonly.chargeInfoApi._
 import uk.gov.hmrc.timetopayproxy.models.saonly.common._
 import uk.gov.hmrc.timetopayproxy.models.saonly.common.apistatus._
 import uk.gov.hmrc.timetopayproxy.models.saonly.ttpcancel._
-import uk.gov.hmrc.timetopayproxy.models.saonly.ttpfullamend.{ ChargeAmendment, NewDebtItemChargeReference, NewPaymentPlan, OriginalPaymentPlan, TtpFullAmendInformativeError, TtpFullAmendInternalError, TtpFullAmendRequest, TtpFullAmendRequestR2, TtpFullAmendSuccessfulResponse }
+import uk.gov.hmrc.timetopayproxy.models.saonly.ttpfullamend._
 import uk.gov.hmrc.timetopayproxy.models.saonly.ttpinform._
 import uk.gov.hmrc.timetopayproxy.support.IntegrationBaseSpec
 import uk.gov.hmrc.timetopayproxy.testutils.TestOnlyJsonFormats._
@@ -1000,22 +1000,60 @@ class TimeToPayProxyControllerItSpec extends IntegrationBaseSpec {
 
       "should return a 200 statusCode" - {
         "when given a valid json payload" - {
-          "when TimeToPay returns a successful response" in new TimeToPayProxyControllerTestBase {
-            stubRequest(
-              httpMethod = POST,
-              url = "/debts/time-to-pay/inform",
-              status = 200,
-              responseBody = Json.toJson(informResponse).toString()
-            )
+          "when TimeToPay returns a successful response" - {
+            "when both CESA and ETMP are called, successfully" in new TimeToPayProxyControllerTestBase {
+              stubRequest(
+                httpMethod = POST,
+                url = "/debts/time-to-pay/inform",
+                status = 200,
+                responseBody = Json.toJson(informResponse).toString()
+              )
 
-            val requestForInformTtp: WSRequest = buildRequest("/inform")
+              val requestForInformTtp: WSRequest = buildRequest("/inform")
 
-            val response: WSResponse = await(
-              requestForInformTtp.post(Json.toJson(informRequest))
-            )
+              val response: WSResponse = await(
+                requestForInformTtp.post(Json.toJson(informRequest))
+              )
 
-            response.json shouldBe Json.toJson(informResponse)
-            response.status shouldBe 200
+              response.json shouldBe Json.toJson(informResponse)
+              response.status shouldBe 200
+            }
+
+            "when only ETMP is called, successfully" in new TimeToPayProxyControllerTestBase {
+              stubRequest(
+                httpMethod = POST,
+                url = "/debts/time-to-pay/inform",
+                status = 200,
+                responseBody = Json.toJson(informResponseSuccessfulEtmpCall).toString()
+              )
+
+              val requestForInformTtp: WSRequest = buildRequest("/inform")
+
+              val response: WSResponse = await(
+                requestForInformTtp.post(Json.toJson(informRequest))
+              )
+
+              response.json shouldBe Json.toJson(informResponseSuccessfulEtmpCall)
+              response.status shouldBe 200
+            }
+
+            "when only CESA is called, unsuccessfully" in new TimeToPayProxyControllerTestBase {
+              stubRequest(
+                httpMethod = POST,
+                url = "/debts/time-to-pay/inform",
+                status = 200,
+                responseBody = Json.toJson(informResponseUnsuccessfulCesaCall).toString()
+              )
+
+              val requestForInformTtp: WSRequest = buildRequest("/inform")
+
+              val response: WSResponse = await(
+                requestForInformTtp.post(Json.toJson(informRequest))
+              )
+
+              response.json shouldBe Json.toJson(informResponseUnsuccessfulCesaCall)
+              response.status shouldBe 200
+            }
           }
         }
       }
@@ -2190,6 +2228,30 @@ class TimeToPayProxyControllerItSpec extends IntegrationBaseSpec {
           name = ApiName("ETMP"),
           statusCode = ApiStatusCode(201),
           processingDateTime = ProcessingDateTimeInstant(java.time.Instant.parse("2025-05-01T14:31:00Z")),
+          errorResponse = None
+        )
+      ),
+      processingDateTime = ProcessingDateTimeInstant(java.time.Instant.parse("2025-10-15T10:31:00Z"))
+    )
+
+    val informResponseSuccessfulEtmpCall: TtpInformSuccessfulResponse = TtpInformSuccessfulResponse(
+      apisCalled = List(
+        ApiStatus(
+          name = ApiName("ETMP API 1853"),
+          statusCode = ApiStatusCode(200),
+          processingDateTime = ProcessingDateTimeInstant(java.time.Instant.parse("2025-05-01T14:30:00Z")),
+          errorResponse = None
+        )
+      ),
+      processingDateTime = ProcessingDateTimeInstant(java.time.Instant.parse("2025-10-15T10:31:00Z"))
+    )
+
+    val informResponseUnsuccessfulCesaCall: TtpInformSuccessfulResponse = TtpInformSuccessfulResponse(
+      apisCalled = List(
+        ApiStatus(
+          name = ApiName("CESA"),
+          statusCode = ApiStatusCode(400),
+          processingDateTime = ProcessingDateTimeInstant(java.time.Instant.parse("2025-05-01T14:30:00Z")),
           errorResponse = None
         )
       ),
