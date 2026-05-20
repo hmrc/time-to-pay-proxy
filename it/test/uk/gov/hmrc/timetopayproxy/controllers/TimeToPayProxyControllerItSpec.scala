@@ -45,6 +45,95 @@ class TimeToPayProxyControllerItSpec extends IntegrationBaseSpec {
   def saRelease2Enabled: Boolean = true
 
   "TimeToPayProxyController" - {
+    ".createPlan" - {
+      "should return a 400 statusCode" - {
+        "when given a valid json payload" - {
+          "with a missing required field" in new TimeToPayProxyControllerTestBase {
+            val requestForCreatePlan: WSRequest = buildRequest("/quote/arrangement")
+
+            val response: WSResponse = await(
+              requestForCreatePlan.post(
+                Json.parse(
+                  """
+                    |{
+                    |  "customerReference": "",
+                    |  "quoteReference": "quoteRef1234",
+                    |  "channelIdentifier": "advisor",
+                    |  "plan": {
+                    |    "quoteId": "quoteId1",
+                    |    "quoteType": "instalmentAmount",
+                    |    "quoteDate": "2021-05-13",
+                    |    "instalmentStartDate": "2021-05-13",
+                    |    "instalmentAmount": 100,
+                    |    "paymentPlanType": "timeToPay",
+                    |    "thirdPartyBank": true,
+                    |    "numberOfInstalments": 1,
+                    |    "frequency": "annually",
+                    |    "duration": 12,
+                    |    "initialPaymentAmount": 100,
+                    |    "initialPaymentDate": "2021-05-13",
+                    |    "totalDebtIncInt": 10,
+                    |    "totalInterest": 0.14,
+                    |    "interestAccrued": 10,
+                    |    "planInterest": 0.24
+                    |  },
+                    |  "debtItemCharges": [
+                    |    {
+                    |      "debtItemChargeId": "debtItemChrgId1",
+                    |      "mainTrans": "1546",
+                    |      "subTrans": "1090",
+                    |      "originalDebtAmount": 100,
+                    |      "interestStartDate": "2021-05-13",
+                    |      "paymentHistory": [
+                    |        {
+                    |          "paymentDate": "2021-05-13",
+                    |          "paymentAmount": 100
+                    |        }
+                    |      ]
+                    |    }
+                    |  ],
+                    |  "payments": [
+                    |    {
+                    |      "paymentMethod": "BACS",
+                    |      "paymentReference": "paymentRef123"
+                    |    }
+                    |  ],
+                    |  "customerPostCodes": [
+                    |    {
+                    |      "addressPostcode": "NW9 5XW",
+                    |      "postcodeDate": "2021-05-13"
+                    |    }
+                    |  ],
+                    |  "instalments": [
+                    |    {
+                    |      "debtItemChargeId": "debtItemChrgId1",
+                    |      "dueDate": "2021-05-13",
+                    |      "amountDue": 100,
+                    |      "expectedPayment": 10,
+                    |      "interestRate": 0.25,
+                    |      "instalmentNumber": 1,
+                    |      "instalmentInterestAccrued": 10,
+                    |      "instalmentBalance": 100
+                    |    }
+                    |  ]
+                    |}
+                  """.stripMargin
+                )
+              )
+            )
+
+            val expectedTtppErrorResponse: TtppErrorResponse = TtppErrorResponse(
+              statusCode = 400,
+              errorMessage = "Could not parse body due to requirement failed: customerReference should not be empty"
+            )
+
+            response.json shouldBe Json.toJson(expectedTtppErrorResponse)
+            response.status shouldBe 400
+          }
+        }
+      }
+    }
+
     ".getAffordableQuotes" - {
       val getAffordableQuotesPath: String = "/self-serve/affordable-quotes" // Extracted to prevent copy-paste errors.
 
