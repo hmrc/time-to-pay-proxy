@@ -33,7 +33,7 @@ import java.time.LocalDate
 final class TtpFullAmendRequestSpec extends AnyFreeSpec with MockFactory {
   val featureSwitch: FeatureSwitch = mock[FeatureSwitch]
 
-  "FullAmendRequestR2" - {
+  "FullAmendRequest" - {
     object TestData {
       object WithOnlySomes {
         def obj: FullAmendRequest = FullAmendRequest(
