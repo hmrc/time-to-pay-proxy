@@ -17,59 +17,24 @@
 package uk.gov.hmrc.timetopayproxy.models.saonly.ttpfullamend
 
 import cats.data.NonEmptyList
-import play.api.libs.json.{ Format, Json, OFormat, OWrites, Reads }
-import uk.gov.hmrc.timetopayproxy.config.FeatureSwitch
+import play.api.libs.json.{ Format, Json, OFormat }
 import uk.gov.hmrc.timetopayproxy.models._
 import uk.gov.hmrc.timetopayproxy.models.saonly.common._
 import uk.gov.hmrc.timetopayproxy.utils.json.CatsNonEmptyListJson
 
-sealed trait FullAmendRequest
-
-object FullAmendRequest {
-  private def reads(featureSwitch: FeatureSwitch): Reads[FullAmendRequest] = Reads { jsValue =>
-    if (featureSwitch.saRelease2Enabled.enabled)
-      TtpFullAmendRequestR2.format.reads(jsValue)
-    else
-      TtpFullAmendRequest.format.reads(jsValue)
-  }
-
-  private val writes: OWrites[FullAmendRequest] = OWrites {
-    case r1: TtpFullAmendRequest   => TtpFullAmendRequest.format.writes(r1)
-    case r2: TtpFullAmendRequestR2 => TtpFullAmendRequestR2.format.writes(r2)
-  }
-
-  def format(featureSwitch: FeatureSwitch): OFormat[FullAmendRequest] = OFormat(reads(featureSwitch), writes)
-}
-
-final case class TtpFullAmendRequest(
-  identifications: NonEmptyList[Identification],
-  paymentPlan: SaOnlyPaymentPlan,
-  instalments: NonEmptyList[SaOnlyInstalment],
-  channelIdentifier: ChannelIdentifier,
-  transitioned: TransitionedIndicator
-) extends FullAmendRequest
-
-object TtpFullAmendRequest {
-  implicit val format: OFormat[TtpFullAmendRequest] = {
-    implicit def nelFormat[T: Format]: Format[NonEmptyList[T]] = CatsNonEmptyListJson.nonEmptyListFormat[T]
-
-    Json.format[TtpFullAmendRequest]
-  }
-}
-
-case class TtpFullAmendRequestR2(
+case class FullAmendRequest(
   identifications: NonEmptyList[Identification],
   originalPaymentPlan: OriginalPaymentPlan,
   newPaymentPlan: NewPaymentPlan,
   instalments: NonEmptyList[SaOnlyInstalment],
   channelIdentifier: ChannelIdentifier,
   transitioned: TransitionedIndicator
-) extends FullAmendRequest
+)
 
-object TtpFullAmendRequestR2 {
-  implicit val format: OFormat[TtpFullAmendRequestR2] = {
+object FullAmendRequest {
+  implicit val format: OFormat[FullAmendRequest] = {
     implicit def nelFormat[T: Format]: Format[NonEmptyList[T]] = CatsNonEmptyListJson.nonEmptyListFormat[T]
 
-    Json.format[TtpFullAmendRequestR2]
+    Json.format[FullAmendRequest]
   }
 }

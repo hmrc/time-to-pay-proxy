@@ -772,8 +772,8 @@ class TimeToPayProxyControllerEnrolmentAuthEnabledItSpec extends IntegrationBase
     }
 
     ".fullAmendTtp" - {
-      val requestPayload: TtpFullAmendRequestR2 =
-        TtpFullAmendRequestR2(
+      val requestPayload: FullAmendRequest =
+        FullAmendRequest(
           identifications = NonEmptyList.of(
             Identification(
               idType = IdType("idtype"),

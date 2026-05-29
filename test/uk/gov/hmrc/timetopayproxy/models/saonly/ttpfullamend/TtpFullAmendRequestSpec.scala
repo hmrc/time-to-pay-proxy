@@ -24,7 +24,6 @@ import play.api.libs.json._
 import uk.gov.hmrc.timetopayproxy.config.FeatureSwitch
 import uk.gov.hmrc.timetopayproxy.models._
 import uk.gov.hmrc.timetopayproxy.models.currency.GbpPounds
-import uk.gov.hmrc.timetopayproxy.models.featureSwitches.SaRelease2Enabled
 import uk.gov.hmrc.timetopayproxy.models.saonly.common._
 import uk.gov.hmrc.timetopayproxy.testutils.JsonAssertionOps._
 import uk.gov.hmrc.timetopayproxy.testutils.schematestutils.Validators
@@ -34,224 +33,10 @@ import java.time.LocalDate
 final class TtpFullAmendRequestSpec extends AnyFreeSpec with MockFactory {
   val featureSwitch: FeatureSwitch = mock[FeatureSwitch]
 
-  "FullAmendRequestR1" - {
+  "FullAmendRequest" - {
     object TestData {
       object WithOnlySomes {
-        def obj: TtpFullAmendRequest = TtpFullAmendRequest(
-          identifications = NonEmptyList.of(
-            Identification(
-              idType = IdType("idtype"),
-              idValue = IdValue("idvalue")
-            )
-          ),
-          paymentPlan = SaOnlyPaymentPlan(
-            arrangementAgreedDate = ArrangementAgreedDate(LocalDate.parse("2020-01-02")),
-            ttpEndDate = TtpEndDate(LocalDate.parse("2020-02-04")),
-            frequency = FrequencyLowercase.Weekly,
-            initialPaymentDate = Some(InitialPaymentDate(LocalDate.parse("2020-04-06"))),
-            initialPaymentAmount = Some(GbpPounds.createOrThrow(100.12)),
-            ddiReference = Some(DdiReference("TestDDIReference")),
-            debtItemCharges = NonEmptyList.of(
-              DebtItemChargeReference(DebtItemChargeId("some-cesa-id"), ChargeSourceSAOnly.CESA),
-              DebtItemChargeReference(DebtItemChargeId("some-etmp-id"), ChargeSourceSAOnly.ETMP)
-            )
-          ),
-          instalments = NonEmptyList.of(
-            SaOnlyInstalment(
-              dueDate = InstalmentDueDate(LocalDate.parse("2020-05-07")),
-              amountDue = GbpPounds.createOrThrow(200.34)
-            )
-          ),
-          channelIdentifier = ChannelIdentifier.SelfService,
-          transitioned = TransitionedIndicator(true)
-        )
-
-        def json: JsValue = Json.parse(
-          """{
-            |  "channelIdentifier" : "selfService",
-            |  "identifications" : [
-            |    {
-            |      "idType" : "idtype",
-            |      "idValue" : "idvalue"
-            |    }
-            |  ],
-            |  "instalments" : [
-            |    {
-            |      "amountDue" : 200.34,
-            |      "dueDate" : "2020-05-07"
-            |    }
-            |  ],
-            |  "paymentPlan" : {
-            |    "arrangementAgreedDate" : "2020-01-02",
-            |    "frequency" : "weekly",
-            |    "initialPaymentAmount" : 100.12,
-            |    "initialPaymentDate" : "2020-04-06",
-            |    "ttpEndDate" : "2020-02-04",
-            |    "ddiReference" : "TestDDIReference",
-            |    "debtItemCharges": [
-            |       {
-            |          "debtItemChargeId": "some-cesa-id",
-            |          "chargeSource": "CESA"
-            |       },
-            |       {
-            |          "debtItemChargeId": "some-etmp-id",
-            |          "chargeSource": "ETMP"
-            |       }
-            |    ]
-            |  },
-            |  "transitioned" : true
-            |}
-            |""".stripMargin
-        )
-      }
-
-      object With0SomeOnEachPath {
-        def obj: TtpFullAmendRequest = TtpFullAmendRequest(
-          identifications = NonEmptyList.of(
-            Identification(
-              idType = IdType("idtype"),
-              idValue = IdValue("idvalue")
-            )
-          ),
-          paymentPlan = SaOnlyPaymentPlan(
-            arrangementAgreedDate = ArrangementAgreedDate(LocalDate.parse("2020-01-02")),
-            ttpEndDate = TtpEndDate(LocalDate.parse("2020-02-04")),
-            frequency = FrequencyLowercase.Weekly,
-            initialPaymentDate = None,
-            initialPaymentAmount = None,
-            ddiReference = None,
-            debtItemCharges = NonEmptyList.of(
-              DebtItemChargeReference(DebtItemChargeId("some-cesa-id"), ChargeSourceSAOnly.CESA),
-              DebtItemChargeReference(DebtItemChargeId("some-etmp-id"), ChargeSourceSAOnly.ETMP)
-            )
-          ),
-          instalments = NonEmptyList.of(
-            SaOnlyInstalment(
-              dueDate = InstalmentDueDate(LocalDate.parse("2020-05-07")),
-              amountDue = GbpPounds.createOrThrow(200.34)
-            )
-          ),
-          channelIdentifier = ChannelIdentifier.SelfService,
-          transitioned = TransitionedIndicator(true)
-        )
-
-        def json: JsValue = Json.parse(
-          """{
-            |  "channelIdentifier" : "selfService",
-            |  "identifications" : [
-            |    {
-            |      "idType" : "idtype",
-            |      "idValue" : "idvalue"
-            |    }
-            |  ],
-            |  "instalments" : [
-            |    {
-            |      "amountDue" : 200.34,
-            |      "dueDate" : "2020-05-07"
-            |    }
-            |  ],
-            |  "paymentPlan" : {
-            |    "arrangementAgreedDate" : "2020-01-02",
-            |    "frequency" : "weekly",
-            |    "ttpEndDate" : "2020-02-04",
-            |    "debtItemCharges": [
-            |       {
-            |          "debtItemChargeId": "some-cesa-id",
-            |          "chargeSource": "CESA"
-            |       },
-            |       {
-            |          "debtItemChargeId": "some-etmp-id",
-            |          "chargeSource": "ETMP"
-            |       }
-            |    ]
-            |    },
-            |  "transitioned" : true
-            |}
-            |""".stripMargin
-        )
-      }
-
-    }
-
-    "implicit JSON writer (data going to time-to-pay)" - {
-      def writerToTtp: Writes[FullAmendRequest] = FullAmendRequest.format(featureSwitch).writes(_)
-
-      "when all the optional fields are fully populated" - {
-        def json: JsValue = TestData.WithOnlySomes.json
-        def obj: TtpFullAmendRequest = TestData.WithOnlySomes.obj
-
-        "writes the correct JSON" in {
-          writerToTtp.writes(obj) shouldBeEquivalentTo json
-        }
-
-        "writes JSON compatible with the time-to-pay schema" in {
-          val schema = Validators.TimeToPay.TtpFullAmend.Live.openApiRequestSchema
-          val writtenJson: JsValue = writerToTtp.writes(obj)
-
-          schema.validateAndGetErrors(writtenJson) shouldBe Nil
-        }
-      }
-
-      "when none of the optional fields are populated" - {
-        def json: JsValue = TestData.With0SomeOnEachPath.json
-        def obj: TtpFullAmendRequest = TestData.With0SomeOnEachPath.obj
-
-        "writes the correct JSON" in {
-          writerToTtp.writes(obj) shouldBeEquivalentTo json
-        }
-
-        "writes JSON compatible with the time-to-pay schema" in {
-          val schema = Validators.TimeToPay.TtpFullAmend.Live.openApiRequestSchema
-          val writtenJson: JsValue = writerToTtp.writes(obj)
-
-          schema.validateAndGetErrors(writtenJson) shouldBe Nil
-        }
-      }
-    }
-
-    "implicit JSON reader (data coming from our clients)" - {
-      def readerFromClients: Reads[FullAmendRequest] = FullAmendRequest.format(featureSwitch).reads(_)
-
-      "when all the optional fields are fully populated" - {
-        def json: JsValue = TestData.WithOnlySomes.json
-        def obj: TtpFullAmendRequest = TestData.WithOnlySomes.obj
-
-        "reads the JSON correctly" in {
-          (() => featureSwitch.saRelease2Enabled).expects().returning(SaRelease2Enabled(false)).once()
-
-          readerFromClients.reads(json) shouldBe JsSuccess(obj)
-        }
-
-        "was tested against JSON compatible with our schema" in {
-          val schema = Validators.TimeToPayProxy.TtpFullAmend.Live.openApiRequestSchema
-
-          schema.validateAndGetErrors(json) shouldBe Nil
-        }
-      }
-
-      "when none of the optional fields are populated" - {
-        def json: JsValue = TestData.With0SomeOnEachPath.json
-        def obj: TtpFullAmendRequest = TestData.With0SomeOnEachPath.obj
-
-        "reads the JSON correctly" in {
-          (() => featureSwitch.saRelease2Enabled).expects().returning(SaRelease2Enabled(false)).once()
-
-          readerFromClients.reads(json) shouldBe JsSuccess(obj)
-        }
-
-        "was tested against JSON compatible with our schema" in {
-          val schema = Validators.TimeToPayProxy.TtpFullAmend.Live.openApiRequestSchema
-
-          schema.validateAndGetErrors(json) shouldBe Nil
-        }
-      }
-    }
-  }
-
-  "FullAmendRequestR2" - {
-    object TestData {
-      object WithOnlySomes {
-        def obj: TtpFullAmendRequestR2 = TtpFullAmendRequestR2(
+        def obj: FullAmendRequest = FullAmendRequest(
           identifications = NonEmptyList.of(
             Identification(
               idType = IdType("idtype"),
@@ -348,7 +133,7 @@ final class TtpFullAmendRequestSpec extends AnyFreeSpec with MockFactory {
       }
 
       object With0SomeOnEachPath {
-        def obj: TtpFullAmendRequestR2 = TtpFullAmendRequestR2(
+        def obj: FullAmendRequest = FullAmendRequest(
           identifications = NonEmptyList.of(
             Identification(
               idType = IdType("idtype"),
@@ -441,18 +226,18 @@ final class TtpFullAmendRequestSpec extends AnyFreeSpec with MockFactory {
     }
 
     "implicit JSON writer (data going to time-to-pay)" - {
-      def writerToTtp: Writes[FullAmendRequest] = FullAmendRequest.format(featureSwitch).writes(_)
+      def writerToTtp: Writes[FullAmendRequest] = FullAmendRequest.format.writes(_)
 
       "when all the optional fields are fully populated" - {
         def json: JsValue = TestData.WithOnlySomes.json
-        def obj: TtpFullAmendRequestR2 = TestData.WithOnlySomes.obj
+        def obj: FullAmendRequest = TestData.WithOnlySomes.obj
 
         "writes the correct JSON" in {
           writerToTtp.writes(obj) shouldBeEquivalentTo json
         }
 
         "writes JSON compatible with the time-to-pay schema" in {
-          val schema = Validators.TimeToPay.TtpFullAmend.Proposed.openApiRequestSchema
+          val schema = Validators.TimeToPay.TtpFullAmend.Live.openApiRequestSchema
           val writtenJson: JsValue = writerToTtp.writes(obj)
 
           schema.validateAndGetErrors(writtenJson) shouldBe Nil
@@ -461,14 +246,14 @@ final class TtpFullAmendRequestSpec extends AnyFreeSpec with MockFactory {
 
       "when none of the optional fields are populated" - {
         def json: JsValue = TestData.With0SomeOnEachPath.json
-        def obj: TtpFullAmendRequestR2 = TestData.With0SomeOnEachPath.obj
+        def obj: FullAmendRequest = TestData.With0SomeOnEachPath.obj
 
         "writes the correct JSON" in {
           writerToTtp.writes(obj) shouldBeEquivalentTo json
         }
 
         "writes JSON compatible with the time-to-pay schema" in {
-          val schema = Validators.TimeToPay.TtpFullAmend.Proposed.openApiRequestSchema
+          val schema = Validators.TimeToPay.TtpFullAmend.Live.openApiRequestSchema
           val writtenJson: JsValue = writerToTtp.writes(obj)
 
           schema.validateAndGetErrors(writtenJson) shouldBe Nil
@@ -477,20 +262,18 @@ final class TtpFullAmendRequestSpec extends AnyFreeSpec with MockFactory {
     }
 
     "implicit JSON reader (data coming from our clients)" - {
-      def readerFromClients: Reads[FullAmendRequest] = FullAmendRequest.format(featureSwitch).reads(_)
+      def readerFromClients: Reads[FullAmendRequest] = FullAmendRequest.format.reads(_)
 
       "when all the optional fields are fully populated" - {
         def json: JsValue = TestData.WithOnlySomes.json
-        def obj: TtpFullAmendRequestR2 = TestData.WithOnlySomes.obj
+        def obj: FullAmendRequest = TestData.WithOnlySomes.obj
 
         "reads the JSON correctly" in {
-          (() => featureSwitch.saRelease2Enabled).expects().returning(SaRelease2Enabled(true)).once()
-
           readerFromClients.reads(json) shouldBe JsSuccess(obj)
         }
 
         "was tested against JSON compatible with our schema" in {
-          val schema = Validators.TimeToPayProxy.TtpFullAmend.Proposed.openApiRequestSchema
+          val schema = Validators.TimeToPayProxy.TtpFullAmend.Live.openApiRequestSchema
 
           schema.validateAndGetErrors(json) shouldBe Nil
         }
@@ -498,16 +281,14 @@ final class TtpFullAmendRequestSpec extends AnyFreeSpec with MockFactory {
 
       "when none of the optional fields are populated" - {
         def json: JsValue = TestData.With0SomeOnEachPath.json
-        def obj: TtpFullAmendRequestR2 = TestData.With0SomeOnEachPath.obj
+        def obj: FullAmendRequest = TestData.With0SomeOnEachPath.obj
 
         "reads the JSON correctly" in {
-          (() => featureSwitch.saRelease2Enabled).expects().returning(SaRelease2Enabled(true)).once()
-
           readerFromClients.reads(json) shouldBe JsSuccess(obj)
         }
 
         "was tested against JSON compatible with our schema" in {
-          val schema = Validators.TimeToPayProxy.TtpFullAmend.Proposed.openApiRequestSchema
+          val schema = Validators.TimeToPayProxy.TtpFullAmend.Live.openApiRequestSchema
 
           schema.validateAndGetErrors(json) shouldBe Nil
         }
