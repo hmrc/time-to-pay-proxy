@@ -53,8 +53,8 @@ info:
       | 1.0.19 | 30-10-2025 | Alex Olkhovskiy | R1 changes for udpate cancel, inform and full amend|
       | 1.0.20 | 06-11-2025 | Alex Olkhovskiy | Add 422 error response for charge reference mismatch |
       | 1.0.21 | 28-01-2026 | Alex Olkhovskiy | DTD-4248: Fix mismatches between spec and code |
-      | 1.0.21_A | 17-03-2026 | Sunil Sen | DTD-4295: Send charge references to CESA |
-  version: 1.0.21_A
+      | 1.0.22 | 17-03-2026 | Sunil Sen | DTD-4295: Send charge references to CESA |
+  version: 1.0.22
   contact: {}
 servers:
   - url: https://api.service.hmrc.gov.uk
