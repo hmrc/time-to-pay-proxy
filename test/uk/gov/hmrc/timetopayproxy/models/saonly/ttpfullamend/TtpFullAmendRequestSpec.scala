@@ -237,7 +237,7 @@ final class TtpFullAmendRequestSpec extends AnyFreeSpec with MockFactory {
         }
 
         "writes JSON compatible with the time-to-pay schema" in {
-          val schema = Validators.TimeToPay.TtpFullAmend.Proposed.openApiRequestSchema
+          val schema = Validators.TimeToPay.TtpFullAmend.Live.openApiRequestSchema
           val writtenJson: JsValue = writerToTtp.writes(obj)
 
           schema.validateAndGetErrors(writtenJson) shouldBe Nil
@@ -253,7 +253,7 @@ final class TtpFullAmendRequestSpec extends AnyFreeSpec with MockFactory {
         }
 
         "writes JSON compatible with the time-to-pay schema" in {
-          val schema = Validators.TimeToPay.TtpFullAmend.Proposed.openApiRequestSchema
+          val schema = Validators.TimeToPay.TtpFullAmend.Live.openApiRequestSchema
           val writtenJson: JsValue = writerToTtp.writes(obj)
 
           schema.validateAndGetErrors(writtenJson) shouldBe Nil
@@ -273,7 +273,7 @@ final class TtpFullAmendRequestSpec extends AnyFreeSpec with MockFactory {
         }
 
         "was tested against JSON compatible with our schema" in {
-          val schema = Validators.TimeToPayProxy.TtpFullAmend.Proposed.openApiRequestSchema
+          val schema = Validators.TimeToPayProxy.TtpFullAmend.Live.openApiRequestSchema
 
           schema.validateAndGetErrors(json) shouldBe Nil
         }
@@ -288,7 +288,7 @@ final class TtpFullAmendRequestSpec extends AnyFreeSpec with MockFactory {
         }
 
         "was tested against JSON compatible with our schema" in {
-          val schema = Validators.TimeToPayProxy.TtpFullAmend.Proposed.openApiRequestSchema
+          val schema = Validators.TimeToPayProxy.TtpFullAmend.Live.openApiRequestSchema
 
           schema.validateAndGetErrors(json) shouldBe Nil
         }
