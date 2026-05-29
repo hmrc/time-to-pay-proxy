@@ -30,7 +30,7 @@ import uk.gov.hmrc.timetopayproxy.models.error.{ ConnectorError, TtppEnvelope }
 import uk.gov.hmrc.timetopayproxy.models.saonly.common._
 import uk.gov.hmrc.timetopayproxy.models.saonly.common.apistatus.{ ApiName, ApiStatus, ApiStatusCode }
 import uk.gov.hmrc.timetopayproxy.models.saonly.ttpcancel.{ CancellationDate, TtpCancelPaymentPlan, TtpCancelPaymentPlanR2, TtpCancelRequest, TtpCancelRequestR2, TtpCancelSuccessfulResponse }
-import uk.gov.hmrc.timetopayproxy.models.saonly.ttpfullamend.{ TtpFullAmendRequest, TtpFullAmendSuccessfulResponse }
+import uk.gov.hmrc.timetopayproxy.models.saonly.ttpfullamend.{ ChargeAmendment, FullAmendRequest, NewDebtItemChargeReference, NewPaymentPlan, OriginalPaymentPlan, TtpFullAmendSuccessfulResponse }
 import uk.gov.hmrc.timetopayproxy.models.saonly.ttpinform.{ TtpInformRequest, TtpInformSuccessfulResponse }
 
 import java.time.{ Instant, LocalDate }
@@ -262,11 +262,11 @@ class TtpFeedbackLoopServiceSpec extends AnyFreeSpec with MockFactory with Scala
     }
 
     "fullAmendTtp" - {
-      val ttpFullAmendRequest = TtpFullAmendRequest(
+      val ttpFullAmendRequest = FullAmendRequest(
         identifications = NonEmptyList.of(
           Identification(idType = IdType("NINO"), idValue = IdValue("AB123456C"))
         ),
-        paymentPlan = SaOnlyPaymentPlan(
+        originalPaymentPlan = OriginalPaymentPlan(
           arrangementAgreedDate = ArrangementAgreedDate(LocalDate.of(2025, 1, 1)),
           ttpEndDate = TtpEndDate(LocalDate.of(2025, 2, 1)),
           frequency = FrequencyLowercase.Monthly,
@@ -276,6 +276,26 @@ class TtpFeedbackLoopServiceSpec extends AnyFreeSpec with MockFactory with Scala
           debtItemCharges = NonEmptyList.of(
             DebtItemChargeReference(DebtItemChargeId("some-cesa-id"), ChargeSourceSAOnly.CESA),
             DebtItemChargeReference(DebtItemChargeId("some-etmp-id"), ChargeSourceSAOnly.ETMP)
+          )
+        ),
+        newPaymentPlan = NewPaymentPlan(
+          arrangementAgreedDate = ArrangementAgreedDate(LocalDate.of(2025, 1, 1)),
+          ttpEndDate = TtpEndDate(LocalDate.of(2025, 2, 1)),
+          frequency = FrequencyLowercase.Monthly,
+          initialPaymentDate = Some(InitialPaymentDate(LocalDate.of(2025, 1, 5))),
+          initialPaymentAmount = Some(GbpPounds.createOrThrow(100.00)),
+          ddiReference = Some(DdiReference("Test DDI Reference")),
+          debtItemCharges = NonEmptyList.of(
+            NewDebtItemChargeReference(
+              DebtItemChargeId("some-cesa-id"),
+              ChargeSourceSAOnly.CESA,
+              ChargeAmendment.Remain
+            ),
+            NewDebtItemChargeReference(
+              DebtItemChargeId("some-etmp-id"),
+              ChargeSourceSAOnly.ETMP,
+              ChargeAmendment.Remain
+            )
           )
         ),
         instalments = NonEmptyList.of(
@@ -302,7 +322,7 @@ class TtpFeedbackLoopServiceSpec extends AnyFreeSpec with MockFactory with Scala
 
       "return success response when connector returns success" in {
         (mockConnector
-          .fullAmendTtp(_: TtpFullAmendRequest)(
+          .fullAmendTtp(_: FullAmendRequest)(
             _: ExecutionContext,
             _: HeaderCarrier
           ))
@@ -318,7 +338,7 @@ class TtpFeedbackLoopServiceSpec extends AnyFreeSpec with MockFactory with Scala
         val error = ConnectorError(500, "Internal Server Error")
 
         (mockConnector
-          .fullAmendTtp(_: TtpFullAmendRequest)(
+          .fullAmendTtp(_: FullAmendRequest)(
             _: ExecutionContext,
             _: HeaderCarrier
           ))

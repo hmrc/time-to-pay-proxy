@@ -167,7 +167,7 @@ class TimeToPayProxyController @Inject() (
 
   def fullAmendTtp: Action[JsValue] = authThenCorrelationIdActions.async(parse.json) { implicit request =>
     if (featureSwitch.fullAmendEndpointEnabled) {
-      implicit val requestFormat: OFormat[FullAmendRequest] = FullAmendRequest.format(featureSwitch)
+      implicit val requestFormat: OFormat[FullAmendRequest] = FullAmendRequest.format
       withJsonBody[FullAmendRequest] { deserialisedRequest: FullAmendRequest =>
         ttpFeedbackLoopService
           .fullAmendTtp(deserialisedRequest)

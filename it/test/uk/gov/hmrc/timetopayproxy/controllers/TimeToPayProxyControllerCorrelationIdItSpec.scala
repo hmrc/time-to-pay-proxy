@@ -28,7 +28,7 @@ import uk.gov.hmrc.timetopayproxy.models.currency.GbpPounds
 import uk.gov.hmrc.timetopayproxy.models.saonly.chargeInfoApi.{ ChargeInfoChannelIdentifier, ChargeInfoRequest }
 import uk.gov.hmrc.timetopayproxy.models.saonly.common.{ ArrangementAgreedDate, ChargeSourceSAOnly, DdiReference, DebtItemChargeReference, InitialPaymentDate, SaOnlyInstalment, SaOnlyPaymentPlan, SaOnlyRegimeType, TransitionedIndicator, TtpEndDate }
 import uk.gov.hmrc.timetopayproxy.models.saonly.ttpcancel.{ CancellationDate, TtpCancelPaymentPlanR2, TtpCancelRequestR2 }
-import uk.gov.hmrc.timetopayproxy.models.saonly.ttpfullamend.{ ChargeAmendment, NewDebtItemChargeReference, NewPaymentPlan, OriginalPaymentPlan, TtpFullAmendRequestR2 }
+import uk.gov.hmrc.timetopayproxy.models.saonly.ttpfullamend.{ ChargeAmendment, FullAmendRequest, NewDebtItemChargeReference, NewPaymentPlan, OriginalPaymentPlan }
 import uk.gov.hmrc.timetopayproxy.models.saonly.ttpinform.TtpInformRequest
 import uk.gov.hmrc.timetopayproxy.support.IntegrationBaseSpec
 
@@ -613,8 +613,8 @@ class TimeToPayProxyControllerCorrelationIdItSpec extends IntegrationBaseSpec {
   }
 
   ".fullAmendTtp" - {
-    val fullAmendRequest: TtpFullAmendRequestR2 =
-      TtpFullAmendRequestR2(
+    val fullAmendRequest: FullAmendRequest =
+      FullAmendRequest(
         identifications = NonEmptyList.of(
           Identification(
             idType = IdType("idtype"),

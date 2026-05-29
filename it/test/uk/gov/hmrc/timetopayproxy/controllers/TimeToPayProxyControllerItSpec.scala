@@ -1395,7 +1395,7 @@ class TimeToPayProxyControllerItSpec extends IntegrationBaseSpec {
     }
 
     ".fullAmendTtp" - {
-      implicit val r2RequestFormat: OFormat[TtpFullAmendRequest] = TtpFullAmendRequest.format
+      implicit val r2RequestFormat: OFormat[FullAmendRequest] = FullAmendRequest.format
       "should return a 200 statusCode" - {
         "when given a valid json payload" - {
           "when TimeToPay returns a successful response" in new TimeToPayProxyControllerTestBase {
@@ -2347,7 +2347,7 @@ class TimeToPayProxyControllerItSpec extends IntegrationBaseSpec {
       processingDateTime = ProcessingDateTimeInstant(java.time.Instant.parse("2025-10-15T10:31:00Z"))
     )
 
-    val fullAmendRequest: TtpFullAmendRequestR2 = TtpFullAmendRequestR2(
+    val fullAmendRequest: FullAmendRequest = FullAmendRequest(
       identifications = NonEmptyList.of(
         Identification(idType = IdType("NINO"), idValue = IdValue("AA000000A")),
         Identification(idType = IdType("MTDITID"), idValue = IdValue("XAIT00000000054")),
