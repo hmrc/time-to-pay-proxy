@@ -130,7 +130,7 @@ class TtpFeedbackLoopConnector @Inject() (
       EitherT(
         httpClient
           .post(url)
-          .withBody(Json.toJson(request)(FullAmendRequest.format))
+          .withBody(Json.toJson(request))
           .setHeader(requestHeaders: _*)
           .execute[Either[ProxyEnvelopeError, TtpFullAmendSuccessfulResponse]]
       )

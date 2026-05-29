@@ -1395,7 +1395,6 @@ class TimeToPayProxyControllerItSpec extends IntegrationBaseSpec {
     }
 
     ".fullAmendTtp" - {
-      implicit val r2RequestFormat: OFormat[FullAmendRequest] = FullAmendRequest.format
       "should return a 200 statusCode" - {
         "when given a valid json payload" - {
           "when TimeToPay returns a successful response" in new TimeToPayProxyControllerTestBase {
