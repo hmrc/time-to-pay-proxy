@@ -55,7 +55,7 @@ info:
       | 1.0.21 | 28-01-2026 | Alex Olkhovskiy | DTD-4248: Fix mismatches between spec and code |
       | 1.0.22 | 17-03-2026 | Sunil Sen | DTD-4295: Send charge references to CESA |
       | 1.0.23 | 29-05-2026 | Dan Smith | DTD-4585: Align Full Amend with SA Release 2 spec |
-  version: 1.0.22
+  version: 1.0.23
   contact: {}
 servers:
   - url: https://api.service.hmrc.gov.uk
