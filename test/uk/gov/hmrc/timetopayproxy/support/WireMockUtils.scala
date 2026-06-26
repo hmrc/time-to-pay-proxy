@@ -40,8 +40,6 @@ trait WireMockUtils extends BeforeAndAfterEach with BeforeAndAfterAll with Guice
 
   val wireMockServer: WireMockServer = new WireMockServer(wireMockConfig().port(wireMockPort))
 
-  SharedMetricRegistries.clear()
-
   override implicit lazy val app: Application = GuiceApplicationBuilder()
     .configure("auditing.enabled" -> "false")
     .build()
@@ -49,6 +47,7 @@ trait WireMockUtils extends BeforeAndAfterEach with BeforeAndAfterAll with Guice
   override def beforeAll(): Unit = {
     super.beforeAll()
     wireMockServer.start()
+    SharedMetricRegistries.clear()
     WireMock.configureFor("localhost", wireMockPort)
   }
 
