@@ -21,21 +21,13 @@ object AppDependencies {
     "com.fasterxml.jackson.module" %% "jackson-module-scala"        % "2.20.2"             % Test,
     "com.vladsch.flexmark"          % "flexmark-all"                % "0.64.8"             % Test,
     "org.scalatestplus.play"       %% "scalatestplus-play"          % "7.0.2"              % Test,
-    "com.networknt"                 % "json-schema-validator"       % "1.5.9"              % Test
-      // This exclusion is because Play/Pekko depends on an old (Jackson) Scala module, incompatible with jackson-databind version 2.17.1 or later.
-      // Without an updated Play/Pekko, some Play tests would throw this error:
-      //   Scala module 2.14.3 requires Jackson Databind version >= 2.14.0 and < 2.15.0 - Found jackson-databind version 2.17.1
-      // We can exclude the later version because our schema tests don't use many features of Jackson.
-      // An earlier version of the library is added by our other dependencies.
-      exclude ("com.fasterxml.jackson.dataformat", "jackson-dataformat-yaml" /* would be version 2.17.1 or later */ )
-      exclude ("com.fasterxml.jackson.core", "jackson-databind" /* would be version 2.17.1 or later */ ),
-    "org.openapi4j"                 % "openapi-operation-validator" % "1.0.7"              % Test,
-    "org.openapi4j"                 % "openapi-parser"              % "1.0.7"              % Test,
-    "com.softwaremill.quicklens"   %% "quicklens"                   % "1.9.15"             % Test
+    "com.networknt"                 % "json-schema-validator"       % "1.5.9"              % Test,
+    "com.softwaremill.quicklens"   %% "quicklens"                   % "1.9.12"             % Test
   )
 
   val dependencyOverrides = Seq(
-    "com.fasterxml.jackson.module"  % "jackson-module-scala_2.13" % "2.15.3",
+    "com.fasterxml.jackson.module"  % "jackson-module-scala_2.13" % "2.15.4",
+    "com.fasterxml.jackson.core"    % "jackson-databind"          % "2.15.4",
     "uk.gov.hmrc"                   % "http-verbs-play-30_2.13"   % "15.8.0",
     "org.slf4j"                     % "slf4j-api"                 % "2.0.17",
     "com.google.guava"              % "guava"                     % "32.1.3-jre"
