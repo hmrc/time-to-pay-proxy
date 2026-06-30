@@ -252,8 +252,7 @@ final class AffordableQuoteResponseSpec extends AnyFreeSpec {
 
           schema.validateAndGetErrors(json) shouldBe List(
             // This is an issue with the time-to-pay schema. As of 2025-08-05, this response is not tested in time-to-pay.
-            """processingDateTime: Value '2023-10-01T12:00:00' does not match format 'date-time'. (code: 1007)
-              |From: processingDateTime.<format>""".stripMargin
+            "/processingDateTime: does not match the date-time pattern must be a valid RFC 3339 date-time"
           )
         }
       }
@@ -271,8 +270,7 @@ final class AffordableQuoteResponseSpec extends AnyFreeSpec {
 
           schema.validateAndGetErrors(json) shouldBe List(
             // This is an issue with the time-to-pay schema. As of 2025-08-05, this response is not tested in time-to-pay.
-            """processingDateTime: Value '2023-10-01T12:00:00' does not match format 'date-time'. (code: 1007)
-              |From: processingDateTime.<format>""".stripMargin
+            "/processingDateTime: does not match the date-time pattern must be a valid RFC 3339 date-time"
           )
         }
       }

@@ -271,10 +271,8 @@ final class TtpCancelRequestSpec extends AnyFreeSpec {
           val schema = Live.openApiRequestSchema
 
           schema.validateAndGetErrors(json) shouldBe List(
-            """instalments.0.amountDue: Value '200.349' is not a multiple of '0.01'. (code: 1019)
-              |From: instalments.0.<items>.<#/components/schemas/CancelInstalment>.amountDue.<multipleOf>""".stripMargin,
-            """paymentPlan.initialPaymentAmount: Value '100.129' is not a multiple of '0.01'. (code: 1019)
-              |From: paymentPlan.<#/components/schemas/CancelPaymentPlan>.initialPaymentAmount.<multipleOf>""".stripMargin
+            "/instalments/0/amountDue: must be multiple of 0.01",
+            "/paymentPlan/initialPaymentAmount: must be multiple of 0.01"
           )
         }
       }
