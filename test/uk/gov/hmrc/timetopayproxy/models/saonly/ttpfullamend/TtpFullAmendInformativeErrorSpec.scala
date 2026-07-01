@@ -188,7 +188,9 @@ final class TtpFullAmendInformativeErrorSpec extends AnyFreeSpec {
           val schema = Validators.TimeToPay.TtpFullAmend.Live.openApiFullAmendErrorResponseSchema
 
           schema.validateAndGetErrors(notAcceptedJson) shouldBe
-            List("Additional property 'notWanted' is not allowed. (code: 1000)\nFrom: <additionalProperties>")
+            List(
+              ": property 'notWanted' is not defined in the schema and the schema does not allow additional properties"
+            )
         }
       }
 
