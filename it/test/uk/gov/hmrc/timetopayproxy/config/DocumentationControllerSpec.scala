@@ -38,9 +38,7 @@ class DocumentationControllerSpec extends IntegrationBaseSpec {
       |    "versions": [
       |      {
       |        "version": "1.0",
-      |        "access": {
-      |          "type": "PRIVATE"
-      |        },
+      |        "access": "INTERNAL",
       |        "status": "BETA",
       |        "endpointsEnabled": true
       |      }
