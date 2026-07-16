@@ -21,7 +21,7 @@ object AppDependencies {
     "com.fasterxml.jackson.module" %% "jackson-module-scala"        % "2.20.2"             % Test,
     "com.vladsch.flexmark"          % "flexmark-all"                % "0.64.8"             % Test,
     "org.scalatestplus.play"       %% "scalatestplus-play"          % "7.0.2"              % Test,
-    "com.networknt"                 % "json-schema-validator"       % "1.5.9"              % Test,
+    "com.networknt"                 % "json-schema-validator"       % "2.0.4"              % Test,
     "com.softwaremill.quicklens"   %% "quicklens"                   % "1.9.12"             % Test
   )
 

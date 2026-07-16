@@ -17,7 +17,9 @@
 package uk.gov.hmrc.timetopayproxy.support
 
 import com.fasterxml.jackson.databind.{ JsonNode, ObjectMapper }
-import com.networknt.schema.{ JsonSchema, JsonSchemaFactory, SpecVersion }
+import com.networknt.schema.regex.JDKRegularExpressionFactory
+import com.networknt.schema.resource.SchemaLoader
+import com.networknt.schema._
 import org.scalatest.EitherValues
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
@@ -29,12 +31,30 @@ import scala.jdk.CollectionConverters.CollectionHasAsScala
 import scala.util.Using
 
 class JsonSchemaValidatorSpec extends AnyWordSpec with Matchers with EitherValues {
+  val schemaLoader: SchemaLoader = SchemaLoader
+    .builder()
+    .fetchRemoteResources(true)
+    .build()
 
-  lazy val schemaFactory = JsonSchemaFactory.getInstance(SpecVersion.VersionFlag.V4)
+  val config =
+    SchemaRegistryConfig
+      .builder()
+      .regularExpressionFactory(JDKRegularExpressionFactory.getInstance())
+      .formatAssertionsEnabled(true)
+      .build()
+
+  val registry = SchemaRegistry.withDefaultDialect(
+    SpecificationVersion.DRAFT_4,
+    (builder: SchemaRegistry.Builder) => {
+      builder.schemaRegistryConfig(config)
+      builder.schemaLoader(schemaLoader)
+      ()
+    }
+  )
+  def loadSchema(path: String): Schema =
+    registry.getSchema(SchemaLocation.of(Paths.get(path).toUri.toString))
+
   lazy val objectMapper = new ObjectMapper
-
-  def loadSchema(path: String): JsonSchema =
-    schemaFactory.getSchema(Paths.get(path).toUri)
 
   def loadJson(path: String): JsonNode =
     objectMapper.readTree(Paths.get(path).toFile)
