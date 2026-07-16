@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.timetopayproxy.testutils.schematestutils.impl
 
-import com.networknt.schema.SpecVersion
+import com.networknt.schema.SpecificationVersion
 import org.scalactic.source.Position
 import org.scalatest.Assertions.fail
 import uk.gov.hmrc.timetopayproxy.testutils.schematestutils.impl.DebtTransSchemaValidator.SimpleJsonSchema
@@ -36,7 +36,7 @@ private[impl] object MetaSchemas {
         //   https://github.com/OAI/OpenAPI-Specification/blob/bdf9337a8866bd2f568ff9c0f0e946d62473ecc7/schemas/v3.0/schema.yaml
         new SimpleJsonSchema(
           jsonSchemaFilename = "test/resources/schemas/general/openapi-meta-schema-v3.0.yaml",
-          version = SpecVersion.VersionFlag.V4,
+          version = SpecificationVersion.DRAFT_4,
           metaSchemaValidation = None
         )
       case _ =>
@@ -48,20 +48,20 @@ private[impl] object MetaSchemas {
   /** JSON schema to validate the structure of a JSON schema.
     * @param version what JSON schema version we want this meta-schema to target.
     */
-  def jsonSchemaSchema(version: SpecVersion.VersionFlag)(implicit pos: Position): SimpleJsonSchema =
+  def jsonSchemaSchema(version: SpecificationVersion)(implicit pos: Position): SimpleJsonSchema =
     version match {
-      case SpecVersion.VersionFlag.V4 =>
+      case SpecificationVersion.DRAFT_4 =>
         new SimpleJsonSchema(
           jsonSchemaFilename = "test/resources/schemas/general/json-meta-schema-v4.json",
           // This version is independent of parameter. It's file-specific.
-          SpecVersion.VersionFlag.V4,
+          SpecificationVersion.DRAFT_4,
           metaSchemaValidation = None
         )
-      case SpecVersion.VersionFlag.V7 =>
+      case SpecificationVersion.DRAFT_7 =>
         new SimpleJsonSchema(
           jsonSchemaFilename = "test/resources/schemas/general/json-meta-schema-v7.json",
           // This version is independent of parameter. It's file-specific.
-          SpecVersion.VersionFlag.V7,
+          SpecificationVersion.DRAFT_7,
           metaSchemaValidation = None
         )
       case _ =>

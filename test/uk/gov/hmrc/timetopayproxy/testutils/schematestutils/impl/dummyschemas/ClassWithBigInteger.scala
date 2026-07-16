@@ -17,7 +17,7 @@
 package uk.gov.hmrc.timetopayproxy.testutils.schematestutils.impl.dummyschemas
 
 import cats.data.Validated.Valid
-import com.networknt.schema.SpecVersion
+import com.networknt.schema.SpecificationVersion
 import play.api.libs.json.{ Json, OFormat }
 import uk.gov.hmrc.timetopayproxy.testutils.schematestutils.impl.DebtTransSchemaValidator.{ OpenApi3DerivedSchema, SimpleJsonSchema }
 
@@ -30,14 +30,14 @@ private[impl] object ClassWithBigInteger {
   def jsonSchemaV4: SimpleJsonSchema =
     new SimpleJsonSchema(
       jsonSchemaFilename = "test/resources/schemas/general/class-with-big-integer/json-schema-v4.json",
-      SpecVersion.VersionFlag.V4,
+      SpecificationVersion.DRAFT_4,
       metaSchemaValidation = Some(Valid(()))
     )
 
   def jsonSchemaV7: SimpleJsonSchema =
     new SimpleJsonSchema(
       jsonSchemaFilename = "test/resources/schemas/general/class-with-big-integer/json-schema-v7.json",
-      SpecVersion.VersionFlag.V7,
+      SpecificationVersion.DRAFT_7,
       metaSchemaValidation = Some(Valid(()))
     )
 

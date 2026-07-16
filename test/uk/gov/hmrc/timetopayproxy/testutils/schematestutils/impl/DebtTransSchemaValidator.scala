@@ -20,8 +20,8 @@ import cats.data.ValidatedNel
 import com.fasterxml.jackson.databind.node.ObjectNode
 import com.fasterxml.jackson.databind.{ JsonNode, ObjectMapper }
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory
+import com.networknt.schema.{ Schema, SchemaRegistry, SchemaRegistryConfig, SpecificationVersion }
 import com.networknt.schema.regex.JDKRegularExpressionFactory
-import com.networknt.schema.{ JsonSchema, JsonSchemaFactory, SchemaValidatorsConfig, SpecVersion }
 import org.scalactic.source.Position
 import org.scalatest.Assertions.fail
 import org.scalatest.matchers.should.Matchers._
@@ -69,7 +69,7 @@ object DebtTransSchemaValidator {
   /** @param jsonSchemaFilename can be a JSON or a YAML file. Note that this is NOT an OpenAPI spec. */
   final class SimpleJsonSchema private[schematestutils] (
     jsonSchemaFilename: String,
-    version: SpecVersion.VersionFlag,
+    version: SpecificationVersion,
     metaSchemaValidation: Option[ValidatedNel[String, Unit]]
   ) extends DebtTransSchemaValidator {
 
@@ -85,10 +85,8 @@ object DebtTransSchemaValidator {
         }
     }
 
-    private val jsonSchema: JsonSchema = {
-      val schemaFactory: JsonSchemaFactory = JsonSchemaFactory.getInstance(version)
-
-      val config = SchemaValidatorsConfig
+    private val jsonSchema: Schema = {
+      val config = SchemaRegistryConfig
         .builder()
         .regularExpressionFactory(
           // Without depending on other libraries, it's not possible to validate ECMAScript regular expressions.
@@ -97,10 +95,16 @@ object DebtTransSchemaValidator {
         )
         .build()
 
-      schemaFactory.getSchema(
-        InternalUtils.readJsonNode(jsonOrYamlPath = jsonSchemaFilename),
-        config
+      val registry = SchemaRegistry.withDefaultDialect(
+        version,
+        (builder: SchemaRegistry.Builder) => {
+          builder.schemaRegistryConfig(config)
+          ()
+        }
       )
+
+      registry.getSchema(InternalUtils.readJsonNode(jsonOrYamlPath = jsonSchemaFilename))
+
     }
 
     protected def validateAndGetErrors(json: JsonNode)(implicit pos: Position): List[String] =
@@ -149,7 +153,7 @@ object DebtTransSchemaValidator {
       *   "$ref": "#/$defs/<defaultJsonSubschemaName>"
       * }
       */
-    private val jsonConvertedSchema: JsonSchema = {
+    private val jsonConvertedSchema: Schema = {
       val openApiSchemasNode: JsonNode =
         fullOpenApiNode.path("components").path("schemas")
 
@@ -159,15 +163,20 @@ object DebtTransSchemaValidator {
 
       val jsonSchemaRoot: ObjectNode = convertToJsonSchema(mutableOpenApiSchemasNode)
 
-      val config = SchemaValidatorsConfig
+      val config = SchemaRegistryConfig
         .builder()
         .regularExpressionFactory(JDKRegularExpressionFactory.getInstance())
         .formatAssertionsEnabled(true)
-        .nullableKeywordEnabled(true)
         .build()
 
-      val schemaFactory = JsonSchemaFactory.getInstance(SpecVersion.VersionFlag.V7)
-      schemaFactory.getSchema(jsonSchemaRoot, config)
+      val registry = SchemaRegistry.withDefaultDialect(
+        SpecificationVersion.DRAFT_7,
+        (builder: SchemaRegistry.Builder) => {
+          builder.schemaRegistryConfig(config)
+          ()
+        }
+      )
+      registry.getSchema(jsonSchemaRoot)
     }
 
     private def validateOpenApiSchemaStructure(openApiSchemasNode: JsonNode): Unit = {
