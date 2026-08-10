@@ -18,6 +18,7 @@ package uk.gov.hmrc.timetopayproxy.services
 
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.timetopayproxy.connectors.TtpFeedbackLoopConnector
+import uk.gov.hmrc.timetopayproxy.models.cdcs.chargemigration.{ ChargeMigrationRequest, ChargeMigrationResponse }
 import uk.gov.hmrc.timetopayproxy.models.error.TtppEnvelope.TtppEnvelope
 import uk.gov.hmrc.timetopayproxy.models.saonly.ttpcancel.{ TtpCancelRequest, TtpCancelRequestR2, TtpCancelSuccessfulResponse }
 import uk.gov.hmrc.timetopayproxy.models.saonly.ttpfullamend.{ FullAmendRequest, TtpFullAmendSuccessfulResponse }
@@ -47,4 +48,10 @@ class TtpFeedbackLoopService @Inject() (ttppConnector: TtpFeedbackLoopConnector)
     request: FullAmendRequest
   )(implicit ec: ExecutionContext, hc: HeaderCarrier): TtppEnvelope[TtpFullAmendSuccessfulResponse] =
     ttppConnector.fullAmendTtp(request)
+
+  def chargeMigration(
+    request: ChargeMigrationRequest
+  )(implicit ec: ExecutionContext, hc: HeaderCarrier): TtppEnvelope[ChargeMigrationResponse] =
+    ttppConnector.chargeMigration(request)
+
 }

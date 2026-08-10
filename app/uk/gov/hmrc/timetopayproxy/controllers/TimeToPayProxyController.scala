@@ -27,6 +27,7 @@ import uk.gov.hmrc.timetopayproxy.config.FeatureSwitch
 import uk.gov.hmrc.timetopayproxy.logging.{ PagerAlert, RequestAwareLogger }
 import uk.gov.hmrc.timetopayproxy.models.*
 import uk.gov.hmrc.timetopayproxy.models.affordablequotes.AffordableQuotesRequest
+import uk.gov.hmrc.timetopayproxy.models.cdcs.chargemigration.ChargeMigrationRequest
 import uk.gov.hmrc.timetopayproxy.models.error.TtppEnvelope.TtppEnvelope
 import uk.gov.hmrc.timetopayproxy.models.error.{ TtppEnvelope, TtppErrorResponse, ValidationError }
 import uk.gov.hmrc.timetopayproxy.models.saonly.chargeInfoApi.{ ChargeInfoRequest, ChargeInfoResponse }
@@ -260,4 +261,27 @@ class TimeToPayProxyController @Inject() (
         )
     }
 
+  def chargeMigration: Action[JsValue] =
+    authThenCorrelationIdActions.async(parse.json) { implicit request =>
+      if (featureSwitch.chargeMigrationEnabled.enabled) {
+        withJsonBody[ChargeMigrationRequest] { deserialisedRequest: ChargeMigrationRequest =>
+          ttpFeedbackLoopService
+            .chargeMigration(deserialisedRequest)
+            .leftMap(ttppError => ttppError.toWriteableProxyError)
+            .fold(
+              e => e.toErrorResult,
+              r => Results.Ok(Json.toJson(r))
+            )
+        }
+      } else {
+        logger.warn("Charge migration endpoint was called while the feature switch is disabled")
+
+        Future.successful(
+          TtppErrorResponse(
+            statusCode = 404,
+            errorMessage = "/charge-migration endpoint is not currently enabled"
+          ).toErrorResult
+        )
+      }
+    }
 }

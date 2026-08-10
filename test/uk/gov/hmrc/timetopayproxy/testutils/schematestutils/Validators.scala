@@ -237,6 +237,42 @@ object Validators {
       }
     }
 
+    object ChargeMigrationRequest {
+      object Live {
+
+        // Downloaded from:
+        // https://github.com/hmrc/time-to-pay/blob/48b02b8f4ba25000e1db0dc421b7c5b61f94407d/test/resources/schemas/apis/time-to-pay-proposed/ChargeMigrationAPI-v0.0.1-proposed.yaml
+        // Official location:
+        // https://github.com/hmrc/time-to-pay/tree/main/resources/public/api/conf/1.0
+        private val path: String =
+          "resources/public/api/conf/1.0/application.yaml"
+
+        def openApiRequestSchema: OpenApi3DerivedSchema =
+          new OpenApi3DerivedSchema(
+            path,
+            defaultJsonSubschemaName = "ChargeMigrationRequest",
+            metaSchemaValidation = Some(Valid(())),
+            restrictAdditionalProperties = true
+          )
+
+        def openApiResponseSchema: OpenApi3DerivedSchema =
+          new OpenApi3DerivedSchema(
+            path,
+            defaultJsonSubschemaName = "ChargeMigrationResponse",
+            metaSchemaValidation = Some(Valid(())),
+            restrictAdditionalProperties = true
+          )
+
+        def openApiErrorResponseSchema: OpenApi3DerivedSchema =
+          new OpenApi3DerivedSchema(
+            path,
+            defaultJsonSubschemaName = "ErrorResponse",
+            metaSchemaValidation = Some(Valid(())),
+            restrictAdditionalProperties = true
+          )
+      }
+    }
+
     /** For now, this applies to all responses from the proxy */
     def openApiResponseErrorSchema: OpenApi3DerivedSchema =
       new OpenApi3DerivedSchema(
