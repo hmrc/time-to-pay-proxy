@@ -264,7 +264,7 @@ class TimeToPayProxyController @Inject() (
   def chargeMigration: Action[JsValue] =
     authThenCorrelationIdActions.async(parse.json) { implicit request =>
       if (featureSwitch.chargeMigrationEnabled.enabled) {
-        withJsonBody[ChargeMigrationRequest] { deserialisedRequest: ChargeMigrationRequest =>
+        withJsonBody[ChargeMigrationRequest] { deserialisedRequest =>
           ttpFeedbackLoopService
             .chargeMigration(deserialisedRequest)
             .leftMap(ttppError => ttppError.toWriteableProxyError)

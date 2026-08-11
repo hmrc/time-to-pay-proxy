@@ -18,7 +18,6 @@ package uk.gov.hmrc.timetopayproxy.models.cdcs.chargemigration
 
 import play.api.libs.json.{ Format, Json }
 import uk.gov.hmrc.timetopayproxy.models.ChannelIdentifier
-
 import java.time.Instant
 
 case class ChargeMigrationRequest(

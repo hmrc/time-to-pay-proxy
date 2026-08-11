@@ -34,7 +34,6 @@ case class FeatureSwitch(value: Option[Configuration]) {
 
   def saRelease2Enabled: SaRelease2Enabled = SaRelease2Enabled(value.exists(_.get[Boolean]("saRelease2Enabled")))
 
-  def chargeMigrationEnabled: ChargeMigrationEnabled = ChargeMigrationEnabled(
-    value.exists(_.get[Boolean]("chargeMigrationEnabled"))
-  )
+  def chargeMigrationEnabled: ChargeMigrationEnabled =
+    ChargeMigrationEnabled(value.exists(_.get[Boolean]("endpoint.charge-migration.enabled")))
 }

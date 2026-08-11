@@ -194,7 +194,7 @@ class TtpFeedbackLoopConnector @Inject() (
         httpClient
           .post(url)
           .withBody(Json.toJson(request))
-          .setHeader(requestHeaders: _*)
+          .setHeader(requestHeaders*)
           .execute[Either[ProxyEnvelopeError, ChargeMigrationResponse]]
       )
     ).logBasedOnStatusCode(logger)

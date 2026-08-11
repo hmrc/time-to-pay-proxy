@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.timetopayproxy.controllers
 
-import cats.data.NonEmptyList
+import cats.data.{ EitherT, NonEmptyList}
 import cats.syntax.either.*
 import org.scalamock.scalatest.MockFactory
 import org.scalatest.matchers.should.Matchers.*
@@ -28,7 +28,7 @@ import play.api.test.Helpers.*
 import play.api.test.{ FakeRequest, Helpers }
 import uk.gov.hmrc.auth.core.PlayAuthConnector
 import uk.gov.hmrc.auth.core.authorise.Predicate
-import uk.gov.hmrc.auth.core.retrieve.{ EmptyRetrieval, Retrieval }
+import uk.gov.hmrc.auth.core.retrieve.{EmptyRetrieval, Retrieval}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.timetopayproxy.actions.auth.ReadAuthoriseAction
 import uk.gov.hmrc.timetopayproxy.actions.auth.StoredEnrolmentScope.ReadTimeToPayProxy
@@ -36,10 +36,11 @@ import uk.gov.hmrc.timetopayproxy.actions.correlationid.CorrelationIdPopulationA
 import uk.gov.hmrc.timetopayproxy.config.FeatureSwitch
 import uk.gov.hmrc.timetopayproxy.models.*
 import uk.gov.hmrc.timetopayproxy.models.affordablequotes.*
+import uk.gov.hmrc.timetopayproxy.models.cdcs.chargemigration.{ChargeMigration, ChargeMigrationRequest, ChargeMigrationResponse, ReplacementCharge}
 import uk.gov.hmrc.timetopayproxy.models.currency.GbpPounds
 import uk.gov.hmrc.timetopayproxy.models.error.TtppEnvelope.TtppEnvelope
 import uk.gov.hmrc.timetopayproxy.models.error.{ ConnectorError, TtppEnvelope, TtppErrorResponse }
-import uk.gov.hmrc.timetopayproxy.models.featureSwitches.{ EnrolmentAuthEnabled, SaRelease2Enabled }
+import uk.gov.hmrc.timetopayproxy.models.featureSwitches.{ ChargeMigrationEnabled, EnrolmentAuthEnabled, SaRelease2Enabled }
 import uk.gov.hmrc.timetopayproxy.models.saonly.chargeInfoApi.*
 import uk.gov.hmrc.timetopayproxy.models.saonly.common.*
 import uk.gov.hmrc.timetopayproxy.models.saonly.common.apistatus.{ ApiName, ApiStatus, ApiStatusCode }
@@ -48,9 +49,9 @@ import uk.gov.hmrc.timetopayproxy.models.saonly.ttpfullamend.*
 import uk.gov.hmrc.timetopayproxy.models.saonly.ttpinform.{ TtpInformRequest, TtpInformSuccessfulResponse }
 import uk.gov.hmrc.timetopayproxy.services.{ TTPEService, TTPQuoteService, TtpFeedbackLoopService }
 
-import java.time.{ Instant, LocalDate, LocalDateTime }
+import java.time.{Instant, LocalDate, LocalDateTime}
 import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.{ ExecutionContext, Future }
+import scala.concurrent.{ExecutionContext, Future}
 
 class TimeToPayProxyControllerSpec extends AnyWordSpec with MockFactory {
 
@@ -2334,6 +2335,119 @@ class TimeToPayProxyControllerSpec extends AnyWordSpec with MockFactory {
         status(response) shouldBe Status.SERVICE_UNAVAILABLE
         (contentAsJson(response) \ "errorMessage")
           .as[String] shouldBe "/full-amend endpoint is not currently enabled"
+      }
+    }
+
+    "POST /individuals/time-to-pay-proxy/charge-migration" should {
+      val chargeMigrationRequest: ChargeMigrationRequest =
+        ChargeMigrationRequest(
+          planId = "planId",
+          migratedAt = Instant.parse("2026-07-08T13:49:51.123Z"),
+          planCreationChannel = ChannelIdentifier.Advisor,
+          chargeMigrations = List(
+            ChargeMigration(
+              originalChargeId = "chargeId01",
+              replacementDebtItemChargeId = "chargeId02",
+              replacementCharges = List(
+                ReplacementCharge(
+                  parentMainTrans = Some("5330"),
+                  mainTrans = "5330",
+                  subTrans = "7006",
+                  originalDebtAmount = BigInt(5000),
+                  interestStartDate = Some(LocalDate.parse("2026-06-30")),
+                  paymentHistory = None
+                )
+              )
+            )
+          )
+        )
+
+      val chargeMigrationResponse: ChargeMigrationResponse =
+        ChargeMigrationResponse(
+          planId = "planId",
+          processingDateTime = Instant.parse("2026-07-08T13:50:00Z")
+        )
+
+      "return 200 when charge migration succeeds" in {
+
+        (() => featureSwitch.enrolmentAuthEnabled)
+          .expects()
+          .returning(EnrolmentAuthEnabled(true))
+
+        (() => featureSwitch.chargeMigrationEnabled)
+          .expects()
+          .returning(ChargeMigrationEnabled(true))
+
+        (authConnector
+          .authorise[Unit](_: Predicate, _: Retrieval[Unit])(
+            _: HeaderCarrier,
+            _: ExecutionContext
+          ))
+          .expects(where { (e: Predicate, r: Retrieval[Unit], _: HeaderCarrier, _: ExecutionContext) =>
+            e shouldBe ReadTimeToPayProxy.toEnrolment
+            r shouldBe EmptyRetrieval
+            true
+          })
+          .returning(Future.successful(()))
+
+        (ttpFeedbackLoopService
+          .chargeMigration(_: ChargeMigrationRequest)(
+            _: ExecutionContext,
+            _: HeaderCarrier
+          ))
+          .expects(
+            chargeMigrationRequest,
+            *,
+            *
+          )
+          .returning(
+            EitherT.rightT[Future, ProxyEnvelopeError](chargeMigrationResponse)
+          )
+
+        val fakeRequest: FakeRequest[JsValue] =
+          FakeRequest("POST", "/individuals/time-to-pay-proxy/charge-migration")
+            .withHeaders(CONTENT_TYPE -> MimeTypes.JSON)
+            .withBody(Json.toJson(chargeMigrationRequest))
+
+        val response: Future[Result] =
+          controller.chargeMigration(fakeRequest)
+
+        status(response) shouldBe Status.OK
+        contentAsJson(response) shouldBe Json.toJson(chargeMigrationResponse)
+      }
+
+      "return 400" when {
+        "request body is in wrong format" in {
+          (() => featureSwitch.enrolmentAuthEnabled)
+            .expects()
+            .returning(EnrolmentAuthEnabled(true))
+
+          (() => featureSwitch.chargeMigrationEnabled)
+            .expects()
+            .returning(ChargeMigrationEnabled(true))
+
+          (authConnector
+            .authorise[Unit](_: Predicate, _: Retrieval[Unit])(
+              _: HeaderCarrier,
+              _: ExecutionContext
+            ))
+            .expects(where { (e: Predicate, r: Retrieval[Unit], _: HeaderCarrier, _: ExecutionContext) =>
+              e shouldBe ReadTimeToPayProxy.toEnrolment
+              r shouldBe EmptyRetrieval
+              true
+            })
+            .returning(Future.successful(()))
+
+          val fakeRequest: FakeRequest[JsValue] =
+            FakeRequest("POST", "/individuals/time-to-pay-proxy/charge-migration")
+              .withHeaders(CONTENT_TYPE -> MimeTypes.JSON)
+              .withBody(Json.obj("some-obj" -> "bad-string"))
+
+          val response: Future[Result] =
+            controller.chargeMigration(fakeRequest)
+
+          status(response) shouldBe Status.BAD_REQUEST
+        }
       }
     }
   }
