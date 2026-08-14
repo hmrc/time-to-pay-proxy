@@ -55,7 +55,8 @@ info:
       | 1.0.21 | 28-01-2026 | Alex Olkhovskiy | DTD-4248: Fix mismatches between spec and code |
       | 1.0.22 | 17-03-2026 | Sunil Sen | DTD-4295: Send charge references to CESA |
       | 1.0.23 | 29-05-2026 | Dan Smith | DTD-4585: Align Full Amend with SA Release 2 spec |
-  version: 1.0.23
+      | 1.0.24 | 12-08-2026 | Alfie Molloy | DTD-4721: Add Charge Migration API |
+  version: 1.0.24
   contact: {}
 servers:
   - url: https://api.service.hmrc.gov.uk
@@ -1323,6 +1324,140 @@ paths:
               example:
                 statusCode: 503
                 errorMessage: The server is temporarily unavailable.
+  /individuals/time-to-pay-proxy/charge-migration:
+    post:
+      tags:
+        - individuals
+      summary: create plans for charge migration from CESA to ETMP
+      operationId: CreatePlanForChargeMigration
+      description: |
+        An API called by CDCS to create data when debt items relating to a plan are migrated from CESA to ETMP
+
+        Response Behavior:
+        - Returns HTTP 201 when all migrated charge data is persisted successfully
+        - Returns HTTP 400 when the request is invalid
+        - Returns HTTP 401 when the user is unauthorized
+        - Returns HTTP 404 when an existing TTP record doesn't currently exist for the migrated planId provided
+        - Returns HTTP 500 only for internal TTP errors or data cannot be persisted
+      parameters:
+        - name: correlationId
+          in: header
+          description: Correlation Id used for end to end traceability
+          required: true
+          schema:
+            type: string
+            format: uuid
+            example: f0bd1f32-de51-45cc-9b18-0520d6e3ab1a
+      security:
+        - applicationRestricted:
+            - read:time-to-pay-proxy
+      requestBody:
+        description: Request body with fields to create a replacement charge migration record
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ChargeMigrationRequest'
+            examples:
+              example:
+                summary: Sample request for Charge Migration API
+                value:
+                  planId: planId
+                  migratedAt: 2026-07-08T13:49:51.123Z
+                  planCreationChannel: advisor
+                  chargeMigrations:
+                    - originalChargeId: chargeId01
+                      replacementDebtItemChargeId: chargeId02
+                      replacementCharges:
+                        - parentMainTrans: "5330"
+                          mainTrans: "5330"
+                          subTrans: "7006"
+                          originalDebtAmount: 5000
+                          interestStartDate: 2026-06-30
+                          paymentHistory:
+                            - paymentDate: 2026-06-30
+                              paymentAmount: 20
+                        - parentMainTrans: "5330"
+                          mainTrans: "5330"
+                          subTrans: "7007"
+                          originalDebtAmount: 5000
+                          interestStartDate: 2026-06-30
+      responses:
+        '201':
+          description: |
+            Charge migration API operation successful with results successfully persisted to the database.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChargeMigrationResponse'
+              examples:
+                example:
+                  summary: TTP responds successfully (HTTP 201)
+                  value:
+                    planId: "examplePlanId"
+                    processingDateTime: '2026-07-07T14:32:00Z'
+        '400':
+          description: |
+            Bad request due to invalid or missing data in the request payload.
+            This indicates client-side errors that prevent TTP from processing the inform request.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                missingMandatoryField:
+                  summary: "missing mandatory field"
+                  value:
+                    statusCode: "400"
+                    errorMessage: "missing planId"
+                amountsMismatch:
+                  summary: "Sum of debts doesn't match originalDebtAmount stored"
+                  value:
+                    statusCode: "400"
+                    errorMessage: "the sum of the debt item charges does not match the originalDebtAmount for the stored plan"
+                planWithoutMatchingDebtItems:
+                  summary: "existing plan doesn't contain provided debt items"
+                  value:
+                    statusCode: "400"
+                    errorMessage: "existing plan with planId: <planId> doesn't contain one or more of the provided debtItemChargeIds"
+        '401':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                statusCode: "401"
+                errorMessage: "A user with no active session will return 401 response"
+        '404':
+          description: Existing plan not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                statusCode: "404"
+                errorMessage: "No existing plan exists with provided planId: <planId>"
+        '500':
+          description: |
+            Internal TTP error or failure to persist data to the database.
+            This status is returned only when TTP cannot complete its processing.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                statusCode: "500"
+                errorMessage: "Internal error processing request"
+        '503':
+          description: The server is temporarily unavailable due to overload or maintenance.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                statusCode: "503"
+                errorMessage: "The server is temporarily unavailable due to overload or maintenance"
 components:
   securitySchemes:
     userRestricted:
@@ -3404,3 +3539,81 @@ components:
           format: date-time
           description: Timestamp for processing the full-amend request
           example: '2025-10-15T10:31:00Z'
+    ChargeMigrationRequest:
+      type: object
+      properties:
+        planId:
+          type: string
+        migratedAt:
+          type: string
+          format: date-time
+          example: '2026-07-08T13:49:51.123Z'
+        planCreationChannel:
+          type: string
+          enum:
+            - "advisor"
+            - "selfService"
+        chargeMigrations:
+          type: array
+          items:
+            type: object
+            properties:
+              originalChargeId:
+                type: string
+              replacementDebtItemChargeId:
+                type: string
+              replacementCharges:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    parentMainTrans:
+                      type: string
+                    mainTrans:
+                      type: string
+                    subTrans:
+                      type: string
+                    originalDebtAmount:
+                      type: integer
+                    interestStartDate:
+                      type: string
+                      format: date
+                    paymentHistory:
+                      type: array
+                      items:
+                        type: object
+                        properties:
+                          paymentDate:
+                            type: string
+                            format: date
+                          paymentAmount:
+                            type: integer
+                        required:
+                          - paymentDate
+                          - paymentAmount
+                  required:
+                    - mainTrans
+                    - subTrans
+                    - originalDebtAmount
+            required:
+              - replacementDebtItemChargeId
+              - originalChargeId
+              - replacementCharges
+      required:
+        - planId
+        - migratedAt
+        - planCreationChannel
+        - chargeMigrations
+    ChargeMigrationResponse:
+      type: object
+      required:
+        - planId
+        - processingDateTime
+      properties:
+        planId:
+          type: string
+          description: The plan Id for the repayment plan that has been created
+        processingDateTime:
+          type: string
+          format: date-time
+          example: '2026-07-08T13:49:51.123'

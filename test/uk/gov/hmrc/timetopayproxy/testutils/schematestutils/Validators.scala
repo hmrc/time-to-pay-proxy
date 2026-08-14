@@ -240,10 +240,11 @@ object Validators {
     object ChargeMigrationRequest {
       object Live {
 
+        //TODO Update links once updated
         // Downloaded from:
-        // https://github.com/hmrc/time-to-pay/blob/48b02b8f4ba25000e1db0dc421b7c5b61f94407d/test/resources/schemas/apis/time-to-pay-proposed/ChargeMigrationAPI-v0.0.1-proposed.yaml
+        // ????
         // Official location:
-        // https://github.com/hmrc/time-to-pay/tree/main/resources/public/api/conf/1.0
+        // ????
         private val path: String =
           "resources/public/api/conf/1.0/application.yaml"
 
