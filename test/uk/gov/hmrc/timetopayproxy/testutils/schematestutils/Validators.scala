@@ -244,7 +244,7 @@ object Validators {
         // Downloaded from:
         // ????
         // Official location:
-        // ????
+        // https://confluence.tools.tax.service.gov.uk/spaces/DTDT/pages/828113579/TTP+API+Current+Version+Proxy
         private val path: String =
           "resources/public/api/conf/1.0/application.yaml"
 
