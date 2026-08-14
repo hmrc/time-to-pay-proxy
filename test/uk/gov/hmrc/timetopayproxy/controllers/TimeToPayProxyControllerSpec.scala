@@ -28,7 +28,7 @@ import play.api.test.Helpers.*
 import play.api.test.{ FakeRequest, Helpers }
 import uk.gov.hmrc.auth.core.PlayAuthConnector
 import uk.gov.hmrc.auth.core.authorise.Predicate
-import uk.gov.hmrc.auth.core.retrieve.{EmptyRetrieval, Retrieval}
+import uk.gov.hmrc.auth.core.retrieve.{ EmptyRetrieval, Retrieval}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.timetopayproxy.actions.auth.ReadAuthoriseAction
 import uk.gov.hmrc.timetopayproxy.actions.auth.StoredEnrolmentScope.ReadTimeToPayProxy
@@ -39,7 +39,7 @@ import uk.gov.hmrc.timetopayproxy.models.affordablequotes.*
 import uk.gov.hmrc.timetopayproxy.models.cdcs.chargemigration.{ChargeMigration, ChargeMigrationRequest, ChargeMigrationResponse, ReplacementCharge}
 import uk.gov.hmrc.timetopayproxy.models.currency.GbpPounds
 import uk.gov.hmrc.timetopayproxy.models.error.TtppEnvelope.TtppEnvelope
-import uk.gov.hmrc.timetopayproxy.models.error.{ ConnectorError, TtppEnvelope, TtppErrorResponse }
+import uk.gov.hmrc.timetopayproxy.models.error.{ ConnectorError, ProxyEnvelopeError, TtppEnvelope, TtppErrorResponse }
 import uk.gov.hmrc.timetopayproxy.models.featureSwitches.{ ChargeMigrationEnabled, EnrolmentAuthEnabled, SaRelease2Enabled }
 import uk.gov.hmrc.timetopayproxy.models.saonly.chargeInfoApi.*
 import uk.gov.hmrc.timetopayproxy.models.saonly.common.*
@@ -49,9 +49,9 @@ import uk.gov.hmrc.timetopayproxy.models.saonly.ttpfullamend.*
 import uk.gov.hmrc.timetopayproxy.models.saonly.ttpinform.{ TtpInformRequest, TtpInformSuccessfulResponse }
 import uk.gov.hmrc.timetopayproxy.services.{ TTPEService, TTPQuoteService, TtpFeedbackLoopService }
 
-import java.time.{Instant, LocalDate, LocalDateTime}
+import java.time.{ Instant, LocalDate, LocalDateTime }
 import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.{ ExecutionContext, Future }
 
 class TimeToPayProxyControllerSpec extends AnyWordSpec with MockFactory {
 
