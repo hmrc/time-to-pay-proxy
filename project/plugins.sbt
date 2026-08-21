@@ -8,7 +8,7 @@ addSbtPlugin("uk.gov.hmrc"       % "sbt-auto-build"     % "3.24.0")
 addSbtPlugin("uk.gov.hmrc"       % "sbt-distributables" % "2.6.0")
 addSbtPlugin("org.playframework" % "sbt-plugin"         % "3.0.11")
 addSbtPlugin("org.scoverage"     % "sbt-scoverage"      % "2.4.4")
-addSbtPlugin("org.scalameta"     % "sbt-scalafmt"       % "2.6.1")
+addSbtPlugin("org.scalameta"     % "sbt-scalafmt"       % "2.6.2")
 
 // To use this plugin, run: sbt dependencyUpdates
 addSbtPlugin("com.timushev.sbt" % "sbt-updates" % "0.7.0")
