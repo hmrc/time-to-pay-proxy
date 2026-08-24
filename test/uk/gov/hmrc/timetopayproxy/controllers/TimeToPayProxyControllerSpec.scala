@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.timetopayproxy.controllers
 
-import cats.data.{ EitherT, NonEmptyList}
+import cats.data.{ EitherT, NonEmptyList }
 import cats.syntax.either.*
 import org.scalamock.scalatest.MockFactory
 import org.scalatest.matchers.should.Matchers.*
@@ -28,7 +28,7 @@ import play.api.test.Helpers.*
 import play.api.test.{ FakeRequest, Helpers }
 import uk.gov.hmrc.auth.core.PlayAuthConnector
 import uk.gov.hmrc.auth.core.authorise.Predicate
-import uk.gov.hmrc.auth.core.retrieve.{ EmptyRetrieval, Retrieval}
+import uk.gov.hmrc.auth.core.retrieve.{ EmptyRetrieval, Retrieval }
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.timetopayproxy.actions.auth.ReadAuthoriseAction
 import uk.gov.hmrc.timetopayproxy.actions.auth.StoredEnrolmentScope.ReadTimeToPayProxy
@@ -36,7 +36,7 @@ import uk.gov.hmrc.timetopayproxy.actions.correlationid.CorrelationIdPopulationA
 import uk.gov.hmrc.timetopayproxy.config.FeatureSwitch
 import uk.gov.hmrc.timetopayproxy.models.*
 import uk.gov.hmrc.timetopayproxy.models.affordablequotes.*
-import uk.gov.hmrc.timetopayproxy.models.cdcs.chargemigration.{ChargeMigration, ChargeMigrationRequest, ChargeMigrationResponse, ReplacementCharge}
+import uk.gov.hmrc.timetopayproxy.models.cdcs.chargemigration.{ ChargeMigration, ChargeMigrationRequest, ChargeMigrationResponse, ReplacementCharge }
 import uk.gov.hmrc.timetopayproxy.models.currency.GbpPounds
 import uk.gov.hmrc.timetopayproxy.models.error.TtppEnvelope.TtppEnvelope
 import uk.gov.hmrc.timetopayproxy.models.error.{ ConnectorError, ProxyEnvelopeError, TtppEnvelope, TtppErrorResponse }
