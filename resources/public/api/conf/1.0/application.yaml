@@ -3616,4 +3616,4 @@ components:
         processingDateTime:
           type: string
           format: date-time
-          example: '2026-07-08T13:49:51.123'
+          example: '2026-07-08T13:49:51.123Z'
