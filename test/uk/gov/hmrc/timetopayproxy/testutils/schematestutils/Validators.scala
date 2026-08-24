@@ -237,7 +237,7 @@ object Validators {
       }
     }
 
-    object ChargeMigrationRequest {
+    object ChargeMigration {
       object Live {
 
         // TODO Update links once updated
