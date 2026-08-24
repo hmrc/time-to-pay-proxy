@@ -22,7 +22,7 @@ import play.api.libs.json.{ Format, JsValue, Json }
 import uk.gov.hmrc.timetopayproxy.testutils.JsonAssertionOps.RichJsValueWithAssertions
 import uk.gov.hmrc.timetopayproxy.testutils.schematestutils.Validators
 
-class ChargeMigrationRequestSpec extends AnyFreeSpecLike with Matchers {
+class ChargeMigrationSpec extends AnyFreeSpecLike with Matchers {
 
   "ChargeMigrationRequest" - {
 
@@ -66,7 +66,7 @@ class ChargeMigrationRequestSpec extends AnyFreeSpecLike with Matchers {
 
     "should match the OpenAPI schema" in {
       val errors =
-        Validators.TimeToPayProxy.ChargeMigrationRequest.Live.openApiRequestSchema
+        Validators.TimeToPayProxy.ChargeMigration.Live.openApiRequestSchema
           .validateAndGetErrors(chargeMigrationRequest)
 
       errors shouldBe Nil

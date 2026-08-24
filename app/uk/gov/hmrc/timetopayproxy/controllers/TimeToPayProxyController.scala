@@ -184,6 +184,30 @@ class TimeToPayProxyController @Inject() (
     }
   }
 
+  def chargeMigration: Action[JsValue] =
+    authThenCorrelationIdActions.async(parse.json) { implicit request =>
+      if (featureSwitch.chargeMigrationEnabled.enabled) {
+        withJsonBody[ChargeMigrationRequest] { deserialisedRequest =>
+          ttpFeedbackLoopService
+            .chargeMigration(deserialisedRequest)
+            .leftMap(ttppError => ttppError.toWriteableProxyError)
+            .fold(
+              e => e.toErrorResult,
+              r => Results.Ok(Json.toJson(r))
+            )
+        }
+      } else {
+        logger.warn("Charge migration endpoint was called while the feature switch is disabled")
+
+        Future.successful(
+          TtppErrorResponse(
+            statusCode = 404,
+            errorMessage = "/charge-migration endpoint is not currently enabled"
+          ).toErrorResult
+        )
+      }
+    }
+
   private def validateUpdateRequestMatchesQueryParams(
     customerReference: String,
     planId: String,
@@ -259,29 +283,5 @@ class TimeToPayProxyController @Inject() (
             invalidJsonErrorMessage
           ).toErrorResult
         )
-    }
-
-  def chargeMigration: Action[JsValue] =
-    authThenCorrelationIdActions.async(parse.json) { implicit request =>
-      if (featureSwitch.chargeMigrationEnabled.enabled) {
-        withJsonBody[ChargeMigrationRequest] { deserialisedRequest =>
-          ttpFeedbackLoopService
-            .chargeMigration(deserialisedRequest)
-            .leftMap(ttppError => ttppError.toWriteableProxyError)
-            .fold(
-              e => e.toErrorResult,
-              r => Results.Ok(Json.toJson(r))
-            )
-        }
-      } else {
-        logger.warn("Charge migration endpoint was called while the feature switch is disabled")
-
-        Future.successful(
-          TtppErrorResponse(
-            statusCode = 404,
-            errorMessage = "/charge-migration endpoint is not currently enabled"
-          ).toErrorResult
-        )
-      }
     }
 }

@@ -2337,39 +2337,88 @@ class TimeToPayProxyControllerSpec extends AnyWordSpec with MockFactory {
           .as[String] shouldBe "/full-amend endpoint is not currently enabled"
       }
     }
+  }
 
-    "POST /individuals/time-to-pay-proxy/charge-migration" should {
-      val chargeMigrationRequest: ChargeMigrationRequest =
-        ChargeMigrationRequest(
-          planId = "planId",
-          migratedAt = Instant.parse("2026-07-08T13:49:51.123Z"),
-          planCreationChannel = ChannelIdentifier.Advisor,
-          chargeMigrations = List(
-            ChargeMigration(
-              originalChargeId = "chargeId01",
-              replacementDebtItemChargeId = "chargeId02",
-              replacementCharges = List(
-                ReplacementCharge(
-                  parentMainTrans = Some("5330"),
-                  mainTrans = "5330",
-                  subTrans = "7006",
-                  originalDebtAmount = BigInt(5000),
-                  interestStartDate = Some(LocalDate.parse("2026-06-30")),
-                  paymentHistory = None
-                )
+  "POST /individuals/time-to-pay-proxy/charge-migration" should {
+    val chargeMigrationRequest: ChargeMigrationRequest =
+      ChargeMigrationRequest(
+        planId = "planId",
+        migratedAt = Instant.parse("2026-07-08T13:49:51.123Z"),
+        planCreationChannel = ChannelIdentifier.Advisor,
+        chargeMigrations = List(
+          ChargeMigration(
+            originalChargeId = "chargeId01",
+            replacementDebtItemChargeId = "chargeId02",
+            replacementCharges = List(
+              ReplacementCharge(
+                parentMainTrans = Some("5330"),
+                mainTrans = "5330",
+                subTrans = "7006",
+                originalDebtAmount = BigInt(5000),
+                interestStartDate = Some(LocalDate.parse("2026-06-30")),
+                paymentHistory = None
               )
             )
           )
         )
+      )
 
-      val chargeMigrationResponse: ChargeMigrationResponse =
-        ChargeMigrationResponse(
-          planId = "planId",
-          processingDateTime = Instant.parse("2026-07-08T13:50:00Z")
+    val chargeMigrationResponse: ChargeMigrationResponse =
+      ChargeMigrationResponse(
+        planId = "planId",
+        processingDateTime = Instant.parse("2026-07-08T13:50:00Z")
+      )
+
+    "return 200 when charge migration succeeds" in {
+
+      (() => featureSwitch.enrolmentAuthEnabled)
+        .expects()
+        .returning(EnrolmentAuthEnabled(true))
+
+      (() => featureSwitch.chargeMigrationEnabled)
+        .expects()
+        .returning(ChargeMigrationEnabled(true))
+
+      (authConnector
+        .authorise[Unit](_: Predicate, _: Retrieval[Unit])(
+          _: HeaderCarrier,
+          _: ExecutionContext
+        ))
+        .expects(where { (e: Predicate, r: Retrieval[Unit], _: HeaderCarrier, _: ExecutionContext) =>
+          e shouldBe ReadTimeToPayProxy.toEnrolment
+          r shouldBe EmptyRetrieval
+          true
+        })
+        .returning(Future.successful(()))
+
+      (ttpFeedbackLoopService
+        .chargeMigration(_: ChargeMigrationRequest)(
+          _: ExecutionContext,
+          _: HeaderCarrier
+        ))
+        .expects(
+          chargeMigrationRequest,
+          *,
+          *
+        )
+        .returning(
+          EitherT.rightT[Future, ProxyEnvelopeError](chargeMigrationResponse)
         )
 
-      "return 200 when charge migration succeeds" in {
+      val fakeRequest: FakeRequest[JsValue] =
+        FakeRequest("POST", "/individuals/time-to-pay-proxy/charge-migration")
+          .withHeaders(CONTENT_TYPE -> MimeTypes.JSON)
+          .withBody(Json.toJson(chargeMigrationRequest))
 
+      val response: Future[Result] =
+        controller.chargeMigration(fakeRequest)
+
+      status(response) shouldBe Status.OK
+      contentAsJson(response) shouldBe Json.toJson(chargeMigrationResponse)
+    }
+
+    "return 400" when {
+      "request body is in wrong format" in {
         (() => featureSwitch.enrolmentAuthEnabled)
           .expects()
           .returning(EnrolmentAuthEnabled(true))
@@ -2390,19 +2439,40 @@ class TimeToPayProxyControllerSpec extends AnyWordSpec with MockFactory {
           })
           .returning(Future.successful(()))
 
-        (ttpFeedbackLoopService
-          .chargeMigration(_: ChargeMigrationRequest)(
-            _: ExecutionContext,
-            _: HeaderCarrier
+        val fakeRequest: FakeRequest[JsValue] =
+          FakeRequest("POST", "/individuals/time-to-pay-proxy/charge-migration")
+            .withHeaders(CONTENT_TYPE -> MimeTypes.JSON)
+            .withBody(Json.obj("some-obj" -> "bad-string"))
+
+        val response: Future[Result] =
+          controller.chargeMigration(fakeRequest)
+
+        status(response) shouldBe Status.BAD_REQUEST
+      }
+    }
+
+    "return 404" when {
+      "the charge migration endpoint is disabled" in {
+
+        (() => featureSwitch.enrolmentAuthEnabled)
+          .expects()
+          .returning(EnrolmentAuthEnabled(true))
+
+        (() => featureSwitch.chargeMigrationEnabled)
+          .expects()
+          .returning(ChargeMigrationEnabled(false))
+
+        (authConnector
+          .authorise[Unit](_: Predicate, _: Retrieval[Unit])(
+            _: HeaderCarrier,
+            _: ExecutionContext
           ))
-          .expects(
-            chargeMigrationRequest,
-            *,
-            *
-          )
-          .returning(
-            EitherT.rightT[Future, ProxyEnvelopeError](chargeMigrationResponse)
-          )
+          .expects(where { (e: Predicate, r: Retrieval[Unit], _: HeaderCarrier, _: ExecutionContext) =>
+            e shouldBe ReadTimeToPayProxy.toEnrolment
+            r shouldBe EmptyRetrieval
+            true
+          })
+          .returning(Future.successful(()))
 
         val fakeRequest: FakeRequest[JsValue] =
           FakeRequest("POST", "/individuals/time-to-pay-proxy/charge-migration")
@@ -2412,42 +2482,9 @@ class TimeToPayProxyControllerSpec extends AnyWordSpec with MockFactory {
         val response: Future[Result] =
           controller.chargeMigration(fakeRequest)
 
-        status(response) shouldBe Status.OK
-        contentAsJson(response) shouldBe Json.toJson(chargeMigrationResponse)
-      }
-
-      "return 400" when {
-        "request body is in wrong format" in {
-          (() => featureSwitch.enrolmentAuthEnabled)
-            .expects()
-            .returning(EnrolmentAuthEnabled(true))
-
-          (() => featureSwitch.chargeMigrationEnabled)
-            .expects()
-            .returning(ChargeMigrationEnabled(true))
-
-          (authConnector
-            .authorise[Unit](_: Predicate, _: Retrieval[Unit])(
-              _: HeaderCarrier,
-              _: ExecutionContext
-            ))
-            .expects(where { (e: Predicate, r: Retrieval[Unit], _: HeaderCarrier, _: ExecutionContext) =>
-              e shouldBe ReadTimeToPayProxy.toEnrolment
-              r shouldBe EmptyRetrieval
-              true
-            })
-            .returning(Future.successful(()))
-
-          val fakeRequest: FakeRequest[JsValue] =
-            FakeRequest("POST", "/individuals/time-to-pay-proxy/charge-migration")
-              .withHeaders(CONTENT_TYPE -> MimeTypes.JSON)
-              .withBody(Json.obj("some-obj" -> "bad-string"))
-
-          val response: Future[Result] =
-            controller.chargeMigration(fakeRequest)
-
-          status(response) shouldBe Status.BAD_REQUEST
-        }
+        status(response) shouldBe Status.NOT_FOUND
+        (contentAsJson(response) \ "errorMessage")
+          .as[String] shouldBe "/charge-migration endpoint is not currently enabled"
       }
     }
   }
