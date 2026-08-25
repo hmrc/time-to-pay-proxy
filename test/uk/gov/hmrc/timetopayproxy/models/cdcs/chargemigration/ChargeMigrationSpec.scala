@@ -89,4 +89,40 @@ class ChargeMigrationSpec extends AnyFreeSpecLike with Matchers {
       writtenModel shouldBeEquivalentTo chargeMigrationRequest
     }
   }
+
+  "ChargeMigrationResponse" - {
+    val format = implicitly[Format[ChargeMigrationResponse]]
+
+    val chargeMigrationResponse: JsValue = Json.parse(
+      """{
+        |  "planId": "planId",
+        |  "processingDateTime": "2026-07-08T13:50:00Z"
+        |}""".stripMargin
+    )
+
+    "should match the OpenAPI schema" in {
+      val errors =
+        Validators.TimeToPayProxy.ChargeMigration.Live.openApiResponseSchema
+          .validateAndGetErrors(chargeMigrationResponse)
+
+      errors shouldBe Nil
+    }
+
+    "deserialises to the model class" in {
+      val result = format.reads(chargeMigrationResponse)
+
+      result.isSuccess shouldBe true
+      val _: ChargeMigrationResponse = result.get
+    }
+
+    "deserialises and reserialises to the same thing" in {
+      val readModel: ChargeMigrationResponse =
+        format.reads(chargeMigrationResponse).get
+
+      val writtenModel: JsValue =
+        format.writes(readModel)
+
+      writtenModel shouldBeEquivalentTo chargeMigrationResponse
+    }
+  }
 }

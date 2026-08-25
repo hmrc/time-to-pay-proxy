@@ -242,7 +242,7 @@ object Validators {
 
         // TODO Update links once updated
         // Downloaded from:
-        // ????
+        // https://confluence.tools.tax.service.gov.uk/spaces/DTDT/pages/828113579/TTP+API+Current+Version+Proxy?preview=/828113579/1373439380/time-to-pay-v1.0.24_A.yaml
         // Official location:
         // https://confluence.tools.tax.service.gov.uk/spaces/DTDT/pages/828113579/TTP+API+Current+Version+Proxy
         private val path: String =
