@@ -25,7 +25,6 @@ import uk.gov.hmrc.timetopayproxy.config.{ AppConfig, FeatureSwitch }
 import uk.gov.hmrc.timetopayproxy.connectors.util.httpreadsbuilder.HttpReadsBuilder
 import uk.gov.hmrc.timetopayproxy.logging.{ RequestAwareLogger, StatusLogger }
 import uk.gov.hmrc.timetopayproxy.models.TimeToPayError
-import uk.gov.hmrc.timetopayproxy.models.cdcs.chargemigration.{ ChargeMigrationRequest, ChargeMigrationResponse }
 import uk.gov.hmrc.timetopayproxy.models.error.ProxyEnvelopeError
 import uk.gov.hmrc.timetopayproxy.models.error.TtppEnvelope.TtppEnvelope
 import uk.gov.hmrc.timetopayproxy.models.saonly.ttpcancel.{ TtpCancelInformativeError, TtpCancelRequest, TtpCancelRequestR2, TtpCancelSuccessfulResponse }
@@ -70,13 +69,6 @@ class TtpFeedbackLoopConnector @Inject() (
       .withDefault503ConnectorError[ProxyEnvelopeError, TtpFullAmendSuccessfulResponse](this.getClass)
       .handleSuccess[TtpFullAmendSuccessfulResponse](200)
       .handleError[TtpFullAmendInformativeError](500)
-      .handleErrorTransformed[TimeToPayError](400, ttpError => ttpError.toConnectorError(status = 400))
-      .handleErrorTransformed[TimeToPayError](401, ttpError => ttpError.toConnectorError(status = 401))
-
-  private val httpReadsBuilderForChargeMigration: HttpReadsBuilder[ProxyEnvelopeError, ChargeMigrationResponse] =
-    HttpReadsBuilder
-      .withDefault503ConnectorError[ProxyEnvelopeError, ChargeMigrationResponse](this.getClass)
-      .handleSuccess[ChargeMigrationResponse](200)
       .handleErrorTransformed[TimeToPayError](400, ttpError => ttpError.toConnectorError(status = 400))
       .handleErrorTransformed[TimeToPayError](401, ttpError => ttpError.toConnectorError(status = 401))
 
@@ -176,27 +168,5 @@ class TtpFeedbackLoopConnector @Inject() (
     } else {
       combinedPreviousHeaders
     }
-  }
-
-  def chargeMigration(
-    request: ChargeMigrationRequest
-  )(implicit ec: ExecutionContext, hc: HeaderCarrier): TtppEnvelope[ChargeMigrationResponse] = {
-
-    implicit def httpReads: HttpReads[Either[ProxyEnvelopeError, ChargeMigrationResponse]] =
-      httpReadsBuilderForChargeMigration.httpReads(logger, _.toStringSafeToLogInProd)
-
-    val path = "/debts/time-to-pay/charge-migration"
-
-    val url = url"${appConfig.ttpBaseUrl + path}"
-
-    StatusLogger(
-      EitherT(
-        httpClient
-          .post(url)
-          .withBody(Json.toJson(request))
-          .setHeader(requestHeaders*)
-          .execute[Either[ProxyEnvelopeError, ChargeMigrationResponse]]
-      )
-    ).logBasedOnStatusCode(logger)
   }
 }

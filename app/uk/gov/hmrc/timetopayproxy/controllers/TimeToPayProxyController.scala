@@ -34,7 +34,7 @@ import uk.gov.hmrc.timetopayproxy.models.saonly.chargeInfoApi.{ ChargeInfoReques
 import uk.gov.hmrc.timetopayproxy.models.saonly.ttpcancel.{ TtpCancelRequest, TtpCancelRequestR2 }
 import uk.gov.hmrc.timetopayproxy.models.saonly.ttpfullamend.FullAmendRequest
 import uk.gov.hmrc.timetopayproxy.models.saonly.ttpinform.TtpInformRequest
-import uk.gov.hmrc.timetopayproxy.services.{ TTPEService, TTPQuoteService, TtpFeedbackLoopService }
+import uk.gov.hmrc.timetopayproxy.services.{ ChargeMigrationService, TTPEService, TTPQuoteService, TtpFeedbackLoopService }
 
 import javax.inject.{ Inject, Singleton }
 import scala.concurrent.{ ExecutionContext, Future }
@@ -47,6 +47,7 @@ class TimeToPayProxyController @Inject() (
   cc: ControllerComponents,
   timeToPayQuoteService: TTPQuoteService,
   ttpFeedbackLoopService: TtpFeedbackLoopService,
+  chargeMigrationService: ChargeMigrationService,
   timeToPayEligibilityService: TTPEService,
   featureSwitch: FeatureSwitch
 ) extends BackendController(cc) with BaseController {
@@ -188,7 +189,7 @@ class TimeToPayProxyController @Inject() (
     authThenCorrelationIdActions.async(parse.json) { implicit request =>
       if (featureSwitch.chargeMigrationEnabled.enabled) {
         withJsonBody[ChargeMigrationRequest] { deserialisedRequest =>
-          ttpFeedbackLoopService
+          chargeMigrationService
             .chargeMigration(deserialisedRequest)
             .leftMap(ttppError => ttppError.toWriteableProxyError)
             .fold(

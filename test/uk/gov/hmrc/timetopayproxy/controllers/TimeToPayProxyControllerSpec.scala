@@ -47,7 +47,7 @@ import uk.gov.hmrc.timetopayproxy.models.saonly.common.apistatus.{ ApiName, ApiS
 import uk.gov.hmrc.timetopayproxy.models.saonly.ttpcancel.*
 import uk.gov.hmrc.timetopayproxy.models.saonly.ttpfullamend.*
 import uk.gov.hmrc.timetopayproxy.models.saonly.ttpinform.{ TtpInformRequest, TtpInformSuccessfulResponse }
-import uk.gov.hmrc.timetopayproxy.services.{ TTPEService, TTPQuoteService, TtpFeedbackLoopService }
+import uk.gov.hmrc.timetopayproxy.services.{ ChargeMigrationService, TTPEService, TTPQuoteService, TtpFeedbackLoopService }
 
 import java.time.{ Instant, LocalDate, LocalDateTime }
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -66,6 +66,7 @@ class TimeToPayProxyControllerSpec extends AnyWordSpec with MockFactory {
   private val ttpQuoteService = mock[TTPQuoteService]
   private val ttpeService = mock[TTPEService]
   private val ttpFeedbackLoopService = mock[TtpFeedbackLoopService]
+  private val chargeMigrationService = mock[ChargeMigrationService]
   private val controller =
     new TimeToPayProxyController(
       correlationIdPopulationAction,
@@ -73,6 +74,7 @@ class TimeToPayProxyControllerSpec extends AnyWordSpec with MockFactory {
       cc,
       ttpQuoteService,
       ttpFeedbackLoopService,
+      chargeMigrationService,
       ttpeService,
       featureSwitch
     )
@@ -2391,7 +2393,7 @@ class TimeToPayProxyControllerSpec extends AnyWordSpec with MockFactory {
         })
         .returning(Future.successful(()))
 
-      (ttpFeedbackLoopService
+      (chargeMigrationService
         .chargeMigration(_: ChargeMigrationRequest)(
           _: ExecutionContext,
           _: HeaderCarrier
