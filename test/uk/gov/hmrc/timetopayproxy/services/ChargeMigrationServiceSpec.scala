@@ -38,7 +38,7 @@ class ChargeMigrationServiceSpec extends AnyFreeSpec with MockFactory with Scala
 
   implicit val hc: HeaderCarrier = HeaderCarrier()
 
-  "chargeMigration" - {
+  "ChargeMigrationService" - {
     "return the connector response" in {
       val request: ChargeMigrationRequest =
         ChargeMigrationRequest(
