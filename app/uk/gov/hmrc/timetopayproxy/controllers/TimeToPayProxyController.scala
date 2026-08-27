@@ -27,13 +27,14 @@ import uk.gov.hmrc.timetopayproxy.config.FeatureSwitch
 import uk.gov.hmrc.timetopayproxy.logging.{ PagerAlert, RequestAwareLogger }
 import uk.gov.hmrc.timetopayproxy.models.*
 import uk.gov.hmrc.timetopayproxy.models.affordablequotes.AffordableQuotesRequest
+import uk.gov.hmrc.timetopayproxy.models.cdcs.chargemigration.ChargeMigrationRequest
 import uk.gov.hmrc.timetopayproxy.models.error.TtppEnvelope.TtppEnvelope
 import uk.gov.hmrc.timetopayproxy.models.error.{ TtppEnvelope, TtppErrorResponse, ValidationError }
 import uk.gov.hmrc.timetopayproxy.models.saonly.chargeInfoApi.{ ChargeInfoRequest, ChargeInfoResponse }
 import uk.gov.hmrc.timetopayproxy.models.saonly.ttpcancel.{ TtpCancelRequest, TtpCancelRequestR2 }
 import uk.gov.hmrc.timetopayproxy.models.saonly.ttpfullamend.FullAmendRequest
 import uk.gov.hmrc.timetopayproxy.models.saonly.ttpinform.TtpInformRequest
-import uk.gov.hmrc.timetopayproxy.services.{ TTPEService, TTPQuoteService, TtpFeedbackLoopService }
+import uk.gov.hmrc.timetopayproxy.services.{ ChargeMigrationService, TTPEService, TTPQuoteService, TtpFeedbackLoopService }
 
 import javax.inject.{ Inject, Singleton }
 import scala.concurrent.{ ExecutionContext, Future }
@@ -46,6 +47,7 @@ class TimeToPayProxyController @Inject() (
   cc: ControllerComponents,
   timeToPayQuoteService: TTPQuoteService,
   ttpFeedbackLoopService: TtpFeedbackLoopService,
+  chargeMigrationService: ChargeMigrationService,
   timeToPayEligibilityService: TTPEService,
   featureSwitch: FeatureSwitch
 ) extends BackendController(cc) with BaseController {
@@ -183,6 +185,30 @@ class TimeToPayProxyController @Inject() (
     }
   }
 
+  def chargeMigration: Action[JsValue] =
+    authThenCorrelationIdActions.async(parse.json) { implicit request =>
+      if (featureSwitch.chargeMigrationEnabled.enabled) {
+        withJsonBody[ChargeMigrationRequest] { deserialisedRequest =>
+          chargeMigrationService
+            .chargeMigration(deserialisedRequest)
+            .leftMap(ttppError => ttppError.toWriteableProxyError)
+            .fold(
+              e => e.toErrorResult,
+              r => Results.Ok(Json.toJson(r))
+            )
+        }
+      } else {
+        logger.warn("Charge migration endpoint was called while the feature switch is disabled")
+
+        Future.successful(
+          TtppErrorResponse(
+            statusCode = 404,
+            errorMessage = "/charge-migration endpoint is not currently enabled"
+          ).toErrorResult
+        )
+      }
+    }
+
   private def validateUpdateRequestMatchesQueryParams(
     customerReference: String,
     planId: String,
@@ -259,5 +285,4 @@ class TimeToPayProxyController @Inject() (
           ).toErrorResult
         )
     }
-
 }

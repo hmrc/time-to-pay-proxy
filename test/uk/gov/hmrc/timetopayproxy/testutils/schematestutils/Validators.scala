@@ -237,6 +237,42 @@ object Validators {
       }
     }
 
+    object ChargeMigration {
+      object Live {
+
+        // Downloaded from:
+        // https://confluence.tools.tax.service.gov.uk/spaces/DTDT/pages/828113579/TTP+API+Current+Version+Proxy?preview=/828113579/1373439380/time-to-pay-v1.0.24_A.yaml
+        // Official location:
+        // https://confluence.tools.tax.service.gov.uk/spaces/DTDT/pages/828113579/TTP+API+Current+Version+Proxy
+        private val path: String =
+          "resources/public/api/conf/1.0/application.yaml"
+
+        def openApiRequestSchema: OpenApi3DerivedSchema =
+          new OpenApi3DerivedSchema(
+            path,
+            defaultJsonSubschemaName = "ChargeMigrationRequest",
+            metaSchemaValidation = Some(Valid(())),
+            restrictAdditionalProperties = true
+          )
+
+        def openApiResponseSchema: OpenApi3DerivedSchema =
+          new OpenApi3DerivedSchema(
+            path,
+            defaultJsonSubschemaName = "ChargeMigrationResponse",
+            metaSchemaValidation = Some(Valid(())),
+            restrictAdditionalProperties = true
+          )
+
+        def openApiErrorResponseSchema: OpenApi3DerivedSchema =
+          new OpenApi3DerivedSchema(
+            path,
+            defaultJsonSubschemaName = "ErrorResponse",
+            metaSchemaValidation = Some(Valid(())),
+            restrictAdditionalProperties = true
+          )
+      }
+    }
+
     /** For now, this applies to all responses from the proxy */
     def openApiResponseErrorSchema: OpenApi3DerivedSchema =
       new OpenApi3DerivedSchema(

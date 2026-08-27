@@ -169,5 +169,4 @@ class TtpFeedbackLoopConnector @Inject() (
       combinedPreviousHeaders
     }
   }
-
 }
