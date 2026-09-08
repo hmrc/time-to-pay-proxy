@@ -56,7 +56,9 @@ final class StableStringGeneratorSpec extends AnyFreeSpec {
               ClassWithBigInteger.openApiSchema.validateJsonAndGetErrors(stringifier(badValueJson)) shouldBe Nil
             }
             "fails with the default stringifier" in {
-              ClassWithBigInteger.openApiSchema.validateJsonAndGetErrors(badValueJson.toString) shouldBe Nil
+              ClassWithBigInteger.openApiSchema.validateJsonAndGetErrors(badValueJson.toString) shouldBe List(
+                "/needsToBeInteger: number found, integer expected"
+              )
             }
           }
 

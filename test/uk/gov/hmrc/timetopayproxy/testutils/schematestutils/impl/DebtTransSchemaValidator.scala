@@ -17,11 +17,14 @@
 package uk.gov.hmrc.timetopayproxy.testutils.schematestutils.impl
 
 import cats.data.ValidatedNel
-import com.fasterxml.jackson.databind.node.ObjectNode
+import com.fasterxml.jackson.databind.node.{ MissingNode, ObjectNode }
 import com.fasterxml.jackson.databind.{ JsonNode, ObjectMapper }
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory
+import com.networknt.schema.dialect.Dialects
+import com.networknt.schema.path.{ NodePath, PathType }
 import com.networknt.schema.{ Schema, SchemaRegistry, SchemaRegistryConfig, SpecificationVersion }
 import com.networknt.schema.regex.JDKRegularExpressionFactory
+import com.networknt.schema.utils.JsonNodes
 import org.scalactic.source.Position
 import org.scalatest.Assertions.fail
 import org.scalatest.matchers.should.Matchers.*
@@ -86,7 +89,7 @@ object DebtTransSchemaValidator {
         }
     }
 
-    private val jsonSchema: Schema = {
+    private val schema: Schema = {
       val config = SchemaRegistryConfig
         .builder()
         .regularExpressionFactory(
@@ -98,18 +101,17 @@ object DebtTransSchemaValidator {
 
       val registry = SchemaRegistry.withDefaultDialect(
         version,
-        (builder: SchemaRegistry.Builder) => {
+        builder => {
           builder.schemaRegistryConfig(config)
           ()
         }
       )
 
       registry.getSchema(InternalUtils.readJsonNode(jsonOrYamlPath = jsonSchemaFilename))
-
     }
 
     protected def validateAndGetErrors(json: JsonNode)(implicit pos: Position): List[String] =
-      jsonSchema.validate(json).asScala.map(_.toString).toList.sorted
+      schema.validate(json).asScala.map(_.toString).toList.sorted
 
     override def toString: String = s"""${getClass.getSimpleName}(${JsString(jsonSchemaFilename)}, $version)"""
   }
@@ -121,11 +123,10 @@ object DebtTransSchemaValidator {
     restrictAdditionalProperties: Boolean
   ) extends DebtTransSchemaValidator {
 
-    private val objectMapper: ObjectMapper = new ObjectMapper()
-
     private val fullOpenApiNode: JsonNode =
       InternalUtils.readJsonNode(jsonOrYamlPath = openApiYamlFilename)
 
+    /** Constructing this class will automatically verify it against the meta-schema. */
     metaSchemaValidation match {
       case None                           => ()
       case Some(expectedValidationResult) =>
@@ -139,45 +140,30 @@ object DebtTransSchemaValidator {
         }
     }
 
-    /** Builds the JSON Schema from the Open API components
-      *
-      * Convention is to have reusable Open API components in components/schemas.
-      * json-schema-validator resolves URIs relatively to a root
-      * so we can move those components to the $defs block.
-      * Then we can set $ref pointing to the right subschema in $defs as the root
-      * so that the library can resolve them properly
-      *
-      * So the JSON schema this makes has the form:
-      * {
-      *   "$schema": "http://json-schema.org/draft-07/schema#",
-      *   "$defs": { <every schema from components/schemas> },
-      *   "$ref": "#/$defs/<defaultJsonSubschemaName>"
-      * }
-      */
-    private val jsonConvertedSchema: Schema = {
-      val openApiSchemasNode: JsonNode =
-        fullOpenApiNode.path("components").path("schemas")
+    private val schema: Schema = {
+      val componentsSchemasPath: NodePath =
+        new NodePath(PathType.JSON_POINTER).append("components").append("schemas")
 
-      validateOpenApiSchemaStructure(openApiSchemasNode)
+      val mutableRoot: JsonNode = fullOpenApiNode.deepCopy[JsonNode]
+      val schemasNode: JsonNode =
+        Option(JsonNodes.get[JsonNode](mutableRoot, componentsSchemasPath))
+          .getOrElse(MissingNode.getInstance())
 
-      val mutableOpenApiSchemasNode: JsonNode = openApiSchemasNode.deepCopy[JsonNode]()
+      validateOpenApiSchemaStructure(schemasNode)
 
-      val jsonSchemaRoot: ObjectNode = convertToJsonSchema(mutableOpenApiSchemasNode)
+      InternalUtils.rewriteRegexPatterns(schemasNode, openApiYamlFilename)
 
-      val config = SchemaRegistryConfig
-        .builder()
-        .regularExpressionFactory(JDKRegularExpressionFactory.getInstance())
-        .formatAssertionsEnabled(true)
-        .build()
+      if (restrictAdditionalProperties) {
+        InternalUtils.injectAdditionalPropertiesFalse(schemasNode)
+      }
 
-      val registry = SchemaRegistry.withDefaultDialect(
-        SpecificationVersion.DRAFT_7,
-        (builder: SchemaRegistry.Builder) => {
-          builder.schemaRegistryConfig(config)
-          ()
-        }
-      )
-      registry.getSchema(jsonSchemaRoot)
+      val config = InternalUtils.createSchemaRegistryConfig()
+
+      val registry = InternalUtils.createSchemaRegistry(config)
+
+      val documentSchema: Schema = registry.getSchema(mutableRoot)
+
+      documentSchema.getSubSchema(componentsSchemasPath.append(defaultJsonSubschemaName))
     }
 
     private def validateOpenApiSchemaStructure(openApiSchemasNode: JsonNode): Unit = {
@@ -188,98 +174,92 @@ object DebtTransSchemaValidator {
         fail(s"Could not find subschema '$defaultJsonSubschemaName' in $openApiYamlFilename")
     }
 
-    private def convertToJsonSchema(openApiSchemasNode: JsonNode): ObjectNode = {
-      rewriteRefsAndRegex(openApiSchemasNode)
-
-      if (restrictAdditionalProperties) {
-        injectAdditionalPropertiesFalse(openApiSchemasNode)
-      }
-
-      // Builds the Json wrapper schema in the form aligning to Scaladoc above
-      val root: ObjectNode = objectMapper.createObjectNode()
-      root.put("$schema", "http://json-schema.org/draft-07/schema#")
-      root.set[ObjectNode]("$defs", openApiSchemasNode)
-      root.put("$ref", s"#/$$defs/$defaultJsonSubschemaName")
-
-      root
-    }
-
-    /** Recursively rewrites every {{{ "$ref": "#/components/schemas/Foo" }}}
-      * to {{{ "$ref": "#/$defs/Foo" }}} so that the JSON schema is handled properly
-      *
-      * Fix the regular expression bug in the schema validator library.
-      * The regex flavour SHOULD be ECMA-262, but the library uses the Java flavour to validate regexes.
-      * The biggest difference is that the YAML is allowed to declare {{{[[]}}},
-      * but Java forbids it without escaping: {{{[\[]}}}
-      *
-      * This is the faulty YAML entry that initially required this hack:
-      * {{{
-      *   addressLine1:
-      *     type: string
-      *     maxLength: 35
-      *     example: "ADDRESS LINE 1"
-      *     pattern: '^[a-zA-Z0-9 -/:-@[-`]{1,35}$'
-      *     description: "Incoming address line 1 from ETMP"
-      * }}}
-      */
-    private def rewriteRefsAndRegex(openApiSchemasNode: JsonNode): Unit =
-      if (openApiSchemasNode.isObject) {
-        val jsonObjectNode = openApiSchemasNode.asInstanceOf[ObjectNode]
-
-        Option(jsonObjectNode.get("$ref")).foreach { refNode =>
-          val oldRef = refNode.asText()
-          val newRef = oldRef.replace("#/components/schemas/", "#/$defs/")
-
-          if (newRef != oldRef) {
-            jsonObjectNode.put("$ref", newRef)
-          }
-        }
-
-        Option(jsonObjectNode.get("pattern")).foreach { patternNode =>
-          val oldPattern = patternNode.asText()
-          val newPattern = RegexFlavourTranslator.ecmaScriptRegexFlavourToJavaFlavour(
-            esPattern = oldPattern,
-            locationContext = s"schema in file $openApiYamlFilename"
-          )
-
-          if (newPattern != oldPattern) {
-            jsonObjectNode.put("pattern", newPattern)
-          }
-        }
-
-        jsonObjectNode.properties().asScala.foreach(entry => rewriteRefsAndRegex(entry.getValue))
-
-      } else if (openApiSchemasNode.isArray) {
-        openApiSchemasNode.elements().asScala.foreach(rewriteRefsAndRegex)
-      }
-
-    /** Recursively injects {{{ "additionalProperties": false }}} into every
-      * object schema node that has "properties" but no "additionalProperties".
-      * openapi4j had ValidationOptions.ADDITIONAL_PROPS_RESTRICT
-      * This effectively does the same thing by changing the schema before validation
-      * instead of doing this as part of validation.
-      */
-    private def injectAdditionalPropertiesFalse(node: JsonNode): Unit =
-      if (node.isObject) {
-        val obj = node.asInstanceOf[ObjectNode]
-
-        val hasProperties = obj.has("properties")
-        val hasAdditionalProperties = obj.has("additionalProperties")
-
-        if (hasProperties && !hasAdditionalProperties)
-          obj.put("additionalProperties", false)
-
-        obj.properties().asScala.foreach(entry => injectAdditionalPropertiesFalse(entry.getValue))
-
-      } else if (node.isArray) {
-        node.elements().asScala.foreach(injectAdditionalPropertiesFalse)
-      }
-
     protected def validateAndGetErrors(jsonNode: JsonNode)(implicit pos: Position): List[String] =
-      jsonConvertedSchema.validate(jsonNode).asScala.map(_.toString).toList.sorted
+      schema.validate(jsonNode).asScala.map(_.toString).toList.sorted
 
     override def toString: String =
       s"""${getClass.getSimpleName}(${JsString(defaultJsonSubschemaName)} in $openApiYamlFilename)"""
+  }
+
+  /** Validates JSON responses against a schema located at a specific path within an OpenAPI document.
+    *
+    * This class allows you to validate against any schema in the OpenAPI document by specifying a dot-separated path,
+    * rather than being limited to schemas in components/schemas.
+    */
+  final class OpenApi3PathSchema private[schematestutils] (
+    openApiYamlFilename: String,
+    /** Dot-separated path to the sub schema within the OpenAPI document. Examples:
+      * "paths./example/route/endpoint.post.requestBody.content.application/json.schema"
+      */
+    subschemaPath: String,
+    metaSchemaValidation: Option[ValidatedNel[String, Unit]],
+    restrictAdditionalProperties: Boolean
+  ) extends DebtTransSchemaValidator {
+
+    private val fullOpenApiNode: JsonNode =
+      InternalUtils.readJsonNode(jsonOrYamlPath = openApiYamlFilename)
+
+    /** Constructing this class will automatically verify it against the meta-schema. */
+    metaSchemaValidation match {
+      case None                           => ()
+      case Some(expectedValidationResult) =>
+        val actualVersion = fullOpenApiNode.path("openapi").asText("")
+        val validator = MetaSchemas.yamlSchemaSchema(version = actualVersion)
+
+        val errors = validator.validateFromPathAndGetErrors(jsonOrYamlPath = openApiYamlFilename)
+
+        withClue(s"Validate $openApiYamlFilename against $validator\n\n") {
+          errors shouldBe expectedValidationResult.fold[List[String]](_.toList, { case () => Nil })
+        }
+    }
+
+    private val schema: Schema = {
+      val responseSchemaPath: NodePath = buildNodePathFromString(subschemaPath)
+
+      val mutableRoot: JsonNode = fullOpenApiNode.deepCopy[JsonNode]
+      val schemasNode: JsonNode =
+        Option(JsonNodes.get[JsonNode](mutableRoot, responseSchemaPath))
+          .getOrElse(MissingNode.getInstance())
+
+      validateByPathOpenApiSchemaStructure(schemasNode)
+
+      InternalUtils.rewriteRegexPatterns(schemasNode, openApiYamlFilename)
+
+      if (restrictAdditionalProperties) {
+        InternalUtils.injectAdditionalPropertiesFalse(schemasNode)
+      }
+
+      val config = InternalUtils.createSchemaRegistryConfig()
+
+      val registry = InternalUtils.createSchemaRegistry(config)
+
+      val documentSchema: Schema = registry.getSchema(mutableRoot)
+
+      documentSchema
+    }
+
+    /** Builds a NodePath from a dot-separated path string. Examples:
+      *   - "paths./example/route/endpoint.post.requestBody.content.application/json.schema"
+      *
+      * @param subschemaPath
+      *   dot-separated path string
+      * @return
+      *   NodePath object
+      */
+    private def buildNodePathFromString(subschemaPath: String): NodePath = {
+      val pathSegments = subschemaPath.split("\\.")
+
+      pathSegments.foldLeft(new NodePath(PathType.JSON_POINTER)) { (acc, segment) =>
+        acc.append(segment)
+      }
+    }
+
+    private def validateByPathOpenApiSchemaStructure(openApiSchemasNode: JsonNode): Unit =
+      if (openApiSchemasNode.isMissingNode)
+        fail(s"No schema paths found in $openApiYamlFilename")
+
+    protected def validateAndGetErrors(jsonNode: JsonNode)(implicit pos: Position): List[String] =
+      schema.validate(jsonNode).asScala.map(_.toString).toList.sorted
   }
 
   /** Assortment of utilities needed to make the validation work. */
@@ -299,6 +279,81 @@ object DebtTransSchemaValidator {
     def yamlToJsonNode(yaml: String): JsonNode = new ObjectMapper(new YAMLFactory()).readTree(yaml)
 
     def jsonToJsonNode(json: String): JsonNode = new ObjectMapper().readTree(json)
+
+    /** Recursively rewrites every {{{"$ref": "#/components/schemas/Foo"}}} to {{{"$ref": "#/$defs/Foo"}}} so that the
+      * JSON schema is handled properly
+      *
+      * Fix the regular expression bug in the schema validator library. The regex flavour SHOULD be ECMA-262, but the
+      * library uses the Java flavour to validate regexes. The biggest difference is that the YAML is allowed to declare
+      * {{{[[]}}}, but Java forbids it without escaping: {{{[\[]}}}
+      *
+      * This is the faulty YAML entry that initially required this hack:
+      * {{{
+      *   addressLine1:
+      *     type: string
+      *     maxLength: 35
+      *     example: "ADDRESS LINE 1"
+      *     pattern: '^[a-zA-Z0-9 -/:-@[-`]{1,35}$'
+      *     description: "Incoming address line 1 from ETMP"
+      * }}}
+      */
+    def rewriteRegexPatterns(node: JsonNode, openApiYamlFilename: String): Unit =
+      if (node.isObject) {
+        val jsonObjectNode = node.asInstanceOf[ObjectNode]
+
+        Option(jsonObjectNode.get("pattern")).foreach { patternNode =>
+          val oldPattern = patternNode.asText()
+          val newPattern = RegexFlavourTranslator.ecmaScriptRegexFlavourToJavaFlavour(
+            esPattern = oldPattern,
+            locationContext = s"schema in file $openApiYamlFilename"
+          )
+
+          if (newPattern != oldPattern) {
+            jsonObjectNode.put("pattern", newPattern)
+          }
+        }
+
+        jsonObjectNode.properties().asScala.foreach(entry => rewriteRegexPatterns(entry.getValue, openApiYamlFilename))
+
+      } else if (node.isArray) {
+        node.elements().asScala.foreach(rewriteRegexPatterns(_, openApiYamlFilename))
+      }
+
+    /** Recursively injects {{{"additionalProperties": false}}} into every object schema node that has "properties" but
+      * no "additionalProperties". openapi4j had ValidationOptions.ADDITIONAL_PROPS_RESTRICT This effectively does the
+      * same thing by changing the schema before validation instead of doing this as part of validation.
+      */
+    def injectAdditionalPropertiesFalse(node: JsonNode): Unit =
+      if (node.isObject) {
+        val obj = node.asInstanceOf[ObjectNode]
+
+        val hasProperties = obj.has("properties")
+        val hasAdditionalProperties = obj.has("additionalProperties")
+
+        if (hasProperties && !hasAdditionalProperties)
+          obj.put("additionalProperties", false)
+
+        obj.properties().asScala.foreach(entry => injectAdditionalPropertiesFalse(entry.getValue))
+
+      } else if (node.isArray) {
+        node.elements().asScala.foreach(injectAdditionalPropertiesFalse)
+      }
+
+    def createSchemaRegistryConfig(): SchemaRegistryConfig =
+      SchemaRegistryConfig
+        .builder()
+        .regularExpressionFactory(JDKRegularExpressionFactory.getInstance())
+        .formatAssertionsEnabled(true)
+        .build()
+
+    def createSchemaRegistry(config: SchemaRegistryConfig): SchemaRegistry =
+      SchemaRegistry.withDialect(
+        Dialects.getOpenApi30,
+        builder => {
+          builder.schemaRegistryConfig(config)
+          ()
+        }
+      )
   }
 
 }
