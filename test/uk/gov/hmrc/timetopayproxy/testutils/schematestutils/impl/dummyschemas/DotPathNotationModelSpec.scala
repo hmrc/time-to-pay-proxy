@@ -40,7 +40,6 @@ class DotPathNotationModelSpec extends AnyFreeSpec {
 
     "implicit json reader" - {
       "reads the expected json for a ClassForDotNotationSchemaInteger" in {
-        println(pathNotationIntegerJson)
         reader.reads(pathNotationIntegerJson) shouldBe JsSuccess(pathNotationIntegerModel)
       }
 
