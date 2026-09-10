@@ -1,0 +1,32 @@
+openapi: 3.0.3
+info:
+  title: Dot Notation OneOf Test
+  description: "Schema comprised of  that requires the dot notation to access."
+  contact: {}
+  version: 1.0.0
+paths:
+  /example/route/endpoint:
+    post:
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                multichoiceField:
+                  oneOf:
+                    - type: object
+                      properties:
+                        booleanField:
+                          type: boolean
+                      required:
+                        - booleanField
+                    - type: object
+                      properties:
+                        integerField:
+                          type: integer
+                      required:
+                        - integerField
+      responses:
+        '200':
+          description: OK
