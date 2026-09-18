@@ -1,0 +1,41 @@
+info:
+  name: bearerTokenRequest
+  type: http
+  seq: 1
+
+http:
+  method: POST
+  url: http://localhost:8585/government-gateway/session/login
+  headers:
+    - name: content-type
+      value: application/json
+  body:
+    type: json
+    data: |-
+      {
+        "affinityGroup" : "Organisation",
+        "excludeGnapToken" : true,
+        "credentialStrength" : "strong",
+        "confidenceLevel" : 50,
+        "credId" : "test",
+        "enrolments" : [
+          {
+          "key" : "read:time-to-pay-proxy",
+          "identifiers" : [
+              {
+            "key" : "UTRNumber",
+            "value" : "12345678901234"
+              }
+            ],
+          "state" : "Activated"
+          }
+        ]
+      }
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: true
