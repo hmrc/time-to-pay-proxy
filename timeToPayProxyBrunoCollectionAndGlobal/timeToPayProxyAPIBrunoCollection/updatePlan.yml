@@ -10,8 +10,8 @@ http:
     type: json
     data: |-
       {
-        "customerReference": "customerRef1234",
-        "planId": "0T46qCx53VwexlV",
+        "customerReference": "{{customerReference}}",
+        "planId": "{{planId}}",
         "updateType": "planStatus",
         "planStatus": "Resolved - TTP Amended"
         //"completeReason": "Payment in full"
