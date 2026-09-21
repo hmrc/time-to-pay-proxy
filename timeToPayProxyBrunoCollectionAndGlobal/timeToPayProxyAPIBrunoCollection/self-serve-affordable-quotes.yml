@@ -1,0 +1,56 @@
+info:
+  name: self-serve/affordable-quotes
+  type: http
+  seq: 8
+
+http:
+  method: POST
+  url: http://localhost:9600/self-serve/affordable-quotes
+  headers:
+    - name: Content-Type
+      value: application/json
+    - name: Accept
+      value: application/vnd.hmrc.1.0+json
+  body:
+    type: json
+    data: |-
+      {
+        "regimeType": "SA",
+        "channelIdentifier": "eSSTTP",
+        "paymentPlanAffordableAmount": 5000,
+        "paymentPlanFrequency": "Monthly",
+        "paymentPlanMaxLength": 6,
+        "paymentPlanMinLength": 1,
+        "accruedDebtInterest": 1,
+        "paymentPlanStartDate": "2026-07-27",
+        "initialPaymentDate": "2026-07-22",
+        "initialPaymentAmount": 500,
+        "debtItemCharges": [
+          {
+            "debtItemChargeId": "ChargeRef 0745_2",
+            "mainTrans": "5200",
+            "subTrans": "1553",
+            "outstandingDebtAmount": 30000,
+            "interestStartDate": "2025-08-12",
+            "debtItemOriginalDueDate": "2026-04-13",
+            "isInterestBearingCharge": true,
+            "useChargeReference": false
+          }
+        ],
+        "customerPostcodes": [
+          {
+            "addressPostcode": "TW3 4QQ",
+            "postcodeDate": "2019-07-06"
+          }
+        ]
+      }
+  auth:
+    type: bearer
+    token: BXQ3/Treo4kQCZvVcCqKPnhmmE09OUN55pXg1RF6Zipp5VHpqDWsug25DwwQ6r8inFHQiIQAIaeuVn8mutbUw5Bitiv1Jw1T/CcyyoBlE0GmScxFOs8/j1lOh6LJy2zi4BGVQBZ5qiLONk7oyqCs2froSsXqIEA3SZ3G7np1jCJ21PvYqab0b4rsMF2co5Eb/SsCJHiDyv5jJQREo7nuFQ==
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: true

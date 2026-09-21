@@ -1,0 +1,28 @@
+info:
+  name: updatePlan
+  type: http
+  seq: 9
+
+http:
+  method: PUT
+  url: http://localhost:9600/quote/{{customerReference}}/{{planId}}
+  body:
+    type: json
+    data: |-
+      {
+        "customerReference": "{{customerReference}}",
+        "planId": "{{planId}}",
+        "updateType": "planStatus",
+        "planStatus": "Resolved - TTP Amended"
+        //"completeReason": "Payment in full"
+      }
+  auth:
+    type: bearer
+    token: BXQ3/Treo4kQCZvVcCqKPnhmmE09OUN55pXg1RF6Zipp5VHpqDWsug25DwwQ6r8inFHQiIQAIaeuVn8mutbUw5Bitiv1Jw1T/CcyyoBlE0GmScxFOs8/j1lOh6LJy2zi4BGVQBZ5qiLONk7oyqCs2froSsXqIEA3SZ3G7np1jCJ21PvYqab0b4rsMF2co5Eb/SsCJHiDyv5jJQREo7nuFQ==
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: true

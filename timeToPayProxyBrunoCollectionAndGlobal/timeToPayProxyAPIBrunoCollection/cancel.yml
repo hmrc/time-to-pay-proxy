@@ -1,0 +1,57 @@
+info:
+  name: cancel
+  type: http
+  seq: 1
+
+http:
+  method: POST
+  url: http://localhost:9600/cancel
+  headers:
+    - name: Content-Type
+      value: application/json
+    - name: Accept
+      value: application/vnd.hmrc.1.0+json
+  body:
+    type: json
+    data: |-
+      {
+        "channelIdentifier": "advisor",
+        "identifications": [
+          {
+            "idType": "UTR",
+            "idValue": "cesaCancelPlanSuccess"
+          }
+        ],
+        "paymentPlan": {
+          "arrangementAgreedDate": "2025-05-01",
+          "ttpEndDate": "2025-05-01",
+          "frequency": "monthly",
+          "cancellationDate": "2025-05-01",
+          "debtItemCharges": [
+            {
+              "debtItemChargeId": "K0000000000001",
+              "chargeSource": "CESA"
+            }
+          ]
+        },
+        "instalments": [
+          {
+            "dueDate": "2025-07-01",
+            "amountDue": 300
+          },
+          {
+            "dueDate": "2025-06-01",
+            "amountDue": 300
+          }
+        ]
+      }
+  auth:
+    type: bearer
+    token: BXQ3/Treo4kQCZvVcCqKPnhmmE09OUN55pXg1RF6Zipp5VHpqDWsug25DwwQ6r8inFHQiIQAIaeuVn8mutbUw5Bitiv1Jw1T/CcyyoBlE0GmScxFOs8/j1lOh6LJy2zi4BGVQBZ5qiLONk7oyqCs2froSsXqIEA3SZ3G7np1jCJ21PvYqab0b4rsMF2co5Eb/SsCJHiDyv5jJQREo7nuFQ==
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: true

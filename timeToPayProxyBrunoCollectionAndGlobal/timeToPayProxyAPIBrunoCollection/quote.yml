@@ -1,0 +1,86 @@
+info:
+  name: quote
+  type: http
+  seq: 6
+
+http:
+  method: POST
+  url: http://localhost:9600/quote
+  headers:
+    - name: Content-Type
+      value: application/json
+    - name: Accept
+      value: application/vnd.hmrc.1.0+json
+  body:
+    type: json
+    data: |-
+      {
+        "regimeType": "SA",
+        "customerReference": "customerRef1234",
+        "quoteReference": "quoteRef123434567",
+        "channelIdentifier": "advisor",
+        "plan": {
+          "quoteId": "quoteId",
+          "quoteType": "instalmentAmount",
+          "quoteDate": "2022-03-29",
+          "instalmentStartDate": "2022-03-31",
+          "paymentPlanType": "timeToPay",
+          "thirdPartyBank": true,
+          "numberOfInstalments": 1,
+          "frequency": "monthly",
+          "duration": 1,
+          "initialPaymentMethod": "BACS",
+          "initialPaymentReference": "cardPayment",
+          "initialPaymentDate": "2022-03-31",
+          "initialPaymentAmount": 100,
+          "totalDebtIncInt": 2000,
+          "totalInterest": 0,
+          "interestAccrued": 0,
+          "planInterest": 0
+        },
+        "debtItemCharges": [
+          {
+            "debtItemChargeId": "debtItemChargeId4",
+            "mainTrans": "1525",
+            "subTrans": "1000",
+            "originalDebtAmount": 2000,
+            "dueDate": "2025-08-22",
+            "interestStartDate": "2025-08-22",
+            "paymentHistory": []
+          }
+        ],
+        "payments": [
+          {
+            "paymentMethod": "cheque",
+            "paymentReference": "PaymentRef"
+          }
+        ],
+        "customerPostCodes": [
+          {
+            "addressPostcode": "NW9 5XW",
+            "postcodeDate": "2021-05-13"
+          }
+        ],
+        "instalments": [
+          {
+            "debtItemChargeId": "debtItemChargeId4",
+            "instalmentNumber": 1,
+            "dueDate": "2022-03-31",
+            "amountDue": 2000,
+            "instalmentBalance": 2000,
+            "instalmentInterestAccrued": 0,
+            "expectedPayment": 2000,
+            "interestRate": 3
+          }
+        ]
+      }
+  auth:
+    type: bearer
+    token: BXQ3/Treo4kQCZvVcCqKPnhmmE09OUN55pXg1RF6Zipp5VHpqDWsug25DwwQ6r8inFHQiIQAIaeuVn8mutbUw5Bitiv1Jw1T/CcyyoBlE0GmScxFOs8/j1lOh6LJy2zi4BGVQBZ5qiLONk7oyqCs2froSsXqIEA3SZ3G7np1jCJ21PvYqab0b4rsMF2co5Eb/SsCJHiDyv5jJQREo7nuFQ==
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: true

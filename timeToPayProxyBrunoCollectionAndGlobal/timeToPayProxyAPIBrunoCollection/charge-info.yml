@@ -1,0 +1,36 @@
+info:
+  name: charge-info
+  type: http
+  seq: 2
+
+http:
+  method: POST
+  url: http://localhost:9600/charge-info
+  headers:
+    - name: Content-Type
+      value: application/json
+    - name: Accept
+      value: application/vnd.hmrc.1.0+json
+  body:
+    type: json
+    data: |-
+      {
+        "channelIdentifier": "Advisor",
+        "identifications": [
+          {
+            "idType": "UTR",
+            "idValue": "chargeInfoSuccess"
+          }
+        ],
+        "regimeType": "SA"
+      }
+  auth:
+    type: bearer
+    token: BXQ3/Treo4kQCZvVcCqKPnhmmE09OUN55pXg1RF6Zipp5VHpqDWsug25DwwQ6r8inFHQiIQAIaeuVn8mutbUw5Bitiv1Jw1T/CcyyoBlE0GmScxFOs8/j1lOh6LJy2zi4BGVQBZ5qiLONk7oyqCs2froSsXqIEA3SZ3G7np1jCJ21PvYqab0b4rsMF2co5Eb/SsCJHiDyv5jJQREo7nuFQ==
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: true
