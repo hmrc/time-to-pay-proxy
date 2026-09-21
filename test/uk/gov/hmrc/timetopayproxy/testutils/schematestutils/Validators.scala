@@ -51,7 +51,7 @@ object Validators {
 
       object Proposed {
         private val proposedPath =
-          "test/resources/schemas/apis/proposed/time-to-pay-proxy/time-to-pay-v1.0.22-proposedAll-2.yaml"
+          "test/resources/schemas/apis/proposed/time-to-pay-proxy/time-to-pay-v1.0.25-proposedAll.yaml"
 
         def openApiRequestSchema: OpenApi3DerivedSchema =
           new OpenApi3DerivedSchema(
@@ -285,10 +285,10 @@ object Validators {
 
   object TimeToPayEligibility {
     // Downloaded from:
-    //   https://github.com/hmrc/time-to-pay-eligibility/blob/dfc3c970abfe7ee8bafbd32e2dc77d35b829a37b/test/resources/schemas/apis/time-to-pay-eligibility/ttp-eligibility0.3.6.yaml
+    //   https://github.com/hmrc/time-to-pay-eligibility/blob/main/test/resources/schemas/apis/time-to-pay-eligibility/ttp-eligibility0.3.13.yaml
     // Official location:
     //   https://confluence.tools.tax.service.gov.uk/display/DTDT/TTP+Eligibility+API
-    private val livePath = "test/resources/schemas/apis/live/time-to-pay-eligibility/ttp-eligibility0.3.10.yaml"
+    private val livePath = "test/resources/schemas/apis/live/time-to-pay-eligibility/ttp-eligibility0.3.13.yaml"
 
     object ChargeInfo {
       object Live {
@@ -319,7 +319,7 @@ object Validators {
 
       object Proposed {
         private val proposedPath =
-          "test/resources/schemas/apis/proposed/time-to-pay-eligibility/ttp-eligibility0.3.8-proposedAll-R2-2.yaml"
+          "test/resources/schemas/apis/proposed/time-to-pay-eligibility/ttp-eligibility0.3.13_Proposed_FDL-R2.yaml"
 
         def openApiResponseSuccessfulSchema =
           new OpenApi3DerivedSchema(

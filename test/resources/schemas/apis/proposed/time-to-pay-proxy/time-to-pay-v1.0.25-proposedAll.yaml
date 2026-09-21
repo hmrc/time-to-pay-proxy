@@ -52,13 +52,19 @@ info:
       | 1.0.18 | 28-10-2025 | Alex Olkhovskiy | Add 409 conflict response to PUT /quote endpoint for duplicate plan ID|
       | 1.0.19 | 30-10-2025 | Alex Olkhovskiy | R1 changes for udpate cancel, inform and full amend|
       | 1.0.20 | 06-11-2025 | Alex Olkhovskiy | Add 422 error response for charge reference mismatch |
+      | 1.0.21 | 28-01-2026 | Alex Olkhovskiy | DTD-4248: Fix mismatches between spec and code |
+      | 1.0.22 | 17-03-2026 | Sunil Sen | DTD-4295: Send charge references to CESA |
+      | 1.0.23 | 29-05-2026 | Dan Smith | DTD-4585: Align Full Amend with SA Release 2 spec |
+      | 1.0.24 | 12-08-2026 | Alfie Molloy | DTD-4721: Add Charge Migration API |
+      | 1.0.25 | 21-09-2026 | Alex Olkhovskiy | Added mandatory addressSource (ETMP/CESA) to charge-info response addresses |
       | 1.0.20a | 28-10-2025 | Alex Olkhovskiy | Get charges: Added customer signals, insolvency indicator, locks data and charge types excluded|
       | 1.0.20b | 28-10-2025 | Alex Olkhovskiy | Inform API: Added debtItemCharges array and ddiReference for ETMP integration                             |
       | 1.0.20c | 28-10-2025 | Alex Olkhovskiy | Cancel API: Added debtItemCharges array and ddiReference for ETMP integration|
       | 1.0.20-proposedAll-R4 | 28-10-2025 | Alex Olkhovskiy | Full Amend API: Split into originalPaymentPlan and newPaymentPlan with charge amendment to understand which HoD API to call and which plan data to provide     |
       | 1.0.21-proposedAll | 18-12-2025 | Alex Olkhovskiy | Make signalDescription optional in CustomerSignal schema |
       | 1.0.22-proposedAll-2 | 20-01-2026 | Alex Olkhovskiy | Cancel API updates and totalDebtIncInt description change |
-  version: 1.0.22-proposedAll-2
+      | 1.0.25-proposedAll | 22-09-2026 | Alex Olkhovskiy | Rebased the R2 proposal onto 1.0.25 (addressSource included). Remaining proposed changes: charge-info R2 fields (customerSignals, chargeTypesExcluded, isInsolvent, locks; originalCreationDate/originalTieBreaker removed) and Cancel API debtItemCharges. Inform and Full Amend R2 changes are already live since 1.0.23 |
+  version: 1.0.25-proposedAll
   contact: {}
 servers:
   - url: https://api.service.hmrc.gov.uk
@@ -349,7 +355,6 @@ paths:
                   totalInterest: 0
                   interestAccrued: 0
                   planInterest: 0.24
-                  frequency: annually
                 debtItemCharges:
                   - debtItemChargeId: debtItemChrgId1
                     mainTrans: '1546'
@@ -752,6 +757,7 @@ paths:
                   transitionToCDCS: true
                 addresses:
                   - addressType: ppob
+                    addressSource: ETMP
                     addressLine1: 999 Elm Street
                     addressLine2: Suite 12C
                     addressLine3: Northshire
@@ -901,7 +907,7 @@ paths:
             example: f0bd1f32-de51-45cc-9b18-0520d6e3ab1a
       security:
         - applicationRestricted:
-            - write:time-to-pay-proxy
+            - read:time-to-pay-proxy
       requestBody:
         description: Request body containing cancellation and identification details
         required: true
@@ -1271,7 +1277,7 @@ paths:
             example: f0bd1f32-de51-45cc-9b18-0520d6e3ab1a
       security:
         - applicationRestricted:
-            - write:time-to-pay-proxy
+            - read:time-to-pay-proxy
       requestBody:
         description: Request body with fields to amend a TTP in CESA and ETMP.
         required: true
@@ -1465,6 +1471,140 @@ paths:
               example:
                 statusCode: 503
                 errorMessage: The server is temporarily unavailable.
+  /individuals/time-to-pay-proxy/charge-migration:
+    post:
+      tags:
+        - individuals
+      summary: create plans for charge migration from CESA to ETMP
+      operationId: CreatePlanForChargeMigration
+      description: |
+        An API called by CDCS to create data when debt items relating to a plan are migrated from CESA to ETMP
+
+        Response Behavior:
+        - Returns HTTP 201 when all migrated charge data is persisted successfully
+        - Returns HTTP 400 when the request is invalid
+        - Returns HTTP 401 when the user is unauthorized
+        - Returns HTTP 404 when an existing TTP record doesn't currently exist for the migrated planId provided
+        - Returns HTTP 500 only for internal TTP errors or data cannot be persisted
+      parameters:
+        - name: correlationId
+          in: header
+          description: Correlation Id used for end to end traceability
+          required: true
+          schema:
+            type: string
+            format: uuid
+            example: f0bd1f32-de51-45cc-9b18-0520d6e3ab1a
+      security:
+        - applicationRestricted:
+            - read:time-to-pay-proxy
+      requestBody:
+        description: Request body with fields to create a replacement charge migration record
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ChargeMigrationRequest'
+            examples:
+              example:
+                summary: Sample request for Charge Migration API
+                value:
+                  planId: planId
+                  migratedAt: 2026-07-08T13:49:51.123Z
+                  planCreationChannel: advisor
+                  chargeMigrations:
+                    - originalChargeId: chargeId01
+                      replacementDebtItemChargeId: chargeId02
+                      replacementCharges:
+                        - parentMainTrans: "5330"
+                          mainTrans: "5330"
+                          subTrans: "7006"
+                          originalDebtAmount: 5000
+                          interestStartDate: 2026-06-30
+                          paymentHistory:
+                            - paymentDate: 2026-06-30
+                              paymentAmount: 20
+                        - parentMainTrans: "5330"
+                          mainTrans: "5330"
+                          subTrans: "7007"
+                          originalDebtAmount: 5000
+                          interestStartDate: 2026-06-30
+      responses:
+        '201':
+          description: |
+            Charge migration API operation successful with results successfully persisted to the database.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChargeMigrationResponse'
+              examples:
+                example:
+                  summary: TTP responds successfully (HTTP 201)
+                  value:
+                    planId: "examplePlanId"
+                    processingDateTime: '2026-07-07T14:32:00Z'
+        '400':
+          description: |
+            Bad request due to invalid or missing data in the request payload.
+            This indicates client-side errors that prevent TTP from processing the inform request.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                missingMandatoryField:
+                  summary: "missing mandatory field"
+                  value:
+                    statusCode: "400"
+                    errorMessage: "missing planId"
+                amountsMismatch:
+                  summary: "Sum of debts doesn't match originalDebtAmount stored"
+                  value:
+                    statusCode: "400"
+                    errorMessage: "the sum of the debt item charges does not match the originalDebtAmount for the stored plan"
+                planWithoutMatchingDebtItems:
+                  summary: "existing plan doesn't contain provided debt items"
+                  value:
+                    statusCode: "400"
+                    errorMessage: "existing plan with planId: <planId> doesn't contain one or more of the provided debtItemChargeIds"
+        '401':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                statusCode: "401"
+                errorMessage: "A user with no active session will return 401 response"
+        '404':
+          description: Existing plan not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                statusCode: "404"
+                errorMessage: "No existing plan exists with provided planId: <planId>"
+        '500':
+          description: |
+            Internal TTP error or failure to persist data to the database.
+            This status is returned only when TTP cannot complete its processing.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                statusCode: "500"
+                errorMessage: "Internal error processing request"
+        '503':
+          description: The server is temporarily unavailable due to overload or maintenance.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                statusCode: "503"
+                errorMessage: "The server is temporarily unavailable due to overload or maintenance"
 components:
   securitySchemes:
     userRestricted:
@@ -1510,7 +1650,7 @@ components:
         - weekly
         - 2Weekly
         - 4Weekly
-        - Monthly
+        - monthly
         - quarterly
         - 6Monthly
         - annually
@@ -1837,11 +1977,12 @@ components:
       enum:
         - directDebit
         - BACS
+        - Bank payments
         - cheque
         - cardPayment
         - Ongoing award
       type: string
-      description: Payment method (Direct debit, BACS, Cheque, Card)
+      description: Payment method (Direct debit, BACS, Bank payments, Cheque, Card)
     ArrangementPlan:
       title: ArrangementPlan
       required:
@@ -1977,11 +2118,12 @@ components:
       enum:
         - directDebit
         - BACS
+        - Bank payments
         - cheque
         - cardPayment
         - Ongoing award
       type: string
-      description: Payment method (Direct debit, BACS, Cheque, Card)
+      description: Payment method (Direct debit, BACS, Bank payments, Cheque, Card)
     PaymentRequest:
       title: PaymentRequest
       required:
@@ -2184,10 +2326,6 @@ components:
           type: integer
           description: Number of instalments
           format: int32
-        frequency:
-          allOf:
-            - $ref: '#/components/schemas/PaymentFrequency'
-            - description: payment frequency
         initialPaymentMethod:
           allOf:
             - $ref: '#/components/schemas/InitialPaymentMethodType'
@@ -2265,11 +2403,12 @@ components:
       enum:
         - directDebit
         - BACS
+        - Bank payments
         - cheque
         - cardPayment
         - Ongoing award
       type: string
-      description: Payment method (Direct debit, BACS, Cheque, Card)
+      description: Payment method (Direct debit, BACS, Bank payments, Cheque, Card)
     PaymentResponse:
       title: PaymentResponse
       required:
@@ -2365,11 +2504,12 @@ components:
       enum:
         - directDebit
         - BACS
+        - Bank payments
         - cheque
         - cardPayment
         - Ongoing award
       type: string
-      description: Payment method (Direct debit, BACS, Cheque, Card)
+      description: Payment method (Direct debit, BACS, Bank payments, Cheque, Card)
     PaymentUpdate:
       title: PaymentUpdate
       required:
@@ -2467,7 +2607,7 @@ components:
         - Monthly
         - Quarterly
         - 6Monthly
-        - annually
+        - Annually
     DebtItem:
       title: DebtItem
       required:
@@ -2527,6 +2667,11 @@ components:
         regimeType:
           type: string
           description: Regime type
+          enum:
+            - PAYE
+            - VATC
+            - SIMP
+            - SA
         channelIdentifier:
           type: string
         paymentPlanAffordableAmount:
@@ -2783,6 +2928,12 @@ components:
               addressType:
                 type: string
                 description: Type of address
+              addressSource:
+                type: string
+                description: System the address was taken from
+                enum:
+                  - ETMP
+                  - CESA
               addressLine1:
                 type: string
                 description: Address line 1
@@ -2837,6 +2988,7 @@ components:
             required:
               - addressLine1
               - addressType
+              - addressSource
               - postcodeHistory
         customerSignals:
           type: array
@@ -2952,23 +3104,6 @@ components:
           description: Identifier value
           pattern: ^[A-Za-z0-9]{1,25}$
           example: '1234567890'
-    DebtItemChargeReference:
-      type: object
-      required:
-        - debtItemChargeId
-        - chargeSource
-      properties:
-        debtItemChargeId:
-          type: string
-          description: An ID which uniquely identifies a particular charge. Required for ETMP but not CESA. Needed to know which charge relates to the charge source to know which HoD to call.
-          example: XW006559808862
-        chargeSource:
-          type: string
-          description: Source system of the charge. So we know when to call CESA or ETMP.
-          enum:
-            - CESA
-            - ETMP
-          example: CESA
     CancelPaymentPlan:
       type: object
       required:
@@ -3138,6 +3273,23 @@ components:
           format: date-time
           description: Timestamp for processing the cancel request
           example: '2025-10-15T10:31:00Z'
+    DebtItemChargeReference:
+      type: object
+      required:
+        - debtItemChargeId
+        - chargeSource
+      properties:
+        debtItemChargeId:
+          type: string
+          description: An ID which uniquely identifies a particular charge. Required for ETMP but not CESA. Needed to know which charge relates to the charge source to know which HoD to call.
+          example: XW006559808862
+        chargeSource:
+          type: string
+          description: Source system of the charge. So we know when to call CESA or ETMP.
+          enum:
+            - CESA
+            - ETMP
+          example: CESA
     InformIdentification:
       type: object
       required:
@@ -3593,3 +3745,81 @@ components:
           format: date-time
           description: Timestamp for processing the full-amend request
           example: '2025-10-15T10:31:00Z'
+    ChargeMigrationRequest:
+      type: object
+      properties:
+        planId:
+          type: string
+        migratedAt:
+          type: string
+          format: date-time
+          example: '2026-07-08T13:49:51.123Z'
+        planCreationChannel:
+          type: string
+          enum:
+            - "advisor"
+            - "selfService"
+        chargeMigrations:
+          type: array
+          items:
+            type: object
+            properties:
+              originalChargeId:
+                type: string
+              replacementDebtItemChargeId:
+                type: string
+              replacementCharges:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    parentMainTrans:
+                      type: string
+                    mainTrans:
+                      type: string
+                    subTrans:
+                      type: string
+                    originalDebtAmount:
+                      type: integer
+                    interestStartDate:
+                      type: string
+                      format: date
+                    paymentHistory:
+                      type: array
+                      items:
+                        type: object
+                        properties:
+                          paymentDate:
+                            type: string
+                            format: date
+                          paymentAmount:
+                            type: integer
+                        required:
+                          - paymentDate
+                          - paymentAmount
+                  required:
+                    - mainTrans
+                    - subTrans
+                    - originalDebtAmount
+            required:
+              - replacementDebtItemChargeId
+              - originalChargeId
+              - replacementCharges
+      required:
+        - planId
+        - migratedAt
+        - planCreationChannel
+        - chargeMigrations
+    ChargeMigrationResponse:
+      type: object
+      required:
+        - planId
+        - processingDateTime
+      properties:
+        planId:
+          type: string
+          description: The plan Id for the repayment plan that has been created
+        processingDateTime:
+          type: string
+          format: date-time
+          example: '2026-07-08T13:49:51.123Z'

@@ -41,6 +41,7 @@ object ChargeInfoTestData {
         addresses = List(
           Address(
             addressType = AddressType("Address Type"),
+            addressSource = AddressSource("ETMP"),
             addressLine1 = AddressLine1("Address Line 1"),
             addressLine2 = Some(AddressLine2("Address Line 2")),
             addressLine3 = Some(AddressLine3("Address Line 3")),
@@ -113,6 +114,7 @@ object ChargeInfoTestData {
         addresses = List(
           Address(
             addressType = AddressType("Address Type"),
+            addressSource = AddressSource("ETMP"),
             addressLine1 = AddressLine1("Address Line 1"),
             addressLine2 = Some(AddressLine2("Address Line 2")),
             addressLine3 = Some(AddressLine3("Address Line 3")),
@@ -205,6 +207,7 @@ object ChargeInfoTestData {
             |      "addressLine3" : "Address Line 3",
             |      "addressLine4" : "Address Line 4",
             |      "addressType" : "Address Type",
+            |      "addressSource" : "ETMP",
             |      "contactDetails" : {
             |        "emailAddress" : "email address",
             |        "emailSource" : "ETMP",
@@ -339,6 +342,7 @@ object ChargeInfoTestData {
             |      "addressLine3" : "Address Line 3",
             |      "addressLine4" : "Address Line 4",
             |      "addressType" : "Address Type",
+            |      "addressSource" : "ETMP",
             |      "contactDetails" : {
             |        "emailAddress" : "email address",
             |        "emailSource" : "ETMP",
@@ -464,6 +468,7 @@ object ChargeInfoTestData {
         addresses = List(
           Address(
             addressType = AddressType("Address Type"),
+            addressSource = AddressSource("CESA"),
             addressLine1 = AddressLine1("Address Line 1"),
             addressLine2 = Some(AddressLine2("Address Line 2")),
             addressLine3 = Some(AddressLine3("Address Line 3")),
@@ -536,6 +541,7 @@ object ChargeInfoTestData {
         addresses = List(
           Address(
             addressType = AddressType("Address Type"),
+            addressSource = AddressSource("CESA"),
             addressLine1 = AddressLine1("Address Line 1"),
             addressLine2 = Some(AddressLine2("Address Line 2")),
             addressLine3 = Some(AddressLine3("Address Line 3")),
@@ -622,6 +628,7 @@ object ChargeInfoTestData {
             |      "addressLine3" : "Address Line 3",
             |      "addressLine4" : "Address Line 4",
             |      "addressType" : "Address Type",
+            |      "addressSource" : "CESA",
             |      "contactDetails" : { },
             |      "postCode" : "AB12 3CD",
             |      "postcodeHistory" : [
@@ -738,6 +745,7 @@ object ChargeInfoTestData {
             |      "addressLine3" : "Address Line 3",
             |      "addressLine4" : "Address Line 4",
             |      "addressType" : "Address Type",
+            |      "addressSource" : "CESA",
             |      "contactDetails" : { },
             |      "postCode" : "AB12 3CD",
             |      "postcodeHistory" : [
@@ -850,6 +858,7 @@ object ChargeInfoTestData {
         addresses = List(
           Address(
             addressType = AddressType("Address Type"),
+            addressSource = AddressSource("ETMP"),
             addressLine1 = AddressLine1("Address Line 1"),
             addressLine2 = None,
             addressLine3 = None,
@@ -914,6 +923,7 @@ object ChargeInfoTestData {
         addresses = List(
           Address(
             addressType = AddressType("Address Type"),
+            addressSource = AddressSource("ETMP"),
             addressLine1 = AddressLine1("Address Line 1"),
             addressLine2 = None,
             addressLine3 = None,
@@ -985,6 +995,7 @@ object ChargeInfoTestData {
             |    {
             |      "addressLine1" : "Address Line 1",
             |      "addressType" : "Address Type",
+            |      "addressSource" : "ETMP",
             |      "postcodeHistory" : [
             |        {
             |          "addressPostcode" : "AB12 3CD",
@@ -1071,6 +1082,7 @@ object ChargeInfoTestData {
             |    {
             |      "addressLine1" : "Address Line 1",
             |      "addressType" : "Address Type",
+            |      "addressSource" : "ETMP",
             |      "postcodeHistory" : [
             |        {
             |          "addressPostcode" : "AB12 3CD",

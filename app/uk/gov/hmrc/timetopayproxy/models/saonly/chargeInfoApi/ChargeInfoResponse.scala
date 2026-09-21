@@ -158,6 +158,7 @@ object TransitionToCdcs {
 
 final case class Address(
   addressType: AddressType,
+  addressSource: AddressSource,
   addressLine1: AddressLine1,
   addressLine2: Option[AddressLine2],
   addressLine3: Option[AddressLine3],
@@ -176,6 +177,12 @@ final case class AddressType(value: String) extends AnyVal
 
 object AddressType {
   implicit val format: Format[AddressType] = Json.valueFormat[AddressType]
+}
+
+final case class AddressSource(value: String) extends AnyVal
+
+object AddressSource {
+  implicit val format: Format[AddressSource] = Json.valueFormat[AddressSource]
 }
 
 final case class AddressLine1(value: String) extends AnyVal
