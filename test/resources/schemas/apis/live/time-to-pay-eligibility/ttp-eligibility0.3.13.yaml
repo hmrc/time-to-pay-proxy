@@ -1,0 +1,2050 @@
+openapi: 3.0.3
+info:
+  title: TTP Eligibility API
+  description: |-
+    API to check Eligibility for SSTTP
+    ```
+    Change Log
+    ```
+
+      | Version | Date | Author | Description |
+      |---|-----|------|-----|
+      | 0.1.0 | 01-12-2024 | Alex Olkhovskiy| Baselined Version |
+      | 0.1.1 | 12-12-2024 | Alex Olkhovskiy | Remove fdl endpoint |
+      | 0.1.2 | 12-12-2024 | Alex Olkhovskiy | make dmSpecialOfficeProcessingRequired nullable |
+      | 0.2.2 | 21-01-2025 | Alex Olkhovskiy |                     |
+      | 0.3.2 | 17-03-2025 | Alex Olkhovskiy | Add charge info Eligibility endpoint |
+      | 0.3.3 | 28-03-2025 | Alex Olkhovskiy | Update charge info Eligibility endpoint  |
+      | 0.3.4 | 08-07-2025 | Alex Olkhovskiy | Update charge-info: removed R2 and returnFinancialAssessment, added isInterestBearingCharge, fixed ChargeTypeAssessment nesting, resolved 5xx errors |
+      | 0.3.5 | 09-07-2025 | Alex Olkhovskiy | Fix a dash bug in customer type|
+      | 0.3.6 | 21-07-2025 | Alex Olkhovskiy | remove country and altFormats and make individualDetails mandatory and indentations non-empty  for charge-info|
+      | 0.3.7 | 21-07-2025 | Alex Olkhovskiy | Added 422 error response to charge-info endpoint|
+      | 0.3.8 | 08-01-2026 | Alex Olkhovskiy | Added customerSignals to charge-info response to match proxy spec |
+      | 0.3.9 | 28-01-2026 | Alex Olkhovskiy | DTD-4248: Fix mismatches between spec and code |
+      | 0.3.10 | 30-01-2026 | Sunil Sen | DTD-3509: Locks, isInsolvent, DTD-4253: Amended TTPEligibilitySuccessResponseChargeInfo' schema -added a new mandatory field - chargeTypesExcluded of type boolean |
+      | 0.3.11 | 16-04-2026 | Aashvin Relwani | DTD-4459: Added chargeTypeAssessments array and related Eligibility Rules to Eligibility Response with examples |
+      | 0.3.12 | 16-04-2026 | Aashvin Relwani | DTD-4459: Removed chargeTypeAssessment with related eligibility rules from customer level, added more assessmentCategory options, adjusted examples |
+      | 0.3.13 | 21-09-2026 | Alex Olkhovskiy | Added mandatory addressSource (ETMP/CESA) to charge-info response addresses |
+
+  version: 0.3.13
+servers:
+  - url: https://time-to-pay-eligibility.protected.mdtp
+    description: Production
+paths:
+  /debts/time-to-pay/eligibility:
+    post:
+      operationId: checkEligibilitySSTTP
+      summary: Check eligibility for SSTTP
+      description: Checks customer eligibility for Self-Service Time To Pay (SSTTP) arrangement
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TTPEligibilityRequest'
+            examples:
+              exampleRequest:
+                $ref: '#/components/examples/TTPEligibilityRequestExample'
+      responses:
+        '200':
+          description: Successful eligibility check
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TTPEligibilitySuccessResponse'
+              examples:
+                exampleResponse1:
+                  $ref: '#/components/examples/TTPEligibilitySuccessResponseEligibleSiAOnlyDebts'
+                exampleResponse2:
+                  $ref: '#/components/examples/TTPEligibilitySuccessResponseEligibleSiADebtsAndLiabilities'
+                exampleResponse3:
+                  $ref: '#/components/examples/TTPEligibilitySuccessResponseIneligibleSiADebtsAndLiabilities'
+                exampleResponse4:
+                  $ref: '#/components/examples/TTPEligibilitySuccessResponseEligibleSA'
+                exampleResponse5:
+                  $ref: '#/components/examples/TTPEligibilitySuccessResponseIneligibleSA'
+                exampleResponse6:
+                  $ref: '#/components/examples/TTPEligibilitySuccessResponseEligibleVAT'
+        '400':
+          description: Bad request
+          headers:
+            CorrelationId:
+              $ref: '#/components/headers/CorrelationId'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BadRequestError'
+              example:
+                code: INVALID_ID_TYPE
+                reason: Submission has not passed validation.Invalid parameter idType.
+  /debts/time-to-pay/charge-info:
+    post:
+      operationId: checkEligibilityChargeInfo
+      summary: Gets customer charge information, but does not determine eligibility
+      description: Retrieves customer charge information for time-to-pay assessment without determining final eligibility
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TTPEligibilityRequestChargeInfo'
+            examples:
+              exampleRequest:
+                $ref: '#/components/examples/TTPEligibilityRequestExampleChargeInfo'
+      responses:
+        '200':
+          description: Gets customer charge information
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TTPEligibilitySuccessResponseChargeInfo'
+              examples:
+                exampleResponse:
+                  $ref: '#/components/examples/TTPEligibilitySuccessResponseExampleChargeInfo'
+        '400':
+          description: Bad request
+          headers:
+            CorrelationId:
+              $ref: '#/components/headers/CorrelationId'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BadRequestError'
+              example:
+                code: INVALID_ID_TYPE
+                reason: Submission has not passed validation.Invalid parameter idType.
+        '422':
+          description: Unprocessable Entity
+          headers: {}
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                code: '422'
+                reason: Charges with the same charge reference do not share the same data
+        '500':
+          description: Internal Server Error
+          headers: {}
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                code: INTERNAL_SERVER
+                reason: Eligibility service is currently experiencing problems that require live service intervention. No valid idType found in customer data identifications when calling CDCS
+        '503':
+          description: Service Unavailable
+          headers: {}
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                code: INVALID_JSON
+                reason: Dependent systems are currently not responding. Couldn't validate body from upstream against model
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+  schemas:
+    TTPEligibilityRequest:
+      type: object
+      description: A JSON Schema for TTP Eligibility Service API.
+      properties:
+        channelIdentifier:
+          type: string
+          description: Channel Identifier
+        idType:
+          type: string
+          description: ID Type
+        idValue:
+          type: string
+          description: ID Value
+        regimeType:
+          type: string
+          description: Regime Type
+          enum:
+            - PAYE
+            - VATC
+            - SIMP
+            - SA
+        returnFinancialAssessment:
+          type: boolean
+          description: Return Financials data flag
+      required:
+        - channelIdentifier
+        - idType
+        - idValue
+        - regimeType
+        - returnFinancialAssessment
+    TTPEligibilitySuccessResponse:
+      type: object
+      description: A JSON Schema for TTP Eligibility Service API success response.
+      properties:
+        processingDateTime:
+          type: string
+        identification:
+          type: array
+          items:
+            type: object
+            properties:
+              idType:
+                type: string
+                description: ID type
+              idValue:
+                type: string
+                description: ID value
+            required:
+              - idType
+              - idValue
+        invalidSignals:
+          type: array
+          items:
+            type: object
+            properties:
+              signalType:
+                type: string
+                description: Signal type
+                enum:
+                  - Year of Migration
+                  - Transitioned to CDCS
+                  - RLS
+                  - insolvent
+                  - Active TTP
+                  - Disguised Remuneration
+                  - Capacitor
+                  - Clerical Interest Indicator
+                  - Additional Security Check
+                  - Breathing Space
+                  - Deceased
+                  - CUSTOMER ACCOUNT GROUP
+                  - Welsh Language Signal
+              signalValue:
+                type: string
+                description: Signal value
+              signalDescription:
+                type: string
+                description: Signal description
+            required:
+              - signalType
+              - signalValue
+        customerPostcodes:
+          type: array
+          items:
+            type: object
+            properties:
+              addressPostcode:
+                type: string
+                description: Address Postcode
+              postcodeDate:
+                type: string
+                format: date
+                description: Date the customer used this postcode from
+            required:
+              - addressPostcode
+              - postcodeDate
+        customerDetails:
+          type: array
+          items:
+            type: object
+            properties:
+              emailAddress:
+                type: string
+                description: Email address
+              emailSource:
+                type: string
+                description: Email source
+                enum:
+                  - ETMP
+                  - CESA
+        individualDetails:
+          type: object
+          properties:
+            title:
+              type: string
+              description: Title
+            firstName:
+              type: string
+              description: Firstname
+            lastName:
+              type: string
+              description: Lastname
+            dateOfBirth:
+              type: string
+              format: date
+              description: Date of birth
+            districtNumber:
+              type: string
+              description: District Number
+            customerType:
+              type: string
+              description: Customer Type
+              enum:
+                - MTD(ITSA)
+                - Classic SA - Transitioned
+                - Classic SA - Non Transitioned
+            transitionToCDCS:
+              type: boolean
+              description: Signifies if the customer must be transitioned to CDCS
+        addresses:
+          type: array
+          items:
+            type: object
+            properties:
+              addressType:
+                type: string
+                description: Type of address
+              addressLine1:
+                type: string
+                description: Address line 1
+              addressLine2:
+                type: string
+                description: Address line 2
+              addressLine3:
+                type: string
+                description: Address line 3
+              addressLine4:
+                type: string
+                description: Address line 4
+              rls:
+                type: boolean
+                description: Returned Letter Service indicates tax payer is no longer resident
+              contactDetails:
+                type: object
+                properties:
+                  telephoneNumber:
+                    type: string
+                    description: Telephone number
+                  fax:
+                    type: string
+                    description: Fax number
+                  mobile:
+                    type: string
+                    description: Mobile number
+                  emailAddress:
+                    type: string
+                    description: Email address
+                  emailSource:
+                    type: string
+                    description: Email source
+                    enum:
+                      - ETMP
+                      - CESA
+                  altFormat:
+                    type: integer
+                    description: Specifies alternative format for letters
+              postCode:
+                type: string
+                description: Post code
+              country:
+                type: string
+                description: Country
+              postcodeHistory:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    addressPostcode:
+                      type: string
+                      description: Customer postcode
+                    postcodeDate:
+                      type: string
+                      format: date
+                      description: Date the customer used this postcode from
+                  required:
+                    - addressPostcode
+                    - postcodeDate
+            required:
+              - addressType
+              - postcodeHistory
+        regimeDigitalCorrespondence:
+          type: boolean
+          description: Regime Digital Correspondence
+        regimePaymentFrequency:
+          type: string
+          description: Regime Payment Frequency
+          enum:
+            - Single
+            - Weekly
+            - 2Weekly
+            - 4Weekly
+            - Monthly
+            - Quarterly
+            - 6Monthly
+            - Annually
+        paymentPlanFrequency:
+          type: string
+          description: Payment Plan Frequency
+          enum:
+            - Single
+            - Weekly
+            - 2Weekly
+            - 4Weekly
+            - Monthly
+            - Quarterly
+            - 6Monthly
+            - Annually
+        paymentPlanMinLength:
+          type: integer
+          description: Payment plan minimum length
+        paymentPlanMaxLength:
+          type: integer
+          description: Payment plan maximum length
+        eligibilityStatus:
+          type: object
+          properties:
+            eligibilityPass:
+              type: boolean
+              description: Overall eligibility status
+          required:
+            - eligibilityPass
+        eligibilityRules:
+          type: object
+          properties:
+            hasRlsOnAddress:
+              type: boolean
+              description: Has RLS on address
+            markedAsInsolvent:
+              type: boolean
+              description: Marked as insolvent
+            allChargeTypeAssessmentsFailed:
+              type: boolean
+              description: All ChargeType Assessments failed
+            noValidPlanAfterAssessments:
+              type: boolean
+              description: If some of the chargeTypeAssessments pass but no valid plan can be constructed from the ones that have. Only present for SIMP regimeType
+            existingTTP:
+              type: boolean
+              description: Existing TTP
+            missingFiledReturns:
+              type: boolean
+              description: Missing filed returns
+            hasInvalidInterestSignals:
+              type: boolean
+              description: Invalid interest signals
+            hasInvalidInterestSignalsCESA:
+              type: boolean
+              description: Has invalid interest signals CESA
+            dmSpecialOfficeProcessingRequired:
+              type: boolean
+              nullable: true
+              description: DM special office processing required, based on IDMS debt check
+            dmSpecialOfficeProcessingRequiredCDCS:
+              type: boolean
+              description: DM special office processing required, based on CDCS debt check
+            dmSpecialOfficeProcessingRequiredCESA:
+              type: boolean
+              description: DM special office processing required, based on CESA debt check
+            creditsNotAllowed:
+              type: boolean
+              description: Credits not allowed flag
+            cannotFindLockReason:
+              type: boolean
+              description: Lock reason not found
+            isAnMtdCustomer:
+              type: boolean
+              description: MTD customer flag
+            hasCapacitor:
+              type: boolean
+              description: Has capacitor
+            isMoreThanMaxPaymentReference:
+              type: boolean
+              description: Amount exceeds allowed tax months/quarters
+            hasDisguisedRemuneration:
+              type: boolean
+              description: Has disguised remuneration
+          required:
+            - hasRlsOnAddress
+            - markedAsInsolvent
+            - allChargeTypeAssessmentsFailed
+            - existingTTP
+            - missingFiledReturns
+            - hasInvalidInterestSignals
+            - creditsNotAllowed
+            - cannotFindLockReason
+            - isMoreThanMaxPaymentReference
+            - dmSpecialOfficeProcessingRequired
+        futureChargeLiabilitiesExcluded:
+          type: boolean
+          description: Has future charge liabilities excluded
+        chargeTypesExcluded:
+          type: boolean
+          description: Indicator to show that some charge types have been filtered out
+        chargeTypeAssessments:
+          description: An array for the assessment(s) over the customer's charges. Will only contain 1 element if the assessmentCategory is standard - otherwise can include up to 3 elements, one with each other assessmentCategory
+          type: array
+          items:
+            $ref: '#/components/schemas/ChargeTypeAssessmentWithEligibility'
+      required:
+        - processingDateTime
+        - identification
+        - invalidSignals
+        - customerPostcodes
+        - customerDetails
+        - regimeDigitalCorrespondence
+        - regimePaymentFrequency
+        - paymentPlanFrequency
+        - paymentPlanMinLength
+        - paymentPlanMaxLength
+        - eligibilityStatus
+        - eligibilityRules
+        - futureChargeLiabilitiesExcluded
+        - addresses
+        - chargeTypeAssessments
+    BadRequestError:
+      type: object
+      description: A JSON Error Schema for BadRequest Error
+      properties:
+        code:
+          type: string
+          description: Keys for all the errors returned
+        reason:
+          type: string
+          description: A simple description for the failure
+      required:
+        - code
+        - reason
+    TTPEligibilityRequestChargeInfo:
+      type: object
+      description: A JSON Schema for TTP Eligibility Service API.
+      properties:
+        channelIdentifier:
+          type: string
+          description: Channel Identifier
+        identifications:
+          type: array
+          minItems: 1
+          items:
+            type: object
+            properties:
+              idType:
+                type: string
+                description: ID type
+              idValue:
+                type: string
+                description: ID value
+            required:
+              - idType
+              - idValue
+        regimeType:
+          type: string
+          description: Regime Type
+          enum:
+            - SA
+      required:
+        - channelIdentifier
+        - identifications
+        - regimeType
+    CustomerSignal:
+      type: object
+      description: Signal information for operator consideration
+      required:
+        - signalType
+        - signalValue
+      properties:
+        signalType:
+          type: string
+          description: Type of the signal
+          example: Year of Migration
+        signalValue:
+          type: string
+          description: Value of the signal
+          example: 'true'
+        signalDescription:
+          type: string
+          description: Description of the signal
+          example: Description
+    Lock:
+      type: object
+      required:
+        - lockType
+        - lockReason
+      properties:
+        lockType:
+          type: string
+          description: Type of lock applied to the charge
+          example: Payment
+        lockReason:
+          type: string
+          description: Reason for the lock
+          example: Insolvency
+    TTPEligibilitySuccessResponseChargeInfo:
+      type: object
+      description: A JSON Schema for TTP Eligibility Service API success response.
+      properties:
+        processingDateTime:
+          type: string
+        identification:
+          type: array
+          items:
+            type: object
+            properties:
+              idType:
+                type: string
+                description: ID type
+              idValue:
+                type: string
+                description: ID value
+            required:
+              - idType
+              - idValue
+        individualDetails:
+          type: object
+          properties:
+            title:
+              type: string
+              description: Title
+            firstName:
+              type: string
+              description: Firstname
+            lastName:
+              type: string
+              description: Lastname
+            dateOfBirth:
+              type: string
+              format: date
+              description: Date of birth
+            districtNumber:
+              type: string
+              description: District Number
+            customerType:
+              type: string
+              description: Customer Type
+              enum:
+                - MTD(ITSA)
+                - Classic SA - Transitioned
+                - Classic SA - Non Transitioned
+            transitionToCDCS:
+              type: boolean
+              description: Signifies if the customer must be transitioned to CDCS
+          required:
+            - customerType
+            - transitionToCDCS
+        addresses:
+          type: array
+          items:
+            type: object
+            properties:
+              addressType:
+                type: string
+                description: Type of address
+              addressSource:
+                type: string
+                description: System the address was taken from
+                enum:
+                  - ETMP
+                  - CESA
+              addressLine1:
+                type: string
+                description: Address line 1
+              addressLine2:
+                type: string
+                description: Address line 2
+              addressLine3:
+                type: string
+                description: Address line 3
+              addressLine4:
+                type: string
+                description: Address line 4
+              rls:
+                type: boolean
+                description: Returned Letter Service indicates tax payer is no longer resident
+              contactDetails:
+                type: object
+                properties:
+                  telephoneNumber:
+                    type: string
+                    description: Telephone number
+                  fax:
+                    type: string
+                    description: Fax number
+                  mobile:
+                    type: string
+                    description: Mobile number
+                  emailAddress:
+                    type: string
+                    description: Email address
+                  emailSource:
+                    type: string
+                    description: Email source
+                    enum:
+                      - ETMP
+                      - CESA
+              postCode:
+                type: string
+                description: Post code
+              postcodeHistory:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    addressPostcode:
+                      type: string
+                      description: Customer postcode
+                    postcodeDate:
+                      type: string
+                      format: date
+                      description: Date the customer used this postcode from
+                  required:
+                    - addressPostcode
+                    - postcodeDate
+            required:
+              - addressLine1
+              - addressType
+              - addressSource
+              - postcodeHistory
+        customerSignals:
+          type: array
+          items:
+            $ref: '#/components/schemas/CustomerSignal'
+          description: Signal information to be considered by the operator. Not all signals will be returned. Examples of signals returned include ring-fenced signals, insolvency and Welsh Language signal.
+        chargeTypeAssessment:
+          type: array
+          items:
+            type: object
+            required:
+              - debtTotalAmount
+              - chargeReference
+              - charges
+              - mainTrans
+              - isInsolvent
+            properties:
+              debtTotalAmount:
+                type: integer
+                description: Total debt amount
+              chargeReference:
+                type: string
+                description: Charge reference
+              parentChargeReference:
+                type: string
+              isInsolvent:
+                type: boolean
+                description: |
+                  Debt level insolvency indicator. Indicates if this charge should be shown as insolvent and excluded from TTP.
+                  For ETMP (MTD ITSA): True only when BOTH conditions are met: (1) customer level insolvency signal exists AND (2) charge has 'no reallocation' lock applied. If customer signal exists but no lock, this field is false.
+              mainTrans:
+                type: string
+                description: |
+                  Represents main transaction types. Unrecognized values is treated
+                  as "UsedMainTrans" with the provided string value.
+              charges:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    taxPeriodFrom:
+                      type: string
+                      format: date
+                      description: Tax period start date
+                    taxPeriodTo:
+                      type: string
+                      format: date
+                      description: Tax period end date
+                    chargeType:
+                      type: string
+                    mainType:
+                      type: string
+                    subTrans:
+                      type: string
+                    outstandingAmount:
+                      type: integer
+                    dueDate:
+                      type: string
+                      format: date
+                    isInterestBearingCharge:
+                      type: boolean
+                      description: shows whether its an interest bearing charge
+                    interestStartDate:
+                      type: string
+                      format: date
+                    accruedInterest:
+                      type: integer
+                    chargeSource:
+                      type: string
+                    parentMainTrans:
+                      type: string
+                    originalCreationDate:
+                      type: string
+                      format: date
+                    tieBreaker:
+                      type: string
+                    originalTieBreaker:
+                      type: string
+                    saTaxYearEnd:
+                      type: string
+                      format: date
+                    creationDate:
+                      type: string
+                      format: date
+                    originalChargeType:
+                      type: string
+                    locks:
+                      type: array
+                      items:
+                        $ref: '#/components/schemas/Lock'
+                      description: Locks applied to this charge
+                  required:
+                    - taxPeriodFrom
+                    - taxPeriodTo
+                    - chargeSource
+                    - chargeType
+                    - mainType
+                    - subTrans
+                    - outstandingAmount
+                    - dueDate
+                    - accruedInterest
+        chargeTypesExcluded:
+          type: boolean
+          description: Indicator to show that some charge types have been filtered out
+      required:
+        - processingDateTime
+        - identification
+        - chargeTypeAssessment
+        - addresses
+        - individualDetails
+        - chargeTypesExcluded
+    ErrorResponse:
+      type: object
+      description: A JSON Error Schema for ErrorResponse
+      properties:
+        code:
+          type: string
+          description: Keys for all the errors returned
+        reason:
+          type: string
+          description: A simple description for the failure
+      required:
+        - code
+        - reason
+    ChargesInTaxPeriod:
+      type: object
+      description: Charges in a given tax period
+      required:
+        - taxPeriodFrom
+        - taxPeriodTo
+        - debtTotalAmount
+        - chargeReference
+        - charges
+      properties:
+        taxPeriodFrom:
+          type: string
+          format: date
+          description: Tax period start date
+        taxPeriodTo:
+          type: string
+          format: date
+          description: Tax period end date
+        debtTotalAmount:
+          type: integer
+          description: Total debt amount
+        chargeReference:
+          type: string
+          description: Charge reference
+        charges:
+          type: array
+          items:
+            type: object
+            properties:
+              chargeType:
+                type: string
+              mainType:
+                type: string
+              mainTrans:
+                type: string
+                description: |
+                  Represents main transaction types. Unrecognized values is treated
+                  as "UsedMainTrans" with the provided string value.
+              subTrans:
+                type: string
+              outstandingAmount:
+                type: integer
+              dueDate:
+                type: string
+                format: date
+              interestStartDate:
+                type: string
+                format: date
+              accruedInterest:
+                type: integer
+              ineligibleChargeType:
+                type: boolean
+              chargeOverMaxDebtAge:
+                type: boolean
+              chargeBeforeMaxAccountingDate:
+                type: boolean
+              dueDateNotReached:
+                type: boolean
+              isInterestBearingCharge:
+                type: boolean
+              useChargeReference:
+                type: boolean
+              ddInProgress:
+                type: boolean
+              chargeSource:
+                type: string
+              parentChargeReference:
+                type: string
+              parentMainTrans:
+                type: string
+              originalCreationDate:
+                type: string
+                format: date
+              tieBreaker:
+                type: string
+              originalTieBreaker:
+                type: string
+              saTaxYearEnd:
+                type: string
+                format: date
+              creationDate:
+                type: string
+                format: date
+              originalChargeType:
+                type: string
+              locks:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    lockType:
+                      type: string
+                      enum:
+                        - Dunning
+                        - Calculate Interest
+                        - Posting/Clearing
+                        - Payments
+                    lockReason:
+                      type: string
+                    disallowedChargeLockType:
+                      type: boolean
+                  required:
+                    - lockType
+                    - lockReason
+                    - disallowedChargeLockType
+            required:
+              - chargeType
+              - mainType
+              - mainTrans
+              - subTrans
+              - outstandingAmount
+              - dueDate
+              - accruedInterest
+              - ineligibleChargeType
+              - dueDateNotReached
+              - chargeSource
+    ChargeTypeAssessmentWithEligibility:
+      description: A group of charges per tax period with eligibility rules
+      type: object
+      properties:
+        chargeTypeAssessment:
+          type: array
+          items:
+            $ref: '#/components/schemas/ChargesInTaxPeriod'
+        assessmentEligibilityRules:
+          type: object
+          properties:
+            isLessThanMinDebtAllowance:
+              type: boolean
+              description: Less than minimum allowance
+            isMoreThanMaxDebtAllowance:
+              type: boolean
+              description: More than maximum allowance
+            chargesOverMaxDebtAge:
+              type: boolean
+              description: Charges over max debt age
+            ineligibleChargeTypes:
+              type: boolean
+              description: Ineligible charge types
+            disallowedChargeLockTypes:
+              type: boolean
+              description: Disallowed charge lock types
+            noDueDatesReached:
+              type: boolean
+              description: No due dates reached
+            chargesBeforeMaxAccountingDate:
+              type: boolean
+              description: Charge before max accounting date
+          required:
+            - isLessThanMinDebtAllowance
+            - isMoreThanMaxDebtAllowance
+            - ineligibleChargeTypes
+            - disallowedChargeLockTypes
+            - noDueDatesReached
+        assessmentEligibilityStatus:
+          type: boolean
+        assessmentCategory:
+          description: When used in elements in the chargeTypeAssessment array, there will only be 1 element if the category is standard. Otherwise there can be up to 1 entry for each of the other categories.
+          type: string
+          enum:
+            - standard
+            - debts
+            - liabilities
+            - debtsAndLiabilities
+      required:
+        - chargeTypeAssessment
+        - assessmentEligibilityRules
+        - assessmentCategory
+        - assessmentEligibilityStatus
+  examples:
+    TTPEligibilityRequestExample:
+      summary: Example of a TTP Eligibility Request
+      value:
+        channelIdentifier: channelIdentifier
+        idType: EMPREF
+        idValue: 064XZ36815
+        regimeType: PAYE
+        returnFinancialAssessment: true
+
+    TTPEligibilitySuccessResponseEligibleSiAOnlyDebts:
+      summary: Example Eligibility Success Response for an eligible SiA customer with only debts
+      value:
+        identification:
+          - idType: NINO
+            idValue: 'AB123456C'
+        processingDateTime: '2022-08-23T13:49:51.141Z'
+        customerPostcodes:
+          - addressPostcode: BN127ER
+            postcodeDate: '2022-05-22'
+        customerDetails:
+          - emailAddress: john@example.com
+            emailSource: ETMP
+        addresses:
+          - addressType: ppob
+            addressLine1: 999 Elm Street
+            addressLine2: Suite 12C
+            addressLine3: Northshire
+            addressLine4: London
+            rls: true
+            contactDetails:
+              telephoneNumber: +44 20 1234 5678
+              fax: '01234'
+              mobile: '07123456789'
+              emailAddress: john@example.com
+              emailSource: ETMP
+              altFormat: 123
+            postCode: BN12 9ER
+            country: ZZ
+            postcodeHistory:
+              - addressPostcode: BN12 9ER
+                postcodeDate: '2022-05-22'
+        regimeDigitalCorrespondence: false
+        invalidSignals: []
+        regimePaymentFrequency: Monthly
+        paymentPlanFrequency: Monthly
+        paymentPlanMinLength: 1
+        paymentPlanMaxLength: 36
+        eligibilityStatus:
+          eligibilityPass: true
+        eligibilityRules:
+          hasRlsOnAddress: false
+          markedAsInsolvent: false
+          allChargeTypeAssessmentsFailed: false
+          noValidPlanAfterAssessments: false
+          existingTTP: false
+          missingFiledReturns: false
+          hasInvalidInterestSignals: false
+          dmSpecialOfficeProcessingRequired: false
+          creditsNotAllowed: false
+          cannotFindLockReason: false
+          isMoreThanMaxPaymentReference: false
+        futureChargeLiabilitiesExcluded: false
+        chargeTypeAssessments:
+          - chargeTypeAssessment:
+            - taxPeriodFrom: '2022-04-01'
+              taxPeriodTo: '2022-06-30'
+              debtTotalAmount: 35000
+              chargeReference: XW006559808862
+              charges:
+                - chargeType: In Year RTI Charge - Tax
+                  mainType: In Year RTI Charge (FPS)
+                  mainTrans: '4530'
+                  subTrans: '3190'
+                  outstandingAmount: 25000
+                  dueDate: '2022-05-01'
+                  interestStartDate: '2022-05-02'
+                  accruedInterest: 100
+                  ineligibleChargeType: false
+                  chargeBeforeMaxAccountingDate: false
+                  dueDateNotReached: false
+                  isInterestBearingCharge: false
+                  useChargeReference: false
+                  ddInProgress: false
+                  chargeSource: ETMP
+                  locks:
+                    - lockType: Calculate Interest
+                      lockReason: Clerical Interest Signal
+                      disallowedChargeLockType: false
+                    - lockType: Dunning
+                      lockReason: Complaint
+                      disallowedChargeLockType: false
+                    - lockType: Posting/Clearing
+                      lockReason: Clear Lock Interest
+                      disallowedChargeLockType: false
+            assessmentEligibilityRules:
+              isLessThanMinDebtAllowance: false
+              isMoreThanMaxDebtAllowance: false
+              ineligibleChargeTypes: false
+              disallowedChargeLockTypes: false
+              noDueDatesReached: false
+              chargesBeforeMaxAccountingDate: false
+            assessmentCategory: debts
+            assessmentEligibilityStatus: true
+
+    TTPEligibilitySuccessResponseEligibleSiADebtsAndLiabilities:
+      summary: Example Eligibility Success Response for an eligible SiA customer with debts and liabilities
+      value:
+        identification:
+          - idType: NINO
+            idValue: 'AB123456C'
+        processingDateTime: '2022-08-23T13:49:51.141Z'
+        customerPostcodes:
+          - addressPostcode: BN127ER
+            postcodeDate: '2022-05-22'
+        customerDetails:
+          - emailAddress: john@example.com
+            emailSource: ETMP
+        addresses:
+          - addressType: ppob
+            addressLine1: 999 Elm Street
+            addressLine2: Suite 12C
+            addressLine3: Northshire
+            addressLine4: London
+            rls: true
+            contactDetails:
+              telephoneNumber: +44 20 1234 5678
+              fax: '01234'
+              mobile: '07123456789'
+              emailAddress: john@example.com
+              emailSource: ETMP
+              altFormat: 123
+            postCode: BN12 9ER
+            country: ZZ
+            postcodeHistory:
+              - addressPostcode: BN12 9ER
+                postcodeDate: '2022-05-22'
+        regimeDigitalCorrespondence: false
+        invalidSignals: [ ]
+        regimePaymentFrequency: Monthly
+        paymentPlanFrequency: Monthly
+        paymentPlanMinLength: 1
+        paymentPlanMaxLength: 36
+        eligibilityStatus:
+          eligibilityPass: true
+        eligibilityRules:
+          hasRlsOnAddress: false
+          markedAsInsolvent: false
+          allChargeTypeAssessmentsFailed: false
+          noValidPlanAfterAssessments: false
+          existingTTP: false
+          missingFiledReturns: false
+          hasInvalidInterestSignals: false
+          dmSpecialOfficeProcessingRequired: false
+          creditsNotAllowed: false
+          cannotFindLockReason: false
+          isMoreThanMaxPaymentReference: false
+        futureChargeLiabilitiesExcluded: false
+        chargeTypeAssessments:
+          - chargeTypeAssessment:
+            - taxPeriodFrom: '2022-04-01'
+              taxPeriodTo: '2022-06-30'
+              debtTotalAmount: 35000
+              chargeReference: XW006559808862
+              charges:
+                - chargeType: In Year RTI Charge - Tax
+                  mainType: In Year RTI Charge (FPS)
+                  mainTrans: '4530'
+                  subTrans: '3190'
+                  outstandingAmount: 25000
+                  dueDate: '2022-05-01'
+                  interestStartDate: '2022-05-02'
+                  accruedInterest: 100
+                  ineligibleChargeType: false
+                  chargeBeforeMaxAccountingDate: false
+                  dueDateNotReached: false
+                  isInterestBearingCharge: false
+                  useChargeReference: false
+                  ddInProgress: false
+                  chargeSource: ETMP
+                  locks:
+                    - lockType: Calculate Interest
+                      lockReason: Clerical Interest Signal
+                      disallowedChargeLockType: false
+                    - lockType: Dunning
+                      lockReason: Complaint
+                      disallowedChargeLockType: false
+                    - lockType: Posting/Clearing
+                      lockReason: Clear Lock Interest
+                      disallowedChargeLockType: false
+            assessmentEligibilityRules:
+              isLessThanMinDebtAllowance: false
+              isMoreThanMaxDebtAllowance: false
+              ineligibleChargeTypes: false
+              disallowedChargeLockTypes: false
+              noDueDatesReached: false
+              chargesBeforeMaxAccountingDate: false
+            assessmentCategory: debts
+            assessmentEligibilityStatus: true
+          - chargeTypeAssessment:
+            - taxPeriodFrom: '2022-07-01'
+              taxPeriodTo: '2022-08-31'
+              debtTotalAmount: 20000
+              chargeReference: XW006528735862
+              charges:
+                - chargeType: In Year RTI Charge - Tax
+                  mainType: In Year RTI Charge (FPS)
+                  mainTrans: '4530'
+                  subTrans: '3190'
+                  outstandingAmount: 20000
+                  dueDate: '2022-08-25'
+                  interestStartDate: '2022-08-26'
+                  accruedInterest: 0
+                  ineligibleChargeType: false
+                  chargeBeforeMaxAccountingDate: false
+                  dueDateNotReached: false
+                  isInterestBearingCharge: false
+                  useChargeReference: false
+                  ddInProgress: false
+                  chargeSource: ETMP
+                  locks:
+                    - lockType: Calculate Interest
+                      lockReason: Clerical Interest Signal
+                      disallowedChargeLockType: false
+                    - lockType: Dunning
+                      lockReason: Complaint
+                      disallowedChargeLockType: false
+                    - lockType: Posting/Clearing
+                      lockReason: Clear Lock Interest
+                      disallowedChargeLockType: false
+            assessmentEligibilityRules:
+              isLessThanMinDebtAllowance: false
+              isMoreThanMaxDebtAllowance: false
+              ineligibleChargeTypes: false
+              disallowedChargeLockTypes: false
+              noDueDatesReached: false
+              chargesBeforeMaxAccountingDate: false
+            assessmentCategory: liabilities
+            assessmentEligibilityStatus: true
+          - chargeTypeAssessment:
+            - taxPeriodFrom: '2022-05-01'
+              taxPeriodTo: '2022-08-31'
+              debtTotalAmount: 45000
+              chargeReference: XW006528735862
+              charges:
+                - chargeType: In Year RTI Charge - Tax
+                  mainType: In Year RTI Charge (FPS)
+                  mainTrans: '4530'
+                  subTrans: '3190'
+                  outstandingAmount: 25000
+                  dueDate: '2022-05-01'
+                  interestStartDate: '2022-05-02'
+                  accruedInterest: 100
+                  ineligibleChargeType: false
+                  chargeBeforeMaxAccountingDate: false
+                  dueDateNotReached: false
+                  isInterestBearingCharge: false
+                  useChargeReference: false
+                  ddInProgress: false
+                  chargeSource: ETMP
+                  locks:
+                    - lockType: Calculate Interest
+                      lockReason: Clerical Interest Signal
+                      disallowedChargeLockType: false
+                    - lockType: Dunning
+                      lockReason: Complaint
+                      disallowedChargeLockType: false
+                    - lockType: Posting/Clearing
+                      lockReason: Clear Lock Interest
+                      disallowedChargeLockType: false
+                - chargeType: In Year RTI Charge - Tax
+                  mainType: In Year RTI Charge (FPS)
+                  mainTrans: '4530'
+                  subTrans: '3190'
+                  outstandingAmount: 20000
+                  dueDate: '2022-08-25'
+                  interestStartDate: '2022-08-26'
+                  accruedInterest: 0
+                  ineligibleChargeType: false
+                  chargeBeforeMaxAccountingDate: false
+                  dueDateNotReached: false
+                  isInterestBearingCharge: false
+                  useChargeReference: false
+                  ddInProgress: false
+                  chargeSource: ETMP
+                  locks:
+                    - lockType: Calculate Interest
+                      lockReason: Clerical Interest Signal
+                      disallowedChargeLockType: false
+                    - lockType: Dunning
+                      lockReason: Complaint
+                      disallowedChargeLockType: false
+                    - lockType: Posting/Clearing
+                      lockReason: Clear Lock Interest
+                      disallowedChargeLockType: false
+            assessmentEligibilityRules:
+              isLessThanMinDebtAllowance: false
+              isMoreThanMaxDebtAllowance: false
+              ineligibleChargeTypes: false
+              disallowedChargeLockTypes: false
+              noDueDatesReached: false
+              chargesBeforeMaxAccountingDate: false
+            assessmentCategory: debtsAndLiabilities
+            assessmentEligibilityStatus: true
+
+    TTPEligibilitySuccessResponseIneligibleSiADebtsAndLiabilities:
+      summary: Example Eligibility Success Response for an ineligible SiA customer due to all chargeTypeAssessments
+      value:
+        identification:
+          - idType: NINO
+            idValue: 'FJ567320Y'
+        processingDateTime: '2022-08-23T13:49:51.141Z'
+        customerPostcodes:
+          - addressPostcode: BN127ER
+            postcodeDate: '2022-05-22'
+        customerDetails:
+          - emailAddress: john@example.com
+            emailSource: ETMP
+        addresses:
+          - addressType: ppob
+            addressLine1: 999 Elm Street
+            addressLine2: Suite 12C
+            addressLine3: Northshire
+            addressLine4: London
+            rls: true
+            contactDetails:
+              telephoneNumber: +44 20 1234 5678
+              fax: '01234'
+              mobile: '07123456789'
+              emailAddress: john@example.com
+              emailSource: ETMP
+              altFormat: 123
+            postCode: BN12 9ER
+            country: ZZ
+            postcodeHistory:
+              - addressPostcode: BN12 9ER
+                postcodeDate: '2022-05-22'
+        regimeDigitalCorrespondence: false
+        invalidSignals: [ ]
+        regimePaymentFrequency: Monthly
+        paymentPlanFrequency: Monthly
+        paymentPlanMinLength: 1
+        paymentPlanMaxLength: 36
+        eligibilityStatus:
+          eligibilityPass: false
+        eligibilityRules:
+          hasRlsOnAddress: false
+          markedAsInsolvent: false
+          isLessThanMinDebtAllowance: true
+          isMoreThanMaxDebtAllowance: false
+          ineligibleChargeTypes: false
+          disallowedChargeLockTypes: false
+          allChargeTypeAssessmentsFailed: true
+          noValidPlanAfterAssessments: true
+          existingTTP: false
+          missingFiledReturns: false
+          hasInvalidInterestSignals: false
+          noDueDatesReached: false
+          dmSpecialOfficeProcessingRequired: false
+          chargesBeforeMaxAccountingDate: false
+          creditsNotAllowed: false
+          cannotFindLockReason: false
+          isMoreThanMaxPaymentReference: false
+        futureChargeLiabilitiesExcluded: false
+        chargeTypeAssessments:
+          - chargeTypeAssessment:
+              - taxPeriodFrom: '2022-04-01'
+                taxPeriodTo: '2022-06-30'
+                debtTotalAmount: 60000
+                chargeReference: XW006559808862
+                charges:
+                  - chargeType: In Year RTI Charge - Tax
+                    mainType: In Year RTI Charge (FPS)
+                    mainTrans: '4530'
+                    subTrans: '3190'
+                    outstandingAmount: 60000
+                    dueDate: '2022-05-01'
+                    interestStartDate: '2022-05-02'
+                    accruedInterest: 100
+                    ineligibleChargeType: false
+                    chargeBeforeMaxAccountingDate: false
+                    dueDateNotReached: false
+                    isInterestBearingCharge: false
+                    useChargeReference: false
+                    ddInProgress: false
+                    chargeSource: ETMP
+                    locks:
+                      - lockType: Calculate Interest
+                        lockReason: Clerical Interest Signal
+                        disallowedChargeLockType: false
+                      - lockType: Dunning
+                        lockReason: Complaint
+                        disallowedChargeLockType: false
+                      - lockType: Posting/Clearing
+                        lockReason: Clear Lock Interest
+                        disallowedChargeLockType: false
+            assessmentEligibilityRules:
+              isLessThanMinDebtAllowance: false
+              isMoreThanMaxDebtAllowance: true
+              ineligibleChargeTypes: false
+              disallowedChargeLockTypes: false
+              noDueDatesReached: false
+              chargesBeforeMaxAccountingDate: false
+            assessmentCategory: debts
+            assessmentEligibilityStatus: false
+          - chargeTypeAssessment:
+              - taxPeriodFrom: '2022-07-01'
+                taxPeriodTo: '2022-08-31'
+                debtTotalAmount: 10
+                chargeReference: XW006528735862
+                charges:
+                  - chargeType: In Year RTI Charge - Tax
+                    mainType: In Year RTI Charge (FPS)
+                    mainTrans: '4530'
+                    subTrans: '3190'
+                    outstandingAmount: 10
+                    dueDate: '2022-08-25'
+                    interestStartDate: '2022-08-26'
+                    accruedInterest: 100
+                    ineligibleChargeType: false
+                    chargeBeforeMaxAccountingDate: false
+                    dueDateNotReached: false
+                    isInterestBearingCharge: false
+                    useChargeReference: false
+                    ddInProgress: false
+                    chargeSource: ETMP
+                    locks:
+                      - lockType: Calculate Interest
+                        lockReason: Clerical Interest Signal
+                        disallowedChargeLockType: false
+                      - lockType: Dunning
+                        lockReason: Complaint
+                        disallowedChargeLockType: false
+                      - lockType: Posting/Clearing
+                        lockReason: Clear Lock Interest
+                        disallowedChargeLockType: false
+            assessmentEligibilityRules:
+              isLessThanMinDebtAllowance: true
+              isMoreThanMaxDebtAllowance: false
+              ineligibleChargeTypes: false
+              disallowedChargeLockTypes: false
+              noDueDatesReached: false
+              chargesBeforeMaxAccountingDate: false
+            assessmentCategory: liabilities
+            assessmentEligibilityStatus: false
+          - chargeTypeAssessment:
+              - taxPeriodFrom: '2022-05-01'
+                taxPeriodTo: '2022-08-31'
+                debtTotalAmount: 60010
+                chargeReference: XW006528735862
+                charges:
+                  - chargeType: In Year RTI Charge - Tax
+                    mainType: In Year RTI Charge (FPS)
+                    mainTrans: '4530'
+                    subTrans: '3190'
+                    outstandingAmount: 60000
+                    dueDate: '2022-05-01'
+                    interestStartDate: '2022-05-02'
+                    accruedInterest: 100
+                    ineligibleChargeType: false
+                    chargeBeforeMaxAccountingDate: false
+                    dueDateNotReached: false
+                    isInterestBearingCharge: false
+                    useChargeReference: false
+                    ddInProgress: false
+                    chargeSource: ETMP
+                    locks:
+                      - lockType: Calculate Interest
+                        lockReason: Clerical Interest Signal
+                        disallowedChargeLockType: false
+                      - lockType: Dunning
+                        lockReason: Complaint
+                        disallowedChargeLockType: false
+                      - lockType: Posting/Clearing
+                        lockReason: Clear Lock Interest
+                        disallowedChargeLockType: false
+                  - chargeType: In Year RTI Charge - Tax
+                    mainType: In Year RTI Charge (FPS)
+                    mainTrans: '4530'
+                    subTrans: '3190'
+                    outstandingAmount: 10
+                    dueDate: '2022-08-25'
+                    interestStartDate: '2022-08-26'
+                    accruedInterest: 0
+                    ineligibleChargeType: false
+                    chargeBeforeMaxAccountingDate: false
+                    dueDateNotReached: false
+                    isInterestBearingCharge: false
+                    useChargeReference: false
+                    ddInProgress: false
+                    chargeSource: ETMP
+                    locks:
+                      - lockType: Calculate Interest
+                        lockReason: Clerical Interest Signal
+                        disallowedChargeLockType: false
+                      - lockType: Dunning
+                        lockReason: Complaint
+                        disallowedChargeLockType: false
+                      - lockType: Posting/Clearing
+                        lockReason: Clear Lock Interest
+                        disallowedChargeLockType: false
+            assessmentEligibilityRules:
+              isLessThanMinDebtAllowance: false
+              isMoreThanMaxDebtAllowance: true
+              ineligibleChargeTypes: false
+              disallowedChargeLockTypes: false
+              noDueDatesReached: false
+              chargesBeforeMaxAccountingDate: false
+            assessmentCategory: debtsAndLiabilities
+            assessmentEligibilityStatus: false
+
+    TTPEligibilitySuccessResponseEligibleSA:
+      summary: Example Eligibility Success response for an eligible SA customer
+      value:
+        processingDateTime: '2022-03-23T13:49:51.141Z'
+        identification:
+          - idType: UTR
+            idValue: '1234512345'
+          - idType: NINO
+            idValue: 'QW234567E'
+        invalidSignals:
+          - signalType: Year of Migration
+            signalValue: 'true'
+            signalDescription: Description
+        customerPostcodes:
+          - addressPostcode: BN127ER
+            postcodeDate: '2022-05-22'
+        customerDetails:
+          - emailAddress: notmymail@yourmail.com
+            emailSource: ETMP
+        individualDetails:
+          title: Mr
+          firstName: John
+          lastName: Doe
+          dateOfBirth: '2069-06-06'
+          districtNumber: xyz
+          customerType: MTD(ITSA)
+          transitionToCDCS: true
+        addresses:
+          - addressType: ppob
+            addressLine1: 999 Elm Street
+            addressLine2: Suite 12C
+            addressLine3: Northshire
+            addressLine4: London
+            rls: true
+            contactDetails:
+              telephoneNumber: +44 20 1234 5678
+              fax: '01234'
+              mobile: '07123456789'
+              emailAddress: john@example.com
+              emailSource: ETMP
+              altFormat: 123
+            postCode: W1A 1ZZ
+            country: ZZ
+            postcodeHistory:
+              - addressPostcode: BN12 9ER
+                postcodeDate: '2022-04-30'
+        regimeDigitalCorrespondence: true
+        regimePaymentFrequency: Monthly
+        paymentPlanFrequency: Monthly
+        paymentPlanMinLength: 1
+        paymentPlanMaxLength: 24
+        eligibilityStatus:
+          eligibilityPass: true
+        eligibilityRules:
+          hasRlsOnAddress: false
+          markedAsInsolvent: false
+          allChargeTypeAssessmentsFailed: false
+          existingTTP: false
+          missingFiledReturns: false
+          hasInvalidInterestSignals: false
+          hasInvalidInterestSignalsCESA: false
+          dmSpecialOfficeProcessingRequired: false
+          dmSpecialOfficeProcessingRequiredCDCS: false
+          dmSpecialOfficeProcessingRequiredCESA: false
+          creditsNotAllowed: false
+          cannotFindLockReason: false
+          isMoreThanMaxPaymentReference: false
+          hasDisguisedRemuneration: false
+          hasCapacitor: false
+          isAnMtdCustomer: false
+        futureChargeLiabilitiesExcluded: false
+        chargeTypesExcluded: false
+        chargeTypeAssessments:
+          - chargeTypeAssessment:
+            - taxPeriodFrom: '2022-04-01'
+              taxPeriodTo: '2022-06-30'
+              debtTotalAmount: 35000
+              chargeReference: XW006559808862
+              charges:
+                - chargeType: SA charge type
+                  mainType: SA main charge
+                  mainTrans: '4980'
+                  subTrans: '1090'
+                  outstandingAmount: 25000
+                  dueDate: '2022-08-01'
+                  interestStartDate: '2022-08-01'
+                  accruedInterest: 3
+                  ineligibleChargeType: false
+                  chargeOverMaxDebtAge: false
+                  chargeBeforeMaxAccountingDate: false
+                  dueDateNotReached: false
+                  isInterestBearingCharge: false
+                  useChargeReference: false
+                  ddInProgress: false
+                  chargeSource: CESA
+                  parentChargeReference: XW006559808862
+                  parentMainTrans: '4920'
+                  originalCreationDate: '2022-08-01'
+                  tieBreaker: xyz
+                  originalTieBreaker: xyz
+                  saTaxYearEnd: '2022-08-01'
+                  creationDate: '2022-08-01'
+                  originalChargeType: SA charge type
+                  locks:
+                    - lockType: Payments
+                      lockReason: Risk/Fraud
+                      disallowedChargeLockType: false
+                    - lockType: Calculate Interest
+                      lockReason: ClericalInterestSignal
+                      disallowedChargeLockType: false
+                    - lockType: Dunning
+                      lockReason: Complaint
+                      disallowedChargeLockType: false
+                    - lockType: Posting/Clearing
+                      lockReason: ClearLockInterest
+                      disallowedChargeLockType: false
+                - chargeType: SA charge type
+                  mainType: SA charge type
+                  mainTrans: '4955'
+                  subTrans: '2090'
+                  outstandingAmount: 10000
+                  dueDate: '2022-08-01'
+                  interestStartDate: '2022-08-01'
+                  accruedInterest: 3
+                  ineligibleChargeType: false
+                  chargeOverMaxDebtAge: false
+                  chargeBeforeMaxAccountingDate: false
+                  dueDateNotReached: false
+                  isInterestBearingCharge: false
+                  useChargeReference: false
+                  ddInProgress: false
+                  chargeSource: ETMP
+                  parentChargeReference: XW006559808862
+                  parentMainTrans: '4955'
+                  originalCreationDate: '2022-08-01'
+                  tieBreaker: xyz
+                  originalTieBreaker: xyz
+                  saTaxYearEnd: '2022-08-01'
+                  creationDate: '2022-08-01'
+                  originalChargeType: SA charge type
+                  locks:
+                    - lockType: Payments
+                      lockReason: Risk/Fraud
+                      disallowedChargeLockType: false
+                    - lockType: Calculate Interest
+                      lockReason: ClericalInterestSignal
+                      disallowedChargeLockType: false
+                    - lockType: Dunning
+                      lockReason: Complaint
+                      disallowedChargeLockType: false
+                    - lockType: Posting/Clearing
+                      lockReason: ClearLockInterest
+                      disallowedChargeLockType: false
+            assessmentEligibilityRules:
+              isLessThanMinDebtAllowance: false
+              isMoreThanMaxDebtAllowance: false
+              chargesOverMaxDebtAge: false
+              ineligibleChargeTypes: false
+              disallowedChargeLockTypes: false
+              noDueDatesReached: false
+              chargesBeforeMaxAccountingDate: false
+            assessmentCategory: standard
+            assessmentEligibilityStatus: true
+
+    TTPEligibilitySuccessResponseIneligibleSA:
+      summary: Example Eligibility Success response for an ineligible SA customer not due to chargeTypeAssessment
+      value:
+        processingDateTime: '2022-03-23T13:49:51.141Z'
+        identification:
+          - idType: UTR
+            idValue: '6789067890'
+          - idType: NINO
+            idValue: 'PO876543I'
+        invalidSignals:
+          - signalType: Year of Migration
+            signalValue: 'true'
+            signalDescription: Description
+        customerPostcodes:
+          - addressPostcode: BN127ER
+            postcodeDate: '2022-05-22'
+        customerDetails:
+          - emailAddress: notmymail@yourmail.com
+            emailSource: ETMP
+        individualDetails:
+          title: Mr
+          firstName: John
+          lastName: Doe
+          dateOfBirth: '2069-06-06'
+          districtNumber: xyz
+          customerType: MTD(ITSA)
+          transitionToCDCS: true
+        addresses:
+          - addressType: ppob
+            addressLine1: 999 Elm Street
+            addressLine2: Suite 12C
+            addressLine3: Northshire
+            addressLine4: London
+            rls: true
+            contactDetails:
+              telephoneNumber: +44 20 1234 5678
+              fax: '01234'
+              mobile: '07123456789'
+              emailAddress: john@example.com
+              emailSource: ETMP
+              altFormat: 123
+            postCode: W1A 1ZZ
+            country: ZZ
+            postcodeHistory:
+              - addressPostcode: BN12 9ER
+                postcodeDate: '2022-04-30'
+        regimeDigitalCorrespondence: true
+        regimePaymentFrequency: Monthly
+        paymentPlanFrequency: Monthly
+        paymentPlanMinLength: 1
+        paymentPlanMaxLength: 24
+        eligibilityStatus:
+          eligibilityPass: false
+        eligibilityRules:
+          hasRlsOnAddress: false
+          markedAsInsolvent: false
+          allChargeTypeAssessmentsFailed: false
+          existingTTP: false
+          missingFiledReturns: false
+          hasInvalidInterestSignals: true
+          hasInvalidInterestSignalsCESA: false
+          dmSpecialOfficeProcessingRequired: true
+          dmSpecialOfficeProcessingRequiredCDCS: false
+          dmSpecialOfficeProcessingRequiredCESA: false
+          creditsNotAllowed: true
+          cannotFindLockReason: true
+          isMoreThanMaxPaymentReference: false
+          hasDisguisedRemuneration: false
+          hasCapacitor: false
+          isAnMtdCustomer: false
+        futureChargeLiabilitiesExcluded: false
+        chargeTypesExcluded: false
+        chargeTypeAssessments:
+          - chargeTypeAssessment:
+            - taxPeriodFrom: '2022-04-01'
+              taxPeriodTo: '2022-06-30'
+              debtTotalAmount: 35000
+              chargeReference: XW006559808862
+              charges:
+                - chargeType: SA charge type
+                  mainType: SA main charge
+                  mainTrans: '4980'
+                  subTrans: '1090'
+                  outstandingAmount: 25000
+                  dueDate: '2022-08-01'
+                  interestStartDate: '2022-08-01'
+                  accruedInterest: 3
+                  ineligibleChargeType: false
+                  chargeOverMaxDebtAge: false
+                  chargeBeforeMaxAccountingDate: false
+                  dueDateNotReached: false
+                  isInterestBearingCharge: false
+                  useChargeReference: false
+                  ddInProgress: false
+                  chargeSource: CESA
+                  parentChargeReference: XW006559808862
+                  parentMainTrans: '4920'
+                  originalCreationDate: '2022-08-01'
+                  tieBreaker: xyz
+                  originalTieBreaker: xyz
+                  saTaxYearEnd: '2022-08-01'
+                  creationDate: '2022-08-01'
+                  originalChargeType: SA charge type
+                  locks:
+                    - lockType: Payments
+                      lockReason: Risk/Fraud
+                      disallowedChargeLockType: false
+                    - lockType: Calculate Interest
+                      lockReason: ClericalInterestSignal
+                      disallowedChargeLockType: false
+                    - lockType: Dunning
+                      lockReason: Complaint
+                      disallowedChargeLockType: false
+                    - lockType: Posting/Clearing
+                      lockReason: ClearLockInterest
+                      disallowedChargeLockType: false
+                - chargeType: SA charge type
+                  mainType: SA charge type
+                  mainTrans: '4955'
+                  subTrans: '2090'
+                  outstandingAmount: 10000
+                  dueDate: '2022-08-01'
+                  interestStartDate: '2022-08-01'
+                  accruedInterest: 3
+                  ineligibleChargeType: false
+                  chargeOverMaxDebtAge: false
+                  chargeBeforeMaxAccountingDate: false
+                  dueDateNotReached: false
+                  isInterestBearingCharge: false
+                  useChargeReference: false
+                  ddInProgress: false
+                  chargeSource: ETMP
+                  parentChargeReference: XW006559808862
+                  parentMainTrans: '4955'
+                  originalCreationDate: '2022-08-01'
+                  tieBreaker: xyz
+                  originalTieBreaker: xyz
+                  saTaxYearEnd: '2022-08-01'
+                  creationDate: '2022-08-01'
+                  originalChargeType: SA charge type
+                  locks:
+                    - lockType: Payments
+                      lockReason: Risk/Fraud
+                      disallowedChargeLockType: false
+                    - lockType: Calculate Interest
+                      lockReason: ClericalInterestSignal
+                      disallowedChargeLockType: false
+                    - lockType: Dunning
+                      lockReason: Complaint
+                      disallowedChargeLockType: false
+                    - lockType: Posting/Clearing
+                      lockReason: ClearLockInterest
+                      disallowedChargeLockType: false
+            assessmentEligibilityRules:
+              isLessThanMinDebtAllowance: false
+              isMoreThanMaxDebtAllowance: false
+              chargesOverMaxDebtAge: false
+              ineligibleChargeTypes: false
+              disallowedChargeLockTypes: false
+              noDueDatesReached: false
+              chargesBeforeMaxAccountingDate: false
+            assessmentCategory: standard
+            assessmentEligibilityStatus: true
+
+    TTPEligibilitySuccessResponseEligibleVAT:
+      summary: Example Eligibility Success response for an eligible VAT customer
+      value:
+        processingDateTime: '2022-03-23T13:49:51.141Z'
+        identification:
+          - idType: VRN
+            idValue: 'GB123456789'
+        invalidSignals: [ ]
+        customerPostcodes:
+          - addressPostcode: BN127ER
+            postcodeDate: '2022-05-22'
+        customerDetails:
+          - emailAddress: notmymail@yourmail.com
+            emailSource: ETMP
+        individualDetails:
+          title: Mr
+          firstName: John
+          lastName: Doe
+          dateOfBirth: '2069-06-06'
+        addresses:
+          - addressType: ppob
+            addressLine1: 999 Elm Street
+            addressLine2: Suite 12C
+            addressLine3: Northshire
+            addressLine4: London
+            rls: true
+            contactDetails:
+              telephoneNumber: +44 20 1234 5678
+              fax: '01234'
+              mobile: '07123456789'
+              emailAddress: john@example.com
+              emailSource: ETMP
+              altFormat: 123
+            postCode: W1A 1ZZ
+            country: ZZ
+            postcodeHistory:
+              - addressPostcode: BN12 9ER
+                postcodeDate: '2022-04-30'
+        regimeDigitalCorrespondence: true
+        regimePaymentFrequency: Monthly
+        paymentPlanFrequency: Monthly
+        paymentPlanMinLength: 1
+        paymentPlanMaxLength: 12
+        eligibilityStatus:
+          eligibilityPass: true
+        eligibilityRules:
+          hasRlsOnAddress: false
+          markedAsInsolvent: false
+          allChargeTypeAssessmentsFailed: false
+          existingTTP: false
+          missingFiledReturns: false
+          hasInvalidInterestSignals: false
+          dmSpecialOfficeProcessingRequired: false
+          creditsNotAllowed: false
+          cannotFindLockReason: false
+          isMoreThanMaxPaymentReference: false
+        futureChargeLiabilitiesExcluded: false
+        chargeTypesExcluded: false
+        chargeTypeAssessments:
+          - chargeTypeAssessment:
+            - taxPeriodFrom: '2022-04-01'
+              taxPeriodTo: '2022-06-30'
+              debtTotalAmount: 35000
+              chargeReference: XW006559808862
+              charges:
+                - chargeType: VAT Return Debit Charge
+                  mainType: VAT Return charge
+                  mainTrans: '4700'
+                  subTrans: '1174'
+                  outstandingAmount: 25000
+                  dueDate: '2022-08-01'
+                  interestStartDate: '2022-08-01'
+                  accruedInterest: 3
+                  ineligibleChargeType: false
+                  chargeOverMaxDebtAge: false
+                  chargeBeforeMaxAccountingDate: false
+                  dueDateNotReached: false
+                  isInterestBearingCharge: false
+                  useChargeReference: false
+                  ddInProgress: false
+                  chargeSource: ETMP
+                  locks:
+                    - lockType: Payments
+                      lockReason: Risk/Fraud
+                      disallowedChargeLockType: false
+                    - lockType: Calculate Interest
+                      lockReason: ClericalInterestSignal
+                      disallowedChargeLockType: false
+                    - lockType: Dunning
+                      lockReason: Complaint
+                      disallowedChargeLockType: false
+                    - lockType: Posting/Clearing
+                      lockReason: ClearLockInterest
+                      disallowedChargeLockType: false
+                - chargeType: VAT Return Debit Charge
+                  mainType: VAT Return charge
+                  mainTrans: '4700'
+                  subTrans: '1174'
+                  outstandingAmount: 10000
+                  dueDate: '2022-08-01'
+                  interestStartDate: '2022-08-01'
+                  accruedInterest: 3
+                  ineligibleChargeType: false
+                  chargeOverMaxDebtAge: false
+                  chargeBeforeMaxAccountingDate: false
+                  dueDateNotReached: false
+                  isInterestBearingCharge: false
+                  useChargeReference: false
+                  ddInProgress: false
+                  chargeSource: ETMP
+                  locks:
+                    - lockType: Payments
+                      lockReason: Risk/Fraud
+                      disallowedChargeLockType: false
+                    - lockType: Calculate Interest
+                      lockReason: ClericalInterestSignal
+                      disallowedChargeLockType: false
+                    - lockType: Dunning
+                      lockReason: Complaint
+                      disallowedChargeLockType: false
+                    - lockType: Posting/Clearing
+                      lockReason: ClearLockInterest
+                      disallowedChargeLockType: false
+            assessmentEligibilityRules:
+              isLessThanMinDebtAllowance: false
+              isMoreThanMaxDebtAllowance: false
+              chargesOverMaxDebtAge: false
+              ineligibleChargeTypes: false
+              disallowedChargeLockTypes: false
+              noDueDatesReached: false
+              chargesBeforeMaxAccountingDate: false
+            assessmentCategory: standard
+            assessmentEligibilityStatus: true
+
+    TTPEligibilityRequestExampleChargeInfo:
+      summary: Example of a TTP Eligibility Request
+      value:
+        channelIdentifier: Advisor
+        identifications:
+          - idType: UTR
+            idValue: '1234567890'
+        regimeType: SA
+
+    TTPEligibilitySuccessResponseExampleChargeInfo:
+      summary: Example of a get SA customer data Success Response
+      value:
+        processingDateTime: '2022-03-23T13:49:51.141Z'
+        identification:
+          - idType: UTR
+            idValue: '1234567890'
+        individualDetails:
+          title: Mr
+          firstName: John
+          lastName: Doe
+          dateOfBirth: '2069-06-06'
+          districtNumber: xyz
+          customerType: MTD(ITSA)
+          transitionToCDCS: true
+        addresses:
+          - addressType: ppob
+            addressSource: ETMP
+            addressLine1: 999 Elm Street
+            addressLine2: Suite 12C
+            addressLine3: Northshire
+            addressLine4: London
+            rls: true
+            contactDetails:
+              telephoneNumber: +44 20 1234 5678
+              fax: '01234'
+              mobile: '07123456789'
+              emailAddress: john@example.com
+              emailSource: ETMP
+            postCode: W1A 1ZZ
+            postcodeHistory:
+              - addressPostcode: BN12 9ER
+                postcodeDate: '2022-04-30'
+        customerSignals:
+          - signalType: insolvent
+            signalValue: 'true'
+            signalDescription: Description
+          - signalType: Year of Migration
+            signalValue: 'true'
+        chargeTypeAssessment:
+          - debtTotalAmount: 148781
+            chargeReference: XW006559808862
+            mainTrans: '4700'
+            parentChargeReference: XW006559808862
+            isInsolvent: false
+            charges:
+              - taxPeriodFrom: '2022-04-01'
+                taxPeriodTo: '2022-06-30'
+                chargeType: VAT Return Debit Charge
+                mainType: VAT Return charge
+                subTrans: '1174'
+                outstandingAmount: 148781
+                dueDate: '2022-08-01'
+                isInterestBearingCharge: true
+                interestStartDate: '2022-08-01'
+                accruedInterest: 3
+                chargeSource: CESA
+                parentMainTrans: '4700'
+                originalCreationDate: '2022-08-01'
+                tieBreaker: xyz
+                originalTieBreaker: xyz
+                saTaxYearEnd: '2022-08-01'
+                creationDate: '2022-08-01'
+                originalChargeType: VAT Return Debit Charge
+                locks:
+                  - lockType: Payment
+                    lockReason: Insolvency
+        chargeTypesExcluded: false
+  headers:
+    CorrelationId:
+      description: A UUID format string for the transaction used for traceability purposes.
+      schema:
+        type: string
+        pattern: ^[0-9a-fA-F]{8}[-][0-9a-fA-F]{4}[-][0-9a-fA-F]{4}[-][0-9a-fA-F]{4}[-][0-9a-fA-F]{12}$
+        example: f92d12cd-7087-42b9-b7ae-b32665c5dc31

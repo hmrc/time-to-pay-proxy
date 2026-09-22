@@ -56,7 +56,8 @@ info:
       | 1.0.22 | 17-03-2026 | Sunil Sen | DTD-4295: Send charge references to CESA |
       | 1.0.23 | 29-05-2026 | Dan Smith | DTD-4585: Align Full Amend with SA Release 2 spec |
       | 1.0.24 | 12-08-2026 | Alfie Molloy | DTD-4721: Add Charge Migration API |
-  version: 1.0.24
+      | 1.0.25 | 21-09-2026 | Alex Olkhovskiy | Added mandatory addressSource (ETMP/CESA) to charge-info response addresses |
+  version: 1.0.25
   contact: {}
 servers:
   - url: https://api.service.hmrc.gov.uk
@@ -2747,6 +2748,12 @@ components:
               addressType:
                 type: string
                 description: Type of address
+              addressSource:
+                type: string
+                description: System the address was taken from
+                enum:
+                  - ETMP
+                  - CESA
               addressLine1:
                 type: string
                 description: Address line 1
@@ -2801,6 +2808,7 @@ components:
             required:
               - addressLine1
               - addressType
+              - addressSource
               - postcodeHistory
         chargeTypeAssessment:
           type: array

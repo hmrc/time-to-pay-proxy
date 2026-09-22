@@ -2158,6 +2158,7 @@ class TimeToPayProxyControllerItSpec extends IntegrationBaseSpec {
       addresses = List(
         Address(
           addressType = AddressType("Address Type"),
+          addressSource = AddressSource("ETMP"),
           addressLine1 = AddressLine1("Address Line 1"),
           addressLine2 = Some(AddressLine2("Address Line 2")),
           addressLine3 = Some(AddressLine3("Address Line 3")),
