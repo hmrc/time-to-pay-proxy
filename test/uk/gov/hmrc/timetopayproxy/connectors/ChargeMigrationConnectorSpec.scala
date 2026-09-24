@@ -152,7 +152,7 @@ final class ChargeMigrationConnectorSpec
         stubPostWithResponseBodyEnsuringRequest(
           "/debts/time-to-pay/charge-migration",
           Json.toJson(chargeMigrationRequest).toString(),
-          200,
+          201,
           Json.toJson(chargeMigrationResponse).toString()
         )
 
@@ -185,6 +185,32 @@ final class ChargeMigrationConnectorSpec
         private val result = connector.chargeMigration(chargeMigrationRequest)
 
         await(result.value) mustBe Left(ConnectorError(401, "Unauthorized"))
+      }
+
+      "parse a 404 error response from TTP" in new Setup() {
+        stubPostWithResponseBodyEnsuringRequest(
+          "/debts/time-to-pay/charge-migration",
+          Json.toJson(chargeMigrationRequest).toString(),
+          404,
+          """{"failures": [{"code": "NOT_FOUND", "reason": "No existing plan exists with provided planId: planId"}]}"""
+        )
+
+        private val result = connector.chargeMigration(chargeMigrationRequest)
+
+        await(result.value) mustBe Left(ConnectorError(404, "No existing plan exists with provided planId: planId"))
+      }
+
+      "parse a 500 error response from TTP" in new Setup() {
+        stubPostWithResponseBodyEnsuringRequest(
+          "/debts/time-to-pay/charge-migration",
+          Json.toJson(chargeMigrationRequest).toString(),
+          500,
+          """{"failures": [{"code": "SERVICE_UNAVAILABLE", "reason": "insert failed"}]}"""
+        )
+
+        private val result = connector.chargeMigration(chargeMigrationRequest)
+
+        await(result.value) mustBe Left(ConnectorError(500, "insert failed"))
       }
 
       "return the default connector error for a 503 response" in new Setup() {

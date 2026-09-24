@@ -194,7 +194,7 @@ class TimeToPayProxyController @Inject() (
             .leftMap(ttppError => ttppError.toWriteableProxyError)
             .fold(
               e => e.toErrorResult,
-              r => Results.Ok(Json.toJson(r))
+              r => Results.Created(Json.toJson(r))
             )
         }
       } else {

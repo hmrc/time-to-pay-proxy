@@ -2372,7 +2372,7 @@ class TimeToPayProxyControllerSpec extends AnyWordSpec with MockFactory {
         processingDateTime = Instant.parse("2026-07-08T13:50:00Z")
       )
 
-    "return 200 when charge migration succeeds" in {
+    "return 201 when charge migration succeeds" in {
 
       (() => featureSwitch.enrolmentAuthEnabled)
         .expects()
@@ -2416,7 +2416,7 @@ class TimeToPayProxyControllerSpec extends AnyWordSpec with MockFactory {
       val response: Future[Result] =
         controller.chargeMigration(fakeRequest)
 
-      status(response) shouldBe Status.OK
+      status(response) shouldBe Status.CREATED
       contentAsJson(response) shouldBe Json.toJson(chargeMigrationResponse)
     }
 

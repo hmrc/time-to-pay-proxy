@@ -43,9 +43,11 @@ class ChargeMigrationConnector @Inject() (
   private val httpReadsBuilderForChargeMigration: HttpReadsBuilder[ProxyEnvelopeError, ChargeMigrationResponse] =
     HttpReadsBuilder
       .withDefault503ConnectorError[ProxyEnvelopeError, ChargeMigrationResponse](this.getClass)
-      .handleSuccess[ChargeMigrationResponse](200)
+      .handleSuccess[ChargeMigrationResponse](201)
       .handleErrorTransformed[TimeToPayError](400, ttpError => ttpError.toConnectorError(status = 400))
       .handleErrorTransformed[TimeToPayError](401, ttpError => ttpError.toConnectorError(status = 401))
+      .handleErrorTransformed[TimeToPayError](404, ttpError => ttpError.toConnectorError(status = 404))
+      .handleErrorTransformed[TimeToPayError](500, ttpError => ttpError.toConnectorError(status = 500))
 
   def chargeMigration(
     request: ChargeMigrationRequest
