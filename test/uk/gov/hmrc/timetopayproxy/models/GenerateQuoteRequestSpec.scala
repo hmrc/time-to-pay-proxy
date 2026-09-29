@@ -208,14 +208,21 @@ class GenerateQuoteRequestSpec extends AnyWordSpec with Matchers {
       }
     }
 
-    "fail decoding if paymentAmount is zero" in {
+    "decode if paymentAmount is zero" in {
+      Json
+        .parse(getJsonWithInvalidReference(paymentAmount = 0))
+        .validate[GenerateQuoteRequest]
+        .map(_.debtItemCharges.flatMap(_.paymentHistory).map(_.paymentAmount)) shouldBe JsSuccess(List(BigDecimal(0)))
+    }
+
+    "fail decoding if paymentAmount is negative" in {
       Try(
         Json
-          .parse(getJsonWithInvalidReference(paymentAmount = 0))
+          .parse(getJsonWithInvalidReference(paymentAmount = -5))
           .validate[GenerateQuoteRequest]
       ) match {
         case Failure(t) =>
-          t.toString() shouldBe "java.lang.IllegalArgumentException: requirement failed: paymentAmount should be a positive amount."
+          t.toString() shouldBe "java.lang.IllegalArgumentException: requirement failed: paymentAmount should not be a negative amount."
         case _ => fail()
       }
     }
