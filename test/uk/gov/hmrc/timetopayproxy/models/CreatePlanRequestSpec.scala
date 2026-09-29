@@ -182,9 +182,15 @@ class CreatePlanRequestSpec extends AnyWordSpec with Matchers with CreatePlanReq
           .validate[CreatePlanRequest]
       ) match {
         case Failure(t) =>
-          t.toString() shouldBe "java.lang.IllegalArgumentException: requirement failed: paymentAmount should be a positive amount."
+          t.toString() shouldBe "java.lang.IllegalArgumentException: requirement failed: paymentAmount should not be a negative amount."
         case _ => fail("Response should be a validation error")
       }
+    }
+    "decode if paymentAmount is zero" in {
+      Json
+        .parse(getJsonWithInvalidReference(paymentAmount = 0))
+        .validate[CreatePlanRequest]
+        .map(_.debtItemCharges.flatMap(_.paymentHistory).map(_.paymentAmount)) shouldBe JsSuccess(List(BigDecimal(0)))
     }
     "fail decoding if amountDue is negative" in {
       Try(

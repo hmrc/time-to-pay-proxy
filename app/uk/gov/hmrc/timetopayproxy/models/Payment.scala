@@ -21,7 +21,7 @@ import play.api.libs.json.{ Json, OFormat }
 import java.time.LocalDate
 
 final case class Payment(paymentDate: LocalDate, paymentAmount: BigDecimal) {
-  require(paymentAmount > 0, "paymentAmount should be a positive amount.")
+  require(paymentAmount >= 0, "paymentAmount should not be a negative amount.")
 }
 
 object Payment {
