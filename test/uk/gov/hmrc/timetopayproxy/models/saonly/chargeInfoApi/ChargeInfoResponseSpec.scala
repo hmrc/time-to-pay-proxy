@@ -33,27 +33,25 @@ class ChargeInfoResponseSpec extends AnyFreeSpec with MockFactory {
   "ChargeInfoResponse" - {
     "Release 1 schema" - {
       "implicit JSON writer (data going to our clients)" - {
-        val timeToPayProxyR1Schema = Validators.TimeToPayProxy.ChargeInfo.Live.openApiResponseSuccessfulSchema
-
         "when all the optional fields are fully populated" - {
           val allOptionsJson: JsValue = TestData.WithOnlySomes.chargeInfoResponseR1JsonFromProxy
           val allOptionsObject: ChargeInfoResponse = TestData.WithOnlySomes.chargeInfoResponseR1
 
-          testSchemaWriter(timeToPayProxyR1Schema, allOptionsJson, allOptionsObject)
+          testWriter(allOptionsJson, allOptionsObject)
         }
 
         "when only one optional field on each path is populated" - {
           val someOptionsJson: JsValue = TestData.With1SomeOnEachPath.chargeInfoResponseR1JsonFromProxy
           val someOptionsObject: ChargeInfoResponse = TestData.With1SomeOnEachPath.chargeInfoResponseR1
 
-          testSchemaWriter(timeToPayProxyR1Schema, someOptionsJson, someOptionsObject)
+          testWriter(someOptionsJson, someOptionsObject)
         }
 
         "when none of the optional fields are populated" - {
           val noOptionsJson: JsValue = TestData.With0SomeOnEachPath.chargeInfoResponseR1JsonFromProxy
           val noOptionsObject: ChargeInfoResponse = TestData.With0SomeOnEachPath.chargeInfoResponseR1
 
-          testSchemaWriter(timeToPayProxyR1Schema, noOptionsJson, noOptionsObject)
+          testWriter(noOptionsJson, noOptionsObject)
         }
       }
 
@@ -87,7 +85,7 @@ class ChargeInfoResponseSpec extends AnyFreeSpec with MockFactory {
 
     "Release 2 schema" - {
       "implicit JSON writer (data going to our clients)" - {
-        val timeToPayProxyRelease2Schema = Validators.TimeToPayProxy.ChargeInfo.Proposed.openApiResponseSuccessfulSchema
+        val timeToPayProxyRelease2Schema = Validators.TimeToPayProxy.ChargeInfo.Live.openApiResponseSuccessfulSchema
 
         "when all the optional fields are fully populated" - {
           val allOptionsJson: JsValue = TestData.WithOnlySomes.chargeInfoResponseR2JsonFromProxy
@@ -140,19 +138,20 @@ class ChargeInfoResponseSpec extends AnyFreeSpec with MockFactory {
     }
   }
 
+  private def testWriter(json: JsValue, obj: ChargeInfoResponse)(implicit pos: Position): Unit =
+    "writes the correct JSON" in {
+      ChargeInfoResponse.writes.writes(obj) shouldBeEquivalentTo json
+    }
+
   private def testSchemaWriter(
     schema: DebtTransSchemaValidator.OpenApi3DerivedSchema,
     json: JsValue,
     obj: ChargeInfoResponse
   )(implicit pos: Position): Unit = {
-    def writerToClients: Writes[ChargeInfoResponse] = ChargeInfoResponse.writes
-
-    "writes the correct JSON" in {
-      writerToClients.writes(obj) shouldBeEquivalentTo json
-    }
+    testWriter(json, obj)
 
     "writes JSON compatible with our schema" in {
-      val writtenJson: JsValue = writerToClients.writes(obj)
+      val writtenJson: JsValue = ChargeInfoResponse.writes.writes(obj)
 
       schema.validateAndGetErrors(writtenJson) shouldBe Nil
     }
