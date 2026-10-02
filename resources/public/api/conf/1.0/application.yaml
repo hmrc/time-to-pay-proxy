@@ -57,7 +57,8 @@ info:
       | 1.0.23 | 29-05-2026 | Dan Smith | DTD-4585: Align Full Amend with SA Release 2 spec |
       | 1.0.24 | 12-08-2026 | Alfie Molloy | DTD-4721: Add Charge Migration API |
       | 1.0.25 | 21-09-2026 | Alex Olkhovskiy | Added mandatory addressSource (ETMP/CESA) to charge-info response addresses |
-  version: 1.0.25
+      | 1.0.26 | 01-10-2026 | Alex Olkhovskiy | SA Release 2: charge-info and cancel changes |
+  version: 1.0.26
   contact: {}
 servers:
   - url: https://api.service.hmrc.gov.uk
@@ -735,6 +736,96 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/TTPChargeInfoResponse'
+              example:
+                processingDateTime: '2022-03-23T13:49:51.141'
+                identification:
+                  - idType: UTR
+                    idValue: '1234567890'
+                individualDetails:
+                  title: Mr
+                  firstName: John
+                  lastName: Doe
+                  dateOfBirth: '2069-06-06'
+                  districtNumber: xyz
+                  customerType: MTD(ITSA)
+                  transitionToCDCS: true
+                addresses:
+                  - addressType: ppob
+                    addressSource: ETMP
+                    addressLine1: 999 Elm Street
+                    addressLine2: Suite 12C
+                    addressLine3: Northshire
+                    addressLine4: London
+                    rls: true
+                    contactDetails:
+                      telephoneNumber: +44 20 1234 5678
+                      fax: '01234'
+                      mobile: '07123456789'
+                      emailAddress: john@example.com
+                      emailSource: ETMP
+                    postCode: W1A 1ZZ
+                    postcodeHistory:
+                      - addressPostcode: BN12 9ER
+                        postcodeDate: '2022-04-30'
+                customerSignals:
+                  - signalType: Insolvency
+                    signalValue: 'true'
+                    signalDescription: Description
+                  - signalType: ITSA Migrated
+                    signalValue: 'true'
+                    signalDescription: Customer has migrated to ITSA
+                chargeTypesExcluded: false
+                chargeTypeAssessment:
+                  - debtTotalAmount: 250000
+                    chargeReference: XW006559808863
+                    mainTrans: '4700'
+                    parentChargeReference: XW006559808863
+                    isInsolvent: true
+                    charges:
+                      - taxPeriodFrom: '2022-04-01'
+                        taxPeriodTo: '2022-06-30'
+                        chargeType: Payment
+                        mainType: Payment
+                        subTrans: '1174'
+                        outstandingAmount: 250000
+                        dueDate: '2022-08-01'
+                        isInterestBearingCharge: true
+                        interestStartDate: '2022-08-01'
+                        accruedInterest: 5000
+                        chargeSource: ETMP
+                        parentMainTrans: '4700'
+                        tieBreaker: abc123
+                        saTaxYearEnd: '2022-04-05'
+                        creationDate: '2022-08-01'
+                        originalChargeType: Payment
+                        locks:
+                          - lockType: no reallocation
+                            lockReason: Insolvency
+                  - debtTotalAmount: 148781
+                    chargeReference: XW006559808862
+                    mainTrans: '4700'
+                    parentChargeReference: XW006559808862
+                    isInsolvent: true
+                    charges:
+                      - taxPeriodFrom: '2022-04-01'
+                        taxPeriodTo: '2022-06-30'
+                        chargeType: VAT Return Debit Charge
+                        mainType: VAT Return charge
+                        subTrans: '1174'
+                        outstandingAmount: 148781
+                        dueDate: '2022-08-01'
+                        isInterestBearingCharge: true
+                        interestStartDate: '2022-08-01'
+                        accruedInterest: 3
+                        chargeSource: CESA
+                        parentMainTrans: '4700'
+                        tieBreaker: xyz
+                        saTaxYearEnd: '2022-08-01'
+                        creationDate: '2022-08-01'
+                        originalChargeType: VAT Return Debit Charge
+                        locks:
+                          - lockType: Payment
+                            lockReason: Insolvency
         '400':
           description: ''
           headers: {}
@@ -819,8 +910,8 @@ paths:
             schema:
               $ref: '#/components/schemas/CancelRequest'
             examples:
-              exampleR1:
-                summary: Release 1 Example Request (CESA only)
+              exampleCESA:
+                summary: Example Request (CESA only)
                 value:
                   identifications:
                     - idType: UTR
@@ -832,6 +923,55 @@ paths:
                     initialPaymentAmount: 150
                     frequency: monthly
                     cancellationDate: '2025-10-15'
+                    debtItemCharges:
+                      - debtItemChargeId: K0000000000001
+                        chargeSource: CESA
+                  instalments:
+                    - dueDate: '2025-06-01'
+                      amountDue: 300
+                    - dueDate: '2025-07-01'
+                      amountDue: 300
+                    - dueDate: '2025-08-01'
+                      amountDue: 300
+                  channelIdentifier: advisor
+                  transitioned: true
+              exampleETMP:
+                summary: Example Request (ETMP only)
+                value:
+                  identifications:
+                    - idType: UTR
+                      idValue: '1234567890'
+                  paymentPlan:
+                    cancellationDate: '2025-10-15'
+                    debtItemCharges:
+                      - debtItemChargeId: XW006559808863
+                        chargeSource: ETMP
+                  instalments:
+                    - dueDate: '2025-06-01'
+                      amountDue: 300
+                    - dueDate: '2025-07-01'
+                      amountDue: 300
+                    - dueDate: '2025-08-01'
+                      amountDue: 300
+                  channelIdentifier: advisor
+              exampleCESAandETMP:
+                summary: Example Request (CESA and ETMP)
+                value:
+                  identifications:
+                    - idType: UTR
+                      idValue: '1234567890'
+                  paymentPlan:
+                    arrangementAgreedDate: '2025-05-01'
+                    ttpEndDate: '2025-11-01'
+                    initialPaymentDate: '2025-05-05'
+                    initialPaymentAmount: 150
+                    frequency: monthly
+                    cancellationDate: '2025-10-15'
+                    debtItemCharges:
+                      - debtItemChargeId: K0000000000001
+                        chargeSource: CESA
+                      - debtItemChargeId: XW006559808863
+                        chargeSource: ETMP
                   instalments:
                     - dueDate: '2025-06-01'
                       amountDue: 300
@@ -1899,7 +2039,7 @@ components:
           format: date
         totalDebtIncInt:
           type: number
-          description: This is the total debt plus interest for the plan
+          description: Total debts, liabilities and interest
         totalInterest:
           type: number
           description: This is the total interest accrued for the duration of the plan
@@ -2610,6 +2750,7 @@ components:
           type: number
         totalDebtIncInt:
           type: number
+          description: Total debts, liabilities and interest
         planInterest:
           type: number
         numberOfInstalments:
@@ -2680,6 +2821,38 @@ components:
               - idType
               - idValue
           description: An array of customer identifications
+    CustomerSignal:
+      type: object
+      required:
+        - signalType
+        - signalValue
+      properties:
+        signalType:
+          type: string
+          description: Type of customer signal
+          example: ITSA Migrated
+        signalValue:
+          type: string
+          description: Value of the signal
+          example: 'true'
+        signalDescription:
+          type: string
+          description: Description of the signal
+          example: Description
+    Lock:
+      type: object
+      required:
+        - lockType
+        - lockReason
+      properties:
+        lockType:
+          type: string
+          description: Type of lock applied to the charge
+          example: Payment
+        lockReason:
+          type: string
+          description: Reason for the lock
+          example: Insolvency
     TTPChargeInfoResponse:
       title: TTPChargeInfoResponse
       required:
@@ -2688,6 +2861,7 @@ components:
         - chargeTypeAssessment
         - addresses
         - individualDetails
+        - chargeTypesExcluded
       properties:
         processingDateTime:
           type: string
@@ -2810,6 +2984,14 @@ components:
               - addressType
               - addressSource
               - postcodeHistory
+        customerSignals:
+          type: array
+          items:
+            $ref: '#/components/schemas/CustomerSignal'
+          description: Signal information to be considered by the operator. Not all signals will be returned.  Examples of signals returned include ring-fenced signals, insolvency and Welsh Language signal.
+        chargeTypesExcluded:
+          type: boolean
+          description: Indicates whether any charge types have been excluded from the response
         chargeTypeAssessment:
           type: array
           items:
@@ -2819,6 +3001,7 @@ components:
               - chargeReference
               - charges
               - mainTrans
+              - isInsolvent
             properties:
               debtTotalAmount:
                 type: integer
@@ -2828,6 +3011,11 @@ components:
                 description: Charge reference
               parentChargeReference:
                 type: string
+              isInsolvent:
+                type: boolean
+                description: |
+                  Debt level insolvency indicator. Indicates if this charge should be shown as insolvent and excluded from TTP.
+                  For ETMP (MTD ITSA): True only when BOTH conditions are met: (1) customer level insolvency signal exists AND (2) charge has 'no reallocation' lock applied. If customer signal exists but no lock, this field is false.
               mainTrans:
                 type: string
                 description: |
@@ -2869,12 +3057,7 @@ components:
                       type: string
                     parentMainTrans:
                       type: string
-                    originalCreationDate:
-                      type: string
-                      format: date
                     tieBreaker:
-                      type: string
-                    originalTieBreaker:
                       type: string
                     saTaxYearEnd:
                       type: string
@@ -2884,6 +3067,11 @@ components:
                       format: date
                     originalChargeType:
                       type: string
+                    locks:
+                      type: array
+                      items:
+                        $ref: '#/components/schemas/Lock'
+                      description: Locks applied to this charge
                   required:
                     - taxPeriodFrom
                     - taxPeriodTo
@@ -2913,10 +3101,8 @@ components:
     CancelPaymentPlan:
       type: object
       required:
-        - arrangementAgreedDate
-        - ttpEndDate
-        - frequency
         - cancellationDate
+        - debtItemCharges
       properties:
         arrangementAgreedDate:
           type: string
@@ -2956,6 +3142,12 @@ components:
           multipleOf: 0.01
           description: Optional upfront payment amount
           example: 150
+        debtItemCharges:
+          type: array
+          minItems: 1
+          items:
+            $ref: '#/components/schemas/DebtItemChargeReference'
+          description: Array of debt item charges required to know which HoD to call
     CancelInstalment:
       type: object
       required:
