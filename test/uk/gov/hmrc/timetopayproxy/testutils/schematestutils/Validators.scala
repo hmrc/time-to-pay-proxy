@@ -48,28 +48,6 @@ object Validators {
             restrictAdditionalProperties = true
           )
       }
-
-      object Proposed {
-        private val proposedPath =
-          "test/resources/schemas/apis/proposed/time-to-pay-proxy/time-to-pay-v1.0.25-proposedAll.yaml"
-
-        def openApiRequestSchema: OpenApi3DerivedSchema =
-          new OpenApi3DerivedSchema(
-            openApiYamlFilename = proposedPath,
-            defaultJsonSubschemaName = "TTPChargeInfoRequest",
-            metaSchemaValidation = Some(Valid(())),
-            restrictAdditionalProperties = true
-          )
-
-        def openApiResponseSuccessfulSchema: OpenApi3DerivedSchema =
-          new OpenApi3DerivedSchema(
-            openApiYamlFilename = proposedPath,
-            defaultJsonSubschemaName = "TTPChargeInfoResponse",
-            metaSchemaValidation = Some(Valid(())),
-            restrictAdditionalProperties = true
-          )
-
-      }
     }
 
     object AffordableQuotes {
