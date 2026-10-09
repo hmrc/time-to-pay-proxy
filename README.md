@@ -46,6 +46,6 @@ curl -i -X POST -H 'Content-Type: application/json'  -d '{
 ```
 
 
-The resources of this service are secured, which means that a bearer token should be provided [via auth login stub service](https://confluence.tools.tax.service.gov.uk/display/DTRG/Testing+an+API+microservice+locally).
+The resources of this service are secured, which means that a bearer token should be provided [via auth login stub service](https://confluence.tools.tax.service.gov.uk/spaces/ApiPlatform/pages/76511240/Testing+an+API+microservice+locally).
 
 This service can be run stand alone, although doesn't offer much value without time-to-pay service running.
