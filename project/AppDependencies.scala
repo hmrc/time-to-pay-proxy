@@ -26,10 +26,8 @@ object AppDependencies {
   )
 
   val dependencyOverrides = Seq(
-    "com.fasterxml.jackson.module" %% "jackson-module-scala" % "2.20.2",
-    "com.fasterxml.jackson.core"    % "jackson-databind"     % "2.20.2",
     "uk.gov.hmrc"                  %% "http-verbs-play-30"   % "15.8.0",
-    "org.slf4j"                     % "slf4j-api"            % "2.0.18",
-    "com.google.guava"              % "guava"                % "33.7.1-jre"
+    "org.slf4j"                     % "slf4j-api"            % "2.0.20",
+    "com.google.guava"              % "guava"                % "33.7.2-jre"
   )
 }
