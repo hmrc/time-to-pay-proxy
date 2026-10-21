@@ -40,7 +40,7 @@ class CorrelationIdPopulationAction @Inject() ()(implicit ec: ExecutionContext)
         )
       case None =>
         val generatedCorrelationId = UUID.randomUUID().toString
-        logger.warn(
+        logger.info(
           s"[CORRELATION ID] Not found in request header for ${request.uri}, generated new correlationId: $generatedCorrelationId"
         )(
           baseHeaderCarrier
