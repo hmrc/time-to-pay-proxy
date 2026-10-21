@@ -92,10 +92,10 @@ class CorrelationIdPopulationActionSpec extends AnyFreeSpec {
           val logs = appender.list.asScala
           logs.exists { event =>
             // Duplicate assertions here because the shouldBe true at the bottom doesn't point to what exactly failed
-            event.getLevel shouldBe Level.WARN
+            event.getLevel shouldBe Level.INFO
             event.getFormattedMessage shouldBe s"[CORRELATION ID] Not found in request header for $requestUri, generated new correlationId: $generatedCorrelationId"
 
-            event.getLevel == Level.WARN &&
+            event.getLevel == Level.INFO &&
             event.getFormattedMessage.contains(
               s"[CORRELATION ID] Not found in request header for $requestUri, generated new correlationId: $generatedCorrelationId"
             )
