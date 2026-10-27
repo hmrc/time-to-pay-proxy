@@ -667,19 +667,19 @@ final class HttpReadsBuilderSpec extends AnyFreeSpec with MockFactory {
           // The URLs should not touch any punctuation.
           stripped shouldBe List(
             """ERROR | JSON structure is not valid in received HTTP response. Originally expected to turn response into a Right. Returning: [DEEMED SAFE BY TEST LOGIC] <ResponseBodyInvalidJsonStructure( #  sourceClass = class java.lang.Thread, #  responseContext = RESPONSE TO: POST https://some.domain/for-success-236-wrong-structure #  === #  HTTP 236 Custom Status # #  {} #  ===, #  whichEitherWasExpected = OriginallyMeantToBeRight, #  errs = List((/for236,List(JsonValidationError(List(error.path.missing),ArraySeq())))) )> . Request made for received HTTP response: POST https://some.domain/for-success-236-wrong-structure . Received HTTP response status: 236. Received HTTP response body not logged for 2xx statuses.""",
-            """ERROR | HTTP body is not JSON in received HTTP response. Originally expected to turn response into a Right. Returning: [DEEMED SAFE BY TEST LOGIC] <ResponseBodyNotJson( #  sourceClass = class java.lang.Thread, #  responseContext = RESPONSE TO: POST https://some.domain/for-success-236-not-json #  === #  HTTP 236 Custom Status # #  some body that's not JSON #  ===, #  whichEitherWasExpected = OriginallyMeantToBeRight, #  sensitiveException = com.fasterxml.jackson.core.JsonParseException: Unrecognized token 'some': was expecting (JSON String, Number, Array, Object or token 'null', 'true' or 'false') #   at [Source: REDACTED (`StreamReadFeature.INCLUDE_SOURCE_IN_LOCATION` disabled); line: 1, column: 5] )> . Request made for received HTTP response: POST https://some.domain/for-success-236-not-json . Received HTTP response status: 236. Received HTTP response body not logged for 2xx statuses.""",
+            """ERROR | HTTP body is not JSON in received HTTP response. Originally expected to turn response into a Right. Returning: [DEEMED SAFE BY TEST LOGIC] <ResponseBodyNotJson( #  sourceClass = class java.lang.Thread, #  responseContext = RESPONSE TO: POST https://some.domain/for-success-236-not-json #  === #  HTTP 236 Custom Status # #  some body that's not JSON #  ===, #  whichEitherWasExpected = OriginallyMeantToBeRight, #  sensitiveException = com.fasterxml.jackson.core.JsonParseException: Unrecognized token 'some': was expecting (JSON String, Number, Array, Object or token 'null', 'true' or 'false') #   at [Source: REDACTED (`StreamReadFeature.INCLUDE_SOURCE_IN_LOCATION` disabled); line: 1, column: 1] )> . Request made for received HTTP response: POST https://some.domain/for-success-236-not-json . Received HTTP response status: 236. Received HTTP response body not logged for 2xx statuses.""",
             """ERROR | Body of received HTTP response is not empty. Originally expected to turn response into a Right. Returning: [DEEMED SAFE BY TEST LOGIC] <ResponseBodyNotEmpty( #  sourceClass = class java.lang.Thread, #  responseContext = RESPONSE TO: POST https://some.domain/for-success-265-wrong-structure #  === #  HTTP 265 Custom Status # #  {} #  ===, #  whichEitherWasExpected = OriginallyMeantToBeRight )> . Request made for received HTTP response: POST https://some.domain/for-success-265-wrong-structure . Received HTTP response status: 265. Received HTTP response body not logged for 2xx statuses.""",
             """ERROR | Body of received HTTP response is not empty. Originally expected to turn response into a Right. Returning: [DEEMED SAFE BY TEST LOGIC] <ResponseBodyNotEmpty( #  sourceClass = class java.lang.Thread, #  responseContext = RESPONSE TO: POST https://some.domain/for-success-265-not-json #  === #  HTTP 265 Custom Status # #  some body that's not JSON #  ===, #  whichEitherWasExpected = OriginallyMeantToBeRight )> . Request made for received HTTP response: POST https://some.domain/for-success-265-not-json . Received HTTP response status: 265. Received HTTP response body not logged for 2xx statuses.""",
             """ERROR | JSON structure is not valid in received HTTP response. Originally expected to turn response into a Right. Detail: Validation errors:     - For path /for419 , errors: [error.path.missing]. Returning: [DEEMED SAFE BY TEST LOGIC] <ResponseBodyInvalidJsonStructure( #  sourceClass = class java.lang.Thread, #  responseContext = RESPONSE TO: POST https://some.domain/for-success-419-wrong-structure #  === #  HTTP 419 Custom Status # #  {} #  ===, #  whichEitherWasExpected = OriginallyMeantToBeRight, #  errs = List((/for419,List(JsonValidationError(List(error.path.missing),ArraySeq())))) )> . Request made for received HTTP response: POST https://some.domain/for-success-419-wrong-structure . Received HTTP response status: 419. Received HTTP response body: {}""",
-            """ERROR | HTTP body is not JSON in received HTTP response. Originally expected to turn response into a Right. Detail: com.fasterxml.jackson.core.JsonParseException: Unrecognized token 'some': was expecting (JSON String, Number, Array, Object or token 'null', 'true' or 'false')  at [Source: REDACTED (`StreamReadFeature.INCLUDE_SOURCE_IN_LOCATION` disabled); line: 1, column: 5] Returning: [DEEMED SAFE BY TEST LOGIC] <ResponseBodyNotJson( #  sourceClass = class java.lang.Thread, #  responseContext = RESPONSE TO: POST https://some.domain/for-success-419-not-json #  === #  HTTP 419 Custom Status # #  some body that's not JSON #  ===, #  whichEitherWasExpected = OriginallyMeantToBeRight, #  sensitiveException = com.fasterxml.jackson.core.JsonParseException: Unrecognized token 'some': was expecting (JSON String, Number, Array, Object or token 'null', 'true' or 'false') #   at [Source: REDACTED (`StreamReadFeature.INCLUDE_SOURCE_IN_LOCATION` disabled); line: 1, column: 5] )> . Request made for received HTTP response: POST https://some.domain/for-success-419-not-json . Received HTTP response status: 419. Received HTTP response body: some body that's not JSON""",
+            """ERROR | HTTP body is not JSON in received HTTP response. Originally expected to turn response into a Right. Detail: com.fasterxml.jackson.core.JsonParseException: Unrecognized token 'some': was expecting (JSON String, Number, Array, Object or token 'null', 'true' or 'false')  at [Source: REDACTED (`StreamReadFeature.INCLUDE_SOURCE_IN_LOCATION` disabled); line: 1, column: 1] Returning: [DEEMED SAFE BY TEST LOGIC] <ResponseBodyNotJson( #  sourceClass = class java.lang.Thread, #  responseContext = RESPONSE TO: POST https://some.domain/for-success-419-not-json #  === #  HTTP 419 Custom Status # #  some body that's not JSON #  ===, #  whichEitherWasExpected = OriginallyMeantToBeRight, #  sensitiveException = com.fasterxml.jackson.core.JsonParseException: Unrecognized token 'some': was expecting (JSON String, Number, Array, Object or token 'null', 'true' or 'false') #   at [Source: REDACTED (`StreamReadFeature.INCLUDE_SOURCE_IN_LOCATION` disabled); line: 1, column: 1] )> . Request made for received HTTP response: POST https://some.domain/for-success-419-not-json . Received HTTP response status: 419. Received HTTP response body: some body that's not JSON""",
             """ERROR | Body of received HTTP response is not empty. Originally expected to turn response into a Right. Returning: [DEEMED SAFE BY TEST LOGIC] <ResponseBodyNotEmpty( #  sourceClass = class java.lang.Thread, #  responseContext = RESPONSE TO: POST https://some.domain/for-success-445-wrong-structure #  === #  HTTP 445 Custom Status # #  {} #  ===, #  whichEitherWasExpected = OriginallyMeantToBeRight )> . Request made for received HTTP response: POST https://some.domain/for-success-445-wrong-structure . Received HTTP response status: 445. Received HTTP response body: {}""",
             """ERROR | Body of received HTTP response is not empty. Originally expected to turn response into a Right. Returning: [DEEMED SAFE BY TEST LOGIC] <ResponseBodyNotEmpty( #  sourceClass = class java.lang.Thread, #  responseContext = RESPONSE TO: POST https://some.domain/for-success-445-not-json #  === #  HTTP 445 Custom Status # #  some body that's not JSON #  ===, #  whichEitherWasExpected = OriginallyMeantToBeRight )> . Request made for received HTTP response: POST https://some.domain/for-success-445-not-json . Received HTTP response status: 445. Received HTTP response body: some body that's not JSON""",
             """WARN | Valid and expected error response was received from HTTP call. Request made for received HTTP response: POST https://some.domain/for-failure-109-correct-structure-for-warning-log . Received HTTP response status: 109. Received HTTP response body: {"for109":"example"}""",
             """ERROR | JSON structure is not valid in received HTTP response. Originally expected to turn response into a Left. Detail: Validation errors:     - For path /for109 , errors: [error.path.missing]. Returning: [DEEMED SAFE BY TEST LOGIC] <ResponseBodyInvalidJsonStructure( #  sourceClass = class java.lang.Thread, #  responseContext = RESPONSE TO: POST https://some.domain/for-failure-109-wrong-structure #  === #  HTTP 109 Custom Status # #  {} #  ===, #  whichEitherWasExpected = OriginallyMeantToBeLeft, #  errs = List((/for109,List(JsonValidationError(List(error.path.missing),ArraySeq())))) )> . Request made for received HTTP response: POST https://some.domain/for-failure-109-wrong-structure . Received HTTP response status: 109. Received HTTP response body: {}""",
-            """ERROR | HTTP body is not JSON in received HTTP response. Originally expected to turn response into a Left. Detail: com.fasterxml.jackson.core.JsonParseException: Unrecognized token 'some': was expecting (JSON String, Number, Array, Object or token 'null', 'true' or 'false')  at [Source: REDACTED (`StreamReadFeature.INCLUDE_SOURCE_IN_LOCATION` disabled); line: 1, column: 5] Returning: [DEEMED SAFE BY TEST LOGIC] <ResponseBodyNotJson( #  sourceClass = class java.lang.Thread, #  responseContext = RESPONSE TO: POST https://some.domain/for-failure-109-not-json #  === #  HTTP 109 Custom Status # #  some body that's not JSON #  ===, #  whichEitherWasExpected = OriginallyMeantToBeLeft, #  sensitiveException = com.fasterxml.jackson.core.JsonParseException: Unrecognized token 'some': was expecting (JSON String, Number, Array, Object or token 'null', 'true' or 'false') #   at [Source: REDACTED (`StreamReadFeature.INCLUDE_SOURCE_IN_LOCATION` disabled); line: 1, column: 5] )> . Request made for received HTTP response: POST https://some.domain/for-failure-109-not-json . Received HTTP response status: 109. Received HTTP response body: some body that's not JSON""",
+            """ERROR | HTTP body is not JSON in received HTTP response. Originally expected to turn response into a Left. Detail: com.fasterxml.jackson.core.JsonParseException: Unrecognized token 'some': was expecting (JSON String, Number, Array, Object or token 'null', 'true' or 'false')  at [Source: REDACTED (`StreamReadFeature.INCLUDE_SOURCE_IN_LOCATION` disabled); line: 1, column: 1] Returning: [DEEMED SAFE BY TEST LOGIC] <ResponseBodyNotJson( #  sourceClass = class java.lang.Thread, #  responseContext = RESPONSE TO: POST https://some.domain/for-failure-109-not-json #  === #  HTTP 109 Custom Status # #  some body that's not JSON #  ===, #  whichEitherWasExpected = OriginallyMeantToBeLeft, #  sensitiveException = com.fasterxml.jackson.core.JsonParseException: Unrecognized token 'some': was expecting (JSON String, Number, Array, Object or token 'null', 'true' or 'false') #   at [Source: REDACTED (`StreamReadFeature.INCLUDE_SOURCE_IN_LOCATION` disabled); line: 1, column: 1] )> . Request made for received HTTP response: POST https://some.domain/for-failure-109-not-json . Received HTTP response status: 109. Received HTTP response body: some body that's not JSON""",
             """WARN | Valid and expected error response was received from HTTP call. Request made for received HTTP response: POST https://some.domain/for-failure-211-correct-structure-for-warning-log . Received HTTP response status: 211. Received HTTP response body not logged for 2xx statuses.""",
             """ERROR | JSON structure is not valid in received HTTP response. Originally expected to turn response into a Left. Returning: [DEEMED SAFE BY TEST LOGIC] <ResponseBodyInvalidJsonStructure( #  sourceClass = class java.lang.Thread, #  responseContext = RESPONSE TO: POST https://some.domain/for-failure-211-wrong-structure #  === #  HTTP 211 Custom Status # #  {} #  ===, #  whichEitherWasExpected = OriginallyMeantToBeLeft, #  errs = List((/for211,List(JsonValidationError(List(error.path.missing),ArraySeq())))) )> . Request made for received HTTP response: POST https://some.domain/for-failure-211-wrong-structure . Received HTTP response status: 211. Received HTTP response body not logged for 2xx statuses.""",
-            """ERROR | HTTP body is not JSON in received HTTP response. Originally expected to turn response into a Left. Returning: [DEEMED SAFE BY TEST LOGIC] <ResponseBodyNotJson( #  sourceClass = class java.lang.Thread, #  responseContext = RESPONSE TO: POST https://some.domain/for-failure-211-not-json #  === #  HTTP 211 Custom Status # #  some body that's not JSON #  ===, #  whichEitherWasExpected = OriginallyMeantToBeLeft, #  sensitiveException = com.fasterxml.jackson.core.JsonParseException: Unrecognized token 'some': was expecting (JSON String, Number, Array, Object or token 'null', 'true' or 'false') #   at [Source: REDACTED (`StreamReadFeature.INCLUDE_SOURCE_IN_LOCATION` disabled); line: 1, column: 5] )> . Request made for received HTTP response: POST https://some.domain/for-failure-211-not-json . Received HTTP response status: 211. Received HTTP response body not logged for 2xx statuses.""",
+            """ERROR | HTTP body is not JSON in received HTTP response. Originally expected to turn response into a Left. Returning: [DEEMED SAFE BY TEST LOGIC] <ResponseBodyNotJson( #  sourceClass = class java.lang.Thread, #  responseContext = RESPONSE TO: POST https://some.domain/for-failure-211-not-json #  === #  HTTP 211 Custom Status # #  some body that's not JSON #  ===, #  whichEitherWasExpected = OriginallyMeantToBeLeft, #  sensitiveException = com.fasterxml.jackson.core.JsonParseException: Unrecognized token 'some': was expecting (JSON String, Number, Array, Object or token 'null', 'true' or 'false') #   at [Source: REDACTED (`StreamReadFeature.INCLUDE_SOURCE_IN_LOCATION` disabled); line: 1, column: 1] )> . Request made for received HTTP response: POST https://some.domain/for-failure-211-not-json . Received HTTP response status: 211. Received HTTP response body not logged for 2xx statuses.""",
             """WARN | Valid and expected error response was received from HTTP call. Request made for received HTTP response: POST https://some.domain/for-failure-277-correct-structure-for-warning-log . Received HTTP response status: 277. Received HTTP response body not logged for 2xx statuses.""",
             """ERROR | Body of received HTTP response is not empty. Originally expected to turn response into a Left. Returning: [DEEMED SAFE BY TEST LOGIC] <ResponseBodyNotEmpty( #  sourceClass = class java.lang.Thread, #  responseContext = RESPONSE TO: POST https://some.domain/for-failure-277-wrong-structure #  === #  HTTP 277 Custom Status # #  {} #  ===, #  whichEitherWasExpected = OriginallyMeantToBeLeft )> . Request made for received HTTP response: POST https://some.domain/for-failure-277-wrong-structure . Received HTTP response status: 277. Received HTTP response body not logged for 2xx statuses.""",
             """ERROR | Body of received HTTP response is not empty. Originally expected to turn response into a Left. Returning: [DEEMED SAFE BY TEST LOGIC] <ResponseBodyNotEmpty( #  sourceClass = class java.lang.Thread, #  responseContext = RESPONSE TO: POST https://some.domain/for-failure-277-not-json #  === #  HTTP 277 Custom Status # #  some body that's not JSON #  ===, #  whichEitherWasExpected = OriginallyMeantToBeLeft )> . Request made for received HTTP response: POST https://some.domain/for-failure-277-not-json . Received HTTP response status: 277. Received HTTP response body not logged for 2xx statuses.""",
@@ -1021,7 +1021,7 @@ final class HttpReadsBuilderSpec extends AnyFreeSpec with MockFactory {
                   |#  ===,
                   |#  whichEitherWasExpected = OriginallyMeantToBeRight,
                   |#  sensitiveException = com.fasterxml.jackson.core.JsonParseException: Unrecognized token 'TEXT': was expecting (JSON String, Number, Array, Object or token 'null', 'true' or 'false')
-                  |#   at [Source: REDACTED (`StreamReadFeature.INCLUDE_SOURCE_IN_LOCATION` disabled); line: 1, column: 5]
+                  |#   at [Source: REDACTED (`StreamReadFeature.INCLUDE_SOURCE_IN_LOCATION` disabled); line: 1, column: 1]
                   |)""".stripMargin
               )
 
@@ -1038,7 +1038,7 @@ final class HttpReadsBuilderSpec extends AnyFreeSpec with MockFactory {
                     |#  ===,
                     |#  whichEitherWasExpected = OriginallyMeantToBeRight,
                     |#  sensitiveException = com.fasterxml.jackson.core.JsonParseException: Unrecognized token 'TEXT': was expecting (JSON String, Number, Array, Object or token 'null', 'true' or 'false')
-                    |#   at [Source: REDACTED (`StreamReadFeature.INCLUDE_SOURCE_IN_LOCATION` disabled); line: 1, column: 5]
+                    |#   at [Source: REDACTED (`StreamReadFeature.INCLUDE_SOURCE_IN_LOCATION` disabled); line: 1, column: 1]
                     |)> .
                     |Request made for received HTTP response: MYMETHOD some/url .
                     |Received HTTP response status: 236.
@@ -1063,7 +1063,7 @@ final class HttpReadsBuilderSpec extends AnyFreeSpec with MockFactory {
                   |#  ===,
                   |#  whichEitherWasExpected = OriginallyMeantToBeRight,
                   |#  sensitiveException = com.fasterxml.jackson.core.JsonParseException: Unrecognized token 'TEXT': was expecting (JSON String, Number, Array, Object or token 'null', 'true' or 'false')
-                  |#   at [Source: REDACTED (`StreamReadFeature.INCLUDE_SOURCE_IN_LOCATION` disabled); line: 1, column: 5]
+                  |#   at [Source: REDACTED (`StreamReadFeature.INCLUDE_SOURCE_IN_LOCATION` disabled); line: 1, column: 1]
                   |)""".stripMargin
               )
 
@@ -1153,7 +1153,7 @@ final class HttpReadsBuilderSpec extends AnyFreeSpec with MockFactory {
                   |#  ===,
                   |#  whichEitherWasExpected = OriginallyMeantToBeRight,
                   |#  sensitiveException = com.fasterxml.jackson.core.JsonParseException: Unrecognized token 'TEXT': was expecting (JSON String, Number, Array, Object or token 'null', 'true' or 'false')
-                  |#   at [Source: REDACTED (`StreamReadFeature.INCLUDE_SOURCE_IN_LOCATION` disabled); line: 1, column: 5]
+                  |#   at [Source: REDACTED (`StreamReadFeature.INCLUDE_SOURCE_IN_LOCATION` disabled); line: 1, column: 1]
                   |)""".stripMargin
               )
 
@@ -1161,7 +1161,7 @@ final class HttpReadsBuilderSpec extends AnyFreeSpec with MockFactory {
                 "ERROR" ->
                   s"""HTTP body is not JSON in received HTTP response. Originally expected to turn response into a Right.
                     |Detail: com.fasterxml.jackson.core.JsonParseException: Unrecognized token 'TEXT': was expecting (JSON String, Number, Array, Object or token 'null', 'true' or 'false')
-                    | at [Source: REDACTED (`StreamReadFeature.INCLUDE_SOURCE_IN_LOCATION` disabled); line: 1, column: 5]
+                    | at [Source: REDACTED (`StreamReadFeature.INCLUDE_SOURCE_IN_LOCATION` disabled); line: 1, column: 1]
                     |Returning: [DEEMED SAFE BY TEST LOGIC] <ResponseBodyNotJson(
                     |#  sourceClass = class java.lang.Thread,
                     |#  responseContext = RESPONSE TO: MYMETHOD some/url
@@ -1172,7 +1172,7 @@ final class HttpReadsBuilderSpec extends AnyFreeSpec with MockFactory {
                     |#  ===,
                     |#  whichEitherWasExpected = OriginallyMeantToBeRight,
                     |#  sensitiveException = com.fasterxml.jackson.core.JsonParseException: Unrecognized token 'TEXT': was expecting (JSON String, Number, Array, Object or token 'null', 'true' or 'false')
-                    |#   at [Source: REDACTED (`StreamReadFeature.INCLUDE_SOURCE_IN_LOCATION` disabled); line: 1, column: 5]
+                    |#   at [Source: REDACTED (`StreamReadFeature.INCLUDE_SOURCE_IN_LOCATION` disabled); line: 1, column: 1]
                     |)> .
                     |Request made for received HTTP response: MYMETHOD some/url .
                     |Received HTTP response status: 419.
@@ -1197,7 +1197,7 @@ final class HttpReadsBuilderSpec extends AnyFreeSpec with MockFactory {
                   |#  ===,
                   |#  whichEitherWasExpected = OriginallyMeantToBeRight,
                   |#  sensitiveException = com.fasterxml.jackson.core.JsonParseException: Unrecognized token 'TEXT': was expecting (JSON String, Number, Array, Object or token 'null', 'true' or 'false')
-                  |#   at [Source: REDACTED (`StreamReadFeature.INCLUDE_SOURCE_IN_LOCATION` disabled); line: 1, column: 5]
+                  |#   at [Source: REDACTED (`StreamReadFeature.INCLUDE_SOURCE_IN_LOCATION` disabled); line: 1, column: 1]
                   |)""".stripMargin
               )
 
@@ -1361,7 +1361,7 @@ final class HttpReadsBuilderSpec extends AnyFreeSpec with MockFactory {
                 |#  ===,
                 |#  whichEitherWasExpected = OriginallyMeantToBeLeft,
                 |#  sensitiveException = com.fasterxml.jackson.core.JsonParseException: Unrecognized token 'TEXT': was expecting (JSON String, Number, Array, Object or token 'null', 'true' or 'false')
-                |#   at [Source: REDACTED (`StreamReadFeature.INCLUDE_SOURCE_IN_LOCATION` disabled); line: 1, column: 5]
+                |#   at [Source: REDACTED (`StreamReadFeature.INCLUDE_SOURCE_IN_LOCATION` disabled); line: 1, column: 1]
                 |)""".stripMargin
             )
 
@@ -1369,7 +1369,7 @@ final class HttpReadsBuilderSpec extends AnyFreeSpec with MockFactory {
               "ERROR" ->
                 s"""HTTP body is not JSON in received HTTP response. Originally expected to turn response into a Left.
                   |Detail: com.fasterxml.jackson.core.JsonParseException: Unrecognized token 'TEXT': was expecting (JSON String, Number, Array, Object or token 'null', 'true' or 'false')
-                  | at [Source: REDACTED (`StreamReadFeature.INCLUDE_SOURCE_IN_LOCATION` disabled); line: 1, column: 5]
+                  | at [Source: REDACTED (`StreamReadFeature.INCLUDE_SOURCE_IN_LOCATION` disabled); line: 1, column: 1]
                   |Returning: [DEEMED SAFE BY TEST LOGIC] <ResponseBodyNotJson(
                   |#  sourceClass = class java.lang.Thread,
                   |#  responseContext = RESPONSE TO: MYMETHOD some/url
@@ -1380,7 +1380,7 @@ final class HttpReadsBuilderSpec extends AnyFreeSpec with MockFactory {
                   |#  ===,
                   |#  whichEitherWasExpected = OriginallyMeantToBeLeft,
                   |#  sensitiveException = com.fasterxml.jackson.core.JsonParseException: Unrecognized token 'TEXT': was expecting (JSON String, Number, Array, Object or token 'null', 'true' or 'false')
-                  |#   at [Source: REDACTED (`StreamReadFeature.INCLUDE_SOURCE_IN_LOCATION` disabled); line: 1, column: 5]
+                  |#   at [Source: REDACTED (`StreamReadFeature.INCLUDE_SOURCE_IN_LOCATION` disabled); line: 1, column: 1]
                   |)> .
                   |Request made for received HTTP response: MYMETHOD some/url .
                   |Received HTTP response status: 109.
@@ -1483,7 +1483,7 @@ final class HttpReadsBuilderSpec extends AnyFreeSpec with MockFactory {
                 |#  ===,
                 |#  whichEitherWasExpected = OriginallyMeantToBeLeft,
                 |#  sensitiveException = com.fasterxml.jackson.core.JsonParseException: Unrecognized token 'TEXT': was expecting (JSON String, Number, Array, Object or token 'null', 'true' or 'false')
-                |#   at [Source: REDACTED (`StreamReadFeature.INCLUDE_SOURCE_IN_LOCATION` disabled); line: 1, column: 5]
+                |#   at [Source: REDACTED (`StreamReadFeature.INCLUDE_SOURCE_IN_LOCATION` disabled); line: 1, column: 1]
                 |)""".stripMargin
             )
 
@@ -1500,7 +1500,7 @@ final class HttpReadsBuilderSpec extends AnyFreeSpec with MockFactory {
                   |#  ===,
                   |#  whichEitherWasExpected = OriginallyMeantToBeLeft,
                   |#  sensitiveException = com.fasterxml.jackson.core.JsonParseException: Unrecognized token 'TEXT': was expecting (JSON String, Number, Array, Object or token 'null', 'true' or 'false')
-                  |#   at [Source: REDACTED (`StreamReadFeature.INCLUDE_SOURCE_IN_LOCATION` disabled); line: 1, column: 5]
+                  |#   at [Source: REDACTED (`StreamReadFeature.INCLUDE_SOURCE_IN_LOCATION` disabled); line: 1, column: 1]
                   |)> .
                   |Request made for received HTTP response: MYMETHOD some/url .
                   |Received HTTP response status: 211.
